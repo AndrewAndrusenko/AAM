@@ -1,0 +1,21 @@
+.file-menu {
+  border-width: 3px;
+  border-color:rgb(67, 79, 79);
+  border-style: solid;
+  margin-bottom: 5px;
+  padding: 3px;
+}
+.mat-flat-button {
+  font-size: large;
+  color: rgb(255, 255, 255);
+  margin-right: 5px;
+}
+.mat-menu-item {
+  font-size: large;
+}
+.example-button-container {
+  display: flex;
+  justify-content: center;
+  width: 120px;
+  color:indianred;
+}

@@ -1,0 +1,31 @@
+<mat-tab-group *ngIf="messageReceived.text=='Accounts'" mat-stretch-tabs #AccountInfo>
+  <mat-tab label="Account Summary" style="padding: 20px;">{{messageReceived.text}} </mat-tab>  
+  <mat-tab label="Portfolio Details"> Detailed positions with PnL data  </mat-tab>
+  <mat-tab label="Trades by Account"> Trades history by Account </mat-tab>
+</mat-tab-group>
+
+<mat-tab-group *ngIf="messageReceived.text=='Instruments'" mat-stretch-tabs #InstrumentInfo>
+  <mat-tab label="Instrment Summary" style="padding: 20px;">Instrment Summary Form </mat-tab>  
+  <mat-tab label="Positions"> Detailed positions with deviations versus model Portfolio  </mat-tab>
+  <mat-tab label="Trades by Instrument"> Trades history by Instrument</mat-tab>
+</mat-tab-group>
+
+<mat-tab-group *ngIf="messageReceived.text=='Strategies'" #StrategiesInfo mat-stretch-tabs>
+  <mat-tab label="Strategy Structure" style="padding: 20px;">{{messageReceived.text}} </mat-tab>  
+  <mat-tab label="Positions by Strategy"> Detailed positions with PnL data  </mat-tab>
+  <mat-tab label="Trades by Strategy"> Trades by Strategy history  </mat-tab>
+  <mat-tab label="Orders by Strategy"> Orders by Strategy history  </mat-tab>
+</mat-tab-group>
+
+<mat-tab-group *ngIf="messageReceived.text=='Trades & Orders'" mat-stretch-tabs #TradesOrdersInfo>
+  <mat-tab label="Orders" style="padding: 20px;">OrdersTable</mat-tab>  
+  <mat-tab label="Trades"> Trades table  </mat-tab>
+  <mat-tab label="Positions"> Positions table  </mat-tab>
+  <mat-tab label="Orders by Strategy"> Orders history  </mat-tab>
+</mat-tab-group>
+
+<mat-tab-group *ngIf="messageReceived.text=='Clients'" mat-stretch-tabs #ClientInfo>
+  <mat-tab label="Client Summary" style="padding: 20px;">Client Summary</mat-tab>  
+  <mat-tab label="Client Accounts"> Client Accounts </mat-tab>
+  <mat-tab label="Positions"> Positions table  </mat-tab>
+</mat-tab-group>

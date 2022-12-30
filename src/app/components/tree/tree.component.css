@@ -1,0 +1,20 @@
+  .mat-tree {
+    background-color:rgb(77, 76, 76);
+  }
+  .mat-flat-button {
+    font-size:large;
+    background-color:rgb(196, 97, 97);
+    color: rgb(255, 255, 255);
+  }
+  .example-form-field {
+    width: 200px;
+    font-size: large;
+  }
+  .SelectNode:hover{
+    color: rgb(36, 36, 36);
+    cursor: pointer;
+  }
+  
+  .background-highlight{
+    background: rgb(142, 156, 212);
+  }

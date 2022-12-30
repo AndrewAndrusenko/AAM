@@ -1,0 +1,37 @@
+<mat-form-field class="example-form-field">
+<mat-label>Search tree</mat-label>
+<input matInput type="text" #SearchTree  name="SearchTree">
+<button matSuffix mat-icon-button aria-label="Clear" (click)="SearchTree.value=''">
+  <mat-icon>close</mat-icon>
+</button>
+</mat-form-field>
+
+
+<div class="tree-menu">
+<mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
+  <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding>
+    <button mat-flat-button 
+    class="tree-button" 
+    (click)="sendMessage(node); 
+    activeNode = node;"
+    [ngClass]="{ 'background-highlight': activeNode === node }">
+    <span class="txtColor">{{node.item}}</span>
+    </button>    
+  </mat-tree-node>
+
+  <mat-tree-node *matTreeNodeDef="let node; when: hasChild" matTreeNodePadding>
+    <button 
+      mat-flat-button class="tree-button" 
+      color="primary" 
+      (click)="sendMessage(node);
+      activeNode = node;"
+      [ngClass]="{ 'background-highlight': activeNode === node }"  
+      [attr.aria-label]="'Toggle ' + node.item" matTreeNodeToggle>
+      <mat-icon class="mat-icon-rtl-mirror">
+        {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
+      </mat-icon> 
+      <span class="txtColor">{{node.item}}</span>
+    </button>    
+  </mat-tree-node>
+</mat-tree>
+</div>
