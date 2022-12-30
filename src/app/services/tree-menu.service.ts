@@ -8,7 +8,7 @@ import { Observable } from "rxjs";
 export class TreeMenuSevice {
   constructor (private http:HttpClient) {    
   }
-  getTreeData ():Observable <Map <string, string[]>>{
-   return this.http.get <Map <string, string[]>>('http://localhost:3002/AAM/Accounts')
+  getTreeData ():Observable < string[]>{
+   return this.http.get <string[]>('http://localhost:3002/AAM/Accounts')
   }
 }

@@ -6,10 +6,11 @@ import {BehaviorSubject, merge, Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import { CommonService } from 'src/app/services/mtree.service';
 import { AppMenuComponent } from '../app-menu/app-menu.component';
-
+import { TreeMenuSevice } from "src/app/services/tree-menu.service"
 /** Flat node with expandable and level information */
 export class DynamicFlatNode {
   constructor(
+    
     public item: string,
     public level = 1,
     public expandable = false,
@@ -23,20 +24,15 @@ export class DynamicFlatNode {
  */
 @Injectable({providedIn: 'root'})
 export class DynamicDatabase {
-  dataMap = new Map<string, string[]>([
-    ['Accounts', ['ICM001', 'ICM005', 'CMC003']],
-    ['Strategies', ['100Shares', '80Shares20Bonds']],
-    ['ICM005', ['GOOG', 'TSLA']],
-    ['100Shares', ['INTL', 'INST', 'GOOG','TSLA']],
-    ['Favourites', ['INTL', 'ICM005', '100Shares']],
-
-  ]);
-  // rootLevelNodes: string[][] = [['Favourites','1'],['Clients','2']];
-
+  constructor (private TreeMenuSevice:TreeMenuSevice){}
+  dataMap = new Map;
   rootLevelNodes: string[] = ['Favourites','Clients','Accounts', 'Strategies','Instruments','Trades & Orders'];
 
   /** Initial data from database */
   initialData(): DynamicFlatNode[] {
+  this.TreeMenuSevice.getTreeData().subscribe (treeData =>{
+    this.dataMap = new Map (treeData.map(object => {return [object[0], object[1]]}));
+   })   
     return this.rootLevelNodes.map(name => new DynamicFlatNode(name, 0, true));
   }
 
@@ -147,7 +143,7 @@ export class TreeComponent {
   constructor(database: DynamicDatabase, private Service: CommonService)  {
     this.treeControl = new FlatTreeControl<DynamicFlatNode>(this.getLevel, this.isExpandable);
     this.dataSource = new DynamicDataSource(this.treeControl, database);
-
+   
     this.dataSource.data = database.initialData();
   }
   
