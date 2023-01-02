@@ -8,7 +8,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {MatTreeModule} from '@angular/material/tree' ;
 import {MatIconModule} from '@angular/material/icon'; 
 import {MatProgressBarModule} from '@angular/material/progress-bar'; 
-
+import {CdkMenuModule} from '@angular/cdk/menu';
 
 import {MaterialExampleModule} from '../material.module';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
@@ -21,6 +21,7 @@ import { DashboardComponent } from './general/dashboard/dashboard.component';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import { AppLoginComponent } from './components/app-login/app-login.component';
 import {MatInputModule} from '@angular/material/input'; 
+import {ScrollingModule} from '@angular/cdk/scrolling'; 
 @NgModule({
   declarations: [
     AppComponent,
@@ -46,7 +47,9 @@ import {MatInputModule} from '@angular/material/input';
     HttpClientModule,
     AppRoutingModule,
     MatFormFieldModule,
-    MatInputModule
+    MatInputModule,
+    CdkMenuModule,
+    ScrollingModule
   
   ],
 

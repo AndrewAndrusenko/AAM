@@ -7,18 +7,28 @@
     <mat-icon>favorite</mat-icon>
     {{favorites? 'Remove':'Add'}} 
   </button>
-<button mat-flat-button [matMenuTriggerFor]="menu" style="margin-left: 45px;" matRipple="">Clients</button>
-<mat-menu #menu="matMenu">
-  <button mat-menu-item>Accounts</button>
-  <button mat-menu-item>Trades</button>
-</mat-menu>
-<button mat-flat-button mat-button [matMenuTriggerFor]="menu2">PM</button>
-<mat-menu #menu2="matMenu">
-  <button mat-menu-item>Strategies</button>
-  <button mat-menu-item>Orders</button>
-</mat-menu>
-<button mat-flat-button mat-button [matMenuTriggerFor]="menu3">Settings</button>
-<mat-menu #menu3="matMenu">
-  <button mat-menu-item>Settings</button>
-  <button mat-menu-item>User profile</button>
-</mat-menu>
+  <button mat-flat-button [matMenuTriggerFor]="menu" style="margin-left: 45px;" matRipple="">Clients</button>
+    <mat-menu #menu="matMenu">
+    <button mat-menu-item>Accounts</button>
+    <button mat-menu-item>Trades</button>
+  </mat-menu>
+  <button mat-flat-button mat-button [matMenuTriggerFor]="menu2">PM</button>
+    <mat-menu #menu2="matMenu">
+    <button mat-menu-item>Strategies</button>
+    <button mat-menu-item>Orders</button>
+  </mat-menu>
+  <button mat-flat-button mat-button [matMenuTriggerFor]="menu3">Settings</button>
+    <mat-menu #menu3="matMenu">
+    <button mat-menu-item>Settings</button>
+    <button mat-menu-item>User profile</button>
+  </mat-menu>
+
+<button mat-icon-button 
+  class="menuright"
+  disableRipple    
+  aria-label="Example icon button fullscreen"
+  [ngStyle]="{'color':fullscreen ? 'indianred' : 'white'}"
+  (click)="fullscreen=!fullscreen">
+  <mat-icon>{{fullscreen? 'fullscreen_exit' :'fullscreen'}} fullscreen</mat-icon>
+  {{fullscreen? 'Exit FullScreen':'FullScreen'}} 
+</button>

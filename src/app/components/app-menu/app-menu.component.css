@@ -19,3 +19,8 @@
   width: 120px;
   color:indianred;
 }
+.menuright {
+ margin-right: 120px;
+  float: inline-end;
+  font-size: 18px;
+}

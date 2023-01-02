@@ -6,11 +6,11 @@
 </button>
 </mat-form-field>
 
-
-<div class="tree-menu">
+<cdk-virtual-scroll-viewport appendOnly itemSize="50" class="example-viewport">
+<div class="tree-menu" >
 <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
   <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding>
-    <button mat-flat-button 
+    <button mat-flat-button [cdkContextMenuTriggerFor]="treecontextmenu"
     class="tree-button" 
     (click)="sendMessage(node); 
     activeNode = node;"
@@ -35,3 +35,17 @@
   </mat-tree-node>
 </mat-tree>
 </div>
+</cdk-virtual-scroll-viewport>
+<ng-template #treecontextmenu>
+  <div class="tree-menu-context" cdkMenu>
+    <button class="tree-menu-item">
+      <mat-icon class="menu-icon" matPrefix>favorite</mat-icon> 
+       Add to favorites</button>
+    <button class="tree-menu-item">
+      <mat-icon class="menu-icon" matPrefix>add_circle</mat-icon>      
+       New Item</button>
+    <button class="tree-menu-item">
+      <mat-icon class="menu-icon" matPrefix>edit</mat-icon>      
+       Edit Item</button>
+  </div>
+</ng-template>

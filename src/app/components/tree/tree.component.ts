@@ -15,6 +15,7 @@ export class DynamicFlatNode {
     public level = 1,
     public expandable = false,
     public isLoading = false,
+    public nodeRoot: string
   ) {}
 }
 
@@ -33,7 +34,7 @@ export class DynamicDatabase {
   this.TreeMenuSevice.getTreeData().subscribe (treeData =>{
     this.dataMap = new Map (treeData.map(object => {return [object[0], object[1]]}));
    })   
-    return this.rootLevelNodes.map(name => new DynamicFlatNode(name, 0, true));
+    return this.rootLevelNodes.map(name => new DynamicFlatNode(name, 0, true, false, ''));
   }
 
   getChildren(node: string): string[] | undefined {
@@ -111,7 +112,7 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
     setTimeout(() => {
       if (expand) {
         const nodes = children.map(
-          name => new DynamicFlatNode(name, node.level + 1, this._database.isExpandable(name)),
+          name => new DynamicFlatNode(name, node.level + 1, this._database.isExpandable(name), false, node.item ),
         );
         this.data.splice(index + 1, 0, ...nodes);
       } else {
@@ -160,12 +161,6 @@ export class TreeComponent {
 
   hasChild = (_: number, _nodeData: DynamicFlatNode) => _nodeData.expandable;
     
-  sendMessage = (node: DynamicFlatNode) => {
-    // send message to subscribers via observable subject
-    var leaf :string
-    console.log(node)
-    leaf = node.item.toString() || 'aaa' 
-    this.Service.sendUpdate(leaf );
-  }
+  sendMessage = (node: DynamicFlatNode) => {this.Service.sendUpdate(node.nodeRoot.toString())}
     
 }

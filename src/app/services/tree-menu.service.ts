@@ -9,6 +9,6 @@ export class TreeMenuSevice {
   constructor (private http:HttpClient) {    
   }
   getTreeData ():Observable < string[]>{
-   return this.http.get <string[]>('http://localhost:3002/AAM/Accounts')
+   return this.http.get <string[]>('http://localhost:3000/AAM/Accounts')
   }
 }
