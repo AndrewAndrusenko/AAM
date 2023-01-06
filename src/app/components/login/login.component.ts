@@ -31,8 +31,8 @@ export class LoginComponent implements OnInit {
   handleLoginClick(){
     this.authService.validate(this.username, this.password)
     .then((response) => {
-      console.log(response)
-      this.authService.setUserInfo({'user' : response ['user']});
+     console.log(response)
+      this.authService.setUserInfo({'user' : response ['username']});
       this.router.navigate(['general']);
     })
    

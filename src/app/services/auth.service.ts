@@ -16,6 +16,7 @@ export class AuthService {
 
   public setUserInfo(user){
     localStorage.setItem('userInfo',JSON.stringify(user));
+    console.log ('localStorage', user, JSON.stringify(user))
   }
 
   public validate(login, password) {

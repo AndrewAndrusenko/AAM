@@ -6,7 +6,13 @@ const jsPassport = require ('passport')
 var LocalStrategy = require('passport-local');
 const uiAmmModule = require ('./aam_ui_module');
 const auth_module = require('./auth_module');
+const bcrypt = require('bcryptjs');
+const config = require('./db_config');
+const Pool = require('pg').Pool;
+const pool = new Pool(config.dbConfig);
+const cors = require('cors');
 
+appServer.use(cors());
 appServer.use (express.static('public'));
 appServer.use(bodyParser.json());
 appServer.use(
@@ -23,49 +29,15 @@ appServer.use(session({
   cookie: { secure: true }
 }));
 
-appServer.use((req, res, next) => {
-  res.append('Access-Control-Allow-Methods', 'GET, PUT, POST,DELETE');
-  res.append ('Access-Control-Allow-Origin', '*');
-  res.append ("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  next();
-})
-
-//appServer.use(session({ secret: 'SECRET' }));
-
 appServer.use(jsPassport.initialize());
 appServer.use(jsPassport.session());
 
-
-/* const isLoggedIn = (req, res, next) => {
- console.log('isLoggedIn',  req.username, req.isAuthenticated())
-  if (req.isAuthenticated()) {return next()}
-  return res.status(400).json({"statusCode" : 400, "message" : "not authenticated"})    
-}
-// http://localhost:3000/authenticate/{"username":"mofficer","password":"middle"}
-
-const authFunc = () => {
-  console.log('authFunc')
-  return (req, res, next) => {
-  
-    jsPassport.authenticate('local',(error, user, info) => {
-      console.log('authenticate')
-      if (error) res.status(400).json({"statusCode" : 200, "message" : error});
-      req.login (user, function (error) {
-        console.log('login')
-        console.log(user)
-        if (error) return next(error);
-        next();
-      });
-    })(req, res, next);
-  }
-} 
- */
 jsPassport.serializeUser(function(user, cb) {
   process.nextTick(function() {
-    console.log('serializeUser')
+    console.log('serializeUser', user.id, user.login)
     return cb(null, {
       id: user.id,
-      username: user.username
+      username: user.login
     });
   });
 });
@@ -80,28 +52,35 @@ jsPassport.deserializeUser(function(user, cb) {
 
 jsPassport.use(new LocalStrategy(function verify(username, password, cb) {
   
-  pool.query ("SELECT accessrole, login, hashed_password FROM public.dusers WHERE login = '" + username + "';", (err, row) => {
-    console.log(row)
+  pool.query ("SELECT id, accessrole, login, hashed_password FROM public.dusers WHERE login = '" + username + "';", (err, row) => {
+  
     if (err) { return cb(err); }
     if (!row) { return cb(null, false, { message: 'Incorrect username or password.' }); }
 
-    crypto.pbkdf2(password, 'bf', 310000, 32, 'sha256', function(err, hashedPassword) {
-      console.log(hashedPassword,'  ', password)
-      console.log(row.rows[0].hashed_password ,'  ', password)
-      if (err) { return cb(err); }
-      if (!crypto.timingSafeEqual(row.rows[0].hashed_password, hashedPassword)) {
-        return cb(null, false, { message: 'Incorrect username or password.' });
+
+    bcrypt.compare(password, row.rows[0].hashed_password,
+      async function (err, isMatch) {
+        
+      if (isMatch) {
+      return cb(null, row.rows[0]) 
+      console.log('Encrypted password is: ', password);
+      console.log('Decrypted password is: ', hashedPassword);
       }
-      return cb(null, row);
-    });
+      if (!isMatch) {  
+      return cb(null, false, { message: 'Incorrect username or password.' })
+      console.log(hashedPassword + ' is not encryption of '+ password);
+      }
+      })
   });
 }));
 
 
-appServer.post ('/auth/', jsPassport.authenticate('local', {
-  successRedirect: '/general',
-  failureRedirect: '/login'
-}));
+appServer.post ('/auth/', jsPassport.authenticate('local'), function(req, res) {  
+  console.log ('req', req.user)
+  res.json({message:"Success", username: req.user});
+});
+
+
 appServer.get ('/AAM/Accounts/',  jsPassport.authenticate('session') ,  uiAmmModule.FAmmGetAccountsList)
 
  appServer.get ('/auth/newUserP/:psw', auth_module.encryptPsw)
