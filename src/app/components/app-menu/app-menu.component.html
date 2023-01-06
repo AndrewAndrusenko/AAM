@@ -28,7 +28,7 @@
   disableRipple    
   aria-label="Example icon button fullscreen"
   [ngStyle]="{'color':fullscreen ? 'indianred' : 'white'}"
-  (click)="fullscreen=!fullscreen">
+  (click)="toggleFullscreenMode()">
   <mat-icon>{{fullscreen? 'fullscreen_exit' :'fullscreen'}} fullscreen</mat-icon>
   {{fullscreen? 'Exit FullScreen':'FullScreen'}} 
 </button>

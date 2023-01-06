@@ -8,4 +8,10 @@ import { Component } from '@angular/core';
 export class AppMenuComponent {
 favorites=false;
 fullscreen=false;
+toggleFullscreenMode = () => {
+  var elem = document.documentElement;
+  this.fullscreen ? document.exitFullscreen() : elem.requestFullscreen();
+  this.fullscreen=!this.fullscreen;
+
+}
 }

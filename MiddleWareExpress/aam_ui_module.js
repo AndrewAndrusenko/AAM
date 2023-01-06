@@ -26,9 +26,15 @@ async function FAmmGetAccountsList (request,response) {
   Treelist = ['Clients','Accounts','Strategies'];  
   await Promise.all(
     Treelist.map(RootNode => TreeSQLQueryExc(RootNode))
-  ).then((value) => {return response.status(200).json(value)})
+  ).then((value) => {
+    return response.status(200).json(value)
+   
+  })
 }
-
+async function fPutNewFavorite () {
+console.log ('fPutNewFavorite')
+}
  module.exports = {
-  FAmmGetAccountsList
+  FAmmGetAccountsList,
+  fPutNewFavorite
  }

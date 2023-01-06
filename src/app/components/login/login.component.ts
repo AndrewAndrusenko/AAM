@@ -1,16 +1,19 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import {MatFormFieldModule} from '@angular/material/form-field';
 
 import {MatInputModule} from '@angular/material/input'; 
+import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css']
+  styleUrls: ['./login.component.css'],
+/*   encapsulation: ViewEncapsulation.None */
 })
 export class LoginComponent implements OnInit {  
+  userrole:string;
   username:string;
   password:string;
   hide : boolean = true;
@@ -19,18 +22,19 @@ export class LoginComponent implements OnInit {
   myFunction() {
     this.hide = !this.hide;
   }
-  constructor(private http : HttpClient, private router : Router) { }
+  constructor(private authService : AuthService, private router : Router) { }
 
   ngOnInit(): void {
     
   }
 
   handleLoginClick(){
-    if(this.username && this.password){
-      this.authenticateUser(this.username);
-    } else {
-      alert('enter username and password');
-    }
+    this.authService.validate(this.username, this.password)
+    .then((response) => {
+      console.log(response)
+      this.authService.setUserInfo({'user' : response ['user']});
+      this.router.navigate(['general']);
+    })
    
   }
 
@@ -43,6 +47,16 @@ export class LoginComponent implements OnInit {
     } else if(userName == "officer"){
       this.router.navigate(['/general'])
     }
+  }
+
+  handleNewUserClick(){
+    this.authService.createNewUser (this.userrole, this.username, this.password)
+    .then((response) => {
+      console.log(response)
+  /*     this.authService.setUserInfo({'user' : response ['user']});
+      this.router.navigate(['general']); */
+    })
+   
   }
 
 }

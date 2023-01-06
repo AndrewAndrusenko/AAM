@@ -3,8 +3,11 @@
   <h1 class="font-bold  to-black tx" style="color: black; text-align: center; margin-top: 5vh;">  Model Portfolio Investment Management System by Andrey Andrusenko</h1>
 
 
+  <mat-tab-group  style="padding-left: 50px;" #AccountInfo>
+    <mat-tab label="Sign In to System" style="padding: 20px;">
+ <br>
 
-  <form class="example-form" >
+  <form class="AccessForm" >
     <img class="mb-4" src="assets/logo.png" alt="" width="64" height="64" >
     <h1 class="h2 mb-3 font-weight-normal" >Please sign in</h1>
     <p>
@@ -41,43 +44,66 @@
   >Sign In
 </button>
 </p>
-<!--     <table class="example-full-width" cellspacing="0"><tr>
-      <td><mat-form-field class="example-full-width">
-        <mat-label>First name</mat-label>
-        <input matInput>
-      </mat-form-field></td>
-      <td><mat-form-field class="example-full-width">
-        <mat-label>Long Last Name That Will Be Truncated</mat-label>
-        <input matInput>
-      </mat-form-field></td>
-    </tr></table>
-  
+</form>
+</mat-tab>  
+
+<mat-tab label="Create New User" style="padding: 120px;"> 
+  <br>
+  <form class="AccessForm" >
+    <img class="mb-4" src="assets/logo.png" alt="" width="64" height="64" >
+    <h1 class="h2 mb-3 font-weight-normal" >Please sign in</h1>
     <p>
-      <mat-form-field class="example-full-width">
-        <mat-label>Address</mat-label>
-        <textarea matInput placeholder="Ex. 100 Main St">1600 Amphitheatre Pkwy</textarea>
-      </mat-form-field>
-      <mat-form-field class="example-full-width">
-        <mat-label>Address 2</mat-label>
-        <textarea matInput></textarea>
+      <mat-form-field appearance="fill">
+        <mat-label>Userrole</mat-label>
+        <input  matInput type="text" [(ngModel)]="userrole" [ngModelOptions]="{standalone: true}" >
+        <button mat-icon-button matPrefix color="primary" aria-label="Example icon button with a home icon">
+           <mat-icon  >accessibility</mat-icon>
+          </button> 
+           <button *ngIf="userrole" matSuffix mat-icon-button aria-label="Clear" (click)="userrole=''">
+           <mat-icon>close</mat-icon>
+           </button>
+       
       </mat-form-field>
     </p>
-   -->
-<!--     <table class="example-full-width" cellspacing="0"><tr>
-      <td><mat-form-field class="example-full-width">
-        <mat-label>City</mat-label>
-        <input matInput placeholder="Ex. San Francisco">
-      </mat-form-field></td>
-      <td><mat-form-field class="example-full-width">
-        <mat-label>State</mat-label>
-        <input matInput placeholder="Ex. California">
-      </mat-form-field></td>
-      <td><mat-form-field class="example-full-width">
-        <mat-label>Postal Code</mat-label>
-        <input matInput #postalCode maxlength="5" placeholder="Ex. 94105" value="94043">
-        <mat-hint align="end">{{postalCode.value.length}} / 5</mat-hint>
-      </mat-form-field></td>
-    </tr></table> -->
-  </form>
-  
+    
+    <p>
+      <mat-form-field appearance="fill">
+        <mat-label>Username</mat-label>
+        <input  matInput type="text" [(ngModel)]="username" [ngModelOptions]="{standalone: true}" >
+        <button mat-icon-button matPrefix color="primary" aria-label="Example icon button with a home icon">
+           <mat-icon  >perm_identity</mat-icon>
+          </button> 
+           <button *ngIf="username" matSuffix mat-icon-button aria-label="Clear" (click)="username=''">
+           <mat-icon>close</mat-icon>
+           </button>
+       
+      </mat-form-field>
+    </p>
+    <mat-form-field appearance="fill">
+      <mat-label>Password</mat-label>
+      <button mat-icon-button color="primary" matPrefix (click)="hide = !hide" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide">
+        
+        <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
+      </button>
+      <input matInput [(ngModel)]="password" [ngModelOptions]="{standalone: true}" [type]="hide ? 'password' : 'text'">
+
+      <button *ngIf="password" matSuffix mat-icon-button aria-label="Clear" (click)="password=''">
+        <mat-icon>close</mat-icon>
+        </button>
+    </mat-form-field>
+      <p>
+      <button 
+      class = "signin" mat-flat-button color="primary" 
+      (click)="handleNewUserClick()"
+      >Create New User
+      </button>
+    </p>
 </form>
+
+
+
+</mat-tab>
+</mat-tab-group>
+ 
+  
+

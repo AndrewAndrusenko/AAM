@@ -17,7 +17,7 @@
   margin-right: 15px;
   font-size: 20px;
 }
-.example-form {
+.AccessForm {
   min-width: 150px;
   max-width: 500px;
   width: 100%;
@@ -65,4 +65,28 @@ td {
   width: 200px;
   font-size: 20px;
   border-radius: 20px;
+}
+
+:host ::ng-deep .mat-tab-label {
+  min-width: 25px !important;
+  padding: 25px;
+  background-color: transparent;
+  color: rgb(0, 0, 0);
+  font-size:larger;
+  font-weight: 700;
+}
+
+/* Styles for the active tab label */
+:host ::ng-deep .mat-tab-label.mat-tab-label-active {
+  min-width: 25px !important;
+  padding: 25px;
+  background-color:darkgrey; 
+  color: rgb(0, 0, 0);
+  font-size:large;
+  font-weight: 700;
+}
+
+/* Styles for the ink bar */
+:host ::ng-deep .mat-ink-bar {
+  background-color: green;
 }
