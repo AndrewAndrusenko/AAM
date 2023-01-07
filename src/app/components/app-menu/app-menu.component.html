@@ -21,9 +21,12 @@
     <mat-menu #menu3="matMenu">
     <button mat-menu-item>Settings</button>
     <button mat-menu-item>User profile</button>
+    <button mat-menu-item
+    (click)="LogOut()"
+    >Sign out</button>
   </mat-menu>
 
-<button mat-icon-button 
+<button mat-flat-button
   class="menuright"
   disableRipple    
   aria-label="Example icon button fullscreen"
@@ -32,3 +35,17 @@
   <mat-icon>{{fullscreen? 'fullscreen_exit' :'fullscreen'}} fullscreen</mat-icon>
   {{fullscreen? 'Exit FullScreen':'FullScreen'}} 
 </button>
+
+<button mat-flat-button 
+  class="menuright"
+  disableRipple    
+  aria-label="Example icon button fullscreen"
+  color="warn"
+  (click)="LogOut()">
+   Sign Out 
+</button>
+<h2 class="menuright"
+>{{this.getLogin()}} 
+</h2>
+<mat-icon class="menuright " style = "transform: scale(2); margin-top: 8px;">account_box</mat-icon> 
+

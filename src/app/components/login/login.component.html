@@ -8,7 +8,10 @@
  <br>
 
   <form class="AccessForm" >
+    <div class="logo">
     <img class="mb-4" src="assets/logo.png" alt="" width="64" height="64" >
+    <h2 *ngIf="errorMsg!=''" style ="color:rgb(157, 2, 2); font-style: italic;">Incorrect username or password</h2>
+  </div>
     <h1 class="h2 mb-3 font-weight-normal" >Please sign in</h1>
     <p>
       <mat-form-field appearance="fill">
@@ -51,7 +54,7 @@
   <br>
   <form class="AccessForm" >
     <img class="mb-4" src="assets/logo.png" alt="" width="64" height="64" >
-    <h1 class="h2 mb-3 font-weight-normal" >Please sign in</h1>
+    <h1 class="h2 mb-3 font-weight-normal" >Please sign up</h1>
     <p>
       <mat-form-field appearance="fill">
         <mat-label>Userrole</mat-label>
@@ -105,5 +108,3 @@
 </mat-tab>
 </mat-tab-group>
  
-  
-

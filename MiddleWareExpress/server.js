@@ -33,8 +33,9 @@ appServer.use(jsPassport.initialize());
 appServer.use(jsPassport.session());
 
 jsPassport.serializeUser(function(user, cb) {
+  console.log('serializeUser')
   process.nextTick(function() {
-    console.log('serializeUser', user.id, user.login)
+   console.log('serializeUser', user)
     return cb(null, {
       id: user.id,
       username: user.login
@@ -51,33 +52,46 @@ jsPassport.deserializeUser(function(user, cb) {
 
 
 jsPassport.use(new LocalStrategy(function verify(username, password, cb) {
-  
+//  console.log('Select')
   pool.query ("SELECT id, accessrole, login, hashed_password FROM public.dusers WHERE login = '" + username + "';", (err, row) => {
-  
+   console.log('verify')
     if (err) { return cb(err); }
-    if (!row) { return cb(null, false, { message: 'Incorrect username or password.' }); }
+    if (row.rowCount==0) { 
+      var error = new Object;
+      error = { message: 'User: Incorrect username or password.' }
+      console.log ('row.rowCount==0', 'Incorrect Username or Password');
+      return cb (error.message, false, { message: 'User: Incorrect username or password.' }) }
 
 
     bcrypt.compare(password, row.rows[0].hashed_password,
       async function (err, isMatch) {
+   console.log('isMatch')
         
-      if (isMatch) {
-      return cb(null, row.rows[0]) 
-      console.log('Encrypted password is: ', password);
-      console.log('Decrypted password is: ', hashedPassword);
-      }
+      if (isMatch) {return cb(null, row.rows[0])}
       if (!isMatch) {  
-      return cb(null, false, { message: 'Incorrect username or password.' })
-      console.log(hashedPassword + ' is not encryption of '+ password);
+        error = { message: 'Password: Incorrect username or password.' }
+        console.log('Password: Incorrect username or password.');
+        return cb(error.message, false, { message: 'Password: Incorrect username or password.' })
       }
       })
   });
 }));
 
 
-appServer.post ('/auth/', jsPassport.authenticate('local'), function(req, res) {  
-  console.log ('req', req.user)
-  res.json({message:"Success", username: req.user});
+appServer.post ('/auth/', function (req, res, next) { 
+  jsPassport.authenticate('local', function(err, user, info)  { 
+  console.log('err', err) 
+  if (err) {return res.send(err)}
+  if (!user) { return res.redirect('/login'); }
+  console.log('user', user) 
+  console.log('info', info) 
+  return res.json({message:"Success", username: user});
+})(req, res, next)
+}) 
+
+appServer.post ('/logout/', function (req, res){
+  console.log('req', req.session)
+  req.session.destroy();
 });
 
 

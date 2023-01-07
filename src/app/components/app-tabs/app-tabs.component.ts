@@ -9,7 +9,7 @@ import { CommonService } from 'src/app/services/mtree.service';
   styleUrls: ['./app-tabs.component.css']
 })
 export class AppTabsComponent implements OnDestroy {
-  messageReceived: any;
+  messageReceived ={text:'AAA'};
         private subscriptionName: Subscription; //important to create a subscription
     
         constructor(private Service: CommonService) {

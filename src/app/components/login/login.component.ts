@@ -17,7 +17,7 @@ export class LoginComponent implements OnInit {
   username:string;
   password:string;
   hide : boolean = true;
-
+  errorMsg="";
 
   myFunction() {
     this.hide = !this.hide;
@@ -32,8 +32,15 @@ export class LoginComponent implements OnInit {
     this.authService.validate(this.username, this.password)
     .then((response) => {
      console.log(response)
+     //console.log(response)
       this.authService.setUserInfo({'user' : response ['username']});
-      this.router.navigate(['general']);
+      this.router.navigate(['general']);    
+    })
+    .catch ((error) => {
+     console.log(error.error.text)
+
+      this.errorMsg = error.error.text
+      
     })
    
   }

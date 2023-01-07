@@ -20,7 +20,11 @@
   color:indianred;
 }
 .menuright {
- margin-right: 120px;
+ 
   float: inline-end;
   font-size: 18px;
+  margin-left: 10px;
+}
+.icon-display {
+  transform: scale(1.2);
 }
