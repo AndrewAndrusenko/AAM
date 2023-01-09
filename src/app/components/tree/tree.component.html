@@ -1,6 +1,8 @@
 <mat-form-field class="example-form-field">
 <mat-label>Search tree</mat-label>
-<input matInput type="text" #SearchTree  name="SearchTree">
+<input 
+(keyup.enter)="searchByTree(SearchTree.value)"
+matInput type="text" #SearchTree  name="SearchTree">
 <button matSuffix mat-icon-button aria-label="Clear" (click)="SearchTree.value=''">
   <mat-icon>close</mat-icon>
 </button>
