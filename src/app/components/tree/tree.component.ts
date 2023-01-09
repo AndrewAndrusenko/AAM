@@ -1,6 +1,6 @@
 import {CollectionViewer, SelectionChange, DataSource} from '@angular/cdk/collections';
 import {FlatTreeControl} from '@angular/cdk/tree';
-import { NgSwitch } from '@angular/common';
+import { NgSwitch, UpperCasePipe } from '@angular/common';
 import {Component, Injectable, Input, OnChanges, SimpleChanges} from '@angular/core';
 import {BehaviorSubject, merge, Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
@@ -26,13 +26,16 @@ export class DynamicFlatNode {
 @Injectable({providedIn: 'root'})
 export class DynamicDatabase {
   constructor (private TreeMenuSevice:TreeMenuSevice){}
-  dataMap = new Map;
+  public dataMap = new Map;
   rootLevelNodes: string[] = ['Favourites','Clients','Accounts', 'Strategies','Instruments','Trades & Orders'];
 
   /** Initial data from database */
   initialData(): DynamicFlatNode[] {
   this.TreeMenuSevice.getTreeData().subscribe (treeData =>{
-    this.dataMap = new Map (treeData.map(object => {return [object[0], object[1]]}));
+    this.dataMap = new Map (treeData.map(object => {return [object[0], object[1]]}))
+    //console.log('SQL dataMap')
+    //console.table(this.dataMap)
+    ;
    })   
     return this.rootLevelNodes.map(name => new DynamicFlatNode(name, 0, true, false, ''));
   }
@@ -59,8 +62,11 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
     return this.dataChange.value;
   }
   set data(value: DynamicFlatNode[]) {
+    console.log('set',value)
     this._treeControl.dataNodes = value;
     this.dataChange.next(value);
+    //console.log (value)
+
   }
 
   constructor(
@@ -77,6 +83,8 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
         this.handleTreeControl(change as SelectionChange<DynamicFlatNode>);
       }
     });
+  //  console.log (this.data)
+   // console.log (this.dataChange)
 
     return merge(collectionViewer.viewChange, this.dataChange).pipe(map(() => this.data));
   }
@@ -85,7 +93,10 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
 
   /** Handle expand/collapse behaviors */
   handleTreeControl(change: SelectionChange<DynamicFlatNode>) {
+    //console.log('handleTreeControl')
+    console.log (change)
     if (change.added) {
+      console.log('change.added')
       change.added.forEach(node => this.toggleNode(node, true));
     }
     if (change.removed) {
@@ -114,7 +125,10 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
         const nodes = children.map(
           name => new DynamicFlatNode(name, node.level + 1, this._database.isExpandable(name), false, node.item ),
         );
+
         this.data.splice(index + 1, 0, ...nodes);
+      //console.table(nodes)
+
       } else {
         let count = 0;
         for (
@@ -128,7 +142,13 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
       // notify the change
       this.dataChange.next(this.data);
       node.isLoading = false;
+      //console.log('data')
+      //console.table(this.data)
     }, 1);
+    
+
+    //console.table(this._treeControl.dataNodes)
+
   }
 }
 
@@ -141,26 +161,71 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
   styleUrls: ['tree.component.css'],
 })
 export class TreeComponent {
+  dataChange: any;
   constructor(database: DynamicDatabase, private Service: CommonService)  {
     this.treeControl = new FlatTreeControl<DynamicFlatNode>(this.getLevel, this.isExpandable);
     this.dataSource = new DynamicDataSource(this.treeControl, database);
-   
+    this.databaseM = database
     this.dataSource.data = database.initialData();
+   // console.log('initialData');
+    //console.table (this.databaseM)
   }
   
-
+  
   treeControl: FlatTreeControl<DynamicFlatNode>;
-
+  databaseM: DynamicDatabase 
   dataSource: DynamicDataSource;
   public node : DynamicFlatNode;
   isclicked : boolean;
-  activeNode;
+  public activeNode : DynamicFlatNode;
+  
   getLevel = (node: DynamicFlatNode) => node.level;
 
   isExpandable = (node: DynamicFlatNode) => node.expandable;
 
   hasChild = (_: number, _nodeData: DynamicFlatNode) => _nodeData.expandable;
     
-  sendMessage = (node: DynamicFlatNode) => {this.Service.sendUpdate(node.nodeRoot.toString())}
+  sendMessage = (node: DynamicFlatNode) => {
+ // console.log ('Send Click');
+ //  console.table(this.databaseM.dataMap);
+ 
+    this.Service.sendUpdate(node.nodeRoot.toString())}
+   
+  searchByTree = (SearchText:string) => {
+    SearchText = SearchText.toUpperCase();
+    var parentName : string;
+    var isFinded : boolean = false;
     
+    this.databaseM.dataMap.forEach( (node, key) => {
+      if (node.find(element => element.toUpperCase().includes(SearchText))) {
+        parentName = key;
+        isFinded = true;
+        console.log (key);}
+    });
+    console.log(isFinded)
+    !isFinded ? alert ("Element isn't found") :{}
+
+    for (let i = 0; i < this.treeControl.dataNodes.length; i++) {
+      if (this.treeControl.dataNodes[i].item == parentName) {this.treeControl.expand(this.treeControl.dataNodes[i])}
+    }
+    setTimeout(() => {
+      for (let i = 0; i < this.treeControl.dataNodes.length; i++) {
+      if (this.treeControl.dataNodes[i].item.toUpperCase() == SearchText) {
+        this.sendMessage(this.treeControl.dataNodes[i]);
+        this.activeNode=this.treeControl.dataNodes[i]; 
+      }
+    }
+     console.log(this.treeControl.dataNodes.length)      
+    }, 200); 
+
+  }
 }
+
+
+//this.treeControl.isExpanded (parentNode)
+
+// public item: string,
+// public level = 1,
+// public expandable = false,
+// public isLoading = false,
+// public nodeRoot: string
