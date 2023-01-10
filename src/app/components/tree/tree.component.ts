@@ -26,7 +26,7 @@ export class DynamicFlatNode {
 export class DynamicDatabase {
   constructor (private TreeMenuSevice:TreeMenuSevice){}
   public dataMap = new Map;
-  rootLevelNodes: string[] = ['Favourites','Clients','Accounts', 'Strategies','Instruments','Trades & Orders'];
+  public rootLevelNodes: string[] = ['Favourites','Clients','Accounts', 'Strategies','Instruments','Trades & Orders'];
 
   /** Initial data from database */
   initialData(): DynamicFlatNode[] {
@@ -156,7 +156,7 @@ export class TreeComponent {
   databaseM: DynamicDatabase 
   dataSource: DynamicDataSource;
   public node : DynamicFlatNode;
-  isclicked : boolean;
+  isExpanded : boolean = false;
   public activeNode : DynamicFlatNode;
   
   getLevel = (node: DynamicFlatNode) => node.level;
@@ -168,33 +168,45 @@ export class TreeComponent {
   // SendMessage: when node is selected method sends node rootTypeName to the Tab component to show relevant information structure     
   sendMessage = (node: DynamicFlatNode) => {this.Service.sendUpdate(node.nodeRoot.toString())}
   
+  //
+  ToggleTree = () => {
+    if (this.isExpanded) {
+      this.treeControl.dataNodes.forEach ( (node, index) => { 
+        if (node.level === 0) {setTimeout(() => {this.treeControl.expand(node)}, index*50 ); } 
+      })
+      } else {this.treeControl.collapseAll()}
+  }
   // Method to search the Tree Menu element for the item inputed in Search field. 
   searchByTree = (SearchText:string) => {
     SearchText = SearchText.toUpperCase();
     var parentName : string;
     var isFinded : boolean = false;
+    var parentIndex: number;
     //Searching through DataSourse map of Tree component to get parent node name. Then notify if it's not found
     // or expand parent node for further search of given element
     this.databaseM.dataMap.forEach( (node, key) => {
       if (node.find(element => element.toUpperCase().includes(SearchText))) {
         parentName = key;
         isFinded = true;
-        console.log (key);}
+      }
     });
     console.log(isFinded)
     !isFinded ? alert ("Element isn't found") :{}
 
     // Looping through nodes to find parent node which should be expanded
     for (let i = 0; i < this.treeControl.dataNodes.length; i++) {
-      if (this.treeControl.dataNodes[i].item == parentName) {this.treeControl.expand(this.treeControl.dataNodes[i])}
+      if (this.treeControl.dataNodes[i].item == parentName) {
+        this.treeControl.expand(this.treeControl.dataNodes[i])
+        parentIndex = i; 
+      }
     }
     
     // Continue to loop through nodes to find given child item. Then emulate a click on the item to get relevant tab component
     // and acivate node to make it highleted. Timeout is needed to give treeControl.dataNodes time to append childnodes of expanded 
     // parent node. 
     setTimeout(() => {
-      for (let i = 0; i < this.treeControl.dataNodes.length; i++) {
-        if (this.treeControl.dataNodes[i].item.toUpperCase() == SearchText) {
+      for (let i = parentIndex; i < this.treeControl.dataNodes.length; i++) {
+        if (this.treeControl.dataNodes[i].item.toUpperCase().includes (SearchText)) {
           this.sendMessage(this.treeControl.dataNodes[i]);
           this.activeNode=this.treeControl.dataNodes[i];        
         }
@@ -202,11 +214,10 @@ export class TreeComponent {
       // Scroll into view founded item
       setTimeout(() => {
         const classElement = document.getElementsByClassName('background-highlight');
-        console.log(classElement.length)
         if(classElement.length > 0) {classElement[0].scrollIntoView(); }
-      }, 100); 
+      }, 50); 
 
-    }, 200); 
+    }, 100); 
 
   }
   // ------------------------SearchByTreeComponent-----------------------------------

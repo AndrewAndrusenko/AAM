@@ -64,4 +64,6 @@
     width: 300px;
     border: 1px solid black;
   }
- 
+  .icon-display {
+    transform: scale(1.2);
+  }

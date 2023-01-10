@@ -9,13 +9,24 @@ async function TreeSQLQueryExc (RootNode) {
     case 'Clients':
       pool.QueryArrayConfig.text='SELECT dclients.clientname from public.dclients '; 
     break;
+
     case 'Accounts':
       pool.QueryArrayConfig.text='SELECT  dportfolios.portfolioname from public.dportfolios'; 
     break;
+
     case 'Strategies':
       pool.QueryArrayConfig.text='select dstrategiesglobal.sname from public.dstrategiesglobal'; 
     break; 
+
+    case 'Instruments':
+      pool.QueryArrayConfig.text='SELECT "InstrumentName" FROM public."dFInstruments"'
+    break;     
+
+    case 'Favourites':
+      pool.QueryArrayConfig.text="SELECT nodename FROM public.dtree_menu_favorites where userlogin = 'bofficer' "
+    break;     
   }
+  console.log(pool.QueryArrayConfig.text)
   PromQty = new Promise((resolve, reject) => {
     pool.query(pool.QueryArrayConfig, (error,result) => { resolve( [RootNode,result.rows.flat()]) })
   })
@@ -23,7 +34,7 @@ async function TreeSQLQueryExc (RootNode) {
  }
  
 async function FAmmGetAccountsList (request,response) {
-  Treelist = ['Clients','Accounts','Strategies'];  
+  Treelist = ['Clients','Accounts','Strategies','Favourites', 'Instruments'];  
   await Promise.all(
     Treelist.map(RootNode => TreeSQLQueryExc(RootNode))
   ).then((value) => {

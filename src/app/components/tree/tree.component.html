@@ -8,6 +8,19 @@ matInput type="text" #SearchTree  name="SearchTree">
 </button>
 </mat-form-field>
 
+<button mat-raised-button
+    disableRipple    
+    matTooltip="{{isExpanded? 'Collapse Tree':'Expand Tree'}}"
+    style ="font-size: larger; border-width: 2px; margin-left: 6px;"
+    aria-label="TreeExpandCollapse"
+    (click)="isExpanded=!isExpanded;
+    ToggleTree();">
+    {{isExpanded? 'Tree':'Tree'}}
+    <mat-icon>{{isExpanded? 'unfold_less':'unfold_more'}}</mat-icon>
+    
+
+</button>
+
 <cdk-virtual-scroll-viewport appendOnly itemSize="50" class="example-viewport">
 <div class="tree-menu" >
 <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
