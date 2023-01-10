@@ -167,11 +167,8 @@ export class TreeComponent {
     this.dataSource = new DynamicDataSource(this.treeControl, database);
     this.databaseM = database
     this.dataSource.data = database.initialData();
-   // console.log('initialData');
-    //console.table (this.databaseM)
   }
-  
-  
+    
   treeControl: FlatTreeControl<DynamicFlatNode>;
   databaseM: DynamicDatabase 
   dataSource: DynamicDataSource;
@@ -185,12 +182,8 @@ export class TreeComponent {
 
   hasChild = (_: number, _nodeData: DynamicFlatNode) => _nodeData.expandable;
     
-  sendMessage = (node: DynamicFlatNode) => {
- // console.log ('Send Click');
- //  console.table(this.databaseM.dataMap);
- 
-    this.Service.sendUpdate(node.nodeRoot.toString())}
-   
+  sendMessage = (node: DynamicFlatNode) => {this.Service.sendUpdate(node.nodeRoot.toString())}
+    
   searchByTree = (SearchText:string) => {
     SearchText = SearchText.toUpperCase();
     var parentName : string;
@@ -208,24 +201,22 @@ export class TreeComponent {
     for (let i = 0; i < this.treeControl.dataNodes.length; i++) {
       if (this.treeControl.dataNodes[i].item == parentName) {this.treeControl.expand(this.treeControl.dataNodes[i])}
     }
+
     setTimeout(() => {
       for (let i = 0; i < this.treeControl.dataNodes.length; i++) {
-      if (this.treeControl.dataNodes[i].item.toUpperCase() == SearchText) {
-        this.sendMessage(this.treeControl.dataNodes[i]);
-        this.activeNode=this.treeControl.dataNodes[i]; 
+        if (this.treeControl.dataNodes[i].item.toUpperCase() == SearchText) {
+          this.sendMessage(this.treeControl.dataNodes[i]);
+          this.activeNode=this.treeControl.dataNodes[i];        
+        }
       }
-    }
-     console.log(this.treeControl.dataNodes.length)      
+      setTimeout(() => {
+        const classElement = document.getElementsByClassName('background-highlight');
+        console.log(classElement.length)
+        if(classElement.length > 0) {classElement[0].scrollIntoView(); }
+      }, 100); 
+
     }, 200); 
 
   }
+  
 }
-
-
-//this.treeControl.isExpanded (parentNode)
-
-// public item: string,
-// public level = 1,
-// public expandable = false,
-// public isLoading = false,
-// public nodeRoot: string
