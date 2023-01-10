@@ -10,7 +10,6 @@ import { TreeMenuSevice } from "src/app/services/tree-menu.service"
 /** Flat node with expandable and level information */
 export class DynamicFlatNode {
   constructor(
-    
     public item: string,
     public level = 1,
     public expandable = false,
@@ -31,11 +30,8 @@ export class DynamicDatabase {
 
   /** Initial data from database */
   initialData(): DynamicFlatNode[] {
-  this.TreeMenuSevice.getTreeData().subscribe (treeData =>{
-    this.dataMap = new Map (treeData.map(object => {return [object[0], object[1]]}))
-    //console.log('SQL dataMap')
-    //console.table(this.dataMap)
-    ;
+    this.TreeMenuSevice.getTreeData().subscribe (treeData =>{
+    this.dataMap = new Map (treeData.map(object => {return [object[0], object[1]]}))    ;
    })   
     return this.rootLevelNodes.map(name => new DynamicFlatNode(name, 0, true, false, ''));
   }
@@ -62,11 +58,8 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
     return this.dataChange.value;
   }
   set data(value: DynamicFlatNode[]) {
-    console.log('set',value)
     this._treeControl.dataNodes = value;
     this.dataChange.next(value);
-    //console.log (value)
-
   }
 
   constructor(
@@ -83,8 +76,6 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
         this.handleTreeControl(change as SelectionChange<DynamicFlatNode>);
       }
     });
-  //  console.log (this.data)
-   // console.log (this.dataChange)
 
     return merge(collectionViewer.viewChange, this.dataChange).pipe(map(() => this.data));
   }
@@ -93,8 +84,6 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
 
   /** Handle expand/collapse behaviors */
   handleTreeControl(change: SelectionChange<DynamicFlatNode>) {
-    //console.log('handleTreeControl')
-    console.log (change)
     if (change.added) {
       console.log('change.added')
       change.added.forEach(node => this.toggleNode(node, true));
@@ -141,14 +130,8 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
 
       // notify the change
       this.dataChange.next(this.data);
-      node.isLoading = false;
-      //console.log('data')
-      //console.table(this.data)
-    }, 1);
-    
-
-    //console.table(this._treeControl.dataNodes)
-
+      node.isLoading = false;     
+    }, 1);    
   }
 }
 
@@ -181,14 +164,17 @@ export class TreeComponent {
   isExpandable = (node: DynamicFlatNode) => node.expandable;
 
   hasChild = (_: number, _nodeData: DynamicFlatNode) => _nodeData.expandable;
-    
+
+  // SendMessage: when node is selected method sends node rootTypeName to the Tab component to show relevant information structure     
   sendMessage = (node: DynamicFlatNode) => {this.Service.sendUpdate(node.nodeRoot.toString())}
-    
+  
+  // Method to search the Tree Menu element for the item inputed in Search field. 
   searchByTree = (SearchText:string) => {
     SearchText = SearchText.toUpperCase();
     var parentName : string;
     var isFinded : boolean = false;
-    
+    //Searching through DataSourse map of Tree component to get parent node name. Then notify if it's not found
+    // or expand parent node for further search of given element
     this.databaseM.dataMap.forEach( (node, key) => {
       if (node.find(element => element.toUpperCase().includes(SearchText))) {
         parentName = key;
@@ -198,10 +184,14 @@ export class TreeComponent {
     console.log(isFinded)
     !isFinded ? alert ("Element isn't found") :{}
 
+    // Looping through nodes to find parent node which should be expanded
     for (let i = 0; i < this.treeControl.dataNodes.length; i++) {
       if (this.treeControl.dataNodes[i].item == parentName) {this.treeControl.expand(this.treeControl.dataNodes[i])}
     }
-
+    
+    // Continue to loop through nodes to find given child item. Then emulate a click on the item to get relevant tab component
+    // and acivate node to make it highleted. Timeout is needed to give treeControl.dataNodes time to append childnodes of expanded 
+    // parent node. 
     setTimeout(() => {
       for (let i = 0; i < this.treeControl.dataNodes.length; i++) {
         if (this.treeControl.dataNodes[i].item.toUpperCase() == SearchText) {
@@ -209,6 +199,7 @@ export class TreeComponent {
           this.activeNode=this.treeControl.dataNodes[i];        
         }
       }
+      // Scroll into view founded item
       setTimeout(() => {
         const classElement = document.getElementsByClassName('background-highlight');
         console.log(classElement.length)
@@ -218,5 +209,6 @@ export class TreeComponent {
     }, 200); 
 
   }
+  // ------------------------SearchByTreeComponent-----------------------------------
   
 }
