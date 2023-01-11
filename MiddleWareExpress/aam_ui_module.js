@@ -1,3 +1,4 @@
+const { param } = require('jquery');
 const Module = require('module');
 const config = require('./db_config');
 const Pool = require('pg').Pool;
@@ -23,7 +24,7 @@ async function TreeSQLQueryExc (RootNode) {
     break;     
 
     case 'Favourites':
-      pool.QueryArrayConfig.text="SELECT nodename FROM public.dtree_menu_favorites where userlogin = 'bofficer' "
+      pool.QueryArrayConfig.text="SELECT nodename FROM public.dtree_menu_favorites "
     break;     
   }
   console.log(pool.QueryArrayConfig.text)
@@ -42,9 +43,23 @@ async function FAmmGetAccountsList (request,response) {
    
   })
 }
-async function fPutNewFavorite () {
-console.log ('fPutNewFavorite')
+
+async function fPutNewFavorite (request, response) {
+    console.log ('fPutNewFavorite')
+    paramArr = [request.body.nodename, request.body.nodeparent, request.body.userId]
+    const query = {
+      text: "INSERT INTO public.dtree_menu_favorites(nodename, nodeparent, userid) VALUES ($1, $2, $3) RETURNING *",
+      values: paramArr,
+      rowMode: 'array'
+    }
+    pool.query (query, (err, res) => {
+      if (err) {console.log (err.stack) 
+      } else {
+        return response.status(200).json(res.rows[0])
+      }
+    })
 }
+
  module.exports = {
   FAmmGetAccountsList,
   fPutNewFavorite

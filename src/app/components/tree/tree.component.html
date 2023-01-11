@@ -17,8 +17,6 @@ matInput type="text" #SearchTree  name="SearchTree">
     ToggleTree();">
     {{isExpanded? 'Tree':'Tree'}}
     <mat-icon>{{isExpanded? 'unfold_less':'unfold_more'}}</mat-icon>
-    
-
 </button>
 
 <cdk-virtual-scroll-viewport appendOnly itemSize="50" class="example-viewport">
@@ -52,10 +50,12 @@ matInput type="text" #SearchTree  name="SearchTree">
 </div>
 </cdk-virtual-scroll-viewport>
 
-
+<!-- Context menu for treeMenu element -->
 <ng-template #treecontextmenu>
   <div class="tree-menu-context" cdkMenu>
-    <button class="tree-menu-item">
+    <button 
+    (click)="handleNewFavoriteClick()"
+    class="tree-menu-item">
       <mat-icon class="menu-icon" matPrefix>favorite</mat-icon> 
        Add to favorites</button>
     <button class="tree-menu-item">
@@ -66,3 +66,4 @@ matInput type="text" #SearchTree  name="SearchTree">
        Edit Item</button>
   </div>
 </ng-template>
+<!-- //Context menu for treeMenu element -->

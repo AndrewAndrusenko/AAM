@@ -4,9 +4,8 @@ import { NgSwitch, UpperCasePipe } from '@angular/common';
 import {Component, Injectable, Input, OnChanges, SimpleChanges} from '@angular/core';
 import {BehaviorSubject, merge, Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
-import { CommonService } from 'src/app/services/mtree.service';
 import { AppMenuComponent } from '../app-menu/app-menu.component';
-import { TreeMenuSevice } from "src/app/services/tree-menu.service"
+import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
 /** Flat node with expandable and level information */
 export class DynamicFlatNode {
   constructor(
@@ -145,7 +144,7 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
 })
 export class TreeComponent {
   dataChange: any;
-  constructor(database: DynamicDatabase, private Service: CommonService)  {
+  constructor(database: DynamicDatabase, private TreeMenuSevice:TreeMenuSevice)  {
     this.treeControl = new FlatTreeControl<DynamicFlatNode>(this.getLevel, this.isExpandable);
     this.dataSource = new DynamicDataSource(this.treeControl, database);
     this.databaseM = database
@@ -166,7 +165,7 @@ export class TreeComponent {
   hasChild = (_: number, _nodeData: DynamicFlatNode) => _nodeData.expandable;
 
   // SendMessage: when node is selected method sends node rootTypeName to the Tab component to show relevant information structure     
-  sendMessage = (node: DynamicFlatNode) => {this.Service.sendUpdate(node.nodeRoot.toString())}
+  sendMessage = (node: DynamicFlatNode) => {this.TreeMenuSevice.sendUpdate(node.nodeRoot.toString())}
   
   //
   ToggleTree = () => {
@@ -222,4 +221,11 @@ export class TreeComponent {
   }
   // ------------------------SearchByTreeComponent-----------------------------------
   
+  handleNewFavoriteClick(){
+    let user:any;
+    user = localStorage.getItem('userInfo')
+    console.log(user)
+    this.TreeMenuSevice.addItemToFavorites (this.activeNode.item , this.activeNode.nodeRoot, user.id)
+    .then((response) => { console.log(response)})
+  }
 }

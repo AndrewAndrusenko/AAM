@@ -11,7 +11,6 @@ async function encryptPsw (accessRole, login , password) {
   bcrypt.genSalt(10, (err,Salt) => {
     bcrypt.hash(password, Salt, (err, hash) => {
       if (err) {return console.log ('Cannot encrypt');}
-      console.log(hash);
       hashedPassword=hash;
 
       return new Promise ((resolve) => { 
@@ -38,8 +37,6 @@ async function encryptPsw (accessRole, login , password) {
 }
 
 async function addNewUser (request,response) {
-
-console.log (request.body)
 response =  await encryptPsw (request.body.accessrole, request.body.username, request.body.password)
 }
 
