@@ -25,7 +25,7 @@ async function TreeSQLQueryExc (RootNode, userId) {
 
     case 'Favorites':
       pool.QueryArrayConfig.values = [userId]
-      pool.QueryArrayConfig.text="SELECT nodename FROM public.dtree_menu_favorites where (userid= $1) "
+      pool.QueryArrayConfig.text="SELECT nodename || ',' || nodeparent as nodeF FROM public.dtree_menu_favorites where (userid= $1) "
       pool.QueryArrayConfig.rowMode="array"
     break;     
   }

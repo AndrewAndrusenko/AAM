@@ -1,23 +1,30 @@
 <!-- Context menu for treeMenu element -->
 <ng-template  #treecontextmenu>
-  <div class="tree-menu-context"cdkMenu>
-    <button *ngIf="activeNode.nodeRoot!=='Favorites'"
-    (click)="handleNewFavoriteClick()" 
-    class="tree-menu-item" cdkMenuItem>
+  <div class="tree-menu-context"cdkMenu *ngIf="activeNode.nodeRoot !==''">
+    <!-- -----------toggle favorite button of context menu. more readable version it semms------ -->
+    <button *ngIf="activeNode.favoriteRoot !=='Favorites'"
+      (click)="handleNewFavoriteClick($event.target)" 
+      class="tree-menu-item" cdkMenuItem>
       <mat-icon class="menu-icon" matPrefix>favorite</mat-icon> 
-       Add to favorites</button>
-    <button *ngIf="activeNode.nodeRoot=='Favorites'"
-    (click)="handleDeleteFavoriteClick()"
-    class="tree-menu-item" cdkMenuItem>
+       Add to favorites
+    </button>    
+    <button *ngIf="activeNode.favoriteRoot=='Favorites'"
+      (click)="handleDeleteFavoriteClick()"
+      class="tree-menu-item" cdkMenuItem>
       <mat-icon class="menu-icon" matPrefix>favorite_border</mat-icon>      
-      Remove from favorites</button>   
-    <button class="tree-menu-item"cdkMenuItem >
+      Remove from favorites
+    </button>  
+    <!-- -----------toggle favorite button of context menu. more readable version it semms------ -->
+    <button 
+      (click)="handleDeleteFavUpdate()"
+      class="tree-menu-item" cdkMenuItem >
       <mat-icon class="menu-icon" matPrefix>add_circle</mat-icon>      
        New Item</button>
     <button 
        class="tree-menu-item" cdkMenuItem>
       <mat-icon class="menu-icon" matPrefix>edit</mat-icon>      
-       Edit Item</button>
+       Edit Item
+    </button>
   </div>
 </ng-template>
 <!-- //Context menu for treeMenu element -->
@@ -52,7 +59,7 @@ matInput type="text" #SearchTree  name="SearchTree">
 <div class="tree-menu" >
 <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
   <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding>
-    <button mat-flat-button [cdkContextMenuTriggerFor]="treecontextmenu"
+    <button mat-flat-button [cdkContextMenuTriggerFor]="treecontextmenu"  
     class="tree-button" 
     (click)="sendMessage(node); 
     activeNode = node;"
