@@ -2,6 +2,7 @@ const express = require ('express')
 const bodyParser = require('body-parser')
 const appServer = new express()
 const port = 3000
+const userId=0
 const jsPassport = require ('passport')
 var LocalStrategy = require('passport-local');
 const uiAmmModule = require ('./aam_ui_module');
@@ -33,9 +34,10 @@ appServer.use(jsPassport.initialize());
 appServer.use(jsPassport.session());
 
 jsPassport.serializeUser(function(user, cb) {
-  console.log('serializeUser')
+ // console.log('serializeUser')
   process.nextTick(function() {
-   console.log('serializeUser', user)
+ //  console.log('serializeUser', user)
+   userId=user.id;
     return cb(null, {
       id: user.id,
       username: user.login
@@ -54,7 +56,7 @@ jsPassport.deserializeUser(function(user, cb) {
 jsPassport.use(new LocalStrategy(function verify(username, password, cb) {
 //  console.log('Select')
   pool.query ("SELECT id, accessrole, login, hashed_password FROM public.dusers WHERE login = '" + username + "';", (err, row) => {
-   console.log('verify')
+  // console.log('verify')
     if (err) { return cb(err); }
     if (row.rowCount==0) { 
       var error = new Object;
@@ -65,7 +67,6 @@ jsPassport.use(new LocalStrategy(function verify(username, password, cb) {
 
     bcrypt.compare(password, row.rows[0].hashed_password,
       async function (err, isMatch) {
-   console.log('isMatch')
         
       if (isMatch) {return cb(null, row.rows[0])}
       if (!isMatch) {  
@@ -83,14 +84,14 @@ appServer.post ('/auth/', function (req, res, next) {
   console.log('err', err) 
   if (err) {return res.send(err)}
   if (!user) { return res.redirect('/login'); }
-  console.log('user', user) 
-  console.log('info', info) 
+ // console.log('user', user) 
+ // console.log('info', info) 
   return res.json({message:"Success", username: user});
 })(req, res, next)
 }) 
 
 appServer.post ('/logout/', function (req, res){
-  console.log('req', req.session)
+ // console.log('req', req.session)
   req.session.destroy();
 });
 
@@ -102,5 +103,7 @@ appServer.get ('/auth/newUserP/:psw', auth_module.encryptPsw)
 appServer.post ('/auth/newUser/',auth_module.addNewUser)
 
 appServer.post('/Favorites/newItem/',uiAmmModule.fPutNewFavorite)
+
+appServer.post('/Favorites/deleteItem/',uiAmmModule.fRemoveFavorite)
 
 appServer.listen (port,'localhost', () => {console.log (`AAM Server is running on port ${port}`)})

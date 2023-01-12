@@ -1,11 +1,12 @@
 import {CollectionViewer, SelectionChange, DataSource} from '@angular/cdk/collections';
 import {FlatTreeControl} from '@angular/cdk/tree';
 import { NgSwitch, UpperCasePipe } from '@angular/common';
-import {Component, Injectable, Input, OnChanges, SimpleChanges} from '@angular/core';
+import {Component, Injectable, Input, OnChanges, SimpleChanges, ViewChild} from '@angular/core';
 import {BehaviorSubject, merge, Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import { AppMenuComponent } from '../app-menu/app-menu.component';
 import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
+import { MatMenuTrigger } from '@angular/material/menu';
 /** Flat node with expandable and level information */
 export class DynamicFlatNode {
   constructor(
@@ -25,11 +26,12 @@ export class DynamicFlatNode {
 export class DynamicDatabase {
   constructor (private TreeMenuSevice:TreeMenuSevice){}
   public dataMap = new Map;
-  public rootLevelNodes: string[] = ['Favourites','Clients','Accounts', 'Strategies','Instruments','Trades & Orders'];
+  public rootLevelNodes: string[] = ['Favorites','Clients','Accounts', 'Strategies','Instruments','Trades & Orders'];
 
   /** Initial data from database */
   initialData(): DynamicFlatNode[] {
-    this.TreeMenuSevice.getTreeData().subscribe (treeData =>{
+    let userData = JSON.parse(localStorage.getItem('userInfo'))
+    this.TreeMenuSevice.getTreeData( userData.user.id  ).subscribe (treeData =>{
     this.dataMap = new Map (treeData.map(object => {return [object[0], object[1]]}))    ;
    })   
     return this.rootLevelNodes.map(name => new DynamicFlatNode(name, 0, true, false, ''));
@@ -150,7 +152,8 @@ export class TreeComponent {
     this.databaseM = database
     this.dataSource.data = database.initialData();
   }
-    
+  @ViewChild(MatMenuTrigger) trigger: MatMenuTrigger;
+
   treeControl: FlatTreeControl<DynamicFlatNode>;
   databaseM: DynamicDatabase 
   dataSource: DynamicDataSource;
@@ -222,10 +225,13 @@ export class TreeComponent {
   // ------------------------SearchByTreeComponent-----------------------------------
   
   handleNewFavoriteClick(){
-    let user:any;
-    user = localStorage.getItem('userInfo')
-    console.log(user)
-    this.TreeMenuSevice.addItemToFavorites (this.activeNode.item , this.activeNode.nodeRoot, user.id)
+    let userData = JSON.parse(localStorage.getItem('userInfo'))
+    this.TreeMenuSevice.addItemToFavorites (this.activeNode.item , this.activeNode.nodeRoot, userData.user.id)
     .then((response) => { console.log(response)})
+  }
+  handleDeleteFavoriteClick(){
+    let userData = JSON.parse(localStorage.getItem('userInfo'))
+    this.TreeMenuSevice.removeItemFromFavorites (this.activeNode.item , userData.user.id)
+    .then((response) => {console.log(response)})
   }
 }

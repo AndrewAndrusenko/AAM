@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonService } from './services/mtree.service';
 import { TreeMenuSevice } from './services/tree-menu.service';
 
 @Component({
@@ -10,12 +9,10 @@ import { TreeMenuSevice } from './services/tree-menu.service';
 })
 export class AppComponent implements OnInit {
   
-  constructor (private treeSevice:TreeMenuSevice,  private Service: CommonService) {    
+  constructor (private treeSevice:TreeMenuSevice) {    
   }
   ngOnInit(): void {
-   
-    this.Service.sendUpdate("Accounts");
-    // this.treeSevice.getTreeData().subscribe( treeElem => { console.log('appint', treeElem)} )
+    this.treeSevice.sendUpdate("Accounts");
   }
   title = 'AAM';
 }

@@ -4,7 +4,7 @@ const config = require('./db_config');
 const Pool = require('pg').Pool;
 const pool = new Pool(config.dbConfig);
 
-async function TreeSQLQueryExc (RootNode) {
+async function TreeSQLQueryExc (RootNode, userId) {
   pool.QueryArrayConfig = {values: [], rowMode: "array" }
   switch (RootNode) {
     case 'Clients':
@@ -23,21 +23,28 @@ async function TreeSQLQueryExc (RootNode) {
       pool.QueryArrayConfig.text='SELECT "InstrumentName" FROM public."dFInstruments"'
     break;     
 
-    case 'Favourites':
-      pool.QueryArrayConfig.text="SELECT nodename FROM public.dtree_menu_favorites "
+    case 'Favorites':
+      pool.QueryArrayConfig.values = [userId]
+      pool.QueryArrayConfig.text="SELECT nodename FROM public.dtree_menu_favorites where (userid= $1) "
+      pool.QueryArrayConfig.rowMode="array"
     break;     
   }
-  console.log(pool.QueryArrayConfig.text)
+  console.log(pool.QueryArrayConfig)
   PromQty = new Promise((resolve, reject) => {
-    pool.query(pool.QueryArrayConfig, (error,result) => { resolve( [RootNode,result.rows.flat()]) })
+    pool.query(pool.QueryArrayConfig, (error,result) => { 
+      console.log(RootNode,result.rows);
+      resolve( 
+      [RootNode,result.rows.flat()]) })
   })
   return PromQty;
  }
  
 async function FAmmGetAccountsList (request,response) {
-  Treelist = ['Clients','Accounts','Strategies','Favourites', 'Instruments'];  
+  console.log(request.query.userId)
+  Treelist = ['Clients','Accounts','Strategies','Favorites', 'Instruments'];  
+  // Treelist = ['Clients','Accounts','Strategies', 'Instruments'];  
   await Promise.all(
-    Treelist.map(RootNode => TreeSQLQueryExc(RootNode))
+    Treelist.map(RootNode => TreeSQLQueryExc(RootNode, request.query.userId))
   ).then((value) => {
     return response.status(200).json(value)
    
@@ -45,7 +52,6 @@ async function FAmmGetAccountsList (request,response) {
 }
 
 async function fPutNewFavorite (request, response) {
-    console.log ('fPutNewFavorite')
     paramArr = [request.body.nodename, request.body.nodeparent, request.body.userId]
     const query = {
       text: "INSERT INTO public.dtree_menu_favorites(nodename, nodeparent, userid) VALUES ($1, $2, $3) RETURNING *",
@@ -59,8 +65,25 @@ async function fPutNewFavorite (request, response) {
       }
     })
 }
+async function fRemoveFavorite (request, response) {
+    console.log ('fRemoveFavorite')
+    paramArr = [request.body.nodename, request.body.userId]
+    const query = {
+      text: "DELETE FROM public.dtree_menu_favorites where (nodename = $1 and userid= $2) RETURNING *",
+      values: paramArr,
+      rowMode: 'array'
+    }
+    pool.query (query, (err, res) => {
+      if (err) {console.log (err.stack) 
+      } else {
+        console.log(query)
+        return response.status(200).json(res.rows[0])
+      }
+    })
+}
 
  module.exports = {
   FAmmGetAccountsList,
-  fPutNewFavorite
+  fPutNewFavorite,
+  fRemoveFavorite
  }

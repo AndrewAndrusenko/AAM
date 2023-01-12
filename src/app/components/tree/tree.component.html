@@ -1,3 +1,28 @@
+<!-- Context menu for treeMenu element -->
+<ng-template  #treecontextmenu>
+  <div class="tree-menu-context"cdkMenu>
+    <button *ngIf="activeNode.nodeRoot!=='Favorites'"
+    (click)="handleNewFavoriteClick()" 
+    class="tree-menu-item" cdkMenuItem>
+      <mat-icon class="menu-icon" matPrefix>favorite</mat-icon> 
+       Add to favorites</button>
+    <button *ngIf="activeNode.nodeRoot=='Favorites'"
+    (click)="handleDeleteFavoriteClick()"
+    class="tree-menu-item" cdkMenuItem>
+      <mat-icon class="menu-icon" matPrefix>favorite_border</mat-icon>      
+      Remove from favorites</button>   
+    <button class="tree-menu-item"cdkMenuItem >
+      <mat-icon class="menu-icon" matPrefix>add_circle</mat-icon>      
+       New Item</button>
+    <button 
+       class="tree-menu-item" cdkMenuItem>
+      <mat-icon class="menu-icon" matPrefix>edit</mat-icon>      
+       Edit Item</button>
+  </div>
+</ng-template>
+<!-- //Context menu for treeMenu element -->
+
+<!-- ---Search Tree input------- -->
 <mat-form-field class="example-form-field">
 <mat-label>Search tree</mat-label>
 <input 
@@ -7,7 +32,9 @@ matInput type="text" #SearchTree  name="SearchTree">
   <mat-icon>close</mat-icon>
 </button>
 </mat-form-field>
+<!-- ---Search Tree input------- -->
 
+<!-- ---Expand All / Collapse Tree menu button------- -->
 <button mat-raised-button
     disableRipple    
     matTooltip="{{isExpanded? 'Collapse Tree':'Expand Tree'}}"
@@ -18,7 +45,9 @@ matInput type="text" #SearchTree  name="SearchTree">
     {{isExpanded? 'Tree':'Tree'}}
     <mat-icon>{{isExpanded? 'unfold_less':'unfold_more'}}</mat-icon>
 </button>
+<!-- ---Expand All / Collapse Tree menu button------- -->
 
+<!-- ---Tree Menu items with scrolling area------- -->
 <cdk-virtual-scroll-viewport appendOnly itemSize="50" class="example-viewport">
 <div class="tree-menu" >
 <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
@@ -49,21 +78,4 @@ matInput type="text" #SearchTree  name="SearchTree">
 </mat-tree>
 </div>
 </cdk-virtual-scroll-viewport>
-
-<!-- Context menu for treeMenu element -->
-<ng-template #treecontextmenu>
-  <div class="tree-menu-context" cdkMenu>
-    <button 
-    (click)="handleNewFavoriteClick()"
-    class="tree-menu-item">
-      <mat-icon class="menu-icon" matPrefix>favorite</mat-icon> 
-       Add to favorites</button>
-    <button class="tree-menu-item">
-      <mat-icon class="menu-icon" matPrefix>add_circle</mat-icon>      
-       New Item</button>
-    <button class="tree-menu-item">
-      <mat-icon class="menu-icon" matPrefix>edit</mat-icon>      
-       Edit Item</button>
-  </div>
-</ng-template>
-<!-- //Context menu for treeMenu element -->
+<!-- ---Tree Menu items with scrolling area------- -->

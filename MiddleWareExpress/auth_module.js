@@ -18,7 +18,7 @@ async function encryptPsw (accessRole, login , password) {
         resolve (respArr)
             
         const query = {
-          text: "INSERT INTO public.dusers( accessrole, login, hashed_password) VALUES ($1, $2, $3) RETURNING *",
+          text: "INSERT INTO public.dusers(accessrole, login, hashed_password) VALUES ($1, $2, $3) RETURNING *",
           values: respArr,
           rowMode: 'array'
         }
