@@ -21,7 +21,8 @@ import { DashboardComponent } from './general/dashboard/dashboard.component';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import { AppLoginComponent } from './components/app-login/app-login.component';
 import {MatInputModule} from '@angular/material/input'; 
-import {ScrollingModule} from '@angular/cdk/scrolling'; 
+import {ScrollingModule} from '@angular/cdk/scrolling';
+import { TableAccounts } from './components/app-accout-tablee/app-accout-tablee.component'; 
 @NgModule({
   declarations: [
     AppComponent,
@@ -31,7 +32,8 @@ import {ScrollingModule} from '@angular/cdk/scrolling';
     AppMenuComponent,
     AppTabsComponent,
     
-    AppLoginComponent
+    AppLoginComponent,
+    TableAccounts
     
   ],
   imports: [

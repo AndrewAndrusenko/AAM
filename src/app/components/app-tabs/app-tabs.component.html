@@ -50,7 +50,7 @@
 
 <mat-tab-group [cdkContextMenuTriggerFor]="tabcontextmenu" *ngIf="messageReceived.text=='Clients'" mat-stretch-tabs #ClientInfo>
   <mat-tab label="Client Summary" style="padding: 20px;">Client Summary</mat-tab>  
-  <mat-tab label="Client Accounts"> Client Accounts </mat-tab>
+  <mat-tab label="Client Accounts"> <app-app-accout-tablee></app-app-accout-tablee> </mat-tab>
   <mat-tab label="Positions"> Positions table  </mat-tab>
 </mat-tab-group>
 
