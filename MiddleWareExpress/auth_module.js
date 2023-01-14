@@ -40,7 +40,17 @@ async function addNewUser (request,response) {
 response =  await encryptPsw (request.body.accessrole, request.body.username, request.body.password)
 }
 
+async function getUserRoles (request,response) {
+  pool.query ({text : 'SELECT "roleName" from  public."aAccesRoles"; ',rowMode: "array"}, (err, res) => {
+    if (err) {console.log (err.stack) 
+    } else {
+      return response.status(200).json(res.rows.flat())
+    }
+  })
+}
+
 module.exports = {
   encryptPsw,
-  addNewUser
+  addNewUser,
+  getUserRoles
 }

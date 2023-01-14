@@ -96,14 +96,20 @@ appServer.post ('/logout/', function (req, res){
 });
 
 
-appServer.get ('/AAM/Accounts/',  jsPassport.authenticate('session') ,  uiAmmModule.FAmmGetAccountsList)
-
-appServer.get ('/auth/newUserP/:psw', auth_module.encryptPsw)
+appServer.get ('/auth/userRoles/', auth_module.getUserRoles)
 
 appServer.post ('/auth/newUser/',auth_module.addNewUser)
 
 appServer.post('/Favorites/newItem/',uiAmmModule.fPutNewFavorite)
 
 appServer.post('/Favorites/deleteItem/',uiAmmModule.fRemoveFavorite)
+
+// -------------Get Tree for Tree Menu UI----------------------
+appServer.get ('/AAM/treeMenu/',  jsPassport.authenticate('session') ,  uiAmmModule.FAmmGetAccountsList)
+
+// -------------Get Tree for Tree Menu UI----------------------
+appServer.get ('/AAM/portfolioTable/',  jsPassport.authenticate('session') ,  uiAmmModule.fGetportfolioTable)
+
+
 
 appServer.listen (port,'localhost', () => {console.log (`AAM Server is running on port ${port}`)})

@@ -1,6 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-
+import { Observable } from 'rxjs';
+interface userRoles {
+  value: string;
+}
 @Injectable({
   providedIn: 'root'
 })
@@ -35,7 +38,6 @@ export class AuthService {
     return this.http.post ('http://localhost:3000/auth/newUser/',{'accessrole': userrole, 'username' : login, 'password' : password}).toPromise()
   }
 
-
   public LogOut() { 
     localStorage.removeItem('userInfo')
     console.log('AngLogOut')
@@ -43,4 +45,7 @@ export class AuthService {
     
   }
   
+  public getUsersRoles(): Observable < userRoles[]>{
+    return this.http.get < userRoles[]> ('http://localhost:3000/auth/userRoles/')
+  }
 }

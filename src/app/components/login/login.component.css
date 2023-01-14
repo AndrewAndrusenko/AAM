@@ -10,13 +10,7 @@
   padding: 15px;
 }
 
-.form-control {
-  display: flex;
-  width: 350px;
-  height: auto;
-  margin-right: 15px;
-  font-size: 20px;
-}
+
 .AccessForm {
   min-width: 150px;
   max-width: 500px;
@@ -33,7 +27,6 @@
 }
 
 td {
-  padding-right: 8px;
 }
 .mat-form-field {
   color: #000;
@@ -46,9 +39,19 @@ td {
 :host ::ng-deep .mat-form-field-label {
   color: black;
   font-size: 20px;
+  margin-bottom: 5px;
 }
 :host ::ng-deep .mat-input-element{
   color: black;
+  font-size: 20px;
+  margin-bottom: -7px;
+}
+:host ::ng-deep .mat-select-value{
+  color: black;
+  font-size: 20px;
+  margin-bottom: -10px;
+}
+:host ::ng-deep .mat-option {
   font-size: 20px;
 }
 :host ::ng-deep .mat-form-field-underline{
@@ -80,6 +83,7 @@ td {
 :host ::ng-deep .mat-tab-label.mat-tab-label-active {
   min-width: 25px !important;
   padding: 25px;
+  margin-bottom: 5px;
   background-color:darkgrey; 
   color: rgb(0, 0, 0);
   font-size:large;

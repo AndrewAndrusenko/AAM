@@ -57,16 +57,17 @@
     <h1 class="h2 mb-3 font-weight-normal" >Please sign up</h1>
     <p>
       <mat-form-field appearance="fill">
-        <mat-label>Userrole</mat-label>
-        <input  matInput type="text" [(ngModel)]="userrole" [ngModelOptions]="{standalone: true}" >
-        <button mat-icon-button matPrefix color="primary" aria-label="Example icon button with a home icon">
-           <mat-icon  >accessibility</mat-icon>
-          </button> 
-           <button *ngIf="userrole" matSuffix mat-icon-button aria-label="Clear" (click)="userrole=''">
-           <mat-icon>close</mat-icon>
-           </button>
+        <mat-label > <mat-icon  >accessibility</mat-icon> Userrole</mat-label>
+        <mat-select [(ngModel)]="userrole" [ngModelOptions]="{standalone: true}">
+          <mat-option>None</mat-option>
+          <mat-option *ngFor="let userrole of userroles " [value]="userrole">
+            {{userrole}}
+          </mat-option>
+        </mat-select>
        
       </mat-form-field>
+
+
     </p>
     
     <p>
@@ -108,3 +109,16 @@
 </mat-tab>
 </mat-tab-group>
  
+
+
+<!-- <mat-form-field appearance="fill">
+  <mat-label>Userrole</mat-label>
+  <input  matInput type="text" [(ngModel)]="userrole" [ngModelOptions]="{standalone: true}" >
+  <button mat-icon-button matPrefix color="primary" aria-label="Example icon button with a home icon">
+     <mat-icon  >accessibility</mat-icon>
+    </button> 
+     <button *ngIf="userrole" matSuffix mat-icon-button aria-label="Clear" (click)="userrole=''">
+     <mat-icon>close</mat-icon>
+     </button>
+ 
+</mat-form-field> -->

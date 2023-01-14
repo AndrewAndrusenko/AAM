@@ -5,7 +5,9 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 
 import {MatInputModule} from '@angular/material/input'; 
 import { AuthService } from 'src/app/services/auth.service';
-
+interface userRoles {
+  value: string;
+}
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
@@ -18,14 +20,20 @@ export class LoginComponent implements OnInit {
   password:string;
   hide : boolean = true;
   errorMsg="";
-
+  userroles:userRoles[] 
+/*   foods: Food[] = [
+    {value: 'steak-0', viewValue: 'Steak'},
+    {value: 'pizza-1', viewValue: 'Pizza'},
+    {value: 'tacos-2', viewValue: 'Tacos'},
+  ]; */
+  
   myFunction() {
     this.hide = !this.hide;
   }
   constructor(private authService : AuthService, private router : Router) { }
 
   ngOnInit(): void {
-    
+   this.authService.getUsersRoles().subscribe (UsersRolesData => this.userroles=UsersRolesData)
   }
 
   handleLoginClick(){

@@ -32,7 +32,6 @@ async function TreeSQLQueryExc (RootNode, userId) {
   console.log(pool.QueryArrayConfig)
   PromQty = new Promise((resolve, reject) => {
     pool.query(pool.QueryArrayConfig, (error,result) => { 
-      console.log(RootNode,result.rows);
       resolve( 
       [RootNode,result.rows.flat()]) })
   })
@@ -40,14 +39,26 @@ async function TreeSQLQueryExc (RootNode, userId) {
  }
  
 async function FAmmGetAccountsList (request,response) {
-  console.log(request.query.userId)
   Treelist = ['Clients','Accounts','Strategies','Favorites', 'Instruments'];  
-  // Treelist = ['Clients','Accounts','Strategies', 'Instruments'];  
   await Promise.all(
     Treelist.map(RootNode => TreeSQLQueryExc(RootNode, request.query.userId))
   ).then((value) => {
     return response.status(200).json(value)
    
+  })
+}
+
+async function fGetportfolioTable (request,response) {
+  let sql="SELECT "+
+  " dportfolios.idportfolio, dportfolios.idclient, dportfolios.idstategy, " + 
+  " dstrategiesglobal.sname,dportfolios.portfolioname, dportfolios.portleverage " +
+  " FROM public.dportfolios LEFT JOIN public.dstrategiesglobal ON dportfolios.idstategy=public.dstrategiesglobal.id; "
+  pool.query ({text : sql}, (err, res) => {
+    if (err) {console.log (err.stack) 
+    } else {
+      console.log(res.rows)
+      return response.status(200).json((res.rows))
+    }
   })
 }
 
@@ -84,6 +95,7 @@ async function fRemoveFavorite (request, response) {
 
  module.exports = {
   FAmmGetAccountsList,
+  fGetportfolioTable,
   fPutNewFavorite,
   fRemoveFavorite
  }

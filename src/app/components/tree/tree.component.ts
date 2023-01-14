@@ -274,7 +274,7 @@ export class TreeComponent {
     }, 40); 
 
   }
-
+public Sendclick() {console.log('click')}
   public handleAddFavUpdate () {
     let favarr = this.dataSource._database.dataMap.get('Favorites')
     let newFavItem = this.activeNode.item + ',' + this.activeNode.nodeRoot

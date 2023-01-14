@@ -16,7 +16,7 @@ export class AppTabsComponent implements OnDestroy {
             this.subscriptionName= this.TreeMenuSevice.getUpdate().subscribe
              (message => { //message contains the data sent from service
              this.messageReceived = message;
-             console.log(this.messageReceived,'ddd')
+             //console.log(this.messageReceived,'ddd')
              });
         }
     

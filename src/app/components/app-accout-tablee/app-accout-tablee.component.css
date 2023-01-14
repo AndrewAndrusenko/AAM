@@ -1,12 +1,20 @@
-table {
+.demo-table {
   width: 100%;
 }
 
-.mat-mdc-form-field {
-  font-size: 14px;
-  width: 100%;
+
+.mat-sort-header {
+  font-weight: bold;
+  font-size: 20px;
+  text-align: center;
+
+}
+.mat-column-demo {
+  
+  font-size: 20px;
+  text-align: center;
 }
 
-td, th {
-  width: 25%;
+.mat-column-demo-weight {
+  font-style: italic;
 }

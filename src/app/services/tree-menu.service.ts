@@ -9,7 +9,7 @@ export class TreeMenuSevice {
   }
   getTreeData ( userId:number ):Observable < string[]>{
     const params = {'userId': userId}
-    return this.http.get <string[]>('http://localhost:3000/AAM/Accounts',{ params: params } ) 
+    return this.http.get <string[]>('http://localhost:3000/AAM/treeMenu/',{ params: params } ) 
   }
   public addItemToFavorites (nodename:string, nodeparent:string, userId:number) { 
     return this.http.post ('http://localhost:3000/Favorites/newItem/',{'nodename': nodename, 'nodeparent' : nodeparent, 'userId' : userId}).toPromise()

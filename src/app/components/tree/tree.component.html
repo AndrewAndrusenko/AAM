@@ -61,7 +61,9 @@ matInput type="text" #SearchTree  name="SearchTree">
   <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding>
     <button mat-flat-button [cdkContextMenuTriggerFor]="treecontextmenu"  
     class="tree-button" 
-    (click)="sendMessage(node); 
+    (click)="
+    Sendclick();
+    sendMessage(node); 
     activeNode = node;"
     [ngClass]="{ 'background-highlight': activeNode === node }">
     <span class="txtColor">{{node.item}}</span>
@@ -72,8 +74,7 @@ matInput type="text" #SearchTree  name="SearchTree">
     <button 
       mat-flat-button class="tree-button" 
       color="primary" 
-      (click)="sendMessage(node);
-      activeNode = node;"
+     
       [ngClass]="{ 'background-highlight': activeNode === node }"  
       [attr.aria-label]="'Toggle ' + node.item" matTreeNodeToggle>
       <mat-icon class="mat-icon-rtl-mirror">
@@ -86,3 +87,5 @@ matInput type="text" #SearchTree  name="SearchTree">
 </div>
 </cdk-virtual-scroll-viewport>
 <!-- ---Tree Menu items with scrolling area------- -->
+<!-- (click)="sendMessage(node);
+activeNode = node;" -->
