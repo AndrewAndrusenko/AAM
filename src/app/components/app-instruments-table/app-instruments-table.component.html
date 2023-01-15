@@ -1,0 +1,47 @@
+<div >
+  <div >
+      <div >
+          <table class="table table-bordered table-striped table-hover" datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger">
+              <thead>
+              <tr>
+               <th> SecId </th>  
+               <th> Short Name </th>  
+               <th> Name </th>   
+               <th> ISIN </th>   
+               <th> List Level </th>  
+               <th> Face Value </th>  
+               <th> Face Unit </th> 
+               <th> Primary Board Title </th> 
+               <th> QI </th> 
+               <th> Registry Close Date </th>   
+               <th> Lot Size </th>  
+               <th> Price </th>  
+               <th> Discountl0 </th>  
+               <th> isCounth0 </th> 
+               <th> FC </th>  
+              </tr>
+              </thead>
+              <tbody>
+              <tr *ngFor="let instrument of instrumentData">
+                <td> {{instrument.secid}}</td> 
+                <td> {{instrument.shortname}}</td> 
+                <td> {{instrument.name}}</td>  
+                <td> {{instrument.isin}}</td>  
+                <td> {{instrument.listlevel}}</td> 
+                <td> {{instrument.facevalue}}</td> 
+                <td> {{instrument.faceunit}}</td>
+                <td> {{instrument.primary_board_title}}</td>
+                <td> {{instrument.s_qualified_investors}}</td>
+                <td> {{instrument.registryclosedate}}</td>  
+                <td> {{instrument.lotsize}}</td> 
+                <td> {{instrument.price}}</td> 
+                <td> {{instrument.discountl0}}</td> 
+                <td> {{instrument.discounth0}}</td>
+                <td> {{instrument.fullcovered}}</td> 
+              </tr>
+              </tbody>
+          </table>
+      </div>
+
+  </div>
+</div>

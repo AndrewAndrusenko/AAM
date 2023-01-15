@@ -110,6 +110,6 @@ appServer.get ('/AAM/treeMenu/',  jsPassport.authenticate('session') ,  uiAmmMod
 // -------------Get Tree for Tree Menu UI----------------------
 appServer.get ('/AAM/portfolioTable/',  jsPassport.authenticate('session') ,  uiAmmModule.fGetportfolioTable)
 
-
+appServer.get ('/AAM/InstrumentData/',  jsPassport.authenticate('session') ,  uiAmmModule.fGetInstrumentData)
 
 appServer.listen (port,'localhost', () => {console.log (`AAM Server is running on port ${port}`)})

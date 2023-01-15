@@ -35,7 +35,7 @@ export class DynamicDatabase {
     this.TreeMenuSevice.getTreeData( userData.user.id  ).subscribe (treeData =>{
     this.dataMap = new Map (treeData.map(object => {return [object[0], object[1]]}))    ;
    })   
-    return this.rootLevelNodes.map(name => new DynamicFlatNode(name, 0, true, false, '',''));
+    return this.rootLevelNodes.map(name => new DynamicFlatNode(name, 0, true, false, 'TestIns',''));
   }
 
   getChildren(node: string): string[] | undefined {

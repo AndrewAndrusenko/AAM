@@ -62,6 +62,20 @@ async function fGetportfolioTable (request,response) {
   })
 }
 
+async function fGetInstrumentData(request,response) {
+ let sql=' SELECT ' +
+         ' secid, shortname, name,  isin,  listlevel, facevalue, faceunit,  primary_board_title, ' +
+         ' is_qualified_investors,  registryclosedate,  lotsize, price, discountl0, discounth0, fullcovered ' +
+         ' FROM public."aMoexInstruments";'
+ pool.query ({text : sql}, (err, res) => {
+  if (err) {console.log (err.stack) 
+  } else {
+    console.log(res.rows)
+    return response.status(200).json((res.rows))
+  }
+})
+}
+
 async function fPutNewFavorite (request, response) {
     paramArr = [request.body.nodename, request.body.nodeparent, request.body.userId]
     const query = {
@@ -97,5 +111,6 @@ async function fRemoveFavorite (request, response) {
   FAmmGetAccountsList,
   fGetportfolioTable,
   fPutNewFavorite,
-  fRemoveFavorite
+  fRemoveFavorite,
+  fGetInstrumentData
  }

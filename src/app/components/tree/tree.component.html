@@ -74,7 +74,10 @@ matInput type="text" #SearchTree  name="SearchTree">
     <button 
       mat-flat-button class="tree-button" 
       color="primary" 
-     
+      (click)="
+      Sendclick();
+      sendMessage(node); 
+      activeNode = node;"
       [ngClass]="{ 'background-highlight': activeNode === node }"  
       [attr.aria-label]="'Toggle ' + node.item" matTreeNodeToggle>
       <mat-icon class="mat-icon-rtl-mirror">

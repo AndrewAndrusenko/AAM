@@ -1,7 +1,7 @@
   
   <mat-tab-group  [matMenuTriggerFor]="menu" *ngIf="messageReceived.text=='Accounts' " mat-stretch-tabs #AccountInfo >
     
-  <mat-tab label="Account Summary" >{{messageReceived.text}} </mat-tab>  
+  <mat-tab label="Account Summary" style="padding: 20px;">{{messageReceived.text}} </mat-tab>  
   <mat-tab label="Portfolio Details"> Detailed positions with PnL data  </mat-tab>
   <mat-tab label="Trades by Account"> Trades history by Account </mat-tab>
 </mat-tab-group  >
@@ -14,7 +14,7 @@
 </mat-tab-group>
 
 <mat-tab-group *ngIf="messageReceived.text=='Strategies'" #StrategiesInfo mat-stretch-tabs>
-  <mat-tab label="Strategy Structure" >{{messageReceived.text}} </mat-tab>  
+  <mat-tab label="Strategy Structure" style="padding: 20px;">{{messageReceived.text}} </mat-tab>  
   <mat-tab label="Positions by Strategy"> 
     
     
@@ -42,14 +42,14 @@
 </mat-tab-group>
 
 <mat-tab-group  *ngIf="messageReceived.text=='Trades & Orders'" mat-stretch-tabs #TradesOrdersInfo>
-  <mat-tab label="Orders" >OrdersTable</mat-tab>  
+  <mat-tab label="Orders" style="padding: 20px;">OrdersTable</mat-tab>  
   <mat-tab label="Trades"> Trades table  </mat-tab>
   <mat-tab label="Positions"> Positions table  </mat-tab>
   <mat-tab label="Orders by Strategy"> Orders history  </mat-tab>
 </mat-tab-group>
 
 <mat-tab-group [cdkContextMenuTriggerFor]="tabcontextmenu" *ngIf="messageReceived.text=='Clients'" mat-stretch-tabs #ClientInfo>
-  <mat-tab label="Client Summary" >Client Summary</mat-tab>  
+  <mat-tab label="Client Summary" style="padding: 20px;">Client Summary</mat-tab>  
   <mat-tab label="Client Accounts"> <app-app-accout-tablee></app-app-accout-tablee> </mat-tab>
   <mat-tab label="Positions"> Positions table  </mat-tab>
 </mat-tab-group>
@@ -79,7 +79,4 @@
   </div>
 </ng-template>
 
-<app-app-instruments-table 
-*ngIf="messageReceived.text=='TestIns'"
-style="width: 900px; margin-left: -20px;"
-></app-app-instruments-table>
+<app-app-instruments-table *ngIf="messageReceived.text=='TestIns'"></app-app-instruments-table>

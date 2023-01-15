@@ -22,7 +22,9 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import { AppLoginComponent } from './components/app-login/app-login.component';
 import {MatInputModule} from '@angular/material/input'; 
 import {ScrollingModule} from '@angular/cdk/scrolling';
-import { TableAccounts } from './components/app-accout-tablee/app-accout-tablee.component'; 
+import { TableAccounts } from './components/app-accout-tablee/app-accout-tablee.component';
+import { DataTablesModule } from "angular-datatables";
+import { AppInstrumentsTableComponent } from './components/app-instruments-table/app-instruments-table.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -31,9 +33,9 @@ import { TableAccounts } from './components/app-accout-tablee/app-accout-tablee.
     TreeComponent,
     AppMenuComponent,
     AppTabsComponent,
-    
     AppLoginComponent,
-    TableAccounts
+    TableAccounts,
+    AppInstrumentsTableComponent
     
   ],
   imports: [
@@ -51,8 +53,8 @@ import { TableAccounts } from './components/app-accout-tablee/app-accout-tablee.
     MatFormFieldModule,
     MatInputModule,
     CdkMenuModule,
-    ScrollingModule
-  
+    ScrollingModule,
+    DataTablesModule
   ],
 
   providers: [],
