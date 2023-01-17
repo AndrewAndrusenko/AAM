@@ -8,7 +8,7 @@
 
 <!-- <mat-icon [matMenuTriggerFor]="menu" >more_vert</mat-icon>   -->
 <mat-tab-group *ngIf="messageReceived.text=='Instruments'" mat-stretch-tabs #InstrumentInfo>
-  <mat-tab label="Instrments table" ><app-app-instruments-table></app-app-instruments-table> </mat-tab>  
+  <mat-tab label="Instrments table" >Instrument Table </mat-tab>  
   <mat-tab label="Positions"> Detailed positions with deviations versus model Portfolio  </mat-tab>
   <mat-tab label="Trades by Instrument"> Trades history by Instrument</mat-tab>
 </mat-tab-group>
@@ -80,5 +80,5 @@
 </ng-template>
 
 <app-app-instruments-table 
-*ngIf="messageReceived.text=='TestIns'"
+*ngIf="messageReceived.text=='Trades & Orders_Root'"
 ></app-app-instruments-table>

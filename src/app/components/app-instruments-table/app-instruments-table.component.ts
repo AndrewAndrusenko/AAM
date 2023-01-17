@@ -19,29 +19,29 @@ export class ButtonsExtensionComponent implements OnInit {
     },
     
     columns: [
-      { title: 'trade_num',
+      { title: 'Trade ID',
        data: 'trade_num'},
-      { title: 'dealdate',
+      { title: 'DealDate',
        data: 'dealdate'},
-      { title: 'number',
+      { title: 'Number ',
        data: 'number'},
-      { title: 'dbo_tdealdealtype',
+      { title: 'Type',
        data: 'dbo_tdealdealtype'},
-      { title: 'qty' ,
+      { title: 'Quantity' ,
        data: 'qty' },
-      { title: 'instpercent' ,                   
+      { title: 'Price' ,                   
        data: 'instpercent' },                   
-      { title: 'dbo_tinstrumentbrief',
+      { title: 'Ins_Type',
        data: 'dbo_tinstrumentbrief'},
-      { title: 'dbo_tinstitutionbrief',  
+      { title: 'Counterparty',  
        data: 'dbo_tinstitutionbrief'},  
-      { title: 'valuedate' ,  
+      { title: 'Value Date' ,  
        data: 'valuedate' },  
-      { title: 'tcurrencybrief',   
+      { title: 'Currency 1',   
        data: 'tcurrencybrief'},   
-      { title: 'tcurrency2',
+      { title: 'Currency 2',
        data: 'tcurrency2'},
-      { title: 'dealid' ,
+      { title: 'Id' ,
        data: 'dealid' },
   ],
   buttons: 
@@ -60,9 +60,11 @@ export class ButtonsExtensionComponent implements OnInit {
   ],
   dom: {button: { className: 'btn btn-rounded'}}
   },
+  
   language: {decimal: ',', thousands: '.'},
   pageLength: 25,                            
-  dom:  '<"dtsp-dataTable"Bfrtip>',
+  dom:  'Bfrtip',
+  order: [11, 'desc'] 
     };
   }
 }
