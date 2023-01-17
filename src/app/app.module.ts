@@ -24,7 +24,7 @@ import {MatInputModule} from '@angular/material/input';
 import {ScrollingModule} from '@angular/cdk/scrolling';
 import { TableAccounts } from './components/app-accout-tablee/app-accout-tablee.component';
 import { DataTablesModule } from "angular-datatables";
-import { AppInstrumentsTableComponent } from './components/app-instruments-table/app-instruments-table.component';
+import { ButtonsExtensionComponent } from './components/app-instruments-table/app-instruments-table.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -35,7 +35,7 @@ import { AppInstrumentsTableComponent } from './components/app-instruments-table
     AppTabsComponent,
     AppLoginComponent,
     TableAccounts,
-    AppInstrumentsTableComponent
+    ButtonsExtensionComponent
     
   ],
   imports: [
