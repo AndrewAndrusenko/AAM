@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { TreeComponent } from './components/tree/tree.component';
@@ -9,7 +8,6 @@ import {MatTreeModule} from '@angular/material/tree' ;
 import {MatIconModule} from '@angular/material/icon'; 
 import {MatProgressBarModule} from '@angular/material/progress-bar'; 
 import {CdkMenuModule} from '@angular/cdk/menu';
-
 import {MaterialExampleModule} from '../material.module';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatNativeDateModule} from '@angular/material/core';
@@ -24,7 +22,8 @@ import {MatInputModule} from '@angular/material/input';
 import {ScrollingModule} from '@angular/cdk/scrolling';
 import { TableAccounts } from './components/app-accout-tablee/app-accout-tablee.component';
 import { DataTablesModule } from "angular-datatables";
-import { ButtonsExtensionComponent } from './components/app-instruments-table/app-instruments-table.component';
+import { tradesDataTable } from './components/app-trades-table/app-trades-table.component';
+import { AppInstrumentTableComponent } from './components/app-instrument-table/app-instrument-table.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -35,7 +34,8 @@ import { ButtonsExtensionComponent } from './components/app-instruments-table/ap
     AppTabsComponent,
     AppLoginComponent,
     TableAccounts,
-    ButtonsExtensionComponent
+    tradesDataTable,
+    AppInstrumentTableComponent
     
   ],
   imports: [

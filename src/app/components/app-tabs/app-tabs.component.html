@@ -79,6 +79,10 @@
   </div>
 </ng-template>
 
-<app-app-instruments-table 
+<app-app-trades-table 
 *ngIf="messageReceived.text=='Trades & Orders_Root'"
-></app-app-instruments-table>
+></app-app-trades-table>
+
+<app-app-instrument-table 
+*ngIf="messageReceived.text=='Instruments_Root'"
+></app-app-instrument-table>

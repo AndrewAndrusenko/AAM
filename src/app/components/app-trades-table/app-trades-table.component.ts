@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'app-app-instruments-table',
-  templateUrl: './app-instruments-table.component.html',
-  styleUrls: ['./app-instruments-table.component.css']
+  selector: 'app-app-trades-table',
+  templateUrl: './app-trades-table.component.html',
+  styleUrls: ['./app-trades-table.component.css']
 })
-export class ButtonsExtensionComponent implements OnInit {
+export class tradesDataTable implements OnInit {
   // Must be declared as "any", not as "DataTables.Settings"
   dtOptions: any = {};
 
@@ -68,3 +68,4 @@ export class ButtonsExtensionComponent implements OnInit {
     };
   }
 }
+
