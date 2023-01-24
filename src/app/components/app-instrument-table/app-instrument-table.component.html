@@ -1,1 +1,35 @@
---><table datatable  [dtOptions]="dtOptions" class="dataTable row-border table-bordered table-striped table-hovered"></table>
+
+<!-- Context menu for treeMenu element -->
+<ng-template  #instrumentcontextmenu>
+  <div class="tree-menu-context" cdkMenu >
+    <!-- -----------toggle favorite button of context menu. more readable version it semms------ -->
+    <!-- (click)="handleNewFavoriteClick($event.target)"  -->
+    <button 
+      (click)="openAddFileDialog('Create')"
+      class="tree-menu-item" cdkMenuItem >
+      <mat-icon class="menu-icon" matPrefix>add_circle</mat-icon>      
+      New Imstrument</button>
+    <button 
+      (click)="openAddFileDialog('Edit')"
+      class="tree-menu-item" cdkMenuItem>
+      <mat-icon class="menu-icon" matPrefix>edit</mat-icon>      
+      Edit Instrument
+    </button>
+    <button 
+     (click)="openAddFileDialog('Delete')"
+      class="tree-menu-item" cdkMenuItem>
+      <mat-icon class="menu-icon" matPrefix>delete</mat-icon> 
+      Delete Instrument
+    </button> 
+  </div>
+</ng-template>
+<!-- //Context menu for treeMenu element -->
+
+<button mat-raised-button style="float: inline-start; margin-left: 8px; margin-bottom: 5px;" color="primary">Add instrument</button>
+<div [cdkContextMenuTriggerFor]="instrumentcontextmenu" class="dataTableTitle"> <h2> Instruments list </h2> </div>
+
+<table datatable  id="mytable" [cdkContextMenuTriggerFor]="instrumentcontextmenu"[dtOptions]="dtOptions" 
+class="row-border hover"></table>
+
+
+ <!-- <app-app-instrument-edit-form></app-app-instrument-edit-form>  -->

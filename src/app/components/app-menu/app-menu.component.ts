@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { AppMenuServiceService } from 'src/app/services/app-menu-service.service';
 import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
@@ -7,10 +8,10 @@ import { AuthService } from 'src/app/services/auth.service';
   styleUrls: ['./app-menu.component.css']
 })
 export class AppMenuComponent {
-favorites=false;
-fullscreen=false;
+treeOpened : boolean = true;
+fullscreen : boolean = false;
 
-constructor(private authService : AuthService) { }
+constructor(private authService : AuthService, private appMenuService : AppMenuServiceService) { }
 
 public getLogin = () => {
   var userData;
@@ -26,5 +27,11 @@ toggleFullscreenMode = () => {
 LogOut = () => {
   this.authService.LogOut();
   window.location.reload();
+}
+
+showHideTree = () => {
+this.treeOpened = !this.treeOpened
+this.appMenuService.sendToggleTree(this.treeOpened)
+console.log ('showHideTree',this.treeOpened)
 }
 }

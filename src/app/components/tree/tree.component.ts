@@ -2,7 +2,7 @@ import {CollectionViewer, SelectionChange, DataSource} from '@angular/cdk/collec
 import {FlatTreeControl} from '@angular/cdk/tree';
 import { NgSwitch, UpperCasePipe } from '@angular/common';
 import {Component, Injectable, Input, OnChanges, SimpleChanges, ViewChild} from '@angular/core';
-import {BehaviorSubject, merge, Observable} from 'rxjs';
+import {BehaviorSubject, merge, Observable, Subscription} from 'rxjs';
 import {map} from 'rxjs/operators';
 import { AppMenuComponent } from '../app-menu/app-menu.component';
 import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
@@ -118,10 +118,10 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
       if (expand) {
         const nodes = children.map(
           name => { 
-            let favoriteName = name.split(',');
-            if (node.item=='Favorites') {
-              console.log('Fav',node.item)
-              return new DynamicFlatNode(favoriteName[0], node.level + 1, false, false, favoriteName[1], node.item )
+            let favoriteName = node.item.split('_');
+            if (favoriteName[0]=='Favorites') {
+              console.log('Fav',node.item,name)
+              return new DynamicFlatNode(name, node.level + 1, this._database.isExpandable(name), false, favoriteName[1], favoriteName[0] )
             } else {
               console.log(node.item, node)
               return new DynamicFlatNode(name, node.level + 1, this._database.isExpandable(name), false, node.item, '' )
@@ -164,14 +164,17 @@ export class TreeComponent {
     this.dataSource.data = database.initialData();
   }
   @ViewChild(MatMenuTrigger) trigger: MatMenuTrigger;
-
+  public opened : boolean = true;
   treeControl: FlatTreeControl<DynamicFlatNode>;
   databaseM: DynamicDatabase 
   dataSource: DynamicDataSource;
   public node : DynamicFlatNode;
   isExpanded : boolean = false;
   public activeNode : DynamicFlatNode;
-  
+
+           
+        
+
   getLevel = (node: DynamicFlatNode) => node.level;
 
   isExpandable = (node: DynamicFlatNode) => node.expandable;
@@ -179,7 +182,12 @@ export class TreeComponent {
   hasChild = (_: number, _nodeData: DynamicFlatNode) => _nodeData.expandable;
 
   // SendMessage: when node is selected method sends node rootTypeName to the Tab component to show relevant information structure     
-  sendMessage = (node: DynamicFlatNode) => {this.TreeMenuSevice.sendUpdate(node.nodeRoot.toString())}
+  sendMessage = (node: DynamicFlatNode) => {
+    let rootNodeName: string;
+    let rootNode=node.nodeRoot.split('_')
+    if (rootNode[0]==='Favorites') {rootNodeName=rootNode[1]} else {rootNodeName = node.nodeRoot }
+    this.TreeMenuSevice.sendUpdate(rootNodeName)
+  }
   
   //
   ToggleTree = () => {
@@ -274,21 +282,29 @@ export class TreeComponent {
     }, 40); 
 
   }
-public Sendclick() {console.log('click')}
   public handleAddFavUpdate () {
-    let favarr = this.dataSource._database.dataMap.get('Favorites')
-    let newFavItem = this.activeNode.item + ',' + this.activeNode.nodeRoot
-    favarr.push(newFavItem)
-    this.dataSource._database.dataMap.set('Favorites', favarr)
-    let favnode= this.treeControl.dataNodes.find(node=>node.item='Favorites')
+    console.log(this.databaseM.rootLevelNodes)
+    console.log(this.dataSource._database.dataMap)
 
-    setTimeout(() => {
+    console.log(this.activeNode.nodeRoot)
+    let favarr = this.dataSource._database.dataMap.get('Favorites'+'_'+this.activeNode.nodeRoot)
+    // let newFavItem = this.activeNode.item + ',' + this.activeNode.nodeRoot
+    favarr.push(this.activeNode.item)
+    console.log(favarr)
+    this.dataSource._database.dataMap.set('Favorites'+'_'+this.activeNode.nodeRoot, favarr)
+    console.log(this.databaseM.rootLevelNodes)
+
+    console.log(this.dataSource._database.dataMap)
+   // let favnode= this.treeControl.dataNodes.find(node=>node.item='Favorites'+'_'+this.activeNode.nodeRoot)
+
+   /*  setTimeout(() => {
       this.treeControl.collapse (favnode)
     }, 20); 
     setTimeout(() => {
     this.treeControl.expand (favnode)
-    }, 40); 
+    }, 40);  */
 
   }
+  public Sendclick() {console.log('click')}
 
 }

@@ -24,6 +24,9 @@ import { TableAccounts } from './components/app-accout-tablee/app-accout-tablee.
 import { DataTablesModule } from "angular-datatables";
 import { tradesDataTable } from './components/app-trades-table/app-trades-table.component';
 import { AppInstrumentTableComponent } from './components/app-instrument-table/app-instrument-table.component';
+import { AppInstrumentEditFormComponent } from './components/forms/app-instrument-edit-form/app-instrument-edit-form.component';
+import { MatDialogModule} from "@angular/material/dialog";
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -35,7 +38,8 @@ import { AppInstrumentTableComponent } from './components/app-instrument-table/a
     AppLoginComponent,
     TableAccounts,
     tradesDataTable,
-    AppInstrumentTableComponent
+    AppInstrumentTableComponent,
+    AppInstrumentEditFormComponent
     
   ],
   imports: [
@@ -54,7 +58,8 @@ import { AppInstrumentTableComponent } from './components/app-instrument-table/a
     MatInputModule,
     CdkMenuModule,
     ScrollingModule,
-    DataTablesModule
+    DataTablesModule,
+    MatDialogModule,
   ],
 
   providers: [],

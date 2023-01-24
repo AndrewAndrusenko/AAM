@@ -1,0 +1,19 @@
+.tree-container{
+  height: 88vh;
+  width:max-content;
+  min-width: 350px;
+
+}
+.tree-chevron {
+  display: flex;
+  justify-content: center;
+  border: 1px solid black;
+  left: -15px;
+}
+.tab-container {
+  min-width: 1600px;
+  border-width: 3px;
+  border-color:rgb(67, 79, 79);
+  border-style: solid;
+  padding-top: 5px;
+}

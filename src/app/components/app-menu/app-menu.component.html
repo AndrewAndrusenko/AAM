@@ -2,10 +2,10 @@
   <button mat-icon-button 
     disableRipple    
     aria-label="Example icon button with a heart icon"
-    [ngStyle]="{'color':favorites ? 'indianred' : 'white'}"
-    (click)="favorites=!favorites">
-    <mat-icon>favorite</mat-icon>
-    {{favorites? 'Remove':'Add'}} 
+    [ngStyle]="{'color':treeOpened ? 'indianred' : 'white'}"
+    (click)="showHideTree()">
+    
+    {{treeOpened? 'Tree hide':'Tree show'}} 
   </button>
   <button mat-flat-button [matMenuTriggerFor]="menu" style="margin-left: 45px;" matRipple="">Clients</button>
     <mat-menu #menu="matMenu">
@@ -24,6 +24,7 @@
     <button mat-menu-item
     (click)="LogOut()"
     >Sign out</button>
+  
   </mat-menu>
 
 <button mat-flat-button
@@ -48,4 +49,5 @@
 >{{this.getLogin()}} 
 </h2>
 <mat-icon class="menuright " style = "transform: scale(2); margin-top: 8px;">account_box</mat-icon> 
+</div>
 

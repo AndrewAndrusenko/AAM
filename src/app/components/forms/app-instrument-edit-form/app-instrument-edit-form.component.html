@@ -1,0 +1,54 @@
+<mat-toolbar color="primary" style="margin-bottom:10px; border-radius: 0px;">
+  {{action}} instrument
+</mat-toolbar>
+<form class="submit" [formGroup]="editInstrumentForm">
+<mat-form-field>
+  <input matInput placeholder="secid" formControlName="secid">
+</mat-form-field>
+<mat-form-field>
+  <input matInput placeholder="shortname" formControlName="shortname">
+</mat-form-field>
+<mat-form-field>
+  <input matInput placeholder="name" formControlName="name">
+</mat-form-field>
+<mat-form-field>
+  <input matInput placeholder="isin" formControlName="isin">
+</mat-form-field>
+<mat-form-field>
+  <input matInput placeholder="listlevel" formControlName="listlevel">
+</mat-form-field>
+
+<mat-form-field>
+  <input matInput placeholder="facevalue" formControlName="facevalue">
+</mat-form-field>
+<mat-form-field>
+  <input matInput placeholder="faceunit" formControlName="faceunit">
+</mat-form-field>
+<mat-form-field>
+  <input matInput placeholder="primary_board_title" formControlName="primary_board_title">
+</mat-form-field>
+<mat-form-field>
+  <input matInput placeholder="is_qualified_investors" formControlName="is_qualified_investors">
+</mat-form-field><mat-form-field>
+  <input matInput placeholder="lotsize" formControlName="lotsize">
+</mat-form-field>
+<mat-form-field>
+  <input matInput placeholder="price" formControlName="price">
+</mat-form-field>
+<mat-form-field>
+  <input matInput placeholder="discountl0" formControlName="discountl0">
+</mat-form-field>
+<mat-form-field>
+  <input matInput placeholder="discounth0" formControlName="discounth0">
+</mat-form-field>
+<mat-form-field>
+  <input matInput placeholder="fullcovered" formControlName="fullcovered">
+</mat-form-field>
+
+<button mat-flat-button color="primary" type="submit" 
+[disabled]="!editInstrumentForm.valid"
+style="margin-top: 10px; width: 200px; font-size: 18px;">
+  {{action}} instrument
+</button>
+
+</form>

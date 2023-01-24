@@ -4,6 +4,7 @@
   border-style: solid;
   margin-bottom: 5px;
   padding: 3px;
+  width: 92%;
 }
 .mat-flat-button {
   font-size: large;
@@ -27,4 +28,7 @@
 }
 .icon-display {
   transform: scale(1.2);
+}
+.buttons_right {
+  margin-right: 10px;
 }

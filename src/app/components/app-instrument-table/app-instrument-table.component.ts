@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { MatDialog, MatDialogRef} from '@angular/material/dialog';
+import { AppInstrumentEditFormComponent } from '../forms/app-instrument-edit-form/app-instrument-edit-form.component';
 
 
 @Component({
@@ -7,9 +9,12 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./app-instrument-table.component.css']
 })
 export class AppInstrumentTableComponent {
-// Must be declared as "any", not as "DataTables.Settings"
-dtOptions: any = {};
-
+  isEditForm: boolean = false;
+  
+  dialogRef: MatDialogRef<AppInstrumentEditFormComponent>;
+  // Must be declared as "any", not as "DataTables.Settings"
+  dtOptions: any = {};
+  constructor(private dialog: MatDialog) {}
 ngOnInit(): void {
   this.dtOptions = {
                              
@@ -47,10 +52,8 @@ ngOnInit(): void {
     {title :'Discountl0', 
     data :'discountl0'}, 
     {title :'Discounth0',
-    data :'discounth0'},
-    {title :'FC',
-    data :'fullcovered'}
-],
+    data :'discounth0'}
+   ],
 buttons: 
 {
 buttons: 
@@ -71,7 +74,28 @@ dom: {button: { className: 'btn btn-rounded'}}
 language: {decimal: ',', thousands: '.'},
 pageLength: 25,                            
 dom:  'Bfrtip',
+select: true
 /* order: [11, 'desc']  */
   };
+}
+
+openAddFileDialog(actionType) {
+  console.log(actionType)
+  this.dialogRef = this.dialog.open(AppInstrumentEditFormComponent ,{
+    minHeight:'400px',
+    width:'900px'
+  });
+  this.dialogRef.componentInstance.action = actionType;
+  let table =  $('#mytable')
+ 
+  let target = event.target || event.srcElement || event.currentTarget;
+  // console.log(target);
+  // console.log(event);
+ 
+        let data = table.DataTable().row({ selected: true }).data()
+        
+  console.log(data)
+  
+
 }
 }

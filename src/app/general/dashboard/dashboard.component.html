@@ -1,7 +1,24 @@
+
 <app-app-menu></app-app-menu>
 <div style="display:flex">
+
+<mat-sidenav-container class="tree-container">
+  <mat-sidenav #sidenav mode="side" [(opened)]="opened">
+
 <div fxFlex style="padding: 10px;"><app-tree></app-tree></div>
-<mat-divider [vertical]="true" style="border-width : 3px;"></mat-divider>
-<div style=" width: 2000px"><app-app-tabs></app-app-tabs></div>
+</mat-sidenav>
+
+
+<mat-sidenav-content class="tree-chevron">
+  <button mat-icon-button style="height: 90%;" (click)="sidenav.toggle()"> 
+    <mat-icon >chevron_right</mat-icon>
+  </button>
+
+  <div class="tab-container" ><app-app-tabs></app-app-tabs></div>
+  
+</mat-sidenav-content>
+</mat-sidenav-container>
+
+
 </div>
 <p>AAM 0.1b</p>

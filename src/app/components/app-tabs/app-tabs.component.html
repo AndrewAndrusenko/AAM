@@ -1,4 +1,7 @@
-  
+
+<app-app-instrument-table 
+*ngIf="messageReceived.text=='Instruments_Root'"
+></app-app-instrument-table>  
   <mat-tab-group  [matMenuTriggerFor]="menu" *ngIf="messageReceived.text=='Accounts' " mat-stretch-tabs #AccountInfo >
     
   <mat-tab label="Account Summary" >{{messageReceived.text}} </mat-tab>  
@@ -82,7 +85,3 @@
 <app-app-trades-table 
 *ngIf="messageReceived.text=='Trades & Orders_Root'"
 ></app-app-trades-table>
-
-<app-app-instrument-table 
-*ngIf="messageReceived.text=='Instruments_Root'"
-></app-app-instrument-table>

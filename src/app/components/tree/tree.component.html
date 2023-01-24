@@ -1,6 +1,6 @@
 <!-- Context menu for treeMenu element -->
 <ng-template  #treecontextmenu>
-  <div class="tree-menu-context"cdkMenu *ngIf="activeNode.nodeRoot !==''">
+  <div class="tree-menu-context" cdkMenu *ngIf="activeNode.nodeRoot !==''">
     <!-- -----------toggle favorite button of context menu. more readable version it semms------ -->
     <button *ngIf="activeNode.favoriteRoot !=='Favorites'"
       (click)="handleNewFavoriteClick($event.target)" 
@@ -89,6 +89,7 @@ matInput type="text" #SearchTree  name="SearchTree">
 </mat-tree>
 </div>
 </cdk-virtual-scroll-viewport>
+
 <!-- ---Tree Menu items with scrolling area------- -->
 <!-- (click)="sendMessage(node);
 activeNode = node;" -->

@@ -4,9 +4,10 @@ const config = require('./db_config');
 const Pool = require('pg').Pool;
 const pool = new Pool(config.dbConfig);
 
-async function TreeSQLQueryExc (RootNode, userId) {
+async function TreeSQLQueryExc (RootNode, userId, nodeParentFavorite) {
+  RootNode = RootNode.split('_')
   pool.QueryArrayConfig = {values: [], rowMode: "array" }
-  switch (RootNode) {
+  switch (RootNode[0]) {
     case 'Clients':
       pool.QueryArrayConfig.text='SELECT dclients.clientname from public.dclients '; 
     break;
@@ -20,29 +21,36 @@ async function TreeSQLQueryExc (RootNode, userId) {
     break; 
 
     case 'Instruments':
-      pool.QueryArrayConfig.text='SELECT "InstrumentName" FROM public."dFInstruments"'
+      pool.QueryArrayConfig.text='SELECT secid FROM public."aMoexInstruments"'
     break;     
 
     case 'Favorites':
-      pool.QueryArrayConfig.values = [userId]
-      pool.QueryArrayConfig.text="SELECT nodename || ',' || nodeparent as nodeF FROM public.dtree_menu_favorites where (userid= $1) "
+      pool.QueryArrayConfig.values = [userId, RootNode[1]]
+      pool.QueryArrayConfig.text="SELECT nodename FROM public.dtree_menu_favorites " +
+      " where (userid= $1) and (nodeparent = $2) "
       pool.QueryArrayConfig.rowMode="array"
     break;     
   }
+  RootNode[1] ? RootNode = RootNode.join('_') : RootNode = RootNode[0]
+
   console.log(pool.QueryArrayConfig)
   PromQty = new Promise((resolve, reject) => {
     pool.query(pool.QueryArrayConfig, (error,result) => { 
       resolve( 
       [RootNode,result.rows.flat()]) })
-  })
+  }) 
   return PromQty;
  }
  
+
+
 async function FAmmGetAccountsList (request,response) {
-  Treelist = ['Clients','Accounts','Strategies','Favorites', 'Instruments'];  
+  Treelist = ['Clients','Accounts','Strategies', 'Instruments','Favorites_Clients', 'Favorites_Accounts','Favorites_Strategies','Favorites_Instruments'];  
   await Promise.all(
-    Treelist.map(RootNode => TreeSQLQueryExc(RootNode, request.query.userId))
+    Treelist.map(RootNode => TreeSQLQueryExc(RootNode, request.query.userId,''))
   ).then((value) => {
+    value.push (['Favorites',['Favorites_Clients', 'Favorites_Accounts','Favorites_Strategies','Favorites_Instruments']])
+    console.log('value', value)
     return response.status(200).json(value)
    
   })

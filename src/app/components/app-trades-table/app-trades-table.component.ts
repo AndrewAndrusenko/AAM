@@ -60,9 +60,9 @@ export class tradesDataTable implements OnInit {
   ],
   dom: {button: { className: 'btn btn-rounded'}}
   },
-  
+  select:true,
   language: {decimal: ',', thousands: '.'},
-  pageLength: 25,                            
+  pageLength: 20,                            
   dom:  'Bfrtip',
   order: [11, 'desc'] 
     };
