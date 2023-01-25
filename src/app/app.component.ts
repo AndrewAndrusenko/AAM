@@ -12,7 +12,7 @@ export class AppComponent implements OnInit {
   constructor (private treeSevice:TreeMenuSevice) {    
   }
   ngOnInit(): void {
-    this.treeSevice.sendUpdate("Accounts");
+    this.treeSevice.sendUpdate("Accounts", "A");
   }
   title = 'AAM';
 }

@@ -32,6 +32,5 @@ LogOut = () => {
 showHideTree = () => {
 this.treeOpened = !this.treeOpened
 this.appMenuService.sendToggleTree(this.treeOpened)
-console.log ('showHideTree',this.treeOpened)
 }
 }

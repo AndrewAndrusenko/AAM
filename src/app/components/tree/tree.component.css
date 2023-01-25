@@ -61,7 +61,7 @@
   }
 
   .example-viewport {
-    height: 88vh;
+    height: 84vh;
     width:max-content;
     min-width: 350px;
     border: 1px solid black;

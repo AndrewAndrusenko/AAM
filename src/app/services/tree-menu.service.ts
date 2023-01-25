@@ -19,8 +19,8 @@ export class TreeMenuSevice {
   }
   private subjectName = new Subject<any>(); 
 
-  sendUpdate(message: string) { //the component that wants to update something, calls this fn
-    this.subjectName.next({ text: message }); //next() will feed the value in Subject
+  sendUpdate(nodeRoot: string, item: string) { //the component that wants to update something, calls this fn
+    this.subjectName.next({ text: nodeRoot, name:item }); //next() will feed the value in Subject
   }
 
   getUpdate(): Observable<any> { //the receiver component calls this function 

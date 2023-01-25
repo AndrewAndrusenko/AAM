@@ -9,6 +9,7 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 export class AppInstrumentEditFormComponent implements OnInit {
   editInstrumentForm: FormGroup;
   public action: string;
+  public secid : string;
   constructor (private fb:FormBuilder) {}
   ngOnInit(): void {
   this.editInstrumentForm=this.fb.group ({

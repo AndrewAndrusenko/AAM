@@ -1,24 +1,19 @@
-
 <app-app-menu></app-app-menu>
-<div style="display:flex">
 
-<mat-sidenav-container class="tree-container">
-  <mat-sidenav #sidenav mode="side" [(opened)]="opened">
+<mat-drawer-container class="example-container" autosize>
+  <mat-drawer #sidenav class="example-sidenav" mode="side" [(opened)]="opened">
+    <app-tree></app-tree>
+  </mat-drawer>
 
-<div fxFlex style="padding: 10px;"><app-tree></app-tree></div>
-</mat-sidenav>
+  <div class="example-sidenav-content">
+    <button 
+      style="height: 100%; background-color: rgb(108, 107, 107); width: 20px; border-radius: 5px; border-color:rgb(67, 79, 79);" (click)="sidenav.toggle()"> 
+      <mat-icon style="margin-left: -8px; color: white;">chevron_right</mat-icon>
+    </button>
+    <app-app-tabs 
+    style="width: 1600px;"
+    ></app-app-tabs>
+  </div>
 
+</mat-drawer-container>
 
-<mat-sidenav-content class="tree-chevron">
-  <button mat-icon-button style="height: 90%;" (click)="sidenav.toggle()"> 
-    <mat-icon >chevron_right</mat-icon>
-  </button>
-
-  <div class="tab-container" ><app-app-tabs></app-app-tabs></div>
-  
-</mat-sidenav-content>
-</mat-sidenav-container>
-
-
-</div>
-<p>AAM 0.1b</p>

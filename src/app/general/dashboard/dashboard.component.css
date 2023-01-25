@@ -1,19 +1,15 @@
-.tree-container{
-  height: 88vh;
-  width:max-content;
-  min-width: 350px;
+.example-container {
+  width: 210vh;
+  height: 95vh;
+  border: 1px solid rgba(0, 0, 0, 0.5);
+}
 
-}
-.tree-chevron {
+.example-sidenav-content {
   display: flex;
-  justify-content: center;
-  border: 1px solid black;
-  left: -15px;
+  width:180vh;
+  height: 100%;
 }
-.tab-container {
-  min-width: 1600px;
-  border-width: 3px;
-  border-color:rgb(67, 79, 79);
-  border-style: solid;
-  padding-top: 5px;
+
+.example-sidenav {
+  padding: 5px;
 }

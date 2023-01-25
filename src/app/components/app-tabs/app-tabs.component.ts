@@ -9,19 +9,18 @@ import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
 })
 export class AppTabsComponent implements OnDestroy {
   messageReceived ={text:'AAA'};
-        private subscriptionName: Subscription; //important to create a subscription
-    
-        constructor(private TreeMenuSevice : TreeMenuSevice) {
-            // subscribe to sender component messages
-            this.subscriptionName= this.TreeMenuSevice.getUpdate().subscribe
-             (message => { //message contains the data sent from service
-             this.messageReceived = message;
-             //console.log(this.messageReceived,'ddd')
-             });
-        }
-    
-        ngOnDestroy() { // It's a good practice to unsubscribe to ensure no memory leaks
-            this.subscriptionName.unsubscribe();
-        }
+  private subscriptionName: Subscription; //important to create a subscription
+ 
+constructor (private TreeMenuSevice : TreeMenuSevice) {
+  this.subscriptionName= this.TreeMenuSevice.getUpdate().subscribe( (message) => {
+    console.log('message',message)
+    this.messageReceived = message})
+  }
+   ngOnDestroy() { // It's a good practice to unsubscribe to ensure no memory leaks
+      this.subscriptionName.unsubscribe();
+  }
+  loadInstrumentData () {
+    console.log('load form')
+  }
  
 }

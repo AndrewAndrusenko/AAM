@@ -87,7 +87,6 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
   /** Handle expand/collapse behaviors */
   handleTreeControl(change: SelectionChange<DynamicFlatNode>) {
     if (change.added) {
-      console.log('change.added')
       change.added.forEach(node => this.toggleNode(node, true));
     }
     if (change.removed) {
@@ -104,7 +103,6 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
   toggleNode(node: DynamicFlatNode, expand: boolean) {
 
     const children = this._database.getChildren(node.item);
-    console.log(node,children)
     const index = this.data.indexOf(node);
     if (!children || index < 0) {
       // If no children, or cannot find the node, no op
@@ -114,22 +112,18 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
     node.isLoading = true;
 
     setTimeout(() => {
-      console.log('expande', node)
       if (expand) {
         const nodes = children.map(
           name => { 
             let favoriteName = node.item.split('_');
             if (favoriteName[0]=='Favorites') {
-              console.log('Fav',node.item,name)
               return new DynamicFlatNode(name, node.level + 1, this._database.isExpandable(name), false, favoriteName[1], favoriteName[0] )
             } else {
-              console.log(node.item, node)
               return new DynamicFlatNode(name, node.level + 1, this._database.isExpandable(name), false, node.item, '' )
             }
           }
         );
         this.data.splice(index + 1, 0, ...nodes);
-        console.log('nodes',nodes)
       } else {
         let count = 0;
         for (
@@ -172,9 +166,6 @@ export class TreeComponent {
   isExpanded : boolean = false;
   public activeNode : DynamicFlatNode;
 
-           
-        
-
   getLevel = (node: DynamicFlatNode) => node.level;
 
   isExpandable = (node: DynamicFlatNode) => node.expandable;
@@ -183,15 +174,11 @@ export class TreeComponent {
 
   // SendMessage: when node is selected method sends node rootTypeName to the Tab component to show relevant information structure     
   sendMessage = (node: DynamicFlatNode) => {
-    let rootNodeName: string;
-    let rootNode=node.nodeRoot.split('_')
-    if (rootNode[0]==='Favorites') {rootNodeName=rootNode[1]} else {rootNodeName = node.nodeRoot }
-    this.TreeMenuSevice.sendUpdate(rootNodeName)
+    this.TreeMenuSevice.sendUpdate(node.nodeRoot, node.item)
   }
   
   //
   ToggleTree = () => {
-    console.log('ToggleTree')
     if (this.isExpanded) {
       this.treeControl.dataNodes.forEach ( (node, index) => { 
         if (node.level === 0) {setTimeout(() => {this.treeControl.expand(node)}, index*20 ); } 
@@ -206,24 +193,26 @@ export class TreeComponent {
   // Method to search the Tree Menu element for the item inputed in Search field. 
   searchByTree = (SearchText:string) => {
     SearchText = SearchText.toUpperCase();
+    console.log('SearchText',SearchText)
     var parentName : string;
     var isFinded : boolean = false;
     var parentIndex: number;
-    console.log(this.treeControl.dataNodes)
     //Searching through DataSourse map of Tree component to get parent node name. Then notify if it's not found
     // or expand parent node for further search of given element
+    console.log ('databaseM',this.databaseM.dataMap)
     this.databaseM.dataMap.forEach( (node, key) => {
-      if (node.find(element => element.toUpperCase().includes(SearchText))) {
+      if (node.find (element => (element.toUpperCase().includes(SearchText) && key.split('_')[0] !=='Favorites')  ) ) {
         parentName = key;
         isFinded = true;
+        console.log('isFinded = true;', key)
       }
     });
-    console.log(isFinded)
     !isFinded ? alert ("Element isn't found") :{}
 
     // Looping through nodes to find parent node which should be expanded
     for (let i = 0; i < this.treeControl.dataNodes.length; i++) {
       if (this.treeControl.dataNodes[i].item == parentName) {
+        console.log('expand',this.treeControl.dataNodes[i])
         this.treeControl.expand(this.treeControl.dataNodes[i])
         parentIndex = i; 
       }
@@ -251,18 +240,16 @@ export class TreeComponent {
   // ------------------------SearchByTreeComponent-----------------------------------
   
   handleNewFavoriteClick(target){
-    console.log(target)
     let userData = JSON.parse(localStorage.getItem('userInfo'))
     this.TreeMenuSevice.addItemToFavorites (this.activeNode.item , this.activeNode.nodeRoot, userData.user.id)
-    .then((response) => { console.log(response)})
+    .then((response) => { console.log('Added to Favorites')})
     this.handleAddFavUpdate()
   }
 
     handleDeleteFavoriteClick(){
-    console.log('_database',this.dataSource._database)
     let userData = JSON.parse(localStorage.getItem('userInfo'))
     this.TreeMenuSevice.removeItemFromFavorites (this.activeNode.item , userData.user.id)
-    .then((response) => {console.log(response)})
+    .then((response) => {console.log('Deleted from Favorites')})
     this.handleDeleteFavUpdate ()
   }
   
@@ -283,28 +270,9 @@ export class TreeComponent {
 
   }
   public handleAddFavUpdate () {
-    console.log(this.databaseM.rootLevelNodes)
-    console.log(this.dataSource._database.dataMap)
 
-    console.log(this.activeNode.nodeRoot)
     let favarr = this.dataSource._database.dataMap.get('Favorites'+'_'+this.activeNode.nodeRoot)
-    // let newFavItem = this.activeNode.item + ',' + this.activeNode.nodeRoot
     favarr.push(this.activeNode.item)
-    console.log(favarr)
     this.dataSource._database.dataMap.set('Favorites'+'_'+this.activeNode.nodeRoot, favarr)
-    console.log(this.databaseM.rootLevelNodes)
-
-    console.log(this.dataSource._database.dataMap)
-   // let favnode= this.treeControl.dataNodes.find(node=>node.item='Favorites'+'_'+this.activeNode.nodeRoot)
-
-   /*  setTimeout(() => {
-      this.treeControl.collapse (favnode)
-    }, 20); 
-    setTimeout(() => {
-    this.treeControl.expand (favnode)
-    }, 40);  */
-
   }
-  public Sendclick() {console.log('click')}
-
 }

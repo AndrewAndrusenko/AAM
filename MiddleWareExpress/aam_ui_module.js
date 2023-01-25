@@ -21,7 +21,7 @@ async function TreeSQLQueryExc (RootNode, userId, nodeParentFavorite) {
     break; 
 
     case 'Instruments':
-      pool.QueryArrayConfig.text='SELECT secid FROM public."aMoexInstruments"'
+      pool.QueryArrayConfig.text='SELECT DISTINCT tidinstrument FROM public.dtrades;'
     break;     
 
     case 'Favorites':
@@ -33,7 +33,6 @@ async function TreeSQLQueryExc (RootNode, userId, nodeParentFavorite) {
   }
   RootNode[1] ? RootNode = RootNode.join('_') : RootNode = RootNode[0]
 
-  console.log(pool.QueryArrayConfig)
   PromQty = new Promise((resolve, reject) => {
     pool.query(pool.QueryArrayConfig, (error,result) => { 
       resolve( 
@@ -50,7 +49,6 @@ async function FAmmGetAccountsList (request,response) {
     Treelist.map(RootNode => TreeSQLQueryExc(RootNode, request.query.userId,''))
   ).then((value) => {
     value.push (['Favorites',['Favorites_Clients', 'Favorites_Accounts','Favorites_Strategies','Favorites_Instruments']])
-    console.log('value', value)
     return response.status(200).json(value)
    
   })
@@ -64,7 +62,6 @@ async function fGetportfolioTable (request,response) {
   pool.query ({text : sql}, (err, res) => {
     if (err) {console.log (err.stack) 
     } else {
-      console.log(res.rows)
       return response.status(200).json((res.rows))
     }
   })
@@ -73,12 +70,11 @@ async function fGetportfolioTable (request,response) {
 async function fGetInstrumentData(request,response) {
  let sql=' SELECT ' +
          ' secid, shortname, name,  isin,  listlevel, facevalue, faceunit,  primary_board_title, ' +
-         ' is_qualified_investors,  registryclosedate,  lotsize, price, discountl0, discounth0, fullcovered ' +
+         ' is_qualified_investors,  registryclosedate,  lotsize, price, discountl0, discounth0, fullcovered, typename, issuesize, is_external, rtl1, rtl2' +
          ' FROM public."aMoexInstruments";'
  pool.query ({text : sql}, (err, res) => {
   if (err) {console.log (err.stack) 
   } else {
-    console.log(res.rows)
     return response.status(200).json((res.rows))
   }
 })
@@ -109,7 +105,6 @@ async function fRemoveFavorite (request, response) {
     pool.query (query, (err, res) => {
       if (err) {console.log (err.stack) 
       } else {
-        console.log(query)
         return response.status(200).json(res.rows[0])
       }
     })

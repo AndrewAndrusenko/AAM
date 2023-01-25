@@ -14,8 +14,9 @@ getAccountsData ():Observable <AccountsTableModel[]> {
   return this.http.get <AccountsTableModel []>('http://localhost:3000/AAM/portfolioTable/')
 }
 
-getInstrumentData():Observable <InstrumentData[]>  {
-  return this.http.get <InstrumentData[]> ('http://localhost:3000/AAM/InstrumentData/')
+getInstrumentData (secid:string) : Observable <InstrumentData[]>  {
+  const params = {'secid': secid}
+  return this.http.get <InstrumentData[]> ('http://localhost:3000/AAM/InstrumentData/',{ params: params } )
 }
 
 }

@@ -4,10 +4,6 @@ import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource} from '@angular/material/table';
 import { AccountsTableModel } from 'src/app/models/accounts-table-model';
 import {AppTabServiceService} from 'src/app/services/app-tab-service.service'
-
-/**
- * @title Data table with sorting, pagination, and filtering.
- */
 @Component({
   selector: 'app-app-accout-tablee',
   templateUrl: './app-accout-tablee.component.html',
@@ -25,22 +21,16 @@ export class TableAccounts implements AfterViewInit {
      this.AppTabServiceService.getAccountsData().subscribe (portfoliosData => {
       this.portfolios = (portfoliosData)
       this.dataSource  = new MatTableDataSource(this.portfolios);
-      console.log(this.portfolios)
     })
-    
   }
 
   ngAfterViewInit() {
     this.AppTabServiceService.getAccountsData().subscribe (portfoliosData => {
       this.portfolios = (portfoliosData)
-      console.log('portfolios', this.portfolios)
-
       this.dataSource  = new MatTableDataSource(this.portfolios);
-      console.log(this.portfolios)
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
     })
-    
   }
 
   applyFilter(event: Event) {
@@ -52,20 +42,3 @@ export class TableAccounts implements AfterViewInit {
     }
   }
 }
-
-/** Builds and returns a new User. */
-/* function createNewUser(id: number): UserData {
-  const name =
-    NAMES[Math.round(Math.random() * (NAMES.length - 1))] +
-    ' ' +
-    NAMES[Math.round(Math.random() * (NAMES.length - 1))].charAt(0) +
-    '.';
-
-  return {
-    id: id.toString(),
-    name: name,
-    progress: Math.round(Math.random() * 100).toString(),
-    fruit: FRUITS[Math.round(Math.random() * (FRUITS.length - 1))],
-  };
-}
- */

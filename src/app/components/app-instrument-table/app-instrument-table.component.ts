@@ -51,9 +51,19 @@ ngOnInit(): void {
     data :'price'}, 
     {title :'Discountl0', 
     data :'discountl0'}, 
-    {title :'Discounth0',
-    data :'discounth0'}
-   ],
+    {title :'fullcovered',
+    data :'fullcovered'}, 
+    {title :'typename',
+    data :'typename'},
+    {title :'issuesize',
+    data :'issuesize'},
+    {title :'is_external',
+    data :'is_external'},
+    {title :'rtl1',
+    data :'rtl1'},
+    {title :'rtl2',
+    data :'rtl2'}
+  ],
 buttons: 
 {
 buttons: 

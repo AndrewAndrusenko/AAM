@@ -1,13 +1,12 @@
 <div class="file-menu">
-  <button mat-icon-button 
-    disableRipple    
-    aria-label="Example icon button with a heart icon"
-    [ngStyle]="{'color':treeOpened ? 'indianred' : 'white'}"
+  <button mat-flat-button 
+    aria-label="Tree show/hide"
+    [ngStyle]="{'color':treeOpened ? '  rgb(192, 192, 222)' : 'white'}"
     (click)="showHideTree()">
     
     {{treeOpened? 'Tree hide':'Tree show'}} 
   </button>
-  <button mat-flat-button [matMenuTriggerFor]="menu" style="margin-left: 45px;" matRipple="">Clients</button>
+  <button mat-flat-button [matMenuTriggerFor]="menu" style="margin-left: 5px;" matRipple="">Clients</button>
     <mat-menu #menu="matMenu">
     <button mat-menu-item>Accounts</button>
     <button mat-menu-item>Trades</button>
