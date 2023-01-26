@@ -47,7 +47,11 @@ export class AppInstrumentEditFormComponent implements OnInit {
   }
   ngOnChanges(changes: SimpleChanges) {
     console.log(changes['secid'].currentValue);
-    this.AppTabServiceService.getInstrumentData(changes['secid'].currentValue).subscribe(data => this.editInstrumentForm.patchValue(data[0]))
+    this.AppTabServiceService.getInstrumentData(changes['secid'].currentValue).subscribe(data => {
+      this.editInstrumentForm.disable()
+      this.editInstrumentForm.patchValue(data[0])
+    }
+      )
     // You can also use categoryId.previousValue and 
     // categoryId.firstChange for comparing old and new values
   }

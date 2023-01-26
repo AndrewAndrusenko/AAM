@@ -1,8 +1,12 @@
 const { param } = require('jquery');
+const { CONSOLE_APPENDER } = require('karma/lib/constants');
 const Module = require('module');
 const config = require('./db_config');
 const Pool = require('pg').Pool;
 const pool = new Pool(config.dbConfig);
+var pgp = require('pg-promise')({
+  capSQL: true // to capitalize all generated SQL
+});
 
 async function TreeSQLQueryExc (RootNode, userId, nodeParentFavorite) {
   RootNode = RootNode.split('_')
@@ -111,7 +115,6 @@ async function fPutNewFavorite (request, response) {
     })
 }
 async function fRemoveFavorite (request, response) {
-    console.log ('fRemoveFavorite')
     paramArr = [request.body.nodename, request.body.userId]
     const query = {
       text: "DELETE FROM public.dtree_menu_favorites where (nodename = $1 and userid= $2) RETURNING *",
@@ -119,11 +122,52 @@ async function fRemoveFavorite (request, response) {
       rowMode: 'array'
     }
     pool.query (query, (err, res) => {
-      if (err) {console.log (err.stack) 
-      } else {
-        return response.status(200).json(res.rows[0])
-      }
+      if (err) {console.log (err.stack)} else {return response.status(200).json(res.rows[0])}
     })
+}
+
+
+async function fGetClientData(request,response) {
+  const query = {text: ' SELECT * FROM public.dclients'}
+  console.log(request.query)
+  if (request.query.client !== undefined) {
+    paramArr = [request.query.client]
+    query.text += ' WHERE (clientname= $1);'
+    query.values = paramArr;
+    } else {query.text += ';'
+  }
+  console.log(query)
+  pool.query (query, (err, res) => {
+    if (err) {console.log (err.stack)} else {
+      console.log('res',res.rows)
+      return response.status(200).json((res.rows))}
+  })
+}
+
+
+async function fEditClientData (request, response) {
+  paramArr = request.body.data
+  const query = {
+  text: 'UPDATE public.dclients ' +
+	'SET clientname=${clientname}, ' +
+   'idcountrydomicile=${idcountrydomicile}, ' +
+   'isclientproffesional=${isclientproffesional}, '+
+   'address=${address}, '+
+   'contact_person=${contact_person}, ' +
+   'email=${email}, '+
+   'phone=${phone}, '+
+   'code=${code} '+
+	 'WHERE idclient=${idclient};',
+    values: paramArr
+  }
+  sql = pgp.as.format(query.text,query.values)
+
+  pool.query (sql,  (err, res) => {
+    if (err) {console.log (err.stack) 
+    } else {
+      return response.status(200).json(res.rows[0])
+    }
+  })  
 }
 
  module.exports = {
@@ -131,5 +175,7 @@ async function fRemoveFavorite (request, response) {
   fGetportfolioTable,
   fPutNewFavorite,
   fRemoveFavorite,
-  fGetInstrumentData
+  fGetInstrumentData,
+  fGetClientData,
+  fEditClientData
  }

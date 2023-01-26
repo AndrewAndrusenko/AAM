@@ -26,6 +26,7 @@ import { tradesDataTable } from './components/app-trades-table/app-trades-table.
 import { AppInstrumentTableComponent } from './components/app-instrument-table/app-instrument-table.component';
 import { AppInstrumentEditFormComponent } from './components/forms/app-instrument-edit-form/app-instrument-edit-form.component';
 import { MatDialogModule} from "@angular/material/dialog";
+import { AppClientFormComponent } from './components/forms/app-client-form/app-client-form.component';
 
 @NgModule({
   declarations: [
@@ -39,7 +40,8 @@ import { MatDialogModule} from "@angular/material/dialog";
     TableAccounts,
     tradesDataTable,
     AppInstrumentTableComponent,
-    AppInstrumentEditFormComponent
+    AppInstrumentEditFormComponent,
+    AppClientFormComponent
     
   ],
   imports: [

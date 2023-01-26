@@ -1,0 +1,41 @@
+<mat-toolbar color="primary" style="margin-bottom:10px; border-radius: 0px;">
+  {{action}} Client Details
+</mat-toolbar>
+<form class="submit" [formGroup]="editClienttForm">
+<mat-form-field>
+  <input matInput placeholder="id client" formControlName="idclient">
+</mat-form-field>
+<mat-form-field>
+  <input matInput placeholder="client name" formControlName="clientname">
+</mat-form-field>
+<mat-form-field>
+  <input matInput placeholder="country" formControlName="idcountrydomicile">
+</mat-form-field>
+<mat-form-field>
+  <input matInput placeholder="is client proffesional" formControlName="isclientproffesional">
+</mat-form-field>
+<mat-form-field>
+  <input matInput placeholder="address" formControlName="address">
+</mat-form-field>
+<mat-form-field>
+  <input matInput placeholder="contact person" formControlName="contact_person">
+</mat-form-field>
+
+<mat-form-field>
+  <input matInput placeholder="email" formControlName="email">
+</mat-form-field>
+<mat-form-field>
+  <input matInput placeholder="phone" formControlName="phone">
+</mat-form-field>
+<mat-form-field>
+  <input matInput placeholder="phone" formControlName="phone">
+</mat-form-field>
+
+<button mat-flat-button color="primary" type="submit" 
+[disabled]="!editClienttForm.valid"
+(click)="updateClientData()"
+style="margin-top: 10px; width: 200px; font-size: 18px;">
+  {{action}} Edit: Client Details
+</button>
+
+</form>

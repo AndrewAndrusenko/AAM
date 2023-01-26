@@ -112,4 +112,9 @@ appServer.get ('/AAM/portfolioTable/',  jsPassport.authenticate('session') ,  ui
 
 appServer.get ('/AAM/InstrumentData/',  jsPassport.authenticate('session') ,  uiAmmModule.fGetInstrumentData)
 
+appServer.get ('/AAM/ClientData/',  jsPassport.authenticate('session') ,  uiAmmModule.fGetClientData)
+
+appServer.post('/AAM/ClientDataEdit/',jsPassport.authenticate('session') , uiAmmModule.fEditClientData)
+
+
 appServer.listen (port,'localhost', () => {console.log (`AAM Server is running on port ${port}`)})

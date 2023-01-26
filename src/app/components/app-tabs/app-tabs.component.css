@@ -1,7 +1,9 @@
-.mat-tab-group{
-  font-size: large;
+
+  .mat-tab-label-content{
+    font-size: 20px;
+  }
   
-}
-.mat-tab-label {
-  width: 100%;
-}
+  .mat-tab-label-active{
+    background-color: rgb(67, 79, 79);
+    border-radius: 5px;
+  }
