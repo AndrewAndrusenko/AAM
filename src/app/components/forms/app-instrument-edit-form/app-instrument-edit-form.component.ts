@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { AppTabServiceService } from 'src/app/services/app-tab-service.service';
 
 @Component({
   selector: 'app-app-instrument-edit-form',
@@ -9,10 +10,12 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 export class AppInstrumentEditFormComponent implements OnInit {
   editInstrumentForm: FormGroup;
   public action: string;
-  public secid : string;
-  constructor (private fb:FormBuilder) {}
+  @Input()  secid : string;
+
+  constructor (private fb:FormBuilder, private AppTabServiceService:AppTabServiceService) {}
+
   ngOnInit(): void {
-  this.editInstrumentForm=this.fb.group ({
+    this.editInstrumentForm=this.fb.group ({
     secid : '', 
     shortname : '', 
     name : '',  
@@ -28,10 +31,24 @@ export class AppInstrumentEditFormComponent implements OnInit {
     discountl0 : '', 
     discounth0 : '',
     fullcovered : ''
-  })
-  
-  let data = $('#mytable').DataTable().row({ selected: true }).data();
-  if (this.action!=='Create') { this.editInstrumentForm.patchValue(data)     } 
+    })
+    console.log('instrumentForm',this.secid)
+    if (this.secid !=='') {
+      this.AppTabServiceService.getInstrumentData(this.secid).subscribe(data =>{
+      this.editInstrumentForm.patchValue(data[0])
+      console.log ('details',data[0])
+      })
+    }
+    
+    let data = $('#mytable').DataTable().row({ selected: true }).data();
+    if (this.action!=='Create') { 
+      console.log ('edit',data)
+      this.editInstrumentForm.patchValue(data)     } 
   }
-  
+  ngOnChanges(changes: SimpleChanges) {
+    console.log(changes['secid'].currentValue);
+    this.AppTabServiceService.getInstrumentData(changes['secid'].currentValue).subscribe(data => this.editInstrumentForm.patchValue(data[0]))
+    // You can also use categoryId.previousValue and 
+    // categoryId.firstChange for comparing old and new values
+  }
 }

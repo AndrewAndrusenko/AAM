@@ -8,7 +8,7 @@ import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
   styleUrls: ['./app-tabs.component.css']
 })
 export class AppTabsComponent implements OnDestroy {
-  messageReceived ={text:'AAA'};
+  messageReceived ={text:'AAA', name:''};
   private subscriptionName: Subscription; //important to create a subscription
  
 constructor (private TreeMenuSevice : TreeMenuSevice) {
@@ -19,8 +19,8 @@ constructor (private TreeMenuSevice : TreeMenuSevice) {
    ngOnDestroy() { // It's a good practice to unsubscribe to ensure no memory leaks
       this.subscriptionName.unsubscribe();
   }
-  loadInstrumentData () {
-    console.log('load form')
+  handleChange (event) {
+    console.log('load form',event)
   }
  
 }

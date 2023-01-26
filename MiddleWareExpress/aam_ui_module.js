@@ -68,16 +68,32 @@ async function fGetportfolioTable (request,response) {
 }
 
 async function fGetInstrumentData(request,response) {
- let sql=' SELECT ' +
-         ' secid, shortname, name,  isin,  listlevel, facevalue, faceunit,  primary_board_title, ' +
-         ' is_qualified_investors,  registryclosedate,  lotsize, price, discountl0, discounth0, fullcovered, typename, issuesize, is_external, rtl1, rtl2' +
-         ' FROM public."aMoexInstruments";'
- pool.query ({text : sql}, (err, res) => {
-  if (err) {console.log (err.stack) 
-  } else {
-    return response.status(200).json((res.rows))
+  console.log(request)
+  const query = {
+    text: ' SELECT ' +
+    ' secid, shortname, name,  isin,  listlevel, facevalue, faceunit,  primary_board_title, ' +
+    ' is_qualified_investors,  registryclosedate,  lotsize, price, discountl0, discounth0, fullcovered, ' +
+    ' typename, issuesize, is_external, rtl1, rtl2 '+
+    ' FROM public."aMoexInstruments"',
   }
-})
+
+
+  if (request.query.secid !== undefined) {
+    paramArr = [request.query.secid]
+    query.text += ' WHERE (secid= $1);'
+    query.values = paramArr;
+    } else
+    { 
+      query.text += ';'}
+    console.log(request.query.secid)
+    console.log(request.query)
+    console.log(query)
+
+  pool.query (query, (err, res) => {
+    if (err) {console.log (err.stack)} else {
+      console.log(res.rows)
+      return response.status(200).json((res.rows))}
+  })
 }
 
 async function fPutNewFavorite (request, response) {

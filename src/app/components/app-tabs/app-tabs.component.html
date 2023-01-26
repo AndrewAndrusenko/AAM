@@ -14,7 +14,8 @@
   <mat-tab label="Instrments table" >
     <br>
     <app-app-instrument-edit-form
-     (onload)="loadInstrumentData()"
+    [secid]="messageReceived.name"
+    (change)="handleChange($event)"
     ></app-app-instrument-edit-form> 
   </mat-tab>  
   <mat-tab label="Positions"> Detailed positions with deviations versus model Portfolio  </mat-tab>
