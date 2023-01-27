@@ -3,7 +3,9 @@ const bcrypt = require('bcryptjs');
 const config = require('./db_config');
 const Pool = require('pg').Pool;
 const pool = new Pool(config.dbConfig);
-
+var pgp = require('pg-promise')({
+  capSQL: true // to capitalize all generated SQL
+});
 
 async function encryptPsw (accessRole, login , password) {
 
@@ -49,8 +51,28 @@ async function getUserRoles (request,response) {
   })
 }
 
+async function getAccessRestriction (request,response) {
+  console.log('request.query',request.query);
+  const query = {
+    text: ' SELECT id, accessrole, elementid, tsmodule, htmltemplate, elementtype, elementvalue ' +
+    ' FROM public."aAccessConstraints"' + 
+    ' WHERE accessrole=$1',
+    values : [request.query.accessRole]
+  }
+  sql = pgp.as.format(query.text,query.values)
+  console.log(sql);
+  
+  pool.query ({text:sql,values:""}, (err, res) => {
+    if (err) {console.log (err.stack) 
+    } else {
+      return response.status(200).json(res.rows[0])
+    }
+  })
+}
+
 module.exports = {
   encryptPsw,
   addNewUser,
-  getUserRoles
+  getUserRoles,
+  getAccessRestriction
 }

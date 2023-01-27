@@ -7,8 +7,13 @@ import { Observable, Subject } from 'rxjs';
 export class TreeMenuSevice {
   constructor (private http:HttpClient) {    
   }
-  getTreeData ( userId:number ):Observable < string[]>{
-    const params = {'userId': userId}
+  
+  getaccessRestriction ( accessRole: string ):Observable < string[]>{
+    const params = {'accessRole': accessRole}
+    return this.http.get <string[]>('http://localhost:3000/accessRestriction/',{ params: params } ) 
+  }
+  getTreeData ( userId:number, paramList: string[] ):Observable < string[]>{
+    const params = {'userId': userId, 'paramList': paramList}
     return this.http.get <string[]>('http://localhost:3000/AAM/treeMenu/',{ params: params } ) 
   }
   public addItemToFavorites (nodename:string, nodeparent:string, userId:number) { 

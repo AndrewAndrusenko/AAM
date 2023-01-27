@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { AppMenuServiceService } from 'src/app/services/app-menu-service.service';
 import { AuthService } from 'src/app/services/auth.service';
 
@@ -8,7 +8,7 @@ import { AuthService } from 'src/app/services/auth.service';
   styleUrls: ['./app-menu.component.css']
 })
 export class AppMenuComponent {
-treeOpened : boolean = true;
+@Input()  treeOpened : boolean = true;
 fullscreen : boolean = false;
 
 constructor(private authService : AuthService, private appMenuService : AppMenuServiceService) { }

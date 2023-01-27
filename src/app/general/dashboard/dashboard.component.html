@@ -1,4 +1,6 @@
-<app-app-menu></app-app-menu>
+<app-app-menu
+  [treeOpened] = "opened" 
+></app-app-menu>
 
 <mat-drawer-container class="example-container" autosize>
   <mat-drawer #sidenav class="example-sidenav" mode="side" [(opened)]="opened">

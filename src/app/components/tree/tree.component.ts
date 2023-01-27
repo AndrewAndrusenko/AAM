@@ -2,11 +2,12 @@ import {CollectionViewer, SelectionChange, DataSource} from '@angular/cdk/collec
 import {FlatTreeControl} from '@angular/cdk/tree';
 import { NgSwitch, UpperCasePipe } from '@angular/common';
 import {Component, Injectable, Input, OnChanges, SimpleChanges, ViewChild} from '@angular/core';
-import {BehaviorSubject, merge, Observable, Subscription} from 'rxjs';
+import {BehaviorSubject, firstValueFrom, merge, Observable, Subscription} from 'rxjs';
 import {map} from 'rxjs/operators';
 import { AppMenuComponent } from '../app-menu/app-menu.component';
 import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { MatMenuTrigger } from '@angular/material/menu';
+import { lastValueFrom } from 'rxjs';
 /** Flat node with expandable and level information */
 export class DynamicFlatNode {
   constructor(
@@ -18,26 +19,23 @@ export class DynamicFlatNode {
     public favoriteRoot:string
   ) {}
 }
-
 /**
  * Database for dynamic data. When expanding a node in the tree, the data source will need to fetch
  * the descendants data from the database.
  */
 @Injectable({providedIn: 'root'})
 export class DynamicDatabase {
-  constructor (private TreeMenuSevice:TreeMenuSevice){}
+  constructor (private TreeMenuSevice:TreeMenuSevice, ){
+   }
   public dataMap = new Map;
-  public rootLevelNodes: string[] = ['Favorites','Clients','Accounts', 'Strategies','Instruments','Trades & Orders'];
-
+  public rootLevelNodes = [] ;
   /** Initial data from database */
-  initialData(): DynamicFlatNode[] {
-    let userData = JSON.parse(localStorage.getItem('userInfo'))
-    this.TreeMenuSevice.getTreeData( userData.user.id  ).subscribe (treeData =>{
+ public async initialDatagetTreeData() {
+    /* let userData = JSON.parse(localStorage.getItem('userInfo'))
+    this.TreeMenuSevice.getTreeData( userData.user.id).subscribe (treeData =>{
     this.dataMap = new Map (treeData.map(object => {return [object[0], object[1]]}))    ;
-   })   
-    return this.rootLevelNodes.map(name => new DynamicFlatNode(name, 0, true, false, name + '_Root',''));
+    }) */
   }
-
   getChildren(node: string): string[] | undefined {
     return this.dataMap.get(node);
   }
@@ -78,7 +76,6 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
         this.handleTreeControl(change as SelectionChange<DynamicFlatNode>);
       }
     });
-
     return merge(collectionViewer.viewChange, this.dataChange).pipe(map(() => this.data));
   }
 
@@ -96,7 +93,6 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
         .forEach(node => this.toggleNode(node, false));
     }
   }
-
   /**
    * Toggle the node, remove from display list
    */
@@ -155,16 +151,18 @@ export class TreeComponent {
     this.treeControl = new FlatTreeControl<DynamicFlatNode>(this.getLevel, this.isExpandable);
     this.dataSource = new DynamicDataSource(this.treeControl, database);
     this.databaseM = database
-    this.dataSource.data = database.initialData();
+    this.databaseM.initialDatagetTreeData();
+    this.initialData();
   }
   @ViewChild(MatMenuTrigger) trigger: MatMenuTrigger;
-  public opened : boolean = true;
   treeControl: FlatTreeControl<DynamicFlatNode>;
   databaseM: DynamicDatabase 
-  dataSource: DynamicDataSource;
-  public node : DynamicFlatNode;
+  public dataSource: DynamicDataSource;
   isExpanded : boolean = false;
+  public node : DynamicFlatNode;
+  public opened : boolean = true;
   public activeNode : DynamicFlatNode;
+  public rootLevelNodes: [];
 
   getLevel = (node: DynamicFlatNode) => node.level;
 
@@ -176,7 +174,19 @@ export class TreeComponent {
   sendMessage = (node: DynamicFlatNode) => {
     this.TreeMenuSevice.sendUpdate(node.nodeRoot, node.item)
   }
-  
+
+  public async initialData() {
+    let userData = JSON.parse(localStorage.getItem('userInfo'))
+    await lastValueFrom (this.TreeMenuSevice.getaccessRestriction (userData.user.accessrole))
+    .then ((accessRestrictionData) =>{
+      this.rootLevelNodes = accessRestrictionData['elementvalue'].split('_');
+      this.dataSource.data =  this.rootLevelNodes.map(name => new DynamicFlatNode(name, 0, true, false, name + '_Root',''));
+      
+      this.TreeMenuSevice.getTreeData( userData.user.id,  this.rootLevelNodes).subscribe (treeData =>{
+        this.databaseM.dataMap = new Map (treeData.map(object => {return [object[0], object[1]]}))    ;
+        })
+    })
+  }
   //
   ToggleTree = () => {
     if (this.isExpanded) {
@@ -250,29 +260,28 @@ export class TreeComponent {
     let userData = JSON.parse(localStorage.getItem('userInfo'))
     this.TreeMenuSevice.removeItemFromFavorites (this.activeNode.item , userData.user.id)
     .then((response) => {console.log('Deleted from Favorites')})
-    this.handleDeleteFavUpdate ()
+    this.handleDeleteFavUpdate (this.activeNode.favoriteRoot + '_' + this.activeNode.nodeRoot)
   }
   
-  public handleDeleteFavUpdate () {
-    let favarr = this.dataSource._database.dataMap.get('Favorites')
+  public handleDeleteFavUpdate (Root) {
+    let favarr = this.dataSource._database.dataMap.get(Root)
     let ind = favarr.findIndex( element => element.includes(this.activeNode.item))
     favarr.splice(ind,1)
 
-    this.dataSource._database.dataMap.set('Favorites', favarr)
-    let favnode= this.treeControl.dataNodes.find(node=>node.item='Favorites')
-
+    this.dataSource._database.dataMap.set(Root, favarr)
+    let favnode = this.treeControl.dataNodes.find(node=>node.item == 'Favorites') 
+    
     setTimeout(() => {
       this.treeControl.collapse (favnode)
-    }, 20); 
+    }, 10); 
     setTimeout(() => {
     this.treeControl.expand (favnode)
-    }, 40); 
-
+    }, 20);  
   }
-  public handleAddFavUpdate () {
 
+  public handleAddFavUpdate () {
     let favarr = this.dataSource._database.dataMap.get('Favorites'+'_'+this.activeNode.nodeRoot)
     favarr.push(this.activeNode.item)
-    this.dataSource._database.dataMap.set('Favorites'+'_'+this.activeNode.nodeRoot, favarr)
+    this.dataSource._database.dataMap.set('Favorites' + '_' + this.activeNode.nodeRoot, favarr)
   }
 }

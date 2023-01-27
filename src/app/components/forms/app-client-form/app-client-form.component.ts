@@ -16,7 +16,7 @@ export class AppClientFormComponent implements OnInit {
   
   ngOnInit(): void {
     this.editClienttForm=this.fb.group ({
-      idclient: '', 
+      idclient: {value:'', disabled: true}, 
       clientname: '', 
       idcountrydomicile: '', 
       isclientproffesional: '', 
@@ -40,7 +40,7 @@ export class AppClientFormComponent implements OnInit {
   }
   ngOnChanges(changes: SimpleChanges) {
     this.AppTabServiceService.getClientData(changes['client'].currentValue).subscribe(data => {
-      // this.editClienttForm.disable()
+      // this.editClienttForm.controls .disable()
       this.editClienttForm.patchValue(data[0])
     }
       )

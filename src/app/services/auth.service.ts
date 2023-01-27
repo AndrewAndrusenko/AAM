@@ -21,6 +21,7 @@ export class AuthService {
   }
 
   public setUserInfo(user){
+    console.log ('user',user)
     localStorage.setItem('userInfo',JSON.stringify(user));
   }
 

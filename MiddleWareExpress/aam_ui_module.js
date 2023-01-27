@@ -47,12 +47,19 @@ async function TreeSQLQueryExc (RootNode, userId, nodeParentFavorite) {
  
 
 
-async function FAmmGetAccountsList (request,response) {
-  Treelist = ['Clients','Accounts','Strategies', 'Instruments','Favorites_Clients', 'Favorites_Accounts','Favorites_Strategies','Favorites_Instruments'];  
+async function FAmmGetTreeData(request,response) {
+  console.log('querty',request.query.paramList);
+  /* Treelist = ['Clients','Accounts','Strategies', 'Instruments','Favorites_Clients', 'Favorites_Accounts','Favorites_Strategies','Favorites_Instruments'];   */
+  Paramlist = request.query.paramList
+  Paramlist.splice (Paramlist.indexOf('Trades & Orders'),1)
+  Paramlist.splice (Paramlist.indexOf('Favorites'),1)
+  FavoritesList = Paramlist.map (element => 'Favorites_' + element);
+  Treelist = [...Paramlist,...FavoritesList]
+  console.log('Treelist',Treelist);
   await Promise.all(
     Treelist.map(RootNode => TreeSQLQueryExc(RootNode, request.query.userId,''))
   ).then((value) => {
-    value.push (['Favorites',['Favorites_Clients', 'Favorites_Accounts','Favorites_Strategies','Favorites_Instruments']])
+    value.push (['Favorites',FavoritesList])
     return response.status(200).json(value)
    
   })
@@ -129,17 +136,14 @@ async function fRemoveFavorite (request, response) {
 
 async function fGetClientData(request,response) {
   const query = {text: ' SELECT * FROM public.dclients'}
-  console.log(request.query)
   if (request.query.client !== undefined) {
     paramArr = [request.query.client]
     query.text += ' WHERE (clientname= $1);'
     query.values = paramArr;
     } else {query.text += ';'
   }
-  console.log(query)
   pool.query (query, (err, res) => {
     if (err) {console.log (err.stack)} else {
-      console.log('res',res.rows)
       return response.status(200).json((res.rows))}
   })
 }
@@ -171,7 +175,7 @@ async function fEditClientData (request, response) {
 }
 
  module.exports = {
-  FAmmGetAccountsList,
+  FAmmGetTreeData,
   fGetportfolioTable,
   fPutNewFavorite,
   fRemoveFavorite,

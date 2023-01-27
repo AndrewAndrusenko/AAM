@@ -98,6 +98,8 @@ appServer.post ('/logout/', function (req, res){
 
 appServer.get ('/auth/userRoles/', auth_module.getUserRoles)
 
+appServer.get ('/accessRestriction/', auth_module.getAccessRestriction)
+
 appServer.post ('/auth/newUser/',auth_module.addNewUser)
 
 appServer.post('/Favorites/newItem/',uiAmmModule.fPutNewFavorite)
@@ -105,7 +107,7 @@ appServer.post('/Favorites/newItem/',uiAmmModule.fPutNewFavorite)
 appServer.post('/Favorites/deleteItem/',uiAmmModule.fRemoveFavorite)
 
 // -------------Get Tree for Tree Menu UI----------------------
-appServer.get ('/AAM/treeMenu/',  jsPassport.authenticate('session') ,  uiAmmModule.FAmmGetAccountsList)
+appServer.get ('/AAM/treeMenu/',  jsPassport.authenticate('session') ,  uiAmmModule.FAmmGetTreeData)
 
 // -------------Get Tree for Tree Menu UI----------------------
 appServer.get ('/AAM/portfolioTable/',  jsPassport.authenticate('session') ,  uiAmmModule.fGetportfolioTable)
