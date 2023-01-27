@@ -45,8 +45,6 @@ async function TreeSQLQueryExc (RootNode, userId, nodeParentFavorite) {
   return PromQty;
  }
  
-
-
 async function FAmmGetTreeData(request,response) {
   console.log('querty',request.query.paramList);
   /* Treelist = ['Clients','Accounts','Strategies', 'Instruments','Favorites_Clients', 'Favorites_Accounts','Favorites_Strategies','Favorites_Instruments'];   */
