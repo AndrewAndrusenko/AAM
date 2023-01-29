@@ -33,10 +33,10 @@ export class AppClientFormComponent implements OnInit {
       })
     }
     
-    /* let data = $('#mytable').DataTable().row({ selected: true }).data();
+   let data = $('#mytable').DataTable().row({ selected: true }).data();
     if (this.action!=='Create') { 
       console.log ('edit',data)
-      this.editInstrumentForm.patchValue(data)     }  */
+      this.editClienttForm.patchValue(data)     }  
   }
   ngOnChanges(changes: SimpleChanges) {
     this.AppTabServiceService.getClientData(changes['client'].currentValue).subscribe(data => {
@@ -48,6 +48,8 @@ export class AppClientFormComponent implements OnInit {
     // categoryId.firstChange for comparing old and new values
   }
   updateClientData(){
+    this.editClienttForm.controls['idclient'].enable()
     this.AppTabServiceService.updateClient (this.editClienttForm.value)
+    this.editClienttForm.controls['idclient'].disable()
   }
 }

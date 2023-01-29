@@ -1,0 +1,32 @@
+<mat-toolbar color="primary" style="margin-bottom:10px; border-radius: 0px;">
+  {{action}} new account
+  (click)="openAddNewAccount('Create')"
+</mat-toolbar>
+<form class="submit" [formGroup]="newAccountForm">
+<mat-form-field>
+  <input matInput placeholder="idportfolio" formControlName="idportfolio">
+</mat-form-field>
+<mat-form-field>
+  <input matInput placeholder="idclient" formControlName="idclient">
+</mat-form-field>
+<mat-form-field>
+  <input matInput placeholder="clientname" formControlName="clientname">
+</mat-form-field>
+<mat-form-field>
+  <input matInput placeholder="idstategy" formControlName="idstategy">
+</mat-form-field>
+<mat-form-field>
+  <input matInput placeholder="portfolioname" formControlName="portfolioname">
+</mat-form-field>
+<mat-form-field>
+  <input matInput placeholder="portleverage" formControlName="portleverage">
+</mat-form-field>
+
+<button mat-flat-button color="primary" type="submit" 
+[disabled]="!newAccountForm.valid"
+(click)='updateClientData'
+style="margin-top: 10px; width: 200px; font-size: 18px;">
+  {{action}} new account
+</button>
+
+</form>

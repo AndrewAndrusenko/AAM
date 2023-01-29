@@ -16,11 +16,12 @@ export class TreeMenuSevice {
     const params = {'userId': userId, 'paramList': paramList}
     return this.http.get <string[]>('http://localhost:3000/AAM/treeMenu/',{ params: params } ) 
   }
-  public addItemToFavorites (nodename:string, nodeparent:string, userId:number) { 
-    return this.http.post ('http://localhost:3000/Favorites/newItem/',{'nodename': nodename, 'nodeparent' : nodeparent, 'userId' : userId}).toPromise()
+  public addItemToFavorites (nodename:string, nodeparent:string, userId:number, idelement:string) { 
+    return this.http.post ('http://localhost:3000/Favorites/newItem/',{'nodename': nodename, 'nodeparent' : nodeparent, 'userId' : userId, 'idelement':idelement}).toPromise()
   }
-  public removeItemFromFavorites (nodename:string, userId:number) {
-    return this.http.post ('http://localhost:3000/Favorites/deleteItem/',{'nodename': nodename, 'userId' : userId}).toPromise()
+  public removeItemFromFavorites (nodename:string, userId:number, idelement:string) {
+    console.log('idelement',idelement);
+    return this.http.post ('http://localhost:3000/Favorites/deleteItem/',{'nodename': nodename, 'userId' : userId, 'idelement':idelement}).toPromise()
   }
   private subjectName = new Subject<any>(); 
 

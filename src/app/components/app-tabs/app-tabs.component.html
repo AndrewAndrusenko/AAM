@@ -67,7 +67,11 @@
   </mat-tab>  
   
   <mat-tab label="Client Accounts">
-     <app-app-accout-tablee></app-app-accout-tablee> 
+    <button 
+      mat-raised-button style="float: inline-end; margin: 8px; font-size: ;" color="primary">
+      Add new account
+    </button>
+    <app-app-accout-tablee style="padding: 20px;"></app-app-accout-tablee> 
   </mat-tab>
   <mat-tab label="Positions"> Positions table  </mat-tab>
 </mat-tab-group>
@@ -87,9 +91,7 @@
   </button>
 </mat-menu>
 
-
 <ng-template  #tabcontextmenu>
-  
   <div class="tree-menu-context" cdkMenu>
     <button  class="tree-menu-item" cdkMenuItem> Add to favorites</button>
     <button class="tree-menu-item" cdkMenuItem> New Item </button>
@@ -97,6 +99,8 @@
   </div>
 </ng-template>
 
-<app-app-trades-table 
-*ngIf="messageReceived.text=='Trades & Orders_Root'"
-></app-app-trades-table>
+<app-app-trades-table *ngIf="messageReceived.text=='Trades & Orders_Root'">
+</app-app-trades-table>
+
+<app-app-clients-table *ngIf="messageReceived.text=='Clients_Root'">
+</app-app-clients-table>    

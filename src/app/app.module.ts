@@ -27,6 +27,8 @@ import { AppInstrumentTableComponent } from './components/app-instrument-table/a
 import { AppInstrumentEditFormComponent } from './components/forms/app-instrument-edit-form/app-instrument-edit-form.component';
 import { MatDialogModule} from "@angular/material/dialog";
 import { AppClientFormComponent } from './components/forms/app-client-form/app-client-form.component';
+import { AppClientsTableComponent } from './components/app-clients-table/app-clients-table.component';
+import { AppNewAccountComponent } from './components/forms/app-new-account/app-new-account.component';
 
 @NgModule({
   declarations: [
@@ -41,7 +43,9 @@ import { AppClientFormComponent } from './components/forms/app-client-form/app-c
     tradesDataTable,
     AppInstrumentTableComponent,
     AppInstrumentEditFormComponent,
-    AppClientFormComponent
+    AppClientFormComponent,
+    AppClientsTableComponent,
+    AppNewAccountComponent
     
   ],
   imports: [

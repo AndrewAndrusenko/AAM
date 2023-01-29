@@ -16,7 +16,8 @@ export class DynamicFlatNode {
     public expandable = false,
     public isLoading = false,
     public nodeRoot: string,
-    public favoriteRoot:string
+    public favoriteRoot:string, 
+    public id : string
   ) {}
 }
 /**
@@ -111,11 +112,17 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
       if (expand) {
         const nodes = children.map(
           name => { 
-            let favoriteName = node.item.split('_');
-            if (favoriteName[0]=='Favorites') {
-              return new DynamicFlatNode(name, node.level + 1, this._database.isExpandable(name), false, favoriteName[1], favoriteName[0] )
+            let favoriteRoot = '';
+            let Root = node.item;
+            if (node.item.includes('Favorites')==true) {
+              favoriteRoot='Favorites';
+              Root = node.item.split('_')[1];
+            }
+            if (node.item == 'Favorites' ) {
+              console.log('ff', name);
+              return new DynamicFlatNode(name, node.level + 1, this._database.isExpandable(name), false, node.item, favoriteRoot, name[1] )
             } else {
-              return new DynamicFlatNode(name, node.level + 1, this._database.isExpandable(name), false, node.item, '' )
+              return new DynamicFlatNode(name[0], node.level + 1, this._database.isExpandable(name), false, Root, favoriteRoot, name[1])
             }
           }
         );
@@ -180,10 +187,12 @@ export class TreeComponent {
     await lastValueFrom (this.TreeMenuSevice.getaccessRestriction (userData.user.accessrole))
     .then ((accessRestrictionData) =>{
       this.rootLevelNodes = accessRestrictionData['elementvalue'].split('_');
-      this.dataSource.data =  this.rootLevelNodes.map(name => new DynamicFlatNode(name, 0, true, false, name + '_Root',''));
+      this.dataSource.data =  this.rootLevelNodes.map(name => new DynamicFlatNode(name, 0, true, false, name + '_Root','',''));
       
       this.TreeMenuSevice.getTreeData( userData.user.id,  this.rootLevelNodes).subscribe (treeData =>{
-        this.databaseM.dataMap = new Map (treeData.map(object => {return [object[0], object[1]]}))    ;
+        this.databaseM.dataMap = new Map (treeData.map( (object)  => {
+          return [object[0], object[1]]}))    ;
+          console.log('this.databaseM.dataMap',this.databaseM.dataMap);
         })
     })
   }
@@ -211,7 +220,8 @@ export class TreeComponent {
     // or expand parent node for further search of given element
     console.log ('databaseM',this.databaseM.dataMap)
     this.databaseM.dataMap.forEach( (node, key) => {
-      if (node.find (element => (element.toUpperCase().includes(SearchText) && key.split('_')[0] !=='Favorites')  ) ) {
+      console.log('node',node.flat());
+      if (node.flat().find (element => (element.toString().toUpperCase().includes(SearchText) && key.split('_')[0] !=='Favorites')  ) ) {
         parentName = key;
         isFinded = true;
         console.log('isFinded = true;', key)
@@ -251,24 +261,26 @@ export class TreeComponent {
   
   handleNewFavoriteClick(target){
     let userData = JSON.parse(localStorage.getItem('userInfo'))
-    this.TreeMenuSevice.addItemToFavorites (this.activeNode.item , this.activeNode.nodeRoot, userData.user.id)
+    this.TreeMenuSevice.addItemToFavorites (this.activeNode.item , this.activeNode.nodeRoot, userData.user.id, this.activeNode.id)
     .then((response) => { console.log('Added to Favorites')})
     this.handleAddFavUpdate()
   }
 
     handleDeleteFavoriteClick(){
     let userData = JSON.parse(localStorage.getItem('userInfo'))
-    this.TreeMenuSevice.removeItemFromFavorites (this.activeNode.item , userData.user.id)
+    console.log('activeNode.',this.activeNode);
+    this.TreeMenuSevice.removeItemFromFavorites (this.activeNode.item , userData.user.id, this.activeNode.id)
     .then((response) => {console.log('Deleted from Favorites')})
-    this.handleDeleteFavUpdate (this.activeNode.favoriteRoot + '_' + this.activeNode.nodeRoot)
+    this.handleDeleteFavUpdate (this.activeNode.nodeRoot)
   }
   
   public handleDeleteFavUpdate (Root) {
-    let favarr = this.dataSource._database.dataMap.get(Root)
+    console.log('R',Root);
+    let favarr = this.dataSource._database.dataMap.get('Favorites'+'_'+ Root)
     let ind = favarr.findIndex( element => element.includes(this.activeNode.item))
     favarr.splice(ind,1)
 
-    this.dataSource._database.dataMap.set(Root, favarr)
+    this.dataSource._database.dataMap.set('Favorites'+'_' + Root, favarr)
     let favnode = this.treeControl.dataNodes.find(node=>node.item == 'Favorites') 
     
     setTimeout(() => {
@@ -281,7 +293,7 @@ export class TreeComponent {
 
   public handleAddFavUpdate () {
     let favarr = this.dataSource._database.dataMap.get('Favorites'+'_'+this.activeNode.nodeRoot)
-    favarr.push(this.activeNode.item)
+    favarr.push([this.activeNode.item, this.activeNode.id])
     this.dataSource._database.dataMap.set('Favorites' + '_' + this.activeNode.nodeRoot, favarr)
   }
 }
