@@ -16,7 +16,7 @@ export class AppInstrumentEditFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.editInstrumentForm=this.fb.group ({
-    secid : '', 
+    secid : {value: '' , disabled: true}, 
     shortname : '', 
     name : '',  
     isin : '',  

@@ -10,7 +10,6 @@ var pgp = require('pg-promise')({
 
 async function TreeSQLQueryExc (RootNode, userId, nodeParentFavorite) {
   RootNode = RootNode.split('_')
-  console.log('roo',RootNode);
   pool.QueryArrayConfig = {values: [], rowMode: "array" }
   switch (RootNode[0]) {
     case 'Clients':
@@ -31,40 +30,44 @@ async function TreeSQLQueryExc (RootNode, userId, nodeParentFavorite) {
 
     case 'Favorites':
       pool.QueryArrayConfig.values = [userId, RootNode[1]]
-      pool.QueryArrayConfig.text="SELECT nodename, idelement FROM public.dtree_menu_favorites " +
-      " where (userid= $1) and (nodeparent = $2) "
       pool.QueryArrayConfig.rowMode="array"
+      switch (RootNode[1]) {
+        case 'Accounts':
+        sql = "SELECT dportfolios.portfolioname, dtree_menu_favorites.idelement FROM public.dtree_menu_favorites " + 
+              "LEFT JOIN dportfolios on dtree_menu_favorites.idelement = dportfolios.idportfolio::text "
+        break;   
+        case 'Clients':
+          sql = "SELECT dclients.clientname, dtree_menu_favorites.idelement  FROM public.dtree_menu_favorites " + 
+          " LEFT JOIN dclients on dtree_menu_favorites.idelement = dclients.idclient::text "
+        break;   
+        case 'Strategies':
+          sql = "SELECT dstrategiesglobal.sname, dtree_menu_favorites.idelement FROM public.dtree_menu_favorites " + 
+          " LEFT JOIN dstrategiesglobal on dtree_menu_favorites.idelement = dstrategiesglobal.id::text "
+        break;   
+        case 'Instruments':
+          sql = "SELECT dtree_menu_favorites.nodename, dtree_menu_favorites.idelement  FROM public.dtree_menu_favorites " 
+        break;   
+      }
+      pool.QueryArrayConfig.text = sql + " where (userid= $1) and (nodeparent = $2) "
     break;     
   }
   RootNode[1] ? RootNode = RootNode.join('_') : RootNode = RootNode[0]
-
-  PromQty = new Promise((resolve, reject) => {
-    pool.query(pool.QueryArrayConfig, (error,result) => { 
-      console.log('result.rows.flat()',result.rows);
-      resolve( 
-      [RootNode,result.rows]) })
-  }) 
+  PromQty = new Promise((resolve, reject) => {pool.query(pool.QueryArrayConfig, (error,result) => resolve([RootNode,result.rows]))}) 
   return PromQty;
  }
  
 async function FAmmGetTreeData(request,response) {
-  console.log('querty',request.query.paramList);
-  /* Treelist = ['Clients','Accounts','Strategies', 'Instruments','Favorites_Clients', 'Favorites_Accounts','Favorites_Strategies','Favorites_Instruments'];   */
   Paramlist = request.query.paramList
   Paramlist.splice (Paramlist.indexOf('Trades & Orders'),1)
   Paramlist.splice (Paramlist.indexOf('Favorites'),1)
   FavoritesList = Paramlist.map (element => 'Favorites_' + element);
   Treelist = [...Paramlist,...FavoritesList]
 
-  console.log('Treelist',Treelist);
   await Promise.all(
     Treelist.map(RootNode => TreeSQLQueryExc(RootNode, request.query.userId,''))
   ).then((value) => {
     value.push (['Favorites',FavoritesList])
-    console.log('value',value);
-
     return response.status(200).json(value)
-   
   })
 }
 
@@ -82,7 +85,6 @@ async function fGetportfolioTable (request,response) {
 }
 
 async function fGetInstrumentData(request,response) {
-  console.log(request)
   const query = {
     text: ' SELECT ' +
     ' secid, shortname, name,  isin,  listlevel, facevalue, faceunit,  primary_board_title, ' +
@@ -99,14 +101,8 @@ async function fGetInstrumentData(request,response) {
     } else
     { 
       query.text += ';'}
-    console.log(request.query.secid)
-    console.log(request.query)
-    console.log(query)
-
   pool.query (query, (err, res) => {
-    if (err) {console.log (err.stack)} else {
-      console.log(res.rows)
-      return response.status(200).json((res.rows))}
+    if (err) {console.log (err.stack)} else {return response.status(200).json((res.rows))}
   })
 }
 
@@ -118,10 +114,7 @@ async function fPutNewFavorite (request, response) {
       rowMode: 'array'
     }
     pool.query (query, (err, res) => {
-      if (err) {console.log (err.stack) 
-      } else {
-        return response.status(200).json(res.rows[0])
-      }
+      if (err) {console.log (err.stack)} else {return response.status(200).json(res.rows[0])}
     })
 }
 async function fRemoveFavorite (request, response) {
@@ -131,32 +124,25 @@ async function fRemoveFavorite (request, response) {
       values: paramArr,
       rowMode: 'array'
     }
-    console.log('query',query);
-    pool.query (query, (err, res) => {
-      if (err) {console.log (err.stack)} else {return response.status(200).json(res.rows[0])}
+    pool.query (query, (err, res) => {if (err) {console.log (err.stack)} else {return response.status(200).json(res.rows[0])}
     })
 }
-
 
 async function fGetClientData(request,response) {
   const query = {text: ' SELECT * FROM public.dclients'}
   if (request.query.client !== undefined) {
     paramArr = [request.query.client]
-    query.text += ' WHERE (clientname= $1);'
+    query.text += ' WHERE (idclient= $1);'
     query.values = paramArr;
     } else {query.text += ';'
   }
-  console.log('query',query);
-  pool.query (query, (err, res) => {
-    if (err) {console.log (err.stack)} else {
-      return response.status(200).json((res.rows))}
+  pool.query (query, (err, res) => {if (err) {console.log (err.stack)} else {return response.status(200).json((res.rows))}
   })
 }
 
 
 async function fEditClientData (request, response) {
   paramArr = request.body.data
-  console.log('request.body.data',request.body.data);
   const query = {
   text: 'UPDATE public.dclients ' +
 	'SET clientname=${clientname}, ' +
@@ -171,12 +157,7 @@ async function fEditClientData (request, response) {
     values: paramArr
   }
   sql = pgp.as.format(query.text,query.values)
-
-  pool.query (sql,  (err, res) => {
-    if (err) {console.log (err.stack) 
-    } else {
-      return response.status(200).json(res.rows[0])
-    }
+  pool.query (sql,  (err, res) => {if (err) {console.log (err.stack)} else {return response.status(200).json(res.rows[0])}
   })  
 }
 

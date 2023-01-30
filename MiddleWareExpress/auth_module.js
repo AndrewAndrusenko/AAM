@@ -8,33 +8,22 @@ var pgp = require('pg-promise')({
 });
 
 async function encryptPsw (accessRole, login , password) {
-
   var hashedPassword;
   bcrypt.genSalt(10, (err,Salt) => {
     bcrypt.hash(password, Salt, (err, hash) => {
       if (err) {return console.log ('Cannot encrypt');}
       hashedPassword=hash;
-
       return new Promise ((resolve) => { 
         respArr =[accessRole, login, hashedPassword]
         resolve (respArr)
-            
         const query = {
           text: "INSERT INTO public.dusers(accessrole, login, hashed_password) VALUES ($1, $2, $3) RETURNING *",
           values: respArr,
           rowMode: 'array'
         }
-     
-        pool.query (query, (err, res) => {
-          if (err) {console.log (err.stack) 
-          } else {
-          
-          }
-        })
+        pool.query (query, (err, res) => {if (err) {console.log (err.stack)}})
       })
-
     })
-
   })
 }
 
@@ -44,15 +33,11 @@ response =  await encryptPsw (request.body.accessrole, request.body.username, re
 
 async function getUserRoles (request,response) {
   pool.query ({text : 'SELECT "roleName" from  public."aAccesRoles"; ',rowMode: "array"}, (err, res) => {
-    if (err) {console.log (err.stack) 
-    } else {
-      return response.status(200).json(res.rows.flat())
-    }
+    if (err) {console.log (err.stack)} else {return response.status(200).json(res.rows.flat())}
   })
 }
 
 async function getAccessRestriction (request,response) {
-  console.log('request.query',request.query);
   const query = {
     text: ' SELECT id, accessrole, elementid, tsmodule, htmltemplate, elementtype, elementvalue ' +
     ' FROM public."aAccessConstraints"' + 
@@ -60,13 +45,7 @@ async function getAccessRestriction (request,response) {
     values : [request.query.accessRole]
   }
   sql = pgp.as.format(query.text,query.values)
-  console.log(sql);
-  
-  pool.query ({text:sql,values:""}, (err, res) => {
-    if (err) {console.log (err.stack) 
-    } else {
-      return response.status(200).json(res.rows[0])
-    }
+  pool.query ({text:sql,values:""}, (err, res) => {if (err) {console.log (err.stack)} else {return response.status(200).json(res.rows[0])}
   })
 }
 

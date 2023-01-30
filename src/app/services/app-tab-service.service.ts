@@ -19,7 +19,7 @@ getInstrumentData (secid:string) : Observable <InstrumentData[]>  {
   return this.http.get <InstrumentData[]> ('http://localhost:3000/AAM/InstrumentData/',{ params: params } )
 }
 
-getClientData (client:string) : Observable <InstrumentData[]>  {
+getClientData (client:number) : Observable <InstrumentData[]>  {
   const params = {'client': client}
   return this.http.get <InstrumentData[]> ('http://localhost:3000/AAM/ClientData/',{ params: params } )
 }

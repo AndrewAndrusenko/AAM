@@ -10,7 +10,7 @@ import { AppTabServiceService } from 'src/app/services/app-tab-service.service';
 export class AppClientFormComponent implements OnInit {
   editClienttForm: FormGroup;
   public action: string;
-  @Input()  client : string;
+  @Input()  client : number;
 
   constructor (private fb:FormBuilder, private AppTabServiceService:AppTabServiceService) {}
   
@@ -26,7 +26,7 @@ export class AppClientFormComponent implements OnInit {
       phone: '', 
       code : ''
     })
-    if (this.client !=='') {
+    if (this.client !==0) {
       this.AppTabServiceService.getClientData(this.client).subscribe(data =>{
       this.editClienttForm.patchValue(data[0])
       console.log ('details',data[0])

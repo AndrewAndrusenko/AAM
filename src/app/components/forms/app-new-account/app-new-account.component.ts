@@ -11,7 +11,7 @@ import { AppTabServiceService } from 'src/app/services/app-tab-service.service';
 export class AppNewAccountComponent implements OnInit {
   newAccountForm: FormGroup;
   public action: string;
-  @Input()  client : string;
+  @Input()  client : number;
   dialogRef: MatDialogRef<AppNewAccountComponent>;
   constructor (private fb:FormBuilder, private AppTabServiceService:AppTabServiceService, private dialog: MatDialog) {}
   ngOnInit(): void {
@@ -23,7 +23,7 @@ export class AppNewAccountComponent implements OnInit {
       portfolioname: '', 
       portleverage: ''
     })
-    if (this.client !=='') {
+    if (this.client !==0) {
       this.AppTabServiceService.getClientData(this.client).subscribe(data =>{
       this.newAccountForm.patchValue(data[0])
       console.log ('details',data[0])

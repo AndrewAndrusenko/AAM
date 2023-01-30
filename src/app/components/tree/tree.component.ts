@@ -179,7 +179,7 @@ export class TreeComponent {
 
   // SendMessage: when node is selected method sends node rootTypeName to the Tab component to show relevant information structure     
   sendMessage = (node: DynamicFlatNode) => {
-    this.TreeMenuSevice.sendUpdate(node.nodeRoot, node.item)
+    this.TreeMenuSevice.sendUpdate(node.nodeRoot, node.item, +node.id)
   }
 
   public async initialData() {
@@ -192,7 +192,6 @@ export class TreeComponent {
       this.TreeMenuSevice.getTreeData( userData.user.id,  this.rootLevelNodes).subscribe (treeData =>{
         this.databaseM.dataMap = new Map (treeData.map( (object)  => {
           return [object[0], object[1]]}))    ;
-          console.log('this.databaseM.dataMap',this.databaseM.dataMap);
         })
     })
   }

@@ -62,13 +62,13 @@
   <mat-tab label="Client Summary" >
     <br>
     <app-app-client-form
-    [client]="messageReceived.name">
+    [client]="messageReceived.id">
     </app-app-client-form> 
   </mat-tab>  
   
   <mat-tab label="Client Accounts">
     <button 
-      mat-raised-button style="float: inline-end; margin: 8px; font-size: ;" color="primary">
+      mat-raised-button style="float: inline-end; margin: 8px;" color="primary">
       Add new account
     </button>
     <app-app-accout-tablee style="padding: 20px;"></app-app-accout-tablee> 

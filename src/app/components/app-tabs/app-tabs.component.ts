@@ -9,7 +9,7 @@ import {Title} from "@angular/platform-browser";
   encapsulation: ViewEncapsulation.None,
 })
 export class AppTabsComponent implements OnDestroy {
-  messageReceived ={text:'AAA', name:''};
+  messageReceived ={text:'AAA', name:'',id:0};
   private subscriptionName: Subscription; //important to create a subscription
  
 constructor (private TreeMenuSevice : TreeMenuSevice, private titleService:Title) {
