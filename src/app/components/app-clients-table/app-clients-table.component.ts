@@ -19,7 +19,7 @@ ngOnInit(): void {
   this.dtOptions = {
     ajax:  {
       type: 'GET',
-      url: 'http://localhost:3000/AAM/ClientData/'  ,       
+      url: '/api/AAM/ClientData/'  ,       
       dataSrc : ''
     },
     columns: [

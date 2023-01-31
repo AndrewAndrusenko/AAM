@@ -14,7 +14,7 @@ export class tradesDataTable implements OnInit {
                                
       ajax:  {
         type: 'GET',
-        url: 'http://localhost:3002/trades/null/null/4000'  ,       
+        url: '/pi2/trades/null/null/4000'  ,       
         dataSrc : ''
     },
     

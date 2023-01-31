@@ -73,12 +73,17 @@ async function FAmmGetTreeData(request,response) {
 
 async function fGetportfolioTable (request,response) {
   let sql="SELECT "+
-  " dportfolios.idportfolio, dportfolios.idclient, dportfolios.idstategy, " + 
-  " dstrategiesglobal.sname,dportfolios.portfolioname, dportfolios.portleverage " +
-  " FROM public.dportfolios LEFT JOIN public.dstrategiesglobal ON dportfolios.idstategy=public.dstrategiesglobal.id; "
+  " dportfolios.idportfolio as Account_ID, dportfolios.idclient as Client_ID, dportfolios.idstategy, " + 
+  " dstrategiesglobal.sname as Strategy ,dportfolios.portfolioname as Account_Name, dportfolios.portleverage as Leverage, " +
+  " dclients.clientname as client_name, dclients.isclientproffesional as proffesional , dclients.address, " +
+  " dclients.contact_person, dclients.email, dclients.phone" +
+  " FROM public.dportfolios "+
+  " LEFT JOIN public.dstrategiesglobal ON dportfolios.idstategy = public.dstrategiesglobal.id " +
+  " LEFT JOIN public.dclients ON dportfolios.idclient = public.dclients.idclient; "
   pool.query ({text : sql}, (err, res) => {
     if (err) {console.log (err.stack) 
     } else {
+      console.log('res.rows',res.rows);
       return response.status(200).json((res.rows))
     }
   })

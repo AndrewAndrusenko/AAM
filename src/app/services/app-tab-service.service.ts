@@ -11,19 +11,19 @@ export class AppTabServiceService {
   constructor(private http:HttpClient) { }
 
 getAccountsData ():Observable <AccountsTableModel[]> {
-  return this.http.get <AccountsTableModel []>('http://localhost:3000/AAM/portfolioTable/')
+  return this.http.get <AccountsTableModel []>('/api/AAM/portfolioTable/')
 }
 
 getInstrumentData (secid:string) : Observable <InstrumentData[]>  {
   const params = {'secid': secid}
-  return this.http.get <InstrumentData[]> ('http://localhost:3000/AAM/InstrumentData/',{ params: params } )
+  return this.http.get <InstrumentData[]> ('/api/AAM/InstrumentData/',{ params: params } )
 }
 
 getClientData (client:number) : Observable <InstrumentData[]>  {
   const params = {'client': client}
-  return this.http.get <InstrumentData[]> ('http://localhost:3000/AAM/ClientData/',{ params: params } )
+  return this.http.get <InstrumentData[]> ('/api/AAM/ClientData/',{ params: params } )
 }
 updateClient (data:any) { 
-  return this.http.post ('http://localhost:3000/AAM/ClientDataEdit/',{'data': data}).toPromise()
+  return this.http.post ('/api/AAM/ClientDataEdit/',{'data': data}).toPromise()
 }
 }

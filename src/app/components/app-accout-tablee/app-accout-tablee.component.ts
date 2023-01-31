@@ -1,10 +1,12 @@
 import {AfterViewInit, Component, ViewChild} from '@angular/core';
 import {MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
+import {lastValueFrom } from 'rxjs';
 import {MatTableDataSource} from '@angular/material/table';
-import { AccountsTableModel } from 'src/app/models/accounts-table-model';
-import {AppTabServiceService} from 'src/app/services/app-tab-service.service';
 import {animate, state, style, transition, trigger} from '@angular/animations';
+import {AccountsTableModel } from 'src/app/models/accounts-table-model';
+import {AppTabServiceService} from 'src/app/services/app-tab-service.service';
+import {TreeMenuSevice } from 'src/app/services/tree-menu.service';
 @Component({
   selector: 'app-app-accout-tablee',
   templateUrl: './app-accout-tablee.component.html',
@@ -18,45 +20,36 @@ import {animate, state, style, transition, trigger} from '@angular/animations';
   ],
 })
 export class TableAccounts implements AfterViewInit {
-  columnsToDisplay : string[] = ['idportfolio', 'portfolioname','sname', 'portleverage'];
-  columnsToDisplayWithExpand = [...this.columnsToDisplay , 'expand'];
+  columnsToDisplay : string[] = ['account_id', 'account_name','strategy', 'leverage'];
+  columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
   dataSource: MatTableDataSource<AccountsTableModel>;
-  portfolios:AccountsTableModel[]
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
-  expandedElement: PeriodicElement  | null;
+  expandedElement: AccountsTableModel  | null;
+  accessToClientData: string = 'true';
 
+  constructor(private AppTabServiceService:AppTabServiceService, private TreeMenuSevice:TreeMenuSevice ) {}
 
-  constructor(private AppTabServiceService:AppTabServiceService) {
-    // Create 100 users
-     this.AppTabServiceService.getAccountsData().subscribe (portfoliosData => {
-      this.portfolios = (portfoliosData)
-      this.dataSource  = new MatTableDataSource(this.portfolios);
+  async ngAfterViewInit() {
+    
+    let userData = JSON.parse(localStorage.getItem('userInfo'))
+    await lastValueFrom (this.TreeMenuSevice.getaccessRestriction (userData.user.accessrole, 'accessToClientData'))
+    .then ((accessRestrictionData) =>{
+      this.accessToClientData = accessRestrictionData['elementvalue']
+      console.log('accessToClientData',this.accessToClientData);
+      this.AppTabServiceService.getAccountsData().subscribe (portfoliosData => {
+        this.dataSource  = new MatTableDataSource(portfoliosData);
+        this.dataSource.paginator = this.paginator;
+        this.dataSource.sort = this.sort;
+      })
     })
-  }
-
-  ngAfterViewInit() {
-    this.AppTabServiceService.getAccountsData().subscribe (portfoliosData => {
-      this.portfolios = (portfoliosData)
-      this.dataSource  = new MatTableDataSource(this.portfolios);
-      this.dataSource.paginator = this.paginator;
-      this.dataSource.sort = this.sort;
-    })
+    console.log('accessToClientData',this.accessToClientData);
+ 
   }
 
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
-
-    if (this.dataSource.paginator) {
-      this.dataSource.paginator.firstPage();
-    }
+    if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
-}
-export interface PeriodicElement {
-  name: string;
-  position: number;
-  weight: number;
-  symbol: string;
-  description: string;
 }

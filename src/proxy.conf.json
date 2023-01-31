@@ -1,6 +1,19 @@
 {
-  "/api": {
-  "target": "http://localhost:5000",
-  "secure": false
-  }
-  }
+ "/api/" : {
+   "target": "http://localhost:3000",
+   "secure": false,
+   "pathRewrite": {"^/api" : ""},
+   "logLevel": "debug"
+ },
+  
+  "/pi2/*": {
+    "target": "http://localhost:3002",
+    "secure": false,
+    "pathRewrite": {"^/pi2" : ""},
+   "logLevel": "debug"
+
+   }
+}
+
+
+

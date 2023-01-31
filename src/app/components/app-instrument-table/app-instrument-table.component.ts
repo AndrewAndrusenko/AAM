@@ -20,7 +20,7 @@ ngOnInit(): void {
                              
     ajax:  {
       type: 'GET',
-      url: 'http://localhost:3000/AAM/InstrumentData/'  ,       
+      url: '/api/AAM/InstrumentData/'  ,       
       dataSrc : ''
   },
   

@@ -99,13 +99,19 @@
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "browserTarget": "your-application-name:build",
+            "proxyConfig": "src/proxy.conf.json"
+          },
           "configurations": {
             "production": {
               "browserTarget": "AAM:build:production",
+              "disableHostCheck": true,
               "proxyConfig": "src/proxy.conf.json"
             },
             "development": {
               "browserTarget": "AAM:build:development",
+              "disableHostCheck": true,
               "proxyConfig": "src/proxy.conf.json"
             }
           },

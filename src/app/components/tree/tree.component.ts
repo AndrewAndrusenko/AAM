@@ -184,7 +184,7 @@ export class TreeComponent {
 
   public async initialData() {
     let userData = JSON.parse(localStorage.getItem('userInfo'))
-    await lastValueFrom (this.TreeMenuSevice.getaccessRestriction (userData.user.accessrole))
+    await lastValueFrom (this.TreeMenuSevice.getaccessRestriction (userData.user.accessrole, 'rootLevelNodes'))
     .then ((accessRestrictionData) =>{
       this.rootLevelNodes = accessRestrictionData['elementvalue'].split('_');
       this.dataSource.data =  this.rootLevelNodes.map(name => new DynamicFlatNode(name, 0, true, false, name + '_Root','',''));

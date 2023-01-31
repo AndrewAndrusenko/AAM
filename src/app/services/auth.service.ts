@@ -26,19 +26,19 @@ export class AuthService {
   }
 
   public validate(login, password) {
-    return this.http.post ('http://localhost:3000/auth/',{'username' : login, 'password' : password}).toPromise()
+    return this.http.post ('/api/auth/',{'username' : login, 'password' : password}).toPromise()
   }
   public createNewUser(userrole, login, password) { 
-    return this.http.post ('http://localhost:3000/auth/newUser/',{'accessrole': userrole, 'username' : login, 'password' : password}).toPromise()
+    return this.http.post ('/api/auth/newUser/',{'accessrole': userrole, 'username' : login, 'password' : password}).toPromise()
   }
 
   public LogOut() { 
     localStorage.removeItem('userInfo')
-    this.http.post ('http://localhost:3000/logout/',{}).toPromise()
+    this.http.post ('/api/logout/',{}).toPromise()
     
   }
   
   public getUsersRoles(): Observable < userRoles[]>{
-    return this.http.get < userRoles[]> ('http://localhost:3000/auth/userRoles/')
+    return this.http.get < userRoles[]> ('/api/auth/userRoles/')
   }
 }

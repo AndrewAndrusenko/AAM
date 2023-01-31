@@ -8,20 +8,20 @@ export class TreeMenuSevice {
   constructor (private http:HttpClient) {    
   }
   
-  getaccessRestriction ( accessRole: string ):Observable < string[]>{
-    const params = {'accessRole': accessRole}
-    return this.http.get <string[]>('http://localhost:3000/accessRestriction/',{ params: params } ) 
+  getaccessRestriction ( accessRole: string, elementid: string ):Observable < string[]>{
+    const params = {'accessRole': accessRole, 'elementid': elementid}
+    return this.http.get <string[]>('/api/accessRestriction/',{ params: params } ) 
   }
   getTreeData ( userId:number, paramList: string[] ):Observable < string[]>{
     const params = {'userId': userId, 'paramList': paramList}
-    return this.http.get <string[]>('http://localhost:3000/AAM/treeMenu/',{ params: params } ) 
+    return this.http.get <string[]>('/api/AAM/treeMenu/',{ params: params } ) 
   }
   public addItemToFavorites (nodename:string, nodeparent:string, userId:number, idelement:string) { 
-    return this.http.post ('http://localhost:3000/Favorites/newItem/',{'nodename': nodename, 'nodeparent' : nodeparent, 'userId' : userId, 'idelement':idelement}).toPromise()
+    return this.http.post ('/api/Favorites/newItem/',{'nodename': nodename, 'nodeparent' : nodeparent, 'userId' : userId, 'idelement':idelement}).toPromise()
   }
   public removeItemFromFavorites (nodename:string, userId:number, idelement:string) {
     console.log('idelement',idelement);
-    return this.http.post ('http://localhost:3000/Favorites/deleteItem/',{'nodename': nodename, 'userId' : userId, 'idelement':idelement}).toPromise()
+    return this.http.post ('/api/Favorites/deleteItem/',{'nodename': nodename, 'userId' : userId, 'idelement':idelement}).toPromise()
   }
   private subjectName = new Subject<any>(); 
 
