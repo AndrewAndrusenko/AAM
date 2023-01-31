@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog, MatDialogRef} from '@angular/material/dialog';
 import { AppClientFormComponent } from '../forms/app-client-form/app-client-form.component';
-
-
+import * as XLSX from 'xlsx'
 @Component({
   selector: 'app-app-clients-table',
   templateUrl: './app-clients-table.component.html',
@@ -10,10 +9,9 @@ import { AppClientFormComponent } from '../forms/app-client-form/app-client-form
 })
 export class AppClientsTableComponent  {
   isEditForm: boolean = false;
-  
   dialogRef: MatDialogRef<AppClientFormComponent>;
-  // Must be declared as "any", not as "DataTables.Settings"
   dtOptions: any = {};
+  action ='';
   constructor(private dialog: MatDialog) {}
 ngOnInit(): void {
   this.dtOptions = {
@@ -68,6 +66,17 @@ select: true
 }
 
 openAddFileDialog(actionType) {
+  console.log('action',actionType);
+  switch (actionType) {
+    case 'Create':
+    break;
+    case 'Update':
+    break;
+    case 'Delete':
+      console.log('Delete Client');
+      this.action=actionType
+    break;
+  }
   this.dialogRef = this.dialog.open(AppClientFormComponent ,{
     minHeight:'400px',
     width:'900px'
@@ -75,5 +84,31 @@ openAddFileDialog(actionType) {
   this.dialogRef.componentInstance.action = actionType;
   let table =  $('#mytable')
   let data = table.DataTable().row({ selected: true }).data()
+}
+
+exportToExcel() {
+  // implement your logic to make the data set from your original dataset.
+  let data = [
+   { title: "Accession Number", show: true, link: "accessionNumber" },
+   { title: "Title", show: true, link: "title" },
+   { title: "Sub Title", show: false, link: "subTitle" },
+   { title: "Status", show: true, link: "status" },
+   { title: "Authors", show: true, link: "authors" },
+   { title: "ISBN", show: true, link: "isbn" },
+   { title: "ISBN 10", show: false, link: "isbn10" },
+   { title: "ISBN 13", show: false, link: "isbn13" },
+   { title: "Subjects", show: true, link: "subjects" },
+   { title: "Publishers", show: false, link: "publishers" },
+   { title: "Vendors", show: false, link: "vendors" },
+   { title: "Contributors", show: false, link: "contributors" },
+   { title: "Collaborators", show: false, link: "collaborators" }
+ ];
+ const fileName = "test.xlsx";
+
+ const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(data);
+ const wb: XLSX.WorkBook = XLSX.utils.book_new();
+ XLSX.utils.book_append_sheet(wb, ws, "test");
+
+ XLSX.writeFile(wb, fileName);
 }
 }

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog, MatDialogRef} from '@angular/material/dialog';
+import { AppConfimActionComponent } from '../alerts/app-confim-action/app-confim-action.component';
 import { AppInstrumentEditFormComponent } from '../forms/app-instrument-edit-form/app-instrument-edit-form.component';
 
 

@@ -29,46 +29,47 @@ import { MatDialogModule} from "@angular/material/dialog";
 import { AppClientFormComponent } from './components/forms/app-client-form/app-client-form.component';
 import { AppClientsTableComponent } from './components/app-clients-table/app-clients-table.component';
 import { AppNewAccountComponent } from './components/forms/app-new-account/app-new-account.component';
+import { AppConfimActionComponent } from './components/alerts/app-confim-action/app-confim-action.component';
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    LoginComponent,
-    DashboardComponent,
-    TreeComponent,
-    AppMenuComponent,
-    AppTabsComponent,
-    AppLoginComponent,
-    TableAccounts,
-    tradesDataTable,
-    AppInstrumentTableComponent,
-    AppInstrumentEditFormComponent,
-    AppClientFormComponent,
-    AppClientsTableComponent,
-    AppNewAccountComponent
-    
-  ],
-  imports: [
-    BrowserModule,   
-    BrowserAnimationsModule,
-    MatTreeModule,
-    MatIconModule,
-    MatProgressBarModule,
-    MaterialExampleModule,
-    FormsModule,
-    ReactiveFormsModule,
-    MatNativeDateModule,
-    HttpClientModule,
-    AppRoutingModule,
-    MatFormFieldModule,
-    MatInputModule,
-    CdkMenuModule,
-    ScrollingModule,
-    DataTablesModule,
-    MatDialogModule,
-  ],
+    declarations: [
+        AppComponent,
+        LoginComponent,
+        DashboardComponent,
+        TreeComponent,
+        AppMenuComponent,
+        AppTabsComponent,
+        AppLoginComponent,
+        TableAccounts,
+        tradesDataTable,
+        AppInstrumentTableComponent,
+        AppInstrumentEditFormComponent,
+        AppClientsTableComponent,
+        AppNewAccountComponent,
+        AppClientFormComponent,
+        AppConfimActionComponent,
 
-  providers: [],
-  bootstrap: [AppComponent]
+    ],
+    providers: [],
+    bootstrap: [AppComponent],
+    imports: [
+        BrowserModule,
+        BrowserAnimationsModule,
+        MatTreeModule,
+        MatIconModule,
+        MatProgressBarModule,
+        MaterialExampleModule,
+        FormsModule,
+        ReactiveFormsModule,
+        MatNativeDateModule,
+        HttpClientModule,
+        AppRoutingModule,
+        MatFormFieldModule,
+        MatInputModule,
+        CdkMenuModule,
+        ScrollingModule,
+        DataTablesModule,
+        MatDialogModule,
+    ]
 })
 export class AppModule { }

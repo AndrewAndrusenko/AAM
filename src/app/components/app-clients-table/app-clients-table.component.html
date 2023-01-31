@@ -8,18 +8,18 @@
       (click)="openAddFileDialog('Create')"
       class="tree-menu-item" cdkMenuItem >
       <mat-icon class="menu-icon" matPrefix>add_circle</mat-icon>      
-      New Imstrument</button>
+      New Client</button>
     <button 
       (click)="openAddFileDialog('Edit')"
       class="tree-menu-item" cdkMenuItem>
       <mat-icon class="menu-icon" matPrefix>edit</mat-icon>      
-      Edit Instrument
+      Edit Client
     </button>
     <button 
      (click)="openAddFileDialog('Delete')"
       class="tree-menu-item" cdkMenuItem>
       <mat-icon class="menu-icon" matPrefix>delete</mat-icon> 
-      Delete Instrument
+      Delete Client
     </button> 
   </div>
 </ng-template>
@@ -30,4 +30,3 @@
 
 <table datatable  id="mytable" [cdkContextMenuTriggerFor]="instrumentcontextmenu"[dtOptions]="dtOptions" 
 class="row-border hover"></table>
-

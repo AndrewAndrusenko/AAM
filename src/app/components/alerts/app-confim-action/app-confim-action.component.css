@@ -1,0 +1,31 @@
+.content-container  {
+  width: 100%;
+  background-color: rgb(189, 195, 201);
+
+}
+.mat-success {
+  background-color: rgb(150, 0, 0);
+  color: #fff;
+  border-radius: 15px;
+}
+.mat-successd {
+  background-color: rgb(0, 22, 150);
+  color: #fff;
+  border-radius: 15px;
+}
+
+
+
+.dialog-headline{
+font-weight: 500;
+padding: 1em;
+margin: 1em;
+margin-bottom: 3em;
+text-align: center;
+font-size: 1.5em;
+color:rgb(246, 5, 5);
+border-radius: 15px;
+background-color: rgb(117, 117, 117);
+
+}
+

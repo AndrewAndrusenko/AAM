@@ -1,5 +1,5 @@
 <mat-toolbar color="primary" style="margin-bottom:10px; border-radius: 0px;">
-  {{action}} Client Details
+  {{action}} Client
 </mat-toolbar>
 <form class="submit" [formGroup]="editClienttForm">
 <mat-form-field>
@@ -31,9 +31,8 @@
 
 <button mat-flat-button color="primary" type="submit" 
 [disabled]="!editClienttForm.valid"
-(click)="updateClientData()"
+(click)="updateClientData(action)"
 style="margin-top: 10px; width: 200px; font-size: 18px;">
-  {{action}} Edit: Client Details
+  {{action}} Client 
 </button>
-
 </form>
