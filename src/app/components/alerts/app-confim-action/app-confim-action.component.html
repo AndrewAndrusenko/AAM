@@ -1,16 +1,16 @@
 
 <h1 class="dialog-headline">
-  Please confirm your action: {{action}} 
+  Please confirm your action: {{actionToConfim.action}} 
 </h1>
 <div class="content-container"> 
 <button mat-raised-button color="success" type="submit" 
-(click)="updateClientData(action)"
+(click)="submitAction(actionToConfim.action)"
 style="margin-top: 10px; width: 200px; font-size: 18px; float: inline-start">
-  {{action}} 
+  {{actionToConfim.action}} 
 </button>
 
-<button mat-raised-button  color="successd" 
-(click)="CancelAction()"
+<button mat-raised-button color="successd" 
+(click)="cancelAction(actionToConfim.action)"
 style="margin-top: 10px; width: 200px; font-size: 18px; float: inline-end;">
   Cancel
 </button>

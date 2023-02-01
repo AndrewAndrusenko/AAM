@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-app-confim-action',
@@ -7,16 +7,17 @@ import { MatDialog } from '@angular/material/dialog';
   styleUrls: ['./app-confim-action.component.css']
 })
 export class AppConfimActionComponent {
-  constructor(private dialog: MatDialog) {
-    
+  constructor(private dialog: MatDialog, public dialogRefConfirm: MatDialogRef<AppConfimActionComponent>) {
   }
-  public action: string;
-  @Input()  secid : string;
+  public actionToConfim : {'action':string ,'isConfirmed': boolean}
 
-  CancelAction () {
-    this.dialog.closeAll();
+  submitAction (actionToConfim) {
+    this.actionToConfim.isConfirmed = true;
+    this.dialogRefConfirm.close(this.actionToConfim);
   }
-
-  updateClientData (action) {}
+  cancelAction (actionToConfim) {
+    this.actionToConfim.isConfirmed = false;
+    this.dialogRefConfirm.close(this.actionToConfim);
+  }
 
 }

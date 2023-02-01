@@ -30,6 +30,7 @@ import { AppClientFormComponent } from './components/forms/app-client-form/app-c
 import { AppClientsTableComponent } from './components/app-clients-table/app-clients-table.component';
 import { AppNewAccountComponent } from './components/forms/app-new-account/app-new-account.component';
 import { AppConfimActionComponent } from './components/alerts/app-confim-action/app-confim-action.component';
+import { AppSnackMsgboxComponent } from './components/app-snack-msgbox/app-snack-msgbox.component';
 
 @NgModule({
     declarations: [
@@ -48,6 +49,7 @@ import { AppConfimActionComponent } from './components/alerts/app-confim-action/
         AppNewAccountComponent,
         AppClientFormComponent,
         AppConfimActionComponent,
+        AppSnackMsgboxComponent,
 
     ],
     providers: [],

@@ -26,4 +26,8 @@ getClientData (client:number) : Observable <InstrumentData[]>  {
 updateClient (data:any) { 
   return this.http.post ('/api/AAM/ClientDataEdit/',{'data': data}).toPromise()
 }
+deleteClient (id:string) {
+  console.log('delete', 'dlient');
+  return this.http.post ('/api/AAM/ClientDataDelete/',{'idclient': id}).toPromise()
+}
 }

@@ -1,6 +1,12 @@
 <mat-toolbar color="primary" style="margin-bottom:10px; border-radius: 0px;">
   {{action}} Client
 </mat-toolbar>
+<button mat-flat-button color="primary" type="submit" 
+[disabled]="!editClienttForm.valid"
+(click)="updateClientData(action)"
+style="margin-top: 10px; width: 200px; font-size: 18px;">
+  {{action}} Client 
+</button>
 <form class="submit" [formGroup]="editClienttForm">
 <mat-form-field>
   <input matInput placeholder="id client" formControlName="idclient">
@@ -27,12 +33,4 @@
 <mat-form-field>
   <input matInput placeholder="phone" formControlName="phone">
 </mat-form-field>
-
-
-<button mat-flat-button color="primary" type="submit" 
-[disabled]="!editClienttForm.valid"
-(click)="updateClientData(action)"
-style="margin-top: 10px; width: 200px; font-size: 18px;">
-  {{action}} Client 
-</button>
 </form>

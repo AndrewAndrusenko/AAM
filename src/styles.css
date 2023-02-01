@@ -11,3 +11,16 @@
 .mat-tooltip {
   font-size: 16px !important
 }
+.snackbar-error {
+  max-width: 100% !important;
+  background-color: rgb(151, 30, 30);
+  color: rgb(183, 181, 181);
+  font-weight:bolder;
+}
+.snackbar-success {
+  background-color: rgb(80, 156, 109);
+  color: rgb(62, 61, 61);
+}
+.snackbar-error, .mat-simple-snack-bar-content {
+  font-size: 20px !important;
+}

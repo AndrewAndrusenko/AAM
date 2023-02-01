@@ -118,5 +118,7 @@ appServer.get ('/AAM/ClientData/',  jsPassport.authenticate('session') ,  uiAmmM
 
 appServer.post('/AAM/ClientDataEdit/',jsPassport.authenticate('session') , uiAmmModule.fEditClientData)
 
+appServer.post('/AAM/ClientDataDelete/',jsPassport.authenticate('session') , uiAmmModule.fClientDataDelete)
+
 
 appServer.listen (port,'localhost', () => {console.log (`AAM Server is running on port ${port}`)})

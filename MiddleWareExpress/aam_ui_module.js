@@ -1,3 +1,4 @@
+const { globalAgent } = require('http');
 const { param } = require('jquery');
 const { CONSOLE_APPENDER } = require('karma/lib/constants');
 const Module = require('module');
@@ -166,12 +167,27 @@ async function fEditClientData (request, response) {
   })  
 }
 
- module.exports = {
+async function fClientDataDelete (request, response) {
+  console.log('rq', request.body)
+  const query = {text: 'DELETE FROM public.dclients WHERE idclient=${idclient};', values:  request.body}
+  sql = pgp.as.format(query.text,query.values)
+  console.log('sql',sql);
+  pool.query (sql,  (err, res) => {if (err) {
+    console.log ('hi',err.stack)
+    return response.send(err)
+  } else {
+    console.log('res.rowCount',res.rowCount); 
+    return response.status(200).json(res.rowCount)}
+  })  
+}
+
+module.exports = {
   FAmmGetTreeData,
   fGetportfolioTable,
   fPutNewFavorite,
   fRemoveFavorite,
   fGetInstrumentData,
   fGetClientData,
-  fEditClientData
+  fEditClientData,
+  fClientDataDelete
  }

@@ -46,8 +46,6 @@ async function getAccessRestriction (request,response) {
   }
   console.log('request.query',request.query);
   sql = pgp.as.format(query.text,query.values)
-  console.log('sql',sql);
-
   pool.query ({text:sql,values:""}, (err, res) => {if (err) {console.log (err.stack)} else {return response.status(200).json(res.rows[0])}
   })
 }
