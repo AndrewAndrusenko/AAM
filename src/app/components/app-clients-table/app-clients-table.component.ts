@@ -21,17 +21,17 @@ ngOnInit(): void {
       dataSrc : ''
     },
     columns: [
-      {title :'idclient', 
+      {title :'ClientID', 
       data :'idclient'}, 
-      {title :'clientname', 
+      {title :'Client Name', 
       data :'clientname'}, 
-      {title :'idcountrydomicile',  
+      {title :'CountryID',  
       data :'idcountrydomicile'},  
-      {title :'isclientproffesional',  
+      {title :'Proffesional',  
       data :'isclientproffesional'},  
-      {title :'address', 
+      {title :'Address', 
       data :'address'}, 
-      {title :'contact_person', 
+      {title :'Contact Person', 
       data :'contact_person'}, 
       {title :'email',
       data :'email'},
@@ -66,24 +66,22 @@ select: true
 }
 
 openAddFileDialog(actionType) {
+  this.dialogRef = this.dialog.open(AppClientFormComponent ,{minHeight:'400px', width:'900px' });
+  this.dialogRef.componentInstance.action = actionType;
+  this.dialogRef.componentInstance.title = actionType;
   console.log('action',actionType);
   switch (actionType) {
     case 'Create':
+    case 'Create_Example': 
+     this.dialogRef.componentInstance.title = 'Create New';
     break;
-    case 'Update':
+    /* case 'Update':
     break;
     case 'Delete':
-      console.log('Delete Client');
-      this.action=actionType
-    break;
+    break; */
   }
-  this.dialogRef = this.dialog.open(AppClientFormComponent ,{
-    minHeight:'400px',
-    width:'900px'
-  });
-  this.dialogRef.componentInstance.action = actionType;
-  let table =  $('#mytable')
-  let data = table.DataTable().row({ selected: true }).data()
+  // let table =  $('#mytable')
+  // let data = table.DataTable().row({ selected: true }).data()
 }
 
 exportToExcel() {

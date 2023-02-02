@@ -30,4 +30,8 @@ deleteClient (id:string) {
   console.log('delete', 'dlient');
   return this.http.post ('/api/AAM/ClientDataDelete/',{'idclient': id}).toPromise()
 }
+createClient (data:any) { 
+  return this.http.post ('/api/AAM/ClientDataCreate/',{'data': data}).toPromise()
+}
+
 }

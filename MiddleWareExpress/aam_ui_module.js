@@ -163,7 +163,36 @@ async function fEditClientData (request, response) {
     values: paramArr
   }
   sql = pgp.as.format(query.text,query.values)
-  pool.query (sql,  (err, res) => {if (err) {console.log (err.stack)} else {return response.status(200).json(res.rows[0])}
+  pool.query (sql,  (err, res) => {if (err) {
+    console.log (err.stack.split("\n", 1).join(""))
+    err.detail = err.stack
+
+    return response.send(err)
+  } else {
+    return response.status(200).json(res.rowCount)}
+  })  
+}
+
+
+async function fCreateClientData (request, response) {
+  paramArr = request.body.data
+  const query = {
+  text: 'INSERT INTO public.dclients ' +
+        '(clientname, idcountrydomicile, isclientproffesional, address, contact_person, email, phone, code)' +
+        ' VALUES (' + 
+        '${clientname}, ${idcountrydomicile}, ${isclientproffesional}, ${address}, ${contact_person}, ' +
+        '${email}, ${phone}, ${code} );',
+    values: paramArr
+  }
+  sql = pgp.as.format(query.text,query.values)
+  console.log('sql', sql);
+  pool.query (sql,  (err, res) => {if (err) {
+    console.log (err.stack.split("\n", 1).join(""))
+    err.detail = err.stack
+
+    return response.send(err)
+  } else {
+    return response.status(200).json(res.rowCount)}
   })  
 }
 
@@ -189,5 +218,6 @@ module.exports = {
   fGetInstrumentData,
   fGetClientData,
   fEditClientData,
-  fClientDataDelete
+  fClientDataDelete,
+  fCreateClientData
  }

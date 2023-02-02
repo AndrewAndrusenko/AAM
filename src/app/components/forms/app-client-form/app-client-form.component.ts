@@ -16,6 +16,7 @@ export class AppClientFormComponent implements OnInit {
   @Input()  client : number;
   dialogRefConfirm: MatDialogRef<AppConfimActionComponent>;
   public action: string;
+  public title: string;
   public actionToConfim = {'action':'delete_client' ,'isConfirmed': false}
   public AppSnackMsgbox : AppSnackMsgboxComponent
   constructor (private fb:FormBuilder, private AppTabServiceService:AppTabServiceService, private dialog: MatDialog, public snack:MatSnackBar) {}
@@ -23,18 +24,28 @@ export class AppClientFormComponent implements OnInit {
   ngOnInit(): void {
     this.editClienttForm=this.fb.group ({
       idclient: {value:'', disabled: true}, 
-      clientname: '', 
-      idcountrydomicile: '', 
-      isclientproffesional: '', 
-      address: '', 
-      contact_person: '', 
-      email: '', 
-      phone: '', 
-      code : ''
+      clientname: null, 
+      idcountrydomicile: null, 
+      isclientproffesional: null, 
+      address: null, 
+      contact_person: null, 
+      email: null, 
+      phone: null, 
+      code : null
     })
     
    let data = $('#mytable').DataTable().row({ selected: true }).data();
-    if (this.action!=='Create') {this.editClienttForm.patchValue(data)}  
+   switch (this.action) {
+    case 'Create': 
+    break;
+    case 'Create_Example':
+      data['idclient']='';
+      this.editClienttForm.patchValue(data);
+    break;
+    default :
+    this.editClienttForm.patchValue(data);
+    break; 
+   }
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -45,13 +56,33 @@ export class AppClientFormComponent implements OnInit {
     
     console.log('action',action);
     switch (action) {
+      case 'Create_Example':
       case 'Create':
-      break;
-      case 'Update':
-        this.editClienttForm.controls['idclient'].enable()
-        this.AppTabServiceService.updateClient (this.editClienttForm.value)
+        console.log('CRE');
+        this.AppTabServiceService.createClient (this.editClienttForm.value).then ( (result) => {
+          if (result['name']=='error') {
+            this.snack.open('Error: ' + result['detail'].split("\n", 1).join(""),'OK',{panelClass: ['snackbar-error']} ) 
+          } else {
+            this.snack.open('Created: ' + result + ' client','OK',{panelClass: ['snackbar-success'], duration: 3000})
+            $('#mytable').DataTable().ajax.reload();
+          }
+        })
         this.editClienttForm.controls['idclient'].disable()
       break;
+
+      case 'Edit':
+        this.editClienttForm.controls['idclient'].enable()
+        this.AppTabServiceService.updateClient (this.editClienttForm.value).then ( (result) => {
+          if (result['name']=='error') {
+            this.snack.open('Error: ' + result['detail'].split("\n", 1).join(""),'OK',{panelClass: ['snackbar-error']} ) 
+          } else {
+            this.snack.open('Updated: ' + result + ' client','OK',{panelClass: ['snackbar-success'], duration: 3000})
+            $('#mytable').DataTable().ajax.reload();
+          }
+        })
+        this.editClienttForm.controls['idclient'].disable()
+      break;
+
       case 'Delete':
         this.dialogRefConfirm = this.dialog.open(AppConfimActionComponent, {panelClass: 'custom-modalbox',} );
         this.dialogRefConfirm.componentInstance.actionToConfim = {'action':'Delete Client' ,'isConfirmed': false}
@@ -63,8 +94,9 @@ export class AppClientFormComponent implements OnInit {
             if (result['name']=='error') {
               this.snack.open('Error: ' + result['detail'],'OK',{panelClass: ['snackbar-error']} ) 
             } else {
-              this.snack.open('Deleted: ' + result + ' rows','OK',{panelClass: ['snackbar-success'], duration: 3000})
-              this.dialog.closeAll()
+              this.snack.open('Deleted: ' + result + ' client','OK',{panelClass: ['snackbar-success'], duration: 3000})
+              this.dialog.closeAll();
+              $('#mytable').DataTable().ajax.reload();
             }
           })
           this.editClienttForm.controls['idclient'].disable()
