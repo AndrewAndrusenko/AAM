@@ -17,9 +17,14 @@ style="margin-top: 10px; width: 200px; font-size: 18px;">
 <mat-form-field>
   <input matInput placeholder="country" formControlName="idcountrydomicile">
 </mat-form-field>
-<mat-form-field>
-  <input matInput placeholder="is client proffesional" formControlName="isclientproffesional">
-</mat-form-field>
+
+  <mat-slide-toggle formControlName="isclientproffesional"
+  labelPosition='before'
+  color='primary'
+  (change)="changed()"
+
+  >Professional Status</mat-slide-toggle>
+
 <mat-form-field>
   <input matInput placeholder="address" formControlName="address">
 </mat-form-field>
