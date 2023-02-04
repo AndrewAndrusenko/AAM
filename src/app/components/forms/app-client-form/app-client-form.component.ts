@@ -1,10 +1,13 @@
-import { Component, Input, OnInit, SimpleChanges } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, Injectable, Input, OnInit, SimpleChanges } from '@angular/core';
+import { AbstractControl, AsyncValidator, FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { AppTabServiceService } from 'src/app/services/app-tab-service.service';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { AppConfimActionComponent } from '../../alerts/app-confim-action/app-confim-action.component';
 import { AppSnackMsgboxComponent } from '../../app-snack-msgbox/app-snack-msgbox.component';
 import { MatSnackBar} from '@angular/material/snack-bar';
+import { count, map, Observable, take } from 'rxjs';
+import {  of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 @Component({
   selector: 'app-app-client-form',
   templateUrl: './app-client-form.component.html',
@@ -18,12 +21,16 @@ export class AppClientFormComponent implements OnInit {
   public title: string;
   public actionToConfim = {'action':'delete_client' ,'isConfirmed': false}
   public AppSnackMsgbox : AppSnackMsgboxComponent
-  constructor (private fb:FormBuilder, private AppTabServiceService:AppTabServiceService, private dialog: MatDialog, public snack:MatSnackBar) {}
+  constructor (private fb:FormBuilder, private AppTabServiceService:AppTabServiceService, private dialog: MatDialog, public snack:MatSnackBar, private AlterEgoValidator:UniqueAlterEgoValidator) {}
   
   ngOnInit(): void {
+    const clientname = new FormControl('', {
+      asyncValidators: [this.AlterEgoValidator.validate.bind(this.AlterEgoValidator)],
+      updateOn: 'blur'
+    });
     this.editClienttForm=this.fb.group ({
       idclient: {value:'', disabled: true}, 
-      clientname: [null, [Validators.required]], 
+     /*  clientname: [null,   ],  */
       idcountrydomicile: [null, [Validators.required, Validators.pattern('[0-9]*')]],
       isclientproffesional: [false],
       address: [null, [Validators.required]],
@@ -32,7 +39,7 @@ export class AppClientFormComponent implements OnInit {
       phone: [null, [Validators.required, Validators.pattern('[0-9]*') ]],
       code : [null, []]
     })
-    
+    this.editClienttForm.addControl ('clientname',clientname) 
    let data = $('#mytable').DataTable().row({ selected: true }).data();
    switch (this.action) {
     case 'Create': 
@@ -52,7 +59,7 @@ export class AppClientFormComponent implements OnInit {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    this.AppTabServiceService.getClientData(changes['client'].currentValue).subscribe(data => {this.editClienttForm.patchValue(data[0])})
+    this.AppTabServiceService.getClientData(changes['client'].currentValue, null, 'Get_Client_Data').subscribe(data => {this.editClienttForm.patchValue(data[0])})
   }
 
   updateClientData(action:string){
@@ -111,9 +118,9 @@ export class AppClientFormComponent implements OnInit {
       break;
     }
   }
-  changed(){
-    console.log('this.checked')
-  }
+
+
+
   get  clientname ()   {return this.editClienttForm.get('clientname') } 
   get  idcountrydomicile ()   {return this.editClienttForm.get('idcountrydomicile') } 
   get  isclientproffesional ()   {return this.editClienttForm.get('isclientproffesional') } 
@@ -123,4 +130,33 @@ export class AppClientFormComponent implements OnInit {
   get  phone ()   {return this.editClienttForm.get('phone') } 
   get  code  ()  {return this.editClienttForm.get('code') } 
 
+
+
 }
+
+@Injectable({ providedIn: 'root' })
+export class UniqueAlterEgoValidator implements AsyncValidator {
+  constructor(private AppTabServiceService: AppTabServiceService) {}
+
+  validate(
+    control: AbstractControl
+  ): Observable<ValidationErrors | null> {
+    console.log('control.value', control.value);
+    return this.AppTabServiceService.getClientData (null, control.value, 'Check_clientname').pipe(
+      map (isTaken => (isTaken.length ? { uniqueAlterEgo: true } : null)),
+      catchError(() => of(null))
+    );
+  }
+}
+/* export class ClientNameValidator {
+  static clientname (control:AbstractControl) {
+    return () => {
+      console.log('control',control);
+      const clientname = control.value.toLowerCase ();
+      console.log('cllientname',clientname);
+      return AppTabServiceService.bind(this).getClientData (null, clientname, 'Check_clientname').subscribe (data => {
+        console.log('data',data);
+        return data.length})
+  }
+ }
+} */

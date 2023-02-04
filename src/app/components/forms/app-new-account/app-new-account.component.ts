@@ -24,7 +24,7 @@ export class AppNewAccountComponent implements OnInit {
       portleverage: ''
     })
     if (this.client !==0) {
-      this.AppTabServiceService.getClientData(this.client).subscribe(data =>{
+      this.AppTabServiceService.getClientData(this.client, null, 'Get_Client_Data').subscribe(data =>{
       this.newAccountForm.patchValue(data[0])
       console.log ('details',data[0])
       })
@@ -36,7 +36,7 @@ export class AppNewAccountComponent implements OnInit {
       this.newAccountForm.patchValue(data)     }  
   }
   ngOnChanges(changes: SimpleChanges) {
-    this.AppTabServiceService.getClientData(changes['client'].currentValue).subscribe(data => {
+    this.AppTabServiceService.getClientData(changes['client'].currentValue,null,'Get_Client_Data').subscribe(data => {
       // this.editClienttForm.controls .disable()
       this.newAccountForm.patchValue(data[0])
     }

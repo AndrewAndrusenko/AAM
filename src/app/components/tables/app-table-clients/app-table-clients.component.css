@@ -2,8 +2,8 @@
   display: inline-flex;
   flex-direction: column;
   min-width: 180px;
-  max-width: 300px;
-  background-color: rgb(255, 255, 255);
+  max-width: 350px;
+  background-color: rgb(184, 184, 184);
   padding: 3px 0;
   font-size: 18px;
 }

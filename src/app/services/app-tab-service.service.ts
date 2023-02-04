@@ -2,7 +2,7 @@ import { HttpClient, HttpParams  } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable, Subject } from 'rxjs';
 import { AccountsTableModel } from "../models/accounts-table-model";
-import { InstrumentData } from "../models/accounts-table-model";
+import { InstrumentData, ClientData } from "../models/accounts-table-model";
 
 @Injectable({
   providedIn: 'root'
@@ -19,10 +19,11 @@ getInstrumentData (secid:string) : Observable <InstrumentData[]>  {
   return this.http.get <InstrumentData[]> ('/api/AAM/InstrumentData/',{ params: params } )
 }
 
-getClientData (client:number) : Observable <InstrumentData[]>  {
-  const params = {'client': client}
-  return this.http.get <InstrumentData[]> ('/api/AAM/ClientData/',{ params: params } )
+getClientData (client:number, clientname:string, action:string) : Observable <ClientData[]>  {
+  const params = {'client': client, 'clientname' :clientname, 'action':action }
+  return this.http.get <ClientData[]> ('/api/AAM/ClientData/',{ params: params } )
 }
+
 updateClient (data:any) { 
   return this.http.post ('/api/AAM/ClientDataEdit/',{'data': data}).toPromise()
 }

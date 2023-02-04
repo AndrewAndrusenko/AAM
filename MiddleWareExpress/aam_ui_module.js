@@ -135,14 +135,25 @@ async function fRemoveFavorite (request, response) {
 }
 
 async function fGetClientData(request,response) {
+  console.log('request.query',request.query);
   const query = {text: ' SELECT * FROM public.dclients'}
-  if (request.query.client !== undefined) {
-    paramArr = [request.query.client]
-    query.text += ' WHERE (idclient= $1);'
-    query.values = paramArr;
-    } else {query.text += ';'
+  switch (request.query.action) {
+    case 'Check_clientname':
+      query.text += ' WHERE ((clientname) = $1);'
+      query.values = [request.query.clientname]
+    break;
+    case 'Get_Client_Data':
+      query.text += ' WHERE (idclient= $1);'
+      query.values = [request.query.client]
+    break;
+    default:
+      query.text += ';'
+    break;
   }
-  pool.query (query, (err, res) => {if (err) {console.log (err.stack)} else {return response.status(200).json((res.rows))}
+  console.log('query',query);
+  pool.query (query, (err, res) => {if (err) {console.log (err.stack)} else {
+    console.log('res.rows',res.rows);
+    return response.status(200).json((res.rows))}
   })
 }
 

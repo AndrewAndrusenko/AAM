@@ -17,7 +17,12 @@
       <mat-icon class="menu-icon" matPrefix>add_circle</mat-icon>      
       New Client (on sample)
     </button>
-
+    <button 
+      (click)="openAddFileDialog('Open_Account')"
+      class="tree-menu-item" cdkMenuItem>
+      <mat-icon class="menu-icon" matPrefix>account_box</mat-icon>      
+      Open Account
+    </button>
     <button 
       (click)="openAddFileDialog('Edit')"
       class="tree-menu-item" cdkMenuItem>

@@ -23,3 +23,15 @@ export interface InstrumentData {
   discounth0 :number,
   fullcovered :string
 }
+
+export interface ClientData {
+  idclient: number,
+  clientname: string,
+  idcountrydomicile: number,
+  isclientproffesional: boolean,
+  address: string,
+  contact_person:string,
+  email: string,
+  phone: string,
+  code : string,
+}
