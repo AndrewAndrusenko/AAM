@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, SimpleChanges } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AppTabServiceService } from 'src/app/services/app-tab-service.service';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { AppConfimActionComponent } from '../../alerts/app-confim-action/app-confim-action.component';
@@ -23,14 +23,14 @@ export class AppClientFormComponent implements OnInit {
   ngOnInit(): void {
     this.editClienttForm=this.fb.group ({
       idclient: {value:'', disabled: true}, 
-      clientname: null, 
-      idcountrydomicile: null, 
-      isclientproffesional: null, 
-      address: null, 
-      contact_person: null, 
-      email: null, 
-      phone: null, 
-      code : null
+      clientname: [null, [Validators.required]], 
+      idcountrydomicile: [null, [Validators.required, Validators.pattern('[0-9]*')]],
+      isclientproffesional: [false],
+      address: [null, [Validators.required]],
+      contact_person: [null, [Validators.required]],
+      email: [null, [Validators.required, Validators.email]],
+      phone: [null, [Validators.required, Validators.pattern('[0-9]*') ]],
+      code : [null, []]
     })
     
    let data = $('#mytable').DataTable().row({ selected: true }).data();
@@ -114,4 +114,13 @@ export class AppClientFormComponent implements OnInit {
   changed(){
     console.log('this.checked')
   }
+  get  clientname ()   {return this.editClienttForm.get('clientname') } 
+  get  idcountrydomicile ()   {return this.editClienttForm.get('idcountrydomicile') } 
+  get  isclientproffesional ()   {return this.editClienttForm.get('isclientproffesional') } 
+  get  address ()   {return this.editClienttForm.get('address') } 
+  get  contact_person ()   {return this.editClienttForm.get('contact_person') } 
+  get  email ()   {return this.editClienttForm.get('email') } 
+  get  phone ()   {return this.editClienttForm.get('phone') } 
+  get  code  ()  {return this.editClienttForm.get('code') } 
+
 }

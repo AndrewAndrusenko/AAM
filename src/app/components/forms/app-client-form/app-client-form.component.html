@@ -1,15 +1,18 @@
-<div class="client_form">
 <mat-toolbar color="primary" >
   {{title}} Client
 </mat-toolbar>
-<button mat-raised-button color="primary" 
-[disabled]="!editClienttForm.valid"
-(click)="updateClientData(action)"
-style="margin-top: 10px; width: 200px; font-size: 18px;">
+<div class="client_form">
+  <button mat-raised-button color="primary" 
+  [disabled]="!(editClienttForm.valid && submitbox.checked)"
+  (click)="updateClientData(action)"
+  style="margin-top: 10px; width: 200px; font-size: 18px;">
   {{title}} Client 
 </button>
+<mat-checkbox color="primary"  #submitbox checked="false" >Submit Data</mat-checkbox>
+</div>
+
 <form class="submit" [formGroup]="editClienttForm">
-<mat-form-field>
+  <mat-form-field>
   <input matInput placeholder="id client" formControlName="idclient">
 </mat-form-field>
 <mat-form-field>
@@ -39,5 +42,5 @@ style="margin-top: 10px; width: 200px; font-size: 18px;">
 <mat-form-field>
   <input matInput placeholder="phone" formControlName="phone">
 </mat-form-field>
+<p color = 'red' *ngIf="editClienttForm.invalid"> Please check the form. Data is invalid</p>
 </form>
-</div>
