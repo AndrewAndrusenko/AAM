@@ -10,13 +10,9 @@
 }
 .dataTable
 {   
-    /* background: #24456b; 
-    color: #ebdfdf; */
     font-size: 18px;
     background-color:#4f4e4e;
-    font-weight: 600;
-/*     padding: 10px; */
-    /* border: 1px solid #ccc; */
+    /* font-weight: 600; */
     color: lightgrey;
     text-align: center;
 }

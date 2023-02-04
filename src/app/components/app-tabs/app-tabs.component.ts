@@ -6,10 +6,11 @@ import {Title} from "@angular/platform-browser";
   selector: 'app-app-tabs',
   templateUrl: './app-tabs.component.html',
   styleUrls: ['./app-tabs.component.css'],
-  encapsulation: ViewEncapsulation.None,
+
 })
 export class AppTabsComponent implements OnDestroy {
   messageReceived ={text:'AAA', name:'', id:0};
+  Edit = "Edit"
   private subscriptionName: Subscription; //important to create a subscription
  
 constructor (private TreeMenuSevice : TreeMenuSevice, private titleService:Title) {
@@ -25,6 +26,9 @@ constructor (private TreeMenuSevice : TreeMenuSevice, private titleService:Title
   handleChange (event) {
     console.log('load form',event)
   }
+
+
+
  SetTitle (title) {
   this.titleService.setTitle(title)
  }

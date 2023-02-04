@@ -13,3 +13,11 @@
 .example-sidenav {
   padding: 5px;
 }
+
+.mat-accent .mat-slide-toggle-thumb{
+filter: grayscale(100%);
+}
+
+.mat-checked .mat-slide-toggle-thumb{
+filter: grayscale(0);
+}

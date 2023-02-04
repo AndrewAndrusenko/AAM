@@ -5,7 +5,10 @@
   <mat-tab-group  [matMenuTriggerFor]="menu" *ngIf="messageReceived.text=='Accounts' " mat-stretch-tabs #AccountInfo >
     
   <mat-tab label="Account Summary" > </mat-tab>  
-  <mat-tab label="Portfolio Details"> Detailed positions with PnL data  </mat-tab>
+  <mat-tab label="Portfolio Details"> Detailed positions with PnL data 
+  
+
+  </mat-tab>
   <mat-tab label="Trades by Account"> Trades history by Account </mat-tab>
 </mat-tab-group  >
 
@@ -51,19 +54,26 @@
 </mat-tab-group>
 
 <mat-tab-group  *ngIf="messageReceived.text=='Trades & Orders'" mat-stretch-tabs #TradesOrdersInfo>
-  <mat-tab label="Orders" >OrdersTable</mat-tab>  
+  <mat-tab label="Orders" >OrdersTable
+
+
+  </mat-tab>  
   <mat-tab label="Trades"> Trades table  </mat-tab>
   <mat-tab label="Positions"> Positions table  </mat-tab>
   <mat-tab label="Orders by Strategy"> Orders history  </mat-tab>
 </mat-tab-group>
 
 <mat-tab-group [cdkContextMenuTriggerFor]="tabcontextmenu" *ngIf="messageReceived.text=='Clients'" mat-stretch-tabs #ClientInfo>
-  
+
   <mat-tab label="Client Summary" >
-    <br>
-    <app-app-client-form
-    [client]="messageReceived.id">
-    </app-app-client-form> 
+    <div class="client_form">
+      <br>
+      <app-app-client-form
+      [action] = "Edit"
+      
+      [client]="messageReceived.id">
+      </app-app-client-form> 
+    </div>
   </mat-tab>  
   
   <mat-tab label="Client Accounts">

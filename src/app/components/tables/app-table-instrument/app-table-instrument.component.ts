@@ -1,13 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { MatDialog, MatDialogRef} from '@angular/material/dialog';
-import { AppConfimActionComponent } from '../alerts/app-confim-action/app-confim-action.component';
-import { AppInstrumentEditFormComponent } from '../forms/app-instrument-edit-form/app-instrument-edit-form.component';
+import { AppInstrumentEditFormComponent } from '../../forms/app-instrument-edit-form/app-instrument-edit-form.component';
 
 
 @Component({
   selector: 'app-app-instrument-table',
-  templateUrl: './app-instrument-table.component.html',
-  styleUrls: ['./app-instrument-table.component.css']
+  templateUrl: './app-table-instrument.component.html',
+  styleUrls: ['./app-table-instrument.component.css']
 })
 export class AppInstrumentTableComponent {
   isEditForm: boolean = false;
@@ -98,14 +97,10 @@ openAddFileDialog(actionType) {
   });
   this.dialogRef.componentInstance.action = actionType;
   let table =  $('#mytable')
- 
-  let target = event.target || event.srcElement || event.currentTarget;
-  // console.log(target);
-  // console.log(event);
+
  
         let data = table.DataTable().row({ selected: true }).data()
-        
-  console.log(data)
+
   
 
 }

@@ -1,5 +1,9 @@
 
-  .mat-tab-label-content{
+ .client_form {
+  width: 900px;
+  height: 900px;
+ }
+ .mat-tab-label-content{
     font-size: 20px;
   }
   

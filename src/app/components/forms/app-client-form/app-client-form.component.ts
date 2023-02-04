@@ -1,11 +1,10 @@
 import { Component, Input, OnInit, SimpleChanges } from '@angular/core';
-import { FormBuilder, FormGroup, NgModel } from '@angular/forms';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { AppTabServiceService } from 'src/app/services/app-tab-service.service';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { AppConfimActionComponent } from '../../alerts/app-confim-action/app-confim-action.component';
 import { AppSnackMsgboxComponent } from '../../app-snack-msgbox/app-snack-msgbox.component';
 import { MatSnackBar} from '@angular/material/snack-bar';
-
 @Component({
   selector: 'app-app-client-form',
   templateUrl: './app-client-form.component.html',
@@ -15,7 +14,7 @@ export class AppClientFormComponent implements OnInit {
   editClienttForm: FormGroup;
   @Input()  client : number;
   dialogRefConfirm: MatDialogRef<AppConfimActionComponent>;
-  public action: string;
+  @Input() action: string;
   public title: string;
   public actionToConfim = {'action':'delete_client' ,'isConfirmed': false}
   public AppSnackMsgbox : AppSnackMsgboxComponent
@@ -42,8 +41,12 @@ export class AppClientFormComponent implements OnInit {
       data['idclient']='';
       this.editClienttForm.patchValue(data);
     break;
+    case 'Delete': 
+    this.editClienttForm.patchValue(data);
+    break;
     default :
     this.editClienttForm.patchValue(data);
+    this.title = "Edit"
     break; 
    }
   }
@@ -107,5 +110,8 @@ export class AppClientFormComponent implements OnInit {
       
       break;
     }
+  }
+  changed(){
+    console.log('this.checked')
   }
 }

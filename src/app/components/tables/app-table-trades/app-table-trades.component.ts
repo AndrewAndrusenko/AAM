@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-app-trades-table',
-  templateUrl: './app-trades-table.component.html',
-  styleUrls: ['./app-trades-table.component.css']
+  templateUrl: './app-table-trades.component.html',
+  styleUrls: ['./app-table-trades.component.css']
 })
 export class tradesDataTable implements OnInit {
   // Must be declared as "any", not as "DataTables.Settings"

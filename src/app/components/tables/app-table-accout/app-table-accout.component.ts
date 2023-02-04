@@ -9,8 +9,8 @@ import {AppTabServiceService} from 'src/app/services/app-tab-service.service';
 import {TreeMenuSevice } from 'src/app/services/tree-menu.service';
 @Component({
   selector: 'app-app-accout-tablee',
-  templateUrl: './app-accout-tablee.component.html',
-  styleUrls: ['./app-accout-tablee.component.css'],
+  templateUrl: './app-table-accout.component.html',
+  styleUrls: ['./app-table-accout.component.css'],
   animations: [
     trigger('detailExpand', [
       state('collapsed', style({height: '0px', minHeight: '0'})),
