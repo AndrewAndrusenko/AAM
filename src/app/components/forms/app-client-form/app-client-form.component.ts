@@ -26,7 +26,7 @@ export class AppClientFormComponent implements OnInit {
   ngOnInit(): void {
     const clientname = new FormControl('', {
       asyncValidators: [this.AlterEgoValidator.validate.bind(this.AlterEgoValidator)],
-      updateOn: 'blur'
+      updateOn: 'change'
     });
     this.editClienttForm=this.fb.group ({
       idclient: {value:'', disabled: true}, 
@@ -59,7 +59,10 @@ export class AppClientFormComponent implements OnInit {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    this.AppTabServiceService.getClientData(changes['client'].currentValue, null, 'Get_Client_Data').subscribe(data => {this.editClienttForm.patchValue(data[0])})
+    this.AppTabServiceService.getClientData(changes['client'].currentValue, null, 'Get_Client_Data').subscribe(data => {
+      this.editClienttForm.patchValue(data[0])
+      localStorage.setItem('intitial_clientName',this.clientname.value  )
+    })
   }
 
   updateClientData(action:string){
@@ -129,34 +132,21 @@ export class AppClientFormComponent implements OnInit {
   get  email ()   {return this.editClienttForm.get('email') } 
   get  phone ()   {return this.editClienttForm.get('phone') } 
   get  code  ()  {return this.editClienttForm.get('code') } 
-
-
-
 }
-
 @Injectable({ providedIn: 'root' })
 export class UniqueAlterEgoValidator implements AsyncValidator {
   constructor(private AppTabServiceService: AppTabServiceService) {}
-
+  
   validate(
-    control: AbstractControl
+    control: AbstractControl,
   ): Observable<ValidationErrors | null> {
-    console.log('control.value', control.value);
-    return this.AppTabServiceService.getClientData (null, control.value, 'Check_clientname').pipe(
-      map (isTaken => (isTaken.length ? { uniqueAlterEgo: true } : null)),
-      catchError(() => of(null))
-    );
+     { 
+      let intClient = localStorage.getItem('intitial_clientName')
+      console.log('control.value', control.value, 'touched',  intClient );
+      return this.AppTabServiceService.getClientData (null, control.value, 'Check_clientname').pipe(
+        map ( isTaken => ( control.touched && control.value !== intClient && isTaken.length ? { uniqueAlterEgo: true } : null)  ),
+        catchError(() => of(null))
+      );
+    }
   }
 }
-/* export class ClientNameValidator {
-  static clientname (control:AbstractControl) {
-    return () => {
-      console.log('control',control);
-      const clientname = control.value.toLowerCase ();
-      console.log('cllientname',clientname);
-      return AppTabServiceService.bind(this).getClientData (null, clientname, 'Check_clientname').subscribe (data => {
-        console.log('data',data);
-        return data.length})
-  }
- }
-} */
