@@ -1,5 +1,5 @@
 import { Component, Injectable, Input, OnInit, SimpleChanges } from '@angular/core';
-import { AbstractControl, AsyncValidator, FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { AbstractControl, AsyncValidator, AsyncValidatorFn, FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { AppTabServiceService } from 'src/app/services/app-tab-service.service';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { AppConfimActionComponent } from '../../alerts/app-confim-action/app-confim-action.component';
@@ -8,29 +8,28 @@ import { MatSnackBar} from '@angular/material/snack-bar';
 import { count, map, Observable, take } from 'rxjs';
 import {  of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { UsernameValidator } from 'src/app/services/UniqueClientName';
 @Component({
   selector: 'app-app-client-form',
   templateUrl: './app-client-form.component.html',
   styleUrls: ['./app-client-form.component.css'],
 })
 export class AppClientFormComponent implements OnInit {
-  editClienttForm: FormGroup;
+  public editClienttForm: FormGroup;
   @Input()  client : number;
   dialogRefConfirm: MatDialogRef<AppConfimActionComponent>;
   @Input() action: string;
   public title: string;
   public actionToConfim = {'action':'delete_client' ,'isConfirmed': false}
   public AppSnackMsgbox : AppSnackMsgboxComponent
-  constructor (private fb:FormBuilder, private AppTabServiceService:AppTabServiceService, private dialog: MatDialog, public snack:MatSnackBar, private AlterEgoValidator:UniqueAlterEgoValidator) {}
+  constructor (
+    private fb:FormBuilder, private AppTabServiceService:AppTabServiceService, private dialog: MatDialog, public snack:MatSnackBar
+  ) {}
   
   ngOnInit(): void {
-    const clientname = new FormControl('', {
-      asyncValidators: [this.AlterEgoValidator.validate.bind(this.AlterEgoValidator)],
-      updateOn: 'change'
-    });
     this.editClienttForm=this.fb.group ({
       idclient: {value:'', disabled: true}, 
-     /*  clientname: [null,   ],  */
+      clientname: [null, { updateOn: 'blur'} ],
       idcountrydomicile: [null, [Validators.required, Validators.pattern('[0-9]*')]],
       isclientproffesional: [false],
       address: [null, [Validators.required]],
@@ -39,7 +38,7 @@ export class AppClientFormComponent implements OnInit {
       phone: [null, [Validators.required, Validators.pattern('[0-9]*') ]],
       code : [null, []]
     })
-    this.editClienttForm.addControl ('clientname',clientname) 
+   
    let data = $('#mytable').DataTable().row({ selected: true }).data();
    switch (this.action) {
     case 'Create': 
@@ -49,11 +48,11 @@ export class AppClientFormComponent implements OnInit {
       this.editClienttForm.patchValue(data);
     break;
     case 'Delete': 
-    this.editClienttForm.patchValue(data);
+      this.editClienttForm.patchValue(data);
     break;
     default :
-    this.editClienttForm.patchValue(data);
-    this.title = "Edit"
+      this.editClienttForm.patchValue(data);
+      this.title = "Edit"
     break; 
    }
   }
@@ -61,12 +60,14 @@ export class AppClientFormComponent implements OnInit {
   ngOnChanges(changes: SimpleChanges) {
     this.AppTabServiceService.getClientData(changes['client'].currentValue, null, 'Get_Client_Data').subscribe(data => {
       this.editClienttForm.patchValue(data[0])
-      localStorage.setItem('intitial_clientName',this.clientname.value  )
+      this.editClienttForm.controls['clientname'].setAsyncValidators(
+        UsernameValidator.createValidator(this.AppTabServiceService, this.clientId.value)
+      )
+      this.editClienttForm.controls['clientname'].updateValueAndValidity();
     })
   }
 
   updateClientData(action:string){
-    
     console.log('action',action);
     switch (action) {
       case 'Create_Example':
@@ -116,15 +117,12 @@ export class AppClientFormComponent implements OnInit {
          
           }
         })
-        console.log('this.editClienttForm.value',this.editClienttForm.value);
-      
       break;
     }
   }
 
-
-
   get  clientname ()   {return this.editClienttForm.get('clientname') } 
+  get  clientId ()   {return this.editClienttForm.get('idclient') } 
   get  idcountrydomicile ()   {return this.editClienttForm.get('idcountrydomicile') } 
   get  isclientproffesional ()   {return this.editClienttForm.get('isclientproffesional') } 
   get  address ()   {return this.editClienttForm.get('address') } 
@@ -132,21 +130,4 @@ export class AppClientFormComponent implements OnInit {
   get  email ()   {return this.editClienttForm.get('email') } 
   get  phone ()   {return this.editClienttForm.get('phone') } 
   get  code  ()  {return this.editClienttForm.get('code') } 
-}
-@Injectable({ providedIn: 'root' })
-export class UniqueAlterEgoValidator implements AsyncValidator {
-  constructor(private AppTabServiceService: AppTabServiceService) {}
-  
-  validate(
-    control: AbstractControl,
-  ): Observable<ValidationErrors | null> {
-     { 
-      let intClient = localStorage.getItem('intitial_clientName')
-      console.log('control.value', control.value, 'touched',  intClient );
-      return this.AppTabServiceService.getClientData (null, control.value, 'Check_clientname').pipe(
-        map ( isTaken => ( control.touched && control.value !== intClient && isTaken.length ? { uniqueAlterEgo: true } : null)  ),
-        catchError(() => of(null))
-      );
-    }
-  }
 }

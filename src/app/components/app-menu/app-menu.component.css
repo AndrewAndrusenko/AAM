@@ -1,4 +1,6 @@
+
 .file-menu {
+  /* background: var(--color-primary); */
   border-width: 3px;
   /* color: rgb(192, 192, 222); */
   border-color:rgb(67, 79, 79);
@@ -19,7 +21,6 @@
   display: flex;
   justify-content: center;
   width: 120px;
-  color:indianred;
 }
 .menuright {
  

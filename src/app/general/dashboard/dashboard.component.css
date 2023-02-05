@@ -2,16 +2,25 @@
   width: 210vh;
   height: 95vh;
   border: 1px solid rgba(0, 0, 0, 0.5);
-}
+  /* background: var(--color-primary); */
 
+}
+.body {
+  /* background: var(--color-primary); */
+
+}
 .example-sidenav-content {
   display: flex;
   width:180vh;
   height: 100%;
+  /* background: var(--color-primary); */
+
 }
 
 .example-sidenav {
   padding: 5px;
+  /* background: var(--color-primary); */
+
 }
 
 .mat-accent .mat-slide-toggle-thumb{

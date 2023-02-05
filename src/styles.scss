@@ -1,6 +1,8 @@
-
-@import "~@angular/material/prebuilt-themes/pink-bluegrey.css";
+@import '@angular/material/theming';
+@include mat-core();
+@import "@angular/material/prebuilt-themes/pink-bluegrey.css";
 @import url("https://fonts.googleapis.com/icon?family=Material+Icons");
+
 .custom-modalbox > mat-dialog-container {
   background-color:transparent !important;
   border-radius: 15px;

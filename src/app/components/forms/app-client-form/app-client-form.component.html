@@ -17,6 +17,9 @@
   </mat-form-field>
   <mat-form-field>
     <input matInput placeholder="client name" formControlName="clientname">
+    <mat-error  *ngIf="clientname.invalid && clientname.touched">
+       Client Name isn't unique. Please choose another one.    
+    </mat-error>
   </mat-form-field>
   <mat-form-field>
     <input matInput placeholder="country" formControlName="idcountrydomicile">

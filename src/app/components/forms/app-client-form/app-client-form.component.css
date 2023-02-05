@@ -1,3 +1,13 @@
+input.ng-invalid.ng-touched {
+  color: rgb(158, 0, 0);
+}
+.mat-error {
+  color: rgb(158, 0, 0);
+  transform: (1.1);
+  height: 110%;
+  font-size: 16px;
+  font-style: italic;
+}
 .mat-checkbox {
   transform: scale(1.2);
   margin-left:2%;
