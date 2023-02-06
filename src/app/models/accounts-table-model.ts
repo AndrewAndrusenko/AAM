@@ -35,3 +35,12 @@ export interface ClientData {
   phone: string,
   code : string,
 }
+export interface StrategiesGlobalData {
+  id: number, 
+  Name : string, 
+  stype : number,
+  Level : number,
+  Description: string, 
+  s_benchmark_account: number,
+  'Benchmark Account': string, 
+}

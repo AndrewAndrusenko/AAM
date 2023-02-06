@@ -6,6 +6,7 @@ const userId=0
 const jsPassport = require ('passport')
 var LocalStrategy = require('passport-local');
 const uiAmmModule = require ('./aam_ui_module');
+const uiAmmInvestmentsModule = require ('./aam_ui_investmentsData')
 const auth_module = require('./auth_module');
 const bcrypt = require('bcryptjs');
 const config = require('./db_config');
@@ -120,7 +121,9 @@ appServer.post('/AAM/ClientDataEdit/',jsPassport.authenticate('session') , uiAmm
 
 appServer.post('/AAM/ClientDataDelete/',jsPassport.authenticate('session') , uiAmmModule.fClientDataDelete)
 
-appServer.post('/AAM/ClientDataCreate/',jsPassport.authenticate('session') , uiAmmModule.fCreateClientData)
+appServer.post('/AAM/ClientDataCreate /',jsPassport.authenticate('session') , uiAmmModule.fCreateClientData)
+
+appServer.get('/AAM/GetStrategiesList/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fGetStrategiesList)
 
 
 appServer.listen (port,'localhost', () => {console.log (`AAM Server is running on port ${port}`)})

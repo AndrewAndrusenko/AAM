@@ -3,9 +3,6 @@
   width: 900px;
   height: 900px;
  }
- .mat-tab-label-content{
-    font-size: 20px;
-  }
   
   .mat-tab-label-active{
     background-color: rgb(67, 79, 79);

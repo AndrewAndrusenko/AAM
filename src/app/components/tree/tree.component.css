@@ -18,8 +18,7 @@
   }
   
   .background-highlight{
-    /* background: var(--color-primary); */
-/*  */
+    background: rgb(142, 156, 212);
   }
 
   .tree-menu-context {

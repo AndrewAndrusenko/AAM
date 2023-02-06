@@ -1,0 +1,64 @@
+.row_field_name {
+  font-weight: bold;
+  color: cadetblue;
+}
+.mat-table {
+  background-color:#4f4e4e;
+  width: 100%;
+  font-size: 26px;
+  margin-left: 10px;
+}
+.mat-header-cell {
+  margin-left: 10px;
+  font-size: 20px;
+  background-color:#393737;
+}
+.mat-paginator {
+  margin-left: 10px;
+}
+.mat-input-element {
+  font-size: 24px;
+  background-color:#4f4e4e;
+}
+.mat-form-field {
+  margin-left: 10px;
+  font-size: 24px;
+  width: 20%;
+}
+.mat-cell {
+  font-size: 18px;
+}
+tr.example-detail-row {
+  height: 0;
+}
+
+.example-element-detail {
+  overflow: hidden;
+  display: flex;
+}
+
+.example-element-description {
+  padding: 16px;
+}
+
+tr.example-detail-row {
+  height: 0;
+}
+
+tr.example-element-row:not(.example-expanded-row):hover {
+  background: rgb(43, 43, 245);
+}
+
+tr.example-element-row:not(.example-expanded-row):active {
+  background: rgb(43, 43, 245);
+}
+
+.example-element-row td {
+  border-bottom-width: 0;
+}
+
+.example-element-detail {
+  overflow: hidden;
+  display: flex;
+}
+

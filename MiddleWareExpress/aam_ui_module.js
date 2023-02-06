@@ -1,6 +1,3 @@
-const { globalAgent } = require('http');
-const { param } = require('jquery');
-const { CONSOLE_APPENDER } = require('karma/lib/constants');
 const Module = require('module');
 const config = require('./db_config');
 const Pool = require('pg').Pool;

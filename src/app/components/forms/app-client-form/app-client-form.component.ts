@@ -17,8 +17,8 @@ import { UsernameValidator } from 'src/app/services/UniqueClientName';
 export class AppClientFormComponent implements OnInit {
   public editClienttForm: FormGroup;
   @Input()  client : number;
-  dialogRefConfirm: MatDialogRef<AppConfimActionComponent>;
   @Input() action: string;
+  dialogRefConfirm: MatDialogRef<AppConfimActionComponent>;
   public title: string;
   public actionToConfim = {'action':'delete_client' ,'isConfirmed': false}
   public AppSnackMsgbox : AppSnackMsgboxComponent
@@ -55,6 +55,10 @@ export class AppClientFormComponent implements OnInit {
       this.title = "Edit"
     break; 
    }
+   this.editClienttForm.controls['clientname'].setAsyncValidators(
+    UsernameValidator.createValidator(this.AppTabServiceService, this.clientId.value)
+  )
+  this.editClienttForm.controls['clientname'].updateValueAndValidity();
   }
 
   ngOnChanges(changes: SimpleChanges) {

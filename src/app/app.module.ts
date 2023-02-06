@@ -30,7 +30,8 @@ import { tradesDataTable } from './components/tables/app-table-trades/app-table-
 import { AppInstrumentTableComponent } from './components/tables/app-table-instrument/app-table-instrument.component';
 import { AppInstrumentEditFormComponent } from './components/forms/app-instrument-edit-form/app-instrument-edit-form.component';
 import { AppClientsTableComponent } from './components/tables/app-table-clients/app-table-clients.component';
-import {MatSlideToggle, MatSlideToggleModule} from '@angular/material/slide-toggle'; 
+import {MatSlideToggle, MatSlideToggleModule} from '@angular/material/slide-toggle';
+import { AppTableStrategiesComponentComponent } from './components/tables/app-table-strategies.component/app-table-strategies.component.component'; 
 
 @NgModule({
     imports: [
@@ -69,6 +70,7 @@ import {MatSlideToggle, MatSlideToggleModule} from '@angular/material/slide-togg
         AppClientFormComponent,
         AppConfimActionComponent,
         AppSnackMsgboxComponent,
+        AppTableStrategiesComponentComponent,
 
     ],
     bootstrap: [AppComponent],

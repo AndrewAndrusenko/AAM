@@ -10,9 +10,19 @@
   border-color: gray
 
 }
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+.mat-focused label{
+  color:rgb(0, 47, 255) !important;
+  transform: 1.2 !important;
+  font-size:x-large !important;
+ }
+
+.mat-tab-label{
+  font-size: 20px !important;
+} 
+.mat-tab-label-active{
+  font-size: 20px !important;
+  background-color: rgb(60, 60, 60)!important;
+} 
 .mat-tooltip {
   font-size: 16px !important
 }
