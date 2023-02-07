@@ -9,6 +9,7 @@ import {Title} from "@angular/platform-browser";
 
 })
 export class AppTabsComponent implements OnDestroy {
+
   messageReceived ={text:'AAA', name:'', id:0};
   Edit = "Edit"
   private subscriptionName: Subscription; //important to create a subscription

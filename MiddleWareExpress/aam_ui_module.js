@@ -70,20 +70,34 @@ async function FAmmGetTreeData(request,response) {
 }
 
 async function fGetportfolioTable (request,response) {
-  let sql="SELECT "+
-  " dportfolios.idportfolio as Account_ID, dportfolios.idclient as Client_ID, dportfolios.idstategy, " + 
-  " dstrategiesglobal.sname as Strategy ,dportfolios.portfolioname as Account_Name, dportfolios.portleverage as Leverage, " +
-  " dclients.clientname as client_name, dclients.isclientproffesional as proffesional , dclients.address, " +
-  " dclients.contact_person, dclients.email, dclients.phone" +
-  " FROM public.dportfolios "+
-  " LEFT JOIN public.dstrategiesglobal ON dportfolios.idstategy = public.dstrategiesglobal.id " +
-  " LEFT JOIN public.dclients ON dportfolios.idclient = public.dclients.idclient; "
-  pool.query ({text : sql}, (err, res) => {
-    if (err) {console.log (err.stack) 
-    } else {
-      console.log('res.rows',res.rows);
-      return response.status(200).json((res.rows))
-    }
+  console.log('request.query', request.query);
+  const query = {text: "SELECT "+
+    " dportfolios.idportfolio as Account_ID, dportfolios.idclient as Client_ID, dportfolios.idstategy, " + 
+    " dstrategiesglobal.sname as Strategy ,dportfolios.portfolioname as Account_Name, dportfolios.portleverage as Leverage, " +
+    " dclients.clientname as client_name, dclients.isclientproffesional as proffesional , dclients.address, " +
+    " dclients.contact_person, dclients.email, dclients.phone" +
+    " FROM public.dportfolios "+
+    " LEFT JOIN public.dstrategiesglobal ON dportfolios.idstategy = public.dstrategiesglobal.id " +
+    " LEFT JOIN public.dclients ON dportfolios.idclient = public.dclients.idclient "
+  }
+
+  switch (request.query.actionOnAccountTable) {
+    case 'Get_Accounts_By_CientId':
+      query.text += ' WHERE (dportfolios.idclient = $1);'
+      query.values = [request.query.clientId]
+    break;
+    case 'Get_Accounts_By_StrategyId':
+      query.text += ' WHERE (public.dstrategiesglobal.id= $1);'
+      query.values = [request.query.strategyId]
+    break;
+    default:
+      query.text += ';'
+    break;
+  }
+  console.log('query',query);
+  pool.query (query, (err, res) => {if (err) {console.log (err.stack)} else {
+    console.log('res.rows',res.rows);
+    return response.status(200).json((res.rows))}
   })
 }
 

@@ -10,29 +10,30 @@ import { InstrumentData, ClientData } from "../models/accounts-table-model";
 export class AppTabServiceService {
   constructor(private http:HttpClient) { }
 
-getAccountsData ():Observable <AccountsTableModel[]> {
-  return this.http.get <AccountsTableModel []>('/api/AAM/portfolioTable/')
-}
+  getAccountsData (clientId: number, strategyId: number, actionOnAccountTable: string):Observable <AccountsTableModel[]> {
+    const params = {'clientId': clientId, 'strategyId' :strategyId, 'actionOnAccountTable':actionOnAccountTable }
+    return this.http.get <AccountsTableModel []>('/api/AAM/portfolioTable/', { params: params })
+  }
 
-getInstrumentData (secid:string) : Observable <InstrumentData[]>  {
-  const params = {'secid': secid}
-  return this.http.get <InstrumentData[]> ('/api/AAM/InstrumentData/',{ params: params } )
-}
+  getInstrumentData (secid: string): Observable <InstrumentData[]>  {
+    const params = {'secid': secid}
+    return this.http.get <InstrumentData[]> ('/api/AAM/InstrumentData/',{ params: params } )
+  }
 
-getClientData (client:number, clientname:string, action:string) : Observable <ClientData[]>  {
-  const params = {'client': client, 'clientname' :clientname, 'action':action }
-  return this.http.get <ClientData[]> ('/api/AAM/ClientData/',{ params: params } )
-}
+  getClientData (client: number, clientname: string, action: string) : Observable <ClientData[]>  {
+    const params = {'client': client, 'clientname' :clientname, 'action':action }
+    return this.http.get <ClientData[]> ('/api/AAM/ClientData/', { params: params } )
+  }
 
-updateClient (data:any) { 
-  return this.http.post ('/api/AAM/ClientDataEdit/',{'data': data}).toPromise()
-}
-deleteClient (id:string) {
-  console.log('delete', 'dlient');
-  return this.http.post ('/api/AAM/ClientDataDelete/',{'idclient': id}).toPromise()
-}
-createClient (data:any) { 
-  return this.http.post ('/api/AAM/ClientDataCreate/',{'data': data}).toPromise()
-}
+  updateClient (data:any) { 
+    return this.http.post ('/api/AAM/ClientDataEdit/',{'data': data}).toPromise()
+  }
+  deleteClient (id:string) {
+    console.log('delete', 'dlient');
+    return this.http.post ('/api/AAM/ClientDataDelete/',{'idclient': id}).toPromise()
+  }
+  createClient (data:any) { 
+    return this.http.post ('/api/AAM/ClientDataCreate/',{'data': data}).toPromise()
+  }
 
 }

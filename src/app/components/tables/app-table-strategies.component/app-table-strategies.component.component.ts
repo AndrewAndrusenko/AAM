@@ -30,7 +30,7 @@ export class AppTableStrategiesComponentComponent  implements AfterViewInit {
     'Benchmark Account': '', 
   });
 
-  columnsToDisplay = ['name',  'level', 'description', 'Benchmark Account'];
+  columnsToDisplay = ['id','name',  'level', 'description', 'Benchmark Account'];
 
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
   dataSource: MatTableDataSource<StrategiesGlobalData>;
