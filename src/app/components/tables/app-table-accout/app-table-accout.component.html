@@ -1,6 +1,6 @@
-<mat-form-field>
+<mat-form-field style="width: 50%;">
   <mat-label>Filter</mat-label>
-  <input matInput (keyup)="applyFilter($event)" placeholder="Ex. Mia" #input>
+  <input matInput (keyup)="applyFilter($event)" placeholder="Type search string" #input>
 </mat-form-field>
 
 <div class="mat-elevation-z8">
@@ -8,7 +8,9 @@
 
     <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay">
       <th mat-header-cell *matHeaderCellDef> {{column | uppercase}}</th>
-      <td mat-cell *matCellDef="let element"> {{element[column]}} </td>
+      <td 
+      (click)="chooseAccount(element)"
+      mat-cell *matCellDef="let element"> {{element[column]}} </td>
     </ng-container>
     <ng-container matColumnDef="expand">
       <th mat-header-cell *matHeaderCellDef aria-label="row actions">&nbsp;</th>

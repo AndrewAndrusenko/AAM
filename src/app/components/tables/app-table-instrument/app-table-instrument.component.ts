@@ -64,28 +64,27 @@ ngOnInit(): void {
     {title :'rtl2',
     data :'rtl2'}
   ],
-buttons: 
-{
-buttons: 
-[      { text: '<i class="fa fa-rotate fa-2x "></i><p style="color:Black,">Reload</p>', className: 'btn  btn-primary', action: ( ) =>   {} 
-        },                  
-       { extend: 'copy', text:'<i class="fa fa-copy fa-2x "></i><p style="color:Black,">Copy</p>', className: 'btn  btn-primary '},
-       { extend: 'excel', text:'<i class="fas fa-file-export fa-2x"></i><p style="color:Black,">To Excel</p>', className: 'btn btn-primary'},
-       { extend: 'pdf', text:'<i class="far fa-file-pdf fa-2x"></i><p style="color:Black,">PDF</p>',  className: 'btn btn-primary ', titleAttr: 'PDF'},
-       { extend: 'print',  text:'<i class="fa-solid fa-print fa-2x"></i><p style="color:Black,">Print</p>',  className: 'btn btn-primary'},
-       { extend: 'colvis', text:'<i class="fa-regular fa-pen-to-square fa-2x"></i><p style="color:Black, width:160px">Hide/Unhide</p>', className: 'btn btn-primary'},
-                { extend: 'pageLength',  className: 'btn btn-primary' }
-   
-                                                             
-],
-dom: {button: { className: 'btn btn-rounded'}}
-},
+  buttons: 
+  {
+  buttons: 
+  [                 
+    { extend: 'copy', text:'<p style="color:Black,">Copy</p>', className: 'btn  btn-primary '},
+    { extend: 'excel', text:'<p style="color:Black,">To Excel</p>', className: 'btn btn-primary'},
+    { extend: 'pdf', text:'<p style="color:Black,">PDF</p>',  className: 'btn btn-primary ', titleAttr: 'PDF'},
+    { extend: 'print',  text:'<p style="color:Black,">Print</p>',  className: 'btn btn-primary'},
+    { extend: 'colvis', text:'<p style="color:Black, width:160px">Hide/Unhide</p>', className: 'btn btn-primary'},
+    { extend: 'pageLength',  className: 'btn btn-primary' }
 
-language: {decimal: ',', thousands: '.'},
-pageLength: 25,                            
-dom:  'Bfrtip',
-select: true
-/* order: [11, 'desc']  */
+                                                              
+  ],
+  dom: {button: { className: 'btn btn-rounded'}}
+  },
+
+  language: {decimal: ',', thousands: '.'},
+  pageLength: 25,                            
+  dom:  'Bfrtip',
+  select: true
+  /* order: [11, 'desc']  */
   };
 }
 

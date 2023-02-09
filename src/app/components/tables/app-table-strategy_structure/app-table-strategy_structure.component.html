@@ -1,0 +1,53 @@
+<div class="mat-elevation-z8">
+  <mat-toolbar style="margin-left: 1%;" color = "primary"> 
+    <span>Strategy Structure with total weight of: {{getTotalWeight() | percent }} </span>
+    <span class="example-spacer"></span>
+    <button mat-raised-button color = "accent" class="example-icon favorite-icon" aria-label="Example icon-button with heart icon">
+      <mat-icon>add_circle</mat-icon> Add New Item
+    </button>
+  </mat-toolbar>
+
+
+  <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class="mat-elevation-z8">
+
+    <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay">
+      <th mat-header-cell *matHeaderCellDef> {{column | uppercase}}</th>
+      <td mat-cell *matCellDef="let element"> {{element[column]}} </td>
+      <td mat-footer-cell *matFooterCellDef> </td>
+    </ng-container>
+    <ng-container matColumnDef="expand">
+      <th mat-header-cell *matHeaderCellDef aria-label="row actions">&nbsp; Actions</th>
+      <td mat-cell *matCellDef="let element">
+        <button  mat-raised-button aria-label="expand row" color="accent" >
+          Edit
+        </button>
+        <button mat-raised-button style="margin-left: 5%;" aria-label="expand row" color="accent" >
+          Delete
+        </button>
+      </td>
+      <td mat-footer-cell *matFooterCellDef > <h2 style="margin-top: 5%;">Total weight: {{getTotalWeight() | percent }} </h2></td>
+
+    </ng-container>
+    
+    <ng-container matColumnDef="expandedDetail" >
+      <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplayWithExpand.length">
+<!--         <div class="example-element-detail"
+             [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
+   
+        </div> -->
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="columnsToDisplayWithExpand"></tr>
+    <tr mat-row *matRowDef="let element; columns: columnsToDisplayWithExpand;"
+        class="example-element-row"
+        [class.example-expanded-row]="expandedElement === element"
+        (click)="expandedElement = expandedElement === element ? null : element">
+    </tr>
+    <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"></tr>
+    <tr mat-footer-row *matFooterRowDef="columnsToDisplayWithExpand; sticky: true"></tr>
+  </table>
+
+</div>
+
+

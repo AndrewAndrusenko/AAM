@@ -32,6 +32,8 @@ import { AppInstrumentEditFormComponent } from './components/forms/app-instrumen
 import { AppClientsTableComponent } from './components/tables/app-table-clients/app-table-clients.component';
 import {MatSlideToggle, MatSlideToggleModule} from '@angular/material/slide-toggle';
 import { AppTableStrategiesComponentComponent } from './components/tables/app-table-strategies.component/app-table-strategies.component.component'; 
+import { AppStrategyFormComponent } from './components/forms/app-strategy-form/app-strategy-form.component';
+import { AppTableStrategyComponent } from './components/tables/app-table-strategy_structure/app-table-strategy_structure.component';
 
 @NgModule({
     imports: [
@@ -71,7 +73,8 @@ import { AppTableStrategiesComponentComponent } from './components/tables/app-ta
         AppConfimActionComponent,
         AppSnackMsgboxComponent,
         AppTableStrategiesComponentComponent,
-
+        AppStrategyFormComponent,
+        AppTableStrategyComponent
     ],
     bootstrap: [AppComponent],
     providers: [],

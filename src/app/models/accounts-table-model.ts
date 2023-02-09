@@ -44,3 +44,12 @@ export interface StrategiesGlobalData {
   s_benchmark_account: number,
   'Benchmark Account': string, 
 }
+export interface StrategyStructure {
+  id_strategy_parent: number, 
+  id : number, 
+  sname : string,
+  description: string;
+  weight_of_child : number,
+ 
+}
+

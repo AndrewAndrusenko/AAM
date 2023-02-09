@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, Input, SimpleChanges, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, EventEmitter, Input, Output, SimpleChanges, ViewChild} from '@angular/core';
 import {MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {lastValueFrom } from 'rxjs';
@@ -27,9 +27,12 @@ export class TableAccounts implements AfterViewInit {
   @ViewChild(MatSort) sort: MatSort;
   expandedElement: AccountsTableModel  | null;
   accessToClientData: string = 'true';
+  public currentAccout:any;
   @Input() clientId : number;
   @Input() strategyId : number;
   @Input() actionOnAccountTable : string;
+  @Output() public modal_principal_parent = new EventEmitter();
+
 
   constructor(private AppTabServiceService:AppTabServiceService, private TreeMenuSevice:TreeMenuSevice ) {}
 
@@ -58,7 +61,13 @@ export class TableAccounts implements AfterViewInit {
     })
   }
     
+  chooseAccount (element) {
+    console.log('chose account', element);
+    this.currentAccout = element;
+    this.modal_principal_parent.emit('CLOSE_PARENT_MODAL');
 
+    
+  }
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();

@@ -8,7 +8,7 @@ import { AppClientFormComponent } from '../../forms/app-client-form/app-client-f
   styleUrls: ['./app-table-clients.component.css']
 })
 export class AppClientsTableComponent  {
-  isEditForm: boolean = false;
+  // isEditForm: boolean = false;
   dialogRef: MatDialogRef<AppClientFormComponent>;
   dtOptions: any = {};
   action ='';

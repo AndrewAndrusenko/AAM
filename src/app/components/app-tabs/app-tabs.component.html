@@ -26,7 +26,17 @@
 </mat-tab-group>
 
 <mat-tab-group *ngIf="messageReceived.text=='Strategies'" #StrategiesInfo mat-stretch-tabs>
-  <mat-tab label="Strategy Structure" >{{messageReceived.text}} </mat-tab>  
+  <mat-tab label="Strategy Structure" >
+    <div class="client_form">
+      <br>
+      <app-app-strategy-form
+      [action] = "Edit"
+      
+      [client]="messageReceived.id">
+      </app-app-strategy-form> 
+    </div>
+  </mat-tab>  
+  
   <mat-tab label="Positions by Strategy"> 
     
     

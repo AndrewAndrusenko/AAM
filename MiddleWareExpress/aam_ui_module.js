@@ -163,7 +163,7 @@ async function fGetClientData(request,response) {
   }
   console.log('query',query);
   pool.query (query, (err, res) => {if (err) {console.log (err.stack)} else {
-    console.log('res.rows',res.rows);
+    // console.log('res.rows',res.rows);
     return response.status(200).json((res.rows))}
   })
 }

@@ -125,5 +125,9 @@ appServer.post('/AAM/ClientDataCreate /',jsPassport.authenticate('session') , ui
 
 appServer.get('/AAM/GetStrategiesList/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fGetStrategiesList)
 
+appServer.post('/AAM/StrategyDataEdit/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fEditStrategyData)
+
+appServer.get('/AAM/GetStrategyStructure/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fGetStrategyStructure)
+
 
 appServer.listen (port,'localhost', () => {console.log (`AAM Server is running on port ${port}`)})

@@ -7,6 +7,9 @@ import {animate, state, style, transition, trigger} from '@angular/animations';
 import { StrategiesGlobalData } from 'src/app/models/accounts-table-model';
 import {TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { AppInvestmentDataServiceService } from 'src/app/services/app-investment-data.service.service';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { AppConfimActionComponent } from '../../alerts/app-confim-action/app-confim-action.component';
+import { AppStrategyFormComponent } from '../../forms/app-strategy-form/app-strategy-form.component';
 @Component({
   selector: 'app-table-strategies',
   templateUrl: './app-table-strategies.component.component.html',
@@ -38,8 +41,12 @@ export class AppTableStrategiesComponentComponent  implements AfterViewInit {
   @ViewChild(MatSort) sort: MatSort;
   expandedElement: StrategiesGlobalData  | null;
   accessToClientData: string = 'true';
-
-  constructor(private InvestmentDataService:AppInvestmentDataServiceService, private TreeMenuSevice:TreeMenuSevice ) {}
+  // isEditForm: boolean = false;
+  dialogRef: MatDialogRef<AppStrategyFormComponent>;
+  dtOptions: any = {};
+  action ='';
+  public row: any;
+  constructor(private InvestmentDataService:AppInvestmentDataServiceService, private TreeMenuSevice:TreeMenuSevice, private dialog: MatDialog ) {}
 
   async ngAfterViewInit() {
     console.log('this.StrategiesGlobalDataC',this.StrategiesGlobalDataC());
@@ -65,5 +72,27 @@ export class AppTableStrategiesComponentComponent  implements AfterViewInit {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
+  }
+
+  
+  openStrategyForm (actionType:string, row: any ) {
+    console.log('row', row);
+    this.dialogRef = this.dialog.open(AppStrategyFormComponent ,{minHeight:'400px', maxWidth:'1000px' });
+    this.dialogRef.componentInstance.action = actionType;
+    this.dialogRef.componentInstance.title = actionType;
+    this.dialogRef.componentInstance.data = row;
+    
+    console.log('action',actionType);
+    switch (actionType) {
+      case 'Create':
+      case 'Create_Example': 
+      this.dialogRef.componentInstance.title = 'Create New';
+      break;
+      /* case 'Update':
+      break;
+      case 'Delete':
+      break; */
+    }
+
   }
 }
