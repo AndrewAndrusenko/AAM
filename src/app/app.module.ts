@@ -34,6 +34,7 @@ import {MatSlideToggle, MatSlideToggleModule} from '@angular/material/slide-togg
 import { AppTableStrategiesComponentComponent } from './components/tables/app-table-strategies.component/app-table-strategies.component.component'; 
 import { AppStrategyFormComponent } from './components/forms/app-strategy-form/app-strategy-form.component';
 import { AppTableStrategyComponent } from './components/tables/app-table-strategy_structure/app-table-strategy_structure.component';
+import { AppStructureStrategyFormComponent } from './components/forms/app-structure-strategy-form/app-structure-strategy-form';
 
 @NgModule({
     imports: [
@@ -74,7 +75,8 @@ import { AppTableStrategyComponent } from './components/tables/app-table-strateg
         AppSnackMsgboxComponent,
         AppTableStrategiesComponentComponent,
         AppStrategyFormComponent,
-        AppTableStrategyComponent
+        AppTableStrategyComponent,
+        AppStructureStrategyFormComponent
     ],
     bootstrap: [AppComponent],
     providers: [],

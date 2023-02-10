@@ -195,7 +195,6 @@ async function fEditClientData (request, response) {
   })  
 }
 
-
 async function fCreateClientData (request, response) {
   paramArr = request.body.data
   const query = {

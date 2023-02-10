@@ -37,10 +37,10 @@ export interface ClientData {
 }
 export interface StrategiesGlobalData {
   id: number, 
-  Name : string, 
+  name : string, 
   stype : number,
   Level : number,
-  Description: string, 
+  description: string, 
   s_benchmark_account: number,
   'Benchmark Account': string, 
 }
@@ -50,6 +50,6 @@ export interface StrategyStructure {
   sname : string,
   description: string;
   weight_of_child : number,
- 
+  id_item:number,
 }
 

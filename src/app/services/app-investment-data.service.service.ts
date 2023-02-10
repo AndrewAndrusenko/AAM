@@ -22,15 +22,26 @@ export class AppInvestmentDataServiceService {
     const params = {'id': id, 'Name' :Name, 'action':action }
     return this.http.get <StrategyStructure[]> ('/api/AAM/GetStrategyStructure/', { params: params } )
   }
-
+  
+  createStrategy (data:any) { 
+    return this.http.post ('/api/AAM/StrategyGlobalDataCreate/',{'data': data}).toPromise()
+  }
+  deleteStrategy (id:string) {
+    return this.http.post ('/api/AAM/StrategyGlobalDataDelete/',{'id': id}).toPromise()
+  }
   updateStrategy (data:any) { 
     return this.http.post ('/api/AAM/StrategyDataEdit/',{'data': data}).toPromise()
   }
-  deleteStrategy (id:string) {
-    console.log('delete', 'dlient');
-    return this.http.post ('/api/AAM/ClientDataDelete/',{'idclient': id}).toPromise()
+
+
+  createStrategyStructure (data:any) { 
+    return this.http.post ('/api/AAM/StrategyStructureCreate/',{'data': data}).toPromise()
+  } 
+  deleteStrategyStructure (id:string) { 
+    return this.http.post ('/api/AAM/StrategyStructureDelete/',{'id': id}).toPromise()
+  } 
+  updateStrategyStructure (data:any) { 
+    return this.http.post ('/api/AAM/StrategyStructureEdit/',{'data': data}).toPromise()
   }
-  createStrategy (data:any) { 
-    return this.http.post ('/api/AAM/ClientDataCreate/',{'data': data}).toPromise()
-  }
+  
 }

@@ -25,10 +25,10 @@ import { AppStrategyFormComponent } from '../../forms/app-strategy-form/app-stra
 export class AppTableStrategiesComponentComponent  implements AfterViewInit {
     StrategiesGlobalDataC = (): StrategiesGlobalData => ( {
     id: 0, 
-    Name : '', 
+    name : '', 
     stype : 0,
     Level : 0,
-    Description: '', 
+    description: '', 
     s_benchmark_account: 0,
     'Benchmark Account': '', 
   });

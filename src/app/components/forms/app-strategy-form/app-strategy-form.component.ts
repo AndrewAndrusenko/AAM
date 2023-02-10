@@ -98,16 +98,16 @@ export class AppStrategyFormComponent implements OnInit, AfterViewInit {
     switch (action) {
       case 'Create_Example':
       case 'Create':
-        console.log('CRE');
+        this.editStrategyForm.controls['s_benchmark_account'].enable()
         this.InvestmentDataServiceService.createStrategy (this.editStrategyForm.value).then ( (result) => {
           if (result['name']=='error') {
             this.snack.open('Error: ' + result['detail'].split("\n", 1).join(""),'OK',{panelClass: ['snackbar-error']} ) 
           } else {
             this.snack.open('Created: ' + result + ' strategy','OK',{panelClass: ['snackbar-success'], duration: 3000})
-            $('#mytable').DataTable().ajax.reload();
           }
         })
         this.editStrategyForm.controls['id'].disable()
+        this.editStrategyForm.controls['s_benchmark_account'].enable()
       break;
 
       case 'Edit':
@@ -127,18 +127,17 @@ export class AppStrategyFormComponent implements OnInit, AfterViewInit {
 
       case 'Delete':
         this.dialogRefConfirm = this.dialog.open(AppConfimActionComponent, {panelClass: 'custom-modalbox',} );
-        this.dialogRefConfirm.componentInstance.actionToConfim = {'action':'Delete Client' ,'isConfirmed': false}
+        this.dialogRefConfirm.componentInstance.actionToConfim = {'action':'Delete Strategy' ,'isConfirmed': false}
         this.dialogRefConfirm.afterClosed().subscribe (actionToConfim => {
           console.log('action', actionToConfim)
           if (actionToConfim.isConfirmed===true) {
-          this.editStrategyForm.controls['idclient'].enable()
-          this.InvestmentDataServiceService.deleteStrategy (this.editStrategyForm.value['idclient']).then ((result) =>{
+          this.editStrategyForm.controls['id'].enable()
+          this.InvestmentDataServiceService.deleteStrategy (this.editStrategyForm.value['id']).then ((result) =>{
             if (result['name']=='error') {
               this.snack.open('Error: ' + result['detail'],'OK',{panelClass: ['snackbar-error']} ) 
             } else {
               this.snack.open('Deleted: ' + result + ' strategy','OK',{panelClass: ['snackbar-success'], duration: 3000})
               this.dialog.closeAll();
-              $('#mytable').DataTable().ajax.reload();
             }
           })
           this.editStrategyForm.controls['id'].disable()

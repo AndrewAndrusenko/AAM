@@ -1,0 +1,37 @@
+<mat-toolbar style="margin-left: 1%;" color="primary" >
+  {{title}} Strategy Structure Item
+</mat-toolbar>
+
+<div class="client_form">
+  <button mat-raised-button color="accent" 
+    [disabled]="!(editStructureStrategyForm.valid && submitbox.checked)"
+    (click)="updateStrategyStructureData(action)"
+    style="margin-top: 1%; margin-right: 1%; width: 200px; font-size: 18px;">
+    {{title}} Strategy 
+  </button>
+  <mat-checkbox color="primary"  #submitbox checked="false" >Submit Data</mat-checkbox>
+</div>
+
+<form class="submit" [formGroup]="editStructureStrategyForm">
+ 
+  <mat-form-field style="width: 65%;" appearance="fill" enabled>
+    <mat-select   formControlName="id"  > 
+      <mat-option *ngFor="let MPname of MPnames" [value]="MPname.id">
+        {{MPname.name}} - {{MPname.description}}
+      </mat-option>
+    </mat-select>
+    <mat-error  *ngIf="id.invalid && id.touched">
+      The field is required.    
+   </mat-error>
+  </mat-form-field>
+
+  <mat-form-field style="width: 25%; font-size: 18px;" >
+    <input matInput placeholder="weight_of_child" formControlName="weight_of_child">
+    <mat-error  *ngIf="weight_of_child.invalid && weight_of_child.touched">
+      The field is required.    
+   </mat-error>
+  </mat-form-field>
+
+  <p color = 'red' *ngIf="editStructureStrategyForm.invalid"> Please check the form. Data is invalid</p>
+  
+</form>
