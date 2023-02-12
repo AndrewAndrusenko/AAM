@@ -21,6 +21,12 @@
       <mat-icon class="menu-icon" matPrefix>delete</mat-icon> 
       Delete Instrument
     </button> 
+    <button 
+    (click)="chooseAccount()"
+     class="tree-menu-item" cdkMenuItem>
+     <mat-icon class="menu-icon" matPrefix>done</mat-icon> 
+     Select Instrument
+   </button> 
   </div>
 </ng-template>
 <!-- //Context menu for treeMenu element -->
@@ -28,7 +34,8 @@
 <div [cdkContextMenuTriggerFor]="instrumentcontextmenu" class="dataTableTitle"> <h2> Instruments list </h2> </div>
 
 <table datatable  id="mytable" [cdkContextMenuTriggerFor]="instrumentcontextmenu"[dtOptions]="dtOptions" 
-class="row-border hover"></table>
+class="row-border hover"
+></table>
 
 
  <!-- <app-app-instrument-edit-form></app-app-instrument-edit-form>  -->

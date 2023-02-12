@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { StrategiesGlobalData, StrategyStructure } from '../models/accounts-table-model';
 
 @Injectable({
@@ -9,6 +9,17 @@ import { StrategiesGlobalData, StrategyStructure } from '../models/accounts-tabl
 export class AppInvestmentDataServiceService {
 
   constructor(private http:HttpClient) { }
+  
+  private subjectName = new Subject<any>(); 
+
+  sendReloadStrategyStructure ( id:number) { //the component that wants to update something, calls this fn
+    this.subjectName.next(id); //next() will feed the value in Subject
+  }
+
+  geReloadStrategyStructure(): Observable<any> { //the receiver component calls this function 
+    return this.subjectName.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
+  }
+
   getGlobalStategiesList (id:number, Name:string, action:string) : Observable <StrategiesGlobalData[]>  {
     const params = {'id': id, 'Name' :Name, 'action':action }
     return this.http.get <StrategiesGlobalData[]> ('/api/AAM/GetStrategiesList/',{ params: params } )

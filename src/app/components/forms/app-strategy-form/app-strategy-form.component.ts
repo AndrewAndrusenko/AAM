@@ -14,13 +14,14 @@ interface Level {
 @Component({
   selector: 'app-app-strategy-form',
   templateUrl: './app-strategy-form.component.html',
-  styleUrls: ['./app-strategy-form.component.css'],
+  styleUrls: ['./app-strategy-form.component.scss'],
 })
 export class AppStrategyFormComponent implements OnInit, AfterViewInit {
   levels: Level[] = [
     {value: 1, viewValue: 'Model Portfolio'},
     {value: 2, viewValue: 'Strategy (based on MP)'},
   ];
+  public panelOpenState = true;
   public editStrategyForm: FormGroup;
   @Input()  client : number;
   @Input() action: string;
@@ -31,6 +32,7 @@ export class AppStrategyFormComponent implements OnInit, AfterViewInit {
   public title: string;
   public actionType : string;
   public strategyId : any;
+  public MP : boolean;
   public actionToConfim = {'action':'delete_client' ,'isConfirmed': false}
   public AppSnackMsgbox : AppSnackMsgboxComponent
   public showStrateryStructure: boolean;
@@ -43,6 +45,8 @@ export class AppStrategyFormComponent implements OnInit, AfterViewInit {
   }
  
   ngOnInit(): void {
+  this.panelOpenState = true;
+
     this.editStrategyForm=this.fb.group ({
       id: {value:'', disabled: true }, 
       name :[null, { updateOn: 'blur'} ], 
@@ -84,6 +88,7 @@ export class AppStrategyFormComponent implements OnInit, AfterViewInit {
     this.InvestmentDataServiceService.getGlobalStategiesList(changes['client'].currentValue, null, 'Get_Strategy_Data').subscribe(data => {
       this.editStrategyForm.patchValue(data[0])
       this.strategyId = this.editStrategyForm.controls['id'].value
+      this.MP = (this.editStrategyForm.controls['level'].value == 1 ) ? true : false
       console.log('strategyId',this.strategyId);
       this.showStrateryStructure = true;
       this.editStrategyForm.controls['name'].setAsyncValidators(

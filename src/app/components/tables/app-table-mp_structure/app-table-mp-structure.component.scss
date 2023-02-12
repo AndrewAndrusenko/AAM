@@ -1,20 +1,3 @@
-
-mat-expansion-panel
-mat-expansion-panel-header {
-  background: #c2185b;
-}
-.mat-form-field {
-  font-size: 12px;
-  border-radius: 9px;
-   width: 40%;
-   margin-right: 10px;
-  }
-
-.mat-expansion-panel-header-description {
-  justify-content: space-between;
-  align-items: center;
-}
-
 .example-spacer {
   flex: 1 1 auto;
 }
@@ -42,8 +25,8 @@ mat-expansion-panel-header {
 }
 .mat-form-field {
   margin-left: 10px;
-  font-size: 18px;
-/*   width: 20%; */
+  font-size: 24px;
+  width: 20%;
 }
 .mat-cell {
   font-size: 18px;

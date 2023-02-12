@@ -3,20 +3,22 @@
 @import "@angular/material/prebuilt-themes/pink-bluegrey.css";
 @import url("https://fonts.googleapis.com/icon?family=Material+Icons");
 
+.mat-expansion-panel-body {
+  padding: 0 !important;
+}
 .custom-modalbox > mat-dialog-container {
   background-color:transparent !important;
   border-radius: 15px;
   border-width: 3px;
   border-color: gray
-
 }
-.mat-focused label{
+.mat-focused label {
   color:rgb(0, 47, 255) !important;
   transform: 1.2 !important;
   font-size:x-large !important;
  }
 
-.mat-tab-label{
+.mat-tab-label {
   font-size: 20px !important;
 } 
 .mat-tab-label-active{

@@ -1,22 +1,7 @@
-<mat-toolbar style="margin-left: 1%;" color="primary" >
-  {{title}} Strategy Structure Item
-</mat-toolbar>
-
-<div class="client_form">
-  <button mat-raised-button color="accent" 
-    [disabled]="!(editStructureStrategyForm.valid && submitbox.checked)"
-    (click)="updateStrategyStructureData(action)"
-    style="margin-top: 1%; margin-right: 1%; width: 200px; font-size: 18px;">
-    {{title}} Strategy 
-  </button>
-  <mat-checkbox color="primary"  #submitbox checked="false" >Submit Data</mat-checkbox>
-</div>
-
 <form class="submit" [formGroup]="editStructureStrategyForm">
- 
-  <mat-form-field style="width: 65%;" appearance="fill" enabled>
+  <mat-form-field *ngIf="!MP" style="width: 45%;"  enabled>
     <mat-select   formControlName="id"  > 
-      <mat-option *ngFor="let MPname of MPnames" [value]="MPname.id">
+      <mat-option *ngFor="let MPname of MPnames" [value]="MPname.id.toString()">
         {{MPname.name}} - {{MPname.description}}
       </mat-option>
     </mat-select>
@@ -25,13 +10,35 @@
    </mat-error>
   </mat-form-field>
 
-  <mat-form-field style="width: 25%; font-size: 18px;" >
-    <input matInput placeholder="weight_of_child" formControlName="weight_of_child">
+  <mat-form-field *ngIf="MP" style="width: 25%; height: 5%; font-size: 18px;" >
+    <input matInput style="width: 70%;" placeholder="id" formControlName="id">
+  </mat-form-field>
+  <button mat-flat-button color="accent" 
+  matTooltip="Select Instrument"
+  (click)="selectInstrument() "
+  *ngIf="MP"
+  style=" width: 5%;  line-height: 80% !important; height: 60px !important;">
+  <mat-icon >input</mat-icon>
+
+</button>
+
+  <mat-form-field style="width: 20%; font-size: 18px;" >
+    <input matInput placeholder="Weight" formControlName="weight_of_child"
+    pattern="[0-9]*" type="number">
     <mat-error  *ngIf="weight_of_child.invalid && weight_of_child.touched">
       The field is required.    
    </mat-error>
   </mat-form-field>
+  <button mat-raised-button color="accent" 
+    [disabled]="!(editStructureStrategyForm.valid )"
+    (click)="updateStrategyStructureData(action)"
+    style="margin-top: 1%; margin-right: 1%; width: 25%; font-size: 18px;">
+    {{title}} Item {{strategyId}}
+  </button>
 
-  <p color = 'red' *ngIf="editStructureStrategyForm.invalid"> Please check the form. Data is invalid</p>
-  
+<!--   <button mat-icon-button color="accent" 
+    
+    (click)="getFormValidationErrors()">
+    <mat-icon>add_circle</mat-icon>
+  </button> -->
 </form>

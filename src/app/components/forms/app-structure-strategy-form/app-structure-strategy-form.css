@@ -1,3 +1,4 @@
+
 input.ng-invalid.ng-touched {
   color: rgb(158, 0, 0);
 }
@@ -24,23 +25,6 @@ margin-bottom:10px;
   margin-left: 1%;
 }
 
-:host ::ng-deep  .mat-slide-toggle {
-  transform: scale(2);
-  margin-left: 12%;
-  justify-self:center;
-}
-:host ::ng-deep  .mat-slide-toggle-thumb:before {
-  height: 110%;
-  content: "\E15B"; 
-  font-family: "Material Icons"; position: absolute; bottom: 1%; left: 2%; font-size: 20px; font-weight: bold; 
-}
-
-::ng-deep .mat-slide-toggle.mat-checked:not(.mat-disabled) .mat-slide-toggle-thumb:before { 
-  height: 110%;
-  content: "\E876"; 
-  
-  font-family: "Material Icons"; position: absolute; bottom: 1%; left: 2%; font-size: 20px; font-weight: bold; 
-}
 
 .mat-form-field {
 font-size: 18px;
@@ -48,7 +32,7 @@ border-radius: 9px;
 width: 400px;
 background-color: rgb(111, 110, 110);
 margin: 10px;
-padding:10px;
+padding :10px;
 }
 
 .content-container {

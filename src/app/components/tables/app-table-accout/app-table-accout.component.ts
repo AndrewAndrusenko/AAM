@@ -65,8 +65,6 @@ export class TableAccounts implements AfterViewInit {
     console.log('chose account', element);
     this.currentAccout = element;
     this.modal_principal_parent.emit('CLOSE_PARENT_MODAL');
-
-    
   }
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;

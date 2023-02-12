@@ -2,18 +2,27 @@
   {{title}} Strategy
 </mat-toolbar>
 
-<div class="client_form">
-
+<mat-expansion-panel 
+style="margin-left: 1%; margin-right: -1%; padding: 0px;" 
+      [expanded]="true"
+      (opened)="panelOpenState = true"  
+      (closed)="panelOpenState = false" >
+      <mat-expansion-panel-header >
+      <mat-panel-title >
+      Strategy details
+      </mat-panel-title>
+      <mat-panel-description  >
+       {{panelOpenState ? 'Hide' : 'Show'}}
+      </mat-panel-description>
+      </mat-expansion-panel-header >
   <button mat-raised-button color="accent" 
     [disabled]="!(editStrategyForm.valid && submitbox.checked)"
     (click)="updateStrategyData(action)"
-    style="margin-top: 10px; width: 200px; font-size: 18px;">
-    {{title}} Strategy 
+    style="margin-top: 1px; width: 200px; font-size: 18px; margin-left: 1%;">
+    {{title}} Strategy {{MP}}
   </button>
 
   <mat-checkbox color="primary"  #submitbox checked="false" >Submit Data</mat-checkbox>
-
-</div>
 
 <form class="submit" [formGroup]="editStrategyForm">
   <mat-form-field style="width: 10%;">
@@ -60,12 +69,11 @@
       The field is required.    
    </mat-error>
   </mat-form-field>
-
-
   <p color = 'red' *ngIf="editStrategyForm.invalid"> Please check the form. Data is invalid</p>
 </form>
+</mat-expansion-panel>
+
 <app-table-strategy_structure *ngIf="showStrateryStructure" 
 [parentStrategyId] = strategyId
- >
-
+[MP] = MP >
 </app-table-strategy_structure>

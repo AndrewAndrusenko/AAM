@@ -38,9 +38,9 @@ async function fGetStrategyStructure (request,response) {
     ' id_strategy_parent, id_strategy_child as id, dstrategiesglobal.sname, dstrategiesglobal.s_description as description,  ' + 
     ' weight_of_child, dstrategies_global_structure.id as id_item ' + 
     ' FROM public.dstrategies_global_structure LEFT JOIN	dstrategiesglobal ' +
-    ' ON dstrategiesglobal.id = dstrategies_global_structure.id_strategy_child	' +
+    ' ON dstrategiesglobal.id::text = dstrategies_global_structure.id_strategy_child	' +
     ' WHERE id_strategy_parent = $1'}
-    query.values = [request.query.id] 
+    query.values = [Number(request.query.id)] 
   switch (request.query.action) {
     case 'Check_Name':
       query.text += ' WHERE ((sname) = $1) AND ((id) != $2);'
