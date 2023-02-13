@@ -26,7 +26,7 @@
     flex-direction: column;
     min-width: 180px;
     max-width: 280px;
-   
+    background-color: rgb(255, 255, 255);
     padding: 1px 0;
     font-size: 18px;
   }

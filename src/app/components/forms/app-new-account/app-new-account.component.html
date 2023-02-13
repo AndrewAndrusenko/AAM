@@ -1,32 +1,57 @@
-<mat-toolbar color="primary" style="margin-bottom:10px; border-radius: 0px;">
-  {{action}} new account
-  (click)="openAddNewAccount('Create')"
+<mat-toolbar color="primary" style="margin-bottom:10px; border-radius: 8px; width: 95%">
+  {{title}} account
 </mat-toolbar>
+
 <form class="submit" [formGroup]="newAccountForm">
-<mat-form-field>
-  <input matInput placeholder="idportfolio" formControlName="idportfolio">
-</mat-form-field>
-<mat-form-field>
-  <input matInput placeholder="idclient" formControlName="idclient">
-</mat-form-field>
-<mat-form-field>
-  <input matInput placeholder="clientname" formControlName="clientname">
-</mat-form-field>
-<mat-form-field>
-  <input matInput placeholder="idstategy" formControlName="idstategy">
-</mat-form-field>
-<mat-form-field>
-  <input matInput placeholder="portfolioname" formControlName="portfolioname">
-</mat-form-field>
-<mat-form-field>
-  <input matInput placeholder="portleverage" formControlName="portleverage">
-</mat-form-field>
+  <mat-form-field style="width: 55%;"  enabled>
+    <mat-select   placeholder="Select Account Type" formControlName="account_type" 
+    (selectionChange)="calculateAccountCode()" > 
+      <mat-option *ngFor="let accountType of accountTypes" [value]="accountType.typeValue">
+        {{accountType.typeValue}}: {{accountType.typeDescription}}
+      </mat-option>
+    </mat-select>
 
-<button mat-flat-button color="primary" type="submit" 
-[disabled]="!newAccountForm.valid"
-(click)='updateClientData'
-style="margin-top: 10px; width: 200px; font-size: 18px;">
-  {{action}} new account
-</button>
+  </mat-form-field>
 
+  <mat-form-field style="width: 20%">
+    <input matInput placeholder="AccountCode" formControlName="portfolioname">
+  </mat-form-field>
+  <div>
+    <mat-form-field style="width: 15%">
+      <input matInput placeholder="ClientID" formControlName="idclient">
+    </mat-form-field>
+    <mat-form-field style="width: 60%">
+      <input matInput placeholder="ClientName" formControlName="clientname">
+    </mat-form-field>
+  </div>
+  <div  (dblclick) = "selectStrategy('Select_Strategies')">
+    <mat-form-field style="width: 15%">
+      <input matInput placeholder="StrategyID" formControlName="idstategy">
+    </mat-form-field>
+    <mat-form-field >
+      <input matInput placeholder="StategyCode" formControlName="stategy_name" [readonly]="true">
+    </mat-form-field>
+    <button mat-flat-button color="accent" 
+      matTooltip="Select Stategy"
+      (click) = "selectStrategy('Select_Strategies')"
+      style=" width: 5%;  line-height: 80% !important; height: 60px !important;">
+      <mat-icon >input</mat-icon>
+    </button>
+  </div>
+  <mat-form-field style="width: 85%">
+    <input matInput placeholder="Stategy Description" formControlName="description" [readonly]="true">
+  </mat-form-field>
+
+  <mat-form-field>
+    <input matInput placeholder="portleverage" formControlName="portleverage">
+  </mat-form-field>
+  <div>
+    <button mat-flat-button color="primary" type="submit" 
+      [disabled]="!(newAccountForm.valid && submitbox.checked)"
+      (click)='updateClientData'
+      style="margin-top: 10px; width: 200px; font-size: 18px;">
+        {{title}} account
+    </button>
+    <mat-checkbox color="primary"  #submitbox checked="false" >Submit Data</mat-checkbox>
+  </div>
 </form>

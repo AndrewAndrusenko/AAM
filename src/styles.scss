@@ -3,6 +3,12 @@
 @import "@angular/material/prebuilt-themes/pink-bluegrey.css";
 @import url("https://fonts.googleapis.com/icon?family=Material+Icons");
 
+
+
+// Add in style.scss as we are overriding css of global mat-select class which is part of other module.
+.mat-select-disabled .mat-select-value {
+  color: black;
+}
 .mat-expansion-panel-body {
   padding: 0 !important;
 }

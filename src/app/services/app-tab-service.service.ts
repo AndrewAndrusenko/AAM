@@ -10,8 +10,8 @@ import { InstrumentData, ClientData } from "../models/accounts-table-model";
 export class AppTabServiceService {
   constructor(private http:HttpClient) { }
 
-  getAccountsData (clientId: number, strategyId: number, actionOnAccountTable: string):Observable <AccountsTableModel[]> {
-    const params = {'clientId': clientId, 'strategyId' :strategyId, 'actionOnAccountTable':actionOnAccountTable }
+  getAccountsData (clientId: number, strategyId: number, accountType:string, actionOnAccountTable: string):Observable <AccountsTableModel[]> {
+    const params = {'clientId': clientId, 'strategyId' :strategyId, 'accountType': accountType,'actionOnAccountTable':actionOnAccountTable }
     return this.http.get <AccountsTableModel []>('/api/AAM/portfolioTable/', { params: params })
   }
 

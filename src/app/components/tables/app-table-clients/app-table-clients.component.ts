@@ -2,14 +2,16 @@ import { Component, OnInit } from '@angular/core';
 import { MatDialog, MatDialogRef} from '@angular/material/dialog';
 import * as XLSX from 'xlsx'
 import { AppClientFormComponent } from '../../forms/app-client-form/app-client-form.component';
+import { AppNewAccountComponent } from '../../forms/app-new-account/app-new-account.component';
 @Component({
   selector: 'app-app-clients-table',
   templateUrl: './app-table-clients.component.html',
   styleUrls: ['./app-table-clients.component.css']
 })
 export class AppClientsTableComponent  {
-  // isEditForm: boolean = false;
+  
   dialogRef: MatDialogRef<AppClientFormComponent>;
+  dialogAccountRef: MatDialogRef<AppNewAccountComponent>
   dtOptions: any = {};
   action ='';
   constructor(private dialog: MatDialog) {}
@@ -74,13 +76,24 @@ openAddFileDialog(actionType) {
     case 'Create_Example': 
      this.dialogRef.componentInstance.title = 'Create New';
     break;
-    /* case 'Update':
-    break;
-    case 'Delete':
-    break; */
   }
-  // let table =  $('#mytable')
-  // let data = table.DataTable().row({ selected: true }).data()
+}
+
+openAccountDialog(actionType) {
+  this.dialogAccountRef = this.dialog.open(AppNewAccountComponent ,{minHeight:'400px', width:'900px' });
+  this.dialogAccountRef.componentInstance.action = actionType;
+  this.dialogAccountRef.componentInstance.title = actionType;
+  let data = $('#mytable').DataTable().row({ selected: true }).data();
+  console.log('data', data);
+  this.dialogAccountRef.componentInstance.clientData = data
+  console.log('action',actionType);
+  switch (actionType) {
+    case 'Create':
+    case 'Create_Example': 
+     this.dialogRef.componentInstance.title = 'Create New';
+    break;
+  }
+
 }
 
 exportToExcel() {

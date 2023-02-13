@@ -45,7 +45,7 @@ export class AppStrategyFormComponent implements OnInit, AfterViewInit {
   }
  
   ngOnInit(): void {
-  this.panelOpenState = true;
+    this.panelOpenState = true;
 
     this.editStrategyForm=this.fb.group ({
       id: {value:'', disabled: true }, 
@@ -57,7 +57,6 @@ export class AppStrategyFormComponent implements OnInit, AfterViewInit {
     })
    switch (this.action) {
     case 'Create': 
-
     break;
     case 'Create_Example':
       this.data['id']='';
@@ -74,13 +73,13 @@ export class AppStrategyFormComponent implements OnInit, AfterViewInit {
       
     break; 
    }  
-   this.editStrategyForm.controls['name'].addValidators ( [Validators.required])
-      this.editStrategyForm.controls['description'].addValidators ( [Validators.required])
-      this.editStrategyForm.controls['level'].addValidators ( [Validators.required, Validators.pattern('[0-9]*')])
-   this.editStrategyForm.controls['name'].setAsyncValidators (
-    StrategynameValidator.createValidator(this.InvestmentDataServiceService, this.id.value), 
-   ) 
-   this.editStrategyForm.controls['name'].updateValueAndValidity();
+    this.editStrategyForm.controls['name'].addValidators ( [Validators.required])
+    this.editStrategyForm.controls['description'].addValidators ( [Validators.required])
+    this.editStrategyForm.controls['level'].addValidators ( [Validators.required, Validators.pattern('[0-9]*')])
+    this.editStrategyForm.controls['name'].setAsyncValidators (
+      StrategynameValidator.createValidator(this.InvestmentDataServiceService, this.id.value), 
+    )  
+    this.editStrategyForm.controls['name'].updateValueAndValidity();
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -106,9 +105,10 @@ export class AppStrategyFormComponent implements OnInit, AfterViewInit {
         this.editStrategyForm.controls['s_benchmark_account'].enable()
         this.InvestmentDataServiceService.createStrategy (this.editStrategyForm.value).then ( (result) => {
           if (result['name']=='error') {
-            this.snack.open('Error: ' + result['detail'].split("\n", 1).join(""),'OK',{panelClass: ['snackbar-error']} ) 
+            this.snack.open('Error: ' + result['detail'].split("\n", 1).join(""),'OK',{panelClass: ['snackbar-error']}); 
           } else {
-            this.snack.open('Created: ' + result + ' strategy','OK',{panelClass: ['snackbar-success'], duration: 3000})
+            this.snack.open('Created: ' + result + ' strategy','OK',{panelClass: ['snackbar-success'], duration: 3000});
+            this.InvestmentDataServiceService.sendReloadStrategyList (this.editStrategyForm.controls['id']);
           }
         })
         this.editStrategyForm.controls['id'].disable()
@@ -123,7 +123,7 @@ export class AppStrategyFormComponent implements OnInit, AfterViewInit {
             this.snack.open('Error: ' + result['detail'].split("\n", 1).join(""),'OK',{panelClass: ['snackbar-error']} ) 
           } else {
             this.snack.open('Updated: ' + result + ' strategy','OK',{panelClass: ['snackbar-success'], duration: 3000})
-            // $('#mytable').DataTable().ajax.reload();
+            this.InvestmentDataServiceService.sendReloadStrategyList (this.editStrategyForm.controls['id']);
           }
         })
         this.editStrategyForm.controls['s_benchmark_account'].disable()
@@ -142,6 +142,7 @@ export class AppStrategyFormComponent implements OnInit, AfterViewInit {
               this.snack.open('Error: ' + result['detail'],'OK',{panelClass: ['snackbar-error']} ) 
             } else {
               this.snack.open('Deleted: ' + result + ' strategy','OK',{panelClass: ['snackbar-success'], duration: 3000})
+              this.InvestmentDataServiceService.sendReloadStrategyList (this.editStrategyForm.controls['id']);
               this.dialog.closeAll();
             }
           })

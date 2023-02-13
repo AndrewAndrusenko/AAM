@@ -33,7 +33,7 @@
     [disabled]="!(editStructureStrategyForm.valid )"
     (click)="updateStrategyStructureData(action)"
     style="margin-top: 1%; margin-right: 1%; width: 25%; font-size: 18px;">
-    {{title}} Item {{strategyId}}
+    {{title}} Item
   </button>
 
 <!--   <button mat-icon-button color="accent" 
@@ -42,3 +42,4 @@
     <mat-icon>add_circle</mat-icon>
   </button> -->
 </form>
+<p *ngIf="title!=='Create'">click ouside the window to close it</p>

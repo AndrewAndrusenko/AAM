@@ -43,7 +43,7 @@ export class TableAccounts implements AfterViewInit {
     .then ((accessRestrictionData) =>{
       this.accessToClientData = accessRestrictionData['elementvalue']
       console.log('accessToClientData',this.accessToClientData);
-      this.AppTabServiceService.getAccountsData(this.clientId,this.strategyId,this.actionOnAccountTable).subscribe (portfoliosData => {
+      this.AppTabServiceService.getAccountsData(this.clientId,this.strategyId,'', this.actionOnAccountTable).subscribe (portfoliosData => {
         this.dataSource  = new MatTableDataSource(portfoliosData);
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
@@ -54,7 +54,7 @@ export class TableAccounts implements AfterViewInit {
   }
   ngOnChanges(changes: SimpleChanges) {
     console.log('changes',changes);
-    this.AppTabServiceService.getAccountsData(this.clientId,this.strategyId,this.actionOnAccountTable).subscribe (portfoliosData => {
+    this.AppTabServiceService.getAccountsData(this.clientId,this.strategyId,'', this.actionOnAccountTable).subscribe (portfoliosData => {
       this.dataSource  = new MatTableDataSource(portfoliosData);
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;

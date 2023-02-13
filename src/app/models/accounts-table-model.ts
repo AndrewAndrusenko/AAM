@@ -53,3 +53,8 @@ export interface StrategyStructure {
   id_item:number,
 }
 
+export interface accountTypes {
+  typeCode: string, 
+  typeValue: string,
+  typeDescription: string
+}

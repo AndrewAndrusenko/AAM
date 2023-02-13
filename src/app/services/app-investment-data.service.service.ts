@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
-import { StrategiesGlobalData, StrategyStructure } from '../models/accounts-table-model';
+import { accountTypes, StrategiesGlobalData, StrategyStructure } from '../models/accounts-table-model';
 
 @Injectable({
   providedIn: 'root'
@@ -15,14 +15,24 @@ export class AppInvestmentDataServiceService {
   sendReloadStrategyStructure ( id:number) { //the component that wants to update something, calls this fn
     this.subjectName.next(id); //next() will feed the value in Subject
   }
+  getReloadStrategyStructure(): Observable<any> { //the receiver component calls this function 
+    return this.subjectName.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
+  }
 
-  geReloadStrategyStructure(): Observable<any> { //the receiver component calls this function 
+  sendReloadStrategyList ( id:any) { //the component that wants to update something, calls this fn
+    this.subjectName.next(id); //next() will feed the value in Subject
+  }
+  getReloadStrategyList(): Observable<any> { //the receiver component calls this function 
     return this.subjectName.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
   }
 
   getGlobalStategiesList (id:number, Name:string, action:string) : Observable <StrategiesGlobalData[]>  {
     const params = {'id': id, 'Name' :Name, 'action':action }
     return this.http.get <StrategiesGlobalData[]> ('/api/AAM/GetStrategiesList/',{ params: params } )
+  }
+  getAccountTypesList (id:number, Name:string, action:string) : Observable <accountTypes[]>  {
+    const params = {'id': id, 'Name' :Name, 'action':action }
+    return this.http.get <accountTypes[]> ('/api/AAM/GetStrategiesList/',{ params: params } )
   }
   getStrategyData(client: number, clientname: string, action: string) : Observable <StrategiesGlobalData[]>  {
     const params = {'client': client, 'clientname' :clientname, 'action':action }

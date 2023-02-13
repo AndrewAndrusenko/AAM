@@ -127,7 +127,6 @@ appServer.get('/AAM/GetStrategiesList/',jsPassport.authenticate('session') , uiA
 
 appServer.get('/AAM/GetStrategyStructure/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fGetStrategyStructure)
 
-
 appServer.post('/AAM/StrategyGlobalDataCreate/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fStrategyGlobalDataCreate)
 appServer.post('/AAM/StrategyGlobalDataDelete/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fStrategyGlobalDataDelete)
 appServer.post('/AAM/StrategyDataEdit/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fEditStrategyData)

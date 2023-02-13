@@ -21,6 +21,12 @@ async function fGetStrategiesList (request,response) {
     case 'Get_ModelPortfolios_List' :
       query.text += ' WHERE (s_level_id = 1);'
     break;
+    case 'Get_AccountTypes_List' :
+      query.text = 'SELECT "typeCode", "typeValue", "typeDescription" ' + 
+                   'FROM public."dGeneralTypes" '+ 
+                   'WHERE ("typeCode" = $1) '
+      query.values = ['account_type']
+    break;
     default:
       query.text += ';'
     break;

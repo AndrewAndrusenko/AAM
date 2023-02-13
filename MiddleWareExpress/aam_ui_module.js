@@ -90,6 +90,11 @@ async function fGetportfolioTable (request,response) {
       query.text += ' WHERE (public.dstrategiesglobal.id= $1);'
       query.values = [request.query.strategyId]
     break;
+    case 'calculateAccountCode':
+      console.log('len', request.query.accountType.length); 
+      query.text += ' WHERE (LEFT(public.dportfolios.portfolioname,$2) = $1) '+
+                    ' ORDER BY RIGHT(public.dportfolios.portfolioname,$2)::numeric DESC LIMIT 1; '
+      query.values = [request.query.accountType, request.query.accountType.length ]
     default:
       query.text += ';'
     break;

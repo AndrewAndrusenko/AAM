@@ -50,7 +50,7 @@ export class AppTableStrategyComponent  implements AfterViewInit {
   public editStructureStrategyForm: FormGroup;
 
   constructor(private InvestmentDataService:AppInvestmentDataServiceService, private dialog: MatDialog, private fb:FormBuilder ) {
-    this.subscriptionName= this.InvestmentDataService.geReloadStrategyStructure().subscribe ( (id) => {
+    this.subscriptionName= this.InvestmentDataService.getReloadStrategyStructure().subscribe ( (id) => {
       console.log('messageAA', id )
       this.InvestmentDataService.getStrategyStructure (id,'0','0').subscribe (portfoliosData => {
         console.log('portfoliosData', portfoliosData);

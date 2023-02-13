@@ -1,7 +1,7 @@
-import {AfterViewInit, Component, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, EventEmitter, Output, ViewChild} from '@angular/core';
 import {MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
-import {lastValueFrom } from 'rxjs';
+import {lastValueFrom, Subscription } from 'rxjs';
 import {MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import { StrategiesGlobalData } from 'src/app/models/accounts-table-model';
@@ -23,7 +23,7 @@ import { AppStrategyFormComponent } from '../../forms/app-strategy-form/app-stra
   ],
 })
 export class AppTableStrategiesComponentComponent  implements AfterViewInit {
-    StrategiesGlobalDataC = (): StrategiesGlobalData => ( {
+  StrategiesGlobalDataC = (): StrategiesGlobalData => ( {
     id: 0, 
     name : '', 
     stype : 0,
@@ -32,21 +32,31 @@ export class AppTableStrategiesComponentComponent  implements AfterViewInit {
     s_benchmark_account: 0,
     'Benchmark Account': '', 
   });
-
   columnsToDisplay = ['id','name',  'level', 'description', 'Benchmark Account'];
-
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
   dataSource: MatTableDataSource<StrategiesGlobalData>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
+  @Output() public modal_principal_parent = new EventEmitter();
   expandedElement: StrategiesGlobalData  | null;
   accessToClientData: string = 'true';
-  // isEditForm: boolean = false;
   dialogRef: MatDialogRef<AppStrategyFormComponent>;
   dtOptions: any = {};
   action ='';
-  public row: any;
-  constructor(private InvestmentDataService:AppInvestmentDataServiceService, private TreeMenuSevice:TreeMenuSevice, private dialog: MatDialog ) {}
+  public currentStrategy: any;
+  private subscriptionName: Subscription;
+
+  constructor(private InvestmentDataService:AppInvestmentDataServiceService, private TreeMenuSevice:TreeMenuSevice, private dialog: MatDialog ) {
+    this.subscriptionName= this.InvestmentDataService.getReloadStrategyList().subscribe ( (id) => {
+      console.log('messageAA', id )
+      this.InvestmentDataService.getGlobalStategiesList (0,'0','0').subscribe (portfoliosData => {
+        console.log('portfoliosData', portfoliosData);
+        this.dataSource  = new MatTableDataSource(portfoliosData);
+        this.dataSource.paginator = this.paginator;
+        this.dataSource.sort = this.sort;
+      })
+    } )
+  }
 
   async ngAfterViewInit() {
     console.log('this.StrategiesGlobalDataC',this.StrategiesGlobalDataC());
@@ -64,8 +74,6 @@ export class AppTableStrategiesComponentComponent  implements AfterViewInit {
         this.dataSource.sort = this.sort;
       })
     })
-    console.log('accessToClientData',this.accessToClientData);
- 
   }
 
   applyFilter(event: Event) {
@@ -73,26 +81,23 @@ export class AppTableStrategiesComponentComponent  implements AfterViewInit {
     this.dataSource.filter = filterValue.trim().toLowerCase();
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
-
   
+  chooseStrategy (element) {
+    console.log('chose account', element);
+    this.currentStrategy = element;
+    this.modal_principal_parent.emit('CLOSE_PARENT_MODAL');
+  }
   openStrategyForm (actionType:string, row: any ) {
     console.log('row', row);
     this.dialogRef = this.dialog.open(AppStrategyFormComponent ,{minHeight:'400px', maxWidth:'1000px' });
     this.dialogRef.componentInstance.action = actionType;
     this.dialogRef.componentInstance.title = actionType;
     this.dialogRef.componentInstance.data = row;
-    
-    console.log('action',actionType);
     switch (actionType) {
       case 'Create':
       case 'Create_Example': 
       this.dialogRef.componentInstance.title = 'Create New';
       break;
-      /* case 'Update':
-      break;
-      case 'Delete':
-      break; */
     }
-
   }
 }
