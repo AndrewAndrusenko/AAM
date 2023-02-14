@@ -72,9 +72,10 @@ async function FAmmGetTreeData(request,response) {
 async function fGetportfolioTable (request,response) {
   console.log('request.query', request.query);
   const query = {text: "SELECT "+
-    " dportfolios.idportfolio as Account_ID, dportfolios.idclient as Client_ID, dportfolios.idstategy, " + 
-    " dstrategiesglobal.sname as Strategy ,dportfolios.portfolioname as Account_Name, dportfolios.portleverage as Leverage, " +
-    " dclients.clientname as client_name, dclients.isclientproffesional as proffesional , dclients.address, " +
+    " dportfolios.idportfolio, dportfolios.idclient , dportfolios.idstategy, " + 
+    " dstrategiesglobal.sname as stategy_name, dstrategiesglobal.s_description as description , "+
+    " dportfolios.portfolioname, dportfolios.portleverage , " +
+    " dclients.clientname, dclients.isclientproffesional , dclients.address, " +
     " dclients.contact_person, dclients.email, dclients.phone" +
     " FROM public.dportfolios "+
     " LEFT JOIN public.dstrategiesglobal ON dportfolios.idstategy = public.dstrategiesglobal.id " +
@@ -172,7 +173,6 @@ async function fGetClientData(request,response) {
     return response.status(200).json((res.rows))}
   })
 }
-
 
 async function fEditClientData (request, response) {
   paramArr = request.body.data

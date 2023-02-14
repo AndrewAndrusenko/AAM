@@ -1,4 +1,4 @@
-<mat-form-field style="width: 50%;">
+<mat-form-field style="width: 30%;">
   <mat-label>Filter</mat-label>
   <input matInput (keyup)="applyFilter($event)" placeholder="Type search string" #input>
 </mat-form-field>
@@ -13,10 +13,10 @@
       mat-cell *matCellDef="let element"> {{element[column]}} </td>
 
     </ng-container>
-    <ng-container matColumnDef="expand">
-      <th mat-header-cell *matHeaderCellDef aria-label="row actions">&nbsp;</th>
-      <td mat-cell *matCellDef="let element">
-        <button mat-icon-button aria-label="expand row" (click)="(expandedElement = expandedElement === element ? null : element); $event.stopPropagation()">
+    <ng-container   matColumnDef="expand">
+      <th  mat-header-cell *matHeaderCellDef aria-label="row actions">&nbsp;</th>
+      <td  mat-cell *matCellDef="let element">
+        <button style="width: 5%;" mat-icon-button aria-label="expand row" (click)="(expandedElement = expandedElement === element ? null : element); $event.stopPropagation()">
           <mat-icon *ngIf="expandedElement !== element">keyboard_arrow_down</mat-icon>
           <mat-icon *ngIf="expandedElement === element">keyboard_arrow_up</mat-icon>
         </button>
@@ -29,15 +29,14 @@
              [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
           
           <div class="example-element-description" *ngIf="accessToClientData=='true'">
-            <span class="row_field_name">Client:  </span> {{element.client_name}} 
+            <span class="row_field_name">Client:  </span> {{element.clientname}} 
             <span class="row_field_name">Address: </span>  {{element.address}} 
-              <span class="row_field_name">  Proffesional: </span> {{element.proffesional}}
+              <span class="row_field_name">  Proffesional: </span> {{element.isclientproffesional}}
             <!-- <span class="example-element-description-attribution"> -- Strategy </span> -->
           </div>
         </div>
       </td>
     </ng-container>
-
     <tr mat-header-row *matHeaderRowDef="columnsToDisplayWithExpand"></tr>
     <tr mat-row [cdkContextMenuTriggerFor]="instrumentcontextmenu"  *matRowDef="let element; columns: columnsToDisplayWithExpand;"
         class="example-element-row"

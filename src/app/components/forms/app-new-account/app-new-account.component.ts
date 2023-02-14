@@ -26,9 +26,9 @@ export class AppNewAccountComponent implements OnInit {
   ngOnInit(): void {
     this.newAccountForm=this.fb.group ({
       idportfolio: {value:'', disabled: true, }, 
-      account_type: [{value:'', disabled: false}, [Validators.required]],
-      idclient: {value:this.clientData['idclient'], disabled: true}, 
-      clientname: {value: this.clientData['clientname'], disabled: true}, 
+      account_type: [{value:'', disabled: false}],
+      idclient: {value: null, disabled: true}, 
+      clientname: {value: null, disabled: true}, 
       idstategy: {value:'', disabled: true}, 
       stategy_name: [{value:'', disabled: false}, [Validators.required]],
       description: {value:'', disabled: false}, 
@@ -39,11 +39,13 @@ export class AppNewAccountComponent implements OnInit {
       this.accountTypes = data;
     })
     switch (this.action) {
-      case 'Create': 
+      case 'Open': 
+      this.newAccountForm.controls['idclient'].setValue(this.clientData['idclient'])
+      this.newAccountForm.controls['clientname'].setValue(this.clientData['clientname'])
       break;
       case 'Create_Example':
-        /* this.data['id']='';
-        this.newAccountForm.patchValue(this.data); */
+        this.accountData['account_id']='';
+        this.newAccountForm.patchValue(this.accountData);
         // this.sname.markAsTouched();
       break;
       case 'Edit':
@@ -53,8 +55,8 @@ export class AppNewAccountComponent implements OnInit {
       break;   
       case 'Delete': 
         this.newAccountForm.patchValue(this.accountData);
-        this.newAccountForm.controls['id'].disable() 
-        this.newAccountForm.controls['weight_of_child'].disable() 
+        this.newAccountForm.controls['account_type'].disable()
+
       break;
       default :
         this.title = "Create"
@@ -81,7 +83,7 @@ export class AppNewAccountComponent implements OnInit {
             this.snack.open('Error: ' + result['detail'].split("\n", 1).join(""),'OK',{panelClass: ['snackbar-error']}); 
           } else {
             this.snack.open('Created: ' + result + ' account','OK',{panelClass: ['snackbar-success'], duration: 3000});
-            // this.InvestmentDataServiceService.sendReloadAccountList (Number(this.newAccountForm.controls['idportfolio']));
+            this.InvestmentDataServiceService.sendReloadAccountList (Number(this.newAccountForm.controls['idportfolio']));
           }
         })
         this.newAccountForm.controls['idclient'].disable()
@@ -90,18 +92,23 @@ export class AppNewAccountComponent implements OnInit {
       break;
 
       case 'Edit':
-        this.newAccountForm.controls['s_benchmark_account'].enable()
-        this.newAccountForm.controls['id'].enable()
-        this.InvestmentDataServiceService.updateStrategy (this.newAccountForm.value).then ( (result) => {
+        this.newAccountForm.controls['idportfolio'].enable()
+        this.newAccountForm.controls['idclient'].enable()
+        this.newAccountForm.controls['idstategy'].enable()
+        this.newAccountForm.controls['portfolioname'].enable()
+        this.InvestmentDataServiceService.updateAccount (this.newAccountForm.value).then ( (result) => {
           if (result['name']=='error') {
             this.snack.open('Error: ' + result['detail'].split("\n", 1).join(""),'OK',{panelClass: ['snackbar-error']} ) 
           } else {
             this.snack.open('Updated: ' + result + ' account','OK',{panelClass: ['snackbar-success'], duration: 3000})
-            // this.InvestmentDataServiceService.sendReloadAccountList (Number(this.newAccountForm.controls['idportfolio']));
+            this.InvestmentDataServiceService.sendReloadAccountList (Number(this.newAccountForm.controls['idportfolio']));
           }
         })
-        this.newAccountForm.controls['s_benchmark_account'].disable()
-        this.newAccountForm.controls['id'].disable()
+        this.newAccountForm.controls['idclient'].disable()
+        this.newAccountForm.controls['idstategy'].disable()
+        this.newAccountForm.controls['portfolioname'].disable()
+        this.newAccountForm.controls['idportfolio'].disable()
+
       break;
 
       case 'Delete':
@@ -110,10 +117,12 @@ export class AppNewAccountComponent implements OnInit {
         this.dialogRefConfirm.afterClosed().subscribe (actionToConfim => {
           if (actionToConfim.isConfirmed===true) {
             this.newAccountForm.controls['idportfolio'].enable()
-            this.InvestmentDataServiceService.deleteStrategy (this.newAccountForm.value['idportfolio']).then ((result) =>{
+            this.InvestmentDataServiceService.deleteAccount (this.newAccountForm.value['idportfolio']).then ((result) =>{
             if (result['name']=='error') {
               this.snack.open('Error: ' + result['detail'],'OK',{panelClass: ['snackbar-error']} ) 
+            this.InvestmentDataServiceService.sendReloadAccountList (Number(this.newAccountForm.controls['idportfolio']));
             } else {
+              this.InvestmentDataServiceService.sendReloadAccountList (Number(this.newAccountForm.controls['idportfolio']));
               this.snack.open('Deleted: ' + result + ' account','OK',{panelClass: ['snackbar-success'], duration: 3000})
               this.dialog.closeAll();
             }
@@ -136,11 +145,14 @@ export class AppNewAccountComponent implements OnInit {
     });
   }
   calculateAccountCode () {
+    let newNumberS : string;
     let accountType = this.newAccountForm.controls['account_type'].value
     this.AppTabServiceService.getAccountsData (0,0, accountType ,'calculateAccountCode').subscribe( (dataA) => {
-      let data = dataA[0]
-      let newNumber = Number (data['account_name'].substr(accountType.length)) + 1
-      let newNumberS = newNumber.toString().padStart (3,"0")
+      if (dataA.length === 0) {newNumberS = "001"} else {
+        let data = dataA[0]
+        let newNumber = Number (data['portfolioname'].substr(accountType.length)) + 1
+        newNumberS = newNumber.toString().padStart (3,"0")
+      }
       this.newAccountForm.controls['portfolioname'].setValue (accountType + newNumberS)
     })
   }

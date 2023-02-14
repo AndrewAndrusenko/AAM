@@ -33,6 +33,8 @@ export class AppTableStrategyComponent  implements AfterViewInit {
    });
   private subscriptionName: Subscription;
   columnsToDisplay = ['id','sname', 'description', 'weight_of_child'];
+  public columnsHToDisplay = ['id','sname', 'description', 'weight'];
+
   panelOpenState = false;
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
   dataSource: MatTableDataSource<StrategyStructure>;
@@ -60,6 +62,9 @@ export class AppTableStrategyComponent  implements AfterViewInit {
       })
     } )
   }
+  ngOnInit(): void {
+    if (this.MP==true) { this.columnsToDisplay = ['id','isin', 'shortname', 'weight_of_child'] }
+  }
   async ngAfterViewInit() {
     this.editStructureStrategyForm=this.fb.group ({
       id: {value:''},
@@ -79,6 +84,9 @@ export class AppTableStrategyComponent  implements AfterViewInit {
   }
 
   ngOnChanges(changes: SimpleChanges) {
+    this.columnsToDisplay = ['id','sname', 'description', 'weight_of_child'];
+    if (this.MP==true) { this.columnsToDisplay = ['id','isin', 'shortname', 'weight_of_child'] }
+
     console.log('changes', changes);
     this.columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
     let newId = changes['parentStrategyId'].currentValue

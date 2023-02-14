@@ -40,10 +40,13 @@ async function fGetStrategiesList (request,response) {
 
 async function fGetStrategyStructure (request,response) {
   const query = {text: 'SELECT '+
-    ' id_strategy_parent, id_strategy_child as id, dstrategiesglobal.sname, dstrategiesglobal.s_description as description,  ' + 
+    ' id_strategy_parent, id_strategy_child as id, dstrategiesglobal.sname, dstrategiesglobal.s_description as description,  ' +
+    ' public."aMoexInstruments".isin, public."aMoexInstruments".shortname, '+ 
     ' weight_of_child, dstrategies_global_structure.id as id_item ' + 
     ' FROM public.dstrategies_global_structure LEFT JOIN	dstrategiesglobal ' +
     ' ON dstrategiesglobal.id::text = dstrategies_global_structure.id_strategy_child	' +
+    ' LEFT JOIN public."aMoexInstruments"  ' +
+    ' ON public."aMoexInstruments".secid = dstrategies_global_structure.id_strategy_child '+
     ' WHERE id_strategy_parent = $1'}
     query.values = [Number(request.query.id)] 
   switch (request.query.action) {
@@ -59,6 +62,7 @@ async function fGetStrategyStructure (request,response) {
       query.text += ';'
     break;
   }
+  console.log('query', query);
   pool.query (query, (err, res) => {if (err) {console.log (err.stack)} else {
     return response.status(200).json((res.rows))}
   })
@@ -179,6 +183,7 @@ async function fAccountCreate (request, response) {
 async function fAccountDelete (request, response) {
   const query = {text: 'DELETE FROM public.dportfolios WHERE idportfolio=${id};', values: request.body}
   sql = pgp.as.format(query.text,query.values)
+  console.log('sql',sql);
   pool.query (sql,  (err, res) => {if (err) { return response.send(err)} else { return response.status(200).json(res.rowCount) }
   }) 
 }
@@ -190,9 +195,9 @@ async function fAccountEdit (request, response) {
 	'SET  ' +
    'idclient=${idclient}, ' +
    'idstategy=${idstategy}, '+
-   'portfolioname=${portfolioname} '+
+   'portfolioname=${portfolioname}, '+
    'portleverage=${portleverage} '+
-	 'WHERE idportfolio=${idportfolio};',
+	 'WHERE idportfolio=${idportfolio}; ',
     values: paramArr
   } 
   sql = pgp.as.format(query.text,query.values)

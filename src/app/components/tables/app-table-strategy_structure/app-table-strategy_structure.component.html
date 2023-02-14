@@ -19,8 +19,8 @@
   </mat-expansion-panel>
 
   <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class="mat-elevation-z8">
-    <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay">
-      <th mat-header-cell *matHeaderCellDef> {{column | uppercase}}</th>
+    <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i = index">
+      <th mat-header-cell *matHeaderCellDef> {{columnsHToDisplay[i] | uppercase}}</th>
       <td mat-cell *matCellDef="let element"> {{element[column]}} </td>
       <td mat-footer-cell *matFooterCellDef> </td>
     </ng-container>

@@ -79,7 +79,7 @@ export class AppStrategyFormComponent implements OnInit, AfterViewInit {
     this.editStrategyForm.controls['name'].setAsyncValidators (
       StrategynameValidator.createValidator(this.InvestmentDataServiceService, this.id.value), 
     )  
-    this.editStrategyForm.controls['name'].updateValueAndValidity();
+    // this.editStrategyForm.controls['name'].updateValueAndValidity();
   }
 
   ngOnChanges(changes: SimpleChanges) {

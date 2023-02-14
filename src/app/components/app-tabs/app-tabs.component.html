@@ -38,19 +38,6 @@
   </mat-tab>  
   
   <mat-tab label="Positions by Strategy"> 
-    
-    
-    <div [cdkContextMenuTriggerFor]="context_menu">
-      Did you ever hear the tragedy of Darth Plagueis The Wise? I thought not. It's not a story the Jedi
-      would tell you. It's a Sith legend. Darth Plagueis was a Dark Lord of the Sith, so powerful and so
-      wise he could use the Force to influence the midichlorians to create life… He had such a knowledge
-      of the dark side that he could even keep the ones he cared about from dying. The dark side of the
-      Force is a pathway to many abilities some consider to be unnatural. He became so powerful… the
-      only thing he was afraid of was losing his power, which eventually, of course, he did.
-      Unfortunately, he taught his apprentice everything he knew, then his apprentice killed him in his
-      sleep. Ironic. He could save others from death, but not himself.
-    </div>
-    
     <ng-template #context_menu>
       <div class="example-menu" cdkMenu>
         <button class="example-menu-item" cdkMenuItem>Cut</button>
@@ -87,12 +74,7 @@
   </mat-tab>  
   
   <mat-tab label="Client Accounts">
-    <button 
-      mat-raised-button style="float: inline-end; margin: 8px;" color="primary">
-      Add new account
-    </button>
-    <app-app-accout-tablee 
-      style="padding: 20px;"
+    <app-app-accout-tablee style=""
       [clientId]="messageReceived.id"
       [actionOnAccountTable]="'Get_Accounts_By_CientId'"
     >
@@ -100,15 +82,6 @@
   </mat-tab>
   <mat-tab label="Positions"> Positions table  </mat-tab>
 </mat-tab-group>
-
-
-<!-- <ng-template  #tabcontextmenu>
-  <div class="tree-menu-context" cdkMenu>
-    <button  class="tree-menu-item" cdkMenuItem> Add to favorites</button>
-    <button class="tree-menu-item" cdkMenuItem> New Item </button>
-    <button class="tree-menu-item" cdkMenuItem> Edit Item</button>
-  </div>
-</ng-template> -->
 
 <app-app-trades-table *ngIf="messageReceived.text=='Trades & Orders_Root'">
 </app-app-trades-table>

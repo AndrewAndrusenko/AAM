@@ -1,16 +1,12 @@
 
-<!-- Context menu for treeMenu element -->
 <ng-template  #instrumentcontextmenu>
   <div class="tree-menu-context" cdkMenu >
-    <!-- -----------toggle favorite button of context menu. more readable version it semms------ -->
-    <!-- (click)="handleNewFavoriteClick($event.target)"  -->
     <button 
       (click)="openAddFileDialog('Create')"
       class="tree-menu-item" cdkMenuItem >
       <mat-icon class="menu-icon" matPrefix>add_circle</mat-icon>      
       New Client
     </button>
-
     <button 
       (click)="openAddFileDialog('Create_Example')"
       class="tree-menu-item" cdkMenuItem >
@@ -37,9 +33,6 @@
     </button> 
   </div>
 </ng-template>
-<!-- //Context menu for treeMenu element -->
-
 <div [cdkContextMenuTriggerFor]="instrumentcontextmenu" class="dataTableTitle"> <h2> Clients list </h2> </div>
-
 <table datatable  id="mytable" [cdkContextMenuTriggerFor]="instrumentcontextmenu"[dtOptions]="dtOptions" 
 class="row-border hover"></table>
