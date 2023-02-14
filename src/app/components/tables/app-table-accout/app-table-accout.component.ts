@@ -7,6 +7,8 @@ import {animate, state, style, transition, trigger} from '@angular/animations';
 import {AccountsTableModel } from 'src/app/models/accounts-table-model';
 import {AppTabServiceService} from 'src/app/services/app-tab-service.service';
 import {TreeMenuSevice } from 'src/app/services/tree-menu.service';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { AppNewAccountComponent } from '../../forms/app-new-account/app-new-account.component';
 @Component({
   selector: 'app-app-accout-tablee',
   templateUrl: './app-table-accout.component.html',
@@ -27,6 +29,7 @@ export class TableAccounts implements AfterViewInit {
   @ViewChild(MatSort) sort: MatSort;
   expandedElement: AccountsTableModel  | null;
   accessToClientData: string = 'true';
+  dialogRef: MatDialogRef<AppNewAccountComponent>;
   public currentAccout:any;
   @Input() clientId : number;
   @Input() strategyId : number;
@@ -34,7 +37,7 @@ export class TableAccounts implements AfterViewInit {
   @Output() public modal_principal_parent = new EventEmitter();
 
 
-  constructor(private AppTabServiceService:AppTabServiceService, private TreeMenuSevice:TreeMenuSevice ) {}
+  constructor(private AppTabServiceService:AppTabServiceService, private TreeMenuSevice:TreeMenuSevice, private dialog: MatDialog ) {}
 
   async ngAfterViewInit() {
     
@@ -42,18 +45,15 @@ export class TableAccounts implements AfterViewInit {
     await lastValueFrom (this.TreeMenuSevice.getaccessRestriction (userData.user.accessrole, 'accessToClientData'))
     .then ((accessRestrictionData) =>{
       this.accessToClientData = accessRestrictionData['elementvalue']
-      console.log('accessToClientData',this.accessToClientData);
       this.AppTabServiceService.getAccountsData(this.clientId,this.strategyId,'', this.actionOnAccountTable).subscribe (portfoliosData => {
         this.dataSource  = new MatTableDataSource(portfoliosData);
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
       })
     })
-    console.log('accessToClientData',this.accessToClientData);
  
   }
   ngOnChanges(changes: SimpleChanges) {
-    console.log('changes',changes);
     this.AppTabServiceService.getAccountsData(this.clientId,this.strategyId,'', this.actionOnAccountTable).subscribe (portfoliosData => {
       this.dataSource  = new MatTableDataSource(portfoliosData);
       this.dataSource.paginator = this.paginator;
@@ -62,7 +62,6 @@ export class TableAccounts implements AfterViewInit {
   }
     
   chooseAccount (element) {
-    console.log('chose account', element);
     this.currentAccout = element;
     this.modal_principal_parent.emit('CLOSE_PARENT_MODAL');
   }
@@ -70,5 +69,19 @@ export class TableAccounts implements AfterViewInit {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
+  }
+
+  openAccountForm (actionType:string, row: any ) {
+    console.log('row', row);
+    this.dialogRef = this.dialog.open(AppNewAccountComponent ,{minHeight:'400px', maxWidth:'1000px' });
+    this.dialogRef.componentInstance.action = actionType;
+    this.dialogRef.componentInstance.title = actionType;
+    this.dialogRef.componentInstance.accountData = row;
+    switch (actionType) {
+      case 'Create':
+      case 'Create_Example': 
+      this.dialogRef.componentInstance.title = 'Create New';
+      break;
+    }
   }
 }

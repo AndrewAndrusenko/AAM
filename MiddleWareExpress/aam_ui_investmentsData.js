@@ -4,7 +4,6 @@ const pool = new Pool(config.dbConfig);
 var pgp = require ('pg-promise')({capSQL:true});
 
 async function fGetStrategiesList (request,response) {
-  console.log('request.query',request.query);
   const query = {text: 'SELECT id, sname as Name, s_level_id as Level, s_description as Description, s_benchmark_account, dportfolios.portfolioname as "Benchmark Account"' +
 	' FROM public.dstrategiesglobal LEFT JOIN public.dportfolios ' + 
   ' ON dportfolios.idportfolio = dstrategiesglobal.s_benchmark_account'}
@@ -21,6 +20,9 @@ async function fGetStrategiesList (request,response) {
     case 'Get_ModelPortfolios_List' :
       query.text += ' WHERE (s_level_id = 1);'
     break;
+    case 'Get_Strategies_List' :
+      query.text += ' WHERE (s_level_id = 2);'
+    break;
     case 'Get_AccountTypes_List' :
       query.text = 'SELECT "typeCode", "typeValue", "typeDescription" ' + 
                    'FROM public."dGeneralTypes" '+ 
@@ -31,15 +33,12 @@ async function fGetStrategiesList (request,response) {
       query.text += ';'
     break;
   }
-  console.log('query',query);
   pool.query (query, (err, res) => {if (err) {console.log (err.stack)} else {
-    console.log('res.rows',res.rows);
     return response.status(200).json((res.rows))}
   })
 }
 
 async function fGetStrategyStructure (request,response) {
-  console.log('request.query',request.query);
   const query = {text: 'SELECT '+
     ' id_strategy_parent, id_strategy_child as id, dstrategiesglobal.sname, dstrategiesglobal.s_description as description,  ' + 
     ' weight_of_child, dstrategies_global_structure.id as id_item ' + 
@@ -60,16 +59,13 @@ async function fGetStrategyStructure (request,response) {
       query.text += ';'
     break;
   }
-  console.log('query',query);
   pool.query (query, (err, res) => {if (err) {console.log (err.stack)} else {
-    console.log('res.rows',res.rows);
     return response.status(200).json((res.rows))}
   })
 }
 
 async function fEditStrategyData (request, response) {
   paramArr = request.body.data
-  console.log('paramArr',paramArr );
   const query = {
   text: 'UPDATE public.dstrategiesglobal ' +
 	'SET  ' +
@@ -82,8 +78,7 @@ async function fEditStrategyData (request, response) {
   } 
 
   sql = pgp.as.format(query.text,query.values)
-  console.log('sql', sql);
-   pool.query (sql,  (err, res) => {if (err) {
+  pool.query (sql,  (err, res) => {if (err) {
     console.log (err.stack.split("\n", 1).join(""))
     err.detail = err.stack
 
@@ -94,17 +89,14 @@ async function fEditStrategyData (request, response) {
 }
 
 async function fStrategyGlobalDataDelete (request, response) {
-  console.log('rq', request.body)
   const query = {text: 'DELETE FROM public.dstrategiesglobal WHERE id=${id};', values: request.body}
   sql = pgp.as.format(query.text,query.values)
-  console.log('sql',sql);
   pool.query (sql,  (err, res) => {if (err) { return response.send(err)} else { return response.status(200).json(res.rowCount) }
   }) 
 }
 
 async function fStrategyGlobalDataCreate (request, response) {
   paramArr = request.body.data
-  console.log('request.body.data',request.body.data);
   const query = {
   text: 'INSERT INTO public.dstrategiesglobal ' +
         '(sname, s_level_id, s_description, s_benchmark_account)' +
@@ -112,7 +104,6 @@ async function fStrategyGlobalDataCreate (request, response) {
     values: paramArr
   }
   sql = pgp.as.format(query.text,query.values)
-  console.log('sql', sql);
   pool.query (sql,  (err, res) => {if (err) {
     console.log (err.stack.split("\n", 1).join(""))
     err.detail = err.stack
@@ -139,18 +130,14 @@ async function fStrategyStructureCreate (request, response) {
 }
 
 async function fStrategyStructureDelete (request, response) {
-  console.log('rq', request.body)
   const query = {text: 'DELETE FROM public.dstrategies_global_structure WHERE id=${id};', values: request.body}
   sql = pgp.as.format(query.text,query.values)
-  console.log('sql',sql);
   pool.query (sql,  (err, res) => {if (err) { return response.send(err)} else { return response.status(200).json(res.rowCount) }
   }) 
 }
 
-
 async function fStrategyStructureEdit (request, response) {
   paramArr = request.body.data
-  console.log('paramArr',paramArr );
   const query = {
   text: 'UPDATE public.dstrategies_global_structure ' +
 	'SET  ' +
@@ -161,7 +148,6 @@ async function fStrategyStructureEdit (request, response) {
     values: paramArr
   } 
   sql = pgp.as.format(query.text,query.values)
-  console.log('sql', sql);
    pool.query (sql,  (err, res) => {if (err) {
     console.log (err.stack.split("\n", 1).join(""))
     err.detail = err.stack
@@ -170,6 +156,55 @@ async function fStrategyStructureEdit (request, response) {
     return response.status(200).json(res.rowCount)}
   })   
 }
+
+async function fAccountCreate (request, response) {
+  paramArr = request.body.data
+  const query = {
+  text: 'INSERT INTO public.dportfolios ' +
+        '(idclient, idstategy, portfolioname, portleverage)' +
+        ' VALUES (${idclient}, ${idstategy}, ${portfolioname}, ${portleverage}) ;',
+    values: paramArr
+  }
+  sql = pgp.as.format(query.text,query.values)
+
+  pool.query (sql,  (err, res) => {if (err) {
+    console.log (err.stack.split("\n", 1).join(""))
+    err.detail = err.stack
+    return response.send(err)
+  } else {
+    return response.status(200).json(res.rowCount)}
+  })  
+}
+
+async function fAccountDelete (request, response) {
+  const query = {text: 'DELETE FROM public.dportfolios WHERE idportfolio=${id};', values: request.body}
+  sql = pgp.as.format(query.text,query.values)
+  pool.query (sql,  (err, res) => {if (err) { return response.send(err)} else { return response.status(200).json(res.rowCount) }
+  }) 
+}
+
+async function fAccountEdit (request, response) {
+  paramArr = request.body.data
+  const query = {
+  text: 'UPDATE public.dportfolios ' +
+	'SET  ' +
+   'idclient=${idclient}, ' +
+   'idstategy=${idstategy}, '+
+   'portfolioname=${portfolioname} '+
+   'portleverage=${portleverage} '+
+	 'WHERE idportfolio=${idportfolio};',
+    values: paramArr
+  } 
+  sql = pgp.as.format(query.text,query.values)
+   pool.query (sql,  (err, res) => {if (err) {
+    console.log (err.stack.split("\n", 1).join(""))
+    err.detail = err.stack
+    return response.send(err)
+  } else {
+    return response.status(200).json(res.rowCount)}
+  })   
+}
+
 module.exports = {
   fGetStrategiesList,
   fEditStrategyData,
@@ -178,5 +213,8 @@ module.exports = {
   fStrategyGlobalDataCreate,
   fStrategyStructureCreate,
   fStrategyStructureDelete,
-  fStrategyStructureEdit
+  fStrategyStructureEdit,
+  fAccountCreate,
+  fAccountDelete,
+  fAccountEdit
 }

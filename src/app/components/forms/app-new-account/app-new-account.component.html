@@ -24,7 +24,7 @@
       <input matInput placeholder="ClientName" formControlName="clientname">
     </mat-form-field>
   </div>
-  <div  (dblclick) = "selectStrategy('Select_Strategies')">
+  <div  (dblclick) = "selectStrategy('Get_Strategies_List')">
     <mat-form-field style="width: 15%">
       <input matInput placeholder="StrategyID" formControlName="idstategy">
     </mat-form-field>
@@ -33,7 +33,7 @@
     </mat-form-field>
     <button mat-flat-button color="accent" 
       matTooltip="Select Stategy"
-      (click) = "selectStrategy('Select_Strategies')"
+      (click) = "selectStrategy('Get_Strategies_List')"
       style=" width: 5%;  line-height: 80% !important; height: 60px !important;">
       <mat-icon >input</mat-icon>
     </button>
@@ -48,7 +48,7 @@
   <div>
     <button mat-flat-button color="primary" type="submit" 
       [disabled]="!(newAccountForm.valid && submitbox.checked)"
-      (click)='updateClientData'
+      (click)='updateStrategyData(action)'
       style="margin-top: 10px; width: 200px; font-size: 18px;">
         {{title}} account
     </button>

@@ -59,16 +59,12 @@ export class AppTableStrategiesComponentComponent  implements AfterViewInit {
   }
 
   async ngAfterViewInit() {
-    console.log('this.StrategiesGlobalDataC',this.StrategiesGlobalDataC());
-    // this.columnsToDisplay = Object.keys (this.StrategiesGlobalDataC());
-    console.log('this.columnsToDisplay',this.columnsToDisplay);
     this.columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
     let userData = JSON.parse(localStorage.getItem('userInfo'))
     await lastValueFrom (this.TreeMenuSevice.getaccessRestriction (userData.user.accessrole, 'accessToClientData'))
     .then ((accessRestrictionData) =>{
       this.accessToClientData = accessRestrictionData['elementvalue']
-      console.log('accessToClientData',this.accessToClientData);
-      this.InvestmentDataService.getGlobalStategiesList(0,'0','0').subscribe (portfoliosData => {
+      this.InvestmentDataService.getGlobalStategiesList(0,'0',this.action).subscribe (portfoliosData => {
         this.dataSource  = new MatTableDataSource(portfoliosData);
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;

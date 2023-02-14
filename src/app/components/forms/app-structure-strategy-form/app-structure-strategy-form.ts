@@ -79,8 +79,6 @@ export class AppStructureStrategyFormComponent implements OnInit {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    console.log('changes',changes);
-    console.log('MP',this.MP);
     this.editStructureStrategyForm.controls['id_item'].setValue (changes['strategyId'].currentValue)
   }
   updateStrategyStructureData (action:string){
@@ -149,8 +147,6 @@ export class AppStructureStrategyFormComponent implements OnInit {
   selectInstrument () {
     this.dialogRef = this.dialog.open(AppInstrumentTableComponent ,{minHeight:'400px', minWidth:'900px' });
     this.dialogRef.componentInstance.modal_principal_parent.subscribe ((item)=>{
-      console.log(this.editStructureStrategyForm.controls);
-      console.log(this.dialogRef.componentInstance.currentInstrument['secid']);
       this.editStructureStrategyForm.controls['id'].patchValue(this.dialogRef.componentInstance.currentInstrument['secid'])
       this.dialogRef.close(); 
     });

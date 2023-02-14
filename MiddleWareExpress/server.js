@@ -135,4 +135,8 @@ appServer.post('/AAM/StrategyStructureCreate/',jsPassport.authenticate('session'
 appServer.post('/AAM/StrategyStructureDelete/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fStrategyStructureDelete)
 appServer.post('/AAM/StrategyStructureEdit/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fStrategyStructureEdit)
 
+appServer.post('/AAM/AccountCreate/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fAccountCreate)
+appServer.post('/AAM/AccountDelete/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fAccountDelete)
+appServer.post('/AAM/AccountEdit/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fAccountEdit)
+
 appServer.listen (port,'localhost', () => {console.log (`AAM Server is running on port ${port}`)})

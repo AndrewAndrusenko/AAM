@@ -11,6 +11,12 @@ export class AppInvestmentDataServiceService {
   constructor(private http:HttpClient) { }
   
   private subjectName = new Subject<any>(); 
+  sendReloadAccountList ( id:number) { //the component that wants to update something, calls this fn
+    this.subjectName.next(id); //next() will feed the value in Subject
+  }
+  getReloadAccountList(): Observable<any> { //the receiver component calls this function 
+    return this.subjectName.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
+  }
 
   sendReloadStrategyStructure ( id:number) { //the component that wants to update something, calls this fn
     this.subjectName.next(id); //next() will feed the value in Subject
@@ -63,6 +69,16 @@ export class AppInvestmentDataServiceService {
   } 
   updateStrategyStructure (data:any) { 
     return this.http.post ('/api/AAM/StrategyStructureEdit/',{'data': data}).toPromise()
+  }
+  
+  createAccount (data:any) { 
+    return this.http.post ('/api/AAM/AccountCreate/',{'data': data}).toPromise()
+  } 
+  deleteAccount (id:string) { 
+    return this.http.post ('/api/AAM/AccountDelete/',{'id': id}).toPromise()
+  } 
+  updateAccount (data:any) { 
+    return this.http.post ('/api/AAM/AccountEdit/',{'data': data}).toPromise()
   }
   
 }

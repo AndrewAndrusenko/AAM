@@ -2,7 +2,7 @@
 <app-app-instrument-table 
 *ngIf="messageReceived.text=='Instruments_Root'"
 ></app-app-instrument-table>  
-  <mat-tab-group  [matMenuTriggerFor]="menu" *ngIf="messageReceived.text=='Accounts' " mat-stretch-tabs #AccountInfo >
+  <mat-tab-group  *ngIf="messageReceived.text=='Accounts' " mat-stretch-tabs #AccountInfo >
     
   <mat-tab label="Account Summary" > </mat-tab>  
   <mat-tab label="Portfolio Details"> Detailed positions with PnL data 
@@ -73,7 +73,7 @@
   <mat-tab label="Orders by Strategy"> Orders history  </mat-tab>
 </mat-tab-group>
 
-<mat-tab-group [cdkContextMenuTriggerFor]="tabcontextmenu" *ngIf="messageReceived.text=='Clients'" mat-stretch-tabs #ClientInfo>
+<mat-tab-group  *ngIf="messageReceived.text=='Clients'" mat-stretch-tabs #ClientInfo>
 
   <mat-tab label="Client Summary" >
     <div class="client_form">
@@ -101,28 +101,14 @@
   <mat-tab label="Positions"> Positions table  </mat-tab>
 </mat-tab-group>
 
-<mat-menu #menu="matMenu">
-  <button mat-menu-item>
-    <mat-icon>dialpad</mat-icon>
-    <span>Redial</span>
-  </button>
-  <button mat-menu-item disabled>
-    <mat-icon>voicemail</mat-icon>
-    <span>Check voice mail</span>
-  </button>
-  <button mat-menu-item>
-    <mat-icon>notifications_off</mat-icon>
-    <span>Disable alerts</span>
-  </button>
-</mat-menu>
 
-<ng-template  #tabcontextmenu>
+<!-- <ng-template  #tabcontextmenu>
   <div class="tree-menu-context" cdkMenu>
     <button  class="tree-menu-item" cdkMenuItem> Add to favorites</button>
     <button class="tree-menu-item" cdkMenuItem> New Item </button>
     <button class="tree-menu-item" cdkMenuItem> Edit Item</button>
   </div>
-</ng-template>
+</ng-template> -->
 
 <app-app-trades-table *ngIf="messageReceived.text=='Trades & Orders_Root'">
 </app-app-trades-table>

@@ -70,7 +70,6 @@ openAddFileDialog(actionType) {
   this.dialogRef = this.dialog.open(AppClientFormComponent ,{minHeight:'400px', width:'900px' });
   this.dialogRef.componentInstance.action = actionType;
   this.dialogRef.componentInstance.title = actionType;
-  console.log('action',actionType);
   switch (actionType) {
     case 'Create':
     case 'Create_Example': 
@@ -84,9 +83,7 @@ openAccountDialog(actionType) {
   this.dialogAccountRef.componentInstance.action = actionType;
   this.dialogAccountRef.componentInstance.title = actionType;
   let data = $('#mytable').DataTable().row({ selected: true }).data();
-  console.log('data', data);
   this.dialogAccountRef.componentInstance.clientData = data
-  console.log('action',actionType);
   switch (actionType) {
     case 'Create':
     case 'Create_Example': 

@@ -16,7 +16,6 @@ export class AppTabsComponent implements OnDestroy {
  
 constructor (private TreeMenuSevice : TreeMenuSevice, private titleService:Title) {
   this.subscriptionName= this.TreeMenuSevice.getUpdate().subscribe( (message) => {
-    console.log('message',message)
     this.messageReceived = message;
     this.titleService.setTitle(message.name)
   })
@@ -25,7 +24,6 @@ constructor (private TreeMenuSevice : TreeMenuSevice, private titleService:Title
       this.subscriptionName.unsubscribe();
   }
   handleChange (event) {
-    console.log('load form',event)
   }
 
 
