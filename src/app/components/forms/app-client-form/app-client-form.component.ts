@@ -28,8 +28,8 @@ export class AppClientFormComponent implements OnInit {
   
   ngOnInit(): void {
     this.editClienttForm=this.fb.group ({
-      idclient: {value:'', disabled: true}, 
-      clientname: [null, { updateOn: 'blur'} ],
+      idclient: {value: 0, disabled: true}, 
+      clientname: [null, {    validators: [Validators.required], updateOn:'blur' } ],
       idcountrydomicile: [null, [Validators.required, Validators.pattern('[0-9]*')]],
       isclientproffesional: [false],
       address: [null, [Validators.required]],
@@ -44,7 +44,7 @@ export class AppClientFormComponent implements OnInit {
     case 'Create': 
     break;
     case 'Create_Example':
-      data['idclient']='';
+      data['idclient'] = 0;
       this.editClienttForm.patchValue(data);
     break;
     case 'Delete': 
@@ -68,6 +68,9 @@ export class AppClientFormComponent implements OnInit {
         UsernameValidator.createValidator(this.AppTabServiceService, this.clientId.value)
       )
       this.editClienttForm.controls['clientname'].updateValueAndValidity();
+      this.editClienttForm.updateValueAndValidity();
+      // this.editClienttForm.controls['clientname'].markAsDirty();
+
     })
   }
 
@@ -85,6 +88,7 @@ export class AppClientFormComponent implements OnInit {
             $('#mytable').DataTable().ajax.reload();
           }
         })
+        this.editClienttForm.controls['clientname'].markAsDirty;
         this.editClienttForm.controls['idclient'].disable()
       break;
 

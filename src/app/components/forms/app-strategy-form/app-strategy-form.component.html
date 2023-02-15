@@ -22,7 +22,12 @@ style="margin-left: 1%; margin-right: -1%; padding: 0px;"
     {{title}} Strategy {{MP}}
   </button>
 
-  <mat-checkbox color="primary"  #submitbox checked="false" >Submit Data</mat-checkbox>
+  <mat-checkbox color="primary"  #submitbox checked="false" 
+  (click)=" 
+  editStrategyForm.markAllAsTouched();
+  editStrategyForm.controls['name'].updateValueAndValidity();
+"
+  >Submit Data</mat-checkbox>
 
 <form class="submit" [formGroup]="editStrategyForm">
   <mat-form-field style="width: 10%;">

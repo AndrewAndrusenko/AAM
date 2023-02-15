@@ -121,7 +121,7 @@ appServer.post('/AAM/ClientDataEdit/',jsPassport.authenticate('session') , uiAmm
 
 appServer.post('/AAM/ClientDataDelete/',jsPassport.authenticate('session') , uiAmmModule.fClientDataDelete)
 
-appServer.post('/AAM/ClientDataCreate /',jsPassport.authenticate('session') , uiAmmModule.fCreateClientData)
+appServer.post('/AAM/ClientDataCreate/',jsPassport.authenticate('session') , uiAmmModule.fCreateClientData)
 
 appServer.get('/AAM/GetStrategiesList/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fGetStrategiesList)
 

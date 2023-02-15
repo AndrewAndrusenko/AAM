@@ -24,13 +24,11 @@
     <ng-container matColumnDef="expandedDetail" >
       <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplayWithExpand.length">
         <div class="example-element-detail"
-            [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
-
-          <app-app-accout-tablee 
+           [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
+          <app-app-accout-tablee style="width: 100%;"
             [actionOnAccountTable]="'Get_Accounts_By_StrategyId'"
             [strategyId]="element['id']"
           ></app-app-accout-tablee>
-
         </div>
       </td>
     </ng-container>

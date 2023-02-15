@@ -1,9 +1,6 @@
 
-<!-- Context menu for treeMenu element -->
 <ng-template  #instrumentcontextmenu>
   <div class="tree-menu-context" cdkMenu >
-    <!-- -----------toggle favorite button of context menu. more readable version it semms------ -->
-    <!-- (click)="handleNewFavoriteClick($event.target)"  -->
     <button 
       (click)="openAddFileDialog('Create')"
       class="tree-menu-item" cdkMenuItem >
@@ -29,13 +26,13 @@
    </button> 
   </div>
 </ng-template>
-<!-- //Context menu for treeMenu element -->
 
-<div [cdkContextMenuTriggerFor]="instrumentcontextmenu" class="dataTableTitle"> <h2> Instruments list </h2> </div>
+<div [cdkContextMenuTriggerFor]="instrumentcontextmenu" class="dataTableTitle" style="display:flex; align-items: center;
+justify-content:space-between;"> 
+  <h2> Instruments list </h2>   
+  <h2 *ngIf="action=='Select'" style="color: rgb(224, 73, 73);"> Use context menu to select instrument for MP</h2>
+</div>
 
-<table datatable  id="mytable" [cdkContextMenuTriggerFor]="instrumentcontextmenu"[dtOptions]="dtOptions" 
-class="row-border hover"
-></table>
-
-
- <!-- <app-app-instrument-edit-form></app-app-instrument-edit-form>  -->
+<table 
+  datatable  id="mytable" [cdkContextMenuTriggerFor]="instrumentcontextmenu"[dtOptions]="dtOptions" class="row-border hover">
+</table>

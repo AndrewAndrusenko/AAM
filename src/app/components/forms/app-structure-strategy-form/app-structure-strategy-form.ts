@@ -8,13 +8,7 @@ import { AppInvestmentDataServiceService } from 'src/app/services/app-investment
 import { StrategiesGlobalData } from 'src/app/models/accounts-table-model';
 import { formatPercent } from '@angular/common';
 import { AppInstrumentTableComponent } from '../../tables/app-table-instrument/app-table-instrument.component';
-interface strategy_structure {
-  id: number;
-  sname: string;
-  description: string;
-  weight_of_child: number;
-  id_item:number;
-}
+
 @Component({
   selector: 'app-structure-strategy-form',
   templateUrl: './app-structure-strategy-form.html',
@@ -146,6 +140,7 @@ export class AppStructureStrategyFormComponent implements OnInit {
   }
   selectInstrument () {
     this.dialogRef = this.dialog.open(AppInstrumentTableComponent ,{minHeight:'400px', minWidth:'900px' });
+    this.dialogRef.componentInstance.action="Select";
     this.dialogRef.componentInstance.modal_principal_parent.subscribe ((item)=>{
       this.editStructureStrategyForm.controls['id'].patchValue(this.dialogRef.componentInstance.currentInstrument['secid'])
       this.dialogRef.close(); 

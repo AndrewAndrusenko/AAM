@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatDialog, MatDialogRef} from '@angular/material/dialog';
 import { AppInstrumentEditFormComponent } from '../../forms/app-instrument-edit-form/app-instrument-edit-form.component';
 @Component({
@@ -8,6 +8,7 @@ import { AppInstrumentEditFormComponent } from '../../forms/app-instrument-edit-
 })
 export class AppInstrumentTableComponent {
   isEditForm: boolean = false;
+  @Input() action: string;
   public currentInstrument: any;
   @Output() public modal_principal_parent = new EventEmitter();
   dialogRef: MatDialogRef<AppInstrumentEditFormComponent>;

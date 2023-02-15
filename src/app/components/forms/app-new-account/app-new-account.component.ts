@@ -32,7 +32,7 @@ export class AppNewAccountComponent implements OnInit {
       idstategy: {value:'', disabled: true}, 
       stategy_name: [{value:'', disabled: false}, [Validators.required]],
       description: {value:'', disabled: false}, 
-      portfolioname:[{value:'', disabled: true}, [Validators.required]],
+      portfolioname:[{value:'', disabled: false}, [Validators.required]],
       portleverage: [ {value:0, disabled: false}, [Validators.required, Validators.pattern('[0-9]*')]]
     })
     this.InvestmentDataServiceService.getAccountTypesList (0,'','Get_AccountTypes_List').subscribe (data => {
@@ -42,6 +42,10 @@ export class AppNewAccountComponent implements OnInit {
       case 'Open': 
       this.newAccountForm.controls['idclient'].setValue(this.clientData['idclient'])
       this.newAccountForm.controls['clientname'].setValue(this.clientData['clientname'])
+      break;
+      case 'Create': 
+      this.newAccountForm.controls['idclient'].setValue(this.accountData['idclient'])
+      this.newAccountForm.controls['clientname'].setValue(this.accountData['clientname'])
       break;
       case 'Create_Example':
         this.accountData['account_id']='';
@@ -73,6 +77,7 @@ export class AppNewAccountComponent implements OnInit {
   updateStrategyData(action:string){
     console.log('action',action);
     switch (action) {
+      case 'Create':
       case 'Create_Example':
       case 'Open':
         this.newAccountForm.controls['idclient'].enable()

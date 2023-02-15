@@ -156,12 +156,27 @@ export class AppStrategyFormComponent implements OnInit, AfterViewInit {
 
   selectBenchmarkAccount () {
     this.dialogRef = this.dialog.open(TableAccounts ,{minHeight:'400px', minWidth:'900px' });
+    this.dialogRef.componentInstance.action = 'Select_Benchmark';
     this.dialogRef.componentInstance.modal_principal_parent.subscribe ((item)=>{
-      this.dialogRef.componentInstance.expandedElement
-      console.log('close',item, this.dialogRef.componentInstance.currentAccout);
-      console.log(this.dialogRef.componentInstance.currentAccout['account_id'],this.editStrategyForm.controls['s_benchmark_account']);
-      this.editStrategyForm.controls['s_benchmark_account'].patchValue(this.dialogRef.componentInstance.currentAccout['account_id'])
-      this.editStrategyForm.controls['Benchmark Account'].patchValue(this.dialogRef.componentInstance.currentAccout['account_name'])
+      this.data = this.dialogRef.componentInstance.currentAccout;
+      console.log('close',this.data);
+      console.log('id comp',this.id.value,this.dialogRef.componentInstance.currentAccout['idstategy']);
+      
+      if (this.id.value !== this.dialogRef.componentInstance.currentAccout['idstategy']) {
+        this.dialogRefConfirm = this.dialog.open(AppConfimActionComponent, {panelClass: 'custom-modalbox',} );
+        this.dialogRefConfirm.componentInstance.actionToConfim = {'action':'Select account with different strategy' ,'isConfirmed': false}
+        this.dialogRefConfirm.afterClosed().subscribe (actionToConfim => {
+          console.log('action', actionToConfim)
+          if (actionToConfim.isConfirmed===true) {
+            this.dialogRef.close(); 
+            this.editStrategyForm.controls['s_benchmark_account'].patchValue(this.data['idportfolio'])
+            this.editStrategyForm.controls['Benchmark Account'].patchValue(this.data['portfolioname'])
+          }
+        })
+      } else {
+      this.editStrategyForm.controls['s_benchmark_account'].patchValue(this.data['idportfolio'])
+      this.editStrategyForm.controls['Benchmark Account'].patchValue(this.data['portfolioname'])
+      }
       this.dialogRef.close(); 
     });
     console.log('action',this.actionType);
@@ -171,7 +186,7 @@ export class AppStrategyFormComponent implements OnInit, AfterViewInit {
       break;
   }
   }
-
+​
   get  id ()   {return this.editStrategyForm.get('id') } 
   get  name ()   {return this.editStrategyForm.get('name') } 
   get  Level ()   {return this.editStrategyForm.get('level') } 

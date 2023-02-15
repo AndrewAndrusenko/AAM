@@ -38,6 +38,8 @@ export class TableAccounts implements AfterViewInit {
   @Input() clientId : number;
   @Input() strategyId : number;
   @Input() actionOnAccountTable : string;
+  @Input() action : string;
+
   @Output() public modal_principal_parent = new EventEmitter();
 
   constructor(private AppTabServiceService:AppTabServiceService, private TreeMenuSevice:TreeMenuSevice, private  InvestmentDataService:AppInvestmentDataServiceService, private dialog: MatDialog ) {

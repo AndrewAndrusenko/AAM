@@ -8,7 +8,12 @@
     style="margin-top: 10px; width: 200px; font-size: 18px;">
     {{title}} Client 
   </button>
-  <mat-checkbox color="primary"  #submitbox checked="false" >Submit Data</mat-checkbox>
+  <mat-checkbox color="primary"  #submitbox checked="false" 
+    (click)=" 
+      editClienttForm.markAllAsTouched();
+      editClienttForm.controls['clientname'].updateValueAndValidity();
+    "
+  >Submit Data</mat-checkbox>
 </div>
 
 <form class="submit" [formGroup]="editClienttForm">
@@ -17,7 +22,7 @@
   </mat-form-field>
   <mat-form-field>
     <input matInput placeholder="client name" formControlName="clientname">
-    <mat-error  *ngIf="clientname.invalid && clientname.touched">
+    <mat-error  *ngIf="clientname.invalid">
        Client Name isn't unique. Please choose another one.    
     </mat-error>
   </mat-form-field>
