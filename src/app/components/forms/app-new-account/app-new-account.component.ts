@@ -140,7 +140,7 @@ export class AppNewAccountComponent implements OnInit {
   }
 
   selectStrategy (action:string) {
-    this.dialogTableStrategiesRef = this.dialog.open(AppTableStrategiesComponentComponent ,{minHeight:'400px', minWidth:'900px' });
+    this.dialogTableStrategiesRef = this.dialog.open(AppTableStrategiesComponentComponent ,{minHeight:'400px', minWidth:'900px', autoFocus: false, maxHeight: '90vh'});
     this.dialogTableStrategiesRef.componentInstance.action = action;
     this.dialogTableStrategiesRef.componentInstance.modal_principal_parent.subscribe ((item)=>{
       this.newAccountForm.controls['idstategy'].patchValue(this.dialogTableStrategiesRef.componentInstance.currentStrategy['id'])

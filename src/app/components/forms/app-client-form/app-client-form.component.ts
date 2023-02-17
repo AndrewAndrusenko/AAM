@@ -8,7 +8,7 @@ import { MatSnackBar} from '@angular/material/snack-bar';
 import { count, map, Observable, take } from 'rxjs';
 import {  of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { UsernameValidator } from 'src/app/services/UniqueClientName';
+import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
 @Component({
   selector: 'app-app-client-form',
   templateUrl: './app-client-form.component.html',
@@ -56,7 +56,7 @@ export class AppClientFormComponent implements OnInit {
     break; 
    }
    this.editClienttForm.controls['clientname'].setAsyncValidators(
-    UsernameValidator.createValidator(this.AppTabServiceService, this.clientId.value)
+    customAsyncValidators.clientNameCustomAsyncValidator(this.AppTabServiceService, this.clientId.value)
   )
   this.editClienttForm.controls['clientname'].updateValueAndValidity();
   }
@@ -65,7 +65,7 @@ export class AppClientFormComponent implements OnInit {
     this.AppTabServiceService.getClientData(changes['client'].currentValue, null, 'Get_Client_Data').subscribe(data => {
       this.editClienttForm.patchValue(data[0])
       this.editClienttForm.controls['clientname'].setAsyncValidators(
-        UsernameValidator.createValidator(this.AppTabServiceService, this.clientId.value)
+        customAsyncValidators.clientNameCustomAsyncValidator(this.AppTabServiceService, this.clientId.value)
       )
       this.editClienttForm.controls['clientname'].updateValueAndValidity();
       this.editClienttForm.updateValueAndValidity();

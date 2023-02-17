@@ -4,9 +4,9 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { AppConfimActionComponent } from '../../alerts/app-confim-action/app-confim-action.component';
 import { AppSnackMsgboxComponent } from '../../app-snack-msgbox/app-snack-msgbox.component';
 import { MatSnackBar} from '@angular/material/snack-bar';
-import { StrategynameValidator } from 'src/app/services/UniqueClientName';
 import { AppInvestmentDataServiceService } from 'src/app/services/app-investment-data.service.service';
 import { TableAccounts } from '../../tables/app-table-accout/app-table-accout.component';
+import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
 interface Level {
   value: number;
   viewValue: string;
@@ -77,7 +77,7 @@ export class AppStrategyFormComponent implements OnInit, AfterViewInit {
     this.editStrategyForm.controls['description'].addValidators ( [Validators.required])
     this.editStrategyForm.controls['level'].addValidators ( [Validators.required, Validators.pattern('[0-9]*')])
     this.editStrategyForm.controls['name'].setAsyncValidators (
-      StrategynameValidator.createValidator(this.InvestmentDataServiceService, this.id.value), 
+      customAsyncValidators.strategyCodeCustomAsyncValidator(this.InvestmentDataServiceService, this.id.value), 
     )  
     // this.editStrategyForm.controls['name'].updateValueAndValidity();
   }
@@ -91,7 +91,7 @@ export class AppStrategyFormComponent implements OnInit, AfterViewInit {
       console.log('strategyId',this.strategyId);
       this.showStrateryStructure = true;
       this.editStrategyForm.controls['name'].setAsyncValidators(
-        StrategynameValidator.createValidator(this.InvestmentDataServiceService, this.id.value)
+        customAsyncValidators.strategyCodeCustomAsyncValidator(this.InvestmentDataServiceService, this.id.value)
       ) 
      this.editStrategyForm.controls['name'].updateValueAndValidity();
     })
@@ -155,7 +155,7 @@ export class AppStrategyFormComponent implements OnInit, AfterViewInit {
   }
 
   selectBenchmarkAccount () {
-    this.dialogRef = this.dialog.open(TableAccounts ,{minHeight:'400px', minWidth:'900px' });
+    this.dialogRef = this.dialog.open(TableAccounts ,{minHeight:'400px', minWidth:'900px', autoFocus: false, maxHeight: '90vh'});
     this.dialogRef.componentInstance.action = 'Select_Benchmark';
     this.dialogRef.componentInstance.modal_principal_parent.subscribe ((item)=>{
       this.data = this.dialogRef.componentInstance.currentAccout;

@@ -1,4 +1,7 @@
 
+.uppercase{
+  text-transform: uppercase;
+}
 input.ng-invalid.ng-touched {
   color: rgb(158, 0, 0);
 }

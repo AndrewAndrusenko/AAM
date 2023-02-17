@@ -10,8 +10,15 @@
    </mat-error>
   </mat-form-field>
 
-  <mat-form-field *ngIf="MP" style="width: 25%; height: 5%; font-size: 18px;" >
-    <input matInput style="width: 70%;" placeholder="id" formControlName="id">
+
+  <mat-form-field  *ngIf="MP"  style="width: 25%; height: 5%; font-size: 18px;" >
+    <mat-select   formControlName="id"  > 
+      <input (keyup)="onKey($event.target)"> 
+      <mat-option>None</mat-option>
+      <mat-option *ngFor="let secid of filterednstrumentsLists " [value]="secid">
+        {{secid}}
+      </mat-option>
+    </mat-select>
   </mat-form-field>
 
   <button mat-flat-button color="accent" 
@@ -36,4 +43,6 @@
     {{title}} Item
   </button>
 </form>
+
+
 <p > To close the window click outside it</p>

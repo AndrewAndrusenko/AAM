@@ -108,6 +108,7 @@ async function fGetportfolioTable (request,response) {
 }
 
 async function fGetInstrumentData(request,response) {
+  console.log('request.query',request.query);
   const query = {
     text: ' SELECT ' +
     ' secid, shortname, name,  isin,  listlevel, facevalue, faceunit,  primary_board_title, ' +
@@ -125,7 +126,10 @@ async function fGetInstrumentData(request,response) {
     { 
       query.text += ';'}
   pool.query (query, (err, res) => {
-    if (err) {console.log (err.stack)} else {return response.status(200).json((res.rows))}
+    if (err) {console.log (err.stack)} else {
+      console.log(query.text);
+      console.log(res.rows);
+      return response.status(200).json((res.rows))}
   })
 }
 

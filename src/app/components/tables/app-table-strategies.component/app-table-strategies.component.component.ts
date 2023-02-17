@@ -8,7 +8,6 @@ import { StrategiesGlobalData } from 'src/app/models/accounts-table-model';
 import {TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { AppInvestmentDataServiceService } from 'src/app/services/app-investment-data.service.service';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { AppConfimActionComponent } from '../../alerts/app-confim-action/app-confim-action.component';
 import { AppStrategyFormComponent } from '../../forms/app-strategy-form/app-strategy-form.component';
 @Component({
   selector: 'app-table-strategies',
@@ -48,9 +47,7 @@ export class AppTableStrategiesComponentComponent  implements AfterViewInit {
 
   constructor(private InvestmentDataService:AppInvestmentDataServiceService, private TreeMenuSevice:TreeMenuSevice, private dialog: MatDialog ) {
     this.subscriptionName= this.InvestmentDataService.getReloadStrategyList().subscribe ( (id) => {
-      console.log('messageAA', id )
       this.InvestmentDataService.getGlobalStategiesList (0,'0','0').subscribe (portfoliosData => {
-        console.log('portfoliosData', portfoliosData);
         this.dataSource  = new MatTableDataSource(portfoliosData);
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
