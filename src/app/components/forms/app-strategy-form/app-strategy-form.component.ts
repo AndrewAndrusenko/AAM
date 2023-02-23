@@ -88,6 +88,7 @@ export class AppStrategyFormComponent implements OnInit, AfterViewInit {
       this.editStrategyForm.patchValue(data[0])
       this.strategyId = this.editStrategyForm.controls['id'].value
       this.MP = (this.editStrategyForm.controls['level'].value == 1 ) ? true : false
+      console.log('level', this.MP);
       console.log('strategyId',this.strategyId);
       this.showStrateryStructure = true;
       this.editStrategyForm.controls['name'].setAsyncValidators(

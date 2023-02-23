@@ -52,8 +52,6 @@
 
 <mat-tab-group  *ngIf="messageReceived.text=='Trades & Orders'" mat-stretch-tabs #TradesOrdersInfo>
   <mat-tab label="Orders" >OrdersTable
-
-
   </mat-tab>  
   <mat-tab label="Trades"> Trades table  </mat-tab>
   <mat-tab label="Positions"> Positions table  </mat-tab>
@@ -61,18 +59,15 @@
 </mat-tab-group>
 
 <mat-tab-group  *ngIf="messageReceived.text=='Clients'" mat-stretch-tabs #ClientInfo>
-
   <mat-tab label="Client Summary" >
     <div class="client_form">
       <br>
       <app-app-client-form
       [action] = "Edit"
-      
       [client]="messageReceived.id">
       </app-app-client-form> 
     </div>
   </mat-tab>  
-  
   <mat-tab label="Client Accounts">
     <app-app-accout-tablee style=""
       [clientId]="messageReceived.id"
@@ -92,4 +87,12 @@
 
 <app-table-strategies *ngIf="messageReceived.text=='Strategies_Root'">
 </app-table-strategies>     
+
+<mat-tab-group  *ngIf="messageReceived.name=='Cash IN/OUT Menu'" mat-stretch-tabs #TradesOrdersInfo>
+  <mat-tab label="Transactions List" >Cash IN and Cash OUT transactions</mat-tab>  
+  <mat-tab label="SWIFT Statements processing "> 
+    <app-table-swift-IN-list></app-table-swift-IN-list>
+  </mat-tab>
+  <mat-tab label="Statement Reconcilation"> Statement Reconcilation  </mat-tab>
+</mat-tab-group>
 

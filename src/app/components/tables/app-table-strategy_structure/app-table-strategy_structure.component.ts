@@ -6,7 +6,6 @@ import {animate, state, style, transition, trigger} from '@angular/animations';
 import {StrategyStructure } from 'src/app/models/accounts-table-model';
 import {AppInvestmentDataServiceService } from 'src/app/services/app-investment-data.service.service';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { AppStrategyFormComponent } from '../../forms/app-strategy-form/app-strategy-form.component';
 import { AppStructureStrategyFormComponent } from '../../forms/app-structure-strategy-form/app-structure-strategy-form';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';

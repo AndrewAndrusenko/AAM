@@ -10,7 +10,7 @@ import { formatPercent } from '@angular/common';
 import { AppInstrumentTableComponent } from '../../tables/app-table-instrument/app-table-instrument.component';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
 import { AppTabServiceService } from 'src/app/services/app-tab-service.service';
-import { debounceTime, distinctUntilChanged, filter, Observable, switchMap } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, map, Observable, startWith, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-structure-strategy-form',
@@ -19,7 +19,7 @@ import { debounceTime, distinctUntilChanged, filter, Observable, switchMap } fro
 })
 export class AppStructureStrategyFormComponent implements OnInit {
   public editStructureStrategyForm=this.fb.group ({
-    id: [null, {validators: [Validators.required], updateOn: 'blur'}],
+    id: [null, {validators: [Validators.required]}],
     sname: [null, { updateOn: 'blur'} ],
     description: {value:'', disabled: true}, 
     weight_of_child: {value:'', disabled: false},
@@ -35,7 +35,7 @@ export class AppStructureStrategyFormComponent implements OnInit {
   dtOptions: any = {};
   MPnames: StrategiesGlobalData [] = [];
   public fullInstrumentsLists :string [] =[];
-  public filterednstrumentsLists :string [] =[];
+  public filterednstrumentsLists : Observable<string[]>;
   public title: string;
   public actionType : string;
   public actionToConfim = {'action':'delete_client' ,'isConfirmed': false}
@@ -52,9 +52,14 @@ export class AppStructureStrategyFormComponent implements OnInit {
   ) {}
   
   ngOnInit(): void {
+
+    this.filterednstrumentsLists = this.editStructureStrategyForm.controls['id'].valueChanges.pipe(
+      startWith(''),
+      map(value => this._filter(value || '')),
+    );
+
     this.AppTabServiceService.getSecidLists('').subscribe (data=>{
       this.fullInstrumentsLists = data;
-      this.filterednstrumentsLists = data;
     })
     this.InvestmentDataServiceService.getGlobalStategiesList (0,'','Get_ModelPortfolios_List').subscribe (data => {
       this.MPnames = data;
@@ -80,16 +85,24 @@ export class AppStructureStrategyFormComponent implements OnInit {
       break; 
     }  
     this.editStructureStrategyForm.controls['weight_of_child'].addValidators ( [Validators.required, Validators.pattern('[0-9]*')]);
-    if (this.MP=true) {
+    if (this.MP==true) {
       this.editStructureStrategyForm.controls['id'].setAsyncValidators(customAsyncValidators.secidCustomAsyncValidator(this.AppTabServiceService, this.id.value));
       this.editStructureStrategyForm.controls['id'].updateValueAndValidity();
     }
   }
+  private _filter(value: string): string[] {
+    const filterValue = value.toLowerCase();
+
+    return this.fullInstrumentsLists.filter(option => option.toLowerCase().includes(filterValue));
+  }
 
   ngOnChanges(changes: SimpleChanges) {
     this.editStructureStrategyForm.controls['id_item'].setValue (changes['strategyId'].currentValue)
-    if (this.MP=true) {
+    if (this.MP==true) {
       this.editStructureStrategyForm.controls['id'].setAsyncValidators(customAsyncValidators.secidCustomAsyncValidator(this.AppTabServiceService, this.id.value));
+      this.editStructureStrategyForm.controls['id'].updateValueAndValidity();
+    } else {
+      this.editStructureStrategyForm.controls['id'].clearAsyncValidators();
       this.editStructureStrategyForm.controls['id'].updateValueAndValidity();
     }
   }
@@ -144,11 +157,11 @@ export class AppStructureStrategyFormComponent implements OnInit {
       break;
     }
   }
-  onKey (value) {
+ /*  onKey (value) {
     console.log('value', value.value);
     this.filterednstrumentsLists = this.fullInstrumentsLists.filter(elem=>elem.includes(value.value)) ;
   }
-  
+  */ 
   getFormValidationErrors() {
     Object.keys(this.editStructureStrategyForm.controls).forEach(key => {
       const controlErrors: ValidationErrors = this.editStructureStrategyForm.get(key).errors;

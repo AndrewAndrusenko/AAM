@@ -19,7 +19,7 @@ style="margin-left: 1%; margin-right: -1%; padding: 0px;"
     [disabled]="!(editStrategyForm.valid && submitbox.checked)"
     (click)="updateStrategyData(action)"
     style="margin-top: 1px; width: 200px; font-size: 18px; margin-left: 1%;">
-    {{title}} Strategy {{MP}}
+    {{title}} Strategy
   </button>
 
   <mat-checkbox color="primary"  #submitbox checked="false" 
@@ -78,7 +78,7 @@ style="margin-left: 1%; margin-right: -1%; padding: 0px;"
 </form>
 </mat-expansion-panel>
 
-<app-table-strategy_structure atyle="width:130%" *ngIf="showStrateryStructure" 
+<app-table-strategy_structure style="width:130%" *ngIf="showStrateryStructure" 
 [parentStrategyId] = strategyId
 [MP] = MP >
 </app-table-strategy_structure>

@@ -1,5 +1,6 @@
 <form class="submit" [formGroup]="editStructureStrategyForm">
-  <mat-form-field *ngIf="!MP" style="width: 45%;"  enabled>
+  <mat-form-field *ngIf="!MP" style="width: 45%;"  enabled  appearance="fill">
+    <mat-label>Model Portfolio</mat-label>
     <mat-select   formControlName="id"  > 
       <mat-option *ngFor="let MPname of MPnames" [value]="MPname.id.toString()">
         {{MPname.name}} - {{MPname.description}}
@@ -11,7 +12,7 @@
   </mat-form-field>
 
 
-  <mat-form-field  *ngIf="MP"  style="width: 25%; height: 5%; font-size: 18px;" >
+<!--   <mat-form-field  *ngIf="MP"  style="width: 25%; height: 5%; font-size: 18px;" >
     <mat-select   formControlName="id"  > 
       <input (keyup)="onKey($event.target)"> 
       <mat-option>None</mat-option>
@@ -19,6 +20,21 @@
         {{secid}}
       </mat-option>
     </mat-select>
+  </mat-form-field>
+ -->
+  <mat-form-field  *ngIf="MP"  style="width: 25%; height: 5%; font-size: 18px;" appearance="fill">
+    <mat-label>SecID</mat-label>
+    <input type="text"
+           placeholder="Choose SecID"
+           aria-label="SecID"
+           matInput
+           formControlName="id" 
+           [matAutocomplete]="auto">
+    <mat-autocomplete #auto="matAutocomplete">
+      <mat-option *ngFor="let secid of filterednstrumentsLists | async" [value]="secid">
+        {{secid}}
+      </mat-option>
+    </mat-autocomplete>
   </mat-form-field>
 
   <button mat-flat-button color="accent" 
@@ -45,4 +61,4 @@
 </form>
 
 
-<p > To close the window click outside it</p>
+<p >To close the window click outside it</p>

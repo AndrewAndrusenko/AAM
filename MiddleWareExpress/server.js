@@ -7,6 +7,7 @@ const jsPassport = require ('passport')
 var LocalStrategy = require('passport-local');
 const uiAmmModule = require ('./aam_ui_module');
 const uiAmmInvestmentsModule = require ('./aam_ui_investmentsData')
+const uiAmmAccountingModule = require ('./aam_ui_accounting')
 const auth_module = require('./auth_module');
 const bcrypt = require('bcryptjs');
 const config = require('./db_config');
@@ -139,4 +140,7 @@ appServer.post('/AAM/AccountCreate/',jsPassport.authenticate('session') , uiAmmI
 appServer.post('/AAM/AccountDelete/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fAccountDelete)
 appServer.post('/AAM/AccountEdit/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fAccountEdit)
 
+/* -----------------------Accountting ----------------------------------------------------- */
+appServer.get('/DEA/fGetMT950Transactions/',jsPassport.authenticate('session') , uiAmmAccountingModule.fGetMT950Transactions)
+/* >>>>>>>>>>>>>>>>>>>>>>>>Accounting Closing>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> */
 appServer.listen (port,'localhost', () => {console.log (`AAM Server is running on port ${port}`)})

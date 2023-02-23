@@ -35,6 +35,8 @@ import { AppTableStrategiesComponentComponent } from './components/tables/app-ta
 import { AppStrategyFormComponent } from './components/forms/app-strategy-form/app-strategy-form.component';
 import { AppTableStrategyComponent } from './components/tables/app-table-strategy_structure/app-table-strategy_structure.component';
 import { AppStructureStrategyFormComponent } from './components/forms/app-structure-strategy-form/app-structure-strategy-form';
+import { AppTableSWIFTsInListsComponent } from './components/tables/app-table-swift-IN-list/app-table-swift-IN-list';
+import { AppTableSWIFT950ItemsComponent } from './components/tables/app-table-swift-950-items-process/app-table-swift-950-items-process';
 
 @NgModule({
     imports: [
@@ -76,7 +78,9 @@ import { AppStructureStrategyFormComponent } from './components/forms/app-struct
         AppTableStrategiesComponentComponent,
         AppStrategyFormComponent,
         AppTableStrategyComponent,
-        AppStructureStrategyFormComponent
+        AppStructureStrategyFormComponent,
+        AppTableSWIFTsInListsComponent,
+        AppTableSWIFT950ItemsComponent
     ],
     bootstrap: [AppComponent],
     providers: [],

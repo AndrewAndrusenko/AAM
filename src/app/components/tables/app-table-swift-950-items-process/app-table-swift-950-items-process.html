@@ -4,32 +4,47 @@
 
 <div class="mat-elevation-z8">
   <table  #strategyTable mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class="mat-elevation-z8">
-    <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header> {{column | uppercase}}</th>
+    <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i = index">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> {{columnsHeaderToDisplay[i]  | uppercase}}</th>
       <td  mat-cell *matCellDef="let element"
-      (click)="chooseStrategy(element)"
-      > {{element[column]}} </td>
+      > <span [ngSwitch]="column">
+      <p *ngSwitchCase="'amountTransaction'">
+        {{element[column] | currency}} 
+      </p>
+      <p *ngSwitchCase="'valueDate'">
+        {{element[column] | date}} 
+      
+      </p>
+      <p *ngSwitchDefault>
+        {{element[column]}}  
+      </p>
+      </span>
+    </td>
     </ng-container>
     <ng-container matColumnDef="expand">
       <th mat-header-cell *matHeaderCellDef aria-label="row actions">&nbsp;</th>
       <td mat-cell *matCellDef="let element">
-        <button mat-icon-button aria-label="expand row" 
-        (click)="(expandedElement = expandedElement === element ? null : element); $event.stopPropagation()">
-          <mat-icon *ngIf="expandedElement !== element">keyboard_arrow_down</mat-icon>
-          <mat-icon *ngIf="expandedElement === element">keyboard_arrow_up</mat-icon>
+    <ng-container  *ngIf="['CR','DR'].includes(element['typeTransaction'])">
+        <mat-form-field  >
+          <input matInput placeholder="Account" formControlName="accountId" [value] = "element['comment'].split('/')[3]">
+        </mat-form-field>
+        <mat-form-field  >
+          <input matInput placeholder="Operation" formControlName="xTypeTransaction_Ext" [value] = "element['comment'].split('/')[1]">
+        </mat-form-field>
+        <mat-form-field  >
+          <input matInput placeholder="Amount" formControlName="allocatedAmount" [value] = "element['amountTransaction'] | currency">
+        </mat-form-field>
+ 
+        <button mat-raised-button style="margin-left: 5%;" aria-label="expand row" color="accent">
+          Confim
         </button>
+    </ng-container>
+
       </td>
     </ng-container>
     
     <ng-container matColumnDef="expandedDetail" >
       <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplayWithExpand.length">
-        <div class="example-element-detail"
-           [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
-          <app-app-accout-tablee style="width: 100%;"
-            [actionOnAccountTable]="'Get_Accounts_By_StrategyId'"
-            [strategyId]="element['id']"
-          ></app-app-accout-tablee>
-        </div>
       </td>
     </ng-container>
 
@@ -42,25 +57,21 @@
         <ng-template  #instrumentcontextmenu>
           <div class="tree-menu-context" cdkMenu >
             <button 
-              (click)="openStrategyForm('Create', null)"
               class="tree-menu-item" cdkMenuItem >
               <mat-icon class="menu-icon" matPrefix>add_circle</mat-icon>      
               New Strategy
             </button>
             <button 
-              (click)="openStrategyForm('Create_Example', element)"
               class="tree-menu-item" cdkMenuItem >
               <mat-icon class="menu-icon" matPrefix>add_circle</mat-icon>      
               New Strategy (on sample)
             </button>
             <button 
-              (click)="openStrategyForm('Edit', element)"
               class="tree-menu-item" cdkMenuItem>
               <mat-icon class="menu-icon" matPrefix>edit</mat-icon>      
               Edit Strategy
             </button>
             <button 
-              (click)="openStrategyForm('Delete', element)"
               class="tree-menu-item" cdkMenuItem>
               <mat-icon class="menu-icon" matPrefix>delete</mat-icon> 
               Delete Strategy

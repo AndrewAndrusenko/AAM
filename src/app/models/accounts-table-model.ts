@@ -52,9 +52,25 @@ export interface StrategyStructure {
   weight_of_child : number,
   id_item:number,
 }
-
 export interface accountTypes {
   typeCode: string, 
   typeValue: string,
   typeDescription: string
 }
+
+export interface SWIFTStatement950model {
+  msgId: number,
+  amountTransaction: number,
+  typeTransaction: string, 
+  valueDate: string,
+  comment: string, 
+  entryAllocatedId: number
+}
+export interface SWIFTSGlobalListmodel {
+  id: number, 
+  msgId: number, 
+  senderBIC: string, 
+  DateMsg: string, 
+  typeMsg: string
+}
+

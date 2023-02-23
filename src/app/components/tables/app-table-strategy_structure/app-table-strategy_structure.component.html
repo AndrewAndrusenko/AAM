@@ -3,7 +3,7 @@
     (closed)="panelOpenState = false" >
     <mat-expansion-panel-header >
     <mat-panel-title >
-    Strategy structure 
+    Strategy structure
     </mat-panel-title>
     <mat-panel-description  >
     Add item 
@@ -20,7 +20,7 @@
 
   <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class="mat-elevation-z8">
     <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i = index">
-      <th mat-header-cell *matHeaderCellDef> {{columnsHToDisplay[i] | uppercase}}</th>
+      <th mat-header-cell *matHeaderCellDef  mat-sort-header> {{columnsHToDisplay[i] | uppercase}}</th>
       <td mat-cell *matCellDef="let element"> {{element[column]}} </td>
       <td mat-footer-cell *matFooterCellDef> </td>
     </ng-container>

@@ -14,19 +14,19 @@ async function fGetStrategiesList (request,response) {
       query.values = [request.query.Name, request.query.id]
     break;
     case 'Get_Strategy_Data':
-      query.text += ' WHERE (id= $1);'
+      query.text += ' WHERE (id= $1); '
       query.values = [request.query.id]
     break;
     case 'Get_ModelPortfolios_List' :
-      query.text += ' WHERE (s_level_id = 1);'
+      query.text += ' WHERE (s_level_id = 1) ORDER BY sname;'
     break;
     case 'Get_Strategies_List' :
-      query.text += ' WHERE (s_level_id = 2);'
+      query.text += ' WHERE (s_level_id = 2) ORDER BY sname;'
     break;
     case 'Get_AccountTypes_List' :
       query.text = 'SELECT "typeCode", "typeValue", "typeDescription" ' + 
                    'FROM public."dGeneralTypes" '+ 
-                   'WHERE ("typeCode" = $1) '
+                   'WHERE ("typeCode" = $1) ORDER BY  typeValue'
       query.values = ['account_type']
     break;
     default:
@@ -55,7 +55,7 @@ async function fGetStrategyStructure (request,response) {
       query.values = [request.query.Name, request.query.id]
     break;
     case 'Get_Strategy_Data':
-      query.text += ' WHERE (id= $1);'
+      query.text += ' WHERE (id= $1) ORDER BY secid, sname ;'
       query.values = [request.query.id]
     break;
     default:

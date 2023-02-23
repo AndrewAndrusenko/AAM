@@ -11,20 +11,23 @@ async function TreeSQLQueryExc (RootNode, userId, nodeParentFavorite) {
   pool.QueryArrayConfig = {values: [], rowMode: "array" }
   switch (RootNode[0]) {
     case 'Clients':
-      pool.QueryArrayConfig.text='SELECT dclients.clientname, dclients.idclient from public.dclients '; 
+      pool.QueryArrayConfig.text='SELECT dclients.clientname, dclients.idclient from public.dclients order by dclients.clientname ;'; 
     break;
-
     case 'Accounts':
-      pool.QueryArrayConfig.text='SELECT  dportfolios.portfolioname, dportfolios.idportfolio from public.dportfolios'; 
+      pool.QueryArrayConfig.text='SELECT dportfolios.portfolioname, dportfolios.idportfolio from public.dportfolios order by dportfolios.portfolioname;'; 
     break;
-
     case 'Strategies':
-      pool.QueryArrayConfig.text='select dstrategiesglobal.sname, dstrategiesglobal.id from public.dstrategiesglobal'; 
+      pool.QueryArrayConfig.text='select dstrategiesglobal.sname, dstrategiesglobal.id from public.dstrategiesglobal order by dstrategiesglobal.s_level_id, dstrategiesglobal.sname;'; 
     break; 
-
     case 'Instruments':
-      pool.QueryArrayConfig.text='SELECT DISTINCT tidinstrument, tidinstrument as id FROM public.dtrades;'
+      pool.QueryArrayConfig.text='SELECT DISTINCT tidinstrument, tidinstrument as id FROM public.dtrades order by tidinstrument;'
     break;     
+    case 'Instruments':
+      pool.QueryArrayConfig.text='SELECT DISTINCT tidinstrument, tidinstrument as id FROM public.dtrades order by tidinstrument;'
+    break;     
+    case 'Non-Trade Operations':
+      pool.QueryArrayConfig.text="SELECT name, id FROM public.dtree_menu_items where rootname='Non-Trade Operations' order by id;"
+      break;     
 
     case 'Favorites':
       pool.QueryArrayConfig.values = [userId, RootNode[1]]
@@ -43,27 +46,31 @@ async function TreeSQLQueryExc (RootNode, userId, nodeParentFavorite) {
           " LEFT JOIN dstrategiesglobal on dtree_menu_favorites.idelement = dstrategiesglobal.id::text "
         break;   
         case 'Instruments':
-          sql = "SELECT dtree_menu_favorites.nodename, dtree_menu_favorites.idelement  FROM public.dtree_menu_favorites " 
+          sql = "SELECT dtree_menu_favorites.nodename, dtree_menu_favorites.idelement FROM public.dtree_menu_favorites " 
         break;   
       }
       pool.QueryArrayConfig.text = sql + " where (userid= $1) and (nodeparent = $2) "
     break;     
   }
   RootNode[1] ? RootNode = RootNode.join('_') : RootNode = RootNode[0]
-  PromQty = new Promise((resolve, reject) => {pool.query(pool.QueryArrayConfig, (error,result) => resolve([RootNode,result.rows]))}) 
+  PromQty = new Promise(
+    (resolve, reject) => {
+      pool.query(pool.QueryArrayConfig, (error,result) => {
+        if (result === undefined) {resolve([RootNode,[]])} else {resolve([RootNode,result.rows])} 
+      })
+    }
+  ) 
   return PromQty;
- }
+}
  
 async function FAmmGetTreeData(request,response) {
   Paramlist = request.query.paramList
-  Paramlist.splice (Paramlist.indexOf('Trades & Orders'),1)
   Paramlist.splice (Paramlist.indexOf('Favorites'),1)
   FavoritesList = Paramlist.map (element => 'Favorites_' + element);
   Treelist = [...Paramlist,...FavoritesList]
 
-  await Promise.all(
-    Treelist.map(RootNode => TreeSQLQueryExc(RootNode, request.query.userId,''))
-  ).then((value) => {
+  await Promise.all (Treelist.map(RootNode => TreeSQLQueryExc(RootNode, request.query.userId,'')))
+  .then((value) => {
     value.push (['Favorites',FavoritesList])
     return response.status(200).json(value)
   })
