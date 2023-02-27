@@ -88,10 +88,10 @@
 <app-table-strategies *ngIf="messageReceived.text=='Strategies_Root'">
 </app-table-strategies>     
 
-<mat-tab-group  *ngIf="messageReceived.name=='Cash IN/OUT Menu'" mat-stretch-tabs #TradesOrdersInfo>
-  <mat-tab label="Transactions List" >Cash IN and Cash OUT transactions</mat-tab>  
-  <mat-tab label="SWIFT Statements processing "> 
-    <app-table-swift-IN-list></app-table-swift-IN-list>
+<mat-tab-group  *ngIf="messageReceived.name=='Cash In/Out Menu'" mat-stretch-tabs>
+  <mat-tab  label="Transactions List" >Cash IN and Cash OUT transactions</mat-tab>  
+  <mat-tab   label="SWIFT Statements processing "> 
+    <app-table-swift-IN-list style="width: 150%;"></app-table-swift-IN-list>
   </mat-tab>
   <mat-tab label="Statement Reconcilation"> Statement Reconcilation  </mat-tab>
 </mat-tab-group>

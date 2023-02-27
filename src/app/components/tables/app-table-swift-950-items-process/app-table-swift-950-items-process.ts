@@ -6,7 +6,7 @@ import {MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { SWIFTStatement950model } from 'src/app/models/accounts-table-model';
+import { bcTransactionType_Ext, SWIFTStatement950model } from 'src/app/models/accounts-table-model';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
 @Component({
   selector: 'app-table-swift-950-items-process',
@@ -21,9 +21,10 @@ import { AppAccountingService } from 'src/app/services/app-accounting.service';
   ],
 })
 export class AppTableSWIFT950ItemsComponent  implements AfterViewInit {
+  TransactionTypes: bcTransactionType_Ext[] = [];
   @Input() parentMsgId: number;
   columnsToDisplay = ['amountTransaction',  'typeTransaction', 'valueDate', 'comment' ];
-  columnsHeaderToDisplay = ['amount',  'type', 'value', 'comment'];
+  columnsHeaderToDisplay = ['amount',  'type', 'value', 'comment','details'];
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
   dataSource: MatTableDataSource<SWIFTStatement950model>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -32,10 +33,12 @@ export class AppTableSWIFT950ItemsComponent  implements AfterViewInit {
   expandedElement: SWIFTStatement950model  | null;
   accessToClientData: string = 'true';
   action ='';
-
   constructor(private AccountingDataService:AppAccountingService, private TreeMenuSevice:TreeMenuSevice, private dialog: MatDialog ) {}
 
   async ngAfterViewInit() {
+    this.AccountingDataService.GetTransactionType_Ext(null,null,null,null,'bcTransactionType_Ext').subscribe (data => { this.TransactionTypes=data;
+      console.log('DAATA',data);
+     } )
     this.columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
     let userData = JSON.parse(localStorage.getItem('userInfo'))
     await lastValueFrom (this.TreeMenuSevice.getaccessRestriction (userData.user.accessrole, 'accessToClientData'))

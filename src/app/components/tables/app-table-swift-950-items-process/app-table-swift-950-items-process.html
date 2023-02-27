@@ -19,66 +19,89 @@
         {{element[column]}}  
       </p>
       </span>
+          
     </td>
-    </ng-container>
-    <ng-container matColumnDef="expand">
-      <th mat-header-cell *matHeaderCellDef aria-label="row actions">&nbsp;</th>
-      <td mat-cell *matCellDef="let element">
-    <ng-container  *ngIf="['CR','DR'].includes(element['typeTransaction'])">
-        <mat-form-field  >
-          <input matInput placeholder="Account" formControlName="accountId" [value] = "element['comment'].split('/')[3]">
-        </mat-form-field>
-        <mat-form-field  >
-          <input matInput placeholder="Operation" formControlName="xTypeTransaction_Ext" [value] = "element['comment'].split('/')[1]">
-        </mat-form-field>
-        <mat-form-field  >
-          <input matInput placeholder="Amount" formControlName="allocatedAmount" [value] = "element['amountTransaction'] | currency">
-        </mat-form-field>
- 
-        <button mat-raised-button style="margin-left: 5%;" aria-label="expand row" color="accent">
-          Confim
-        </button>
-    </ng-container>
+    
+  
+  </ng-container>
 
+
+    <ng-container   matColumnDef="expand" >
+      <th  mat-header-cell *matHeaderCellDef aria-label="row actions">&nbsp;</th>
+      <td  mat-cell *matCellDef="let element" >
+        <div *ngIf="['CR','DR'].includes(element['typeTransaction'])"
+        style="width: 200%;"
+        >
+        <mat-form-field  >
+        
+          <mat-select   [value]="element['comment'].split('/')[1]" > 
+            <mat-option *ngFor="let TransactionType of TransactionTypes" [value]="TransactionType.xActTypeCode_Ext">
+              {{TransactionType.xActTypeCode_Ext |uppercase}} - {{TransactionType.description}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        
+         <!--  <mat-error  *ngIf="id.invalid && id.touched">
+            The field is required.    
+         </mat-error> -->
+<!-- 
+        <mat-form-field style="width: 10%;"  >
+          <input matInput placeholder="Operation" formControlName="xTypeTransaction_Ext" [value] = "element['comment'].split('/')[1]">
+        </mat-form-field>  -->
+        <mat-form-field  >
+            <input matInput placeholder="Account" formControlName="accountId" [value] = "element['comment'].split('/')[3]">
+          </mat-form-field>
+          <mat-form-field  >
+            <input matInput placeholder="Amount" formControlName="allocatedAmount" [value] = "element['amountTransaction'] | currency">
+          </mat-form-field>
+                   
+          <button mat-raised-button style="margin-left: 5%;" aria-label="expand row" color="primary" >
+            Confim
+          </button>
+          <button style="width: 5%;" mat-icon-button aria-label="expand row" (click)="(expandedElement = expandedElement === element ? null : element); $event.stopPropagation()">
+            <mat-icon *ngIf="expandedElement !== element">keyboard_arrow_down</mat-icon>
+            <mat-icon *ngIf="expandedElement === element">keyboard_arrow_up</mat-icon>
+          </button>
+        </div>
       </td>
+
     </ng-container>
     
-    <ng-container matColumnDef="expandedDetail" >
+    <ng-container matColumnDef="expandedDetail"  >
       <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplayWithExpand.length">
+        <div class="example-element-detail" *ngIf="['CR','DR'].includes(element['typeTransaction'])"
+          [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'"
+          style="background-color: darkslategray;">
+          <mat-form-field style="width: 13%;" >
+            <input matInput placeholder="Entry Date" formControlName="EntryDate" [value] = "element['valueDate'] | date">
+          </mat-form-field>
+
+            <mat-form-field  >
+                <input matInput placeholder="Debit Account" formControlName="Debit" [value] = "'30114BCHASU001'">
+              </mat-form-field>
+              <mat-form-field  >
+                <input matInput placeholder="Credit Account" formControlName="Credit" [value] = "element['comment'].split('/')[3]">
+              </mat-form-field>
+              <mat-form-field  style="width: 40%;">
+                <input matInput placeholder="Details" formControlName="Details" [value] = "'fsfsdf fsdfdsf fsdfsdfsd fsdfsdf'">
+              </mat-form-field>
+            
+           
+            <!-- <span class="row_field_name">Client:  </span> {{element.clientname}} 
+            <span class="row_field_name">Address: </span>  {{element.address}} 
+            <span class="row_field_name">  Proffesional: </span> {{element.isclientproffesional}}
+ -->         
+        </div>
       </td>
     </ng-container>
 
     <tr mat-header-row *matHeaderRowDef="columnsToDisplayWithExpand"></tr>
-    <tr mat-row [cdkContextMenuTriggerFor]="instrumentcontextmenu"  *matRowDef="let element; columns: columnsToDisplayWithExpand;"
-        class="example-element-row"
-        [class.example-expanded-row]="expandedElement === element"
-        (click)="expandedElement = expandedElement === element ? null : element">
-       
-        <ng-template  #instrumentcontextmenu>
-          <div class="tree-menu-context" cdkMenu >
-            <button 
-              class="tree-menu-item" cdkMenuItem >
-              <mat-icon class="menu-icon" matPrefix>add_circle</mat-icon>      
-              New Strategy
-            </button>
-            <button 
-              class="tree-menu-item" cdkMenuItem >
-              <mat-icon class="menu-icon" matPrefix>add_circle</mat-icon>      
-              New Strategy (on sample)
-            </button>
-            <button 
-              class="tree-menu-item" cdkMenuItem>
-              <mat-icon class="menu-icon" matPrefix>edit</mat-icon>      
-              Edit Strategy
-            </button>
-            <button 
-              class="tree-menu-item" cdkMenuItem>
-              <mat-icon class="menu-icon" matPrefix>delete</mat-icon> 
-              Delete Strategy
-            </button> 
-          </div>
-        </ng-template>
-        <!-- //Context menu for treeMenu element -->
+    <tr mat-row *matRowDef="let element; columns: columnsToDisplayWithExpand;"
+      class="example-element-row"
+      [class.example-expanded-row]="expandedElement === element"
+      (click)="expandedElement = expandedElement === element ? null : element">
+
+
 
       </tr>
     <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"    ></tr>

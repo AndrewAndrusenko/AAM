@@ -6,7 +6,6 @@ import {MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { AppStrategyFormComponent } from '../../forms/app-strategy-form/app-strategy-form.component';
 import { SWIFTSGlobalListmodel } from 'src/app/models/accounts-table-model';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
 @Component({
@@ -22,7 +21,8 @@ import { AppAccountingService } from 'src/app/services/app-accounting.service';
   ],
 })
 export class AppTableSWIFTsInListsComponent  implements AfterViewInit {
-  columnsToDisplay = ['id','msgId',  'senderBIC', 'DateMsg', 'typeMsg'];
+  columnsToDisplay = ['msgId',  'senderBIC', 'DateMsg', 'typeMsg','accountNo', 'ledgerNo'];
+  columnsHeaderToDisplay = ['msgId',  'senderBIC', 'Date', 'Type','Account','ledger'];
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
   dataSource: MatTableDataSource<SWIFTSGlobalListmodel>;
   @ViewChild(MatPaginator) paginator: MatPaginator;

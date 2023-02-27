@@ -71,6 +71,13 @@ export interface SWIFTSGlobalListmodel {
   msgId: number, 
   senderBIC: string, 
   DateMsg: string, 
-  typeMsg: string
+  typeMsg: string,
+  accountNo: string,
+  ledgerNo:string
 }
-
+export interface bcTransactionType_Ext {
+  id: number, 
+  xActTypeCode_Ext: string, 
+  description: string, 
+  code2: string,
+}
