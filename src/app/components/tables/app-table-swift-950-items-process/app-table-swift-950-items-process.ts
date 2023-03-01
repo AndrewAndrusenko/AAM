@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, EventEmitter, Input, Output, SimpleChanges, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, EventEmitter, Input, OnInit, Output, SimpleChanges, ViewChild} from '@angular/core';
 import {MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {lastValueFrom, Subscription } from 'rxjs';
@@ -6,8 +6,9 @@ import {MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { bcTransactionType_Ext, SWIFTStatement950model } from 'src/app/models/accounts-table-model';
+import { bcParametersSchemeAccTrans, bcTransactionType_Ext, SWIFTStatement950model } from 'src/app/models/accounts-table-model';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
+import { FormBuilder, FormGroup } from '@angular/forms';
 @Component({
   selector: 'app-table-swift-950-items-process',
   templateUrl: './app-table-swift-950-items-process.html',
@@ -20,31 +21,35 @@ import { AppAccountingService } from 'src/app/services/app-accounting.service';
     ]),
   ],
 })
-export class AppTableSWIFT950ItemsComponent  implements AfterViewInit {
+export class AppTableSWIFT950ItemsComponent  implements OnInit, AfterViewInit {
+  bcEntryParameters = <bcParametersSchemeAccTrans> {}
   TransactionTypes: bcTransactionType_Ext[] = [];
-  @Input() parentMsgId: number;
-  columnsToDisplay = ['amountTransaction',  'typeTransaction', 'valueDate', 'comment' ];
-  columnsHeaderToDisplay = ['amount',  'type', 'value', 'comment','details'];
+  columnsToDisplay = ['amountTransaction',  'typeTransaction', 'valueDate', 'comment', 'refTransaction' ];
+  columnsHeaderToDisplay = ['amount',  'type', 'value', 'comment','ref'];
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
   dataSource: MatTableDataSource<SWIFTStatement950model>;
+  @Input() parentMsgRow: any;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
   @Output() public modal_principal_parent = new EventEmitter();
   expandedElement: SWIFTStatement950model  | null;
   accessToClientData: string = 'true';
   action ='';
-  constructor(private AccountingDataService:AppAccountingService, private TreeMenuSevice:TreeMenuSevice, private dialog: MatDialog ) {}
-
+  constructor( 
+    private AccountingDataService:AppAccountingService, 
+    private TreeMenuSevice:TreeMenuSevice, 
+    private dialog: MatDialog,
+    private fb:FormBuilder 
+  ) {}
+  ngOnInit(): void {}
+  
   async ngAfterViewInit() {
-    this.AccountingDataService.GetTransactionType_Ext(null,null,null,null,'bcTransactionType_Ext').subscribe (data => { this.TransactionTypes=data;
-      console.log('DAATA',data);
-     } )
     this.columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
     let userData = JSON.parse(localStorage.getItem('userInfo'))
     await lastValueFrom (this.TreeMenuSevice.getaccessRestriction (userData.user.accessrole, 'accessToClientData'))
     .then ((accessRestrictionData) =>{
       this.accessToClientData = accessRestrictionData['elementvalue']
-      this.AccountingDataService.GetMT950Transactions (null,this.parentMsgId,null,null,'GetMT950Transactions').subscribe (MT950Transactions  => {
+      this.AccountingDataService.GetMT950Transactions (null,this.parentMsgRow.id,null,null,'GetMT950Transactions').subscribe (MT950Transactions  => {
         this.dataSource  = new MatTableDataSource(MT950Transactions);
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
@@ -52,20 +57,23 @@ export class AppTableSWIFT950ItemsComponent  implements AfterViewInit {
     })
   }
   
-  ngOnChanges(changes: SimpleChanges) {
+  ngOnChanges(changes: SimpleChanges) {}
 
-    console.log('changes', changes);
-    let newId = changes['id'].currentValue
-    console.log('OK', newId);
-
-    this.AccountingDataService.GetMT950Transactions (null,newId,null,null,'GetMT950Transactions').subscribe (MT950Transactions  => {
-      this.dataSource  = new MatTableDataSource(MT950Transactions);
-      this.dataSource.paginator = this.paginator;
-      this.dataSource.sort = this.sort;
-    })
-  
+  openEntry (row) {
+    console.log('row950', row);
+    console.log('parent', this.parentMsgRow);
+    this.bcEntryParameters.pAccountNo =row.comment.split('/')[3];
+    this.bcEntryParameters.pLedgerNo = this.parentMsgRow.ledgerNo;
+    this.bcEntryParameters.pAmount = row.amountTransaction;
+    this.bcEntryParameters.pDate_T = row.valueDate;
+    this.bcEntryParameters.pSenderBIC = this.parentMsgRow.senderBIC;
+    this.bcEntryParameters.pRef = row.refTransaction;
+    this.bcEntryParameters.cxActTypeCode = row.typeTransaction;
+    this.bcEntryParameters.cxActTypeCode_Ext = row.comment.split('/')[1];
+    this.bcEntryParameters.cLedgerType = 'NostroAccount'
+    console.log('param', this.bcEntryParameters);
+    this.AccountingDataService.GetEntryScheme (this.bcEntryParameters).subscribe (data => console.log('data', data))
   }
-
 
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
@@ -73,6 +81,7 @@ export class AppTableSWIFT950ItemsComponent  implements AfterViewInit {
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
   
+
 /*   chooseStrategy (element) {
     console.log('chose account', element);
     this.currentStrategy = element;

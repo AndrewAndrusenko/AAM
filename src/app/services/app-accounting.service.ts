@@ -22,4 +22,14 @@ export class AppAccountingService {
     const params = {'dataRange': dataRange, 'id' :id, 'MTType': MTType,'Sender':Sender, 'Action': Action}
     return this.http.get <bcTransactionType_Ext []>('/api/DEA/fGetAccountingData/', { params: params })
   }
+ EntryCreate ():Observable <any[]> {
+  console.log('ftEntryCreate','ftEntryCreate');
+    return this.http.get <any []>('/api/DEA/ftEntryCreate/')
+  }
+  
+  GetEntryScheme (bcEntryParameters:any) :Observable <bcTransactionType_Ext[]> { 
+    console.log('GetEntryScheme', bcEntryParameters);
+    return this.http.get <bcTransactionType_Ext []>('/api/DEA/GetEntryScheme/', { params: bcEntryParameters })  
+  } 
+
 }

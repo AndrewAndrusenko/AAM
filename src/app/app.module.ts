@@ -37,6 +37,7 @@ import { AppTableStrategyComponent } from './components/tables/app-table-strateg
 import { AppStructureStrategyFormComponent } from './components/forms/app-structure-strategy-form/app-structure-strategy-form';
 import { AppTableSWIFTsInListsComponent } from './components/tables/app-table-swift-IN-list/app-table-swift-IN-list';
 import { AppTableSWIFT950ItemsComponent } from './components/tables/app-table-swift-950-items-process/app-table-swift-950-items-process';
+import { AppMT950ItemParsing } from './components/forms/app-MT950ItemsParser-form/app-MT950ItemsParser-form';
 
 @NgModule({
     imports: [
@@ -80,7 +81,8 @@ import { AppTableSWIFT950ItemsComponent } from './components/tables/app-table-sw
         AppTableStrategyComponent,
         AppStructureStrategyFormComponent,
         AppTableSWIFTsInListsComponent,
-        AppTableSWIFT950ItemsComponent
+        AppTableSWIFT950ItemsComponent,
+        AppMT950ItemParsing
     ],
     bootstrap: [AppComponent],
     providers: [],

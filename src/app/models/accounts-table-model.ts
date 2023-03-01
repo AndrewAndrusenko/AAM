@@ -64,7 +64,8 @@ export interface SWIFTStatement950model {
   typeTransaction: string, 
   valueDate: string,
   comment: string, 
-  entryAllocatedId: number
+  entryAllocatedId: number,
+  refTransaction: string
 }
 export interface SWIFTSGlobalListmodel {
   id: number, 
@@ -80,4 +81,16 @@ export interface bcTransactionType_Ext {
   xActTypeCode_Ext: string, 
   description: string, 
   code2: string,
+}
+export interface bcParametersSchemeAccTrans {
+  pRef : string,
+  pAccountNo : string,
+  pLedgerNo: string,
+  pAmount: number,
+  pSenderBIC: string,
+  pRefTransaction: string,
+  pDate_T: string,
+  cxActTypeCode_Ext:string,
+  cxActTypeCode: string,
+  cLedgerType: string
 }

@@ -30,18 +30,9 @@ export class AppTableSWIFTsInListsComponent  implements AfterViewInit {
   @Output() public modal_principal_parent = new EventEmitter();
   expandedElement: SWIFTSGlobalListmodel  | null;
   accessToClientData: string = 'true';
-  // dialogRef: MatDialogRef<AppStrategyFormComponent>;
   action ='';
-  // public currentStrategy: any;
-  // private subscriptionName: Subscription;
 
-  constructor(private AccountingDataService:AppAccountingService, private TreeMenuSevice:TreeMenuSevice, private dialog: MatDialog ) {
-/*       this.AccountingDataService.GetSWIFTsList (null,null,null,null,'GetSWIFTsList').subscribe (SWIFTsList => {
-        this.dataSource  = new MatTableDataSource(SWIFTsList);
-        this.dataSource.paginator = this.paginator;
-        this.dataSource.sort = this.sort;
-      }) */
-  }
+  constructor(private AccountingDataService:AppAccountingService, private TreeMenuSevice:TreeMenuSevice, private dialog: MatDialog ) {}
 
   async ngAfterViewInit() {
     this.columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];

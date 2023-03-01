@@ -1,0 +1,36 @@
+<form class="submit" [formGroup]="swift950Entry">
+
+  <mat-form-field style="width: 9%;" >
+    <input matInput placeholder="Entry Date" formControlName="EntryDate" >
+  </mat-form-field>
+
+    <mat-form-field style="width: 11%;"  >
+        <input matInput placeholder="Debit Account" formControlName="Debit" >
+      </mat-form-field>
+      <mat-form-field  style="width: 11%;" >
+        <input matInput placeholder="Credit Account" formControlName="Credit">
+      </mat-form-field>
+      <mat-form-field  style="width: 10%;" >
+        <input matInput placeholder="Amount" formControlName="allocatedAmount" >
+      </mat-form-field>
+      <mat-form-field  style="width: 9%;">
+        <mat-select   formControlName="xActTypeCode_Ext" > 
+          <mat-option *ngFor="let TransactionType of TransactionTypes" [value]="TransactionType.xActTypeCode_Ext">
+            {{TransactionType.xActTypeCode_Ext |uppercase}} - {{TransactionType.description}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field  style="width: 40%;">
+        <input matInput placeholder="Details" formControlName="Details" >
+      </mat-form-field>
+        <button mat-raised-button  aria-label="expand row" color="primary" 
+          (click)="ftEntryCreate()" >
+          Submit
+        </button>
+
+<!--         <mat-form-field  >
+          <input matInput placeholder="Account" formControlName="accountId" >
+        </mat-form-field> -->
+
+      </form>
+    
