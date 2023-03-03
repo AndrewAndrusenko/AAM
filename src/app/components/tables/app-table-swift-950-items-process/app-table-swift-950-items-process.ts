@@ -71,7 +71,7 @@ export class AppTableSWIFT950ItemsComponent  implements OnInit, AfterViewInit {
       // this.bcEntryParameters.dLedgerNo = this.parentMsgRow.ledgerNo;
       this.bcEntryParameters.pExtTransactionId = row.id;
       this.bcEntryParameters.pAmount = row.amountTransaction;
-      this.bcEntryParameters.pDate_T = new Date(row.valueDate).toISOString() ;
+      this.bcEntryParameters.pDate_T = row.valueDate ;
       this.bcEntryParameters.pSenderBIC = this.parentMsgRow.senderBIC;
       this.bcEntryParameters.pRef = row.refTransaction;
       this.bcEntryParameters.cxActTypeCode = row.typeTransaction;

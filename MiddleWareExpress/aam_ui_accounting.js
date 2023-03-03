@@ -74,8 +74,26 @@ async function GetEntryScheme (request, response) {
   } else {
     if (res.rows.length !== 0) {
       entryDraftData = JSON.parse (pgp.as.format (JSON.stringify(res.rows[0]), request.query))
-      console.log('parse',entryDraftData );
-      return response.status(200).json((entryDraftData))
+      console.log('parse',[entryDraftData] );
+
+      sql = 'SELECT ' + 
+      '"bLedger"."ledgerNo", "bAccounts"."accountNo", "bcTransactionType_Ext"."xActTypeCode_Ext", "bcTransactionType_DE"."name", '+ 'json_populate_recordset.* ' +
+      'FROM json_populate_recordset(null::public."bAccountTransaction",\'[' + [JSON.stringify(entryDraftData)] +']\') ' +
+      'LEFT JOIN "bcTransactionType_Ext" ON "bcTransactionType_Ext".id = json_populate_recordset."XactTypeCode_Ext" ' +
+      'LEFT JOIN "bcTransactionType_DE" ON "bcTransactionType_DE"."xActTypeCode" = json_populate_recordset."XactTypeCode" ' +
+      'LEFT JOIN "bLedger" ON "bLedger"."ledgerNoId" = json_populate_recordset."ledgerNoId"	' +
+      'LEFT JOIN "bAccounts" ON "bAccounts"."accountId" = json_populate_recordset."accountId";	' 	
+      console.log('sql',sql); 
+      pool.query (sql,  (err, res) => {if (err) {
+        console.log (err.stack.split("\n", 1).join(""))
+        err.detail = err.stack
+        return response.send(err)
+      } else {
+        console.log('res', res.rows[0]);
+        return response.status(200).json((res.rows[0]))
+
+      }})
+      
     }
   }
   })

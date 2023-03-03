@@ -17,6 +17,7 @@ export class AppMT950ItemParsing  {
   mydate = new Date('2014-04-03'); 
   public swift950Entry=this.fb.group ({
     XactTypeCode_Ext: null,
+    XactTypeCode: null,
     amountTransaction: 0,
     dataTime: new Date().toISOString(),
     accountId: null,
@@ -50,6 +51,8 @@ export class AppMT950ItemParsing  {
       console.log('data', data.XactTypeCode_Ext);
       this.swift950Entry.patchValue(data)
       this.swift950Entry.controls.XactTypeCode_Ext.setValue(Number(data.XactTypeCode_Ext))
+      this.swift950Entry.controls.XactTypeCode.setValue(Number(data.XactTypeCode))
+      this.swift950Entry.controls.dataTime.setValue(new Date(data.dataTime).toISOString())
     })
       
     this.AccountingDataService.GetTransactionType_Ext('',0,'','','bcTransactionType_Ext').subscribe (data => this.TransactionTypes=data)
@@ -57,6 +60,7 @@ export class AppMT950ItemParsing  {
   
   get  amountTransaction ()   {return this.swift950Entry.get('amountTransaction') } 
   get  XactTypeCode_Ext ()   {return this.swift950Entry.get('XactTypeCode_Ext') } 
+  get  XactTypeCode ()   {return this.swift950Entry.get('XactTypeCode') } 
   get  dataTime ()   {return this.swift950Entry.get('dataTime') } 
   get  accountId ()   {return this.swift950Entry.get('accountId') } 
   get  ledgerNoId ()   {return this.swift950Entry.get('ledgerNoId') } 
