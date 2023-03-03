@@ -75,6 +75,7 @@ export interface SWIFTSGlobalListmodel {
   typeMsg: string,
   accountNo: string,
   ledgerNo:string
+  ledgerNoId:number
 }
 export interface bcTransactionType_Ext {
   id: number, 
@@ -84,13 +85,25 @@ export interface bcTransactionType_Ext {
 }
 export interface bcParametersSchemeAccTrans {
   pRef : string,
-  pAccountNo : string,
-  pLedgerNo: string,
   pAmount: number,
   pSenderBIC: string,
   pRefTransaction: string,
   pDate_T: string,
-  cxActTypeCode_Ext:string,
-  cxActTypeCode: string,
-  cLedgerType: string
+  cxActTypeCode_Ext:number,
+  cxActTypeCode: number,
+  cLedgerType: string,
+  pAccountId: number,
+  dAccountNo: string,
+  pLedgerNoId: number,
+  dLedgerNo: string,
+  pExtTransactionId:string
+}
+export interface bAccounts {
+  accountNo: string,  
+  accountTypeExt: number,  
+  Information: string,  
+  clientId: number,  
+  currencyCode: number,  
+  entityTypeCode: number, 
+  accountId: number,
 }

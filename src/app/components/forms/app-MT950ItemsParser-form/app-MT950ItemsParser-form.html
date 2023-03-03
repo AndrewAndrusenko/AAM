@@ -1,36 +1,37 @@
 <form class="submit" [formGroup]="swift950Entry">
 
-  <mat-form-field style="width: 9%;" >
-    <input matInput placeholder="Entry Date" formControlName="EntryDate" >
+  <mat-form-field class="example-full-width" style="width: 13%;" >
+    <input matInput  [matDatepicker]="picker" placeholder="Choose a date"  formControlName="dataTime" >
+    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-datepicker #picker></mat-datepicker>
   </mat-form-field>
-
-    <mat-form-field style="width: 11%;"  >
-        <input matInput placeholder="Debit Account" formControlName="Debit" >
-      </mat-form-field>
-      <mat-form-field  style="width: 11%;" >
-        <input matInput placeholder="Credit Account" formControlName="Credit">
-      </mat-form-field>
-      <mat-form-field  style="width: 10%;" >
-        <input matInput placeholder="Amount" formControlName="allocatedAmount" >
-      </mat-form-field>
-      <mat-form-field  style="width: 9%;">
-        <mat-select   formControlName="xActTypeCode_Ext" > 
-          <mat-option *ngFor="let TransactionType of TransactionTypes" [value]="TransactionType.xActTypeCode_Ext">
-            {{TransactionType.xActTypeCode_Ext |uppercase}} - {{TransactionType.description}}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field  style="width: 40%;">
-        <input matInput placeholder="Details" formControlName="Details" >
-      </mat-form-field>
-        <button mat-raised-button  aria-label="expand row" color="primary" 
-          (click)="ftEntryCreate()" >
-          Submit
-        </button>
-
-<!--         <mat-form-field  >
-          <input matInput placeholder="Account" formControlName="accountId" >
-        </mat-form-field> -->
-
-      </form>
+  <mat-form-field style="width: 3%;"  >
+    <input matInput placeholder="aID" formControlName="accountId">
+  </mat-form-field>
+  <mat-form-field style="width: 11%;"  >
+    <input matInput placeholder="Debit Account" formControlName="accountNo">
+  </mat-form-field>
+  <mat-form-field  style="width: 3%;" >
+    <input matInput placeholder="lID" formControlName="ledgerNoId">
+  </mat-form-field>
+  <mat-form-field  style="width: 11%;" >
+    <input matInput placeholder="Credit Account" formControlName="ledgerNo">
+  </mat-form-field>
+  <mat-form-field  style="width: 10%;" >
+    <input  matInput placeholder="Amount" formControlName="amountTransaction" [value]="swift950Entry.get('amountTransaction').valueChanges | async  | currency">
+  </mat-form-field>
+  <mat-form-field  style="width: 9%;">
+    <mat-select   formControlName="XactTypeCode_Ext" > 
+      <mat-option *ngFor="let TransactionType of TransactionTypes" [value]="TransactionType.id">
+        {{TransactionType.xActTypeCode_Ext |uppercase}} - {{TransactionType.description}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field  style="width: 40%;">
+    <input matInput placeholder="Details" formControlName="entryDetails" >
+  </mat-form-field>
+  <button mat-raised-button  aria-label="expand row" color="primary"  >
+    Submit
+  </button>
+</form>
     

@@ -13,15 +13,17 @@ import { AppAccountingService } from 'src/app/services/app-accounting.service';
   templateUrl: './app-MT950ItemsParser-form.html',
   styleUrls: ['./app-MT950ItemsParser-form.css'],
 })
-export class AppMT950ItemParsing implements OnInit {
+export class AppMT950ItemParsing  {
+  mydate = new Date('2014-04-03'); 
   public swift950Entry=this.fb.group ({
-    xActTypeCode_Ext: 'DP',
-
-    allocatedAmount: '20 00 000 000',
-      EntryDate: '23/02/2023',
-      Debit: '40820PMIKES001',
-      Credit: '30114BCHASU001',
-      Details:' Incoming payment ${pSenderBIC:raw} to with ref: ${pRef:raw}   '
+    XactTypeCode_Ext: null,
+    amountTransaction: 0,
+    dataTime: new Date().toISOString(),
+    accountId: null,
+    accountNo: null,
+    ledgerNoId: null,
+    ledgerNo: null,
+    entryDetails: null
     })
   @Input() action: string;
   @Input() strategyId: string;
@@ -43,27 +45,21 @@ export class AppMT950ItemParsing implements OnInit {
     private AccountingDataService:AppAccountingService, 
     private dialog: MatDialog, 
     public snack:MatSnackBar,
-    
-  ) {}
-  
-  ngOnInit(): void {
-    this.AccountingDataService.GetTransactionType_Ext(null,null,null,null,'bcTransactionType_Ext').subscribe (data => { this.TransactionTypes=data;
-     } )
-
-  }
-
-  ngOnChanges(changes: SimpleChanges) {
-  console.log('950 form SimpleChanges', changes);
-  }
-  ftEntryCreate () {
-    console.log('dd', 'ftEntryCreate');
-    let data:any;
-    // this.AccountingDataService.createEntryTest(data).then ( (result) => {console.log('rers', result) })
+  ) {
+    this.AccountingDataService.getEntryDraft().subscribe (data => {
+      console.log('data', data.XactTypeCode_Ext);
+      this.swift950Entry.patchValue(data)
+      this.swift950Entry.controls.XactTypeCode_Ext.setValue(Number(data.XactTypeCode_Ext))
+    })
+      
+    this.AccountingDataService.GetTransactionType_Ext('',0,'','','bcTransactionType_Ext').subscribe (data => this.TransactionTypes=data)
   }
   
-/*   get  id ()   {return this.editStructureStrategyForm.get('id') } 
-  get  sname ()   {return this.editStructureStrategyForm.get('sname') } 
-  get  description ()   {return this.editStructureStrategyForm.get('description') } 
-  get  weight_of_child ()   {return this.editStructureStrategyForm.get('weight_of_child') }  */
+  get  amountTransaction ()   {return this.swift950Entry.get('amountTransaction') } 
+  get  XactTypeCode_Ext ()   {return this.swift950Entry.get('XactTypeCode_Ext') } 
+  get  dataTime ()   {return this.swift950Entry.get('dataTime') } 
+  get  accountId ()   {return this.swift950Entry.get('accountId') } 
+  get  ledgerNoId ()   {return this.swift950Entry.get('ledgerNoId') } 
+  get  entryDetails ()   {return this.swift950Entry.get('entryDetails') } 
 
 }

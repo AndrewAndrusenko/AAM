@@ -144,7 +144,6 @@ appServer.post('/AAM/AccountEdit/',jsPassport.authenticate('session') , uiAmmInv
 appServer.get('/DEA/fGetMT950Transactions/',jsPassport.authenticate('session') , uiAmmAccountingModule.fGetMT950Transactions)
 appServer.get('/DEA/fGetAccountingData/',jsPassport.authenticate('session') , uiAmmAccountingModule.fGetAccountingData)
 appServer.get('/DEA/GetEntryScheme/',jsPassport.authenticate('session') , uiAmmAccountingModule.GetEntryScheme)
-appServer.post('/DEA/ftEntryCreateTest/',jsPassport.authenticate('session') , uiAmmAccountingModule.ftEntryCreateTest)
 
 /* >>>>>>>>>>>>>>>>>>>>>>>>Accounting Closing>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> */
 appServer.listen (port,'localhost', () => {console.log (`AAM Server is running on port ${port}`)})
