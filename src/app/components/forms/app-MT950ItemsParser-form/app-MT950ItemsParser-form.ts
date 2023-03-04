@@ -4,7 +4,7 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { AppConfimActionComponent } from '../../alerts/app-confim-action/app-confim-action.component';
 import { AppSnackMsgboxComponent } from '../../app-snack-msgbox/app-snack-msgbox.component';
 import { MatSnackBar} from '@angular/material/snack-bar';
-import { bcTransactionType_Ext, StrategiesGlobalData } from 'src/app/models/accounts-table-model';
+import { bcTransactionType_Ext } from 'src/app/models/accounts-table-model';
 import { AppInstrumentTableComponent } from '../../tables/app-table-instrument/app-table-instrument.component';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
 
@@ -24,21 +24,17 @@ export class AppMT950ItemParsing  {
     accountNo: null,
     ledgerNoId: null,
     ledgerNo: null,
-    entryDetails: null
+    entryDetails: null,
+    extTransactionId : null
     })
   @Input() action: string;
-  @Input() strategyId: string;
-  @Input() MP: boolean;
   dialogRefConfirm: MatDialogRef<AppConfimActionComponent>;
   isEditForm: boolean = false;
   dialogRef: MatDialogRef<AppInstrumentTableComponent>;
   dtOptions: any = {};
-  MPnames: StrategiesGlobalData [] = [];
-  public fullInstrumentsLists :string [] =[];
   public actionType : string;
   public actionToConfim = {'action':'delete_client' ,'isConfirmed': false}
   public AppSnackMsgbox : AppSnackMsgboxComponent
-  public showStrateryStructure: boolean;
   public data: any;
   TransactionTypes: bcTransactionType_Ext[] = [];
   constructor (
@@ -48,22 +44,39 @@ export class AppMT950ItemParsing  {
     public snack:MatSnackBar,
   ) {
     this.AccountingDataService.getEntryDraft().subscribe (data => {
-      console.log('data', data.XactTypeCode_Ext);
+      console.log('data', data);
       this.swift950Entry.patchValue(data)
       this.swift950Entry.controls.XactTypeCode_Ext.setValue(Number(data.XactTypeCode_Ext))
       this.swift950Entry.controls.XactTypeCode.setValue(Number(data.XactTypeCode))
       this.swift950Entry.controls.dataTime.setValue(new Date(data.dataTime).toISOString())
+      // this.swift950Entry.controls.extTransactionId.setValue(Number(data.dataTime))
+
     })
       
     this.AccountingDataService.GetTransactionType_Ext('',0,'','','bcTransactionType_Ext').subscribe (data => this.TransactionTypes=data)
   }
-  
-  get  amountTransaction ()   {return this.swift950Entry.get('amountTransaction') } 
-  get  XactTypeCode_Ext ()   {return this.swift950Entry.get('XactTypeCode_Ext') } 
-  get  XactTypeCode ()   {return this.swift950Entry.get('XactTypeCode') } 
-  get  dataTime ()   {return this.swift950Entry.get('dataTime') } 
-  get  accountId ()   {return this.swift950Entry.get('accountId') } 
-  get  ledgerNoId ()   {return this.swift950Entry.get('ledgerNoId') } 
-  get  entryDetails ()   {return this.swift950Entry.get('entryDetails') } 
+  SubmitEntryAccounntingInsertRow () {
+    this.ledgerNo.disable();
+    this.accountNo.disable();
+    this.AccountingDataService.CreateEntryAccountingInsertRow(this.swift950Entry.value).then ((result) => {
+      if (result['name']=='error') {
+        this.snack.open('Error: ' + result['detail'].split("\n", 1).join(""),'OK',{panelClass: ['snackbar-error']} ) 
+      } else {
+        this.snack.open('Created: ' + result + ' entry','OK',{panelClass: ['snackbar-success'], duration: 3000})
+        this.swift950Entry.disable();
+      }
+    });
+  }
+
+  public get  amountTransaction ()   {return this.swift950Entry.get('amountTransaction') } 
+  public get  XactTypeCode_Ext ()   {return this.swift950Entry.get('XactTypeCode_Ext') } 
+  public get  XactTypeCode ()   {return this.swift950Entry.get('XactTypeCode') } 
+  public get  dataTime ()   {return this.swift950Entry.get('dataTime') } 
+  public get  accountId ()   {return this.swift950Entry.get('accountId') } 
+  public get  ledgerNoId ()   {return this.swift950Entry.get('ledgerNoId') } 
+  public get  entryDetails ()   {return this.swift950Entry.get('entryDetails') } 
+  public get  ledgerNo ()   {return this.swift950Entry.get('ledgerNo') } 
+  public get  accountNo ()   {return this.swift950Entry.get('accountNo') } 
+  public get  extTransactionId ()   {return this.swift950Entry.get('extTransactionId') } 
 
 }

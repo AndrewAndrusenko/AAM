@@ -9,6 +9,7 @@
       <td  mat-cell *matCellDef="let element"> 
         <span [ngSwitch]="column">
           <p *ngSwitchCase="'amountTransaction'">{{element[column] | currency}} </p>
+          <p *ngSwitchCase="'entriesAmount'">{{element[column] | currency}} </p>
           <p *ngSwitchCase="'valueDate'">{{element[column] | date}} </p>
           <p *ngSwitchDefault>{{element[column]}}</p>
         </span>

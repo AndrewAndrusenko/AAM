@@ -1,7 +1,7 @@
 import {AfterViewInit, Component, EventEmitter, Input, OnInit, Output, SimpleChanges, ViewChild} from '@angular/core';
 import {MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
-import {firstValueFrom, lastValueFrom, Subscription } from 'rxjs';
+import {EmptyError, firstValueFrom, lastValueFrom, Subscription } from 'rxjs';
 import {MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {TreeMenuSevice } from 'src/app/services/tree-menu.service';
@@ -24,8 +24,8 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 export class AppTableSWIFT950ItemsComponent  implements OnInit, AfterViewInit {
   bcEntryParameters = <bcParametersSchemeAccTrans> {}
   TransactionTypes: bcTransactionType_Ext[] = [];
-  columnsToDisplay = ['amountTransaction',  'typeTransaction', 'valueDate', 'comment', 'refTransaction' ];
-  columnsHeaderToDisplay = ['amount',  'type', 'value', 'comment','ref'];
+  columnsToDisplay = ['amountTransaction',  'typeTransaction', 'valueDate', 'comment', 'refTransaction', 'entriesAmount' ];
+  columnsHeaderToDisplay = ['amount',  'type', 'value', 'comment','ref','allocated'];
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
   dataSource: MatTableDataSource<SWIFTStatement950model>;
   @Input() parentMsgRow: any;
@@ -60,29 +60,43 @@ export class AppTableSWIFT950ItemsComponent  implements OnInit, AfterViewInit {
   ngOnChanges(changes: SimpleChanges) {}
 
   async openEntry (row) {
-    // console.log('row950', row);
-    // console.log('parent', this.parentMsgRow);
-    let accountNo = row.comment.split('/')[3];
-    await lastValueFrom (this.AccountingDataService.GetAccountData(0,0,0, accountNo,'GetAccountData'))
-    .then ((accountData) => {
-      this.bcEntryParameters.pAccountId = Number(accountData[0].accountId);
-      // this.bcEntryParameters.dAccountNo = accountData[0].accountNo;
-      this.bcEntryParameters.pLedgerNoId = this.parentMsgRow.ledgerNoId;
-      // this.bcEntryParameters.dLedgerNo = this.parentMsgRow.ledgerNo;
-      this.bcEntryParameters.pExtTransactionId = row.id;
-      this.bcEntryParameters.pAmount = row.amountTransaction;
-      this.bcEntryParameters.pDate_T = row.valueDate ;
-      this.bcEntryParameters.pSenderBIC = this.parentMsgRow.senderBIC;
-      this.bcEntryParameters.pRef = row.refTransaction;
-      this.bcEntryParameters.cxActTypeCode = row.typeTransaction;
-      this.bcEntryParameters.cxActTypeCode_Ext = row.comment.split('/')[1];
-      this.bcEntryParameters.cLedgerType = 'NostroAccount';
-      console.log('param', this.bcEntryParameters);
-      this.AccountingDataService.GetEntryScheme (this.bcEntryParameters).subscribe (data => {
-      this.AccountingDataService.sendEntryDraft(data);
-      });
-    })
-    
+    console.log('ea',row.entriesAmount);
+    if (row.entriesAmount > 0) {
+      let EmptyEntry = {
+        XactTypeCode_Ext: null,
+        XactTypeCode: null,
+        amountTransaction: 0,
+        dataTime: new Date().toISOString(),
+        accountId: null,
+        accountNo: null,
+        ledgerNoId: null,
+        ledgerNo: null,
+        entryDetails: null,
+        extTransactionId : null
+      }
+      this.AccountingDataService.sendEntryDraft(EmptyEntry);
+    } else {
+      let accountNo = row.comment.split('/')[3];
+      await lastValueFrom (this.AccountingDataService.GetAccountData(0,0,0, accountNo,'GetAccountData'))
+      .then ((accountData) => {
+        this.bcEntryParameters.pAccountId = Number(accountData[0].accountId);
+        // this.bcEntryParameters.dAccountNo = accountData[0].accountNo;
+        this.bcEntryParameters.pLedgerNoId = this.parentMsgRow.ledgerNoId;
+        // this.bcEntryParameters.dLedgerNo = this.parentMsgRow.ledgerNo;
+        this.bcEntryParameters.pExtTransactionId = row.id;
+        this.bcEntryParameters.pAmount = row.amountTransaction;
+        this.bcEntryParameters.pDate_T = row.valueDate ;
+        this.bcEntryParameters.pSenderBIC = this.parentMsgRow.senderBIC;
+        this.bcEntryParameters.pRef = row.refTransaction;
+        this.bcEntryParameters.cxActTypeCode = row.typeTransaction;
+        this.bcEntryParameters.cxActTypeCode_Ext = row.comment.split('/')[1];
+        this.bcEntryParameters.cLedgerType = 'NostroAccount';
+        console.log('param', this.bcEntryParameters);
+        this.AccountingDataService.GetEntryScheme (this.bcEntryParameters).subscribe (data => {
+        this.AccountingDataService.sendEntryDraft(data);
+        });
+      })
+    }
   }
 
   applyFilter(event: Event) {

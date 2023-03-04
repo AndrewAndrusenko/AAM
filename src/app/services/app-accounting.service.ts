@@ -33,24 +33,17 @@ export class AppAccountingService {
   }
   
   GetEntryScheme (bcEntryParameters:any) :Observable <bcTransactionType_Ext[]> { 
-    console.log('GetEntryScheme', bcEntryParameters);
-    let headers = new Headers();
-    headers.append('Content-Type', 'application/json');
-    let params = new URLSearchParams();
-    params.append("someParamKey", '3') 
-
     return this.http.get <bcTransactionType_Ext []>('/api/DEA/GetEntryScheme/', { params: bcEntryParameters })  
-  } 
-
-  TGetEntryScheme (bcEntryParameters:any) :Observable <any[]> { 
-    console.log('GetEntryScheme', bcEntryParameters);
-    let headers = new Headers();
-    headers.append('Content-Type', 'application/json');
-    let params = new URLSearchParams();
-    params.append("someParamKey", '3') 
-
-    return this.http.get <any []>('/api/DEA/GetEntryScheme/', { params: bcEntryParameters })  
   } 
   sendEntryDraft (data: any) { this.subjectName.next(data);}
   getEntryDraft (): Observable<any> {return this.subjectName.asObservable(); }
+
+  CreateEntryAccountingInsertRow (data:any) { 
+    return this.http.post ('/api/DEA/fCreateEntryAccountingInsertRow/',{'data': data}).toPromise()
+  } 
+  GetAccountsEntriesListAccounting (dataRange: string, id: number, MTType:string, Sender: string, Action: string):Observable <SWIFTStatement950model[]> {
+    const params = {'dataRange': dataRange, 'id' :id, 'MTType': MTType,'Sender':Sender, 'Action': Action}
+    return this.http.get <SWIFTStatement950model []>('/api/DEA/fGetMT950Transactions/', { params: params })
+  }
+
 }

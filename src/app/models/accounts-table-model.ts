@@ -65,7 +65,8 @@ export interface SWIFTStatement950model {
   valueDate: string,
   comment: string, 
   entryAllocatedId: number,
-  refTransaction: string
+  refTransaction: string,
+  entriesAmount: number
 }
 export interface SWIFTSGlobalListmodel {
   id: number, 
@@ -106,4 +107,17 @@ export interface bAccounts {
   currencyCode: number,  
   entityTypeCode: number, 
   accountId: number,
+}
+export interface bAccountsEntriesList {
+entryAcountTransactionId : number, 
+dataTime: Date, 
+XactTypeCode: number,  
+xActTypeCode_Ext: number, 
+ledgerNoId : number, 
+ledgerNo: string, 
+accountId : number, 
+accountNo: string,  
+amountTransaction: number, 
+entryDetails: string, 
+extTransactionId: number,
 }

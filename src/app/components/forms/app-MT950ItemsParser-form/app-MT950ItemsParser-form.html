@@ -1,24 +1,47 @@
 <form class="submit" [formGroup]="swift950Entry">
-
+  <button mat-raised-button  aria-label="expand row" color="primary" style="margin-left: 1%;"  
+  (click)="SubmitEntryAccounntingInsertRow()"
+  >
+    Submit
+  </button>
   <mat-form-field class="example-full-width" style="width: 12%;" >
     <input matInput  [matDatepicker]="picker" placeholder="Choose a date"  formControlName="dataTime" >
     <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
     <mat-datepicker #picker></mat-datepicker>
   </mat-form-field>
-  <mat-form-field style="width: 3%;"  >
-    <input matInput placeholder="aID" formControlName="accountId">
-  </mat-form-field>
-  <mat-form-field style="width: 13%;"  >
-    <input matInput placeholder="Debit Account" formControlName="accountNo">
-  </mat-form-field>
-  <mat-form-field  style="width: 3%;" >
-    <input matInput placeholder="lID" formControlName="ledgerNoId">
-  </mat-form-field>
-  <mat-form-field  style="width: 13%;" >
-    <input matInput placeholder="Credit Account" formControlName="ledgerNo">
-  </mat-form-field>
+
+
+  <container-element [ngSwitch]="XactTypeCode.value">
+    <mat-form-field *ngSwitchCase="'1'"  style="width: 3%;" >
+      <input matInput placeholder="lID" formControlName="ledgerNoId">
+    </mat-form-field>
+    <mat-form-field  *ngSwitchCase="1" style="width: 13%;" >
+      <input matInput placeholder="Debit Account" formControlName="ledgerNo">
+    </mat-form-field>
+    <mat-form-field *ngSwitchCase="1" style="width: 3%;"  >
+      <input matInput placeholder="aID" formControlName="accountId">
+    </mat-form-field>
+    <mat-form-field *ngSwitchCase="1" style="width: 13%;"  >
+      <input matInput placeholder="Credit Account" formControlName="accountNo">
+    </mat-form-field>
+
+    <mat-form-field  *ngSwitchDefault style="width: 3%;"  >
+      <input matInput placeholder="aID" formControlName="accountId">
+    </mat-form-field>
+    <mat-form-field  *ngSwitchDefault style="width: 13%;"  >
+      <input matInput placeholder="Debit Account" formControlName="accountNo">
+    </mat-form-field>
+    <mat-form-field   *ngSwitchDefault style="width: 3%;" >
+      <input matInput placeholder="lID" formControlName="ledgerNoId">
+    </mat-form-field>
+    <mat-form-field   *ngSwitchDefault style="width: 13%;" >
+      <input matInput placeholder="Credit Account" formControlName="ledgerNo">
+    </mat-form-field>
+  </container-element>
+
+
   <mat-form-field  style="width: 10%;" >
-    <input  matInput placeholder="Amount" formControlName="amountTransaction" [value]="swift950Entry.get('amountTransaction').valueChanges | async  | currency">
+    <input  matInput placeholder="Amount" formControlName="amountTransaction" [value]="amountTransaction.valueChanges | async  | currency">
   </mat-form-field>
   <mat-form-field  style="width: 14%;">
     <mat-label>Client Type Code</mat-label>
@@ -31,14 +54,15 @@
   <mat-form-field  style="width: 10%;">
     <mat-label>Ledger Side</mat-label>
     <mat-select   formControlName="XactTypeCode" > 
-      <mat-option  [value]="1">Dedit</mat-option>
+      <mat-option  [value]="1">Debit</mat-option>
       <mat-option  [value]="2">Credit</mat-option>
     </mat-select>
   </mat-form-field>
   <mat-form-field  style="width: 40%;">
     <input matInput placeholder="Details" formControlName="entryDetails" >
   </mat-form-field>
-  <button mat-raised-button  aria-label="expand row" color="primary" style="margin-left: 1%;"  >
-    Submit
-  </button>
+
+  <mat-form-field  style="width: 4%;" >
+    <input matInput placeholder="ExtID" formControlName="extTransactionId">
+  </mat-form-field>
 </form>

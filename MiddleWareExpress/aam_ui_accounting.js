@@ -23,6 +23,17 @@ async function fGetAccountingData (request,response) {
                   'FROM public."bAccounts" WHERE ("accountNo"= $1) ; '
       query.values = [request.query.accountNo]
     break;
+    case 'GetAccountsEntriesListAccounting':
+      query.text =SELECT 
+      '"bLedger"."ledgerNo", "dataTime", "bcTransactionType_DE"."name", ' +
+      '"bcTransactionType_Ext"."xActTypeCode_Ext", ' +
+      '"bAccounts"."accountNo",  "amountTransaction", "entryDetails", "extTransactionId" ' +
+      'FROM "bAccountTransaction" ' +
+      'LEFT join "bcTransactionType_Ext" ON "bAccountTransaction"."XactTypeCode_Ext" = "bcTransactionType_Ext".id ' +
+      'LEFT join public."bcTransactionType_DE" ON "bcTransactionType_DE"."xActTypeCode" = "bAccountTransaction"."XactTypeCode" ' +
+      'LEFT JOIN "bAccounts" on "bAccounts"."accountId" = "bAccountTransaction"."accountId" ' +
+      'LEFT JOIN "bLedger" ON "bLedger"."ledgerNoId" = "bAccountTransaction"."ledgerNoId"; ' 
+    break;
   }
   pool.query (query, (err, res) => {if (err) {console.log (err.stack)} else {
     return response.status(200).json((res.rows))}
@@ -42,12 +53,17 @@ async function fGetMT950Transactions (request,response) {
     break;
     case 'GetMT950Transactions':
       query.text ='SELECT '+
-        'id, "msgId", "amountTransaction", "typeTransaction", "valueDate", comment, "entryAllocatedId", "refTransaction" '+
-        'FROM public."bStatementSWIFT" WHERE ("msgId"= $1) ORDER BY "msgId", id; '
+        'id, "msgId", "amountTransaction", "typeTransaction", "valueDate", comment, "entryAllocatedId", "refTransaction", "entriesAllocated"."entriesAmount" '+
+        'FROM public."bStatementSWIFT" ' +
+        'LEFT JOIN "entriesAllocated" ON "bStatementSWIFT".id = "entriesAllocated"."extTransactionId" '+
+        'WHERE ("msgId"= $1) ORDER BY "msgId", id; '
       query.values = [request.query.id]
     break;
   }
-  pool.query (query, (err, res) => {if (err) {console.log (err.stack)} else {return response.status(200).json((res.rows))}
+  console.log('quer', query);
+  pool.query (query, (err, res) => {if (err) {console.log (err.stack)} else {
+    console.log('res', res.rows);
+    return response.status(200).json((res.rows))}
   })
 }
 
@@ -99,8 +115,28 @@ async function GetEntryScheme (request, response) {
   })
 }
 
+async function fCreateEntryAccountingInsertRow (request, response) {
+    data = request.body.data
+    fields = Object.keys(data).map(filed => `"${filed}"`).join()
+    const query = {
+    text: 'INSERT INTO public."bAccountTransaction" ' +
+          '(' +  fields + ')' +
+          ' VALUES (' + Object.values (data).map(value => `'${value}'`).join() + ');',
+    }
+    // sql = pgp.as.format(query.text,query.values)
+    pool.query (query.text,  (err, res) => {if (err) {
+      console.log (err.stack.split("\n", 1).join(""))
+      err.detail = err.stack
+      return response.send(err)
+    } else {
+      return response.status(200).json(res.rowCount)}
+    })  
+}
+
+
 module.exports = {
   fGetMT950Transactions,
   fGetAccountingData,
   GetEntryScheme,
+  fCreateEntryAccountingInsertRow
 }
