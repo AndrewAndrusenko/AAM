@@ -109,6 +109,8 @@ export interface bAccounts {
   accountId: number,
 }
 export interface bAccountsEntriesList {
+debit : string,  
+credit : string,  
 entryAcountTransactionId : number, 
 dataTime: Date, 
 XactTypeCode: number,  

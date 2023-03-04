@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, Subject} from 'rxjs';
-import { bAccounts, bcTransactionType_Ext, SWIFTSGlobalListmodel, SWIFTStatement950model } from '../models/accounts-table-model';
+import { bAccounts, bAccountsEntriesList, bcTransactionType_Ext, SWIFTSGlobalListmodel, SWIFTStatement950model } from '../models/accounts-table-model';
 
 @Injectable({
   providedIn: 'root'
@@ -41,9 +41,9 @@ export class AppAccountingService {
   CreateEntryAccountingInsertRow (data:any) { 
     return this.http.post ('/api/DEA/fCreateEntryAccountingInsertRow/',{'data': data}).toPromise()
   } 
-  GetAccountsEntriesListAccounting (dataRange: string, id: number, MTType:string, Sender: string, Action: string):Observable <SWIFTStatement950model[]> {
+  GetAccountsEntriesListAccounting (dataRange: string, id: number, MTType:string, Sender: string, Action: string):Observable <bAccountsEntriesList[]> {
     const params = {'dataRange': dataRange, 'id' :id, 'MTType': MTType,'Sender':Sender, 'Action': Action}
-    return this.http.get <SWIFTStatement950model []>('/api/DEA/fGetMT950Transactions/', { params: params })
+    return this.http.get <bAccountsEntriesList []>('/api/DEA/fGetAccountingData/', { params: params })
   }
 
 }

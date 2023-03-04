@@ -1,0 +1,77 @@
+<mat-toolbar style="margin-left: 1%;" color="primary" >
+  {{title}} Entry
+</mat-toolbar>
+
+<mat-expansion-panel 
+style="margin-left: 1%; margin-right: -1%; padding: 0px;" 
+      [expanded]="true"
+      (opened)="panelOpenState = true"  
+      (closed)="panelOpenState = false" >
+      <mat-expansion-panel-header >
+      <mat-panel-title >
+      Entry details
+      </mat-panel-title>
+      <mat-panel-description  >
+       {{panelOpenState ? 'Hide' : 'Show'}}
+      </mat-panel-description>
+      </mat-expansion-panel-header >
+  <button mat-raised-button color="accent" 
+    [disabled]="!(entryModifyForm.valid && submitbox.checked)"
+    (click)="updateStrategyData(action)"
+    style="margin-top: 1px; width: 200px; font-size: 18px; margin-left: 1%;">
+    {{title}} Entry
+  </button>
+
+  <mat-checkbox color="primary"  #submitbox checked="false" 
+  (click)=" 
+  entryModifyForm.markAllAsTouched();
+  entryModifyForm.controls['name'].updateValueAndValidity();
+"
+  >Submit Data</mat-checkbox>
+
+
+<form class="submit" [formGroup]="entryModifyForm">
+  <mat-form-field style="width: 10%;">
+    <input  matInput placeholder="Code" formControlName="xActTypeCode_Ext">
+  </mat-form-field>
+  <mat-form-field class="example-full-width" style="width: 14%;" >
+    <input matInput  [matDatepicker]="picker" placeholder="Choose a date"  formControlName="dataTime" >
+    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-datepicker #picker></mat-datepicker>
+  </mat-form-field>
+  <mat-form-field>
+    <input matInput placeholder="Amount" formControlName="amountTransaction" [value]="GamountTransaction.valueChanges | async  | currency">
+  </mat-form-field>
+  <mat-form-field>
+    <input matInput placeholder="Debit" formControlName="Debit">
+<!--     <mat-error  *ngIf="name.invalid && name.value!==''">
+      Strategy Name isn't unique. Please choose another.    
+    </mat-error>
+    <mat-error  *ngIf="name.invalid && name.touched && name.value==''">
+      The field is required.    
+   </mat-error> -->
+  </mat-form-field>
+
+  <mat-form-field  >
+    <input matInput placeholder="Credit" formControlName="Credit">
+
+  </mat-form-field>
+
+
+
+<!--   <button mat-raised-button color="accent" 
+    (click)="selectBenchmarkAccount()"
+    style="margin-top: 10px; font-size: 18px;">
+    Select Benchmark Account
+  </button> -->
+
+  <mat-form-field style="width: 95%;">
+    <input matInput placeholder="entryDetails" formControlName="entryDetails">
+    <mat-error  *ngIf="entryDetails.invalid && entryDetails.touched">
+      The field is required.    
+   </mat-error>
+  </mat-form-field>
+  <p color = 'red' *ngIf="entryModifyForm.invalid"> Please check the form. Data is invalid</p>
+</form>
+</mat-expansion-panel>
+
