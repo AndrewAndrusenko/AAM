@@ -2,7 +2,7 @@
   {{title}} Entry
 </mat-toolbar>
 
-<mat-expansion-panel 
+<!-- <mat-expansion-panel 
 style="margin-left: 1%; margin-right: -1%; padding: 0px;" 
       [expanded]="true"
       (opened)="panelOpenState = true"  
@@ -14,7 +14,7 @@ style="margin-left: 1%; margin-right: -1%; padding: 0px;"
       <mat-panel-description  >
        {{panelOpenState ? 'Hide' : 'Show'}}
       </mat-panel-description>
-      </mat-expansion-panel-header >
+      </mat-expansion-panel-header > -->
   <button mat-raised-button color="accent" 
     [disabled]="!(entryModifyForm.valid && submitbox.checked)"
     (click)="updateStrategyData(action)"
@@ -30,7 +30,16 @@ style="margin-left: 1%; margin-right: -1%; padding: 0px;"
   >Submit Data</mat-checkbox>
 
 
+  
 <form class="submit" [formGroup]="entryModifyForm">
+  <mat-form-field  style="width: 10%;">
+    <mat-label>Ledger Side</mat-label>
+    <mat-select   formControlName="XactTypeCode" > 
+      <mat-option  [value]="1">Debit</mat-option>
+      <mat-option  [value]="2">Credit</mat-option>
+    </mat-select>
+  </mat-form-field>
+
   <mat-form-field style="width: 10%;">
     <input  matInput placeholder="Code" formControlName="xActTypeCode_Ext">
   </mat-form-field>
@@ -73,5 +82,5 @@ style="margin-left: 1%; margin-right: -1%; padding: 0px;"
   </mat-form-field>
   <p color = 'red' *ngIf="entryModifyForm.invalid"> Please check the form. Data is invalid</p>
 </form>
-</mat-expansion-panel>
+<!-- </mat-expansion-panel> -->
 

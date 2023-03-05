@@ -35,30 +35,33 @@ export class AppAccEntryModifyFormComponent implements OnInit, AfterViewInit {
   public AppSnackMsgbox : AppSnackMsgboxComponent
   public showStrateryStructure: boolean;
   public data: any;
+
   constructor (
-    private fb:FormBuilder, private InvestmentDataServiceService:AppInvestmentDataServiceService, AccountingDataService:AppAccountingService, private dialog: MatDialog, public snack:MatSnackBar
-  ) {    this.entryModifyForm=this.fb.group ({
-    Debit: {value:'', disabled: false},
-    Credit: {value:'', disabled: false},
-    dataTime: {value:'', disabled: false}, 
-    XactTypeCode: {value:'', disabled: false},  
-    xActTypeCode_Ext: {value:'', disabled: false}, 
-    amountTransaction: {value:null, disabled: false}, 
-    entryDetails : {value:'', disabled: false}, 
-
-  })}
-  ngAfterViewInit(): void {
-    this.GamountTransaction.updateValueAndValidity()
+    private fb:FormBuilder, 
+    private InvestmentDataServiceService:AppInvestmentDataServiceService, 
+    AccountingDataService:AppAccountingService, 
+    private dialog: MatDialog, 
+    public snack:MatSnackBar
+  ) 
+  {    
+    this.entryModifyForm = this.fb.group ({
+      Debit: {value:'', disabled: false},
+      Credit: {value:'', disabled: false},
+      dataTime: {value:'', disabled: false}, 
+      XactTypeCode: {value:null, disabled: false},  
+      xActTypeCode_Ext: {value:'', disabled: false}, 
+      amountTransaction: {value:null, disabled: false}, 
+      entryDetails : {value:'', disabled: false}
+    })
   }
+
   ngOnInit(): void {
-    this.panelOpenState = true;
-
-
+   this.panelOpenState = true;
    switch (this.action) {
     case 'Create': 
     break;
     case 'Create_Example':
-      this.data['id']='';
+      this.data['id']=null;
       this.entryModifyForm.patchValue(this.data);
     break;
     case 'Delete': 
@@ -70,28 +73,15 @@ export class AppAccEntryModifyFormComponent implements OnInit, AfterViewInit {
       this.dataTime.setValue(new Date(this.data.dataTime).toISOString())
     break; 
    }  
-/*     this.entryModifyForm.controls['name'].addValidators ( [Validators.required])
-    this.entryModifyForm.controls['description'].addValidators ( [Validators.required])
-    this.entryModifyForm.controls['level'].addValidators ( [Validators.required, Validators.pattern('[0-9]*')])
-    this.entryModifyForm.controls['name'].setAsyncValidators (
-      customAsyncValidators.strategyCodeCustomAsyncValidator(this.InvestmentDataServiceService, this.id.value), 
-    )   */
-    // this.entryModifyForm.controls['name'].updateValueAndValidity();
+   this.title = this.action;
+   this.entryModifyForm.patchValue(this.data);
+   this.dataTime.setValue(new Date(this.data.dataTime).toISOString());
+  //  this.xActTypeCode.setValue(Number(this.data.xActTypeCode));
+
   }
 
-  ngOnChanges(changes: SimpleChanges) {
-/*     console.log('changes', changes);
-    this.InvestmentDataServiceService.getGlobalStategiesList(changes['client'].currentValue, null, 'Get_Strategy_Data').subscribe(data => {
-      this.entryModifyForm.patchValue(data[0])
-      this.strategyId = this.entryModifyForm.controls['id'].value
-      this.MP = (this.entryModifyForm.controls['level'].value == 1 ) ? true : false
-      console.log('level', this.MP);
-      console.log('strategyId',this.strategyId);
-      this.showStrateryStructure = true;
-      this.entryModifyForm.controls['name'].setAsyncValidators(
-        customAsyncValidators.strategyCodeCustomAsyncValidator(this.InvestmentDataServiceService, this.id.value)
-      ) 
-    }) */
+  ngAfterViewInit(): void {
+    this.GamountTransaction.updateValueAndValidity()
   }
 
   updateStrategyData(action:string){
@@ -186,11 +176,11 @@ export class AppAccEntryModifyFormComponent implements OnInit, AfterViewInit {
 ​
   get  Debit ()   {return this.entryModifyForm.get('Debit') } 
   get  id ()   {return this.entryModifyForm.get('id') } 
-
   get  Credit ()   {return this.entryModifyForm.get('Credit') } 
   get  dataTime ()   {return this.entryModifyForm.get('dataTime') } 
   get  entryDetails ()   {return this.entryModifyForm.get('entryDetails') } 
   public get  GamountTransaction ()   {return this.entryModifyForm.get('amountTransaction') } 
   get  xActTypeCode_Ext ()   {return this.entryModifyForm.get('xActTypeCode_Ext') } 
+  get  xActTypeCode ()   {return this.entryModifyForm.get('xActTypeCode') } 
 
 }

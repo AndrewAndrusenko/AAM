@@ -24,28 +24,29 @@ async function fGetAccountingData (request,response) {
       query.values = [request.query.accountNo]
     break;
     case 'GetAccountsEntriesListAccounting':
-      query.text ='SELECT '+
-      'CASE "bcTransactionType_DE"."name" ' +
-      'WHEN \'Debit\' THEN  "bLedger"."ledgerNo" ' +
-      'WHEN \'Credit\' THEN "bAccounts"."accountNo" ' +
-      'END as "Debit",' +
-      'CASE "bcTransactionType_DE"."name" ' +
-      'WHEN \'Credit\' THEN "bLedger"."ledgerNo" ' +
-      'WHEN \'Debit\' THEN "bAccounts"."accountNo" ' +
-      'END as "Credit",' +
-      '"bLedger"."ledgerNo", "dataTime", "bcTransactionType_DE"."name" as "XactTypeCode", ' +
-      '"bcTransactionType_Ext"."xActTypeCode_Ext", ' +
-      '"bAccounts"."accountNo",  "amountTransaction", '+
-      '"bcTransactionType_Ext"."description" ||\': \' || "entryDetails" as "entryDetails", "extTransactionId" ' +
+      query.text ='SELECT "bAccountTransaction".id AS "t_id", "entryDetails" AS "t_entryDetails", ' + 
+      '"bAccountTransaction"."ledgerNoId" AS "t_ledgerNoId", "bAccountTransaction"."accountId" AS "t_accountId", ' +
+      '"dataTime" AS "t_dataTime", "extTransactionId" AS "t_extTransactionId", "amountTransaction" AS "t_amountTransaction", '+
+      '"XactTypeCode" AS "t_XactTypeCode", "bAccountTransaction"."XactTypeCode_Ext" AS "t_XactTypeCode_Ext" , '+
+      '"bcTransactionType_Ext"."description" ||\': \' || "bAccountTransaction"."entryDetails" as "d_entryDetails", ' +
+      'CASE "bAccountTransaction"."XactTypeCode" ' +
+      'WHEN 1 THEN  "bLedger"."ledgerNo" ' +
+      'WHEN 2 THEN "bAccounts"."accountNo" ' +
+      'END as "d_Debit",' +
+      'CASE "bAccountTransaction"."XactTypeCode" ' +
+      'WHEN 2 THEN "bLedger"."ledgerNo" ' +
+      'WHEN 1 THEN "bAccounts"."accountNo" ' +
+      'END as "d_Credit",' +
+      '"ledgerNo" AS "d_ledgerNo", "accountNo" AS "d_accountNo", "bcTransactionType_Ext"."xActTypeCode_Ext" AS "d_xActTypeCodeExtName" ' +
       'FROM "bAccountTransaction" ' +
       'LEFT join "bcTransactionType_Ext" ON "bAccountTransaction"."XactTypeCode_Ext" = "bcTransactionType_Ext".id ' +
-      'LEFT join public."bcTransactionType_DE" ON "bcTransactionType_DE"."xActTypeCode" = "bAccountTransaction"."XactTypeCode" ' +
       'LEFT JOIN "bAccounts" on "bAccounts"."accountId" = "bAccountTransaction"."accountId" ' +
       'LEFT JOIN "bLedger" ON "bLedger"."ledgerNoId" = "bAccountTransaction"."ledgerNoId"; ' 
-      console.log('query.text', query.text);
     break;
   }
+console.log('qu', query);
   pool.query (query, (err, res) => {if (err) {console.log (err.stack)} else {
+    //  console.log('res',res.rows);
     return response.status(200).json((res.rows))}
   })
 }

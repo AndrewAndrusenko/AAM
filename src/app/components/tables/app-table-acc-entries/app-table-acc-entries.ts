@@ -23,13 +23,13 @@ import { AppAccEntryModifyFormComponent } from '../../forms/app-acc-entry-modify
 })
 export class AppTableAccEntriesComponent  implements AfterViewInit {
   columnsToDisplay = [
-    'Debit',
-    'Credit',
-    'dataTime', 
-    'XactTypeCode',  
-    'xActTypeCode_Ext', 
-    'amountTransaction', 
-    'entryDetails', 
+    'd_Debit',
+    'd_Credit',
+    't_dataTime', 
+    't_XactTypeCode',  
+    'd_xActTypeCode_ExtName', 
+    't_amountTransaction', 
+    'd_entryDetails', 
   ]
   columnsHeaderToDisplay = [
     'debit',
