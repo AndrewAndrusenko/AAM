@@ -1,5 +1,16 @@
-SELECT "bAccountTransaction".id as entryAcountTransactionId , "dataTime", "bcTransactionType_DE"."name" as "XactTypeCode",  "bcTransactionType_Ext"."xActTypeCode_Ext", 
-"bLedger"."ledgerNoId" , "bLedger"."ledgerNo", 
+SELECT 
+"bcTransactionType_DE"."name",
+CASE "bAccountTransaction"."XactTypeCode"
+WHEN 1 THEN  "bLedger"."ledgerNo" 
+WHEN 2 THEN "bAccounts"."accountNo" 
+END as "DebitAcc",
+CASE "bcTransactionType_DE"."name" 
+WHEN 'Credit' THEN "bLedger"."ledgerNo" 
+WHEN 'Debit' THEN "bAccounts"."accountNo" 
+END as "CreditAcc",
+
+"bAccountTransaction".id, "dataTime", "bcTransactionType_DE"."name" as "XactTypeCode",  "bcTransactionType_Ext"."xActTypeCode_Ext", 
+"bLedger"."ledgerNoId" , "bLedger"."ledgerNo",
  "bAccounts"."accountId" , "bAccounts"."accountNo",  
  "amountTransaction", "entryDetails", 
  "extTransactionId"

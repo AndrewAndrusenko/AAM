@@ -40,6 +40,8 @@ import { AppTableSWIFT950ItemsComponent } from './components/tables/app-table-sw
 import { AppMT950ItemParsing } from './components/forms/app-MT950ItemsParser-form/app-MT950ItemsParser-form';
 import { AppTableAccEntriesComponent } from './components/tables/app-table-acc-entries/app-table-acc-entries';
 import { AppAccEntryModifyFormComponent } from './components/forms/app-acc-entry-modify-form/app-acc-entry-modify-form';
+import { AppTableAccAccountsComponent } from './components/tables/app-table-acc-accounts/app-table-acc-accounts';
+import { AppTableAccLedgerAccountsComponent } from './components/tables/app-table-acc-ledger-accounts/app-table-acc-ledger-accounts';
 
 @NgModule({
     imports: [
@@ -86,7 +88,9 @@ import { AppAccEntryModifyFormComponent } from './components/forms/app-acc-entry
         AppTableSWIFT950ItemsComponent,
         AppMT950ItemParsing,
         AppTableAccEntriesComponent,
-        AppAccEntryModifyFormComponent
+        AppAccEntryModifyFormComponent,
+        AppTableAccAccountsComponent,
+        AppTableAccLedgerAccountsComponent
 
     ],
     bootstrap: [AppComponent],

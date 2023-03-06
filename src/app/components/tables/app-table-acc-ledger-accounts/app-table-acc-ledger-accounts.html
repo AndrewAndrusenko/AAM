@@ -7,14 +7,9 @@
       <th mat-header-cell *matHeaderCellDef mat-sort-header>  {{columnsHeaderToDisplay[i]  | titlecase}}</th>
       <td  mat-cell *matCellDef="let element"> 
         <span [ngSwitch]="column">
-          <p *ngSwitchCase="'t_dataTime'">
-            {{element[column] | date}} 
-          </p>
+
           <p *ngSwitchCase="'t_XactTypeCode'">
             {{element[column]==1?  'Debit' : 'Credit'}}
-          </p>
-          <p *ngSwitchCase="'t_amountTransaction'">
-            {{element[column] | currency}} 
           </p>
           <p *ngSwitchDefault>
             {{element[column]}}  
@@ -52,7 +47,7 @@
 </div>
 
 <ng-template  #instrumentcontextmenu>
-  <div class="tree-menu-context" *ngIf="!readOnly" cdkMenu >
+  <div class="tree-menu-context" cdkMenu >
     <button 
       class="tree-menu-item" cdkMenuItem >
       <mat-icon class="menu-icon" matPrefix>add_circle</mat-icon>      

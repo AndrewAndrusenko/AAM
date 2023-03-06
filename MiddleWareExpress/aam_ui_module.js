@@ -13,7 +13,7 @@ async function TreeSQLQueryExc (RootNode, userId, nodeParentFavorite) {
     case 'Clients':
       pool.QueryArrayConfig.text='SELECT dclients.clientname, dclients.idclient from public.dclients order by dclients.clientname ;'; 
     break;
-    case 'Accounts':
+    case 'Portfolios':
       pool.QueryArrayConfig.text='SELECT dportfolios.portfolioname, dportfolios.idportfolio from public.dportfolios order by dportfolios.portfolioname;'; 
     break;
     case 'Strategies':
@@ -27,13 +27,17 @@ async function TreeSQLQueryExc (RootNode, userId, nodeParentFavorite) {
     break;     
     case 'Non-Trade Operations':
       pool.QueryArrayConfig.text="SELECT name, id FROM public.dtree_menu_items where rootname='Non-Trade Operations' order by id;"
-      break;     
+      break;    
+    case 'Accounting':
+      pool.QueryArrayConfig.text="SELECT name, id FROM public.dtree_menu_items where rootname='Accounting' order by id;"
+    break;    
+         
 
     case 'Favorites':
       pool.QueryArrayConfig.values = [userId, RootNode[1]]
       pool.QueryArrayConfig.rowMode="array"
       switch (RootNode[1]) {
-        case 'Accounts':
+        case 'Portfolios':
         sql = "SELECT dportfolios.portfolioname, dtree_menu_favorites.idelement FROM public.dtree_menu_favorites " + 
               "LEFT JOIN dportfolios on dtree_menu_favorites.idelement = dportfolios.idportfolio::text "
         break;   

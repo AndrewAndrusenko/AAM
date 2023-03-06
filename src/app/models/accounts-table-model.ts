@@ -108,6 +108,22 @@ export interface bAccounts {
   entityTypeCode: number, 
   accountId: number,
 }
+export interface bLedgerAccounts {
+  ledgerNoId: number,
+  ledgerNo: string, 
+  name: string, 
+  accountTypeID: number,  
+  accountId: number,
+  currecyCode: number, 
+  externalAccountNo: string, 
+  clientID: number,  
+  entityTypeCode: number, 
+  ledgerNoCptyCode: string,  
+  ledgerNoTrade: string,
+  d_Account_Type: string,
+  d_Client: string,
+  d_APTypeCodeAccount: string
+}
 export interface bAccountsEntriesList {
   t_id: number,
   t_entryDetails:string,

@@ -8,6 +8,7 @@ import { AppInvestmentDataServiceService } from 'src/app/services/app-investment
 import { TableAccounts } from '../../tables/app-table-accout/app-table-accout.component';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
+import { bAccountsEntriesList, bcTransactionType_Ext } from 'src/app/models/accounts-table-model';
 interface Level {
   value: number;
   viewValue: string;
@@ -21,37 +22,42 @@ export class AppAccEntryModifyFormComponent implements OnInit, AfterViewInit {
 
   public panelOpenState = true;
   public entryModifyForm: FormGroup;
-  @Input()  client : number;
   @Input() action: string;
   dialogRefConfirm: MatDialogRef<AppConfimActionComponent>;
-  isEditForm: boolean = false;
   dialogRef: MatDialogRef<TableAccounts>;
-  dtOptions: any = {};
   public title: string;
   public actionType : string;
-  public strategyId : any;
-  public MP : boolean;
   public actionToConfim = {'action':'delete_client' ,'isConfirmed': false}
   public AppSnackMsgbox : AppSnackMsgboxComponent
-  public showStrateryStructure: boolean;
   public data: any;
+  TransactionTypes: bcTransactionType_Ext[] = [];
 
   constructor (
     private fb:FormBuilder, 
     private InvestmentDataServiceService:AppInvestmentDataServiceService, 
-    AccountingDataService:AppAccountingService, 
+    private AccountingDataService:AppAccountingService, 
     private dialog: MatDialog, 
     public snack:MatSnackBar
   ) 
-  {    
+  { this.AccountingDataService.GetTransactionType_Ext('',0,'','','bcTransactionType_Ext').subscribe (
+    data => this.TransactionTypes=data)
+   
     this.entryModifyForm = this.fb.group ({
-      Debit: {value:'', disabled: false},
-      Credit: {value:'', disabled: false},
-      dataTime: {value:'', disabled: false}, 
-      XactTypeCode: {value:null, disabled: false},  
-      xActTypeCode_Ext: {value:'', disabled: false}, 
-      amountTransaction: {value:null, disabled: false}, 
-      entryDetails : {value:'', disabled: false}
+      t_id: {value:null, disabled: false},
+      t_entryDetails:{value:null, disabled: false},
+      t_ledgerNoId: {value:null, disabled: false}, 
+      t_accountId: {value:null, disabled: false}, 
+      t_extTransactionId : {value:null, disabled: false}, 
+      t_dataTime: {value:null, disabled: false}, 
+      t_amountTransaction: {value:null, disabled: false}, 
+      t_XactTypeCode: {value:null, disabled: false},  
+      t_XactTypeCode_Ext: {value:null, disabled: false}, 
+      d_Debit : {value:null, disabled: false},  
+      d_Credit : {value:null, disabled: false},  
+      d_ledgerNo: {value:null, disabled: false}, 
+      d_accountNo: {value:null, disabled: false},  
+      d_xActTypeCode_ExtName : {value:null, disabled: false}, 
+      d_entryDetails: {value:null, disabled: false}, 
     })
   }
 
@@ -64,19 +70,20 @@ export class AppAccEntryModifyFormComponent implements OnInit, AfterViewInit {
       this.data['id']=null;
       this.entryModifyForm.patchValue(this.data);
     break;
-    case 'Delete': 
+   /*  case 'Delete': 
       this.entryModifyForm.patchValue(this.data);
     break;
     default :
       this.title = "Edit"
       this.entryModifyForm.patchValue(this.data);
       this.dataTime.setValue(new Date(this.data.dataTime).toISOString())
-    break; 
+    break;  */
    }  
    this.title = this.action;
    this.entryModifyForm.patchValue(this.data);
-   this.dataTime.setValue(new Date(this.data.dataTime).toISOString());
-  //  this.xActTypeCode.setValue(Number(this.data.xActTypeCode));
+   this.dataTime.setValue(new Date(this.data.t_dataTime).toISOString());
+   this.xActTypeCode.setValue(Number(this.data.t_XactTypeCode));
+   this.xActTypeCode_Ext.setValue(Number(this.data.t_XactTypeCode_Ext));
 
   }
 
@@ -174,13 +181,13 @@ export class AppAccEntryModifyFormComponent implements OnInit, AfterViewInit {
   }
   }
 ​
-  get  Debit ()   {return this.entryModifyForm.get('Debit') } 
-  get  id ()   {return this.entryModifyForm.get('id') } 
-  get  Credit ()   {return this.entryModifyForm.get('Credit') } 
-  get  dataTime ()   {return this.entryModifyForm.get('dataTime') } 
-  get  entryDetails ()   {return this.entryModifyForm.get('entryDetails') } 
-  public get  GamountTransaction ()   {return this.entryModifyForm.get('amountTransaction') } 
-  get  xActTypeCode_Ext ()   {return this.entryModifyForm.get('xActTypeCode_Ext') } 
-  get  xActTypeCode ()   {return this.entryModifyForm.get('xActTypeCode') } 
+  get  Debit ()   {return this.entryModifyForm.get('d_Debit') } 
+  get  id ()   {return this.entryModifyForm.get('t_id') } 
+  get  Credit ()   {return this.entryModifyForm.get('d_Credit') } 
+  get  dataTime ()   {return this.entryModifyForm.get('t_dataTime') } 
+  get  entryDetails ()   {return this.entryModifyForm.get('d_entryDetails') } 
+  public get  GamountTransaction ()   {return this.entryModifyForm.get('t_amountTransaction') } 
+  get  xActTypeCode_Ext ()   {return this.entryModifyForm.get('t_XactTypeCode_Ext') } 
+  get  xActTypeCode ()   {return this.entryModifyForm.get('t_XactTypeCode') } 
 
 }

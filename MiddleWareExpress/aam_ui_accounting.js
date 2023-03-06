@@ -12,16 +12,30 @@ async function fGetAccountingData (request,response) {
     case 'bcTransactionType_Ext':
       query.text = 'SELECT id, TRIM("xActTypeCode_Ext") as "xActTypeCode_Ext", description, code2 FROM public."bcTransactionType_Ext" ORDER BY "xActTypeCode_Ext"; '
     break;
-    case 'GetMT950Transactions':
-      query.text ='SELECT id, "msgId", "amountTransaction", "typeTransaction", "valueDate", comment, "entryAllocatedId" '+
-                  'FROM public."bStatementSWIFT" WHERE ("msgId"= $1) ORDER BY "msgId", id; '
-      query.values = [request.query.id]
-    break;
     case 'GetAccountData':
       query.text ='SELECT '+
-                  '"accountNo", "accountTypeExt", "Information", "clientId", "currencyCode", "entityTypeCode", "accountId" '+
-                  'FROM public."bAccounts" WHERE ("accountNo"= $1) ; '
+        '"accountNo", "accountTypeExt", "Information", "clientId", "currencyCode", "entityTypeCode", "accountId" '+
+        'FROM public."bAccounts" WHERE ("accountNo"= $1) ; '
       query.values = [request.query.accountNo]
+    break;
+    case 'GetAccountDataWholeList':
+      query.text ='SELECT '+
+      '"accountNo", "accountTypeExt", "Information", "clientId", "currencyCode", "entityTypeCode", "accountId", '+
+      'clientname AS d_clientname, dportfolios.portfolioname AS "d_portfolioCode" ' +
+      'FROM public."bAccounts" '+
+      'LEFT JOIN dclients ON "bAccounts"."clientId" = dclients.idclient ' +
+      'LEFT JOIN "bAccountsPortfoliosLink" ON "bAccountsPortfoliosLink"."accountNoId" = "accountId" '+
+      'LEFT JOIN dportfolios ON dportfolios.idportfolio = "bAccountsPortfoliosLink"."portfolioId" ; '
+    break;
+    case 'GetLedgerAccountsDataWholeList' :
+      query.text ='SELECT '+
+        '"accountTypeID", name, "clientID", "entityTypeCode", "ledgerNo", "currecyCode", '+
+        '"ledgerNoCptyCode", "ledgerNoTrade", "externalAccountNo", "ledgerNoId", '+
+        '"bcAccountType_Ext"."actCodeShort" ||\': \' || "bcAccountType_Ext"."description" as "d_Account_Type", '+
+        '"dclients"."clientname" as "d_Client", "bcAccountType_Ext"."APTypeCode" as "d_APTypeCodeAccount" '+
+        'FROM public."bLedger" '+
+        'LEFT JOIN "dclients" ON "bLedger"."clientID" = "dclients".idclient ' +
+        'LEFT JOIN "bcAccountType_Ext" ON "bcAccountType_Ext"."accountType_Ext" = "bLedger"."accountTypeID" ;'
     break;
     case 'GetAccountsEntriesListAccounting':
       query.text ='SELECT "bAccountTransaction".id AS "t_id", "entryDetails" AS "t_entryDetails", ' + 
@@ -44,7 +58,7 @@ async function fGetAccountingData (request,response) {
       'LEFT JOIN "bLedger" ON "bLedger"."ledgerNoId" = "bAccountTransaction"."ledgerNoId"; ' 
     break;
   }
-console.log('qu', query);
+  console.log('que', query);
   pool.query (query, (err, res) => {if (err) {console.log (err.stack)} else {
     //  console.log('res',res.rows);
     return response.status(200).json((res.rows))}
@@ -56,15 +70,15 @@ async function fGetMT950Transactions (request,response) {
     case 'GetSWIFTsList':
       query.text = 'SELECT ' + 
       ' id, "msgId", "senderBIC", "DateMsg", "typeMsg", "accountNo", "bLedger"."ledgerNo", "ledgerNoId"'+ 
-      ' FROM public."bGlobalMsgSwift" ' +
-      ' LEFT JOIN public."bLedger" ON "bGlobalMsgSwift"."accountNo" = "bLedger"."externalAccountNo" '+
+      ' FROM public."bSWIFTGlobalMsg" ' +
+      ' LEFT JOIN public."bLedger" ON "bSWIFTGlobalMsg"."accountNo" = "bLedger"."externalAccountNo" '+
       ' ORDER BY id; '
     break;
     case 'GetMT950Transactions':
       query.text ='SELECT '+
         'id, "msgId", "amountTransaction", "typeTransaction", "valueDate", comment, "entryAllocatedId", "refTransaction", "entriesAllocated"."entriesAmount" '+
-        'FROM public."bStatementSWIFT" ' +
-        'LEFT JOIN "entriesAllocated" ON "bStatementSWIFT".id = "entriesAllocated"."extTransactionId" '+
+        'FROM public."bSWIFTStatement" ' +
+        'LEFT JOIN "entriesAllocated" ON "bSWIFTStatement".id = "entriesAllocated"."extTransactionId" '+
         'WHERE ("msgId"= $1) ORDER BY "msgId", id; '
       query.values = [request.query.id]
     break;
@@ -114,7 +128,6 @@ async function GetEntryScheme (request, response) {
         return response.status(200).json((res.rows[0]))
 
       }})
-      
     }
   }
   })

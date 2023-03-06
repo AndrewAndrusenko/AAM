@@ -6,13 +6,13 @@ import {MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { bAccountsEntriesList } from 'src/app/models/accounts-table-model';
+import { bAccounts, bAccountsEntriesList } from 'src/app/models/accounts-table-model';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
 import { AppAccEntryModifyFormComponent } from '../../forms/app-acc-entry-modify-form/app-acc-entry-modify-form';
 @Component({
-  selector: 'app-table-acc-entries',
-  templateUrl: './app-table-acc-entries.html',
-  styleUrls: ['./app-table-acc-entries.scss'],
+  selector: 'app-table-acc-accounts',
+  templateUrl: './app-table-acc-accounts.html',
+  styleUrls: ['./app-table-acc-accounts.scss'],
   animations: [
     trigger('detailExpand', [
       state('collapsed', style({height: '0px', minHeight: '0'})),
@@ -21,33 +21,30 @@ import { AppAccEntryModifyFormComponent } from '../../forms/app-acc-entry-modify
     ]),
   ],
 })
-export class AppTableAccEntriesComponent  implements AfterViewInit {
+export class AppTableAccAccountsComponent  implements AfterViewInit {
   columnsToDisplay = [
-    'd_Debit',
-    'd_Credit',
-    't_dataTime', 
-    't_XactTypeCode',  
-    'd_xActTypeCodeExtName', 
-    't_amountTransaction', 
-    'd_entryDetails', 
+    'accountNo',  
+    'accountTypeExt',  
+    'Information',  
+    'd_clientname',
+    'd_portfolioCode',
+    'entityTypeCode', 
   ]
   columnsHeaderToDisplay = [
-    'debit',
-    'credit',
-    'dataTime', 
-    'Ledger',  
-    'Code', 
-    'amount', 
+    'No',
+    'Type',
     'Details', 
+    'Client',  
+    'Portfolio', 
+    'EntityT', 
   ];
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
-  dataSource: MatTableDataSource<bAccountsEntriesList>;
+  dataSource: MatTableDataSource<bAccounts>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
   @Output() public modal_principal_parent = new EventEmitter();
-  expandedElement: bAccountsEntriesList  | null;
+  expandedElement: bAccounts  | null;
   accessToClientData: string = 'true';
-  public readOnly: boolean = false; 
   action ='';
   dialogRef: MatDialogRef<AppAccEntryModifyFormComponent>;
 
@@ -59,8 +56,8 @@ export class AppTableAccEntriesComponent  implements AfterViewInit {
     await lastValueFrom (this.TreeMenuSevice.getaccessRestriction (userData.user.accessrole, 'accessToClientData'))
     .then ((accessRestrictionData) =>{
       this.accessToClientData = accessRestrictionData['elementvalue']
-      this.AccountingDataService.GetAccountsEntriesListAccounting (null,null,null,null,'GetAccountsEntriesListAccounting').subscribe (EntriesList  => {
-        this.dataSource  = new MatTableDataSource(EntriesList);
+      this.AccountingDataService.GetAccountsListAccounting (null,null,null,null,'GetAccountDataWholeList').subscribe (AccountsList  => {
+        this.dataSource  = new MatTableDataSource(AccountsList);
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
       })
@@ -72,6 +69,8 @@ export class AppTableAccEntriesComponent  implements AfterViewInit {
     this.dataSource.filter = filterValue.trim().toLowerCase();
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
+  
+
   openEntryModifyForm (actionType:string, row: any ) {
     console.log('row', row);
     this.dialogRef = this.dialog.open(AppAccEntryModifyFormComponent ,{minHeight:'400px', maxWidth:'1000px' });

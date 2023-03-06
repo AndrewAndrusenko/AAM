@@ -1,86 +1,61 @@
 <mat-toolbar style="margin-left: 1%;" color="primary" >
   {{title}} Entry
 </mat-toolbar>
-
-<!-- <mat-expansion-panel 
-style="margin-left: 1%; margin-right: -1%; padding: 0px;" 
-      [expanded]="true"
-      (opened)="panelOpenState = true"  
-      (closed)="panelOpenState = false" >
-      <mat-expansion-panel-header >
-      <mat-panel-title >
-      Entry details
-      </mat-panel-title>
-      <mat-panel-description  >
-       {{panelOpenState ? 'Hide' : 'Show'}}
-      </mat-panel-description>
-      </mat-expansion-panel-header > -->
   <button mat-raised-button color="accent" 
     [disabled]="!(entryModifyForm.valid && submitbox.checked)"
     (click)="updateStrategyData(action)"
     style="margin-top: 1px; width: 200px; font-size: 18px; margin-left: 1%;">
     {{title}} Entry
   </button>
-
   <mat-checkbox color="primary"  #submitbox checked="false" 
-  (click)=" 
-  entryModifyForm.markAllAsTouched();
-  entryModifyForm.controls['name'].updateValueAndValidity();
-"
-  >Submit Data</mat-checkbox>
+    (click)=" entryModifyForm.markAllAsTouched();"
+    >Submit Data
+  </mat-checkbox>
 
-
-  
-<form class="submit" [formGroup]="entryModifyForm">
-  <mat-form-field  style="width: 10%;">
-    <mat-label>Ledger Side</mat-label>
-    <mat-select   formControlName="XactTypeCode" > 
-      <mat-option  [value]="1">Debit</mat-option>
-      <mat-option  [value]="2">Credit</mat-option>
-    </mat-select>
-  </mat-form-field>
-
-  <mat-form-field style="width: 10%;">
-    <input  matInput placeholder="Code" formControlName="xActTypeCode_Ext">
-  </mat-form-field>
-  <mat-form-field class="example-full-width" style="width: 14%;" >
-    <input matInput  [matDatepicker]="picker" placeholder="Choose a date"  formControlName="dataTime" >
-    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-    <mat-datepicker #picker></mat-datepicker>
-  </mat-form-field>
-  <mat-form-field>
-    <input matInput placeholder="Amount" formControlName="amountTransaction" [value]="GamountTransaction.valueChanges | async  | currency">
-  </mat-form-field>
-  <mat-form-field>
-    <input matInput placeholder="Debit" formControlName="Debit">
-<!--     <mat-error  *ngIf="name.invalid && name.value!==''">
-      Strategy Name isn't unique. Please choose another.    
-    </mat-error>
-    <mat-error  *ngIf="name.invalid && name.touched && name.value==''">
-      The field is required.    
-   </mat-error> -->
-  </mat-form-field>
-
-  <mat-form-field  >
-    <input matInput placeholder="Credit" formControlName="Credit">
-
-  </mat-form-field>
-
-
-
-<!--   <button mat-raised-button color="accent" 
-    (click)="selectBenchmarkAccount()"
-    style="margin-top: 10px; font-size: 18px;">
-    Select Benchmark Account
-  </button> -->
-
-  <mat-form-field style="width: 95%;">
-    <input matInput placeholder="entryDetails" formControlName="entryDetails">
-    <mat-error  *ngIf="entryDetails.invalid && entryDetails.touched">
-      The field is required.    
-   </mat-error>
-  </mat-form-field>
-  <p color = 'red' *ngIf="entryModifyForm.invalid"> Please check the form. Data is invalid</p>
+  <form class="submit" [formGroup]="entryModifyForm">
+    <mat-form-field  style="width: 27%;">
+      <mat-label>Type Code</mat-label>
+      <mat-select   formControlName="t_XactTypeCode_Ext" > 
+        <mat-option *ngFor="let TransactionType of TransactionTypes" [value]="TransactionType.id">
+          {{TransactionType.xActTypeCode_Ext |uppercase}} - {{TransactionType.description}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field class="example-full-width" style="width: 17%;" >
+      <input matInput  [matDatepicker]="picker" placeholder="Choose a date"  formControlName="t_dataTime" >
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+    <mat-form-field style="width: 20%; ">
+      <input matInput placeholder="Amount" formControlName="t_amountTransaction" [value]="GamountTransaction.valueChanges | async  | currency">
+    </mat-form-field>
+    
+    <mat-button-toggle-group style=" width: 26%;font-size: 18px;" formControlName="t_XactTypeCode" 
+      aria-label="Font Style" matTooltip="Choose Ledger Side">
+      <mat-button-toggle  style="width: 50%;font-size: 18px;" [value]="1">Debit</mat-button-toggle>
+      <mat-button-toggle style="width: 50%;font-size: 18px;" [value]="2">Credit</mat-button-toggle>
+    </mat-button-toggle-group>
+    <span [ngSwitch]="xActTypeCode.value">
+      <mat-form-field *ngSwitchCase="1" style="width: 35%;">
+        <input matInput placeholder="Debit" formControlName="d_ledgerNo">   
+        <button mat-icon-button matSuffix><mat-icon >search</mat-icon></button>
+      </mat-form-field>
+      <mat-form-field *ngSwitchCase="1"style="width: 35%;">
+        <input matInput placeholder="Credit" formControlName="d_accountNo">
+        <button mat-icon-button matSuffix><mat-icon >search</mat-icon></button>
+      </mat-form-field>
+      <mat-form-field *ngSwitchCase="2" style="width: 35%;">
+        <input matInput placeholder="Debit" formControlName="d_accountNo">   
+        <button mat-icon-button matSuffix><mat-icon >search</mat-icon></button>
+      </mat-form-field>
+      <mat-form-field *ngSwitchCase="2"style="width: 35%;">
+        <input matInput placeholder="Credit" formControlName="d_ledgerNo">
+        <button mat-icon-button matSuffix><mat-icon >search</mat-icon></button>
+      </mat-form-field>
+    </span>
+    <mat-form-field style="width: 95%;">
+      <input matInput placeholder="entryDetails" formControlName="t_entryDetails">
+    </mat-form-field>
+    <p color = 'red' *ngIf="entryModifyForm.invalid"> Please check the form. Data is invalid</p>
 </form>
 <!-- </mat-expansion-panel> -->
-

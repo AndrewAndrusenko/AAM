@@ -2,7 +2,7 @@
 <app-app-instrument-table 
 *ngIf="messageReceived.text=='Instruments_Root'"
 ></app-app-instrument-table>  
-  <mat-tab-group  *ngIf="messageReceived.text=='Accounts' " mat-stretch-tabs #AccountInfo >
+  <mat-tab-group  *ngIf="messageReceived.text=='Portfolios' " mat-stretch-tabs #AccountInfo >
     
   <mat-tab label="Account Summary" > </mat-tab>  
   <mat-tab label="Portfolio Details"> Detailed positions with PnL data 
@@ -68,8 +68,8 @@
       </app-app-client-form> 
     </div>
   </mat-tab>  
-  <mat-tab label="Client Accounts">
-    <app-app-accout-tablee style=""
+  <mat-tab label="Client Portfolios">
+    <app-app-accout-tablee 
       [clientId]="messageReceived.id"
       [actionOnAccountTable]="'Get_Accounts_By_CientId'"
     >
@@ -98,3 +98,7 @@
   <mat-tab label="Statement Reconcilation"> Statement Reconcilation  </mat-tab>
 </mat-tab-group>
 
+<app-table-acc-accounts *ngIf="messageReceived.name=='Accounts'">
+</app-table-acc-accounts>    
+<app-table-acc-ledger-accounts *ngIf="messageReceived.name=='Ledger'">
+</app-table-acc-ledger-accounts>    

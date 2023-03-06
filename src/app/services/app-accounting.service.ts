@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, Subject} from 'rxjs';
-import { bAccounts, bAccountsEntriesList, bcTransactionType_Ext, SWIFTSGlobalListmodel, SWIFTStatement950model } from '../models/accounts-table-model';
+import { bAccounts, bAccountsEntriesList, bcTransactionType_Ext, bLedgerAccounts, SWIFTSGlobalListmodel, SWIFTStatement950model } from '../models/accounts-table-model';
 
 @Injectable({
   providedIn: 'root'
@@ -45,5 +45,12 @@ export class AppAccountingService {
     const params = {'dataRange': dataRange, 'id' :id, 'MTType': MTType,'Sender':Sender, 'Action': Action}
     return this.http.get <bAccountsEntriesList []>('/api/DEA/fGetAccountingData/', { params: params })
   }
-
+  GetAccountsListAccounting (currencyCode: number, id: number, clientId:number, accountNo: string, Action: string):Observable <bAccounts[]> {
+    const params = {'currencyCode': currencyCode, 'id' :id, 'clientId': clientId,'accountNo':accountNo, 'Action': Action}
+    return this.http.get <bAccounts []>('/api/DEA/fGetAccountingData/', { params: params })
+  }
+  GetLedgerAccountsListAccounting (currencyCode: number, id: number, clientId:number, accountNo: string, Action: string):Observable <bLedgerAccounts[]> {
+    const params = {'currencyCode': currencyCode, 'id' :id, 'clientId': clientId,'accountNo':accountNo, 'Action': Action}
+    return this.http.get <bLedgerAccounts []>('/api/DEA/fGetAccountingData/', { params: params })
+  }
 }
