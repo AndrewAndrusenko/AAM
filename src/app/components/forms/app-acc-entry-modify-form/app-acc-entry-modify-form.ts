@@ -9,6 +9,8 @@ import { TableAccounts } from '../../tables/app-table-accout/app-table-accout.co
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
 import { bAccountsEntriesList, bcTransactionType_Ext } from 'src/app/models/accounts-table-model';
+import { AppTableAccLedgerAccountsComponent } from '../../tables/app-table-acc-ledger-accounts/app-table-acc-ledger-accounts';
+import { AppTableAccAccountsComponent } from '../../tables/app-table-acc-accounts/app-table-acc-accounts';
 interface Level {
   value: number;
   viewValue: string;
@@ -24,12 +26,14 @@ export class AppAccEntryModifyFormComponent implements OnInit, AfterViewInit {
   public entryModifyForm: FormGroup;
   @Input() action: string;
   dialogRefConfirm: MatDialogRef<AppConfimActionComponent>;
-  dialogRef: MatDialogRef<TableAccounts>;
+  dialogChoseAccount: MatDialogRef<AppTableAccAccountsComponent>;
+  dialogChoseLedger: MatDialogRef<AppTableAccLedgerAccountsComponent>;
   public title: string;
   public actionType : string;
   public actionToConfim = {'action':'delete_client' ,'isConfirmed': false}
   public AppSnackMsgbox : AppSnackMsgboxComponent
   public data: any;
+  public Closed : Date
   TransactionTypes: bcTransactionType_Ext[] = [];
 
   constructor (
@@ -62,35 +66,49 @@ export class AppAccEntryModifyFormComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-   this.panelOpenState = true;
-   switch (this.action) {
-    case 'Create': 
-    break;
-    case 'Create_Example':
-      this.data['id']=null;
-      this.entryModifyForm.patchValue(this.data);
-    break;
-   /*  case 'Delete': 
-      this.entryModifyForm.patchValue(this.data);
-    break;
-    default :
-      this.title = "Edit"
-      this.entryModifyForm.patchValue(this.data);
-      this.dataTime.setValue(new Date(this.data.dataTime).toISOString())
-    break;  */
-   }  
-   this.title = this.action;
-   this.entryModifyForm.patchValue(this.data);
-   this.dataTime.setValue(new Date(this.data.t_dataTime).toISOString());
-   this.xActTypeCode.setValue(Number(this.data.t_XactTypeCode));
-   this.xActTypeCode_Ext.setValue(Number(this.data.t_XactTypeCode_Ext));
-
+    this.panelOpenState = true;
+    switch (this.action) {
+      case 'Create': 
+      break;
+      case 'Create_Example':
+        this.data['id']=null;
+        this.entryModifyForm.patchValue(this.data);
+      break;
+    }  
+    this.title = this.action;
+    this.entryModifyForm.patchValue(this.data);
+    this.dataTime.setValue(new Date(this.data.t_dataTime).toISOString());
+    this.xActTypeCode.setValue(Number(this.data.t_XactTypeCode));
+    this.xActTypeCode_Ext.setValue(Number(this.data.t_XactTypeCode_Ext));
   }
 
   ngAfterViewInit(): void {
-    this.GamountTransaction.updateValueAndValidity()
   }
-
+  ClsAcc (){
+    this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data => this.Closed = data[0].ClosedDate)
+  }
+  selectAccount () {
+    this.dialogChoseAccount = this.dialog.open(AppTableAccAccountsComponent ,{minHeight:'600px', minWidth:'1300px', autoFocus: false, maxHeight: '90vh'});
+    this.dialogChoseAccount.componentInstance.action = "Select";
+    this.dialogChoseAccount.componentInstance.readOnly = true;
+    this.dialogChoseAccount.componentInstance.modal_principal_parent.subscribe ((item)=>{
+      this.entryModifyForm.controls['t_accountId'].patchValue(this.dialogChoseAccount.componentInstance.selectedRow['accountId'])
+      this.entryModifyForm.controls['d_accountNo'].patchValue(this.dialogChoseAccount.componentInstance.selectedRow['accountNo'])
+      this.entryModifyForm.controls['d_accountNo'].patchValue(this.dialogChoseAccount.componentInstance.selectedRow['accountNo'])
+      this.dialogChoseAccount.close(); 
+    });
+  }
+  selectLedger () {
+    this.dialogChoseLedger = this.dialog.open(AppTableAccLedgerAccountsComponent ,{minHeight:'600px', minWidth:'1300px', autoFocus: false, maxHeight: '90vh'});
+    this.dialogChoseLedger.componentInstance.action = "Select";
+    this.dialogChoseLedger.componentInstance.readOnly = true;
+    this.dialogChoseLedger.componentInstance.modal_principal_parent.subscribe ((item)=>{
+      this.entryModifyForm.controls['t_ledgerNoId'].patchValue(this.dialogChoseLedger.componentInstance.selectedRow['ledgerNoId'])
+      this.entryModifyForm.controls['d_ledgerNo'].patchValue(this.dialogChoseLedger.componentInstance.selectedRow['ledgerNo'])
+      this.entryModifyForm.controls['d_ledgerNo'].patchValue(this.dialogChoseLedger.componentInstance.selectedRow['ledgerNo'])
+      this.dialogChoseLedger.close(); 
+    });
+  }
   updateStrategyData(action:string){
     console.log('action',action);
     switch (action) {
@@ -147,7 +165,7 @@ export class AppAccEntryModifyFormComponent implements OnInit, AfterViewInit {
       break;
     }
   }
-
+/* 
   selectBenchmarkAccount () {
     this.dialogRef = this.dialog.open(TableAccounts ,{minHeight:'400px', minWidth:'900px', autoFocus: false, maxHeight: '90vh'});
     this.dialogRef.componentInstance.action = 'Select_Benchmark';
@@ -180,14 +198,14 @@ export class AppAccEntryModifyFormComponent implements OnInit, AfterViewInit {
       break;
   }
   }
-​
+ */​
   get  Debit ()   {return this.entryModifyForm.get('d_Debit') } 
-  get  id ()   {return this.entryModifyForm.get('t_id') } 
   get  Credit ()   {return this.entryModifyForm.get('d_Credit') } 
+  get  id ()   {return this.entryModifyForm.get('t_id') } 
   get  dataTime ()   {return this.entryModifyForm.get('t_dataTime') } 
   get  entryDetails ()   {return this.entryModifyForm.get('d_entryDetails') } 
   public get  GamountTransaction ()   {return this.entryModifyForm.get('t_amountTransaction') } 
-  get  xActTypeCode_Ext ()   {return this.entryModifyForm.get('t_XactTypeCode_Ext') } 
+  public get  xActTypeCode_Ext ()   {return this.entryModifyForm.get('t_XactTypeCode_Ext') } 
   get  xActTypeCode ()   {return this.entryModifyForm.get('t_XactTypeCode') } 
 
 }

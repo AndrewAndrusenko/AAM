@@ -45,7 +45,8 @@ export class AppTableAccLedgerAccountsComponent  implements AfterViewInit {
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
   @Output() public modal_principal_parent = new EventEmitter();
-  expandedElement: bAccounts  | null;
+  expandedElement: bLedgerAccounts  | null;
+  public selectedRow : bLedgerAccounts  | null;
   accessToClientData: string = 'true';
   public readOnly: boolean = false; 
   action ='';
@@ -71,6 +72,10 @@ export class AppTableAccLedgerAccountsComponent  implements AfterViewInit {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
+  }
+  chooseAccount (element) {
+    this.selectedRow = element;
+    this.modal_principal_parent.emit('CLOSE_PARENT_MODAL');
   }
   openEntryModifyForm (actionType:string, row: any ) {
     console.log('row', row);

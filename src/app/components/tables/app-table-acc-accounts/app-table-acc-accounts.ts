@@ -43,6 +43,8 @@ export class AppTableAccAccountsComponent  implements AfterViewInit {
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
   @Output() public modal_principal_parent = new EventEmitter();
+  public readOnly: boolean = false; 
+  public selectedRow: bAccounts  | null;
   expandedElement: bAccounts  | null;
   accessToClientData: string = 'true';
   action ='';
@@ -70,6 +72,10 @@ export class AppTableAccAccountsComponent  implements AfterViewInit {
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
   
+  chooseAccount (element) {
+    this.selectedRow = element;
+    this.modal_principal_parent.emit('CLOSE_PARENT_MODAL');
+  }
 
   openEntryModifyForm (actionType:string, row: any ) {
     console.log('row', row);

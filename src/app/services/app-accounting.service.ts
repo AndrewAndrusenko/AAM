@@ -53,4 +53,8 @@ export class AppAccountingService {
     const params = {'currencyCode': currencyCode, 'id' :id, 'clientId': clientId,'accountNo':accountNo, 'Action': Action}
     return this.http.get <bLedgerAccounts []>('/api/DEA/fGetAccountingData/', { params: params })
   }
+  GetbLastClosedAccountingDate (currencyCode: number, id: number, clientId:number, accountNo: string, Action: string):Observable <Date> {
+    const params = {'currencyCode': currencyCode, 'id' :id, 'clientId': clientId,'accountNo':accountNo, 'Action': Action}
+    return this.http.get <Date>('/api/DEA/fGetAccountingData/', { params: params })
+  }
 }

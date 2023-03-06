@@ -13,12 +13,16 @@
   </mat-checkbox>
 
   <form class="submit" [formGroup]="entryModifyForm">
+    <button mat-raised-button
+    (click)="ClsAcc()">DATE CLOSED {{Closed}}</button>
     <mat-form-field  style="width: 27%;">
       <mat-label>Type Code</mat-label>
       <mat-select   formControlName="t_XactTypeCode_Ext" > 
-        <mat-option *ngFor="let TransactionType of TransactionTypes" [value]="TransactionType.id">
-          {{TransactionType.xActTypeCode_Ext |uppercase}} - {{TransactionType.description}}
+        <ng-container *ngFor="let TransactionType of TransactionTypes">
+        <mat-option *ngIf = "TransactionType.code2 == xActTypeCode.value" [value]="TransactionType.id">
+           {{TransactionType.xActTypeCode_Ext |uppercase}} - {{TransactionType.description}}
         </mat-option>
+        </ng-container>
       </mat-select>
     </mat-form-field>
     <mat-form-field class="example-full-width" style="width: 17%;" >
@@ -38,19 +42,28 @@
     <span [ngSwitch]="xActTypeCode.value">
       <mat-form-field *ngSwitchCase="1" style="width: 35%;">
         <input matInput placeholder="Debit" formControlName="d_ledgerNo">   
-        <button mat-icon-button matSuffix><mat-icon >search</mat-icon></button>
+        <button mat-icon-button matSuffix
+        (click)="selectLedger()">
+        <mat-icon >search</mat-icon></button>
       </mat-form-field>
       <mat-form-field *ngSwitchCase="1"style="width: 35%;">
         <input matInput placeholder="Credit" formControlName="d_accountNo">
-        <button mat-icon-button matSuffix><mat-icon >search</mat-icon></button>
+          <button mat-icon-button matSuffix
+          (click)="selectAccount()">
+         <mat-icon >search</mat-icon>
+        </button>
       </mat-form-field>
       <mat-form-field *ngSwitchCase="2" style="width: 35%;">
         <input matInput placeholder="Debit" formControlName="d_accountNo">   
-        <button mat-icon-button matSuffix><mat-icon >search</mat-icon></button>
+        <button mat-icon-button matSuffix
+        (click)="selectAccount()">
+        <mat-icon >search</mat-icon></button>
       </mat-form-field>
       <mat-form-field *ngSwitchCase="2"style="width: 35%;">
         <input matInput placeholder="Credit" formControlName="d_ledgerNo">
-        <button mat-icon-button matSuffix><mat-icon >search</mat-icon></button>
+        <button mat-icon-button matSuffix
+        (click)="selectLedger()">
+        <mat-icon >search</mat-icon></button>
       </mat-form-field>
     </span>
     <mat-form-field style="width: 95%;">

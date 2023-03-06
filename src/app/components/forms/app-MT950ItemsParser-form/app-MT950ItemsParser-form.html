@@ -1,9 +1,5 @@
 <form class="submit" [formGroup]="swift950Entry">
-  <button mat-raised-button  aria-label="expand row" color="primary" style="margin-left: 1%;"  
-  (click)="SubmitEntryAccounntingInsertRow()"
-  >
-    Submit
-  </button>
+
   <mat-form-field class="example-full-width" style="width: 12%;" >
     <input matInput  [matDatepicker]="picker" placeholder="Choose a date"  formControlName="dataTime" >
     <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
@@ -65,4 +61,8 @@
   <mat-form-field  style="width: 4%;" >
     <input matInput placeholder="ExtID" formControlName="extTransactionId">
   </mat-form-field>
+  <button mat-raised-button  aria-label="expand row" color="primary" style="margin-left: 1%;"  
+    (click)="SubmitEntryAccounntingInsertRow()" >  
+    Submit
+  </button>
 </form>

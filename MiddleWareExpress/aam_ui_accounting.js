@@ -57,6 +57,10 @@ async function fGetAccountingData (request,response) {
       'LEFT JOIN "bAccounts" on "bAccounts"."accountId" = "bAccountTransaction"."accountId" ' +
       'LEFT JOIN "bLedger" ON "bLedger"."ledgerNoId" = "bAccountTransaction"."ledgerNoId"; ' 
     break;
+    case 'GetbLastClosedAccountingDate':
+      query.text ='SELECT * FROM "bLastClosedAccountingDate";'
+    break
+    
   }
   console.log('que', query);
   pool.query (query, (err, res) => {if (err) {console.log (err.stack)} else {
