@@ -108,7 +108,7 @@ export interface bAccounts {
   entityTypeCode: number, 
   accountId: number,
 }
-export interface bLedgerAccounts {
+export interface bLedger {
   ledgerNoId: number,
   ledgerNo: string, 
   name: string, 
@@ -119,7 +119,9 @@ export interface bLedgerAccounts {
   clientID: number,  
   entityTypeCode: number, 
   ledgerNoCptyCode: string,  
-  ledgerNoTrade: string,
+  ledgerNoTrade: string
+}
+export interface bLedgerAccounts extends bLedger {
   d_Account_Type: string,
   d_Client: string,
   d_APTypeCodeAccount: string

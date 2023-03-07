@@ -8,9 +8,10 @@ import { AppInvestmentDataServiceService } from 'src/app/services/app-investment
 import { TableAccounts } from '../../tables/app-table-accout/app-table-accout.component';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
-import { bAccountsEntriesList, bcTransactionType_Ext } from 'src/app/models/accounts-table-model';
+import { bcTransactionType_Ext } from 'src/app/models/accounts-table-model';
 import { AppTableAccLedgerAccountsComponent } from '../../tables/app-table-acc-ledger-accounts/app-table-acc-ledger-accounts';
 import { AppTableAccAccountsComponent } from '../../tables/app-table-acc-accounts/app-table-acc-accounts';
+
 interface Level {
   value: number;
   viewValue: string;
@@ -33,7 +34,7 @@ export class AppAccEntryModifyFormComponent implements OnInit, AfterViewInit {
   public actionToConfim = {'action':'delete_client' ,'isConfirmed': false}
   public AppSnackMsgbox : AppSnackMsgboxComponent
   public data: any;
-  public Closed : Date
+  public FirstOpenedAccountingDate : Date
   TransactionTypes: bcTransactionType_Ext[] = [];
 
   constructor (
@@ -45,25 +46,29 @@ export class AppAccEntryModifyFormComponent implements OnInit, AfterViewInit {
   ) 
   { this.AccountingDataService.GetTransactionType_Ext('',0,'','','bcTransactionType_Ext').subscribe (
     data => this.TransactionTypes=data)
-   
+    this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate)
+
     this.entryModifyForm = this.fb.group ({
       t_id: {value:null, disabled: false},
       t_entryDetails:{value:null, disabled: false},
       t_ledgerNoId: {value:null, disabled: false}, 
       t_accountId: {value:null, disabled: false}, 
       t_extTransactionId : {value:null, disabled: false}, 
-      t_dataTime: {value:null, disabled: false}, 
-      t_amountTransaction: {value:null, disabled: false}, 
+      t_dataTime: [null, [Validators.required]],  
+      t_amountTransaction: [null, [Validators.required, Validators.pattern('[0-9]*') ]], 
       t_XactTypeCode: {value:null, disabled: false},  
-      t_XactTypeCode_Ext: {value:null, disabled: false}, 
+      t_XactTypeCode_Ext: [null, [Validators.required]], 
       d_Debit : {value:null, disabled: false},  
       d_Credit : {value:null, disabled: false},  
-      d_ledgerNo: {value:null, disabled: false}, 
-      d_accountNo: {value:null, disabled: false},  
+      d_ledgerNo: [null, {    validators: [Validators.required], updateOn:'blur' } ], 
+      d_accountNo: [null, {    validators: [Validators.required], updateOn:'blur' } ],  
       d_xActTypeCode_ExtName : {value:null, disabled: false}, 
       d_entryDetails: {value:null, disabled: false}, 
     })
+    // this.editStrategyForm.controls['name'].updateValueAndValidity();
   }
+
+  
 
   ngOnInit(): void {
     this.panelOpenState = true;
@@ -83,9 +88,13 @@ export class AppAccEntryModifyFormComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-  }
-  ClsAcc (){
-    this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data => this.Closed = data[0].ClosedDate)
+    this.accountNo.setAsyncValidators (
+      customAsyncValidators.AccountingAccountNoCustomAsyncValidator(this.AccountingDataService, this.accountNo.value) 
+    )  
+    this.ledgerNo.setAsyncValidators (
+      customAsyncValidators .LedgerAccountNoCustomAsyncValidator(this.AccountingDataService, this.ledgerNo.value) 
+    )  
+
   }
   selectAccount () {
     this.dialogChoseAccount = this.dialog.open(AppTableAccAccountsComponent ,{minHeight:'600px', minWidth:'1300px', autoFocus: false, maxHeight: '90vh'});
@@ -198,14 +207,16 @@ export class AppAccEntryModifyFormComponent implements OnInit, AfterViewInit {
       break;
   }
   }
- */​
-  get  Debit ()   {return this.entryModifyForm.get('d_Debit') } 
-  get  Credit ()   {return this.entryModifyForm.get('d_Credit') } 
+ */
+  get  accountNo() {return this.entryModifyForm.get('d_accountNo')}​
+  get  ledgerNo() {return this.entryModifyForm.get('d_ledgerNo')}​
+  get  debit ()   {return this.entryModifyForm.get('d_Debit') } 
+  get  credit ()   {return this.entryModifyForm.get('d_Credit') } 
   get  id ()   {return this.entryModifyForm.get('t_id') } 
   get  dataTime ()   {return this.entryModifyForm.get('t_dataTime') } 
   get  entryDetails ()   {return this.entryModifyForm.get('d_entryDetails') } 
-  public get  GamountTransaction ()   {return this.entryModifyForm.get('t_amountTransaction') } 
-  public get  xActTypeCode_Ext ()   {return this.entryModifyForm.get('t_XactTypeCode_Ext') } 
+  get  amountTransaction ()   {return this.entryModifyForm.get('t_amountTransaction') } 
+  get  xActTypeCode_Ext ()   {return this.entryModifyForm.get('t_XactTypeCode_Ext') } 
   get  xActTypeCode ()   {return this.entryModifyForm.get('t_XactTypeCode') } 
 
 }

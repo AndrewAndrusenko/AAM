@@ -7,7 +7,7 @@ import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { AppInvestmentDataServiceService } from './app-investment-data.service.service';
 import { AppTabServiceService } from './app-tab-service.service';
-
+import { AppAccountingService } from './app-accounting.service';
 export class customAsyncValidators {
   static clientNameCustomAsyncValidator(userService: AppTabServiceService, clientId:number): AsyncValidatorFn {
     return (control: AbstractControl): Observable<ValidationErrors> => {
@@ -37,6 +37,27 @@ export class customAsyncValidators {
         .getGlobalStategiesList (Id, control.value, 'Check_Name')
         .pipe(
           map ( isTaken => ( control.touched && control.value !== Id && isTaken.length ? { uniqueStrategyCode: true } : null)  ),
+          catchError(() => of(null))
+        );
+    };
+  }
+
+  static AccountingAccountNoCustomAsyncValidator (AccountingDataService: AppAccountingService, AccountNo:string): AsyncValidatorFn {
+    return (control: AbstractControl): Observable<ValidationErrors> => {
+      return AccountingDataService
+        .GetAccountData (null,null,null, control.value, 'GetAccountData')
+        .pipe(
+          map ( accountExist => ( control.touched && !accountExist.length ? { accountExist: true } : null)  ),
+          catchError(() => of(null))
+        );
+    };
+  }
+  static LedgerAccountNoCustomAsyncValidator (AccountingDataService: AppAccountingService, AccountNo:string): AsyncValidatorFn {
+    return (control: AbstractControl): Observable<ValidationErrors> => {
+      return AccountingDataService
+        .GetLedgerData (null,null,null, control.value, 'GetLedgerData')
+        .pipe(
+          map ( accountExist => ( control.touched && !accountExist.length ? { accountExist: true } : null)  ),
           catchError(() => of(null))
         );
     };

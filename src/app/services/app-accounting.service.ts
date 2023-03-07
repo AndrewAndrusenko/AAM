@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, Subject} from 'rxjs';
-import { bAccounts, bAccountsEntriesList, bcTransactionType_Ext, bLedgerAccounts, SWIFTSGlobalListmodel, SWIFTStatement950model } from '../models/accounts-table-model';
+import { bAccounts, bAccountsEntriesList, bcTransactionType_Ext, bLedger, bLedgerAccounts, SWIFTSGlobalListmodel, SWIFTStatement950model } from '../models/accounts-table-model';
 
 @Injectable({
   providedIn: 'root'
@@ -27,6 +27,11 @@ export class AppAccountingService {
     const params = {'currencyCode': currencyCode, 'id' :id, 'clientId': clientId,'accountNo':accountNo, 'Action': Action}
     return this.http.get <bAccounts []>('/api/DEA/fGetAccountingData/', { params: params })
   }
+  GetLedgerData (currencyCode: number, id: number, clientId:number, accountNo: string, Action: string):Observable <bLedger[]> {
+    const params = {'currencyCode': currencyCode, 'id' :id, 'clientId': clientId,'accountNo':accountNo, 'Action': Action}
+    return this.http.get <bLedger []>('/api/DEA/fGetAccountingData/', { params: params })
+  }
+
   EntryCreate ():Observable <any[]> {
     console.log('ftEntryCreate','ftEntryCreate');
     return this.http.get <any []>('/api/DEA/ftEntryCreate/')

@@ -27,6 +27,13 @@ async function fGetAccountingData (request,response) {
       'LEFT JOIN "bAccountsPortfoliosLink" ON "bAccountsPortfoliosLink"."accountNoId" = "accountId" '+
       'LEFT JOIN dportfolios ON dportfolios.idportfolio = "bAccountsPortfoliosLink"."portfolioId" ; '
     break;
+    case 'GetLedgerData':
+      query.text ='SELECT '+
+        '"accountTypeID", name, "clientID", "entityTypeCode", "ledgerNo", "currecyCode", '+
+        '"ledgerNoCptyCode", "ledgerNoTrade", "externalAccountNo", "ledgerNoId" '+
+        'FROM public."bLedger" WHERE ("ledgerNo"= $1) ; '
+      query.values = [request.query.accountNo]
+    break;
     case 'GetLedgerAccountsDataWholeList' :
       query.text ='SELECT '+
         '"accountTypeID", name, "clientID", "entityTypeCode", "ledgerNo", "currecyCode", '+
@@ -58,7 +65,7 @@ async function fGetAccountingData (request,response) {
       'LEFT JOIN "bLedger" ON "bLedger"."ledgerNoId" = "bAccountTransaction"."ledgerNoId"; ' 
     break;
     case 'GetbLastClosedAccountingDate':
-      query.text ='SELECT * FROM "bLastClosedAccountingDate";'
+      query.text ='SELECT "FirstOpenedDate"::date FROM "bLastClosedAccountingDate";'
     break
     
   }

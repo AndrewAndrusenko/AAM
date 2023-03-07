@@ -13,8 +13,6 @@
   </mat-checkbox>
 
   <form class="submit" [formGroup]="entryModifyForm">
-    <button mat-raised-button
-    (click)="ClsAcc()">DATE CLOSED {{Closed}}</button>
     <mat-form-field  style="width: 27%;">
       <mat-label>Type Code</mat-label>
       <mat-select   formControlName="t_XactTypeCode_Ext" > 
@@ -24,16 +22,27 @@
         </mat-option>
         </ng-container>
       </mat-select>
+      <mat-error  *ngIf="xActTypeCode_Ext.invalid && xActTypeCode_Ext.touched && xActTypeCode_Ext.value==''">
+        The field is required.    
+     </mat-error>
     </mat-form-field>
     <mat-form-field class="example-full-width" style="width: 17%;" >
-      <input matInput  [matDatepicker]="picker" placeholder="Choose a date"  formControlName="t_dataTime" >
+      <input matInput [min]="FirstOpenedAccountingDate" [matDatepicker]="picker" placeholder="Choose a date"  formControlName="t_dataTime" >
       <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
       <mat-datepicker #picker></mat-datepicker>
+      
     </mat-form-field>
     <mat-form-field style="width: 20%; ">
-      <input matInput placeholder="Amount" formControlName="t_amountTransaction" [value]="GamountTransaction.valueChanges | async  | currency">
+      <input matInput placeholder="Amount" formControlName="t_amountTransaction" [value]="amountTransaction.valueChanges | async  | currency">
+      <mat-error  *ngIf="amountTransaction.invalid && amountTransaction.touched && amountTransaction.value==''">
+        The field is required.    
+     </mat-error>
+     <mat-error  *ngIf="amountTransaction.invalid && amountTransaction.touched && amountTransaction.value!=''">
+      Only dights!    
+   </mat-error>
     </mat-form-field>
-    
+
+
     <mat-button-toggle-group style=" width: 26%;font-size: 18px;" formControlName="t_XactTypeCode" 
       aria-label="Font Style" matTooltip="Choose Ledger Side">
       <mat-button-toggle  style="width: 50%;font-size: 18px;" [value]="1">Debit</mat-button-toggle>
@@ -44,31 +53,55 @@
         <input matInput placeholder="Debit" formControlName="d_ledgerNo">   
         <button mat-icon-button matSuffix
         (click)="selectLedger()">
-        <mat-icon >search</mat-icon></button>
+        <mat-icon class = "icon_search">search</mat-icon></button>
+        <mat-error  *ngIf="ledgerNo.invalid && ledgerNo.value!==''">
+          Incorrect account number. Use search loop.    
+        </mat-error>
+        <mat-error  *ngIf="ledgerNo.invalid && ledgerNo.touched && ledgerNo.value==''">
+          The field is required.    
+       </mat-error>
       </mat-form-field>
       <mat-form-field *ngSwitchCase="1"style="width: 35%;">
         <input matInput placeholder="Credit" formControlName="d_accountNo">
           <button mat-icon-button matSuffix
           (click)="selectAccount()">
-         <mat-icon >search</mat-icon>
+         <mat-icon class = "icon_search">search</mat-icon>
         </button>
+        <mat-error  *ngIf="accountNo.invalid && accountNo.value!==''">
+          Incorrect account number. Use search loop.    
+        </mat-error>
+        <mat-error  *ngIf="accountNo.invalid && accountNo.touched && accountNo.value==''">
+          The field is required.    
+       </mat-error>
       </mat-form-field>
       <mat-form-field *ngSwitchCase="2" style="width: 35%;">
         <input matInput placeholder="Debit" formControlName="d_accountNo">   
         <button mat-icon-button matSuffix
         (click)="selectAccount()">
-        <mat-icon >search</mat-icon></button>
+        <mat-icon class = "icon_search">search</mat-icon></button>
+        <mat-error  *ngIf="accountNo.invalid && accountNo.value!==''">
+          Incorrect account number. Use search loop.    
+        </mat-error>
+        <mat-error  *ngIf="accountNo.invalid && accountNo.touched && accountNo.value==''">
+          The field is required.    
+       </mat-error>
       </mat-form-field>
       <mat-form-field *ngSwitchCase="2"style="width: 35%;">
         <input matInput placeholder="Credit" formControlName="d_ledgerNo">
         <button mat-icon-button matSuffix
         (click)="selectLedger()">
-        <mat-icon >search</mat-icon></button>
+        <mat-icon class = "icon_search">search</mat-icon></button>
+        <mat-error  *ngIf="ledgerNo.invalid && ledgerNo.value!==''">
+          Incorrect account number. Use search loop.    
+        </mat-error>
+        <mat-error  *ngIf="ledgerNo.invalid && ledgerNo.touched && ledgerNo.value==''">
+          The field is required.    
+       </mat-error>
       </mat-form-field>
     </span>
     <mat-form-field style="width: 95%;">
       <input matInput placeholder="entryDetails" formControlName="t_entryDetails">
     </mat-form-field>
-    <p color = 'red' *ngIf="entryModifyForm.invalid"> Please check the form. Data is invalid</p>
+    <h3 style="color:rgb(252, 113, 113)" *ngIf="entryModifyForm.invalid"> Please check the form. Data is invalid</h3>
 </form>
 <!-- </mat-expansion-panel> -->
