@@ -5,7 +5,6 @@ import { AppConfimActionComponent } from '../../alerts/app-confim-action/app-con
 import { AppSnackMsgboxComponent } from '../../app-snack-msgbox/app-snack-msgbox.component';
 import { MatSnackBar} from '@angular/material/snack-bar';
 import { AppInvestmentDataServiceService } from 'src/app/services/app-investment-data.service.service';
-import { TableAccounts } from '../../tables/app-table-accout/app-table-accout.component';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
 import { bcTransactionType_Ext } from 'src/app/models/accounts-table-model';

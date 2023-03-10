@@ -32,7 +32,7 @@ async function TreeSQLQueryExc (RootNode, userId, nodeParentFavorite) {
       pool.QueryArrayConfig.text="SELECT name, id FROM public.dtree_menu_items where rootname='Accounting' order by id;"
     break;    
          
-
+u
     case 'Favorites':
       pool.QueryArrayConfig.values = [userId, RootNode[1]]
       pool.QueryArrayConfig.rowMode="array"
