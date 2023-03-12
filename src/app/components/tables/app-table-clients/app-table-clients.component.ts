@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { MatDialog, MatDialogRef} from '@angular/material/dialog';
 import * as XLSX from 'xlsx'
 import { AppClientFormComponent } from '../../forms/app-client-form/app-client-form.component';
@@ -12,8 +12,11 @@ export class AppClientsTableComponent  {
   
   dialogRef: MatDialogRef<AppClientFormComponent>;
   dialogAccountRef: MatDialogRef<AppNewAccountComponent>
+  @Output() public modal_principal_parent = new EventEmitter();
   dtOptions: any = {};
   action ='';
+  public readOnly: boolean = false;
+  public selectedRow: any;
   constructor(private dialog: MatDialog) {}
 ngOnInit(): void {
   this.dtOptions = {
@@ -64,6 +67,14 @@ dom:  'Bfrtip',
 select: true
 /* order: [11, 'desc']  */
   };
+}
+
+
+chooseClient () {
+  let table =  $('#mytable')
+  let data = table.DataTable().row({ selected: true }).data()
+  this.selectedRow = data;
+  this.modal_principal_parent.emit('CLOSE_PARENT_MODAL');
 }
 
 openAddFileDialog(actionType) {

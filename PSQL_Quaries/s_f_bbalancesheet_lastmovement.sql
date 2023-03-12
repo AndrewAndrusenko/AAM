@@ -1,0 +1,1 @@
+select * from f_bbalancesheet_lastmovement('2023-02-14')

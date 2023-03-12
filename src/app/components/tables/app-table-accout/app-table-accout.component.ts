@@ -31,6 +31,8 @@ export class TableAccounts implements AfterViewInit {
   @ViewChild(MatSort) sort: MatSort;
   expandedElement: AccountsTableModel  | null;
   accessToClientData: string = 'true';
+  public readOnly: boolean = true;
+  public selectedRow: any;
   dialogRef: MatDialogRef<AppNewAccountComponent>;
   public currentAccout:any;
   private subscriptionName: Subscription;
@@ -76,6 +78,7 @@ export class TableAccounts implements AfterViewInit {
     
   chooseAccount (element) {
     this.currentAccout = element;
+    this.selectedRow = element;
     this.modal_principal_parent.emit('CLOSE_PARENT_MODAL');
   }
   applyFilter(event: Event) {
@@ -89,7 +92,7 @@ export class TableAccounts implements AfterViewInit {
     this.dialogRef = this.dialog.open(AppNewAccountComponent ,{minHeight:'400px', maxWidth:'1000px' });
     this.dialogRef.componentInstance.action = actionType;
     this.dialogRef.componentInstance.title = actionType;
-    this.dialogRef.componentInstance.accountData = row;
+    this.dialogRef.componentInstance.clientData = row;
     switch (actionType) {
       case 'Create':
       case 'Create_Example': 

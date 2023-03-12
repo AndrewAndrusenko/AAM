@@ -8,7 +8,7 @@ import {TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { bAccounts, bAccountsEntriesList } from 'src/app/models/accounts-table-model';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
-import { AppAccEntryModifyFormComponent } from '../../forms/app-acc-entry-modify-form/app-acc-entry-modify-form';
+import { AppAccAccountModifyFormComponent } from '../../forms/app-acc-account-modify-form/app-acc-account-modify-form ';
 @Component({
   selector: 'app-table-acc-accounts',
   templateUrl: './app-table-acc-accounts.html',
@@ -24,11 +24,11 @@ import { AppAccEntryModifyFormComponent } from '../../forms/app-acc-entry-modify
 export class AppTableAccAccountsComponent  implements AfterViewInit {
   columnsToDisplay = [
     'accountNo',  
-    'accountTypeExt',  
+    'd_acctypedescription',  
     'Information',  
     'd_clientname',
     'd_portfolioCode',
-    'entityTypeCode', 
+    'd_entitytypedescription', 
   ]
   columnsHeaderToDisplay = [
     'No',
@@ -36,8 +36,9 @@ export class AppTableAccAccountsComponent  implements AfterViewInit {
     'Details', 
     'Client',  
     'Portfolio', 
-    'EntityT', 
+    'Entit yType', 
   ];
+  private subscriptionName: Subscription;
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
   dataSource: MatTableDataSource<bAccounts>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -48,9 +49,18 @@ export class AppTableAccAccountsComponent  implements AfterViewInit {
   expandedElement: bAccounts  | null;
   accessToClientData: string = 'true';
   action ='';
-  dialogRef: MatDialogRef<AppAccEntryModifyFormComponent>;
+  dialogRef: MatDialogRef<AppAccAccountModifyFormComponent>;
+  
 
-  constructor(private AccountingDataService:AppAccountingService, private TreeMenuSevice:TreeMenuSevice, private dialog: MatDialog ) {}
+  constructor(private AccountingDataService:AppAccountingService, private TreeMenuSevice:TreeMenuSevice, private dialog: MatDialog ) {
+    this.subscriptionName= this.AccountingDataService.getReloadAccontList().subscribe ( (id) => {
+      this.AccountingDataService.GetAccountsListAccounting (null,null,null,null,'GetAccountDataWholeList').subscribe (AccountsList  => {
+        this.dataSource  = new MatTableDataSource(AccountsList);
+        this.dataSource.paginator = this.paginator;
+        this.dataSource.sort = this.sort;
+      })
+    } )
+  }
 
   async ngAfterViewInit() {
     this.columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
@@ -77,11 +87,13 @@ export class AppTableAccAccountsComponent  implements AfterViewInit {
     this.modal_principal_parent.emit('CLOSE_PARENT_MODAL');
   }
 
-  openEntryModifyForm (actionType:string, row: any ) {
+  openAccountModifyForm (actionType:string, row: any ) {
     console.log('row', row);
-    this.dialogRef = this.dialog.open(AppAccEntryModifyFormComponent ,{minHeight:'400px', maxWidth:'1000px' });
+    this.dialogRef = this.dialog.open(AppAccAccountModifyFormComponent ,{minHeight:'400px', maxWidth:'1000px' });
     this.dialogRef.componentInstance.action = actionType;
     this.dialogRef.componentInstance.title = actionType;
+    // this.dialogRef.componentInstance.accountType = 'Account';
+
     this.dialogRef.componentInstance.data = row;
     switch (actionType) {
       case 'Create':

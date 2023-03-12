@@ -12,6 +12,12 @@ async function fGetAccountingData (request,response) {
     case 'bcTransactionType_Ext':
       query.text = 'SELECT id, TRIM("xActTypeCode_Ext") as "xActTypeCode_Ext", description, code2 FROM public."bcTransactionType_Ext" ORDER BY "xActTypeCode_Ext"; '
     break;
+    case 'bcEnityType':
+      query.text = 'SELECT "entityType", name, "entityTypeCode" FROM public."bcEnityType"; '
+    break;
+    case 'bcAccountType_Ext':
+      query.text = 'SELECT "accountType_Ext","xActTypeCode",description, "actCodeShort", "APTypeCode" FROM "bcAccountType_Ext";'
+    break;
     case 'GetAccountData':
       query.text ='SELECT '+
         '"accountNo", "accountTypeExt", "Information", "clientId", "currencyCode", "entityTypeCode", "accountId" '+
@@ -20,12 +26,15 @@ async function fGetAccountingData (request,response) {
     break;
     case 'GetAccountDataWholeList':
       query.text ='SELECT '+
-      '"accountNo", "accountTypeExt", "Information", "clientId", "currencyCode", "entityTypeCode", "accountId", '+
-      'clientname AS d_clientname, dportfolios.portfolioname AS "d_portfolioCode" ' +
+      '"accountNo", "accountTypeExt", "Information", "clientId", "currencyCode","bAccounts"."entityTypeCode", "accountId", '+
+      '"bAccounts"."idportfolio", clientname AS d_clientname, dportfolios.portfolioname AS "d_portfolioCode", ' +
+      '"bcAccountType_Ext"."actCodeShort" as "d_accountType", "bcAccountType_Ext"."description" as d_accTypeDescription, ' +
+      '"bcEnityType"."entityTypeCode" as d_entityTypeCode, "bcEnityType"."name" as d_entityTypeDescription '+
       'FROM public."bAccounts" '+
       'LEFT JOIN dclients ON "bAccounts"."clientId" = dclients.idclient ' +
-      'LEFT JOIN "bAccountsPortfoliosLink" ON "bAccountsPortfoliosLink"."accountNoId" = "accountId" '+
-      'LEFT JOIN dportfolios ON dportfolios.idportfolio = "bAccountsPortfoliosLink"."portfolioId" ; '
+      'LEFT JOIN dportfolios ON dportfolios.idportfolio = "bAccounts"."idportfolio" ' +
+      'LEFT JOIN "bcAccountType_Ext" ON "bcAccountType_Ext"."accountType_Ext" = "bAccounts"."accountTypeExt" ' +
+      'LEFT JOIN "bcEnityType" ON "bcEnityType"."entityType" = "bAccounts"."entityTypeCode"; '
     break;
     case 'GetLedgerData':
       query.text ='SELECT '+
@@ -63,6 +72,8 @@ async function fGetAccountingData (request,response) {
       'LEFT join "bcTransactionType_Ext" ON "bAccountTransaction"."XactTypeCode_Ext" = "bcTransactionType_Ext".id ' +
       'LEFT JOIN "bAccounts" on "bAccounts"."accountId" = "bAccountTransaction"."accountId" ' +
       'LEFT JOIN "bLedger" ON "bLedger"."ledgerNoId" = "bAccountTransaction"."ledgerNoId"; ' 
+    break;
+    case 'GetBalanceSheet':
     break;
     case 'GetbLastClosedAccountingDate':
       query.text ='SELECT "FirstOpenedDate"::date FROM "bLastClosedAccountingDate";'
@@ -160,9 +171,120 @@ async function fCreateEntryAccountingInsertRow (request, response) {
       return response.status(200).json(res.rowCount)}
     })  
 }
+async function fcreateAccountAccounting (request, response) {
+  paramArr = request.body.data
+  console.log('data',paramArr);
+  const query = {
+  text: 'INSERT INTO public."bAccounts" ' +
+        ' ("accountNo", "accountTypeExt", "Information", "clientId", "currencyCode", "entityTypeCode", "idportfolio") ' +
+        ' VALUES '+
+        '(${accountNo}, ${accountTypeExt}, ${Information}, ${clientId}, ${currencyCode}, ${entityTypeCode}, ${idportfolio});',
+    values: paramArr
+  }
+  sql = pgp.as.format(query.text,query.values)
+  console.log('sql', sql);
+  pool.query (sql,  (err, res) => {if (err) {
+    console.log (err.stack.split("\n", 1).join(""))
+    err.detail = err.stack
+    return response.send(err)
+  } else {
+    return response.status(200).json(res.rowCount)}
+  })  
+}
+async function fdeleteAccountAccounting (request, response) {
+  const query = {text: 'DELETE FROM public."bAccounts" WHERE "accountId"=${id};', values: request.body}
+  sql = pgp.as.format(query.text,query.values)
+  console.log('sql', sql);
+  
+  pool.query (sql,  (err, res) => {if (err) { return response.send(err)} else { return response.status(200).json(res.rowCount) }
+  }) 
+}
+async function fupdateAccountAccounting (request, response) {
+  paramArr = request.body.data
+  const query = {
+  text: 'UPDATE public."bAccounts" ' +
+	'SET  ' +
+   '"accountNo"=${accountNo}, ' +
+   '"accountTypeExt"=${accountTypeExt}, '+
+   '"Information"=${Information}, '+
+   '"clientId"=${clientId}, '+
+   '"currencyCode"=${currencyCode}, '+
+   '"entityTypeCode"=${entityTypeCode}, '+
+   '"idportfolio"=${idportfolio} '+
+	 'WHERE "accountId"=${accountId};',
+    values: paramArr
+  } 
+  sql = pgp.as.format(query.text,query.values)
+   pool.query (sql,  (err, res) => {if (err) {
+    console.log (err.stack.split("\n", 1).join(""))
+    err.detail = err.stack
+    return response.send(err)
+  } else {
+    return response.status(200).json(res.rowCount)}
+  })   
+}
+
+async function fcreateLedgerAccountAccounting (request, response) {
+  paramArr = request.body.data
+  console.log('data',paramArr);
+  const query = {
+  text: 'INSERT INTO public."bAccounts" ' +
+        ' ("accountNo", "accountTypeExt", "Information", "clientId", "currencyCode", "entityTypeCode", "idportfolio") ' +
+        ' VALUES '+
+        '(${accountNo}, ${accountTypeExt}, ${Information}, ${clientId}, ${currencyCode}, ${entityTypeCode}, ${idportfolio});',
+    values: paramArr
+  }
+  sql = pgp.as.format(query.text,query.values)
+  console.log('sql', sql);
+  pool.query (sql,  (err, res) => {if (err) {
+    console.log (err.stack.split("\n", 1).join(""))
+    err.detail = err.stack
+    return response.send(err)
+  } else {
+    return response.status(200).json(res.rowCount)}
+  })  
+}
+async function fdeleteLedgerAccountAccounting (request, response) {
+  const query = {text: 'DELETE FROM public."bAccounts" WHERE "accountId"=${id};', values: request.body}
+  sql = pgp.as.format(query.text,query.values)
+  console.log('sql', sql);
+  
+  pool.query (sql,  (err, res) => {if (err) { return response.send(err)} else { return response.status(200).json(res.rowCount) }
+  }) 
+}
+async function fupdateLedgerAccountAccounting (request, response) {
+  paramArr = request.body.data
+  const query = {
+  text: 'UPDATE public."bAccounts" ' +
+	'SET  ' +
+   '"accountNo"=${accountNo}, ' +
+   '"accountTypeExt"=${accountTypeExt}, '+
+   '"Information"=${Information}, '+
+   '"clientId"=${clientId}, '+
+   '"currencyCode"=${currencyCode}, '+
+   '"entityTypeCode"=${entityTypeCode}, '+
+   '"idportfolio"=${idportfolio} '+
+	 'WHERE "accountId"=${accountId};',
+    values: paramArr
+  } 
+  sql = pgp.as.format(query.text,query.values)
+   pool.query (sql,  (err, res) => {if (err) {
+    console.log (err.stack.split("\n", 1).join(""))
+    err.detail = err.stack
+    return response.send(err)
+  } else {
+    return response.status(200).json(res.rowCount)}
+  })   
+}
 module.exports = {
   fGetMT950Transactions,
   fGetAccountingData,
   GetEntryScheme,
-  fCreateEntryAccountingInsertRow
+  fCreateEntryAccountingInsertRow,
+  fupdateAccountAccounting,
+  fdeleteAccountAccounting,
+  fcreateAccountAccounting,
+  fupdateLedgerAccountAccounting,
+  fdeleteLedgerAccountAccounting,
+  fcreateLedgerAccountAccounting
 }

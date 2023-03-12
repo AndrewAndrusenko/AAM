@@ -52,6 +52,16 @@ export class customAsyncValidators {
         );
     };
   }
+  static AccountingUniqueAccountNoAsyncValidator (AccountingDataService: AppAccountingService, AccountNo:string): AsyncValidatorFn {
+    return (control: AbstractControl): Observable<ValidationErrors> => {
+      return AccountingDataService
+        .GetAccountData (null,null,null, control.value, 'GetAccountData')
+        .pipe(
+          map ( accountIsTaken => ( control.value !== AccountNo && accountIsTaken.length ? { accountIsTaken: true } : null)  ),
+          catchError(() => of(null))
+        );
+    };
+  }
   static LedgerAccountNoCustomAsyncValidator (AccountingDataService: AppAccountingService, AccountNo:string): AsyncValidatorFn {
     return (control: AbstractControl): Observable<ValidationErrors> => {
       return AccountingDataService

@@ -1,0 +1,1 @@
+select * FROM "bAccountTransaction" where "dataTime"::date = '2023-02-21'::date

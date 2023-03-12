@@ -42,6 +42,7 @@ import { AppTableAccEntriesComponent } from './components/tables/app-table-acc-e
 import { AppAccEntryModifyFormComponent } from './components/forms/app-acc-entry-modify-form/app-acc-entry-modify-form';
 import { AppTableAccAccountsComponent } from './components/tables/app-table-acc-accounts/app-table-acc-accounts';
 import { AppTableAccLedgerAccountsComponent } from './components/tables/app-table-acc-ledger-accounts/app-table-acc-ledger-accounts';
+import { AppAccAccountModifyFormComponent } from './components/forms/app-acc-account-modify-form/app-acc-account-modify-form ';
 
 @NgModule({
     imports: [
@@ -90,8 +91,8 @@ import { AppTableAccLedgerAccountsComponent } from './components/tables/app-tabl
         AppTableAccEntriesComponent,
         AppAccEntryModifyFormComponent,
         AppTableAccAccountsComponent,
-        AppTableAccLedgerAccountsComponent
-
+        AppTableAccLedgerAccountsComponent,
+        AppAccAccountModifyFormComponent
     ],
     bootstrap: [AppComponent],
     providers: [],

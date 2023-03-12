@@ -1,6 +1,6 @@
 
-<ng-template  #instrumentcontextmenu>
-  <div class="tree-menu-context" cdkMenu >
+<ng-template  #instrumentcontextmenu >
+  <div class="tree-menu-context" cdkMenu *ngIf="!readOnly">
     <button 
       (click)="openAddFileDialog('Create')"
       class="tree-menu-item" cdkMenuItem >
@@ -32,7 +32,18 @@
       Delete Client
     </button> 
   </div>
+  <div class="tree-menu-context" cdkMenu *ngIf="readOnly">
+    <button 
+    (click)="chooseClient()"
+     class="tree-menu-item" cdkMenuItem>
+     <mat-icon class="menu-icon" matPrefix>done</mat-icon> 
+     Select Client
+   </button> 
+  </div>
 </ng-template>
 <div [cdkContextMenuTriggerFor]="instrumentcontextmenu" class="dataTableTitle"> <h2> Clients list </h2> </div>
+<h2 *ngIf="readOnly" style="color: rgb(224, 73, 73);"> Use context menu to select client</h2>
+
 <table datatable  id="mytable" [cdkContextMenuTriggerFor]="instrumentcontextmenu"[dtOptions]="dtOptions" 
+(click)="chooseClient()"
 class="row-border hover"></table>

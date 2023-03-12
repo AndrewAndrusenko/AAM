@@ -26,7 +26,7 @@ async function fGetStrategiesList (request,response) {
     case 'Get_AccountTypes_List' :
       query.text = 'SELECT "typeCode", "typeValue", "typeDescription" ' + 
                    'FROM public."dGeneralTypes" '+ 
-                   'WHERE ("typeCode" = $1) ORDER BY  typeValue'
+                   'WHERE ("typeCode" = $1) ORDER BY  "typeValue"'
       query.values = ['account_type']
     break;
     default:

@@ -9,6 +9,7 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { bAccounts, bLedgerAccounts } from 'src/app/models/accounts-table-model';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
 import { AppAccEntryModifyFormComponent } from '../../forms/app-acc-entry-modify-form/app-acc-entry-modify-form';
+import { AppAccAccountModifyFormComponent } from '../../forms/app-acc-account-modify-form/app-acc-account-modify-form ';
 @Component({
   selector: 'app-table-acc-ledger-accounts',
   templateUrl: './app-table-acc-ledger-accounts.html',
@@ -50,7 +51,7 @@ export class AppTableAccLedgerAccountsComponent  implements AfterViewInit {
   accessToClientData: string = 'true';
   public readOnly: boolean = false; 
   action ='';
-  dialogRef: MatDialogRef<AppAccEntryModifyFormComponent>;
+  dialogRef: MatDialogRef<AppAccAccountModifyFormComponent>;
 
   constructor(private AccountingDataService:AppAccountingService, private TreeMenuSevice:TreeMenuSevice, private dialog: MatDialog ) {}
 
@@ -77,12 +78,13 @@ export class AppTableAccLedgerAccountsComponent  implements AfterViewInit {
     this.selectedRow = element;
     this.modal_principal_parent.emit('CLOSE_PARENT_MODAL');
   }
-  openEntryModifyForm (actionType:string, row: any ) {
+  openAccountModifyForm (actionType:string, row: any ) {
     console.log('row', row);
-    this.dialogRef = this.dialog.open(AppAccEntryModifyFormComponent ,{minHeight:'400px', maxWidth:'1000px' });
+    this.dialogRef = this.dialog.open(AppAccAccountModifyFormComponent ,{minHeight:'400px', maxWidth:'1000px' });
     this.dialogRef.componentInstance.action = actionType;
     this.dialogRef.componentInstance.title = actionType;
     this.dialogRef.componentInstance.data = row;
+    this.dialogRef.componentInstance.aType = 1;
     switch (actionType) {
       case 'Create':
       case 'Create_Example': 

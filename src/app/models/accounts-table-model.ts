@@ -84,6 +84,19 @@ export interface bcTransactionType_Ext {
   description: string, 
   code2: string,
 }
+export interface bcEnityType {
+  entityType: number, 
+  entityTypeCode: string, 
+  name: string, 
+}
+export interface bcAccountType_Ext {
+  accountType_Ext: number, 
+  xActTypeCode: number, 
+  description: string, 
+  actCodeShort: string, 
+  APTypeCode: string, 
+}
+
 export interface bcParametersSchemeAccTrans {
   pRef : string,
   pAmount: number,
@@ -107,6 +120,15 @@ export interface bAccounts {
   currencyCode: number,  
   entityTypeCode: number, 
   accountId: number,
+  idportfolio: number
+}
+export interface bAccountsList extends bAccounts {
+  d_clientname: string, 
+  d_portfolioCode: string,
+  d_accountType: string,
+  d_accTypeDescription: string,
+  d_entityTypeCode: string,
+  d_entityTypeDescription: string,
 }
 export interface bLedger {
   ledgerNoId: number,
