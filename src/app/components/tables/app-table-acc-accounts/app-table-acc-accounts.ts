@@ -53,6 +53,7 @@ export class AppTableAccAccountsComponent  implements AfterViewInit {
   
 
   constructor(private AccountingDataService:AppAccountingService, private TreeMenuSevice:TreeMenuSevice, private dialog: MatDialog ) {
+      
     this.subscriptionName= this.AccountingDataService.getReloadAccontList().subscribe ( (id) => {
       this.AccountingDataService.GetAccountsListAccounting (null,null,null,null,'GetAccountDataWholeList').subscribe (AccountsList  => {
         this.dataSource  = new MatTableDataSource(AccountsList);

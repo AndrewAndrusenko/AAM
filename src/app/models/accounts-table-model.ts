@@ -149,6 +149,7 @@ export interface bLedgerAccounts extends bLedger {
   d_APTypeCodeAccount: string
 }
 export interface bAccountsEntriesList {
+  d_transactionType:string,
   t_id: number,
   t_entryDetails:string,
   t_ledgerNoId: number, 
@@ -165,4 +166,10 @@ export interface bAccountsEntriesList {
   d_xActTypeCode_ExtName : string, 
   d_entryDetails: string, 
 }
-      
+export interface bBalanceData {
+  accountId: number,
+  openingBalance: number,
+  totalCredit:number,
+  totalDebit:number,
+  closingBalance:number,
+}      

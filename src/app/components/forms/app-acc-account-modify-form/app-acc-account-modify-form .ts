@@ -39,7 +39,8 @@ export class AppAccAccountModifyFormComponent implements OnInit, AfterViewInit {
   @ViewChild(MatTabGroup) tabGroup: MatTabGroup;
   EnityTypes: bcEnityType[] = [];
   AccountTypes: bcAccountType_Ext[] = [];
-  formDisabledFields: string[] = []; 
+  formDisabledFields: string[] = [];
+  formLedgerDisabledFields: string[] = []; 
   private subscriptionName: Subscription
   constructor (
     private fb:FormBuilder, 
@@ -55,8 +56,9 @@ export class AppAccAccountModifyFormComponent implements OnInit, AfterViewInit {
     this.AccountingDataService.GetAccountTypeList('',0,'','','bcAccountType_Ext').subscribe (
       data => this.AccountTypes=data)
     this.formDisabledFields = ['clientId', 'accountId', 'idportfolio']
+    this.formLedgerDisabledFields = ['ledgerNoId', 'clientID']
     this.accountModifyForm = this.fb.group ({
-      accountNo: [null, {    validators: [Validators.required], updateOn:'blur' } ],   
+      accountNo: [null, {validators: [Validators.required], updateOn:'blur' } ],   
       accountTypeExt:[null, [Validators.required]] ,  
       Information: {value:null, disabled: false},  
       clientId: {value:null, disabled: true},  
@@ -68,20 +70,21 @@ export class AppAccAccountModifyFormComponent implements OnInit, AfterViewInit {
       d_portfolioCode: {value:null, disabled: true}
     })
     this.accountLedgerModifyForm = this.fb.group ({
-      ledgerNoId: {value:null, disabled: false},
-      ledgerNo: {value:null, disabled: false}, 
-      name: {value:null, disabled: false}, 
-      accountTypeID: {value:null, disabled: false},  
-      accountId: {value:null, disabled: false},
-      currecyCode: {value:null, disabled: false}, 
+      ledgerNoId: {value:null, disabled: true},
+      ledgerNo: [null, {validators: [Validators.required], updateOn:'blur' } ],
+      name: [null, [Validators.required]], 
+      accountTypeID: [null, [Validators.required]],  
+      accountId: {value:null, disabled: true},
+      currecyCode: [null, [Validators.required, Validators.pattern('[0-9]*') ]],
       externalAccountNo: {value:null, disabled: false}, 
-      clientID: {value:null, disabled: false},  
-      entityTypeCode: {value:null, disabled: false}, 
+      clientID: [{value:null, disabled: true}, [Validators.required]],   
+      entityTypeCode:[null, [Validators.required]], 
       ledgerNoCptyCode: {value:null, disabled: false},  
       ledgerNoTrade: {value:null, disabled: false},
       d_Account_Type: {value:null, disabled: false},
-      d_Client: {value:null, disabled: false},
+      d_Client: {value:null, disabled: true},
       d_APTypeCodeAccount: {value:null, disabled: false},
+      d_APType: {value:null, disabled: true},
     })
   }
 
@@ -102,11 +105,19 @@ export class AppAccAccountModifyFormComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
+    let accType = this.d_APTypeCodeAccount.value == 1 ? 'Active' : 'Passive'
+    this.accountLedgerModifyForm.controls['d_APType'].patchValue(accType)
+
     let accountNoToCheck = (this.action !== 'Create_Example') ? this.accountNo.value : null
+    let accountNoToCheckLedger = (this.action !== 'Create_Example') ? this.ledgerNo.value : null
     this.accountNo.setAsyncValidators (
       customAsyncValidators.AccountingUniqueAccountNoAsyncValidator(this.AccountingDataService, accountNoToCheck) 
     )
     this.accountNo.updateValueAndValidity();  
+    this.ledgerNo.setAsyncValidators (
+      customAsyncValidators.AccountingUniqueLedgerNoAsyncValidator(this.AccountingDataService, accountNoToCheckLedger) 
+    )
+    this.ledgerNo.updateValueAndValidity();  
   }
   selectPortfolio () {
     this.dialogChoseAccount = this.dialog.open(TableAccounts ,{minHeight:'600px', minWidth:'1300px', autoFocus: false, maxHeight: '90vh'});
@@ -127,9 +138,16 @@ export class AppAccAccountModifyFormComponent implements OnInit, AfterViewInit {
     this.dialogChoseClient.componentInstance.readOnly = true;
     this.dialogChoseClient.componentInstance.modal_principal_parent.subscribe ((item)=>{
       this.accountModifyForm.controls['clientId'].patchValue(this.dialogChoseClient.componentInstance.selectedRow['idclient'])
+      this.accountLedgerModifyForm.controls['clientID'].patchValue(this.dialogChoseClient.componentInstance.selectedRow['idclient'])
       this.accountModifyForm.controls['d_clientname'].patchValue(this.dialogChoseClient.componentInstance.selectedRow['clientname'])
+      this.accountLedgerModifyForm.controls['d_Client'].patchValue(this.dialogChoseClient.componentInstance.selectedRow['clientname'])
       this.dialogChoseClient.close(); 
     });
+  }
+  changeAccountType () {
+   let ind =  this.AccountTypes.findIndex (el => el.accountType_Ext === this.accountTypeIDLedger.value)
+   let accType = (this.AccountTypes[ind].xActTypeCode == 1) ? 'Active' : 'Passive'
+   this.accountLedgerModifyForm.controls['d_APType'].patchValue(accType)
   }
   updateAccountData(action:string){
     console.log('action',action);
@@ -173,7 +191,7 @@ export class AppAccAccountModifyFormComponent implements OnInit, AfterViewInit {
             if (result['name']=='error') {
               this.snack.open('Error: ' + result['detail'],'OK',{panelClass: ['snackbar-error']} ) 
             } else {
-              this.snack.open('Deleted: ' + result + ' strategy','OK',{panelClass: ['snackbar-success'], duration: 3000})
+              this.snack.open('Deleted: ' + result + ' account','OK',{panelClass: ['snackbar-success'], duration: 3000})
               this.AccountingDataService.sendReloadAccontList (this.accountModifyForm.controls['accountId']);
               this.dialog.closeAll();
             }
@@ -184,7 +202,58 @@ export class AppAccAccountModifyFormComponent implements OnInit, AfterViewInit {
       break;
     }
   }
+  updateLedgerAccountData (action:string){
+    console.log('action',action);
+    switch (action) {
+      case 'Create_Example':
+      case 'Create':
+        this.formLedgerDisabledFields.forEach(elem => this.accountLedgerModifyForm.controls[elem].enable())
+        this.AccountingDataService.createLedgerAccountAccounting (this.accountLedgerModifyForm.value).then ( (result) => {
+          if (result['name']=='error') {
+            this.snack.open('Error: ' + result['detail'].split("\n", 1).join(""),'OK',{panelClass: ['snackbar-error']}); 
+          } else {
+            this.snack.open('Created: ' + result + ' account','OK',{panelClass: ['snackbar-success'], duration: 3000});
+            this.AccountingDataService.sendReloadLedgerAccontList (this.ledgerNoId.value);
+          }
+        })
+        this.formLedgerDisabledFields.forEach(elem => this.accountLedgerModifyForm.controls[elem].disable())
+      break;
 
+      case 'Edit':
+        this.formLedgerDisabledFields.forEach(elem => this.accountLedgerModifyForm.controls[elem].enable())
+        this.AccountingDataService.updateLedgerAccountAccounting (this.accountLedgerModifyForm.value).then ( (result) => {
+          if (result['name']=='error') {
+            this.snack.open('Error: ' + result['detail'].split("\n", 1).join(""),'OK',{panelClass: ['snackbar-error']} ) 
+          } else {
+            this.snack.open('Updated: ' + result + ' account','OK',{panelClass: ['snackbar-success'], duration: 3000})
+            this.AccountingDataService.sendReloadLedgerAccontList (this.ledgerNoId.value);
+          }
+        this.formLedgerDisabledFields.forEach(elem => this.accountLedgerModifyForm.controls[elem].disable())
+        })
+      break;
+
+      case 'Delete':
+        this.dialogRefConfirm = this.dialog.open(AppConfimActionComponent, {panelClass: 'custom-modalbox',} );
+        this.dialogRefConfirm.componentInstance.actionToConfim = {'action':'Delete Account' ,'isConfirmed': false}
+        this.dialogRefConfirm.afterClosed().subscribe (actionToConfim => {
+          console.log('action', actionToConfim)
+          if (actionToConfim.isConfirmed===true) {
+          this.ledgerNoId.enable()
+          this.AccountingDataService.deleteLedgerAccountAccounting (this.ledgerNoId.value).then ((result) =>{
+            if (result['name']=='error') {
+              this.snack.open('Error: ' + result['detail'],'OK',{panelClass: ['snackbar-error']} ) 
+            } else {
+              this.snack.open('Deleted: ' + result + ' account','OK',{panelClass: ['snackbar-success'], duration: 3000})
+              this.AccountingDataService.sendReloadLedgerAccontList (this.ledgerNoId.value);
+              this.dialog.closeAll();
+            }
+          })
+         
+          }
+        })
+      break;
+    }
+  }
   get  accountNo() {return this.accountModifyForm.get('accountNo')}​
   get  Information() {return this.accountModifyForm.get('Information')}​
   get  accountTypeExt ()   {return this.accountModifyForm.get('accountTypeExt') } 
@@ -195,4 +264,14 @@ export class AppAccAccountModifyFormComponent implements OnInit, AfterViewInit {
   get  d_clientname ()   {return this.accountModifyForm.get('d_clientname') } 
   get  d_portfolioCode ()   {return this.accountModifyForm.get('d_portfolioCode') } 
 
+  get  ledgerNo() {return this.accountLedgerModifyForm.get('ledgerNo')}​
+  get  ledgerNoId() {return this.accountLedgerModifyForm.get('ledgerNoId')}​
+  get  clientIDledger() {return this.accountLedgerModifyForm.get('clientID')}​
+  get  accountTypeIDLedger() {return this.accountLedgerModifyForm.get('accountTypeID')}​
+  get  currecyCodeLedger () {return this.accountLedgerModifyForm.get('currecyCode')}​
+  get  entityTypeCodeLedger () {return this.accountLedgerModifyForm.get('entityTypeCode')}​
+  get  nameLedger () {return this.accountLedgerModifyForm.get('name')}​
+  get  d_APTypeCodeAccount () {return this.accountLedgerModifyForm.get('d_APTypeCodeAccount')}
+  get  d_APType () {return this.accountLedgerModifyForm.get('d_APType')}
+  ​
 }

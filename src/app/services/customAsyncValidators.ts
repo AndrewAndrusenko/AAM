@@ -4,7 +4,7 @@ import {
   ValidationErrors,
 } from '@angular/forms';
 import { Observable, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map, tap } from 'rxjs/operators';
 import { AppInvestmentDataServiceService } from './app-investment-data.service.service';
 import { AppTabServiceService } from './app-tab-service.service';
 import { AppAccountingService } from './app-accounting.service';
@@ -47,7 +47,7 @@ export class customAsyncValidators {
       return AccountingDataService
         .GetAccountData (null,null,null, control.value, 'GetAccountData')
         .pipe(
-          map ( accountExist => ( control.touched && !accountExist.length ? { accountExist: true } : null)  ),
+          map ( accountExist => (control.touched && !accountExist.length ? { accountExist: true } : null)  ),
           catchError(() => of(null))
         );
     };
@@ -57,7 +57,7 @@ export class customAsyncValidators {
       return AccountingDataService
         .GetAccountData (null,null,null, control.value, 'GetAccountData')
         .pipe(
-          map ( accountIsTaken => ( control.value !== AccountNo && accountIsTaken.length ? { accountIsTaken: true } : null)  ),
+          map ( accountIsTaken => (control.value !== AccountNo && accountIsTaken.length ? { accountIsTaken: true } : null)  ),
           catchError(() => of(null))
         );
     };
@@ -67,9 +67,32 @@ export class customAsyncValidators {
       return AccountingDataService
         .GetLedgerData (null,null,null, control.value, 'GetLedgerData')
         .pipe(
-          map ( accountExist => ( control.touched && !accountExist.length ? { accountExist: true } : null)  ),
+          map ( accountExist => (control.touched && !accountExist.length ? { accountExist: true } : null)  ),
           catchError(() => of(null))
         );
+    };
+  }
+  static AccountingUniqueLedgerNoAsyncValidator (AccountingDataService: AppAccountingService, AccountNo:string): AsyncValidatorFn {
+    return (control: AbstractControl): Observable<ValidationErrors> => {
+      return AccountingDataService
+        .GetLedgerData (null,null,null, control.value, 'GetLedgerData')
+        .pipe(
+          map ( accountIsTaken => (control.value !== AccountNo && accountIsTaken.length ? { accountIsTaken: true } : null)  ),
+          catchError(() => of(null))
+        );
+    };
+  }
+  static AccountingOverdraftAccountAsyncValidator (
+    AccountingDataService: AppAccountingService, AccountId:number, transactionAmount: AbstractControl, transactionDate:string, xactTypeCode:number 
+    ): AsyncValidatorFn {
+    return (control: AbstractControl): Observable<ValidationErrors> => {
+      return AccountingDataService
+        .getExpectedBalanceOverdraftCheck (AccountId,transactionAmount.getRawValue(), transactionDate,xactTypeCode,'AccountingOverdraftAccountCheck')
+        .pipe(
+          tap (expectedBalance => console.log('valid',expectedBalance) ),
+          map ( expectedBalance => (expectedBalance[0].closingBalance < 0 ? { overdraft: true, closingBalance: expectedBalance[0].closingBalance } : null)  ),
+          catchError((err) => of(null))
+          );
     };
   }
 }

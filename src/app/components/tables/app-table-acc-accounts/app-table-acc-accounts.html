@@ -20,11 +20,12 @@
     <ng-container matColumnDef="expand">
       <th mat-header-cell *matHeaderCellDef aria-label="row actions">&nbsp;</th>
       <td mat-cell *matCellDef="let element">
-        <button *ngIf="!readOnly" mat-icon-button aria-label="expand row" color="accent"
+        <button 
+        *ngIf="!readOnly" matTooltip="Edit account" mat-icon-button aria-label="expand row" color="accent"
           (click)="openAccountModifyForm('Edit', element)">
           <mat-icon >edit</mat-icon>
         </button>
-        <button *ngIf="!readOnly" mat-icon-button style="margin-left: 5%;" aria-label="expand row" color="accent" 
+        <button *ngIf="!readOnly" matTooltip="Delete account" mat-icon-button style="margin-left: 5%;" aria-label="expand row" color="accent" 
           (click)="openAccountModifyForm('Delete', element)">
           <mat-icon >delete</mat-icon>
         </button>

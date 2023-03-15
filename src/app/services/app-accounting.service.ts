@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, Subject} from 'rxjs';
-import { bAccounts, bAccountsEntriesList, bcAccountType_Ext, bcEnityType, bcTransactionType_Ext, bLedger, bLedgerAccounts, SWIFTSGlobalListmodel, SWIFTStatement950model } from '../models/accounts-table-model';
+import { bAccounts, bAccountsEntriesList, bBalanceData, bcAccountType_Ext, bcEnityType, bcTransactionType_Ext, bLedger, bLedgerAccounts, SWIFTSGlobalListmodel, SWIFTStatement950model } from '../models/accounts-table-model';
 
 @Injectable({
   providedIn: 'root'
@@ -9,6 +9,7 @@ import { bAccounts, bAccountsEntriesList, bcAccountType_Ext, bcEnityType, bcTran
 export class AppAccountingService {
   constructor(private http:HttpClient) { }
   private subjectName = new Subject<any>(); 
+/* -----------------------Accountting ----------------------------------------------------- */
 
   GetSWIFTsList (dataRange: string, id: number, MTType:string, Sender: string, Action: string):Observable <SWIFTSGlobalListmodel[]> {
     const params = {'dataRange': dataRange, 'id' :id, 'MTType': MTType,'Sender':Sender, 'Action': Action}
@@ -39,12 +40,8 @@ export class AppAccountingService {
     const params = {'currencyCode': currencyCode, 'id' :id, 'clientId': clientId,'accountNo':accountNo, 'Action': Action}
     return this.http.get <bLedger []>('/api/DEA/fGetAccountingData/', { params: params })
   }
+  /*----------------------Create entry by scheme---------------------------------------------------------*/
 
-  EntryCreate ():Observable <any[]> {
-    console.log('ftEntryCreate','ftEntryCreate');
-    return this.http.get <any []>('/api/DEA/ftEntryCreate/')
-  }
-  
   GetEntryScheme (bcEntryParameters:any) :Observable <bcTransactionType_Ext[]> { 
     return this.http.get <bcTransactionType_Ext []>('/api/DEA/GetEntryScheme/', { params: bcEntryParameters })  
   } 
@@ -54,6 +51,8 @@ export class AppAccountingService {
   CreateEntryAccountingInsertRow (data:any) { 
     return this.http.post ('/api/DEA/fCreateEntryAccountingInsertRow/',{'data': data}).toPromise()
   } 
+  /*End------------------Create entry by scheme---------------------------------------------------------*/
+
   GetAccountsEntriesListAccounting (dataRange: string, id: number, MTType:string, Sender: string, Action: string):Observable <bAccountsEntriesList[]> {
     const params = {'dataRange': dataRange, 'id' :id, 'MTType': MTType,'Sender':Sender, 'Action': Action}
     return this.http.get <bAccountsEntriesList []>('/api/DEA/fGetAccountingData/', { params: params })
@@ -70,6 +69,7 @@ export class AppAccountingService {
     const params = {'currencyCode': currencyCode, 'id' :id, 'clientId': clientId,'accountNo':accountNo, 'Action': Action}
     return this.http.get <Date>('/api/DEA/fGetAccountingData/', { params: params })
   }
+  /*----------------------AccountsUI---------------------------------------------------------*/
 
   createAccountAccounting (data:any) { 
     return this.http.post ('/api/DEA/createAccountAccounting/',{'data': data}).toPromise()
@@ -86,7 +86,7 @@ export class AppAccountingService {
   getReloadAccontList(): Observable<any> { //the receiver component calls this function 
     return this.subjectName.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
   }
-
+/*----------------------LedgerAccountsUI----------------------------------------------------*/
   createLedgerAccountAccounting (data:any) { 
     return this.http.post ('/api/DEA/createLedgerAccountAccounting/',{'data': data}).toPromise()
   }
@@ -102,5 +102,44 @@ export class AppAccountingService {
   getReloadLedgerAccontList(): Observable<any> { //the receiver component calls this function 
     return this.subjectName.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
   }
+/*----------------------EntryUI----------------------------------------------------*/
+  fcreateEntryAccounting (data:any) { 
+    return this.http.post ('/api/DEA/createEntryAccounting/',{'data': data}).toPromise()
+  }
+  deleteEntryrAccountAccounting (id:string) { 
+    return this.http.post ('/api/DEA/deleteEntryrAccountAccounting/',{'id': id}).toPromise()
+  } 
+  updateEntryAccountAccounting (data:any) { 
+    console.log('ser', data);
+    return this.http.post ('/api/DEA/updateEntryAccountAccounting/',{'data': data}).toPromise()
+  }
+  createLLEntryAccounting (data:any) { 
+    return this.http.post ('/api/DEA/createLLEntryAccounting/',{'data': data}).toPromise()
+  }
+  deleteLLEntryrAccountAccounting (id:string) { 
+    return this.http.post ('/api/DEA/deleteLLEntryrAccountAccounting/',{'id': id}).toPromise()
+  } 
+  updateLLEntryAccountAccounting (data:any) { 
+    console.log('ser', data);
+    return this.http.post ('/api/DEA/updateLLEntryAccountAccounting/',{'data': data}).toPromise()
+  }
+  sendReloadEntryList ( id:any) { //the component that wants to update something, calls this fn
+    this.subjectName.next(id); //next() will feed the value in Subject
+  }
+  getReloadEntryList(): Observable<any> { //the receiver component calls this function 
+    return this.subjectName.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
+  }
 
+/*----------------------OverdraftValidators----------------------------------------------------*/
+getExpectedBalanceOverdraftCheck (accountId: number, transactionAmount:number, transactionDate: string, xactTypeCode: number, Action: string):Observable <bBalanceData[]> {
+  console.log('transactionAmount',transactionAmount);
+  const params = {
+    'accountId': accountId, 
+    'transactionAmount' : parseFloat(transactionAmount.toString().replace(/,/g, '')), 
+    'transactionDate': transactionDate,
+    'xactTypeCode': xactTypeCode,
+    'Action': Action
+  }
+  return this.http.get <bBalanceData []>('/api/DEA/accountingOverdraftAccountCheck/', { params: params })
+}
 }

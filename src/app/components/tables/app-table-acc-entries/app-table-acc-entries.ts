@@ -50,8 +50,20 @@ export class AppTableAccEntriesComponent  implements AfterViewInit {
   public readOnly: boolean = false; 
   action ='';
   dialogRef: MatDialogRef<AppAccEntryModifyFormComponent>;
+  private subscriptionName: Subscription;
+  public FirstOpenedAccountingDate : Date;
 
-  constructor(private AccountingDataService:AppAccountingService, private TreeMenuSevice:TreeMenuSevice, private dialog: MatDialog ) {}
+  constructor(private AccountingDataService:AppAccountingService, private TreeMenuSevice:TreeMenuSevice, private dialog: MatDialog ) {
+    this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate)
+ 
+    this.subscriptionName= this.AccountingDataService.getReloadAccontList().subscribe ( (id) => {
+      this.AccountingDataService.GetAccountsEntriesListAccounting (null,null,null,null,'GetAccountsEntriesListAccounting').subscribe (EntriesList  => {
+        this.dataSource  = new MatTableDataSource(EntriesList);
+        this.dataSource.paginator = this.paginator;
+        this.dataSource.sort = this.sort;
+      })
+    } )
+  }
 
   async ngAfterViewInit() {
     this.columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
@@ -82,6 +94,9 @@ export class AppTableAccEntriesComponent  implements AfterViewInit {
       case 'Create':
       case 'Create_Example': 
       this.dialogRef.componentInstance.title = 'Create New';
+      break;
+      case 'View':
+        this.dialogRef.componentInstance.entryModifyForm.disable()
       break;
     }
   }

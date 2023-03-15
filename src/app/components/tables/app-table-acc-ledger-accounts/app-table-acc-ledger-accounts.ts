@@ -34,7 +34,7 @@ export class AppTableAccLedgerAccountsComponent  implements AfterViewInit {
   ]
   columnsHeaderToDisplay = [
     'No',
-    'A/P',
+    'Balance',
     'Details', 
     'Client',  
     'external No', 
@@ -52,8 +52,18 @@ export class AppTableAccLedgerAccountsComponent  implements AfterViewInit {
   public readOnly: boolean = false; 
   action ='';
   dialogRef: MatDialogRef<AppAccAccountModifyFormComponent>;
+  private subscriptionName: Subscription;
 
-  constructor(private AccountingDataService:AppAccountingService, private TreeMenuSevice:TreeMenuSevice, private dialog: MatDialog ) {}
+
+  constructor(private AccountingDataService:AppAccountingService, private TreeMenuSevice:TreeMenuSevice, private dialog: MatDialog ) {
+    this.subscriptionName= this.AccountingDataService.getReloadAccontList().subscribe ( (id) => {
+      this.AccountingDataService.GetLedgerAccountsListAccounting (null,null,null,null,'GetLedgerAccountsDataWholeList').subscribe (AccountsList  => {
+        this.dataSource  = new MatTableDataSource(AccountsList);
+        this.dataSource.paginator = this.paginator;
+        this.dataSource.sort = this.sort;
+      })
+    } )
+  }
 
   async ngAfterViewInit() {
     this.columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];

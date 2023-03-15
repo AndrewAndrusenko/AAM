@@ -154,6 +154,19 @@ appServer.post('/DEA/createAccountAccounting/',jsPassport.authenticate('session'
 appServer.post('/DEA/updateLedgerAccountAccounting/',jsPassport.authenticate('session') , uiAmmAccountingModule.fupdateLedgerAccountAccounting)
 appServer.post('/DEA/deleteLedgerAccountAccounting/',jsPassport.authenticate('session') , uiAmmAccountingModule.fdeleteLedgerAccountAccounting)
 appServer.post('/DEA/createLedgerAccountAccounting/',jsPassport.authenticate('session') , uiAmmAccountingModule.fcreateLedgerAccountAccounting)
+/*----------------------EntryUI----------------------------------------------------*/
+appServer.post('/DEA/updateEntryAccountAccounting/',jsPassport.authenticate('session') , uiAmmAccountingModule.fupdateEntryAccountAccounting)
+appServer.post('/DEA/deleteEntryrAccountAccounting/',jsPassport.authenticate('session') , uiAmmAccountingModule.fdeleteEntryrAccountAccounting)
+appServer.post('/DEA/createEntryAccounting/',jsPassport.authenticate('session') , uiAmmAccountingModule.fcreateEntryAccounting)
+
+appServer.post('/DEA/updateLLEntryAccountAccounting/',jsPassport.authenticate('session') , uiAmmAccountingModule.fupdateLLEntryAccountAccounting)
+appServer.post('/DEA/deleteLLEntryrAccountAccounting/',jsPassport.authenticate('session') , uiAmmAccountingModule.fdeleteLLEntryrAccountAccounting)
+appServer.post('/DEA/createLLEntryAccounting/',jsPassport.authenticate('session') , uiAmmAccountingModule.fcreateLLEntryAccounting)
+
+/*----------------------OverdraftValidators----------------------------------------------------*/
+appServer.get('/DEA/accountingOverdraftAccountCheck/',jsPassport.authenticate('session') , uiAmmAccountingModule.faccountingOverdraftAccountCheck)
 
 /* >>>>>>>>>>>>>>>>>>>>>>>>Accounting Closing>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> */
+
 appServer.listen (port,'localhost', () => {console.log (`AAM Server is running on port ${port}`)})
+
