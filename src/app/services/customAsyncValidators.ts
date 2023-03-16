@@ -83,13 +83,13 @@ export class customAsyncValidators {
     };
   }
   static AccountingOverdraftAccountAsyncValidator (
-    AccountingDataService: AppAccountingService, AccountId:number, transactionAmount: AbstractControl, transactionDate:string, xactTypeCode:number 
+    AccountingDataService: AppAccountingService, AccountId:AbstractControl, transactionAmount: AbstractControl, transactionDate:AbstractControl, xactTypeCode:number, d_closingBalance: AbstractControl 
     ): AsyncValidatorFn {
     return (control: AbstractControl): Observable<ValidationErrors> => {
       return AccountingDataService
-        .getExpectedBalanceOverdraftCheck (AccountId,transactionAmount.getRawValue(), transactionDate,xactTypeCode,'AccountingOverdraftAccountCheck')
+        .getExpectedBalanceOverdraftCheck (AccountId.value,transactionAmount.getRawValue(), new Date (transactionDate.value).toDateString(),xactTypeCode,'AccountingOverdraftAccountCheck')
         .pipe(
-          tap (expectedBalance => console.log('valid',expectedBalance) ),
+          tap (expectedBalance => d_closingBalance.setValue (expectedBalance[0].closingBalance ) ),
           map ( expectedBalance => (expectedBalance[0].closingBalance < 0 ? { overdraft: true, closingBalance: expectedBalance[0].closingBalance } : null)  ),
           catchError((err) => of(null))
           );

@@ -1,6 +1,10 @@
-<mat-form-field>
+<span> 
+<mat-form-field >
   <input matInput (keyup)="applyFilter($event)" placeholder="Type search string" #input>
+  <!-- <mat-hint>Format to search by date: YYYY-MM-DD Lorem ipsum dolor sit amet. </mat-hint> -->
 </mat-form-field>
+</span>
+<span style="font-size: 16px;"> Format to search: By date: YYYY-MM-DD (ex 2023-12-28) || By amount: with commas (ex 500,000.20)</span>
 <div class="mat-elevation-z8">
   <table  #strategyTable mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class="mat-elevation-z8">
     <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i=index">

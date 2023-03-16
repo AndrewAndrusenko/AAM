@@ -67,6 +67,7 @@ export class AppAccEntryModifyFormComponent implements OnInit, AfterViewInit {
       d_accountNo: [null, {    validators: [Validators.required], updateOn:'blur' } ],  
       d_xActTypeCode_ExtName : {value:null, disabled: false}, 
       d_entryDetails: {value:null, disabled: false}, 
+      d_closingBalance: {value:null, disabled: false} 
     })
   }
   ngOnInit(): void {
@@ -95,7 +96,7 @@ export class AppAccEntryModifyFormComponent implements OnInit, AfterViewInit {
   }
   ngAfterViewInit(): void {
     this.newV = customAsyncValidators.AccountingOverdraftAccountAsyncValidator (
-      this.AccountingDataService, this.accountId.value,this.amountTransaction, new Date(this.dataTime.value).toLocaleDateString(), this.xActTypeCode.value
+      this.AccountingDataService, this.accountId ,this.amountTransaction, this.dataTime, this.xActTypeCode.value, this.d_closingBalance
     )
     if (this.d_transactionType.value === 'AL') { 
       console.log('al', 'validator');
@@ -165,6 +166,7 @@ export class AppAccEntryModifyFormComponent implements OnInit, AfterViewInit {
       this.dialog.closeAll();
       this.AccountingDataService.sendReloadEntryList (this.id.value);
     }
+    
   }
   updateEntryData (action:string){
     let newDate = new Date(this.dataTime.value)
@@ -223,5 +225,6 @@ export class AppAccEntryModifyFormComponent implements OnInit, AfterViewInit {
   get  amountTransaction ()   {return this.entryModifyForm.get('t_amountTransaction') } 
   get  xActTypeCode_Ext ()   {return this.entryModifyForm.get('t_XactTypeCode_Ext') } 
   get  xActTypeCode ()   {return this.entryModifyForm.get('t_XactTypeCode') } 
+  get  d_closingBalance ()   {return this.entryModifyForm.get('d_closingBalance') } 
 
 }

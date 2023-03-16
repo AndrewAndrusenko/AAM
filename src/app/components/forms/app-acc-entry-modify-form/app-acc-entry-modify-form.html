@@ -11,7 +11,7 @@
   <mat-checkbox color="primary"  #submitbox checked="false" 
     (click)=" 
     showAValidator();
-    entryModifyForm.markAllAsTouched();">Submit Data - {{amountTransaction.getRawValue()}}
+    entryModifyForm.markAllAsTouched();">Submit Data 
   </mat-checkbox>
 
   <form class="submit" [formGroup]="entryModifyForm">
@@ -48,14 +48,20 @@
     </mat-form-field>
 
     <mat-button-toggle-group [disabled]="d_transactionType.value=='LL'"
-        style=" width: 26%;font-size: 18px;" formControlName="t_XactTypeCode" 
+      style=" width: 26%;font-size: 18px;" formControlName="t_XactTypeCode" 
       aria-label="Font Style" matTooltip="Choose Ledger Side"
       (click)="xActTypeCode_Ext.patchValue('')">
-      <mat-button-toggle [disabled]="d_transactionType.value=='LL'" style="width: 50%;font-size: 18px;" [value]="1">Debit</mat-button-toggle>
-      <mat-button-toggle [disabled]="d_transactionType.value=='LL'" style="width: 50%;font-size: 18px;" [value]="2">Credit</mat-button-toggle>
+      <mat-button-toggle 
+        [disabled]="d_transactionType.value=='LL'" style="width: 50%;font-size: 18px;" [value]="1">
+        Debit
+      </mat-button-toggle>
+      <mat-button-toggle 
+        [disabled]="d_transactionType.value=='LL'" style="width: 50%;font-size: 18px;" [value]="2">
+        Credit
+      </mat-button-toggle>
     </mat-button-toggle-group>
-    <span [ngSwitch]="xActTypeCode.value">
 
+    <span [ngSwitch]="xActTypeCode.value">
       <mat-form-field *ngSwitchCase="1" style="width: 35%;">
         <mat-slide-toggle>Overdraft</mat-slide-toggle>
         <input matInput placeholder="Debit" formControlName="d_ledgerNo">   
@@ -71,44 +77,40 @@
      
       <mat-form-field *ngSwitchCase="1"style="width: 35%;">
         <mat-slide-toggle
-        (toggleChange)="toggleOverdraftValidator()"
-        >Overdraft</mat-slide-toggle>
+          (toggleChange)="toggleOverdraftValidator()"
+          >Overdraft
+        </mat-slide-toggle>
         <input matInput placeholder="Credit" formControlName="d_accountNo">
-          <button mat-icon-button matSuffix (click)="selectAccount()">
-         <mat-icon *ngIf="action!=='View'" class = "icon_search">search</mat-icon>
+        <button mat-icon-button matSuffix (click)="selectAccount()">
+          <mat-icon *ngIf="action!=='View'" class = "icon_search">search</mat-icon>
         </button>
-<!--         <mat-error  *ngIf="accountNo.invalid && accountNo.value!==''">
-          Incorrect account number. Use search loop.    
-        </mat-error> -->
         <mat-error  *ngIf="accountNo.invalid && accountNo.touched && accountNo.value==''">
           The field is required.    
-       </mat-error>
-       <mat-error *ngIf="accountNo.hasError('overdraft')">
-        Overdraft!! - {{accountNo.getError('closingBalance') | currency}}
-       </mat-error>
-
+        </mat-error>
+        <mat-error *ngIf="accountNo.hasError('overdraft')">
+          Overdraft!! {{accountNo.getError('closingBalance') | currency}}
+        </mat-error>
+        <mat-hint *ngIf="!accountNo.hasError('overdraft')">Expceted {{d_closingBalance.value | currency}}</mat-hint>
       </mat-form-field>
 
       <mat-form-field *ngSwitchCase="2" style="width: 35%;">
         <mat-slide-toggle
         (toggleChange)="toggleOverdraftValidator()"
-        
         >Overdraft</mat-slide-toggle>
         <input matInput placeholder="Debit" formControlName="d_accountNo" >   
         <button mat-icon-button matSuffix 
           (click)="selectAccount()">
           <mat-icon *ngIf="action!=='View'" class = "icon_search">search</mat-icon>
         </button>
-        <!--         <mat-error  *ngIf="accountNo.invalid && accountNo.value!==''">
-          Incorrect account number. Use search loop.    
-        </mat-error> -->
         <mat-error  *ngIf="accountNo.invalid && accountNo.touched && accountNo.value==''">
           The field is required.    
        </mat-error>
        <mat-error *ngIf="accountNo.hasError('overdraft')">
-        Overdraft!! - {{accountNo.getError('closingBalance') | currency}}
+        Overdraft!! {{accountNo.getError('closingBalance') | currency}}
        </mat-error>
+       <mat-hint *ngIf="!accountNo.hasError('overdraft')">Expceted {{d_closingBalance.value | currency}}</mat-hint>
       </mat-form-field>
+      
       <mat-form-field *ngSwitchCase="2"style="width: 35%;">
         <mat-slide-toggle>Overdraft</mat-slide-toggle>
         <input matInput placeholder="Credit" formControlName="d_ledgerNo">
@@ -121,6 +123,7 @@
         <mat-error  *ngIf="ledgerNo.invalid && ledgerNo.touched && ledgerNo.value==''">
           The field is required.    
        </mat-error>
+
       </mat-form-field>
       
       <mat-form-field *ngSwitchCase="0" style="width: 35%;">
