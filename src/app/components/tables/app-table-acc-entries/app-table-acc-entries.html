@@ -80,18 +80,24 @@
               <mat-icon class="menu-icon" matPrefix>add_circle</mat-icon>      
               New Entry (on sample)
             </button>
-            <button 
+            <button *ngIf="!(element.t_dataTime<FirstOpenedAccountingDate)"
             (click)="openEntryModifyForm('Edit', element)"
               class="tree-menu-item" cdkMenuItem>
               <mat-icon class="menu-icon" matPrefix>edit</mat-icon>      
               Edit Entry
             </button>
-            <button 
+            <button *ngIf="!(element.t_dataTime<FirstOpenedAccountingDate)"
               (click)="openEntryModifyForm('Delete', element)"
               class="tree-menu-item" cdkMenuItem>
               <mat-icon class="menu-icon" matPrefix>delete</mat-icon> 
               Delete Entry
             </button> 
+            <button *ngIf="(element.t_dataTime<FirstOpenedAccountingDate)"
+            (click)="openEntryModifyForm('View', element)"
+            class="tree-menu-item" cdkMenuItem>
+            <mat-icon class="menu-icon" matPrefix>pageview</mat-icon> 
+            View entry (day is closed)
+          </button> 
           </div>
         </ng-template>
       </tr>

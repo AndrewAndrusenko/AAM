@@ -165,6 +165,7 @@ appServer.post('/DEA/createLLEntryAccounting/',jsPassport.authenticate('session'
 
 /*----------------------OverdraftValidators----------------------------------------------------*/
 appServer.get('/DEA/accountingOverdraftAccountCheck/',jsPassport.authenticate('session') , uiAmmAccountingModule.faccountingOverdraftAccountCheck)
+appServer.get('/DEA/accountingOverdraftLedgerAccountCheck/',jsPassport.authenticate('session') , uiAmmAccountingModule.faccountingOverdraftLedgerAccountCheck)
 
 /* >>>>>>>>>>>>>>>>>>>>>>>>Accounting Closing>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> */
 

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, Subject} from 'rxjs';
-import { bAccounts, bAccountsEntriesList, bBalanceData, bcAccountType_Ext, bcEnityType, bcTransactionType_Ext, bLedger, bLedgerAccounts, SWIFTSGlobalListmodel, SWIFTStatement950model } from '../models/accounts-table-model';
+import { bAccounts, bAccountsEntriesList, bBalanceData, bcAccountType_Ext, bcEnityType, bcTransactionType_Ext, bLedger, bLedgerAccounts, bLedgerBalanceData, SWIFTSGlobalListmodel, SWIFTStatement950model } from '../models/accounts-table-model';
 
 @Injectable({
   providedIn: 'root'
@@ -131,15 +131,38 @@ export class AppAccountingService {
   }
 
 /*----------------------OverdraftValidators----------------------------------------------------*/
-getExpectedBalanceOverdraftCheck (accountId: number, transactionAmount:number, transactionDate: string, xactTypeCode: number, Action: string):Observable <bBalanceData[]> {
+getExpectedBalanceOverdraftCheck (accountId: number, transactionAmount:number, transactionDate: string, xactTypeCode: number, id: number, Action: string ):Observable <bBalanceData[]> {
   console.log('transactionAmount',transactionAmount);
   const params = {
     'accountId': accountId, 
     'transactionAmount' : parseFloat(transactionAmount.toString().replace(/,/g, '')), 
     'transactionDate': transactionDate,
     'xactTypeCode': xactTypeCode,
+    'id': id,
     'Action': Action
   }
   return this.http.get <bBalanceData []>('/api/DEA/accountingOverdraftAccountCheck/', { params: params })
 }
+
+getExpectedBalanceLedgerOverdraftCheck (accountId: number, transactionAmount:number, transactionDate: string, xactTypeCode: number, id: number, Action: string ):Observable <bLedgerBalanceData[]> {
+  const params = {
+    'accountId': accountId, 
+    'transactionAmount' : parseFloat(transactionAmount.toString().replace(/,/g, '')), 
+    'transactionDate': transactionDate,
+    'xactTypeCode': xactTypeCode,
+    'id': id,
+    'Action': Action
+  }
+  return this.http.get <bLedgerBalanceData []>('/api/DEA/accountingOverdraftLedgerAccountCheck/', { params: params })
+}
+
+
+
+sendUpdateExpectedBalance ( id:any) { //the component that wants to update something, calls this fn
+  this.subjectName.next(id); //next() will feed the value in Subject
+}
+getUpdateExpectedBalance(): Observable<any> { //the receiver component calls this function 
+  return this.subjectName.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
+}
+
 }

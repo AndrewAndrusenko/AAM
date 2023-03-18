@@ -172,4 +172,12 @@ export interface bBalanceData {
   totalCredit:number,
   totalDebit:number,
   closingBalance:number,
-}      
+}  
+export interface bLedgerBalanceData {
+  accountId: number,
+  openingBalance: number,
+  accountTransaction:	number, 
+  CrSignAmount:number,	
+  DbSignAmount:number,
+  closingBalance:number,
+}    

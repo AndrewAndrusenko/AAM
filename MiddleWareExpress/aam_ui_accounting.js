@@ -409,12 +409,35 @@ async function faccountingOverdraftAccountCheck (request, response) {
   paramArr = request.query
   console.log('param', paramArr);
   const query = {
-    text: 'SELECT * '+
-    'FROM tf_checkoverdraftbyaccountandbydate(${transactionDate}, ${accountId},${xactTypeCode},${transactionAmount}) ', 
+    text: 'SELECT "accountId", "openingBalance", CAST ("closingBalance" AS NUMERIC) AS "closingBalance", "closingBalance" AS "EndBalance"'+
+    'FROM stf_checkoverdraftbyaccountandbydate'+
+    '(${transactionDate}, ${accountId},${xactTypeCode},${transactionAmount},${id}) ', 
     values: paramArr
   } 
   sql = pgp.as.format(query.text,query.values)
   console.log('sql', sql);
+   pool.query (sql,  (err, res) => {if (err) {
+    console.log (err.stack.split("\n", 1).join(""))
+    err.detail = err.stack
+    return response.send(err)
+  } else {
+    console.log('validator', res.rows[0]);
+    return response.status(200).json(res.rows)}
+  })   
+}
+
+async function faccountingOverdraftLedgerAccountCheck (request, response) {
+  paramArr = request.query
+  console.log('param', paramArr);
+  const query = {
+    text: 'SELECT * , '+
+    'CAST(("openingBalance" +	"accountTransaction"	+ "CrSignAmount" + "DbSignAmount" + "signedTransactionAmount") AS numeric) as "closingBalance" '+
+    'FROM stf_CheckOverdraftByLedgerAndByDate'+
+    '(${transactionDate}, ${accountId},${xactTypeCode},${transactionAmount},${id}) ', 
+    values: paramArr
+  } 
+  sql = pgp.as.format(query.text,query.values)
+  console.log('tLedge', sql);
    pool.query (sql,  (err, res) => {if (err) {
     console.log (err.stack.split("\n", 1).join(""))
     err.detail = err.stack
@@ -447,4 +470,5 @@ module.exports = {
   fupdateEntryAccountAccounting,
 
   faccountingOverdraftAccountCheck,
+  faccountingOverdraftLedgerAccountCheck
 }

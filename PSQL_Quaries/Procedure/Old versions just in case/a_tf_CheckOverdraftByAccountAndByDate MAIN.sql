@@ -1,9 +1,9 @@
 -- FUNCTION: public.f_bbalancesheet(date)
 
-DROP FUNCTION IF EXISTS public.tf_CheckOverdraftByAccountAndByDate(date, numeric,numeric, numeric);
+DROP FUNCTION IF EXISTS public.tf_CheckOverdraftByAccountAndByDate(date, numeric,numeric, numeric, numeric);
 -- aa
 CREATE OR REPLACE FUNCTION public.tf_CheckOverdraftByAccountAndByDate(
-	dateTransation date, accountId numeric , transactionxActTypeCode numeric, amountTransaction numeric)
+	dateTransation date, accountId numeric , transactionxActTypeCode numeric, amountTransaction numeric, idTrasactionModifying numeric)
     RETURNS TABLE
 	("accountId" numeric, "openingBalance" money, "totalCredit" money, "totalDebit" money, "closingBalance" numeric) 
     LANGUAGE 'sql'
@@ -41,6 +41,7 @@ LEFT JOIN (
 	 WHERE "bAccountStatement"."dateAcc"::date < $1 ORDER BY "bAccountStatement"."accountId","dateAcc"::date DESC ) AS "IncomingBalances"
 ON ("bAccountTransaction"."accountId" = "IncomingBalances"."accountId")
 WHERE  ("bAccountTransaction"."dataTime"::date <= $1::date 
+		AND "bAccountTransaction".id != $5
 	   AND "bAccountTransaction"."dataTime"::date > "IncomingBalances"."dateAcc"::date
 	   AND "bAccountTransaction"."accountId" = $2)
 GROUP BY "bcAccountType_Ext"."xActTypeCode" ,"bAccountTransaction"."accountId", "IncomingBalances"."closingBalance";
@@ -48,5 +49,5 @@ GROUP BY "bcAccountType_Ext"."xActTypeCode" ,"bAccountTransaction"."accountId", 
 
 $BODY$;
 
-ALTER FUNCTION public.tf_CheckOverdraftByAccountAndByDate(date, numeric, numeric, numeric)
+ALTER FUNCTION public.tf_CheckOverdraftByAccountAndByDate(date, numeric, numeric, numeric, numeric)
     OWNER TO postgres;
