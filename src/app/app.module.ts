@@ -43,7 +43,7 @@ import { AppAccEntryModifyFormComponent } from './components/forms/app-acc-entry
 import { AppTableAccAccountsComponent } from './components/tables/app-table-acc-accounts/app-table-acc-accounts';
 import { AppTableAccLedgerAccountsComponent } from './components/tables/app-table-acc-ledger-accounts/app-table-acc-ledger-accounts';
 import { AppAccAccountModifyFormComponent } from './components/forms/app-acc-account-modify-form/app-acc-account-modify-form ';
-
+import {MatChipsModule} from '@angular/material/chips';
 @NgModule({
     imports: [
         BrowserModule,
@@ -62,7 +62,7 @@ import { AppAccAccountModifyFormComponent } from './components/forms/app-acc-acc
         ScrollingModule,
         DataTablesModule,
         MatDialogModule,
-        
+        MatChipsModule
     ],
     declarations: [
         AppComponent,

@@ -90,6 +90,7 @@ export class AppTableAccEntriesComponent  implements AfterViewInit {
     this.dialogRef.componentInstance.action = actionType;
     this.dialogRef.componentInstance.title = actionType;
     this.dialogRef.componentInstance.data = row;
+    this.dialogRef.componentInstance.FirstOpenedAccountingDate = this.FirstOpenedAccountingDate;
     switch (actionType) {
       case 'Create':
       case 'Create_Example': 

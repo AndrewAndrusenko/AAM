@@ -410,8 +410,8 @@ async function faccountingOverdraftAccountCheck (request, response) {
   console.log('param', paramArr);
   const query = {
     text: 'SELECT "accountId", "openingBalance", CAST ("closingBalance" AS NUMERIC) AS "closingBalance", "closingBalance" AS "EndBalance"'+
-    'FROM stf_checkoverdraftbyaccountandbydate'+
-    '(${transactionDate}, ${accountId},${xactTypeCode},${transactionAmount},${id}) ', 
+    'FROM f_checkoverdraftbyaccountandbydate'+
+    '(${transactionDate}, ${accountId}, ${xactTypeCode}, ${transactionAmount}, ${id}, ${FirstOpenedAccountingDate}) ', 
     values: paramArr
   } 
   sql = pgp.as.format(query.text,query.values)
@@ -431,9 +431,9 @@ async function faccountingOverdraftLedgerAccountCheck (request, response) {
   console.log('param', paramArr);
   const query = {
     text: 'SELECT * , '+
-    'CAST(("openingBalance" +	"accountTransaction"	+ "CrSignAmount" + "DbSignAmount" + "signedTransactionAmount") AS numeric) as "closingBalance" '+
-    'FROM stf_CheckOverdraftByLedgerAndByDate'+
-    '(${transactionDate}, ${accountId},${xactTypeCode},${transactionAmount},${id}) ', 
+    'CAST(("openingBalance" +	"accountTransaction" + "CrSignAmount" + "DbSignAmount" + "signedTransactionAmount") AS numeric) as "closingBalance" '+
+    'FROM f_CheckOverdraftByLedgerAndByDate'+
+    '(${transactionDate}, ${accountId}, ${xactTypeCode}, ${transactionAmount}, ${id}, ${FirstOpenedAccountingDate} )', 
     values: paramArr
   } 
   sql = pgp.as.format(query.text,query.values)
