@@ -131,7 +131,7 @@ export class AppAccountingService {
   }
 
 /*----------------------OverdraftValidators----------------------------------------------------*/
-getExpectedBalanceOverdraftCheck (accountId: number, transactionAmount:number, transactionDate: string, xactTypeCode: number, id: number, FirstOpenedAccountingDate: string, Action: string ):Observable <bBalanceData[]> {
+getExpectedBalanceOverdraftCheck (accountId: number, transactionAmount:number, transactionDate: string, xactTypeCode: number, id: number, Action: string ):Observable <bBalanceData[]> {
   console.log('transactionAmount',transactionAmount);
   const params = {
     'accountId': accountId, 
@@ -139,20 +139,18 @@ getExpectedBalanceOverdraftCheck (accountId: number, transactionAmount:number, t
     'transactionDate': transactionDate,
     'xactTypeCode': xactTypeCode,
     'id': id,
-    'FirstOpenedAccountingDate': FirstOpenedAccountingDate, 
     'Action': Action
   }
   return this.http.get <bBalanceData []>('/api/DEA/accountingOverdraftAccountCheck/', { params: params })
 }
 
-getExpectedBalanceLedgerOverdraftCheck (accountId: number, transactionAmount:number, transactionDate: string, xactTypeCode: number, id: number, FirstOpenedAccountingDate: string, Action: string ):Observable <bLedgerBalanceData[]> {
+getExpectedBalanceLedgerOverdraftCheck (accountId: number, transactionAmount:number, transactionDate: string, xactTypeCode: number, id: number, Action: string ):Observable <bLedgerBalanceData[]> {
   const params = {
     'accountId': accountId, 
     'transactionAmount' : parseFloat(transactionAmount.toString().replace(/,/g, '')), 
     'transactionDate': transactionDate,
     'xactTypeCode': xactTypeCode,
     'id': id,
-    'FirstOpenedAccountingDate': FirstOpenedAccountingDate, 
     'Action': Action
   }
   return this.http.get <bLedgerBalanceData []>('/api/DEA/accountingOverdraftLedgerAccountCheck/', { params: params })

@@ -1,26 +1,19 @@
--- FUNCTION: public.f_checkoverdraftbyledgerandbydate(date, numeric, numeric, numeric, numeric)
+-- FUNCTION: public.f_bbalancesheet(date)
 
--- DROP FUNCTION IF EXISTS public.f_checkoverdraftbyledgerandbydate(date, numeric, numeric, numeric, numeric);
-
-CREATE OR REPLACE FUNCTION public.f_checkoverdraftbyledgerandbydate(
-	datetransation date,
-	ledgerid numeric,
-	transactionxacttypecode numeric,
-	amounttransaction numeric,
-	idtrasactionmodifying numeric, 
-	openedaccountingdate date
-)
-    RETURNS TABLE(
-		"accountId" numeric, 
-		"openingBalance" money, 
-		"accountTransaction" money, 
-		"CrSignAmount" money, "DbSignAmount" money, 
-		"signedTransactionAmount" money) 
+DROP FUNCTION IF EXISTS public.stf_CheckOverdraftByLedgerAndByDate(date, numeric,numeric, numeric, numeric);
+-- aa
+CREATE OR REPLACE FUNCTION public.stf_CheckOverdraftByLedgerAndByDate(
+	dateTransation date, ledgerId numeric , transactionxActTypeCode numeric, amountTransaction numeric, idTrasactionModifying numeric)
+    RETURNS TABLE
+	( "accountId" numeric, "openingBalance" money,  "accountTransaction" money, "CrSignAmount" money, "DbSignAmount" money, "signedTransactionAmount" money
+-- 	 "totalCredit" money, "totalDebit" money, 
+-- 	 "closingBalance" money
+	) 
     LANGUAGE 'sql'
     COST 100
     VOLATILE PARALLEL UNSAFE
     ROWS 1000
-
+-- uP(C):2+2, dP(D):2+1, uA(D):1+1, dA(C):1+2
 AS $BODY$
 
 select 
@@ -38,7 +31,7 @@ CAST(COALESCE(
 			"bLedgerTransactions"."ledgerID"=$2 AND
 			"id" !=$5 AND 
 			"bLedgerTransactions"."dateTime"::date <= $1::date AND 
-			"bLedgerTransactions"."dateTime"::date >= $6::date)
+			"bLedgerTransactions"."dateTime"::date > "IncomingBalances"."dateAcc"::date)
 		 )
 	, 0) 
 AS MONEY) AS "CrSignAmount",
@@ -54,7 +47,7 @@ CAST(
 			"bLedgerTransactions"."ledgerID_Debit"=$2 AND
 			"id" !=$5 AND 
 			"bLedgerTransactions"."dateTime"::date <= $1::date AND 
-			"bLedgerTransactions"."dateTime"::date >= $6::date
+			"bLedgerTransactions"."dateTime"::date > "IncomingBalances"."dateAcc"::date
 		 )
 	, 0)
 AS MONEY) AS "DbSignAmount", 
@@ -71,10 +64,10 @@ left join "bLedgerTransactions"	on
 ("IncomingBalances"."ledgerId" = "bLedgerTransactions"."ledgerID") OR ("IncomingBalances"."ledgerId"  = "bLedgerTransactions"."ledgerID_Debit")
 
 left join LATERAL
-(SELECT	"bLedger"."ledgerNoId", SUM (CASE ("bAccountTransaction"."XactTypeCode" + "bcAccountType_Ext"."xActTypeCode")
+(SELECT	"bLedger"."ledgerNoId", CAST(SUM (CASE ("bAccountTransaction"."XactTypeCode" + "bcAccountType_Ext"."xActTypeCode")
 			WHEN 3 THEN "amountTransaction" * -1
 			ELSE         "amountTransaction" 
-		END) 
+		END) as money) 
 	  AS "sumAccountTransactions"
 FROM "bLedger"
 LEFT JOIN "bcAccountType_Ext" ON "bcAccountType_Ext"."accountType_Ext" = "bLedger"."accountTypeID"
@@ -82,9 +75,8 @@ LEFT JOIN  public."bAccountTransaction"
 ON "bLedger"."ledgerNoId" = "bAccountTransaction"."ledgerNoId"
 WHERE 
 		("bLedger"."ledgerNoId" = $2 AND
-		"id" !=$5 AND 
 		"bAccountTransaction"."dataTime"::date <= $1 ::date AND 
-		"bAccountTransaction"."dataTime"::date >= $6::date)
+		"bAccountTransaction"."dataTime"::date > "IncomingBalances"."dateAcc"::date)
 GROUP BY "bLedger"."ledgerNoId"
 ) AS "accountTransactionTotals"
 
@@ -93,5 +85,5 @@ where "IncomingBalances"."ledgerId" = $2
 GROUP BY "bcAccountType_Ext"."xActTypeCode"
 $BODY$;
 
-ALTER FUNCTION public.f_checkoverdraftbyledgerandbydate(date, numeric, numeric, numeric, numeric)
+ALTER FUNCTION public.stf_CheckOverdraftByLedgerAndByDate(date, numeric, numeric, numeric, numeric)
     OWNER TO postgres;
