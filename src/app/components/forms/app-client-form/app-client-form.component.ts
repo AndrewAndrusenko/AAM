@@ -1,10 +1,10 @@
 import { Component, Injectable, Input, OnInit, SimpleChanges } from '@angular/core';
 import { AbstractControl, AsyncValidator, AsyncValidatorFn, FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { AppTabServiceService } from 'src/app/services/app-tab-service.service';
-import { MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dialog';
+import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { AppConfimActionComponent } from '../../alerts/app-confim-action/app-confim-action.component';
 import { AppSnackMsgboxComponent } from '../../app-snack-msgbox/app-snack-msgbox.component';
-import { MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
+import { MatSnackBar as MatSnackBar} from '@angular/material/snack-bar';
 import { count, map, Observable, take } from 'rxjs';
 import {  of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
