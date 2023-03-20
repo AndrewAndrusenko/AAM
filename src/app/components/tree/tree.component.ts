@@ -6,7 +6,7 @@ import {BehaviorSubject, firstValueFrom, merge, Observable, Subscription} from '
 import {map} from 'rxjs/operators';
 import { AppMenuComponent } from '../app-menu/app-menu.component';
 import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
-import { MatMenuTrigger } from '@angular/material/menu';
+import { MatLegacyMenuTrigger as MatMenuTrigger } from '@angular/material/legacy-menu';
 import { lastValueFrom } from 'rxjs';
 /** Flat node with expandable and level information */
 export class DynamicFlatNode {

@@ -1,9 +1,9 @@
 import { Component,  Input, OnInit, SimpleChanges,  } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup,  ValidationErrors,  Validators } from '@angular/forms';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dialog';
 import { AppConfimActionComponent } from '../../alerts/app-confim-action/app-confim-action.component';
 import { AppSnackMsgboxComponent } from '../../app-snack-msgbox/app-snack-msgbox.component';
-import { MatSnackBar} from '@angular/material/snack-bar';
+import { MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
 import { bcTransactionType_Ext } from 'src/app/models/accounts-table-model';
 import { AppInstrumentTableComponent } from '../../tables/app-table-instrument/app-table-instrument.component';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
