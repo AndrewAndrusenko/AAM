@@ -9,6 +9,7 @@ import { AppInvestmentDataServiceService } from './app-investment-data.service.s
 import { AppTabServiceService } from './app-tab-service.service';
 import { AppAccountingService } from './app-accounting.service';
 export class customAsyncValidators {
+
   static clientNameCustomAsyncValidator(userService: AppTabServiceService, clientId:number): AsyncValidatorFn {
     return (control: AbstractControl): Observable<ValidationErrors> => {
       return userService
@@ -47,7 +48,7 @@ export class customAsyncValidators {
       return AccountingDataService
         .GetAccountData (null,null,null, control.value, 'GetAccountData')
         .pipe(
-          map ( accountExist => (control.touched && !accountExist.length ? { accountExist: true } : null)  ),
+          map ( accountExist => (control.touched && !accountExist.length ? { accountIsNotExist: true } : null)  ),
           catchError(() => of(null))
         );
     };
@@ -67,7 +68,7 @@ export class customAsyncValidators {
       return AccountingDataService
         .GetLedgerData (null,null,null, control.value, 'GetLedgerData')
         .pipe(
-          map ( accountExist => (control.touched && !accountExist.length ? { accountExist: true } : null)  ),
+          map ( accountExist => (control.touched && !accountExist.length ? { accountIsNotExist: true } : null)  ),
           catchError(() => of(null))
         );
     };
@@ -83,11 +84,11 @@ export class customAsyncValidators {
     };
   }
   static AccountingOverdraftAccountAsyncValidator (
-    AccountingDataService: AppAccountingService, AccountId:AbstractControl, transactionAmount: AbstractControl, transactionDate:AbstractControl, xactTypeCode:AbstractControl, d_closingBalance: AbstractControl, id: AbstractControl 
+    AccountingDataService: AppAccountingService, AccountId:AbstractControl, transactionAmount: AbstractControl, transactionDate:AbstractControl, xactTypeCode:AbstractControl, d_closingBalance: AbstractControl, id: AbstractControl, FirstOpenedAccountingDate : Date  
     ): AsyncValidatorFn {
     return (control: AbstractControl): Observable<ValidationErrors> => {
       return AccountingDataService
-        .getExpectedBalanceOverdraftCheck (AccountId.value,transactionAmount.getRawValue(), new Date (transactionDate.value).toDateString(),xactTypeCode.value, id.value, 'AccountingOverdraftAccountCheck')
+        .getExpectedBalanceOverdraftCheck (AccountId.value,transactionAmount.getRawValue(), new Date (transactionDate.value).toDateString(),xactTypeCode.value, id.value, new Date (FirstOpenedAccountingDate).toDateString(),'AccountingOverdraftAccountCheck')
         .pipe(
           tap (expectedBalance => d_closingBalance.setValue (expectedBalance[0].closingBalance ) ),
           map ( expectedBalance => (expectedBalance[0].closingBalance < 0 ? { overdraft: true } : null)  ),
@@ -96,12 +97,13 @@ export class customAsyncValidators {
     };
   }
   static AccountingOverdraftLedgerAccountAsyncValidator (
-    AccountingDataService: AppAccountingService, AccountId:AbstractControl, transactionAmount: AbstractControl, transactionDate:AbstractControl, xactTypeCode:AbstractControl, d_closingLedgerBalance: AbstractControl, id: AbstractControl 
+    AccountingDataService: AppAccountingService, AccountId:AbstractControl, transactionAmount: AbstractControl, transactionDate:AbstractControl, xactTypeCode:number, d_closingLedgerBalance: AbstractControl, id: AbstractControl, FirstOpenedAccountingDate : Date 
     ): AsyncValidatorFn {
     return (control: AbstractControl): Observable<ValidationErrors> => {
       return AccountingDataService
-        .getExpectedBalanceLedgerOverdraftCheck (AccountId.value,transactionAmount.getRawValue(), new Date (transactionDate.value).toDateString(),xactTypeCode.value, id.value, 'AccountingOverdraftAccountCheck')
+        .getExpectedBalanceLedgerOverdraftCheck (AccountId.value,transactionAmount.getRawValue(), new Date (transactionDate.value).toDateString(), xactTypeCode, id.value, new Date (FirstOpenedAccountingDate).toDateString(), 'AccountingOverdraftAccountCheck')
         .pipe(
+          // tap (expectedBalance => console.log('ad', getControlName(AccountId)) ),
           tap (expectedBalance => d_closingLedgerBalance.setValue (expectedBalance[0].closingBalance ) ),
           map ( expectedBalance => (expectedBalance[0].closingBalance < 0 ? { overdraft: true } : null)  ),
           catchError(() => of(null))
@@ -110,3 +112,6 @@ export class customAsyncValidators {
   }  
 }
 function getControlName(c: AbstractControl): string | null {
+  const formGroup = c.parent.controls;
+  return Object.keys(formGroup).find(name => c === formGroup[name]) || null;
+}
