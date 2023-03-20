@@ -1,9 +1,9 @@
 import { AfterViewInit, Component,  Input, OnInit, SimpleChanges, ViewChild,  } from '@angular/core';
 import { FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
-import { MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dialog';
+import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { AppConfimActionComponent } from '../../alerts/app-confim-action/app-confim-action.component';
 import { AppSnackMsgboxComponent } from '../../app-snack-msgbox/app-snack-msgbox.component';
-import { MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
+import { MatSnackBar as MatSnackBar} from '@angular/material/snack-bar';
 import { AppInvestmentDataServiceService } from 'src/app/services/app-investment-data.service.service';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
@@ -13,7 +13,7 @@ import { AppTableAccAccountsComponent } from '../../tables/app-table-acc-account
 import { AppClientsTableComponent } from '../../tables/app-table-clients/app-table-clients.component';
 import { TableAccounts } from '../../tables/app-table-accout/app-table-accout.component';
 import { Subscription } from 'rxjs';
-import { MatLegacyTabGroup as MatTabGroup } from '@angular/material/legacy-tabs';
+import { MatTabGroup as MatTabGroup } from '@angular/material/tabs';
 
 @Component({
   selector: 'app-acc-account-modify-form',
