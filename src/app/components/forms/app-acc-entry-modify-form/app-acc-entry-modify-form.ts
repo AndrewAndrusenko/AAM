@@ -1,9 +1,9 @@
 import { AfterViewInit, Component,  Input, OnInit, SimpleChanges,  } from '@angular/core';
 import { AsyncValidator, AsyncValidatorFn, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dialog';
 import { AppConfimActionComponent } from '../../alerts/app-confim-action/app-confim-action.component';
 import { AppSnackMsgboxComponent } from '../../app-snack-msgbox/app-snack-msgbox.component';
-import { MatSnackBar} from '@angular/material/snack-bar';
+import { MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
 import { AppInvestmentDataServiceService } from 'src/app/services/app-investment-data.service.service';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
@@ -11,11 +11,7 @@ import { bcTransactionType_Ext } from 'src/app/models/accounts-table-model';
 import { AppTableAccLedgerAccountsComponent } from '../../tables/app-table-acc-ledger-accounts/app-table-acc-ledger-accounts';
 import { AppTableAccAccountsComponent } from '../../tables/app-table-acc-accounts/app-table-acc-accounts';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
-import { MatChipInputEvent} from '@angular/material/chips';
-import {MatChipEditedEvent} from '@angular/material/chips';
-export interface Fruit {
-  name: string;
-}
+
 @Component({
   selector: 'app-acc-entry-modify-form',
   templateUrl: './app-acc-entry-modify-form.html',
@@ -43,9 +39,7 @@ export class AppAccEntryModifyFormComponent implements OnInit, AfterViewInit {
   public FirstOpenedAccountingDate : Date;
   // formDisabledFields: ['','']
   TransactionTypes: bcTransactionType_Ext[] = [];
-  addOnBlur = true;
-  readonly separatorKeysCodes = [ENTER, COMMA] as const;
-  fruits: Fruit[] = [{name: 'Lemon'}, {name: 'Lime'}, {name: 'Apple'}];
+
   constructor (
     private fb:FormBuilder, 
     private InvestmentDataServiceService:AppInvestmentDataServiceService, 
@@ -286,41 +280,7 @@ export class AppAccEntryModifyFormComponent implements OnInit, AfterViewInit {
       break;
     }
   }
-  add(event: MatChipInputEvent): void {
-    const value = (event.value || '').trim();
 
-    // Add our fruit
-    if (value) {
-      this.fruits.push({name: value});
-    }
-
-    // Clear the input value
-    event.chipInput!.clear();
-  }
-
-  remove(fruit: Fruit): void {
-    const index = this.fruits.indexOf(fruit);
-
-    if (index >= 0) {
-      this.fruits.splice(index, 1);
-    }
-  }
-
-  edit(fruit: Fruit, event: MatChipEditedEvent) {
-    const value = event.value.trim();
-
-    // Remove fruit if it no longer has a name
-    if (!value) {
-      this.remove(fruit);
-      return;
-    }
-
-    // Edit existing fruit
-    const index = this.fruits.indexOf(fruit);
-    if (index >= 0) {
-      this.fruits[index].name = value;
-    }
-  }
 
   get  d_transactionType() {return this.entryModifyForm.get('d_transactionType')}​
   get  accountNo() {return this.entryModifyForm.get('d_accountNo')}​
