@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { MatDialog, MatDialogRef} from '@angular/material/dialog';
+import { MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import { AppInstrumentEditFormComponent } from '../../forms/app-instrument-edit-form/app-instrument-edit-form.component';
 @Component({
   selector: 'app-app-instrument-table',

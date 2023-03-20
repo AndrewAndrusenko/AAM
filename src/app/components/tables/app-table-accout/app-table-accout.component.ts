@@ -1,13 +1,13 @@
 import {AfterViewInit, Component, EventEmitter, Input, Output, SimpleChanges, ViewChild} from '@angular/core';
-import {MatPaginator} from '@angular/material/paginator';
+import {MatLegacyPaginator as MatPaginator} from '@angular/material/legacy-paginator';
 import {MatSort} from '@angular/material/sort';
 import {lastValueFrom, Subscription } from 'rxjs';
-import {MatTableDataSource} from '@angular/material/table';
+import {MatLegacyTableDataSource as MatTableDataSource} from '@angular/material/legacy-table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {AccountsTableModel } from 'src/app/models/accounts-table-model';
 import {AppTabServiceService} from 'src/app/services/app-tab-service.service';
 import {TreeMenuSevice } from 'src/app/services/tree-menu.service';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dialog';
 import { AppNewAccountComponent } from '../../forms/app-new-account/app-new-account.component';
 import { AppInvestmentDataServiceService } from 'src/app/services/app-investment-data.service.service';
 @Component({

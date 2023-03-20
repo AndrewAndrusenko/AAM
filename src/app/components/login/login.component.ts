@@ -1,9 +1,9 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatLegacyFormFieldModule as MatFormFieldModule} from '@angular/material/legacy-form-field';
 
-import {MatInputModule} from '@angular/material/input'; 
+import {MatLegacyInputModule as MatInputModule} from '@angular/material/legacy-input'; 
 import { AuthService } from 'src/app/services/auth.service';
 interface userRoles {
   value: string;
