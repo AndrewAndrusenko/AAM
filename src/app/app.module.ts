@@ -7,7 +7,6 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {MatTreeModule} from '@angular/material/tree' ;
 import {MatIconModule} from '@angular/material/icon'; 
 import {CdkMenuModule} from '@angular/cdk/menu';
-import {MaterialExampleModule} from '../material.module';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatNativeDateModule} from '@angular/material/core';
 import {HttpClientModule} from '@angular/common/http';
@@ -15,12 +14,12 @@ import { AppMenuComponent } from './components/app-menu/app-menu.component';
 import { AppTabsComponent } from './components/app-tabs/app-tabs.component';
 import { LoginComponent } from './components/login/login.component';
 import { DashboardComponent } from './general/dashboard/dashboard.component';
-import {MatLegacyFormFieldModule as MatFormFieldModule} from '@angular/material/legacy-form-field';
+import {MatFormFieldModule as MatFormFieldModule} from '@angular/material/form-field';
 import { AppLoginComponent } from './components/app-login/app-login.component';
-import {MatLegacyInputModule as MatInputModule} from '@angular/material/legacy-input'; 
+import {MatInputModule as MatInputModule} from '@angular/material/input'; 
 import {ScrollingModule} from '@angular/cdk/scrolling';
 import { DataTablesModule } from "angular-datatables";
-import { MatLegacyDialogModule as MatDialogModule} from "@angular/material/legacy-dialog";
+import { MatDialogModule as MatDialogModule} from "@angular/material/dialog";
 import { AppClientFormComponent } from './components/forms/app-client-form/app-client-form.component';
 import { AppNewAccountComponent } from './components/forms/app-new-account/app-new-account.component';
 import { AppConfimActionComponent } from './components/alerts/app-confim-action/app-confim-action.component';
@@ -30,7 +29,7 @@ import { tradesDataTable } from './components/tables/app-table-trades/app-table-
 import { AppInstrumentTableComponent } from './components/tables/app-table-instrument/app-table-instrument.component';
 import { AppInstrumentEditFormComponent } from './components/forms/app-instrument-edit-form/app-instrument-edit-form.component';
 import { AppClientsTableComponent } from './components/tables/app-table-clients/app-table-clients.component';
-import {MatLegacySlideToggle as MatSlideToggle, MatLegacySlideToggleModule as MatSlideToggleModule} from '@angular/material/legacy-slide-toggle';
+import {MatSlideToggle as MatSlideToggle, MatSlideToggleModule as MatSlideToggleModule} from '@angular/material/slide-toggle';
 import { AppTableStrategiesComponentComponent } from './components/tables/app-table-strategies.component/app-table-strategies.component.component'; 
 import { AppStrategyFormComponent } from './components/forms/app-strategy-form/app-strategy-form.component';
 import { AppTableStrategyComponent } from './components/tables/app-table-strategy_structure/app-table-strategy_structure.component';
@@ -43,14 +42,29 @@ import { AppAccEntryModifyFormComponent } from './components/forms/app-acc-entry
 import { AppTableAccAccountsComponent } from './components/tables/app-table-acc-accounts/app-table-acc-accounts';
 import { AppTableAccLedgerAccountsComponent } from './components/tables/app-table-acc-ledger-accounts/app-table-acc-ledger-accounts';
 import { AppAccAccountModifyFormComponent } from './components/forms/app-acc-account-modify-form/app-acc-account-modify-form ';
-import {MatChipsModule} from '@angular/material/chips'; 
+import {MatDatepickerModule} from '@angular/material/datepicker';
+import {MatButtonToggleModule} from '@angular/material/button-toggle';
+import {MatTabsModule as MatTabsModule} from '@angular/material/tabs';
+import {MatSelectModule as MatSelectModule} from '@angular/material/select';
+import {MatToolbarModule} from '@angular/material/toolbar';
+import {MatCheckboxModule as MatCheckboxModule} from '@angular/material/checkbox';
+import {MatSidenavModule} from '@angular/material/sidenav';
+import {MatTooltipModule as MatTooltipModule} from '@angular/material/tooltip';
+import {MatTableModule as MatTableModule} from '@angular/material/table';
+import {MatPaginatorModule as MatPaginatorModule} from '@angular/material/paginator';
+import {MatExpansionModule} from '@angular/material/expansion';
+import {MatAutocompleteModule as MatAutocompleteModule} from '@angular/material/autocomplete';
+import {MatMenuModule as MatMenuModule} from '@angular/material/menu';
+import {MatSnackBarModule as MatSnackBarModule} from '@angular/material/snack-bar';
+import {MatButtonModule as MatButtonModule} from '@angular/material/button';
+
+
 @NgModule({
     imports: [
         BrowserModule,
         BrowserAnimationsModule,
         MatTreeModule,
         MatIconModule,
-        MaterialExampleModule,
         FormsModule,
         ReactiveFormsModule,
         MatNativeDateModule,
@@ -62,7 +76,22 @@ import {MatChipsModule} from '@angular/material/chips';
         ScrollingModule,
         DataTablesModule,
         MatDialogModule,
-        MatChipsModule
+        MatSlideToggleModule,
+        MatDatepickerModule,
+        MatButtonToggleModule,
+        MatTabsModule,
+        MatSelectModule,
+        MatToolbarModule,
+        MatCheckboxModule,
+        MatSidenavModule,
+        MatTooltipModule,
+        MatTableModule,
+        MatPaginatorModule,
+        MatExpansionModule,
+        MatAutocompleteModule,
+        MatMenuModule,
+        MatSnackBarModule,
+        MatButtonModule
     ],
     declarations: [
         AppComponent,
