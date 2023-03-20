@@ -1,5 +1,5 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import { MatDialog as MatDialog, MatDialogRef as MatDialogRef} from '@angular/material/dialog';
 import * as XLSX from 'xlsx'
 import { AppClientFormComponent } from '../../forms/app-client-form/app-client-form.component';
 import { AppNewAccountComponent } from '../../forms/app-new-account/app-new-account.component';
