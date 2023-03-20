@@ -10,7 +10,8 @@ import { bAccountsEntriesList } from 'src/app/models/accounts-table-model';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
 import { AppAccEntryModifyFormComponent } from '../../forms/app-acc-entry-modify-form/app-acc-entry-modify-form';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
-import {MatChipEditedEvent, MatChipInputEvent} from '@angular/material/chips';
+import { MatChipInputEvent} from '@angular/material/chips';
+import { MatChipEditedEvent} from '@angular/material/chips';
 export interface Fruit {
   name: string;
 }
