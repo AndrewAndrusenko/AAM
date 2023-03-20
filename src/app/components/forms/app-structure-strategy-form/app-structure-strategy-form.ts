@@ -1,9 +1,9 @@
 import { Component,  Input, OnInit, SimpleChanges,  } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup,  ValidationErrors,  Validators } from '@angular/forms';
-import { MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dialog';
+import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { AppConfimActionComponent } from '../../alerts/app-confim-action/app-confim-action.component';
 import { AppSnackMsgboxComponent } from '../../app-snack-msgbox/app-snack-msgbox.component';
-import { MatLegacySnackBar as MatSnackBar} from '@angular/material/legacy-snack-bar';
+import { MatSnackBar as MatSnackBar} from '@angular/material/snack-bar';
 import { AppInvestmentDataServiceService } from 'src/app/services/app-investment-data.service.service';
 import { StrategiesGlobalData } from 'src/app/models/accounts-table-model';
 import { formatPercent } from '@angular/common';
