@@ -57,6 +57,7 @@ import {MatAutocompleteModule as MatAutocompleteModule} from '@angular/material/
 import {MatMenuModule as MatMenuModule} from '@angular/material/menu';
 import {MatSnackBarModule as MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatButtonModule as MatButtonModule} from '@angular/material/button';
+import {MatChipsModule as MatChipsModule} from '@angular/material/chips';
 
 
 @NgModule({
@@ -91,7 +92,8 @@ import {MatButtonModule as MatButtonModule} from '@angular/material/button';
         MatAutocompleteModule,
         MatMenuModule,
         MatSnackBarModule,
-        MatButtonModule
+        MatButtonModule,
+        MatChipsModule
     ],
     declarations: [
         AppComponent,

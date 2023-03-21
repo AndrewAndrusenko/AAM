@@ -10,6 +10,7 @@ import { bAccountsEntriesList } from 'src/app/models/accounts-table-model';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
 import { AppAccEntryModifyFormComponent } from '../../forms/app-acc-entry-modify-form/app-acc-entry-modify-form';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
+import {MatChipInputEvent} from '@angular/material/chips';
 export interface Fruit {
   name: string;
 }
@@ -110,5 +111,25 @@ export class AppTableAccEntriesComponent  implements AfterViewInit {
       break;
     }
   }
+  add(event: MatChipInputEvent): void {
+    const value = (event.value || '').trim();
+
+    // Add our fruit
+    if (value) {
+      this.fruits.push({name: value});
+    }
+
+    // Clear the input value
+    event.chipInput!.clear();
+  }
+
+  remove(fruit: Fruit): void {
+    const index = this.fruits.indexOf(fruit);
+
+    if (index >= 0) {
+      this.fruits.splice(index, 1);
+    }
+  }
+
  
 }
