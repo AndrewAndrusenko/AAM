@@ -3,7 +3,7 @@
 </mat-form-field>
 <mat-form-field 
   *ngIf="readOnly"
-  class="example-chip-list" appearance="fill" style="width: 70%; "    >
+  class="example-chip-list"  style="width: 60%; "    >
   <mat-chip-list #chipList aria-label="Fruit selection"  formControlName="noAccountLedger">
     <mat-chip *ngFor="let account of accounts" (removed)="remove(account)">
       {{account}}
@@ -15,9 +15,16 @@
     [matChipInputFor]="chipList"
     [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
     [matChipInputAddOnBlur]="addOnBlur"
-    (matChipInputTokenEnd)="add($event)">
+    (matChipInputTokenEnd)="add($event)"
+    matTooltip="Type account number and press enter">
   </mat-chip-list>
 </mat-form-field>
+
+<button   *ngIf="readOnly" color = "primary" mat-raised-button 
+style="margin-left: 2%; font-size: 18px;"
+(click)="selectAccountsArray()">
+Select
+</button>
 
 <div class="mat-elevation-z8">
   <table  #strategyTable mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class="mat-elevation-z8">

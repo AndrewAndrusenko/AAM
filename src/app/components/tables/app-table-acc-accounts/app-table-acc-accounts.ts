@@ -105,7 +105,11 @@ export class AppTableAccAccountsComponent  implements OnInit, AfterViewInit {
     this.selectedRow = element;
     this.modal_principal_parent.emit('CLOSE_PARENT_MODAL');
   }
-
+   selectAccountsArray() {
+/*     console.log('sele',this.selection);
+    this.accounts = this.accounts */
+    this.modal_principal_parent.emit('CLOSE_PARENT_MODAL');
+  }
   openAccountModifyForm (actionType:string, row: any ) {
     this.dialogRef = this.dialog.open(AppAccAccountModifyFormComponent ,{minHeight:'400px', maxWidth:'1000px' });
     this.dialogRef.componentInstance.action = actionType;

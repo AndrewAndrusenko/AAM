@@ -69,7 +69,7 @@ export class AppTableAccEntriesComponent  implements AfterViewInit {
   panelOpenState = false;
   public searchParametersFG: FormGroup;
   public searchParameters: any;
-  accounts: string[] = [];
+  accounts: string[] = ['ClearAll'];
   
   dialogChooseAccountsList: MatDialogRef<AppTableAccAccountsComponent>;
 
@@ -142,6 +142,10 @@ export class AppTableAccEntriesComponent  implements AfterViewInit {
     const index = this.accounts.indexOf(account);
    (index >= 0)? this.accounts.splice(index, 1) : null
   }
+  clearAll(event) {
+  console.log('event', event.target.textContent);
+  event.target.textContent.trim() === 'ClearAll cancel'? this.accounts = ['ClearAll']: null;
+  }
   addChips (el: any, column: string) {(['d_Debit', 'd_Credit'].includes(column))? this.accounts.push(el):null;}
   updateFilter (event:Event, el: any) {
     this.filterlFormControl.patchValue(el);
@@ -176,7 +180,9 @@ selectAccounts (typeAccount: string) {
   this.dialogChooseAccountsList.componentInstance.action = "Select";
   this.dialogChooseAccountsList.componentInstance.readOnly = true;
   this.dialogChooseAccountsList.componentInstance.modal_principal_parent.subscribe ((item)=>{
-    console.log('it',this.dialogChooseAccountsList.componentInstance.selectedRow);
+    this.accounts = [...this.accounts,...this.dialogChooseAccountsList.componentInstance.accounts]
+    this.dialogChooseAccountsList.close(); 
+
    
   });
 }
