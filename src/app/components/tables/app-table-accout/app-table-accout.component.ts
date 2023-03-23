@@ -100,4 +100,5 @@ export class TableAccounts implements AfterViewInit {
       break;
     }
   }
+  
 }

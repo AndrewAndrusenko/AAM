@@ -1,0 +1,1 @@
+SELECT * from public.f_bbalancesheet_lastmovement_full() WHERE "accountId" = 1

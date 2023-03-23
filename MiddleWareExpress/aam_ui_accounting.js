@@ -7,7 +7,7 @@ pg.types.setTypeParser(1114, function(stringValue) {
   return stringValue;  //1114 for time without timezone type
 });
 async function fGetAccountingData (request,response) {
-  const query = {text: ''}
+  const query = {text: '', values:[]}
   switch (request.query.Action) {
     case 'bcTransactionType_Ext':
       query.text = 'SELECT id, TRIM("xActTypeCode_Ext") as "xActTypeCode_Ext", description, code2 FROM public."bcTransactionType_Ext" ORDER BY "xActTypeCode_Ext"; '
@@ -21,8 +21,8 @@ async function fGetAccountingData (request,response) {
     case 'GetAccountData':
       query.text ='SELECT '+
         '"accountNo", "accountTypeExt", "Information", "clientId", "currencyCode", "entityTypeCode", "accountId" '+
-        'FROM public."bAccounts" WHERE ("accountNo"= $1) ; '
-      query.values = [request.query.accountNo]
+        'FROM public."bAccounts" WHERE ("accountNo"= ${accountNo}) ; '
+      // query.values = [request.query.accountNo]
     break;
     case 'GetAccountDataWholeList':
       query.text ='SELECT '+
@@ -40,8 +40,8 @@ async function fGetAccountingData (request,response) {
       query.text ='SELECT '+
         '"accountTypeID", name, "clientID", "entityTypeCode", "ledgerNo", "currecyCode", '+
         '"ledgerNoCptyCode", "ledgerNoTrade", "externalAccountNo", "ledgerNoId" '+
-        'FROM public."bLedger" WHERE ("ledgerNo"= $1) ; '
-      query.values = [request.query.accountNo]
+        'FROM public."bLedger" WHERE ("ledgerNo"= ${accountNo}) ; '
+      // query.values = [request.query.accountNo]
     break;
     case 'GetLedgerAccountsDataWholeList' :
       query.text ='SELECT '+
@@ -55,6 +55,34 @@ async function fGetAccountingData (request,response) {
         'LEFT JOIN "bcAccountType_Ext" ON "bcAccountType_Ext"."accountType_Ext" = "bLedger"."accountTypeID" ;'
     break;
     case 'GetAccountsEntriesListAccounting':
+      let conditions = {
+        'noAccountLedger':{
+          1: ' ("bAccounts"."accountNo" = ANY(${noAccountLedger}) OR "bLedger"."ledgerNo" = ANY(${noAccountLedger})) ',
+          2: ' ("bLedger"."ledgerNo" = ANY(${noAccountLedger}) OR "bLedgerDebit"."ledgerNo" = ANY(${noAccountLedger})) '
+        },
+        'dateRangeStart': {
+          1: ' ("dataTime"::date >= ${dateRangeStart}::date )',
+          2: ' ("dateTime"::date >= ${dateRangeStart}::date)'
+        },
+        'dateRangeEnd': {
+          1: ' ("dataTime"::date <= ${dateRangeEnd}::date) ',
+          2: ' ("dateTime"::date <= ${dateRangeEnd}::date)'
+        }
+      }
+      let conditionsAccountLedger =' WHERE'
+      let conditionsLedgerToLedger =' WHERE'
+      Object.entries(conditions).forEach(([key,value]) => {
+      if  (request.query.hasOwnProperty(key)) {
+        query.values.push(request.query[key]);
+        conditionsAccountLedger +=conditions[key][1] + ' AND ';
+        conditionsLedgerToLedger +=conditions[key][2] + ' AND ';
+        }
+      });
+
+      console.log('param',(request.query));
+      console.log('values',(query.values));
+      console.log('conditionsAccountLedger',(conditionsAccountLedger.slice(0,-5)));
+      console.log('conditionsLedgerToLedger',(conditionsLedgerToLedger.slice(0,-5)));
       query.text ='SELECT \'AL\' AS "d_transactionType","bAccountTransaction".id AS "t_id", "entryDetails" AS "t_entryDetails", ' + 
       '"bAccountTransaction"."ledgerNoId" AS "t_ledgerNoId", "bAccountTransaction"."accountId" AS "t_accountId", ' +
       '"dataTime" AS "t_dataTime", "extTransactionId" AS "t_extTransactionId", "amountTransaction" AS "t_amountTransaction", '+
@@ -72,8 +100,10 @@ async function fGetAccountingData (request,response) {
       'FROM "bAccountTransaction" ' +
       'LEFT join "bcTransactionType_Ext" ON "bAccountTransaction"."XactTypeCode_Ext" = "bcTransactionType_Ext".id ' +
       'LEFT JOIN "bAccounts" on "bAccounts"."accountId" = "bAccountTransaction"."accountId" ' +
-      'LEFT JOIN "bLedger" ON "bLedger"."ledgerNoId" = "bAccountTransaction"."ledgerNoId" ' +
-      'UNION ' +
+      'LEFT JOIN "bLedger" ON "bLedger"."ledgerNoId" = "bAccountTransaction"."ledgerNoId" ' ;
+
+      query.text +=conditionsAccountLedger.slice(0,-5);
+      query.text += 'UNION ' +
       'SELECT \'LL\' AS "d_transactionType", "bLedgerTransactions".id AS "t_id", "entryDetails" AS "t_entryDetails", '+
       '"bLedgerTransactions"."ledgerID_Debit" AS "t_ledgerNoId", "bLedgerTransactions"."ledgerID" AS "t_accountId", '+
       '"dateTime" AS "t_dataTime", "extTransactionId" AS "t_extTransactionId", "amount" AS "t_amountTransaction", '+
@@ -85,8 +115,9 @@ async function fGetAccountingData (request,response) {
       'FROM "bLedgerTransactions" '+
       'LEFT join "bcTransactionType_Ext" ON "bLedgerTransactions"."XactTypeCode_Ext" = "bcTransactionType_Ext".id '+
       'LEFT JOIN "bLedger"  ON "bLedger"."ledgerNoId" = "bLedgerTransactions"."ledgerID" '+
-      'LEFT JOIN "bLedger" AS "bLedgerDebit" ON "bLedgerDebit"."ledgerNoId" = "bLedgerTransactions"."ledgerID_Debit"'+
-      'ORDER BY "t_dataTime" DESC;'
+      'LEFT JOIN "bLedger" AS "bLedgerDebit" ON "bLedgerDebit"."ledgerNoId" = "bLedgerTransactions"."ledgerID_Debit" ';
+      query.text += conditionsLedgerToLedger.slice(0,-5);
+      query.text +='ORDER BY "t_dataTime" DESC; '
     break;
     case 'GetBalanceSheet':
     break;
@@ -95,8 +126,10 @@ async function fGetAccountingData (request,response) {
     break
     
   }
-  console.log('que', query);
-  pool.query (query, (err, res) => {if (err) {console.log (err.stack)} else {
+  sql = pgp.as.format(query.text,request.query)
+  console.log('sql',sql);
+  // console.log('que', query);
+  pool.query (sql, (err, res) => {if (err) {console.log (err.stack)} else {
     //  console.log('res',res.rows);
     return response.status(200).json((res.rows))}
   })

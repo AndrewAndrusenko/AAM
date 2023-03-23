@@ -1,3 +1,8 @@
+.filterText {
+  width: 20%;
+  font-size: 20px;
+}
+
 .tree-menu-context {
   display: inline-flex;
   flex-direction: column;
@@ -6,9 +11,6 @@
   background-color: rgb(184, 184, 184);
   padding: 3px 0;
   font-size: 18px;
-}
-.mat-column-select {
-  overflow: initial;
 }
 
 .tree-menu-item {
@@ -54,15 +56,19 @@
 .mat-paginator {
   margin-left: 10px;
 }
-.mat-input-element {
+/* .mat-input-element {
   font-size: 24px;
   background-color:#4f4e4e;
+} */
+.colorLabel {
+  color: rgb(238, 113, 113);
 }
 .mat-form-field {
   margin-left: 10px;
-  font-size: 24px;
-  width: 20%;
+  font-size: 16px;
+ 
 }
+
 .mat-cell {
   font-size: 18px;
 }

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, Subject} from 'rxjs';
-import { bAccounts, bAccountsEntriesList, bBalanceData, bcAccountType_Ext, bcEnityType, bcTransactionType_Ext, bLedger, bLedgerAccounts, bLedgerBalanceData, SWIFTSGlobalListmodel, SWIFTStatement950model } from '../models/accounts-table-model';
+import { bAccountingEntriesComplexSearch, bAccounts, bAccountsEntriesList, bBalanceData, bcAccountType_Ext, bcEnityType, bcTransactionType_Ext, bLedger, bLedgerAccounts, bLedgerBalanceData, SWIFTSGlobalListmodel, SWIFTStatement950model } from '../models/accounts-table-model';
 
 @Injectable({
   providedIn: 'root'
@@ -53,8 +53,10 @@ export class AppAccountingService {
   } 
   /*End------------------Create entry by scheme---------------------------------------------------------*/
 
-  GetAccountsEntriesListAccounting (dataRange: string, id: number, MTType:string, Sender: string, Action: string):Observable <bAccountsEntriesList[]> {
-    const params = {'dataRange': dataRange, 'id' :id, 'MTType': MTType,'Sender':Sender, 'Action': Action}
+  GetAccountsEntriesListAccounting (searchParameters:any, id: number, MTType:string, Sender: string, Action: string):Observable <bAccountsEntriesList[]> {
+    let params = {'id' :id, 'MTType': MTType,'Sender':Sender, 'Action': Action};
+    (searchParameters !== null) ?  params = {...params,...searchParameters}: null
+    console.log('params',params);
     return this.http.get <bAccountsEntriesList []>('/api/DEA/fGetAccountingData/', { params: params })
   }
   GetAccountsListAccounting (currencyCode: number, id: number, clientId:number, accountNo: string, Action: string):Observable <bAccounts[]> {

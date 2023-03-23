@@ -181,3 +181,14 @@ export interface bLedgerBalanceData {
   DbSignAmount:number,
   closingBalance:number,
 }    
+export interface bAccountingEntriesComplexSearch {
+  dataRange : {
+    dateRangeStart:Date,
+    dateRangeEnd:Date
+  },
+  noAccountLedger : string [],
+  amountRange :{
+    min: number,
+    max: number
+  }
+}

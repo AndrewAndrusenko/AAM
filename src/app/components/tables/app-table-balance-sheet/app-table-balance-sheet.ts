@@ -6,17 +6,19 @@ import {MatTableDataSource as MatTableDataSource} from '@angular/material/table'
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { bAccountingEntriesComplexSearch, bAccountsEntriesList } from 'src/app/models/accounts-table-model';
+import { bAccountsEntriesList } from 'src/app/models/accounts-table-model';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
 import { AppAccEntryModifyFormComponent } from '../../forms/app-acc-entry-modify-form/app-acc-entry-modify-form';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { AppTableAccAccountsComponent } from '../app-table-acc-accounts/app-table-acc-accounts';
+export interface Fruit {
+  name: string;
+}
 @Component({
-  selector: 'app-table-acc-entries',
-  templateUrl: './app-table-acc-entries.html',
-  styleUrls: ['./app-table-acc-entries.scss'],
+  selector: 'app-table-balance-sheet',
+  templateUrl: './app-table-balance-sheet.html',
+  styleUrls: ['./app-table-balance-sheet.scss'],
   animations: [
     trigger('detailExpand', [
       state('collapsed', style({height: '0px', minHeight: '0'})),
@@ -25,7 +27,7 @@ import { AppTableAccAccountsComponent } from '../app-table-acc-accounts/app-tabl
     ]),
   ],
 })
-export class AppTableAccEntriesComponent  implements AfterViewInit {
+export class AppTableBalanceSheetComponent  implements AfterViewInit {
   columnsToDisplay = [
     'd_Debit',
     'd_Credit',
@@ -61,18 +63,14 @@ export class AppTableAccEntriesComponent  implements AfterViewInit {
   
   addOnBlur = true;
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
-  dataRange = new FormGroup ({
-    dateRangeStart: new FormControl<Date | null>(null),
-    dateRangeEnd: new FormControl<Date | null>(null),
+  fruits: Fruit[] = [{name: 'AccountNo'}];
+  range = new FormGroup({
+    start: new FormControl<Date | null>(null),
+    end: new FormControl<Date | null>(null),
   });
   
   panelOpenState = false;
-  public searchParametersFG: FormGroup;
-  public searchParameters: any;
-  accounts: string[] = [];
-  
-  dialogChooseAccountsList: MatDialogRef<AppTableAccAccountsComponent>;
-
+  public searchParameters: FormGroup;
   
   constructor(
     private AccountingDataService:AppAccountingService, 
@@ -89,10 +87,19 @@ export class AppTableAccEntriesComponent  implements AfterViewInit {
         this.dataSource.sort = this.sort;
       })
     } )
-    this.searchParametersFG = this.fb.group ({
-      dataRange : this.dataRange,
-      noAccountLedger: null,
-      amount:{value:null, disabled:true}
+    this.searchParameters = this.fb.group ({
+      d_transactionType: {value:null, disabled: false},
+      t_id: {value:0, disabled: false},
+      t_accountId: {value:null, disabled: false}, 
+      t_ledgerNoId: {value:null, disabled: false}, 
+      t_extTransactionId : {value:null, disabled: false}, 
+      t_dataTime: [null, [Validators.required]],  
+      t_amountTransaction: [0, [Validators.required, Validators.pattern('[0-9.,]*') ]   ], 
+      t_XactTypeCode: {value:null, disabled: false},  
+      t_XactTypeCode_Ext: [null, [Validators.required]], 
+      d_Debit : {value:null, disabled: false},  
+      d_Credit : {value:null, disabled: false},  
+
     })
   }
 
@@ -135,54 +142,35 @@ export class AppTableAccEntriesComponent  implements AfterViewInit {
   }
   add(event: MatChipInputEvent): void {
     const value = (event.value || '').trim();
-    (value)? this.accounts.push(value) : null;
+
+    // Add our fruit
+    if (value) {
+      this.fruits.push({name: value});
+    }
+
+    // Clear the input value
     event.chipInput!.clear();
   }
-  remove(account: string): void {
-    const index = this.accounts.indexOf(account);
-   (index >= 0)? this.accounts.splice(index, 1) : null
+
+  remove(fruit: Fruit): void {
+    const index = this.fruits.indexOf(fruit);
+
+    if (index >= 0) {
+      this.fruits.splice(index, 1);
+    }
   }
-  addChips (el: any, column: string) {(['d_Debit', 'd_Credit'].includes(column))? this.accounts.push(el):null;}
   updateFilter (event:Event, el: any) {
-    this.filterlFormControl.patchValue(el);
-    this.dataSource.filter = el.trim();
-    (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
+    this.filterlFormControl.patchValue(el)
+    console.log('filter',this.filterlFormControl.value);
+    this.dataSource.filter = el.trim()
+    if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
   clearFilter () {
     this.filterlFormControl.patchValue('')
     this.dataSource.filter = ''
-    if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
+
+    if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
+
   }
-
-  submitQuery () {
-    let searchObj = {};
-    let accountsList = [];
-    (this.accounts.length===1)? accountsList = [...this.accounts,...this.accounts]: accountsList = this.accounts;
-    (this.accounts.length)? Object.assign (searchObj , {'noAccountLedger': accountsList}): null;
-    (this.gRange.get('dateRangeStart').value)===null? null : Object.assign (searchObj , {
-      'dateRangeStart':new Date (this.gRange.get('dateRangeStart').value).toDateString()});
-    (this.gRange.get('dateRangeEnd').value)===null? null : Object.assign (searchObj , {
-      'dateRangeEnd': new Date (this.gRange.get('dateRangeEnd').value).toDateString()});
-    console.log('searchParameters',searchObj);
-
-    this.AccountingDataService.GetAccountsEntriesListAccounting(searchObj,null,null, null, 'GetAccountsEntriesListAccounting').subscribe (EntriesList  => {
-      this.dataSource  = new MatTableDataSource(EntriesList);
-      this.dataSource.paginator = this.paginator;
-      this.dataSource.sort = this.sort;
-    })
-  }
-selectAccounts (typeAccount: string) {
-  this.dialogChooseAccountsList = this.dialog.open(AppTableAccAccountsComponent ,{minHeight:'600px', minWidth:'1300px', autoFocus: false, maxHeight: '90vh'});
-  this.dialogChooseAccountsList.componentInstance.action = "Select";
-  this.dialogChooseAccountsList.componentInstance.readOnly = true;
-  this.dialogChooseAccountsList.componentInstance.modal_principal_parent.subscribe ((item)=>{
-    console.log('it',this.dialogChooseAccountsList.componentInstance.selectedRow);
-   
-  });
-}
-
-  get  gRange () {return this.searchParametersFG.get('dataRange') } 
-  get  dateRangeStart() {return this.searchParametersFG.get('dateRangeStart') } 
-  get  dateRangeEnd() {return this.searchParametersFG.get('dateRangeEnd') } 
  
 }

@@ -58,6 +58,7 @@ import {MatMenuModule as MatMenuModule} from '@angular/material/menu';
 import {MatSnackBarModule as MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatButtonModule as MatButtonModule} from '@angular/material/button';
 import {MatChipsModule as MatChipsModule} from '@angular/material/chips';
+import { AppTableBalanceSheetComponent } from './components/tables/app-table-balance-sheet/app-table-balance-sheet';
 
 
 @NgModule({
@@ -123,7 +124,8 @@ import {MatChipsModule as MatChipsModule} from '@angular/material/chips';
         AppAccEntryModifyFormComponent,
         AppTableAccAccountsComponent,
         AppTableAccLedgerAccountsComponent,
-        AppAccAccountModifyFormComponent
+        AppAccAccountModifyFormComponent,
+        AppTableBalanceSheetComponent
     ],
     bootstrap: [AppComponent],
     providers: [],
