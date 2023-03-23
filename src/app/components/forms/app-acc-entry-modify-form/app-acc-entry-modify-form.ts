@@ -40,7 +40,6 @@ export class AppAccEntryModifyFormComponent implements OnInit, AfterViewInit {
   public data: any;
   selectedValue : string
   public FirstOpenedAccountingDate : Date;
-  // formDisabledFields: ['','']
   TransactionTypes: bcTransactionType_Ext[] = [];
   addOnBlur = true;
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
@@ -196,7 +195,7 @@ export class AppAccEntryModifyFormComponent implements OnInit, AfterViewInit {
     }
   }
   selectAccount () {
-    this.dialogChoseAccount = this.dialog.open(AppTableAccAccountsComponent ,{minHeight:'600px', minWidth:'1300px', autoFocus: false, maxHeight: '90vh'});
+    this.dialogChoseAccount = this.dialog.open(AppTableAccAccountsComponent ,{minHeight:'600px', minWidth:'1600px', autoFocus: false, maxHeight: '90vh'});
     this.dialogChoseAccount.componentInstance.action = "Select";
     this.dialogChoseAccount.componentInstance.readOnly = true;
     this.dialogChoseAccount.componentInstance.modal_principal_parent.subscribe ((item)=>{
@@ -208,7 +207,7 @@ export class AppAccEntryModifyFormComponent implements OnInit, AfterViewInit {
     });
   }
   selectLedger (type:string) {
-    this.dialogChoseLedger = this.dialog.open(AppTableAccLedgerAccountsComponent ,{minHeight:'600px', minWidth:'1300px', autoFocus: false, maxHeight: '90vh'});
+    this.dialogChoseLedger = this.dialog.open(AppTableAccLedgerAccountsComponent ,{minHeight:'600px', minWidth:'1600px', autoFocus: false, maxHeight: '90vh'});
     this.dialogChoseLedger.componentInstance.action = "Select";
     this.dialogChoseLedger.componentInstance.readOnly = true;
     this.dialogChoseLedger.componentInstance.modal_principal_parent.subscribe ((item)=>{

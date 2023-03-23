@@ -4,7 +4,7 @@
 <mat-form-field 
   *ngIf="readOnly"
   class="example-chip-list"  style="width: 60%; "    >
-  <mat-chip-list #chipList aria-label="Fruit selection"  formControlName="noAccountLedger">
+  <mat-chip-list #chipList aria-label="Fruit selection" >
     <mat-chip *ngFor="let account of accounts" (removed)="remove(account)">
       {{account}}
       <button matChipRemove>
@@ -32,7 +32,7 @@ Select
       <th mat-header-cell *matHeaderCellDef>
         <mat-checkbox (change)="$event ? toggleAllRows() : null;
                                 addChips (selection)"
-                      [checked]="selection.hasValue() && isAllSelected()"
+                      [checked]="(!this.dataSource)? false : selection.hasValue() && isAllSelected()"
                       [indeterminate]="selection.hasValue() && !isAllSelected()"
                       [aria-label]="checkboxLabel()">
         </mat-checkbox>
@@ -41,7 +41,7 @@ Select
         <mat-checkbox (click)="$event.stopPropagation()"
                       (change)="$event ? selection.toggle(row) : null;
                       addChips (selection)"
-                      [checked]="selection.isSelected(row)"
+                      [checked]="(!this.dataSource)? false: selection.isSelected(row)"
                       [aria-label]="checkboxLabel(row)">
         </mat-checkbox>
       </td>

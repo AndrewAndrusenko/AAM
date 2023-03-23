@@ -6,13 +6,14 @@ import {MatTableDataSource as MatTableDataSource} from '@angular/material/table'
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { bAccountingEntriesComplexSearch, bAccountsEntriesList } from 'src/app/models/accounts-table-model';
+import { bAccountingEntriesComplexSearch, bAccountsEntriesList, bcTransactionType_Ext } from 'src/app/models/accounts-table-model';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
 import { AppAccEntryModifyFormComponent } from '../../forms/app-acc-entry-modify-form/app-acc-entry-modify-form';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { AppTableAccAccountsComponent } from '../app-table-acc-accounts/app-table-acc-accounts';
+import { MatOption } from '@angular/material/core';
 @Component({
   selector: 'app-table-acc-entries',
   templateUrl: './app-table-acc-entries.html',
@@ -65,6 +66,7 @@ export class AppTableAccEntriesComponent  implements AfterViewInit {
     dateRangeStart: new FormControl<Date | null>(null),
     dateRangeEnd: new FormControl<Date | null>(null),
   });
+  @ViewChild('allSelected') private allSelected: MatOption;
   
   panelOpenState = false;
   public searchParametersFG: FormGroup;
@@ -73,6 +75,8 @@ export class AppTableAccEntriesComponent  implements AfterViewInit {
   
   dialogChooseAccountsList: MatDialogRef<AppTableAccAccountsComponent>;
 
+  TransactionTypes: bcTransactionType_Ext[] = [];
+  filterEntryTypes:string[] = ['ClearAll'];
   
   constructor(
     private AccountingDataService:AppAccountingService, 
@@ -81,6 +85,8 @@ export class AppTableAccEntriesComponent  implements AfterViewInit {
     private fb:FormBuilder 
 
   ) {
+    this.AccountingDataService.GetTransactionType_Ext('',0,'','','bcTransactionType_Ext').subscribe (
+      data => this.TransactionTypes = data)
     this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate)
     this.subscriptionName= this.AccountingDataService.getReloadAccontList().subscribe ( (id) => {
       this.AccountingDataService.GetAccountsEntriesListAccounting (null,null,null,null,'GetAccountsEntriesListAccounting').subscribe (EntriesList  => {
@@ -92,7 +98,8 @@ export class AppTableAccEntriesComponent  implements AfterViewInit {
     this.searchParametersFG = this.fb.group ({
       dataRange : this.dataRange,
       noAccountLedger: null,
-      amount:{value:null, disabled:true}
+      amount:{value:null, disabled:true},
+      entryType : {value:[], disabled:false}
     })
   }
 
@@ -135,7 +142,8 @@ export class AppTableAccEntriesComponent  implements AfterViewInit {
   }
   add(event: MatChipInputEvent): void {
     const value = (event.value || '').trim();
-    (value)? this.accounts.push(value) : null;
+    const valueArray = event.value.split(',');
+    (value)? this.accounts = [...this.accounts,...valueArray] : null;
     event.chipInput!.clear();
   }
   remove(account: string): void {
@@ -161,12 +169,16 @@ export class AppTableAccEntriesComponent  implements AfterViewInit {
   submitQuery () {
     let searchObj = {};
     let accountsList = [];
+    (this.accounts.indexOf('ClearAll') !== -1)? this.accounts.splice(this.accounts.indexOf('ClearAll'),1) : null;
     (this.accounts.length===1)? accountsList = [...this.accounts,...this.accounts]: accountsList = this.accounts;
     (this.accounts.length)? Object.assign (searchObj , {'noAccountLedger': accountsList}): null;
     (this.gRange.get('dateRangeStart').value)===null? null : Object.assign (searchObj , {
       'dateRangeStart':new Date (this.gRange.get('dateRangeStart').value).toDateString()});
     (this.gRange.get('dateRangeEnd').value)===null? null : Object.assign (searchObj , {
       'dateRangeEnd': new Date (this.gRange.get('dateRangeEnd').value).toDateString()});
+
+    ( this.entryTypes.value != null&&this.entryTypes.value.length !=0)? Object.assign (searchObj , {'entryTypes': [this.entryTypes.value]}): null;
+
     console.log('searchParameters',searchObj);
 
     this.AccountingDataService.GetAccountsEntriesListAccounting(searchObj,null,null, null, 'GetAccountsEntriesListAccounting').subscribe (EntriesList  => {
@@ -175,20 +187,27 @@ export class AppTableAccEntriesComponent  implements AfterViewInit {
       this.dataSource.sort = this.sort;
     })
   }
-selectAccounts (typeAccount: string) {
-  this.dialogChooseAccountsList = this.dialog.open(AppTableAccAccountsComponent ,{minHeight:'600px', minWidth:'1300px', autoFocus: false, maxHeight: '90vh'});
-  this.dialogChooseAccountsList.componentInstance.action = "Select";
-  this.dialogChooseAccountsList.componentInstance.readOnly = true;
-  this.dialogChooseAccountsList.componentInstance.modal_principal_parent.subscribe ((item)=>{
-    this.accounts = [...this.accounts,...this.dialogChooseAccountsList.componentInstance.accounts]
-    this.dialogChooseAccountsList.close(); 
-
-   
-  });
-}
-
+  selectAccounts (typeAccount: string) {
+    this.dialogChooseAccountsList = this.dialog.open(AppTableAccAccountsComponent ,{minHeight:'600px', minWidth:'1600px', autoFocus: false, maxHeight: '90vh'});
+    this.dialogChooseAccountsList.componentInstance.action = "Select";
+    this.dialogChooseAccountsList.componentInstance.readOnly = true;
+    this.dialogChooseAccountsList.componentInstance.modal_principal_parent.subscribe ((item)=>{
+      this.accounts = [...this.accounts,...this.dialogChooseAccountsList.componentInstance.accounts]
+      this.dialogChooseAccountsList.close(); 
+    });
+  }
+  toggleAllSelection() {
+    if (this.allSelected.selected) {
+      this.entryTypes.patchValue([...this.TransactionTypes.map(item => item.id), 0]);
+      console.log('tp', this.TransactionTypes.map(item => item.id))
+    } else {
+      this.entryTypes.patchValue([]);
+    }
+  }
   get  gRange () {return this.searchParametersFG.get('dataRange') } 
   get  dateRangeStart() {return this.searchParametersFG.get('dateRangeStart') } 
   get  dateRangeEnd() {return this.searchParametersFG.get('dateRangeEnd') } 
+  get  entryTypes () {return this.searchParametersFG.get('entryType') } 
+  
  
 }

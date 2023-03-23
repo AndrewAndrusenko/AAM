@@ -67,6 +67,10 @@ async function fGetAccountingData (request,response) {
         'dateRangeEnd': {
           1: ' ("dataTime"::date <= ${dateRangeEnd}::date) ',
           2: ' ("dateTime"::date <= ${dateRangeEnd}::date)'
+        },
+        'entryTypes' : {
+          1: ' ("XactTypeCode_Ext" = ANY(array[${entryTypes:raw}]))',
+          2: ' ("XactTypeCode_Ext" = ANY(array[${entryTypes:raw}]))  '
         }
       }
       let conditionsAccountLedger =' WHERE'
@@ -103,7 +107,7 @@ async function fGetAccountingData (request,response) {
       'LEFT JOIN "bLedger" ON "bLedger"."ledgerNoId" = "bAccountTransaction"."ledgerNoId" ' ;
 
       query.text +=conditionsAccountLedger.slice(0,-5);
-      query.text += 'UNION ' +
+      query.text += ' UNION ' +
       'SELECT \'LL\' AS "d_transactionType", "bLedgerTransactions".id AS "t_id", "entryDetails" AS "t_entryDetails", '+
       '"bLedgerTransactions"."ledgerID_Debit" AS "t_ledgerNoId", "bLedgerTransactions"."ledgerID" AS "t_accountId", '+
       '"dateTime" AS "t_dataTime", "extTransactionId" AS "t_extTransactionId", "amount" AS "t_amountTransaction", '+

@@ -14,22 +14,24 @@
   </button>
 </mat-form-field>
 </span>
-<mat-expansion-panel class="headers-align" >
+<mat-expansion-panel class="headers-align" 
+  (opened)="panelOpenState = true"
+  (closed)="panelOpenState = false" >
   <mat-expansion-panel-header >
     <mat-panel-title>
       Complex search
     </mat-panel-title>
     <mat-panel-description>
-      Tap to open additional parameters
+      Tap to {{panelOpenState? 'hide': 'open'}} additional parameters
       <mat-icon color = 'accent'>filter_alt</mat-icon>
     </mat-panel-description>
   </mat-expansion-panel-header >
   <form class="submit" [formGroup]="searchParametersFG"  style="font-size: 18px;">
     
     <button color = "primary" mat-raised-button 
-      style="margin-left: 2%; font-size: 18px;"
+      style=" margin-left:1%; font-size: 18px;"
       (click)="submitQuery()">
-      Submit request
+      Submit
     </button>
 
     <mat-form-field appearance="fill">
@@ -44,7 +46,8 @@
       <mat-error *ngIf="dataRange.controls.dateRangeStart.hasError('matStartDateInvalid')">Invalid start date</mat-error>
       <mat-error *ngIf="dataRange.controls.dateRangeEnd.hasError('matEndDateInvalid')">Invalid end date</mat-error>
     </mat-form-field>
-    <mat-form-field class="example-chip-list" appearance="fill" style="width: 50%; ">
+
+    <mat-form-field class="example-chip-list" appearance="fill" style="width: 45%; ">
       <mat-chip-list #chipList aria-label="Fruit selection"  >
         <mat-chip *ngFor="let account of accounts" 
         (removed)="remove(account)"
@@ -56,49 +59,48 @@
           </button>
         </mat-chip>
         <input 
-        placeholder="Add account.."
+        placeholder="Add account or account,account1,account2.."
         formControlName="noAccountLedger"
         [matChipInputFor]="chipList"
         [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
         [matChipInputAddOnBlur]="addOnBlur"
         (matChipInputTokenEnd)="add($event)"
-        matTooltip="Type account number and press enter" >
+        matTooltip="Type account number or paste accounts list separated by comma and press enter" >
         <button style="font-size: 16px;" mat-raised-button matSuffix (click)="selectAccounts('ledger')">
           <mat-icon *ngIf="action!=='View'" class = "icon_search">search</mat-icon> MultiSelect </button>
 
       </mat-chip-list>
     </mat-form-field>
 
-    <mat-form-field style="width: 13%; ">
-      <input matInput placeholder="Amount" formControlName="amount"    >
-    </mat-form-field>
-       </form>
-  </mat-expansion-panel>
-
-
-
-<!-- <mat-form-field class="example-chip-list" appearance="fill">
-  <mat-chip-list #chipList aria-label="Fruit selection">
-    <mat-chip *ngFor="let fruit of fruits" (removed)="remove(fruit)">
-      {{fruit.name}}
-      <button matChipRemove>
-        <mat-icon>cancel</mat-icon>
+    <p>
+      <button color = "primary" mat-raised-button 
+        style=" margin-left:1%; font-size: 18px;"
+        (click)="searchParametersFG.reset();
+        this.accounts=['ClearAll']">
+        ClearAll
       </button>
-    </mat-chip>
-    <input placeholder="Type search string..."
-           [matChipInputFor]="chipList"
-           [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-           [matChipInputAddOnBlur]="addOnBlur"
-           (matChipInputTokenEnd)="add($event)">
-  </mat-chip-list>
-</mat-form-field> -->
+      <mat-form-field  style="width: 40%;">
+        <mat-label>Transaction Type Code</mat-label>
+        <mat-select  #t_XactTypeCode_Ext formControlName="entryType"  multiple> 
+          <mat-option #allSelected [value]="0"
+            (click)="toggleAllSelection()" >
+            ALL - {{this.allSelected.selected? 'Clear' :'Select' }} All 
+          </mat-option>
+          <ng-container *ngFor="let TransactionType of TransactionTypes">
+          <mat-option [value]="TransactionType.id">
+              {{TransactionType.xActTypeCode_Ext |uppercase}} - {{TransactionType.description}}
+          </mat-option>
+          </ng-container>
+        </mat-select>
+      </mat-form-field>
+    </p>
+  </form>
+</mat-expansion-panel>
 
-
-<!-- <span class ="longHint" style="font-size: 16px;"> Manual input: Date: YYYY-MM-DD (ex 2023-12-28) Amount: with commas (ex 500,000.20)</span> -->
 <div class="mat-elevation-z8">
   <table  #strategyTable mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class="mat-elevation-z8">
     <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i=index">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>  {{columnsHeaderToDisplay[i]  | titlecase}}</th>
+      <th mat-header-cell *matHeaderCellDef mat-sort-header >  {{columnsHeaderToDisplay[i]  | titlecase}}</th>
       <td  mat-cell *matCellDef="let element" [cdkContextMenuTriggerFor]="instrumentcontextmenu" > 
         <span [ngSwitch]="column">
           <p *ngSwitchCase="'t_dataTime'">
@@ -171,7 +173,7 @@
       </td>
     </ng-container>
     <ng-container matColumnDef="expand">
-      <th mat-header-cell *matHeaderCellDef aria-label="row actions">&nbsp;</th>
+      <th mat-header-cell *matHeaderCellDef aria-label="row actions" mat-sort-header>&nbsp;</th>
       <td mat-cell *matCellDef="let element">
         <button  *ngIf="element.t_dataTime<FirstOpenedAccountingDate" mat-icon-button 
           aria-label="expand row" color="accent"
