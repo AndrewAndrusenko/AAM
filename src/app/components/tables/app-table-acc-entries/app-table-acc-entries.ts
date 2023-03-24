@@ -14,6 +14,8 @@ import {MatChipInputEvent} from '@angular/material/chips';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { AppTableAccAccountsComponent } from '../app-table-acc-accounts/app-table-acc-accounts';
 import { MatOption } from '@angular/material/core';
+import * as XLSX from 'xlsx'
+
 @Component({
   selector: 'app-table-acc-entries',
   templateUrl: './app-table-acc-entries.html',
@@ -129,7 +131,6 @@ export class AppTableAccEntriesComponent  implements AfterViewInit {
     this.dialogRef.componentInstance.title = actionType;
     this.dialogRef.componentInstance.data = row;
     this.dialogRef.componentInstance.FirstOpenedAccountingDate = this.FirstOpenedAccountingDate;
-
     switch (actionType) {
       case 'Create':
       case 'Create_Example': 
@@ -188,9 +189,10 @@ export class AppTableAccEntriesComponent  implements AfterViewInit {
     })
   }
   selectAccounts (typeAccount: string) {
-    this.dialogChooseAccountsList = this.dialog.open(AppTableAccAccountsComponent ,{minHeight:'600px', minWidth:'1600px', autoFocus: false, maxHeight: '90vh'});
-    this.dialogChooseAccountsList.componentInstance.action = "Select";
+    this.dialogChooseAccountsList = this.dialog.open(AppTableAccAccountsComponent ,{minHeight:'600px', minWidth:'1700px', autoFocus: false, maxHeight: '90vh'});
+    this.dialogChooseAccountsList.componentInstance.action = "GetALLAccountsDataWholeList";
     this.dialogChooseAccountsList.componentInstance.readOnly = true;
+    this.dialogChooseAccountsList.componentInstance.multiSelect = true;
     this.dialogChooseAccountsList.componentInstance.modal_principal_parent.subscribe ((item)=>{
       this.accounts = [...this.accounts,...this.dialogChooseAccountsList.componentInstance.accounts]
       this.dialogChooseAccountsList.close(); 
@@ -203,6 +205,49 @@ export class AppTableAccEntriesComponent  implements AfterViewInit {
     } else {
       this.entryTypes.patchValue([]);
     }
+  }
+
+  exportToExcel() {
+    // implement your logic to make the data set from your original dataset.
+/*     let data = [
+     { title: "Accession Number", show: true, link: "accessionNumber" },
+     { title: "Title", show: true, link: "title" },
+     { title: "Sub Title", show: true, link: "subTitle" },
+     { title: "Status", show: true, link: "status" },
+     { title: "Authors", show: true, link: "authors" },
+     { title: "ISBN", show: true, link: "isbn" },
+     { title: "ISBN 10", show: true, link: "isbn10" },
+     { title: "ISBN 13", show: true, link: "isbn13" },
+     { title: "Subjects", show: true, link: "subjects" },
+     { title: "Publishers", show: true, link: "publishers" },
+     { title: "Vendors", show: true, link: "vendors" },
+     { title: "Contributors", show: true, link: "contributors" },
+     { title: "Collaborators", show: true, link: "collaborators" }
+   ]; */
+   let data = [
+     { title: "d_transactionType", show: true, link: "d_transactionType" }, 
+     { title: "t_id", show: true, link: "t_id" },
+     { title: "t_entryDetails", show: true, link: "t_entryDetails" }, 
+     { title: "t_ledgerNoId", show: true, link: "t_ledgerNoId" }, 
+     { title: "t_accountId", show: true, link: "t_accountId" }, 
+     { title: "t_extTransactionId" , show: true, link: "t_extTransactionId" }, 
+     { title: "t_dataTime", show: true, link: "t_dataTime" }, 
+     { title: "t_amountTransaction", show: true, link: "t_amountTransaction" }, 
+     { title: "t_XactTypeCode", show: true, link: "t_XactTypeCode" },  
+     { title: "t_XactTypeCode_Ext", show: true, link: "t_XactTypeCode_Ext" }, 
+     { title: "d_Debit", show: true, link: "d_Debit" },  
+     { title: "d_Credit" , show: true, link: "d_Credit" },  
+     { title: "d_ledgerNo", show: true, link: "d_ledgerNo" }, 
+     { title: "d_accountNo", show: true, link: "d_accountNo" },  
+     { title: "d_xActTypeCode_ExtName" , show: true, link: "d_xActTypeCode_ExtName" }, 
+     { title: "d_entryDetails", show: true, link: "d_entryDetails" }, 
+    ]
+    const fileName = "test.xlsx";
+   const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(this.dataSource.data);
+   const wb: XLSX.WorkBook = XLSX.utils.book_new();
+   XLSX.utils.book_append_sheet(wb, ws, "test");
+  
+   XLSX.writeFile(wb, fileName);
   }
   get  gRange () {return this.searchParametersFG.get('dataRange') } 
   get  dateRangeStart() {return this.searchParametersFG.get('dateRangeStart') } 

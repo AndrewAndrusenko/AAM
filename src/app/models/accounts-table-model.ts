@@ -173,7 +173,7 @@ export interface bBalanceData {
   totalDebit:number,
   closingBalance:number,
 }  
-export interface bLedgerBalanceData {
+export interface bLedgerBalanceData { false
   accountId: number,
   openingBalance: number,
   accountTransaction:	number, 
@@ -192,3 +192,15 @@ export interface bAccountingEntriesComplexSearch {
     max: number
   }
 }
+export interface bBalanceFullData {
+  accountNo : string, 
+  accountId : number, 
+  accountType : string, 
+  datePreviousBalance : Date, 
+  dateBalance : Date, 
+  openingBalance : number, 
+  totalCredit : number, 
+  totalDebit : number, 
+  OutGoingBalance : number,
+   checkClosing : number 
+} 

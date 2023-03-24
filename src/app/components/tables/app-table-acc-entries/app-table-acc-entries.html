@@ -13,7 +13,14 @@
     <mat-icon>close</mat-icon>
   </button>
 </mat-form-field>
+
+<button color = "accent" mat-raised-button 
+style=" margin-left:1%; font-size: 18px;"
+(click)="exportToExcel()">
+Save as XLS 
+</button>
 </span>
+
 <mat-expansion-panel class="headers-align" 
   (opened)="panelOpenState = true"
   (closed)="panelOpenState = false" >

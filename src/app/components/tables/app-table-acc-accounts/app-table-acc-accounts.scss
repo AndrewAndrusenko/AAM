@@ -32,18 +32,19 @@
 .tree-menu-item:active {
   background-color: rgb(147, 128, 128);
 }
-.menu-icon {
-  margin-left: 0px;
-  margin-right: 5px;
+.mat-input-element {
+  font-size: 24px;
+  background-color:#4f4e4e;
 }
-.row_field_name {
-  font-weight: bold;
-  color: cadetblue;
+.mat-form-field {
+  margin-left: 1%;
+  font-size: 24px;
+  width: 20%;
 }
+
 .mat-table {
   background-color:#4f4e4e;
   width: 100%;
-  font-size: 26px;
   margin-left: 1%;
 }
 .mat-header-cell {
@@ -54,30 +55,17 @@
 .mat-paginator {
   margin-left: 1%;
 }
-.mat-input-element {
-  font-size: 24px;
-  background-color:#4f4e4e;
+
+
+.mat-checkbox.mat-accent .mat-checkbox-inner-container {
+  margin: 2px 8px auto 0;
 }
-.mat-form-field {
-  margin-left: 1%;
-  font-size: 24px;
-  width: 20%;
-}
+
 .mat-cell {
   font-size: 18px;
-}
-tr.example-detail-row {
-  height: 0;
+  vertical-align: middle;
 }
 
-.example-element-detail {
-  overflow: hidden;
-  display: flex;
-}
-
-.example-element-description {
-  // padding: 16px;
-}
 
 tr.example-detail-row {
   height: 0;
@@ -91,12 +79,7 @@ tr.example-element-row:not(.example-expanded-row):active {
   background: rgb(43, 43, 245);
 }
 
-.example-element-row td {
-  border-bottom-width: 0;
-}
 
-.example-element-detail {
-  overflow: hidden;
-  display: flex;
-}
+
+
 

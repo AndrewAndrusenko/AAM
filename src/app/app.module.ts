@@ -127,7 +127,7 @@ import {MatSortModule} from '@angular/material/sort';
         AppTableAccAccountsComponent,
         AppTableAccLedgerAccountsComponent,
         AppAccAccountModifyFormComponent,
-        AppTableBalanceSheetComponent
+        AppTableBalanceSheetComponent,
     ],
     bootstrap: [AppComponent],
     providers: [],

@@ -28,7 +28,8 @@ export class AppTableAccAccountsComponent  implements OnInit, AfterViewInit {
   columnsToDisplay = [
     'select',
     'accountNo',  
-    'd_acctypedescription',  
+    'd_APTypeCodeAccount',
+    'd_Account_Type',  
     'Information',  
     'd_clientname',
     'd_portfolioCode',
@@ -36,6 +37,7 @@ export class AppTableAccAccountsComponent  implements OnInit, AfterViewInit {
   ]
   columnsHeaderToDisplay = [
     'No',
+    'Balance',
     'Type',
     'Details', 
     'Client',  
@@ -49,21 +51,23 @@ export class AppTableAccAccountsComponent  implements OnInit, AfterViewInit {
   @ViewChild(MatSort) sort: MatSort;
   @Output() public modal_principal_parent = new EventEmitter();
   public readOnly: boolean = false; 
+  public multiSelect: boolean = false; 
+  
   public selectedRow: bAccounts  | null;
   expandedElement: bAccounts  | null;
   accessToClientData: string = 'true';
-  action ='';
+  action ='GetAccountDataWholeList';
   dialogRef: MatDialogRef<AppAccAccountModifyFormComponent>;
  
   selection = new SelectionModel<bAccounts>(true, []);
   accounts: string[] = [];
   addOnBlur = true;
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
-
+  // GetAccountDataWholeList
   constructor(private AccountingDataService:AppAccountingService, private TreeMenuSevice:TreeMenuSevice, private dialog: MatDialog ) {
       
     this.subscriptionName= this.AccountingDataService.getReloadAccontList().subscribe ( (id) => {
-      this.AccountingDataService.GetAccountsListAccounting (null,null,null,null,'GetAccountDataWholeList').subscribe (AccountsList  => {
+      this.AccountingDataService.GetAccountsListAccounting (null,null,null,null, this.action).subscribe (AccountsList  => {
         this.dataSource  = new MatTableDataSource(AccountsList);
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
@@ -71,7 +75,8 @@ export class AppTableAccAccountsComponent  implements OnInit, AfterViewInit {
     } )
   }
   ngOnInit(): void {
-    this.AccountingDataService.GetAccountsListAccounting (null,null,null,null,'GetAccountDataWholeList').subscribe (AccountsList  => {
+
+    this.AccountingDataService.GetAccountsListAccounting (null,null,null,null,this.action).subscribe (AccountsList  => {
 
       this.dataSource  = new MatTableDataSource(AccountsList);
       this.dataSource.paginator = this.paginator;
@@ -85,7 +90,7 @@ export class AppTableAccAccountsComponent  implements OnInit, AfterViewInit {
     await lastValueFrom (this.TreeMenuSevice.getaccessRestriction (userData.user.accessrole, 'accessToClientData'))
     .then ((accessRestrictionData) =>{
       this.accessToClientData = accessRestrictionData['elementvalue']
-      this.AccountingDataService.GetAccountsListAccounting (null,null,null,null,'GetAccountDataWholeList').subscribe (AccountsList  => {
+      this.AccountingDataService.GetAccountsListAccounting (null,null,null,null,this.action).subscribe (AccountsList  => {
         this.dataSource  = new MatTableDataSource(AccountsList);
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;

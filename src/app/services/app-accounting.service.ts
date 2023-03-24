@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, Subject} from 'rxjs';
-import { bAccountingEntriesComplexSearch, bAccounts, bAccountsEntriesList, bBalanceData, bcAccountType_Ext, bcEnityType, bcTransactionType_Ext, bLedger, bLedgerAccounts, bLedgerBalanceData, SWIFTSGlobalListmodel, SWIFTStatement950model } from '../models/accounts-table-model';
+import { bAccountingEntriesComplexSearch, bAccounts, bAccountsEntriesList, bBalanceData, bBalanceFullData, bcAccountType_Ext, bcEnityType, bcTransactionType_Ext, bLedger, bLedgerAccounts, bLedgerBalanceData, SWIFTSGlobalListmodel, SWIFTStatement950model } from '../models/accounts-table-model';
 
 @Injectable({
   providedIn: 'root'
@@ -159,14 +159,12 @@ getExpectedBalanceLedgerOverdraftCheck (accountId: number, transactionAmount:num
   }
   return this.http.get <bLedgerBalanceData []>('/api/DEA/accountingOverdraftLedgerAccountCheck/', { params: params })
 }
-
-
-
-sendUpdateExpectedBalance ( id:any) { //the component that wants to update something, calls this fn
-  this.subjectName.next(id); //next() will feed the value in Subject
-}
-getUpdateExpectedBalance(): Observable<any> { //the receiver component calls this function 
-  return this.subjectName.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
+/*----------------------Balance Sheets----------------------------------------------------*/
+GetALLClosedBalances (searchParameters:any, id: number, MTType:string, Sender: string, Action: string):Observable <bBalanceFullData[]> {
+  let params = {'id' :id, 'MTType': MTType,'Sender':Sender, 'Action': Action};
+  (searchParameters !== null) ?  params = {...params,...searchParameters}: null
+  console.log('params',params);
+  return this.http.get <bBalanceFullData []>('/api/DEA/fGetAccountingData/', { params: params })
 }
 
 }

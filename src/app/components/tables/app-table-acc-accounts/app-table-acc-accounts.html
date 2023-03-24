@@ -20,21 +20,23 @@
   </mat-chip-list>
 </mat-form-field>
 
-<button   *ngIf="readOnly" color = "primary" mat-raised-button 
+<button   *ngIf="readOnly && multiSelect" color = "primary" mat-raised-button 
 style="margin-left: 2%; font-size: 18px;"
 (click)="selectAccountsArray()">
 Select
 </button>
 
-<div class="mat-elevation-z8">
+<div >
   <table  #strategyTable mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class="mat-elevation-z8">
-    <ng-container matColumnDef="select">
+    <ng-container   matColumnDef="select">
       <th mat-header-cell *matHeaderCellDef>
-        <mat-checkbox (change)="$event ? toggleAllRows() : null;
+        <mat-checkbox style="  vertical-align: top;"
+        (change)="$event ? toggleAllRows() : null;
                                 addChips (selection)"
                       [checked]="(!this.dataSource)? false : selection.hasValue() && isAllSelected()"
                       [indeterminate]="selection.hasValue() && !isAllSelected()"
-                      [aria-label]="checkboxLabel()">
+                      [aria-label]="checkboxLabel()"
+                      [disabled]="!multiSelect">
         </mat-checkbox>
       </th>
       <td mat-cell *matCellDef="let row">
@@ -42,7 +44,8 @@ Select
                       (change)="$event ? selection.toggle(row) : null;
                       addChips (selection)"
                       [checked]="(!this.dataSource)? false: selection.isSelected(row)"
-                      [aria-label]="checkboxLabel(row)">
+                      [aria-label]="checkboxLabel(row)"
+                      [disabled]="!multiSelect">
         </mat-checkbox>
       </td>
     </ng-container>
@@ -51,8 +54,8 @@ Select
       <td  mat-cell *matCellDef="let element"> 
         <span [ngSwitch]="column">
 
-          <p *ngSwitchCase="'t_XactTypeCode'">
-            {{element[column]==1?  'Debit' : 'Credit'}}
+          <p *ngSwitchCase="'d_APTypeCodeAccount'">
+            {{element[column]==1?  'Active' : 'Passive'}}
           </p>
           <p *ngSwitchDefault>
             {{element[column]}}  

@@ -6,7 +6,7 @@ import {MatTableDataSource as MatTableDataSource} from '@angular/material/table'
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { bAccountsEntriesList } from 'src/app/models/accounts-table-model';
+import { bAccountsEntriesList, bBalanceFullData } from 'src/app/models/accounts-table-model';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
 import { AppAccEntryModifyFormComponent } from '../../forms/app-acc-entry-modify-form/app-acc-entry-modify-form';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
@@ -29,25 +29,29 @@ export interface Fruit {
 })
 export class AppTableBalanceSheetComponent  implements AfterViewInit {
   columnsToDisplay = [
-    'd_Debit',
-    'd_Credit',
-    't_dataTime', 
-    't_XactTypeCode',  
-    'd_xActTypeCodeExtName', 
-    't_amountTransaction', 
-    'd_entryDetails', 
+    'accountNo' , 
+    'accountType' , 
+    'datePreviousBalance' , 
+    'dateBalance' , 
+    'openingBalance' , 
+    'totalCredit' , 
+    'totalDebit' , 
+    'OutGoingBalance' , 
+    'checkClosing'
   ]
   columnsHeaderToDisplay = [
-    'debit',
-    'credit',
-    'dataTime', 
-    'Ledger',  
-    'Code', 
-    'amount', 
-    'Details', 
+    'No' , 
+    'Type' , 
+    'PreviousBalance' , 
+    'Balance' , 
+    'OpeningBalance' , 
+    'TotalCredit' , 
+    'TotalDebit' , 
+    'ClosingBalance' , 
+    'checkClosing'
   ];
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
-  dataSource: MatTableDataSource<bAccountsEntriesList>;
+  dataSource: MatTableDataSource<bBalanceFullData>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
   @Output() public modal_principal_parent = new EventEmitter();
@@ -81,8 +85,8 @@ export class AppTableBalanceSheetComponent  implements AfterViewInit {
   ) {
     this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate)
     this.subscriptionName= this.AccountingDataService.getReloadAccontList().subscribe ( (id) => {
-      this.AccountingDataService.GetAccountsEntriesListAccounting (null,null,null,null,'GetAccountsEntriesListAccounting').subscribe (EntriesList  => {
-        this.dataSource  = new MatTableDataSource(EntriesList);
+      this.AccountingDataService.GetALLClosedBalances (null,null,null,null,'GetALLClosedBalances').subscribe (Balances  => {
+        this.dataSource  = new MatTableDataSource(Balances);
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
       })
@@ -109,7 +113,7 @@ export class AppTableBalanceSheetComponent  implements AfterViewInit {
     await lastValueFrom (this.TreeMenuSevice.getaccessRestriction (userData.user.accessrole, 'accessToClientData'))
     .then ((accessRestrictionData) =>{
       this.accessToClientData = accessRestrictionData['elementvalue']
-      this.AccountingDataService.GetAccountsEntriesListAccounting (null,null,null,null,'GetAccountsEntriesListAccounting').subscribe (EntriesList  => {
+      this.AccountingDataService.GetALLClosedBalances  (null,null,null,null,'GetALLClosedBalances').subscribe (EntriesList  => {
         this.dataSource  = new MatTableDataSource(EntriesList);
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
@@ -121,24 +125,6 @@ export class AppTableBalanceSheetComponent  implements AfterViewInit {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
-  }
-  openEntryModifyForm (actionType:string, row: any ) {
-    console.log('row', row);
-    this.dialogRef = this.dialog.open(AppAccEntryModifyFormComponent ,{minHeight:'400px', maxWidth:'1000px' });
-    this.dialogRef.componentInstance.action = actionType;
-    this.dialogRef.componentInstance.title = actionType;
-    this.dialogRef.componentInstance.data = row;
-    this.dialogRef.componentInstance.FirstOpenedAccountingDate = this.FirstOpenedAccountingDate;
-
-    switch (actionType) {
-      case 'Create':
-      case 'Create_Example': 
-      this.dialogRef.componentInstance.title = 'Create New';
-      break;
-      case 'View':
-        this.dialogRef.componentInstance.entryModifyForm.disable()
-      break;
-    }
   }
   add(event: MatChipInputEvent): void {
     const value = (event.value || '').trim();

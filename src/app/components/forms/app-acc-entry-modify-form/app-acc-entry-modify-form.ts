@@ -196,7 +196,6 @@ export class AppAccEntryModifyFormComponent implements OnInit, AfterViewInit {
   }
   selectAccount () {
     this.dialogChoseAccount = this.dialog.open(AppTableAccAccountsComponent ,{minHeight:'600px', minWidth:'1600px', autoFocus: false, maxHeight: '90vh'});
-    this.dialogChoseAccount.componentInstance.action = "Select";
     this.dialogChoseAccount.componentInstance.readOnly = true;
     this.dialogChoseAccount.componentInstance.modal_principal_parent.subscribe ((item)=>{
       this.accountId.patchValue(this.dialogChoseAccount.componentInstance.selectedRow['accountId'])

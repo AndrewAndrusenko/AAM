@@ -28,6 +28,7 @@ async function fGetAccountingData (request,response) {
       query.text ='SELECT '+
       '"accountNo", "accountTypeExt", "Information", "clientId", "currencyCode","bAccounts"."entityTypeCode", "accountId", '+
       '"bAccounts"."idportfolio", clientname AS d_clientname, dportfolios.portfolioname AS "d_portfolioCode", ' +
+      '"bcAccountType_Ext"."actCodeShort" ||\': \' || "bcAccountType_Ext"."description" as "d_Account_Type", ' +
       '"bcAccountType_Ext"."actCodeShort" as "d_accountType", "bcAccountType_Ext"."description" as d_accTypeDescription, ' +
       '"bcEnityType"."entityTypeCode" as d_entityTypeCode, "bcEnityType"."name" as d_entityTypeDescription '+
       'FROM public."bAccounts" '+
@@ -126,17 +127,53 @@ async function fGetAccountingData (request,response) {
     case 'GetBalanceSheet':
     break;
     case 'GetbLastClosedAccountingDate':
+
       query.text ='SELECT "FirstOpenedDate"::date FROM "bLastClosedAccountingDate";'
     break
-    
+    case 'GetALLAccountsDataWholeList' :
+      query.text ='SELECT '+
+      '"accountNo", "accountTypeExt", "Information", "clientId", "currencyCode","bAccounts"."entityTypeCode", "accountId", '+
+      'clientname AS d_clientname, dportfolios.portfolioname AS "d_portfolioCode", ' +
+      '"bcAccountType_Ext"."actCodeShort" ||\': \' || "bcAccountType_Ext"."description" as "d_Account_Type", ' +
+      '"bcEnityType"."name" as d_entityTypeDescription, "bcAccountType_Ext"."xActTypeCode"  as "d_APTypeCodeAccount", '+
+      'null AS "ledgerNoCptyCode", null AS"ledgerNoTrade" '+
+      'FROM public."bAccounts" '+
+      'LEFT JOIN dclients ON "bAccounts"."clientId" = dclients.idclient ' +
+      'LEFT JOIN dportfolios ON dportfolios.idportfolio = "bAccounts"."idportfolio" ' +
+      'LEFT JOIN "bcAccountType_Ext" ON "bcAccountType_Ext"."accountType_Ext" = "bAccounts"."accountTypeExt" ' +
+      'LEFT JOIN "bcEnityType" ON "bcEnityType"."entityType" = "bAccounts"."entityTypeCode" ' +
+      ' UNION '+
+      ' SELECT '+
+      '"ledgerNo", "accountTypeID", "bLedger".name, "clientID", "currecyCode", "bLedger"."entityTypeCode", "ledgerNoId", '+
+      '"clientname" as "d_Client","externalAccountNo",   '+
+      '"bcAccountType_Ext"."actCodeShort" ||\': \' || "bcAccountType_Ext"."description" as "d_Account_Type", '+
+      '"bcEnityType"."name" as d_entityTypeDescription,  '+ 
+      '"bcAccountType_Ext"."xActTypeCode"  as "d_APTypeCodeAccount", "ledgerNoCptyCode", "ledgerNoTrade"  '+
+      'FROM public."bLedger" '+
+      'LEFT JOIN "dclients" ON "bLedger"."clientID" = "dclients".idclient ' +
+      'LEFT JOIN "bcAccountType_Ext" ON "bcAccountType_Ext"."accountType_Ext" = "bLedger"."accountTypeID" '+
+      'LEFT JOIN "bcEnityType" ON "bcEnityType"."entityType" = "bLedger"."entityTypeCode"  ' +
+      'ORDER BY 1;'
+    break;
+    case 'GetALLClosedBalances' :
+      query.text ='SELECT '+
+      ' "accountNo", "accountId", "accountType", "datePreviousBalance" ,"dateBalance" , "openingBalance", "totalCredit", ' + 
+      ' "totalDebit", "OutGoingBalance", "checkClosing" ' +
+      ' FROM f_s_balancesheet_all(); '
+    break;
   }
   sql = pgp.as.format(query.text,request.query)
-  console.log('sql',sql);
-  // console.log('que', query);
-  pool.query (sql, (err, res) => {if (err) {console.log (err.stack)} else {
-    //  console.log('res',res.rows);
-    return response.status(200).json((res.rows))}
-  })
+   console.log('sql', sql);
+   pool.query (sql,  (err, res) => 
+   {if (err) {
+    console.log (err.stack.split("\n", 1).join(""))
+    err.detail = err.stack
+    return response.send(err)
+    } else {
+      console.log('validator', res.rows[0]);
+      return response.status(200).json(res.rows)
+    }
+  }) 
 }
 async function fGetMT950Transactions (request,response) {
   const query = {text: ''}
