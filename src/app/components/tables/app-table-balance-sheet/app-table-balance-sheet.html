@@ -133,10 +133,23 @@ Save as XLS
         <span [ngSwitch]="true==true">
           <p 
           *ngSwitchCase="['dateBalance','datePreviousBalance'].includes(column)">
+          <button mat-stroked-button 
+            *ngIf="column=='dateBalance'"
+            (click)="showEntries(element)">
+            {{ element[column] | date }}
+          </button>
+          <span *ngIf="column!=='dateBalance'">
             {{ element[column] == null ? 'Day is open' : element[column] | date }}
+          </span>
           </p>          
           <p *ngSwitchCase="['openingBalance','totalCredit', 'totalDebit', 'OutGoingBalance', 'checkClosing'].includes(column)">
             {{element[column] | number : '1.2-2' }}
+          </p>
+          <p *ngSwitchCase="['accountNo'].includes(column)">
+            <button mat-stroked-button style="width: 80%;"
+            (click)="showAccounInfo(element)">
+            {{element[column] }}
+          </button> 
           </p>
           <p *ngSwitchDefault>
             {{element[column]}}  

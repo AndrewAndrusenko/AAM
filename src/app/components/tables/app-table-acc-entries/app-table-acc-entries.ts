@@ -80,6 +80,7 @@ export class AppTableAccEntriesComponent  implements AfterViewInit {
   TransactionTypes: bcTransactionType_Ext[] = [];
   filterEntryTypes:string[] = ['ClearAll'];
   
+  paramRowData : any = null;
   constructor(
     private AccountingDataService:AppAccountingService, 
     private TreeMenuSevice:TreeMenuSevice, 
@@ -87,36 +88,58 @@ export class AppTableAccEntriesComponent  implements AfterViewInit {
     private fb:FormBuilder 
 
   ) {
-    this.AccountingDataService.GetTransactionType_Ext('',0,'','','bcTransactionType_Ext').subscribe (
-      data => this.TransactionTypes = data)
-    this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate)
-    this.subscriptionName= this.AccountingDataService.getReloadAccontList().subscribe ( (id) => {
-      this.AccountingDataService.GetAccountsEntriesListAccounting (null,null,null,null,'GetAccountsEntriesListAccounting').subscribe (EntriesList  => {
-        this.dataSource  = new MatTableDataSource(EntriesList);
-        this.dataSource.paginator = this.paginator;
-        this.dataSource.sort = this.sort;
-      })
-    } )
     this.searchParametersFG = this.fb.group ({
       dataRange : this.dataRange,
       noAccountLedger: null,
       amount:{value:null, disabled:true},
       entryType : {value:[], disabled:false}
     })
-  }
-
-  async ngAfterViewInit() {
     this.columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
-    let userData = JSON.parse(localStorage.getItem('userInfo'))
-    await lastValueFrom (this.TreeMenuSevice.getaccessRestriction (userData.user.accessrole, 'accessToClientData'))
-    .then ((accessRestrictionData) =>{
-      this.accessToClientData = accessRestrictionData['elementvalue']
-      this.AccountingDataService.GetAccountsEntriesListAccounting (null,null,null,null,'GetAccountsEntriesListAccounting').subscribe (EntriesList  => {
-        this.dataSource  = new MatTableDataSource(EntriesList);
-        this.dataSource.paginator = this.paginator;
-        this.dataSource.sort = this.sort;
+
+    this.AccountingDataService.GetTransactionType_Ext('',0,'','','bcTransactionType_Ext').subscribe (
+      data => this.TransactionTypes = data)
+    this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate)
+   
+   
+    
+  }
+  async ngOnInit() {
+    console.log('row', this.paramRowData,this.paramRowData.dateBalance);
+      this.accounts = [this.paramRowData.accountNo];
+      this.dataRange.controls['dateRangeStart'].setValue(new Date (this.paramRowData.dateBalance))
+      this.dataRange.controls['dateRangeEnd'].setValue(new Date (this.paramRowData.dateBalance))
+
+    switch (this.action) {
+      case 'ShowEntriesForBalanceSheet': 
+      let userData = JSON.parse(localStorage.getItem('userInfo'))
+      await lastValueFrom (this.TreeMenuSevice.getaccessRestriction (userData.user.accessrole, 'accessToClientData'))
+      .then ((accessRestrictionData) =>{
+        this.accessToClientData = accessRestrictionData['elementvalue']
+        switch (this.action) {
+        case 'ShowEntriesForBalanceSheet': 
+      this.submitQuery();
+
+        break;
+        default :
+        this.AccountingDataService.GetAccountsEntriesListAccounting (null,null,null,null,'GetAccountsEntriesListAccounting').subscribe (EntriesList  => {
+          this.dataSource  = new MatTableDataSource(EntriesList);
+          this.dataSource.paginator = this.paginator;
+          this.dataSource.sort = this.sort;
+        })
+        break;
+      }
       })
-    })
+  
+      
+
+      break;
+    }
+    //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
+    //Add 'implements OnInit' to the class.
+    
+  }
+  async ngAfterViewInit() {
+    
   }
 
   applyFilter(event: Event) {

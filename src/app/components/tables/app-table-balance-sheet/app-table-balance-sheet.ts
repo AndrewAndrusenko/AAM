@@ -15,6 +15,7 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import * as XLSX from 'xlsx'
 import { MatOption } from '@angular/material/core';
 import { AppTableAccAccountsComponent } from '../app-table-acc-accounts/app-table-acc-accounts';
+import { AppTableAccEntriesComponent } from '../app-table-acc-entries/app-table-acc-entries';
 
 export interface Fruit {
   name: string;
@@ -86,6 +87,8 @@ export class AppTableBalanceSheetComponent  implements AfterViewInit {
   TransactionTypes: bcTransactionType_Ext[] = [];
   filterEntryTypes:string[] = ['ClearAll'];
   
+  dialogShowEntriesList: MatDialogRef<AppTableAccEntriesComponent>;
+
   constructor(
     private AccountingDataService:AppAccountingService, 
     private TreeMenuSevice:TreeMenuSevice, 
@@ -193,7 +196,19 @@ export class AppTableBalanceSheetComponent  implements AfterViewInit {
       this.entryTypes.patchValue([]);
     }
   }
-
+  showEntries (row : any) {
+    this.dialogShowEntriesList = this.dialog.open(AppTableAccEntriesComponent ,{minHeight:'600px', minWidth:'1700px', autoFocus: false, maxHeight: '90vh'});
+    console.log('dd',row.dateBalance);
+    this.dialogShowEntriesList.componentInstance.paramRowData = row; 
+    this.dialogShowEntriesList.componentInstance.action = 'ShowEntriesForBalanceSheet';
+    this.dialogShowEntriesList.componentInstance.modal_principal_parent.subscribe ((item)=>{
+      // this.accounts = [...this.accounts,...this.dialogShowEntriesList.componentInstance.accounts]
+      this.dialogChooseAccountsList.close(); 
+    });
+  }
+  showAccounInfo (row : any) {
+    
+  }
   exportToExcel() {
    const fileName = "balancesData.xlsx";
    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(this.dataSource.data);
