@@ -114,7 +114,14 @@ Select
               Delete Account
             </button> 
           </div>
+
           <div class="tree-menu-context"  *ngIf="readOnly" cdkMenu >
+            <button 
+            (click)="openAccountModifyForm('View', element)"
+            class="tree-menu-item" cdkMenuItem>
+            <mat-icon class="menu-icon" matPrefix>pageview</mat-icon> 
+            View account
+            </button> 
             <button 
               class="tree-menu-item" cdkMenuItem 
               (click)="chooseAccount(element)">

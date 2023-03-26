@@ -7,6 +7,7 @@ pg.types.setTypeParser(1114, function(stringValue) {
   return stringValue;  //1114 for time without timezone type
 });
 async function fGetAccountingData (request,response) {
+  let conditions = {}
   const query = {text: '', values:[]}
   switch (request.query.Action) {
     case 'bcTransactionType_Ext':
@@ -56,7 +57,7 @@ async function fGetAccountingData (request,response) {
         'LEFT JOIN "bcAccountType_Ext" ON "bcAccountType_Ext"."accountType_Ext" = "bLedger"."accountTypeID" ;'
     break;
     case 'GetAccountsEntriesListAccounting':
-      let conditions = {
+       conditions = {
         'noAccountLedger':{
           1: ' ("bAccounts"."accountNo" = ANY(${noAccountLedger}) OR "bLedger"."ledgerNo" = ANY(${noAccountLedger})) ',
           2: ' ("bLedger"."ledgerNo" = ANY(${noAccountLedger}) OR "bLedgerDebit"."ledgerNo" = ANY(${noAccountLedger})) '
@@ -156,10 +157,40 @@ async function fGetAccountingData (request,response) {
       'ORDER BY 1;'
     break;
     case 'GetALLClosedBalances' :
+      conditions = {
+        'noAccountLedger':{
+          1: ' ("accountNo" = ANY(${noAccountLedger})) ',
+        },
+        'dateRangeStart': {
+          1: ' ("dateBalance"::date >= ${dateRangeStart}::date )',
+        },
+        'dateRangeEnd': {
+          1: ' ("dateBalance"::date <= ${dateRangeEnd}::date) ',
+        }
+        /* 'entryTypes' : {
+          1: ' ("XactTypeCode_Ext" = ANY(array[${entryTypes:raw}]))',
+        }
+ */      }
+      let conditionsBalance =' WHERE'
+      Object.entries(conditions).forEach(([key,value]) => {
+      if  (request.query.hasOwnProperty(key)) {
+        query.values.push(request.query[key]);
+        conditionsBalance +=conditions[key][1] + ' AND ';
+        }
+      });
+
+
       query.text ='SELECT '+
       ' "accountNo", "accountId", "accountType", "datePreviousBalance" ,"dateBalance" , "openingBalance", "totalCredit", ' + 
       ' "totalDebit", "OutGoingBalance", "checkClosing" ' +
-      ' FROM f_s_balancesheet_all(); '
+      ' FROM f_s_balancesheet_all() '+
+      ' UNION '+
+      'SELECT '+
+      '"accountNo", "accountId", \'Account\', null ,"dataTime" , "corrOpeningBalance", "totalCredit", '+
+      '"totalDebit",  "corrOpeningBalance" + "signedTurnOver" AS "OutGoingBalance", 0 '+
+      'from f_bcurrentturnoversandbalncesnotclosed(\'2023-02-21\') ';
+      query.text += conditionsBalance.slice(0,-5) + ';';
+
     break;
   }
   sql = pgp.as.format(query.text,request.query)

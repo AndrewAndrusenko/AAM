@@ -12,37 +12,37 @@ CREATE OR REPLACE FUNCTION public.f_s_balancesheet_all()
 
 AS $BODY$
 SELECT 
-"accountNo",  "bAccounts"."accountId", 'Account' as "accountType",
+"accountNo",  "vbBalanceDateAccounts"."accountId", 'Account' as "accountType",
 COALESCE ("IncomingBalances"."dateAcc", "bAccountStatement"."dateAcc") AS "datePreviousBalance",
-"bAccountStatement"."dateAcc" AS "dateBalance",
+"vbBalanceDateAccounts"."dateAcc" AS "dateBalance",
 CAST(coalesce("IncomingBalances"."closingBalance" , 0) AS numeric) AS "openingBalance" ,  
-"bAccountStatement"."totalCredit", 
- "bAccountStatement"."totalDebit" , 
-"bAccountStatement"."closingBalance" ,
+COALESCE ("bAccountStatement"."totalCredit", 0),
+COALESCE ( "bAccountStatement"."totalDebit" , 0),
+COALESCE ("bAccountStatement"."closingBalance" , 0),
 (coalesce("IncomingBalances"."closingBalance",0) - "bAccountStatement"."closingBalance") +
 CASE "bcAccountType_Ext"."xActTypeCode"
 when 1 THEN ("bAccountStatement"."totalDebit" - "bAccountStatement"."totalCredit")
 when 2 THEN ("bAccountStatement"."totalDebit" - "bAccountStatement"."totalCredit")*-1
 END 
 as "checkClosing"
-FROM public."bAccounts"
-LEFT JOIN "bcAccountType_Ext" ON "bAccounts"."accountTypeExt" = "bcAccountType_Ext"."accountType_Ext"
-LEFT JOIN "bAccountStatement" ON ("bAccounts"."accountId" = "bAccountStatement"."accountId" )
+FROM public."vbBalanceDateAccounts"
+LEFT JOIN "bcAccountType_Ext" ON "vbBalanceDateAccounts"."accountTypeExt" = "bcAccountType_Ext"."accountType_Ext"
+LEFT JOIN "bAccountStatement" 
+ON ("vbBalanceDateAccounts"."accountId" = "bAccountStatement"."accountId" AND "vbBalanceDateAccounts"."dateAcc" = "bAccountStatement"."dateAcc" )
 LEFT JOIN LATERAL 
   (SELECT DISTINCT ON("b"."accountId") 
 	"b"."accountId", "b"."dateAcc", "b"."closingBalance",
 	"b"."totalCredit", "b"."totalDebit" 
 	FROM "bAccountStatement" as "b" 
-    WHERE "b"."dateAcc" < "bAccountStatement"."dateAcc" 
+    WHERE "b"."dateAcc" < "vbBalanceDateAccounts"."dateAcc" 
 	ORDER BY "b"."accountId", "dateAcc" DESC 
   ) AS "IncomingBalances"
-ON "bAccounts"."accountId" = "IncomingBalances"."accountId"
-WHERE "bAccountStatement"."dateAcc" IS NOT NULL
+ON "vbBalanceDateAccounts"."accountId" = "IncomingBalances"."accountId"
 UNION
 SELECT 
 "ledgerNo",  "ledgerNoId", 'Ledger' as "accountType",
-COALESCE ("IncomingBalances"."dateAcc", "bLedgerStatement"."dateAcc"), 
-"bLedgerStatement"."dateAcc",
+COALESCE ("IncomingBalances"."dateAcc", "vbBalanceDateLedger"."dateAcc"), 
+"vbBalanceDateLedger"."dateAcc",
 CAST(coalesce("IncomingBalances"."closingBalance" , 0) AS numeric) AS "openingBalance" , 
  "bLedgerStatement"."totalCredit" , 
  "bLedgerStatement"."totalDebit" , 
@@ -53,9 +53,10 @@ when 1 THEN ("bLedgerStatement"."totalDebit" - "bLedgerStatement"."totalCredit")
 when 2 THEN ("bLedgerStatement"."totalDebit" - "bLedgerStatement"."totalCredit")*-1
 END 
 as "checkClosing"
-FROM public."bLedger"
-LEFT JOIN "bLedgerStatement" ON ("bLedger"."ledgerNoId" = "bLedgerStatement"."ledgerID" )
-LEFT JOIN "bcAccountType_Ext" ON "bLedger"."accountTypeID" = "bcAccountType_Ext"."accountType_Ext"
+FROM public."vbBalanceDateLedger"
+LEFT JOIN "bLedgerStatement" ON 
+("vbBalanceDateLedger"."ledgerNoId" = "bLedgerStatement"."ledgerID" AND "bLedgerStatement"."dateAcc" = "vbBalanceDateLedger"."dateAcc" )
+LEFT JOIN "bcAccountType_Ext" ON "vbBalanceDateLedger"."accountTypeID" = "bcAccountType_Ext"."accountType_Ext"
 LEFT JOIN LATERAL 
   (SELECT DISTINCT ON("b"."ledgerID") 
 	"b"."ledgerID", "b"."dateAcc", "b"."closingBalance",
@@ -64,9 +65,9 @@ LEFT JOIN LATERAL
     WHERE "b"."dateAcc" < "bLedgerStatement"."dateAcc" 
 	ORDER BY "b"."ledgerID", "dateAcc" DESC 
   ) AS "IncomingBalances"
-ON "bLedger"."ledgerNoId" = "IncomingBalances"."ledgerID"
-WHERE "bLedgerStatement"."dateAcc" IS NOT NULL
-ORDER BY "accountNo", 5 DESC
+ON "vbBalanceDateLedger"."ledgerNoId" = "IncomingBalances"."ledgerID"
+-- WHERE "bLedgerStatement"."dateAcc" IS NOT NULL
+ORDER BY 5 DESC, "accountNo" 
 $BODY$;
 
 ALTER FUNCTION public.f_s_balancesheet_all()

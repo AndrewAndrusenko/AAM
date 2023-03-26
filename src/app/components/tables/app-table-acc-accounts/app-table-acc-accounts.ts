@@ -126,6 +126,10 @@ export class AppTableAccAccountsComponent  implements OnInit, AfterViewInit {
       case 'Create_Example': 
       this.dialogRef.componentInstance.title = 'Create New';
       break;
+      break;
+      case 'View':
+        this.dialogRef.componentInstance.accountModifyForm.disable()
+      break;
     }
   }
   isAllSelected() {
