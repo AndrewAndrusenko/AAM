@@ -44,11 +44,9 @@ export class AppAccAccountModifyFormComponent implements OnInit, AfterViewInit {
   private subscriptionName: Subscription
   constructor (
     private fb:FormBuilder, 
-    private InvestmentDataServiceService:AppInvestmentDataServiceService, 
     private AccountingDataService:AppAccountingService, 
     private dialog: MatDialog, 
     public snack:MatSnackBar,
-
   ) 
   { 
      this.AccountingDataService.GetEntityTypeList('',0,'','','bcEnityType').subscribe (
