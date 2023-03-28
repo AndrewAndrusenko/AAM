@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, EventEmitter, Output, ViewChild} from '@angular/core';
+import {Component, EventEmitter, Output, ViewChild} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {lastValueFrom, Subscription } from 'rxjs';
@@ -28,7 +28,7 @@ import * as XLSX from 'xlsx'
     ]),
   ],
 })
-export class AppTableAccEntriesComponent  implements AfterViewInit {
+export class AppTableAccEntriesComponent  {
   columnsToDisplay = [
     'd_Debit',
     'd_Credit',
@@ -104,43 +104,31 @@ export class AppTableAccEntriesComponent  implements AfterViewInit {
     
   }
   async ngOnInit() {
-    console.log('row', this.paramRowData,this.paramRowData.dateBalance);
+    if (this.action=='ShowEntriesForBalanceSheet') {
+      console.log('row', this.paramRowData,this.paramRowData.dateBalance);
       this.accounts = [this.paramRowData.accountNo];
       this.dataRange.controls['dateRangeStart'].setValue(new Date (this.paramRowData.dateBalance))
       this.dataRange.controls['dateRangeEnd'].setValue(new Date (this.paramRowData.dateBalance))
-
-    switch (this.action) {
-      case 'ShowEntriesForBalanceSheet': 
-      let userData = JSON.parse(localStorage.getItem('userInfo'))
-      await lastValueFrom (this.TreeMenuSevice.getaccessRestriction (userData.user.accessrole, 'accessToClientData'))
-      .then ((accessRestrictionData) =>{
-        this.accessToClientData = accessRestrictionData['elementvalue']
-        switch (this.action) {
+    }
+    let userData = JSON.parse(localStorage.getItem('userInfo'))
+    await lastValueFrom (this.TreeMenuSevice.getaccessRestriction (userData.user.accessrole, 'accessToClientData'))
+    .then ((accessRestrictionData) =>{
+      this.accessToClientData = accessRestrictionData['elementvalue']
+      switch (this.action) {
         case 'ShowEntriesForBalanceSheet': 
-      this.submitQuery();
-
+          this.submitQuery();
         break;
         default :
-        this.AccountingDataService.GetAccountsEntriesListAccounting (null,null,null,null,'GetAccountsEntriesListAccounting').subscribe (EntriesList  => {
-          this.dataSource  = new MatTableDataSource(EntriesList);
-          this.dataSource.paginator = this.paginator;
-          this.dataSource.sort = this.sort;
-        })
+          this.AccountingDataService.GetAccountsEntriesListAccounting (null,null,null,null,'GetAccountsEntriesListAccounting').subscribe (EntriesList  => {
+            this.dataSource  = new MatTableDataSource(EntriesList);
+            this.dataSource.paginator = this.paginator;
+            this.dataSource.sort = this.sort;
+          })
         break;
       }
-      })
-  
-      
+    })
+  }
 
-      break;
-    }
-    //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
-    //Add 'implements OnInit' to the class.
-    
-  }
-  async ngAfterViewInit() {
-    
-  }
 
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;

@@ -5,7 +5,7 @@
       (keyup)="applyFilter($event)"
       [formControl]="filterlFormControl" 
       matInput type="text" #SearchTree  name="tableFilter"
-     matTooltip="Use context menu to add filter"
+      matTooltip="Use context menu to add filter"
      >
     <button matSuffix 
       mat-icon-button aria-label="Clear" 
@@ -14,13 +14,39 @@
     </button>
   </mat-form-field>
   
-<button color = "accent" mat-raised-button 
-style=" margin-left:1%; font-size: 18px;"
-(click)="exportToExcel()">
-Save as XLS 
-</button>
+  <button color = "accent" mat-raised-button 
+    style=" margin-left:1%; font-size: 18px;"
+    (click)="exportToExcel()">
+    Save as XLS 
+  </button>
 </span>
 
+<mat-expansion-panel class="first-expansion" 
+  (opened)="panelOpenState = true"
+  (closed)="panelOpenState = false" >
+  <mat-expansion-panel-header >
+    <mat-panel-title>
+      Balance closing procedure
+    </mat-panel-title>
+    <mat-panel-description>
+      Tap to {{panelOpenState? 'hide': 'open'}} control elements
+      <mat-icon color = 'accent'>account_balance</mat-icon>
+    </mat-panel-description>
+  </mat-expansion-panel-header >
+  <form class="submit"  style="font-size: 18px;" style = "margin-top: 1%;">
+    <button color = "primary" mat-raised-button 
+      style=" margin-left:1%; font-size: 18px;"
+      (click)="accountingBalanceClose()">
+      Close Balance
+    </button>
+    <mat-form-field style="width: 12%; margin-left: 2%;" >
+      <input matInput [min]="FirstOpenedAccountingDate" [matDatepicker]="closedate" placeholder="Operating day to close" 
+      [value]="firstClosingDate" [disabled]="true" >
+      <mat-datepicker-toggle matSuffix [for]="closedate"></mat-datepicker-toggle>
+      <mat-datepicker #closedate></mat-datepicker>
+    </mat-form-field>
+  </form>
+</mat-expansion-panel>
 <mat-expansion-panel class="headers-align" 
   (opened)="panelOpenState = true"
   (closed)="panelOpenState = false" >
@@ -104,52 +130,33 @@ Save as XLS
   </form>
 </mat-expansion-panel>
 
-
-
-<!-- <mat-form-field class="example-chip-list" appearance="fill">
-  <mat-chip-list #chipList aria-label="Fruit selection">
-    <mat-chip *ngFor="let fruit of fruits" (removed)="remove(fruit)">
-      {{fruit.name}}
-      <button matChipRemove>
-        <mat-icon>cancel</mat-icon>
-      </button>
-    </mat-chip>
-    <input placeholder="Type search string..."
-           [matChipInputFor]="chipList"
-           [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-           [matChipInputAddOnBlur]="addOnBlur"
-           (matChipInputTokenEnd)="add($event)">
-  </mat-chip-list>
-</mat-form-field> -->
-
-
-<!-- <span class ="longHint" style="font-size: 16px;"> Manual input: Date: YYYY-MM-DD (ex 2023-12-28) Amount: with commas (ex 500,000.20)</span> -->
 <div class="mat-elevation-z8">
   <table  #strategyTable mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class="mat-elevation-z8">
     <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i=index">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>  {{columnsHeaderToDisplay[i]  | titlecase}}</th>
-      <td [ngStyle]="{'color': element['datePreviousBalance'] == null ? 'rgb(198, 255, 215)' : 'white'}"
-       mat-cell *matCellDef="let element" [cdkContextMenuTriggerFor]="instrumentcontextmenu"  > 
+      <td 
+        [ngStyle]="{'color': element['datePreviousBalance'] == null ? 'rgb(198, 255, 215)' : 'white'}"
+        mat-cell 
+        *matCellDef="let element" [cdkContextMenuTriggerFor]="instrumentcontextmenu"  > 
         <span [ngSwitch]="true==true">
-          <p 
-          *ngSwitchCase="['dateBalance','datePreviousBalance'].includes(column)">
-          <button mat-stroked-button 
-            *ngIf="column=='dateBalance'"
-            (click)="showEntries(element)">
-            {{ element[column] | date }}
-          </button>
-          <span *ngIf="column!=='dateBalance'">
-            {{ element[column] == null ? 'Day is open' : element[column] | date }}
-          </span>
+          <p *ngSwitchCase="['dateBalance','datePreviousBalance'].includes(column)">
+            <button mat-stroked-button matTooltip="Entries list by account for the date"
+              *ngIf="column=='dateBalance'"
+              (click)="showEntries(element)">
+              {{ element[column] | date }}
+            </button>
+            <span *ngIf="column!=='dateBalance'">
+              {{ element[column] == null ? 'Day is open' : element[column] | date }}
+            </span>
           </p>          
           <p *ngSwitchCase="['openingBalance','totalCredit', 'totalDebit', 'OutGoingBalance', 'checkClosing'].includes(column)">
             {{element[column] | number : '1.2-2' }}
           </p>
           <p *ngSwitchCase="['accountNo'].includes(column)">
-            <button mat-stroked-button style="width: 80%;"
-            (click)="showAccounInfo(element)">
-            {{element[column] }}
-          </button> 
+            <button mat-stroked-button style="width: 80%;"  matTooltip="Account details"
+              (click)="showAccounInfo(element)">
+              {{element[column] }}
+            </button> 
           </p>
           <p *ngSwitchDefault>
             {{element[column]}}  
@@ -158,16 +165,16 @@ Save as XLS
         <ng-template  #instrumentcontextmenu>
           <div class="tree-menu-context" *ngIf="!readOnly" cdkMenu >
             <button 
-            (click)="updateFilter($event, element[column])"
-            class="tree-menu-item" cdkMenuItem>
-            <mat-icon class="menu-icon" matPrefix>filter_list</mat-icon> 
-            Add to filter
+              (click)="updateFilter($event, element[column])"
+              class="tree-menu-item" cdkMenuItem>
+              <mat-icon class="menu-icon" matPrefix>filter_list</mat-icon> 
+              Add to filter
             </button> 
             <button 
-            (click)="addChips( element[column], column)"
-            class="tree-menu-item" cdkMenuItem>
-            <mat-icon class="menu-icon" matPrefix>filter_alt</mat-icon> 
-             ComplexFilter
+              (click)="addChips( element[column], column)"
+              class="tree-menu-item" cdkMenuItem>
+              <mat-icon class="menu-icon" matPrefix>filter_alt</mat-icon> 
+              ComplexFilter
             </button> 
           </div>
         </ng-template>   
@@ -176,8 +183,7 @@ Save as XLS
     </ng-container>
     <ng-container matColumnDef="expand">
       <th mat-header-cell *matHeaderCellDef aria-label="row actions">&nbsp;</th>
-      <td mat-cell *matCellDef="let element">
-      </td>
+      <td mat-cell *matCellDef="let element"></td>
     </ng-container>
     
     <ng-container matColumnDef="expandedDetail" >
@@ -186,12 +192,11 @@ Save as XLS
 
     <tr mat-header-row *matHeaderRowDef="columnsToDisplayWithExpand"></tr>
     <tr mat-row  *matRowDef="let element; columns: columnsToDisplayWithExpand;"
-        class="example-element-row"
-        [class.example-expanded-row]="expandedElement === element"
-        (click)="expandedElement = expandedElement === element ? null : element">
-
-      </tr>
-    <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"    ></tr>
+      class="example-element-row"
+      [class.example-expanded-row]="expandedElement === element"
+      (click)="expandedElement = expandedElement === element ? null : element">
+    </tr>
+    <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"></tr>
   </table>
   <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" [pageSize]="20" aria-label="Select page of users"></mat-paginator>
 </div>

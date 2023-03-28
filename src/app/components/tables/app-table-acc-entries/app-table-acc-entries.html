@@ -19,6 +19,7 @@ style=" margin-left:1%; font-size: 18px;"
 (click)="exportToExcel()">
 Save as XLS 
 </button>
+<p>{{action}}</p>
 </span>
 
 <mat-expansion-panel class="headers-align" 
@@ -103,6 +104,8 @@ Save as XLS
     </p>
   </form>
 </mat-expansion-panel>
+
+
 
 <div class="mat-elevation-z8">
   <table  #strategyTable mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class="mat-elevation-z8">

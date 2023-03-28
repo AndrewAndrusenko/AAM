@@ -168,6 +168,7 @@ appServer.get('/DEA/accountingOverdraftAccountCheck/',jsPassport.authenticate('s
 appServer.get('/DEA/accountingOverdraftLedgerAccountCheck/',jsPassport.authenticate('session') , uiAmmAccountingModule.faccountingOverdraftLedgerAccountCheck)
 
 /* >>>>>>>>>>>>>>>>>>>>>>>>Accounting Closing>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> */
+appServer.post('/DEA/accountingBalanceCloseInsert/',jsPassport.authenticate('session') , uiAmmAccountingModule.faccountingBalanceCloseInsert)
 
 appServer.listen (port,'localhost', () => {console.log (`AAM Server is running on port ${port}`)})
 

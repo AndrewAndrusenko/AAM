@@ -1,4 +1,4 @@
-import { AfterViewInit, Component,  Input, OnInit, SimpleChanges, ViewChild,  } from '@angular/core';
+import { AfterViewInit, Component,  EventEmitter,  Input, OnInit, Output, SimpleChanges, ViewChild,  } from '@angular/core';
 import { FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { AppConfimActionComponent } from '../../alerts/app-confim-action/app-confim-action.component';
@@ -29,6 +29,7 @@ export class AppAccAccountModifyFormComponent implements OnInit, AfterViewInit {
   dialogRefConfirm: MatDialogRef<AppConfimActionComponent>;
   dialogChoseAccount: MatDialogRef<TableAccounts>;
   dialogChoseClient: MatDialogRef<AppClientsTableComponent>;
+  @Output() public modal_principal_parent = new EventEmitter();
   public title: string;
   public aType:number = null;
   public actionType : string;
@@ -97,9 +98,14 @@ export class AppAccAccountModifyFormComponent implements OnInit, AfterViewInit {
         this.title = 'Create';
       break;
       default :
+      console.log('this.data)',this.data);
       (this.aType == 1)? this.accountLedgerModifyForm.patchValue(this.data): this.accountModifyForm.patchValue(this.data)
       break;
-    }  
+    } 
+    if (this.action == 'View') {
+      this.accountModifyForm.disable();
+      this.accountLedgerModifyForm.disable();
+    }
   }
 
   ngAfterViewInit(): void {

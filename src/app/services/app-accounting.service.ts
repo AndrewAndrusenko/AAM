@@ -160,11 +160,15 @@ getExpectedBalanceLedgerOverdraftCheck (accountId: number, transactionAmount:num
   return this.http.get <bLedgerBalanceData []>('/api/DEA/accountingOverdraftLedgerAccountCheck/', { params: params })
 }
 /*----------------------Balance Sheets----------------------------------------------------*/
-GetALLClosedBalances (searchParameters:any, id: number, MTType:string, Sender: string, Action: string):Observable <bBalanceFullData[]> {
-  let params = {'id' :id, 'MTType': MTType,'Sender':Sender, 'Action': Action};
+GetALLClosedBalances (searchParameters:any, id: number, lastClosedDate:string, Sender: string, Action: string):Observable <bBalanceFullData[]> {
+  let params = {'id' :id, 'lastClosedDate': lastClosedDate,'Sender':Sender, 'Action': Action};
   (searchParameters !== null) ?  params = {...params,...searchParameters}: null
   console.log('params',params);
   return this.http.get <bBalanceFullData []>('/api/DEA/fGetAccountingData/', { params: params })
 }
+accountingBalanceCloseInsert (data:any) { 
+  return this.http.post ('/api/DEA/accountingBalanceCloseInsert/',{'data': data}).toPromise()
+}
+
 
 }

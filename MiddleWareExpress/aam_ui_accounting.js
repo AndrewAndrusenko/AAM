@@ -21,9 +21,12 @@ async function fGetAccountingData (request,response) {
     break;
     case 'GetAccountData':
       query.text ='SELECT '+
-        '"accountNo", "accountTypeExt", "Information", "clientId", "currencyCode", "entityTypeCode", "accountId" '+
-        'FROM public."bAccounts" WHERE ("accountNo"= ${accountNo}) ; '
-      // query.values = [request.query.accountNo]
+        '"accountNo", "accountTypeExt", "Information", "clientId", "currencyCode", "entityTypeCode", "accountId", '+
+        'clientname AS d_clientname, "bAccounts"."idportfolio", dportfolios.portfolioname AS "d_portfolioCode" '+
+        'FROM public."bAccounts" '+
+        'LEFT JOIN dclients ON "bAccounts"."clientId" = dclients.idclient ' +
+        'LEFT JOIN dportfolios ON dportfolios.idportfolio = "bAccounts"."idportfolio" ' +
+        'WHERE ("accountNo"= ${accountNo}) ; '
     break;
     case 'GetAccountDataWholeList':
       query.text ='SELECT '+
@@ -41,9 +44,12 @@ async function fGetAccountingData (request,response) {
     case 'GetLedgerData':
       query.text ='SELECT '+
         '"accountTypeID", name, "clientID", "entityTypeCode", "ledgerNo", "currecyCode", '+
-        '"ledgerNoCptyCode", "ledgerNoTrade", "externalAccountNo", "ledgerNoId" '+
-        'FROM public."bLedger" WHERE ("ledgerNo"= ${accountNo}) ; '
-      // query.values = [request.query.accountNo]
+        '"ledgerNoCptyCode", "ledgerNoTrade", "externalAccountNo", "ledgerNoId", '+
+        '"dclients"."clientname" as "d_Client" '+
+        'FROM public."bLedger" '+
+        'LEFT JOIN "dclients" ON "bLedger"."clientID" = "dclients".idclient ' +
+        'WHERE ("ledgerNo"= ${accountNo}) ; '
+
     break;
     case 'GetLedgerAccountsDataWholeList' :
       query.text ='SELECT '+
@@ -181,19 +187,27 @@ async function fGetAccountingData (request,response) {
 
 
       query.text ='SELECT '+
-      ' "accountNo", "accountId", "accountType", "datePreviousBalance" ,"dateBalance" , "openingBalance", "totalCredit", ' + 
-      ' "totalDebit", "OutGoingBalance", "checkClosing" ' +
+      ' "accountNo", "accountId", "accountType", "datePreviousBalance" ,"dateBalance" , "openingBalance", '+
+      ' "totalDebit", "totalCredit", "OutGoingBalance", "checkClosing" ' +
       ' FROM f_s_balancesheet_all() '+
       ' UNION '+
-      'SELECT '+
-      '"accountNo", "accountId", \'Account\', null ,"dataTime" , "corrOpeningBalance", "totalCredit", '+
-      '"totalDebit",  "corrOpeningBalance" + "signedTurnOver" AS "OutGoingBalance", 0 '+
-      'from f_bcurrentturnoversandbalncesnotclosed(\'2023-02-21\') ';
-      query.text += conditionsBalance.slice(0,-5) + ';';
+      ' SELECT '+
+      ' "accountNo", "accountId", \'Account\', null ,"dataTime" , "corrOpeningBalance", "totalDebit", "totalCredit", '+
+      ' "corrOpeningBalance" + "signedTurnOver" AS "OutGoingBalance", 0 '+
+      ' FROM f_bcurrentturnoversandbalncesnotclosed(${lastClosedDate}) ' +
+      ' UNION '+
+      ' SELECT '   +
+      ' "accountNo", "accountId", \'Ledger\', null ,"dataTime" , "corrOpeningBalance" ,"totalDebit", "totalCredit", '  +
+      ' ("corrOpeningBalance" + "signedTurnOver") AS "OutGoingBalance" , 0 ' +
+      ' FROM f_bcurrent_ledger_turnovers_balances_notclosed(${lastClosedDate}) ' 
+      query.text += conditionsBalance.slice(0,-5);
+      query.text += ' ORDER BY "dateBalance"::date DESC;';
 
     break;
   }
   sql = pgp.as.format(query.text,request.query)
+  console.log('---------------------------------------------------------------------------------------------------------');
+  console.log('PROJECTION!!  ', sql);
    console.log('sql', sql);
    pool.query (sql,  (err, res) => 
    {if (err) {
@@ -552,6 +566,28 @@ async function faccountingOverdraftLedgerAccountCheck (request, response) {
     return response.status(200).json(res.rows)}
   })   
 }
+
+async function faccountingBalanceCloseInsert (request, response) {
+  paramArr = request.body.data
+  console.log('param', paramArr);
+  const query = {
+  text: 'SELECT public.f_b_close_balance_for_date(${closingDate})',
+  values: paramArr
+  } 
+
+  sql = pgp.as.format(query.text,query.values)
+  console.log('---------------------------------------------------------------------------------------------------------');
+  console.log('faccountingBalanceCloseInsert!!   ', sql);
+
+   pool.query (sql,  (err, res) => {if (err) {
+    console.log (err.stack.split("\n", 1).join(""))
+    err.detail = err.stack
+    return response.send(err)
+  } else {
+    return response.status(200).json(res.rowCount)}
+  })   
+}
+
 module.exports = {
   fGetMT950Transactions,
   fGetAccountingData,
@@ -575,5 +611,7 @@ module.exports = {
   fupdateEntryAccountAccounting,
 
   faccountingOverdraftAccountCheck,
-  faccountingOverdraftLedgerAccountCheck
+  faccountingOverdraftLedgerAccountCheck,
+
+  faccountingBalanceCloseInsert
 }

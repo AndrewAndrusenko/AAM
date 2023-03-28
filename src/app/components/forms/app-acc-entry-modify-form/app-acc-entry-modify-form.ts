@@ -46,7 +46,6 @@ export class AppAccEntryModifyFormComponent implements OnInit, AfterViewInit {
   fruits: Fruit[] = [{name: 'Lemon'}, {name: 'Lime'}, {name: 'Apple'}];
   constructor (
     private fb:FormBuilder, 
-    private InvestmentDataServiceService:AppInvestmentDataServiceService, 
     private AccountingDataService:AppAccountingService, 
     private dialog: MatDialog, 
     public snack:MatSnackBar
