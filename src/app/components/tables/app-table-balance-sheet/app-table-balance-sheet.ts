@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, EventEmitter, Output, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ViewEncapsulation, EventEmitter, Output, ViewChild} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {lastValueFrom, Subscription } from 'rxjs';
@@ -19,6 +19,8 @@ import { AppTableAccEntriesComponent } from '../app-table-acc-entries/app-table-
 import { AppAccAccountModifyFormComponent } from '../../forms/app-acc-account-modify-form/app-acc-account-modify-form ';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AppConfimActionComponent } from '../../alerts/app-confim-action/app-confim-action.component';
+import { MatCalendarCellClassFunction } from '@angular/material/datepicker';
+import { ResolveEnd } from '@angular/router';
 
 export interface Fruit {
   name: string;
@@ -27,6 +29,7 @@ export interface Fruit {
   selector: 'app-table-balance-sheet',
   templateUrl: './app-table-balance-sheet.html',
   styleUrls: ['./app-table-balance-sheet.scss'],
+  encapsulation: ViewEncapsulation.None,
   animations: [
     trigger('detailExpand', [
       state('collapsed', style({height: '0px', minHeight: '0'})),
@@ -45,7 +48,8 @@ export class AppTableBalanceSheetComponent  implements AfterViewInit {
     'totalDebit' ,  
     'totalCredit' , 
     'OutGoingBalance' , 
-    'checkClosing'
+    'checkClosing',
+    "xacttypecode"
   ]
   columnsHeaderToDisplay = [
     'No' , 
@@ -56,7 +60,8 @@ export class AppTableBalanceSheetComponent  implements AfterViewInit {
     'total Debit' ,  
     'total Credit' ,  
     'Closing Balance' , 
-    'check Closing'
+    'check Closing',
+     "AP"
   ];
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
   dataSource: MatTableDataSource<bBalanceFullData>;
@@ -72,6 +77,7 @@ export class AppTableBalanceSheetComponent  implements AfterViewInit {
   dialogRef: MatDialogRef<AppAccEntryModifyFormComponent>;
   private subscriptionName: Subscription;
   public FirstOpenedAccountingDate : Date;
+  public LastClosedDate : Date;
   public firstClosingDate : Date;
   closingDate = new FormControl<Date | null>(null)
   dataRange = new FormGroup ({
@@ -96,15 +102,27 @@ export class AppTableBalanceSheetComponent  implements AfterViewInit {
   
   dialogShowEntriesList: MatDialogRef<AppTableAccEntriesComponent>;
   dialogShowAccountInfo : MatDialogRef<AppAccAccountModifyFormComponent>;
+
+  filterDateFormated : string;
+  balacedDateWithEntries : Date[]
+  public totalActive: number = 0;
+  public totalPassive: number = 0;
   constructor(
     private AccountingDataService:AppAccountingService, 
     private TreeMenuSevice:TreeMenuSevice, 
     private dialog: MatDialog,
     private fb:FormBuilder, 
     public snack:MatSnackBar
-
   ) {
-    this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate)
+    this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data=>{
+      this.FirstOpenedAccountingDate = data[0].FirstOpenedDate;
+      this.LastClosedDate = data[0].LastClosedDate;
+    
+    })
+    this.AccountingDataService.GetbbalacedDateWithEntries('GetbbalacedDateWithEntries').subscribe(data => {
+      this.balacedDateWithEntries = data.flat()
+      console.log('date',this.balacedDateWithEntries);
+    })
     this.subscriptionName= this.AccountingDataService.getReloadAccontList().subscribe ( (id) => {
       this.AccountingDataService.GetALLClosedBalances (null, null, new Date(this.FirstOpenedAccountingDate).toDateString(),null,'GetALLClosedBalances').subscribe (Balances  => {
         this.dataSource  = new MatTableDataSource(Balances);
@@ -160,8 +178,9 @@ export class AppTableBalanceSheetComponent  implements AfterViewInit {
     event.target.textContent.trim() === 'ClearAll cancel'? this.accounts = ['ClearAll']: null;
   }
   addChips (el: any, column: string) {(['d_Debit', 'd_Credit'].includes(column))? this.accounts.push(el):null;}
-  updateFilter (event:Event, el: any) {
+  updateFilter (event:Event, el: any, column: string) {
     this.filterlFormControl.patchValue(el);
+    (column=='dateBalance')? this.filterDateFormated = new Date(el).toLocaleDateString() :null
     this.dataSource.filter = el.trim();
     (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
   }
@@ -171,7 +190,8 @@ export class AppTableBalanceSheetComponent  implements AfterViewInit {
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
   }
 
-  submitQuery () {
+  async submitQuery () {
+    return new Promise((resolve, reject) => {
     let searchObj = {};
     let accountsList = [];
     (this.accounts.indexOf('ClearAll') !== -1)? this.accounts.splice(this.accounts.indexOf('ClearAll'),1) : null;
@@ -184,9 +204,16 @@ export class AppTableBalanceSheetComponent  implements AfterViewInit {
     ( this.entryTypes.value != null&&this.entryTypes.value.length !=0)? Object.assign (searchObj , {'entryTypes': [this.entryTypes.value]}): null;
     this.AccountingDataService.GetALLClosedBalances(searchObj,null,new Date(this.FirstOpenedAccountingDate).toDateString(), null, 'GetALLClosedBalances').subscribe (Balances  => {
       this.dataSource  = new MatTableDataSource(Balances);
+      let openDates = Balances.map((el) => el.datePreviousBalance==null? new Date(el.dateBalance):new Date('2050-01-01'))
+      this.firstClosingDate=new Date(Math.min.apply(null,openDates));
+      console.log('sq',openDates);
+      console.log('sq',this.firstClosingDate);
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
+      resolve(Balances) 
+    
     })
+  })
   }
   selectAccounts (typeAccount: string) {
     this.dialogChooseAccountsList = this.dialog.open(AppTableAccAccountsComponent ,{minHeight:'600px', minWidth:'1700px', autoFocus: false, maxHeight: '90vh'});
@@ -246,14 +273,22 @@ export class AppTableBalanceSheetComponent  implements AfterViewInit {
    XLSX.utils.book_append_sheet(wb, ws, "balancesData");
    XLSX.writeFile(wb, fileName);
   }
-  updateResultHandler (result :any, action: string) {
+  async updateResultHandler (result :any, action: string) {
+    console.log('res',result);
     if (result['name']=='error') {
       this.snack.open('Error: ' + result['detail'].split("\n", 1).join(""),'OK',{panelClass: ['snackbar-error']}); 
     } else {
       this.snack.open(action +': ' + result + ' entry','OK',{panelClass: ['snackbar-success'], duration: 3000});
       this.dialog.closeAll();
-      this.submitQuery();
-      this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate)
+      await this.submitQuery();
+      this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data=>{
+        this.FirstOpenedAccountingDate = data[0].FirstOpenedDate;
+        this.LastClosedDate = data[0].LastClosedDate;
+      })
+      this.AccountingDataService.GetbbalacedDateWithEntries('GetbbalacedDateWithEntries').subscribe(data => {
+        this.balacedDateWithEntries = data.flat()
+        console.log('date',this.balacedDateWithEntries);
+      })
     }
   }
   accountingBalanceClose () {
@@ -268,7 +303,36 @@ export class AppTableBalanceSheetComponent  implements AfterViewInit {
     })
 
   }
-
+  async checkBalance (dateBalance: string){
+    this.totalPassive = 0;
+    this.totalActive = 0;
+    console.log('db',dateBalance);
+    this.gRange.get('dateRangeStart').setValue(new Date(dateBalance))  
+    this.gRange.get('dateRangeEnd').setValue(new Date(dateBalance))
+     await this.submitQuery();
+     this.dataSource.data.forEach ((el) => {
+      Number(el['xacttypecode']) == 1 ? this.totalPassive = this.totalPassive + Number(el.OutGoingBalance): this.totalActive =this.totalActive + Number(el.OutGoingBalance)
+      console.log('ap',el['xacttypecode'].value);
+     })
+     console.log('tt', this.totalActive, this.totalPassive);
+  }
+  dateClass: MatCalendarCellClassFunction<Date> = (cellDate, view) => {
+    let result :string
+    // console.log('dc',cellDate.toLocaleDateString(), new Date(this.balacedDateWithEntries[1]).toLocaleDateString());
+    const index = this.balacedDateWithEntries.findIndex(x => new Date(x).toLocaleDateString() == cellDate.toLocaleDateString());
+    return (index > -1)? 'date-orange' : '';
+  };
+  openBalance (date:string) {
+    this.dialogRefConfirm = this.dialog.open(AppConfimActionComponent, {panelClass: 'custom-modalbox',} );
+    this.dialogRefConfirm.componentInstance.actionToConfim = {'action':'Open date: ' + date ,'isConfirmed': false}
+    this.dialogRefConfirm.afterClosed().subscribe (actionToConfim => {
+      console.log('action', actionToConfim)
+      if (actionToConfim.isConfirmed===true) {
+        this.AccountingDataService.accountingBalanceDayOpen({'dateToOpen' : new Date(date).toDateString()}).then ((result) => 
+        this.updateResultHandler(result, 'Operational day ' + new Date(date).toDateString()+ ' has been opened'))
+      }
+    })
+  }
   get  gRange () {return this.searchParametersFG.get('dataRange') } 
   get  dateRangeStart() {return this.searchParametersFG.get('dateRangeStart') } 
   get  dateRangeEnd() {return this.searchParametersFG.get('dateRangeEnd') } 

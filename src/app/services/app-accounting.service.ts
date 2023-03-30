@@ -71,6 +71,12 @@ export class AppAccountingService {
     const params = {'currencyCode': currencyCode, 'id' :id, 'clientId': clientId,'accountNo':accountNo, 'Action': Action}
     return this.http.get <Date>('/api/DEA/fGetAccountingData/', { params: params })
   }
+  GetbbalacedDateWithEntries (Action: string):Observable <Date[]> {
+    const params = {'Action': Action}
+    return this.http.get <Date[]>('/api/DEA/fGetAccountingData/', { params: params })
+  }
+
+  
   /*----------------------AccountsUI---------------------------------------------------------*/
 
   createAccountAccounting (data:any) { 
@@ -168,6 +174,9 @@ GetALLClosedBalances (searchParameters:any, id: number, lastClosedDate:string, S
 }
 accountingBalanceCloseInsert (data:any) { 
   return this.http.post ('/api/DEA/accountingBalanceCloseInsert/',{'data': data}).toPromise()
+}
+accountingBalanceDayOpen (data:any) { 
+  return this.http.post ('/api/DEA/accountingBalanceDayOpen/',{'data': data}).toPromise()
 }
 
 

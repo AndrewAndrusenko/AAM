@@ -1,6 +1,21 @@
 .mat-stroked-button {
   font-size: 18px;
+}
+.wrapper {
   
+  display: flex;  justify-content: space-between;   align-items: center; width:23%; margin-right: 3%;
+
+}
+.cl-space-evenly {
+ 
+  display:inline-flex;  
+}
+button.date-orange  {
+  background: rgb(0, 140, 255);
+  border-radius: 100%;
+}
+.button-color {
+color: #d3d3d3;
 }
 .mat-flat-button {
   font-size: 18px;
@@ -9,6 +24,9 @@
 .icon_search {
   color: rgb(143, 140, 239);
   transform: scale(1.3) !important
+}
+.mat-expansion-panel-header {
+  margin-left: 1%;
 }
 .first-expansion .mat-expansion-panel-header-description {
   justify-content: space-between;
@@ -28,10 +46,14 @@
 }
 .first-expansion  .mat-expansion-panel-header {
   background-color: #807f7f;
+  margin-left: 1%;
+
 }
 
 .headers-align  .mat-expansion-panel-header {
   background-color: #5d5c5c;
+  margin-left: 1%;
+
 }
 
 .headers-align .mat-expansion-panel-header-description {
@@ -119,7 +141,7 @@ margin-left: 1%;
   color: rgb(238, 113, 113);
 }
 .mat-form-field {
-  margin-left: 10px;
+  margin-left: 1%;
   font-size: 18px;
  
 }

@@ -134,9 +134,13 @@ async function fGetAccountingData (request,response) {
     case 'GetBalanceSheet':
     break;
     case 'GetbLastClosedAccountingDate':
+      query.text ='SELECT "FirstOpenedDate"::date, "LastClosedDate"::date FROM "bLastClosedAccountingDate";'
+    break;
+    case 'GetbbalacedDateWithEntries':
+      query.text ='SELECT "dateAcc"::date FROM "vbBalancedDatesWithEntries" ORDER BY "dateAcc" DESC;'
+      query.rowMode = "array" ;
 
-      query.text ='SELECT "FirstOpenedDate"::date FROM "bLastClosedAccountingDate";'
-    break
+    break;
     case 'GetALLAccountsDataWholeList' :
       query.text ='SELECT '+
       '"accountNo", "accountTypeExt", "Information", "clientId", "currencyCode","bAccounts"."entityTypeCode", "accountId", '+
@@ -166,50 +170,64 @@ async function fGetAccountingData (request,response) {
       conditions = {
         'noAccountLedger':{
           1: ' ("accountNo" = ANY(${noAccountLedger})) ',
+          2: ' ("accountNo" = ANY(${noAccountLedger})) ',
+          3: ' ("accountNo" = ANY(${noAccountLedger})) ',
         },
         'dateRangeStart': {
           1: ' ("dateBalance"::date >= ${dateRangeStart}::date )',
+          2: ' ("dataTime"::date >= ${dateRangeStart}::date )',
+          3: ' ("dataTime"::date >= ${dateRangeStart}::date )',
         },
         'dateRangeEnd': {
           1: ' ("dateBalance"::date <= ${dateRangeEnd}::date) ',
+          2: ' ("dataTime"::date <= ${dateRangeEnd}::date) ',
+          3: ' ("dataTime"::date <= ${dateRangeEnd}::date) ',
         }
         /* 'entryTypes' : {
           1: ' ("XactTypeCode_Ext" = ANY(array[${entryTypes:raw}]))',
         }
  */      }
       let conditionsBalance =' WHERE'
+      let conditionsAccountProject =' WHERE'
+      let conditionsLedgerProject =' WHERE'
       Object.entries(conditions).forEach(([key,value]) => {
       if  (request.query.hasOwnProperty(key)) {
         query.values.push(request.query[key]);
         conditionsBalance +=conditions[key][1] + ' AND ';
+        conditionsAccountProject +=conditions[key][2] + ' AND ';
+        conditionsLedgerProject +=conditions[key][3] + ' AND ';
         }
       });
 
 
       query.text ='SELECT '+
       ' "accountNo", "accountId", "accountType", "datePreviousBalance" ,"dateBalance" , "openingBalance", '+
-      ' "totalDebit", "totalCredit", "OutGoingBalance", "checkClosing" ' +
-      ' FROM f_s_balancesheet_all() '+
-      ' UNION '+
+      ' "totalDebit", "totalCredit", "OutGoingBalance", "checkClosing", "xacttypecode" ' +
+      ' FROM f_s_balancesheet_all() ';
+       query.text += conditionsBalance.slice(0,-5);
+       query.text += ' UNION '+
       ' SELECT '+
       ' "accountNo", "accountId", \'Account\', null ,"dataTime" , "corrOpeningBalance", "totalDebit", "totalCredit", '+
-      ' "corrOpeningBalance" + "signedTurnOver" AS "OutGoingBalance", 0 '+
-      ' FROM f_bcurrentturnoversandbalncesnotclosed(${lastClosedDate}) ' +
-      ' UNION '+
+      ' "corrOpeningBalance" + "signedTurnOver" AS "OutGoingBalance", 0 , "xActTypeCode"'+
+      ' FROM f_bcurrentturnoversandbalncesnotclosed(${lastClosedDate}) ';
+       query.text += conditionsAccountProject.slice(0,-5) ;
+       query.text += ' UNION '+
       ' SELECT '   +
       ' "accountNo", "accountId", \'Ledger\', null ,"dataTime" , "corrOpeningBalance" ,"totalDebit", "totalCredit", '  +
-      ' ("corrOpeningBalance" + "signedTurnOver") AS "OutGoingBalance" , 0 ' +
-      ' FROM f_bcurrent_ledger_turnovers_balances_notclosed(${lastClosedDate}) ' 
-      query.text += conditionsBalance.slice(0,-5);
+      ' ("corrOpeningBalance" + "signedTurnOver") AS "OutGoingBalance" , 0, "xActTypeCode" ' +
+      ' FROM f_bcurrent_ledger_turnovers_balances_notclosed(${lastClosedDate}) '; 
+      query.text += conditionsLedgerProject.slice(0,-5) ;
       query.text += ' ORDER BY "dateBalance"::date DESC;';
 
     break;
   }
-  sql = pgp.as.format(query.text,request.query)
+  sql = pgp.as.format(query.text,request.query);
+  query.values = null
   console.log('---------------------------------------------------------------------------------------------------------');
   console.log('PROJECTION!!  ', sql);
    console.log('sql', sql);
-   pool.query (sql,  (err, res) => 
+   query.text = sql;
+   pool.query (query,  (err, res) => 
    {if (err) {
     console.log (err.stack.split("\n", 1).join(""))
     err.detail = err.stack
@@ -587,7 +605,26 @@ async function faccountingBalanceCloseInsert (request, response) {
     return response.status(200).json(res.rowCount)}
   })   
 }
+async function faccountingBalanceDayOpen (request, response) {
+  paramArr = request.body.data
+  console.log('param', paramArr);
+  const query = {
+  text: 
+  'DELETE FROM public."bAccountStatement" WHERE "dateAcc"::date = ${dateToOpen} RETURNING *; ' +
+  'DELETE FROM public."bLedgerStatement" WHERE "dateAcc"::date = ${dateToOpen} RETURNING *;'
+  } 
+  sql = pgp.as.format(query.text,paramArr)
+  console.log('---------------------------------------------------------------------------------------------------------');
+  console.log('faccountingBalanceDayOpen!!   ', sql);
 
+   pool.query (sql,  (err, res) => {if (err) {
+    console.log (err.stack.split("\n", 1).join(""))
+    err.detail = err.stack
+    return response.send(err)
+  } else {
+    return response.status(200).json(res[0].rowCount + res[1].rowCount)}
+  })   
+}
 module.exports = {
   fGetMT950Transactions,
   fGetAccountingData,
@@ -613,5 +650,6 @@ module.exports = {
   faccountingOverdraftAccountCheck,
   faccountingOverdraftLedgerAccountCheck,
 
-  faccountingBalanceCloseInsert
+  faccountingBalanceCloseInsert,
+  faccountingBalanceDayOpen
 }
