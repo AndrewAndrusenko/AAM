@@ -197,6 +197,7 @@ export class AppTableAccEntriesComponent  {
       this.dataSource  = new MatTableDataSource(EntriesList);
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
+      this.accounts.unshift('ClearAll')
     })
   }
   selectAccounts (typeAccount: string) {
@@ -220,7 +221,17 @@ export class AppTableAccEntriesComponent  {
 
   exportToExcel() {
     const fileName = "entriesData.xlsx";
-    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(this.dataSource.data);
+    let obj = this.dataSource.data.map( (row,ind) =>({
+      'Date': new Date (row.t_dataTime),
+      'Debit' : row.d_Debit,
+      'Credit' : row.d_Credit,
+      'Amount': Number(row.t_amountTransaction),
+      'Details': row.d_entryDetails,
+      'TrType': row.d_transactionType,
+      'TrCode' : row.t_XactTypeCode,
+      't_XactTypeCode_Ext': (row.t_XactTypeCode_Ext)
+    }))
+    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(obj);
     const wb: XLSX.WorkBook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "entriesData");
     XLSX.writeFile(wb, fileName);

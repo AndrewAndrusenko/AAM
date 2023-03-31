@@ -97,7 +97,7 @@ async function fGetAccountingData (request,response) {
       console.log('conditionsLedgerToLedger',(conditionsLedgerToLedger.slice(0,-5)));
       query.text ='SELECT \'AL\' AS "d_transactionType","bAccountTransaction".id AS "t_id", "entryDetails" AS "t_entryDetails", ' + 
       '"bAccountTransaction"."ledgerNoId" AS "t_ledgerNoId", "bAccountTransaction"."accountId" AS "t_accountId", ' +
-      '"dataTime" AS "t_dataTime", "extTransactionId" AS "t_extTransactionId", "amountTransaction" AS "t_amountTransaction", '+
+      '"dataTime"::date AS "t_dataTime", "extTransactionId" AS "t_extTransactionId", "amountTransaction" AS "t_amountTransaction", '+
       '"XactTypeCode" AS "t_XactTypeCode", "bAccountTransaction"."XactTypeCode_Ext" AS "t_XactTypeCode_Ext" , '+
       '"bcTransactionType_Ext"."description" ||\': \' || "bAccountTransaction"."entryDetails" as "d_entryDetails", ' +
       'CASE "bAccountTransaction"."XactTypeCode" ' +
@@ -118,7 +118,7 @@ async function fGetAccountingData (request,response) {
       query.text += ' UNION ' +
       'SELECT \'LL\' AS "d_transactionType", "bLedgerTransactions".id AS "t_id", "entryDetails" AS "t_entryDetails", '+
       '"bLedgerTransactions"."ledgerID_Debit" AS "t_ledgerNoId", "bLedgerTransactions"."ledgerID" AS "t_accountId", '+
-      '"dateTime" AS "t_dataTime", "extTransactionId" AS "t_extTransactionId", "amount" AS "t_amountTransaction", '+
+      '"dateTime"::date AS "t_dataTime", "extTransactionId" AS "t_extTransactionId", "amount" AS "t_amountTransaction", '+
       '0 AS "t_XactTypeCode", "bLedgerTransactions"."XactTypeCode_Ext" AS "t_XactTypeCode_Ext" , '+
       '"bcTransactionType_Ext"."description" ||\': \' || "bLedgerTransactions"."entryDetails" as "d_entryDetails", '+
       '"bLedgerDebit"."ledgerNo" AS "d_Debit", "bLedger"."ledgerNo" AS "d_Credit",'+
@@ -139,8 +139,17 @@ async function fGetAccountingData (request,response) {
     case 'GetbbalacedDateWithEntries':
       query.text ='SELECT "dateAcc"::date FROM "vbBalancedDatesWithEntries" ORDER BY "dateAcc" DESC;'
       query.rowMode = "array" ;
-
     break;
+    case 'GetbAccountingDateToClose':
+      query.text ='SELECT "accountingDateToClose" FROM "bAccountingDateToClose";'
+    break;
+    case 'SumTransactionPerDate':
+      query.text ='SELECT "amountTransaction" FROM f_b_sum_transactions_per_date(${balanceDate});'
+    break;
+    case 'GetDeepBalanceCheck':
+      query.text ='SELECT * FROM public.f_s_balancesheet_deep_check(${dateBalanceToCheck},${firstDayOfCalculation});'
+    break;
+    
     case 'GetALLAccountsDataWholeList' :
       query.text ='SELECT '+
       '"accountNo", "accountTypeExt", "Information", "clientId", "currencyCode","bAccounts"."entityTypeCode", "accountId", '+

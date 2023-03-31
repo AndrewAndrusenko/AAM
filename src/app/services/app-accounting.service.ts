@@ -75,8 +75,14 @@ export class AppAccountingService {
     const params = {'Action': Action}
     return this.http.get <Date[]>('/api/DEA/fGetAccountingData/', { params: params })
   }
-
-  
+  GetbAccountingDateToClose (Action: string):Observable <Date> {
+    const params = {'Action': Action}
+    return this.http.get <Date>('/api/DEA/fGetAccountingData/', { params: params })
+  }
+  GetbAccountingSumTransactionPerDate (balanceDate:string, Action: string):Observable <number> {
+    const params = {'balanceDate': balanceDate,'Action': Action}
+    return this.http.get <number>('/api/DEA/fGetAccountingData/', { params: params })
+  }
   /*----------------------AccountsUI---------------------------------------------------------*/
 
   createAccountAccounting (data:any) { 
@@ -178,6 +184,9 @@ accountingBalanceCloseInsert (data:any) {
 accountingBalanceDayOpen (data:any) { 
   return this.http.post ('/api/DEA/accountingBalanceDayOpen/',{'data': data}).toPromise()
 }
-
+GetDeepBalanceCheck (dateBalanceToCheck:string, firstDayOfCalculation: string, Action: string):Observable <bBalanceFullData[]> {
+  let params = {'dateBalanceToCheck': dateBalanceToCheck,'firstDayOfCalculation':firstDayOfCalculation, 'Action': Action};
+  return this.http.get <bBalanceFullData []>('/api/DEA/fGetAccountingData/', { params: params })
+}
 
 }

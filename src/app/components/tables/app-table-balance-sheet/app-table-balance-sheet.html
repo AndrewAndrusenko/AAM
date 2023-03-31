@@ -22,14 +22,14 @@
 </span>
 
 <mat-expansion-panel class="first-expansion" 
-  (opened)="panelOpenState = true"
-  (closed)="panelOpenState = false" >
+  (opened)="panelOpenStateFirst = true"
+  (closed)="panelOpenStateFirst = false" >
   <mat-expansion-panel-header >
     <mat-panel-title>
       Balance closing procedure
     </mat-panel-title>
     <mat-panel-description>
-      Tap to {{panelOpenState? 'hide': 'open'}} control elements
+      Tap to {{panelOpenStateFirst? 'hide': 'open'}} control elements
       <mat-icon color = 'accent'>account_balance</mat-icon>
     </mat-panel-description>
   </mat-expansion-panel-header >
@@ -48,45 +48,49 @@
       <mat-datepicker  #closedate></mat-datepicker>
     </mat-form-field>
   </span>
-  <span style="display: flex;  justify-content: space-between;   align-items: center; width:45%; margin-left: 2%;"> 
+  <span style="display: flex;  justify-content: space-between;   align-items: center; width:54%; margin-left: 2%;"> 
       <button color = "accent" mat-raised-button 
         style="  font-size: 18px;"
         (click)="checkBalance(iBalanceDate.value)">
         Check Balance
       </button>
       <mat-form-field style=" margin-left: 2%;" >
-        <input #iBalanceDate matInput  [matDatepicker]="balancedate" placeholder="Operating day to close" 
+        <input #iBalanceDate matInput  [matDatepicker]="balancedate" [min]="dateOfOperaationsStart" placeholder="Date to veirfy balance" 
         [value]="LastClosedDate">
         <mat-datepicker-toggle matSuffix [for]="balancedate"></mat-datepicker-toggle>
         <mat-datepicker [dateClass]="dateClass" #balancedate></mat-datepicker>
       </mat-form-field>
 
 
-    <div  style="margin-left:2%; color:  rgb(191, 188, 188);;">
-      <p class="mat-form-field" style = "margin-left:1%; color:rgb(198, 255, 215);">Active total:
-        <span style="color:  rgb(191, 188, 188); font-weight: bold;">{{totalActive | number }}</span>
+    <div  style="margin-left:1%; width:50%; color:  rgb(191, 188, 188);;">
+      <p class="mat-form-field" style = "margin-left:1%; color:rgb(198, 255, 215);">
+        <span style="color:  rgb(191, 188, 188); font-weight: bold;"
+        [style.color]=" (totalActive - totalPassive) ==0 ? 'green' : 'rgb(114, 0, 0)'" >
+          {{
+            (totalActive - totalPassive) ==0? 'Active = Passive : '+ (totalActive | number):
+          'Balance incorrect!! Difference is' + ((totalActive - totalPassive) | number )}}
+        </span>
       </p>
-      <p class="mat-form-field" style = "margin-left:1%; color:rgb(198, 255, 215);">Passive total: 
-        <span style="color:  rgb(191, 188, 188); font-weight: bold;">{{totalPassive | number}}</span>
-      </p>
-      <p  *ngIf="(totalActive - totalPassive) !=0"  
-        class="mat-form-field" 
-        style="margin-left:1%; color: rgb(241, 136, 136); font-weight: bold;">
-        Difference:
-        <span style="color:  rgb(191, 188, 188); font-weight: bold;">{{totalActive - totalPassive | number}}</span>
+      <p  *ngIf="(entriesTotal!=0)" class="mat-form-field" style = "margin-left:1%; color:rgb(198, 255, 215);"> 
+        <span style="color:  rgb(191, 188, 188); font-weight: bold;"
+        [style.color]=" (totalDebit - entriesTotal) ==0 ? 'green' : 'red'" >
+          {{
+            (totalDebit - entriesTotal) == 0? 'Debit = Entries : '+ (entriesTotal | number):
+          'Balance incorrect!! Difference is ' + ((totalDebit - entriesTotal) | number )}}
+        </span>
       </p>
     </div>
 
   </span>
 <span style="display: flex;  justify-content: space-between;   align-items: center; width:22%; margin-right: 2%;"> 
-      <mat-form-field style=" margin-left: 6%;" >
+      <mat-form-field  >
         <input #iBalanceDateToOpen matInput  [matDatepicker]="openBalanceDatePicker" placeholder="Operating day to open" 
         [value]="LastClosedDate" disabled="true">
         <mat-datepicker-toggle matSuffix [for]="openBalanceDatePicker"></mat-datepicker-toggle>
         <mat-datepicker [dateClass]="dateClass" #openBalanceDatePicker></mat-datepicker>
       </mat-form-field>
       <button color = "warn" mat-raised-button 
-      style=" margin-left:1%; font-size: 18px;"
+      style="  font-size: 18px;"
       (click)="openBalance(iBalanceDateToOpen.value)">
       Open Balance
     </button>
@@ -100,39 +104,47 @@
   </form>
 </mat-expansion-panel>
 <mat-expansion-panel class="headers-align" 
-  (opened)="panelOpenState = true"
-  (closed)="panelOpenState = false" >
+  (opened)="panelOpenStateSecond = true"
+  (closed)="panelOpenStateSecond = false" >
   <mat-expansion-panel-header >
     <mat-panel-title>
       Complex search
     </mat-panel-title>
     <mat-panel-description>
-      Tap to {{panelOpenState? 'hide': 'open'}} additional parameters
+      Tap to {{panelOpenStateSecond? 'hide': 'open'}} additional parameters
       <mat-icon color = 'accent'>filter_alt</mat-icon>
     </mat-panel-description>
   </mat-expansion-panel-header >
-  <form class="submit" [formGroup]="searchParametersFG"  style="font-size: 18px;">
-    
+  <form class="submit" [formGroup]="searchParametersFG"  style="font-size: 18px; ">
+     <span style="display: flex;  justify-content: space-between;   align-items:flex-start;  margin-right: 1%;margin-top: 0.2%;">
+      <span style="display:grid; width: 15%;">
     <button color = "primary"  class= "button-color" mat-raised-button 
-      style=" margin-left:1%; font-size: 18px;"
+      style="margin:1%; font-size: 18px;"
       (click)="submitQuery()">
       Submit
     </button>
-
+    <button color = "accent" mat-raised-button 
+    style="margin:1%; font-size: 18px;"
+    (click)="searchParametersFG.reset();
+    this.accounts=['ClearAll']">
+    ClearAll
+   </button>
+  </span>
+ 
     <mat-form-field appearance="fill">
       <mat-label>Enter a date range</mat-label>
-      <mat-date-range-input [formGroup]="dataRange" [rangePicker]="picker" >
-        <input matStartDate placeholder="Start date" formControlName="dateRangeStart">
-        <input matEndDate placeholder="End date" formControlName="dateRangeEnd">
+      <mat-date-range-input [formGroup]="dataRange" [min]="dateOfOperaationsStart" [rangePicker]="picker" >
+        <input matStartDate  placeholder="Start date" formControlName="dateRangeStart">
+        <input matEndDate  placeholder="End date" formControlName="dateRangeEnd">
       </mat-date-range-input>
       <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
       <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-      <mat-date-range-picker #picker></mat-date-range-picker>
+      <mat-date-range-picker [dateClass]="dateClass" #picker></mat-date-range-picker>
       <mat-error *ngIf="dataRange.controls.dateRangeStart.hasError('matStartDateInvalid')">Invalid start date</mat-error>
       <mat-error *ngIf="dataRange.controls.dateRangeEnd.hasError('matEndDateInvalid')">Invalid end date</mat-error>
     </mat-form-field>
 
-    <mat-form-field class="example-chip-list" appearance="fill" style="width: 45%; ">
+    <mat-form-field class="example-chip-list" appearance="fill" style="width: 40%; ">
       <mat-chip-list #chipList aria-label="Fruit selection"  >
         <mat-chip *ngFor="let account of accounts" 
         (removed)="remove(account)"
@@ -153,31 +165,24 @@
         matTooltip="Type account number or paste accounts list separated by comma and press enter" >
         <button style="font-size: 16px;" mat-raised-button matSuffix (click)="selectAccounts('ledger')">
           <mat-icon *ngIf="action!=='View'" class = "icon_search">search</mat-icon> MultiSelect </button>
-
       </mat-chip-list>
     </mat-form-field>
-
+    <button color = "accent"  class= "button-color" mat-raised-button 
+      style="margin:1%; font-size: 18px;"
+      (click)="balanceDeepCheck(dataRange.controls.dateRangeEnd.value.toDateString(),dataRange.controls.dateRangeStart.value.toDateString()) ">
+      Balance Deep Check
+    </button>
+    <p  class="mat-form-field" style = " color:rgb(198, 255, 215);"> 
+      <span style="color:  rgb(191, 188, 188);white-space: pre-line;"
+      [style.color]=" (totalDebit - entriesTotal) ==0 ? 'green' : 'red'" >
+        {{
+          (totalDebit - entriesTotal) == 0? 'Balance = Entries : '+ (entriesTotal | number):
+        'Balance incorrect!!\n Difference is ' + ((totalDebit - entriesTotal) | number )}}
+      </span>
+    </p>
+  </span>
     <p>
-      <button color = "accent" mat-raised-button 
-        style=" margin-left:1%; font-size: 18px;"
-        (click)="searchParametersFG.reset();
-        this.accounts=['ClearAll']">
-        ClearAll
-      </button>
-      <mat-form-field  style="width: 40%;">
-        <mat-label>Transaction Type Code</mat-label>
-        <mat-select  #t_XactTypeCode_Ext formControlName="entryType"  multiple> 
-          <mat-option #allSelected [value]="0"
-            (click)="toggleAllSelection()" >
-            ALL - {{this.allSelected.selected? 'Clear' :'Select' }} All 
-          </mat-option>
-          <ng-container *ngFor="let TransactionType of TransactionTypes">
-          <mat-option [value]="TransactionType.id">
-              {{TransactionType.xActTypeCode_Ext |uppercase}} - {{TransactionType.description}}
-          </mat-option>
-          </ng-container>
-        </mat-select>
-      </mat-form-field>
+
     </p>
   </form>
 </mat-expansion-panel>
@@ -198,11 +203,11 @@
               {{ element[column] | date }}
             </button>
             <span *ngIf="column!=='dateBalance'">
-              {{ element[column] == null ? 'Day is open' : element[column] | date }}
+              {{ element[column] == null ? element['dateBalance']=='2049-12-31T21:00:00.000Z'? 'Entries': 'Day is open' : element[column] | date }}
             </span>
           </p>          
           <p *ngSwitchCase="['openingBalance','totalCredit', 'totalDebit', 'OutGoingBalance', 'checkClosing'].includes(column)">
-            {{element[column] | number : '1.2-2' }}
+            {{element[column] | currency}}
           </p>
           <p *ngSwitchCase="['accountNo'].includes(column)">
             <button mat-stroked-button style="width: 80%;"  matTooltip="Account details"
@@ -210,6 +215,7 @@
               {{element[column] }}
             </button> 
           </p>
+          
           <p *ngSwitchDefault>
             {{element[column]}}  
           </p>
