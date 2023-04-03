@@ -2,6 +2,23 @@
 .uppercase{
   text-transform: uppercase;
 }
+.complex-search-entries .mat-expansion-panel-header-description {
+  justify-content: space-between;
+  align-items: center;
+  color: rgb(241, 136, 136);
+  font-weight: bold;
+  font-size: 18px;
+
+}
+.complex-search-entries .mat-expansion-panel-header-title {
+  justify-content: space-between;
+  align-items: center;
+  color: rgb(191, 188, 188);
+  font-weight: bold;
+  font-size: 20px;
+
+}
+
 input.ng-invalid.ng-touched {
   color: rgb(158, 0, 0);
 }

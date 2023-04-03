@@ -1,4 +1,4 @@
-<span> 
+<span *ngIf="!readOnly"> 
 <mat-form-field class="example-form-field" class = "filterText">
   <mat-label class="colorLabel">Type to search...</mat-label>
   <input 
@@ -22,7 +22,7 @@ Save as XLS
 <p>{{action}}</p>
 </span>
 
-<mat-expansion-panel class="headers-align" 
+<mat-expansion-panel *ngIf="!readOnly" class="complex-search-entries" 
   (opened)="panelOpenState = true"
   (closed)="panelOpenState = false" >
   <mat-expansion-panel-header >
@@ -100,6 +100,9 @@ Save as XLS
           </mat-option>
           </ng-container>
         </mat-select>
+      </mat-form-field>
+      <mat-form-field>
+          <input matInput placeholder="ExtID" formControlName="ExtID">
       </mat-form-field>
     </p>
   </form>
@@ -193,12 +196,14 @@ Save as XLS
           <mat-icon >pageview</mat-icon>
         </button>
         <button  *ngIf="element.t_dataTime>FirstOpenedAccountingDate ||element.t_dataTime==FirstOpenedAccountingDate" 
-          mat-icon-button aria-label="expand row" color="accent"
+          mat-icon-button 
+          aria-label="expand row" color="accent"
           matTooltip="Edit entry"
           (click)="openEntryModifyForm('Edit', element)">
           <mat-icon >edit</mat-icon>
         </button>
-        <button *ngIf="element.t_dataTime>FirstOpenedAccountingDate" mat-icon-button 
+        <button *ngIf="element.t_dataTime>FirstOpenedAccountingDate ||element.t_dataTime==FirstOpenedAccountingDate" 
+          mat-icon-button 
           style="margin-left: 5%;" aria-label="expand row" color="accent" 
           matTooltip="Delete entry"
           (click)="openEntryModifyForm('Delete', element)">

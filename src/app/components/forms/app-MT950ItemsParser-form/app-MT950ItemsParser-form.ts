@@ -28,6 +28,7 @@ export class AppMT950ItemParsing  {
     extTransactionId : null
     })
   @Input() action: string;
+  @Input() externalId: number;
   dialogRefConfirm: MatDialogRef<AppConfimActionComponent>;
   isEditForm: boolean = false;
   dialogRef: MatDialogRef<AppInstrumentTableComponent>;
@@ -37,6 +38,7 @@ export class AppMT950ItemParsing  {
   public AppSnackMsgbox : AppSnackMsgboxComponent
   public data: any;
   TransactionTypes: bcTransactionType_Ext[] = [];
+  panelOpenState: boolean = false;
   constructor (
     private fb:FormBuilder, 
     private AccountingDataService:AppAccountingService, 
@@ -44,11 +46,12 @@ export class AppMT950ItemParsing  {
     public snack:MatSnackBar,
   ) {
     this.AccountingDataService.getEntryDraft().subscribe (data => {
-      console.log('data', data);
-      this.swift950Entry.patchValue(data)
-      this.swift950Entry.controls.XactTypeCode_Ext.setValue(Number(data.XactTypeCode_Ext))
-      this.swift950Entry.controls.XactTypeCode.setValue(Number(data.XactTypeCode))
-      this.swift950Entry.controls.dataTime.setValue(new Date(data.dataTime).toISOString())
+      console.log('getEntryDraft', data);
+      this.swift950Entry.patchValue(data.entryDraft);
+      Boolean(data.formStateisDisabled)? this.swift950Entry.disable() : null;
+      this.swift950Entry.controls.XactTypeCode_Ext.setValue(Number(data.entryDraft.XactTypeCode_Ext))
+      this.swift950Entry.controls.XactTypeCode.setValue(Number(data.entryDraft.XactTypeCode))
+      this.swift950Entry.controls.dataTime.setValue(new Date(data.entryDraft.dataTime).toISOString())
       // this.swift950Entry.controls.extTransactionId.setValue(Number(data.dataTime))
 
     })
@@ -64,6 +67,7 @@ export class AppMT950ItemParsing  {
       } else {
         this.snack.open('Created: ' + result + ' entry','OK',{panelClass: ['snackbar-success'], duration: 3000})
         this.swift950Entry.disable();
+        this.AccountingDataService.sendReloadEntryList(1)
       }
     });
   }

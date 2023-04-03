@@ -37,14 +37,47 @@
       <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplayWithExpand.length+1">
         <div class="example-element-detail" *ngIf="['CR','DR'].includes(element['typeTransaction'])"
           [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'"
-          style="background-color: darkslategray; width: 100%;">
-          <app-MT950ItemsParser-form  style="background-color: darkslategray; width: 120%;">
-          </app-MT950ItemsParser-form>
-           
-            <!-- <span class="row_field_name">Client:  </span> {{element.clientname}} 
-            <span class="row_field_name">Address: </span>  {{element.address}} 
-            <span class="row_field_name">  Proffesional: </span> {{element.isclientproffesional}}
- -->         
+          style=" width: 100%;">
+
+          <mat-expansion-panel class="complex-search-entries"
+          (opened)="panelDraftOpenState = true"
+          (closed)="panelDraftOpenState = false" >
+          <mat-expansion-panel-header  >
+            <mat-panel-title>
+             Entry Draft
+            </mat-panel-title>
+            <mat-panel-description>
+              Tap to {{panelDraftOpenState? 'hide': 'open'}} draft details
+              <mat-icon color = 'accent'>filter_alt</mat-icon>
+            </mat-panel-description>
+          </mat-expansion-panel-header >
+          <app-acc-entry-modify-form 
+          [Ref]="element['refTransaction']"></app-acc-entry-modify-form > 
+          </mat-expansion-panel>
+    
+         
+<!--           <app-MT950ItemsParser-form  [externalId] = "element['id']"
+          style="background-color: darkslategray; width: 120%;">
+          </app-MT950ItemsParser-form> -->
+          <mat-expansion-panel class="complex-search-entries" 
+          (opened)="panelEntryListOpenState = true"
+          (closed)="panelEntryListOpenState = false" >
+          <mat-expansion-panel-header >
+            <mat-panel-title>
+              Linked entries
+            </mat-panel-title>
+            <mat-panel-description>
+              Tap to {{panelEntryListOpenState? 'hide': 'open'}} the list for ID: {{element['id']}}
+              <mat-icon color = 'accent'>filter_alt</mat-icon>
+            </mat-panel-description>
+          </mat-expansion-panel-header >
+            <app-table-acc-entries 
+            [readOnly]="true" 
+            [action]="'ViewEntriesByExternalId'" 
+            [externalId]="element['id']" 
+            
+            ></app-table-acc-entries>
+          </mat-expansion-panel>
         </div>
       </td>
     </ng-container>
@@ -53,8 +86,7 @@
     <tr mat-row *matRowDef="let element; columns: columnsToDisplayWithExpand;"
       class="example-element-row"
       [class.example-expanded-row]="expandedElement === element"
-      (click)="
-      openEntry(element);
+      (click)="expandedElement === element ?  null : openEntry(element);
       (expandedElement = expandedElement === element ? null : element)">
 
 

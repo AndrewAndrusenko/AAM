@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, Subject} from 'rxjs';
-import { bAccountingEntriesComplexSearch, bAccounts, bAccountsEntriesList, bBalanceData, bBalanceFullData, bcAccountType_Ext, bcEnityType, bcTransactionType_Ext, bLedger, bLedgerAccounts, bLedgerBalanceData, SWIFTSGlobalListmodel, SWIFTStatement950model } from '../models/accounts-table-model';
+import { bAccounts, bAccountsEntriesList, bBalanceData, bBalanceFullData, bcAccountType_Ext, bcEnityType, bcTransactionType_Ext, bLedger, bLedgerAccounts, bLedgerBalanceData, SWIFTSGlobalListmodel, SWIFTStatement950model } from '../models/accounts-table-model';
 
 @Injectable({
   providedIn: 'root'
@@ -9,6 +9,26 @@ import { bAccountingEntriesComplexSearch, bAccounts, bAccountsEntriesList, bBala
 export class AppAccountingService {
   constructor(private http:HttpClient) { }
   private subjectName = new Subject<any>(); 
+  AccountsEntriesList = <bAccountsEntriesList> {
+    'd_transactionType': null,
+    't_id': null,
+    't_entryDetails':null,
+    't_accountId': null, 
+    't_ledgerNoId': null, 
+    't_extTransactionId' : null, 
+    't_dataTime': null,  
+    't_amountTransaction': null, 
+    't_XactTypeCode': null,  
+    't_XactTypeCode_Ext': null, 
+    'd_Debit' : null,  
+    'd_Credit' : null,  
+    'd_ledgerNo': null, 
+    'd_accountNo': null,  
+    'd_xActTypeCode_ExtName' : null, 
+    'd_entryDetails': null, 
+    'd_closingBalance': null, 
+    'd_closingLedgerBalance': null 
+  }
 /* -----------------------Accountting ----------------------------------------------------- */
 
   GetSWIFTsList (dataRange: string, id: number, MTType:string, Sender: string, Action: string):Observable <SWIFTSGlobalListmodel[]> {
@@ -45,8 +65,28 @@ export class AppAccountingService {
   GetEntryScheme (bcEntryParameters:any) :Observable <bcTransactionType_Ext[]> { 
     return this.http.get <bcTransactionType_Ext []>('/api/DEA/GetEntryScheme/', { params: bcEntryParameters })  
   } 
-  sendEntryDraft (data: any) { this.subjectName.next(data);}
+  sendEntryDraft (data: any) { 
+    this.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe (OpenedDate => {
+      let newEntryDraft = {}
+      newEntryDraft['FirstOpenedAccountingDate'] = OpenedDate[0].FirstOpenedDate;
+      let entryFormFields = Object.keys (this.AccountsEntriesList)
+      Object.entries(data.entryDraft).forEach ((value,key) => {
+        console.log('entryDraft', value[0],value[1]);
+        entryFormFields.includes('t_'+ value[0])? newEntryDraft['t_' + value[0]] = value[1]  : null;
+        entryFormFields.includes('d_'+ value[0])? newEntryDraft['d_' + value[0]] = value[1] : null;
+      })
+      newEntryDraft['d_transactionType'] = 'AL';
+      
+      console.log('newEntryDraft', newEntryDraft);
+      data.entryDraft = newEntryDraft;
+      this.subjectName.next(data)
+    })
+  }
   getEntryDraft (): Observable<any> {return this.subjectName.asObservable(); }
+  
+  sendFormState(formName: string, state: boolean) {this.subjectName.next({ formName: state })}
+
+  getFormState(): Observable<any> {return this.subjectName.asObservable() }
 
   CreateEntryAccountingInsertRow (data:any) { 
     return this.http.post ('/api/DEA/fCreateEntryAccountingInsertRow/',{'data': data}).toPromise()
@@ -56,7 +96,6 @@ export class AppAccountingService {
   GetAccountsEntriesListAccounting (searchParameters:any, id: number, MTType:string, Sender: string, Action: string):Observable <bAccountsEntriesList[]> {
     let params = {'id' :id, 'MTType': MTType,'Sender':Sender, 'Action': Action};
     (searchParameters !== null) ?  params = {...params,...searchParameters}: null
-    console.log('params',params);
     return this.http.get <bAccountsEntriesList []>('/api/DEA/fGetAccountingData/', { params: params })
   }
   GetAccountsListAccounting (currencyCode: number, id: number, clientId:number, accountNo: string, Action: string):Observable <bAccounts[]> {
@@ -124,7 +163,6 @@ export class AppAccountingService {
     return this.http.post ('/api/DEA/deleteEntryrAccountAccounting/',{'id': id}).toPromise()
   } 
   updateEntryAccountAccounting (data:any) { 
-    console.log('ser', data);
     return this.http.post ('/api/DEA/updateEntryAccountAccounting/',{'data': data}).toPromise()
   }
   createLLEntryAccounting (data:any) { 
@@ -134,7 +172,6 @@ export class AppAccountingService {
     return this.http.post ('/api/DEA/deleteLLEntryrAccountAccounting/',{'id': id}).toPromise()
   } 
   updateLLEntryAccountAccounting (data:any) { 
-    console.log('ser', data);
     return this.http.post ('/api/DEA/updateLLEntryAccountAccounting/',{'data': data}).toPromise()
   }
   sendReloadEntryList ( id:any) { //the component that wants to update something, calls this fn
@@ -146,7 +183,6 @@ export class AppAccountingService {
 
 /*----------------------OverdraftValidators----------------------------------------------------*/
 getExpectedBalanceOverdraftCheck (accountId: number, transactionAmount:number, transactionDate: string, xactTypeCode: number, id: number, FirstOpenedAccountingDate: string, Action: string ):Observable <bBalanceData[]> {
-  console.log('transactionAmount',transactionAmount);
   const params = {
     'accountId': accountId, 
     'transactionAmount' : parseFloat(transactionAmount.toString().replace(/,/g, '')), 
@@ -175,7 +211,6 @@ getExpectedBalanceLedgerOverdraftCheck (accountId: number, transactionAmount:num
 GetALLClosedBalances (searchParameters:any, id: number, lastClosedDate:string, Sender: string, Action: string):Observable <bBalanceFullData[]> {
   let params = {'id' :id, 'lastClosedDate': lastClosedDate,'Sender':Sender, 'Action': Action};
   (searchParameters !== null) ?  params = {...params,...searchParameters}: null
-  console.log('params',params);
   return this.http.get <bBalanceFullData []>('/api/DEA/fGetAccountingData/', { params: params })
 }
 accountingBalanceCloseInsert (data:any) { 

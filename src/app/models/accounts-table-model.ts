@@ -59,6 +59,7 @@ export interface accountTypes {
 }
 
 export interface SWIFTStatement950model {
+  id:number,
   msgId: number,
   amountTransaction: number,
   typeTransaction: string, 

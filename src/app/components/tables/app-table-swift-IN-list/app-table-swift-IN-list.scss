@@ -12,12 +12,10 @@
   background-color: transparent;
   cursor: pointer;
   border: none;
-
   user-select: none;
   min-width: 64px;
   line-height: 36px;
   padding: 6px;
-
   display: flex;
   align-items: center;
   flex-direction: row;
@@ -33,35 +31,28 @@
   margin-left: 0px;
   margin-right: 5px;
 }
-.row_field_name {
-  font-weight: bold;
-  color: cadetblue;
-}
 .mat-table {
   background-color:#4f4e4e;
   width: 100%;
   font-size: 26px;
-  margin-left: 10px;
+  margin-left: 0px;
+
 }
 .mat-header-cell {
-  margin-left: 10px;
   font-size: 20px;
   background-color:#393737;
-}
-.mat-paginator {
-  margin-left: 10px;
 }
 .mat-input-element {
   font-size: 24px;
   background-color:#4f4e4e;
 }
 .mat-form-field {
-  margin-left: 10px;
   font-size: 24px;
   width: 20%;
 }
 .mat-cell {
   font-size: 18px;
+  margin-left: 0px;
 }
 tr.example-detail-row {
   height: 0;
@@ -69,11 +60,6 @@ tr.example-detail-row {
 
 .example-element-detail {
   overflow: hidden;
-  display: flex;
-}
-
-.example-element-description {
-  // padding: 16px;
 }
 
 tr.example-detail-row {
@@ -94,6 +80,5 @@ tr.example-element-row:not(.example-expanded-row):active {
 
 .example-element-detail {
   overflow: hidden;
-  display: flex;
 }
 

@@ -61,8 +61,30 @@
   <mat-form-field  style="width: 4%;" >
     <input matInput placeholder="ExtID" formControlName="extTransactionId">
   </mat-form-field>
-  <button mat-raised-button  aria-label="expand row" color="primary" style="margin-left: 1%;"  
+  <button mat-raised-button 
+  [disabled]="!swift950Entry.valid"
+  aria-label="expand row" color="primary" style="margin-left: 1%;"  
     (click)="SubmitEntryAccounntingInsertRow()" >  
     Submit
   </button>
+
+  <mat-expansion-panel class="complex-search-entries" 
+  (opened)="panelOpenState = true"
+  (closed)="panelOpenState = false" >
+  <mat-expansion-panel-header >
+    <mat-panel-title>
+      Linked entries
+    </mat-panel-title>
+    <mat-panel-description>
+      Tap to {{panelOpenState? 'hide': 'open'}} the list for ID: {{externalId}}
+      <mat-icon color = 'accent'>filter_alt</mat-icon>
+    </mat-panel-description>
+  </mat-expansion-panel-header >
+    <app-table-acc-entries 
+    [readOnly]="true" 
+    [action]="'ViewEntriesByExternalId'" 
+    [externalId]="externalId" 
+    
+    ></app-table-acc-entries>
+  </mat-expansion-panel>
 </form>

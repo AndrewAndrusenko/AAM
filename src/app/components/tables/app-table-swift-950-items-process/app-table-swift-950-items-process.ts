@@ -9,6 +9,7 @@ import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/m
 import { bcParametersSchemeAccTrans, bcTransactionType_Ext, SWIFTStatement950model } from 'src/app/models/accounts-table-model';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { AppAccEntryModifyFormComponent } from '../../forms/app-acc-entry-modify-form/app-acc-entry-modify-form';
 @Component({
   selector: 'app-table-swift-950-items-process',
   templateUrl: './app-table-swift-950-items-process.html',
@@ -24,17 +25,20 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 export class AppTableSWIFT950ItemsComponent  implements OnInit, AfterViewInit {
   bcEntryParameters = <bcParametersSchemeAccTrans> {}
   TransactionTypes: bcTransactionType_Ext[] = [];
-  columnsToDisplay = ['amountTransaction',  'typeTransaction', 'valueDate', 'comment', 'refTransaction', 'entriesAmount' ];
-  columnsHeaderToDisplay = ['amount',  'type', 'value', 'comment','ref','allocated'];
+  columnsToDisplay = ['id', 'amountTransaction',  'typeTransaction', 'valueDate', 'comment', 'refTransaction', 'entriesAmount' ];
+  columnsHeaderToDisplay = ['Id', 'amount',  'type', 'value', 'comment','ref','allocated'];
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
   dataSource: MatTableDataSource<SWIFTStatement950model>;
   @Input() parentMsgRow: any;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
+  @ViewChild(AppAccEntryModifyFormComponent) EntryModifyForm: AppAccEntryModifyFormComponent;
   @Output() public modal_principal_parent = new EventEmitter();
   expandedElement: SWIFTStatement950model  | null;
   accessToClientData: string = 'true';
   action ='';
+  panelDraftOpenState:boolean = false;
+  panelEntryListOpenState:boolean = false;
   constructor ( 
     private AccountingDataService:AppAccountingService, 
     private TreeMenuSevice:TreeMenuSevice, 
@@ -57,23 +61,9 @@ export class AppTableSWIFT950ItemsComponent  implements OnInit, AfterViewInit {
     })
   }
   
-  ngOnChanges(changes: SimpleChanges) {}
-
   async openEntry (row) {
-    console.log('ea',row.entriesAmount);
-    if (row.entriesAmount > 0) {
-      let EmptyEntry = {
-        XactTypeCode_Ext: null,
-        XactTypeCode: null,
-        amountTransaction: 0,
-        dataTime: new Date().toISOString(),
-        accountId: null,
-        accountNo: null,
-        ledgerNoId: null,
-        ledgerNo: null,
-        entryDetails: null,
-        extTransactionId : null
-      }
+    if (Number(row.entriesAmount) > Number(row.amountTransaction)) {
+      let EmptyEntry = {'entryDraft' : {}, 'formStateisDisabled': true}
       this.AccountingDataService.sendEntryDraft(EmptyEntry);
     } else {
       let accountNo = row.comment.split('/')[3];
@@ -91,9 +81,8 @@ export class AppTableSWIFT950ItemsComponent  implements OnInit, AfterViewInit {
         this.bcEntryParameters.cxActTypeCode = row.typeTransaction;
         this.bcEntryParameters.cxActTypeCode_Ext = row.comment.split('/')[1];
         this.bcEntryParameters.cLedgerType = 'NostroAccount';
-        console.log('param', this.bcEntryParameters);
-        this.AccountingDataService.GetEntryScheme (this.bcEntryParameters).subscribe (data => {
-        this.AccountingDataService.sendEntryDraft(data);
+        this.AccountingDataService.GetEntryScheme (this.bcEntryParameters).subscribe (entryScheme => {
+        this.AccountingDataService.sendEntryDraft({'entryDraft' : entryScheme, 'formStateisDisabled': false, 'refTransaction': row.refTransaction});
         });
       })
     }

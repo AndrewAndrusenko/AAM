@@ -79,7 +79,13 @@ async function fGetAccountingData (request,response) {
         'entryTypes' : {
           1: ' ("XactTypeCode_Ext" = ANY(array[${entryTypes:raw}]))',
           2: ' ("XactTypeCode_Ext" = ANY(array[${entryTypes:raw}]))  '
-        }
+        },
+        'extTransactionId' : {
+          1: ' ("extTransactionId" = ${extTransactionId:raw})',
+          2: ' ("extTransactionId" = ${extTransactionId:raw}) '
+        },
+        
+
       }
       let conditionsAccountLedger =' WHERE'
       let conditionsLedgerToLedger =' WHERE'
@@ -91,10 +97,6 @@ async function fGetAccountingData (request,response) {
         }
       });
 
-      console.log('param',(request.query));
-      console.log('values',(query.values));
-      console.log('conditionsAccountLedger',(conditionsAccountLedger.slice(0,-5)));
-      console.log('conditionsLedgerToLedger',(conditionsLedgerToLedger.slice(0,-5)));
       query.text ='SELECT \'AL\' AS "d_transactionType","bAccountTransaction".id AS "t_id", "entryDetails" AS "t_entryDetails", ' + 
       '"bAccountTransaction"."ledgerNoId" AS "t_ledgerNoId", "bAccountTransaction"."accountId" AS "t_accountId", ' +
       '"dataTime"::date AS "t_dataTime", "extTransactionId" AS "t_extTransactionId", "amountTransaction" AS "t_amountTransaction", '+
@@ -232,9 +234,8 @@ async function fGetAccountingData (request,response) {
   }
   sql = pgp.as.format(query.text,request.query);
   query.values = null
-  console.log('---------------------------------------------------------------------------------------------------------');
-  console.log('PROJECTION!!  ', sql);
-   console.log('sql', sql);
+/*   console.log('---------------------------------------------------------------------------------------------------------');
+  console.log(request.query.Action, sql); */
    query.text = sql;
    pool.query (query,  (err, res) => 
    {if (err) {
@@ -242,7 +243,7 @@ async function fGetAccountingData (request,response) {
     err.detail = err.stack
     return response.send(err)
     } else {
-      console.log('validator', res.rows[0]);
+      // console.log('validator', res.rows[0]);
       return response.status(200).json(res.rows)
     }
   }) 
@@ -275,7 +276,7 @@ async function GetEntryScheme (request, response) {
 
   const query = {
     text:'SELECT '+
-    '"ledgerNoId", "dataTime", "XactTypeCode", ' +
+    '"ledgerNoId" , "dataTime", "XactTypeCode", ' +
     '"XactTypeCode_Ext" , "accountId", "amountTransaction", '+
     '"entryDetails", "extTransactionId" '+
     'FROM public."bcSchemeAccountTransaction" '+
@@ -567,7 +568,7 @@ async function faccountingOverdraftAccountCheck (request, response) {
     err.detail = err.stack
     return response.send(err)
   } else {
-    console.log('validator', res.rows[0]);
+    // console.log('validator', res.rows[0]);
     return response.status(200).json(res.rows)}
   })   
 }
@@ -589,7 +590,7 @@ async function faccountingOverdraftLedgerAccountCheck (request, response) {
     err.detail = err.stack
     return response.send(err)
   } else {
-    console.log('validator', res.rows[0]);
+    // console.log('validator', res.rows[0]);
     return response.status(200).json(res.rows)}
   })   
 }
@@ -603,9 +604,9 @@ async function faccountingBalanceCloseInsert (request, response) {
   } 
 
   sql = pgp.as.format(query.text,query.values)
-  console.log('---------------------------------------------------------------------------------------------------------');
+ /*  console.log('---------------------------------------------------------------------------------------------------------');
   console.log('faccountingBalanceCloseInsert!!   ', sql);
-
+ */
    pool.query (sql,  (err, res) => {if (err) {
     console.log (err.stack.split("\n", 1).join(""))
     err.detail = err.stack
@@ -623,8 +624,8 @@ async function faccountingBalanceDayOpen (request, response) {
   'DELETE FROM public."bLedgerStatement" WHERE "dateAcc"::date = ${dateToOpen} RETURNING *;'
   } 
   sql = pgp.as.format(query.text,paramArr)
-  console.log('---------------------------------------------------------------------------------------------------------');
-  console.log('faccountingBalanceDayOpen!!   ', sql);
+  // console.log('---------------------------------------------------------------------------------------------------------');
+  // console.log('faccountingBalanceDayOpen!!   ', sql);
 
    pool.query (sql,  (err, res) => {if (err) {
     console.log (err.stack.split("\n", 1).join(""))

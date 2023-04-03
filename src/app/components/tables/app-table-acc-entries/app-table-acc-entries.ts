@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Output, ViewChild} from '@angular/core';
+import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {lastValueFrom, Subscription } from 'rxjs';
@@ -37,6 +37,7 @@ export class AppTableAccEntriesComponent  {
     'd_xActTypeCodeExtName', 
     't_amountTransaction', 
     'd_entryDetails', 
+    't_extTransactionId'
   ]
   columnsHeaderToDisplay = [
     'debit',
@@ -46,6 +47,7 @@ export class AppTableAccEntriesComponent  {
     'Code', 
     'amount', 
     'Details', 
+    'ExtId'
   ];
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
   dataSource: MatTableDataSource<bAccountsEntriesList>;
@@ -54,8 +56,9 @@ export class AppTableAccEntriesComponent  {
   @Output() public modal_principal_parent = new EventEmitter();
   expandedElement: bAccountsEntriesList  | null;
   accessToClientData: string = 'true';
-  public readOnly: boolean = false; 
-  action ='';
+  @Input() readOnly: boolean = false; 
+  @Input() action :string = '';
+  @Input() externalId: number = null;
   dialogRef: MatDialogRef<AppAccEntryModifyFormComponent>;
   private subscriptionName: Subscription;
   public FirstOpenedAccountingDate : Date;
@@ -92,30 +95,37 @@ export class AppTableAccEntriesComponent  {
       dataRange : this.dataRange,
       noAccountLedger: null,
       amount:{value:null, disabled:true},
-      entryType : {value:[], disabled:false}
+      entryType : {value:[], disabled:false},
+      ExtID:{value:null, disabled:false}
     })
     this.columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
 
     this.AccountingDataService.GetTransactionType_Ext('',0,'','','bcTransactionType_Ext').subscribe (
       data => this.TransactionTypes = data)
     this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate)
-   
-   
-    
+    this.AccountingDataService.getReloadEntryList().subscribe(data => this.submitQuery())
   }
   async ngOnInit() {
-    if (this.action=='ShowEntriesForBalanceSheet') {
-      console.log('row', this.paramRowData,this.paramRowData.dateBalance);
-      this.accounts = [this.paramRowData.accountNo];
-      this.dataRange.controls['dateRangeStart'].setValue(new Date (this.paramRowData.dateBalance))
-      this.dataRange.controls['dateRangeEnd'].setValue(new Date (this.paramRowData.dateBalance))
+    switch (this.action) {
+      case 'ShowEntriesForBalanceSheet':
+        this.accounts = [this.paramRowData.accountNo];
+        this.dataRange.controls['dateRangeStart'].setValue(new Date (this.paramRowData.dateBalance))
+        this.dataRange.controls['dateRangeEnd'].setValue(new Date (this.paramRowData.dateBalance))
+      break;
+      case 'ViewEntriesByExternalId':
+        this.ExtId.setValue(this.externalId)
+      break;
     }
+
     let userData = JSON.parse(localStorage.getItem('userInfo'))
     await lastValueFrom (this.TreeMenuSevice.getaccessRestriction (userData.user.accessrole, 'accessToClientData'))
     .then ((accessRestrictionData) =>{
       this.accessToClientData = accessRestrictionData['elementvalue']
       switch (this.action) {
         case 'ShowEntriesForBalanceSheet': 
+          this.submitQuery();
+        break;
+        case 'ViewEntriesByExternalId': 
           this.submitQuery();
         break;
         default :
@@ -136,7 +146,6 @@ export class AppTableAccEntriesComponent  {
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
   openEntryModifyForm (actionType:string, row: any ) {
-    console.log('row', row);
     this.dialogRef = this.dialog.open(AppAccEntryModifyFormComponent ,{minHeight:'400px', maxWidth:'1000px' });
     this.dialogRef.componentInstance.action = actionType;
     this.dialogRef.componentInstance.title = actionType;
@@ -163,7 +172,6 @@ export class AppTableAccEntriesComponent  {
    (index >= 0)? this.accounts.splice(index, 1) : null
   }
   clearAll(event) {
-  console.log('event', event.target.textContent);
   event.target.textContent.trim() === 'ClearAll cancel'? this.accounts = ['ClearAll']: null;
   }
   addChips (el: any, column: string) {(['d_Debit', 'd_Credit'].includes(column))? this.accounts.push(el):null;}
@@ -191,7 +199,8 @@ export class AppTableAccEntriesComponent  {
 
     ( this.entryTypes.value != null&&this.entryTypes.value.length !=0)? Object.assign (searchObj , {'entryTypes': [this.entryTypes.value]}): null;
 
-    console.log('searchParameters',searchObj);
+    (this.ExtId.value) == null?  null : Object.assign (searchObj , {'extTransactionId': this.ExtId.value});
+
 
     this.AccountingDataService.GetAccountsEntriesListAccounting(searchObj,null,null, null, 'GetAccountsEntriesListAccounting').subscribe (EntriesList  => {
       this.dataSource  = new MatTableDataSource(EntriesList);
@@ -213,7 +222,6 @@ export class AppTableAccEntriesComponent  {
   toggleAllSelection() {
     if (this.allSelected.selected) {
       this.entryTypes.patchValue([...this.TransactionTypes.map(item => item.id), 0]);
-      console.log('tp', this.TransactionTypes.map(item => item.id))
     } else {
       this.entryTypes.patchValue([]);
     }
@@ -240,6 +248,7 @@ export class AppTableAccEntriesComponent  {
   get  dateRangeStart() {return this.searchParametersFG.get('dateRangeStart') } 
   get  dateRangeEnd() {return this.searchParametersFG.get('dateRangeEnd') } 
   get  entryTypes () {return this.searchParametersFG.get('entryType') } 
+  get  ExtId () {return this.searchParametersFG.get('ExtID') } 
   
  
 }
