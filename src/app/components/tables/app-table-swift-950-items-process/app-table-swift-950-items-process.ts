@@ -1,7 +1,7 @@
-import {AfterViewInit, Component, EventEmitter, Input, OnInit, Output, SimpleChanges, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
-import {EmptyError, firstValueFrom, lastValueFrom, Subscription } from 'rxjs';
+import { firstValueFrom, lastValueFrom, Subscription } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {TreeMenuSevice } from 'src/app/services/tree-menu.service';
@@ -22,7 +22,7 @@ import { AppAccEntryModifyFormComponent } from '../../forms/app-acc-entry-modify
     ]),
   ],
 })
-export class AppTableSWIFT950ItemsComponent  implements OnInit, AfterViewInit {
+export class AppTableSWIFT950ItemsComponent  implements  AfterViewInit {
   bcEntryParameters = <bcParametersSchemeAccTrans> {}
   TransactionTypes: bcTransactionType_Ext[] = [];
   columnsToDisplay = ['id', 'amountTransaction',  'typeTransaction', 'valueDate', 'comment', 'refTransaction', 'entriesAmount' ];
@@ -44,23 +44,27 @@ export class AppTableSWIFT950ItemsComponent  implements OnInit, AfterViewInit {
     private TreeMenuSevice:TreeMenuSevice, 
     private dialog: MatDialog,
     private fb:FormBuilder 
-  ) {}
-  ngOnInit(): void {}
+  ) {
+    this.AccountingDataService.getReloadEntryList().subscribe (entryData =>{
+      console.log('AppTableSWIFT950ItemsComponent this.AccountingDataService.getReloadEntryList');
+      
+      this.reloadSwiftItemsTable()})
+  }
   
   async ngAfterViewInit() {
     this.columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
     let userData = JSON.parse(localStorage.getItem('userInfo'))
     await lastValueFrom (this.TreeMenuSevice.getaccessRestriction (userData.user.accessrole, 'accessToClientData'))
-    .then ((accessRestrictionData) =>{
-      this.accessToClientData = accessRestrictionData['elementvalue']
-      this.AccountingDataService.GetMT950Transactions (null,this.parentMsgRow.id,null,null,'GetMT950Transactions').subscribe (MT950Transactions  => {
-        this.dataSource  = new MatTableDataSource(MT950Transactions);
-        this.dataSource.paginator = this.paginator;
-        this.dataSource.sort = this.sort;
-      })
-    })
+    .then (accessRestrictionData => this.reloadSwiftItemsTable())
   }
   
+  reloadSwiftItemsTable () {
+    this.AccountingDataService.GetMT950Transactions (null,this.parentMsgRow.id,null,null,'GetMT950Transactions').subscribe (MT950Transactions  => {
+      this.dataSource  = new MatTableDataSource(MT950Transactions);
+      this.dataSource.paginator = this.paginator;
+      this.dataSource.sort = this.sort;
+    })
+  }
   async openEntry (row) {
     if (Number(row.entriesAmount) > Number(row.amountTransaction)) {
       let EmptyEntry = {'entryDraft' : {}, 'formStateisDisabled': true}

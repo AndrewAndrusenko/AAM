@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, Subject} from 'rxjs';
+import { Observable, ReplaySubject, Subject} from 'rxjs';
 import { bAccounts, bAccountsEntriesList, bBalanceData, bBalanceFullData, bcAccountType_Ext, bcEnityType, bcTransactionType_Ext, bLedger, bLedgerAccounts, bLedgerBalanceData, SWIFTSGlobalListmodel, SWIFTStatement950model } from '../models/accounts-table-model';
 
 @Injectable({
@@ -9,6 +9,7 @@ import { bAccounts, bAccountsEntriesList, bBalanceData, bBalanceFullData, bcAcco
 export class AppAccountingService {
   constructor(private http:HttpClient) { }
   private subjectName = new Subject<any>(); 
+  private relplaySubject = new ReplaySubject(1)
   AccountsEntriesList = <bAccountsEntriesList> {
     'd_transactionType': null,
     't_id': null,
@@ -175,10 +176,11 @@ export class AppAccountingService {
     return this.http.post ('/api/DEA/updateLLEntryAccountAccounting/',{'data': data}).toPromise()
   }
   sendReloadEntryList ( id:any) { //the component that wants to update something, calls this fn
-    this.subjectName.next(id); //next() will feed the value in Subject
+    this.relplaySubject.next(id); //next() will feed the value in Subject
   }
   getReloadEntryList(): Observable<any> { //the receiver component calls this function 
-    return this.subjectName.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
+    console.log('getReloadEntryList', this.subjectName);
+    return this.relplaySubject.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
   }
 
 /*----------------------OverdraftValidators----------------------------------------------------*/

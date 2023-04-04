@@ -78,20 +78,17 @@ export class AppAccEntryModifyFormComponent implements OnInit, AfterViewInit {
     })
     this.AccountingDataService.getEntryDraft().subscribe (entryData => {
       if (entryData.refTransaction === this.Ref ) {
-      this.FirstOpenedAccountingDate = entryData.entryDraft.FirstOpenedAccountingDate
-      console.log('FirstOpenedAccountingDate',this.FirstOpenedAccountingDate);
-      this.entryModifyForm.patchValue(entryData.entryDraft)
-      this.dataTime.setValue(new Date(entryData.entryDraft.t_dataTime));
-      this.xActTypeCode.setValue(Number(entryData.entryDraft.t_XactTypeCode));
-      this.xActTypeCode_Ext.setValue(Number(entryData.entryDraft.t_XactTypeCode_Ext));
-      this.action = 'Create'
-      this.title = 'Create';
-
-      this.id.setValue(0);
-      this.AddAsyncValidators();
-      
-      this.amountFormat()
-      // this.updateExpectedBalance() 
+        this.FirstOpenedAccountingDate = entryData.entryDraft.FirstOpenedAccountingDate
+        console.log('FirstOpenedAccountingDate',this.FirstOpenedAccountingDate);
+        this.entryModifyForm.patchValue(entryData.entryDraft)
+        this.dataTime.setValue(new Date(entryData.entryDraft.t_dataTime));
+        this.xActTypeCode.setValue(Number(entryData.entryDraft.t_XactTypeCode));
+        this.xActTypeCode_Ext.setValue(Number(entryData.entryDraft.t_XactTypeCode_Ext));
+        this.action = 'Create'
+        this.title = 'Create';
+        this.id.setValue(0);
+        this.AddAsyncValidators();
+        this.amountFormat()
       }
     })
   }
@@ -154,9 +151,9 @@ export class AppAccEntryModifyFormComponent implements OnInit, AfterViewInit {
     console.log('updateExpectedBalance');
     
     if (this.d_transactionType.value === 'AL') { 
-      this.AccountingDataService.getExpectedBalanceOverdraftCheck (this.accountId.value,this.amountTransaction.getRawValue(), new Date (this.dataTime.value).toDateString(),this.xActTypeCode.value, this.id.value, new Date (this.FirstOpenedAccountingDate).toDateString(), 'AccountingOverdraftAccountCheck'). subscribe(expectBalanceData => this.d_closingBalance.setValue(expectBalanceData[0].closingBalance))
+      this.AccountingDataService.getExpectedBalanceOverdraftCheck (this.accountId.value,this.amountTransaction.getRawValue(), new Date (this.dataTime.value).toDateString(),this.xActTypeCode.value, this.id.value, new Date (this.FirstOpenedAccountingDate).toDateString(), 'AccountingOverdraftAccountCheck').subscribe(expectBalanceData => this.d_closingBalance.setValue(expectBalanceData[0].closingBalance))
     } else {
-      this.AccountingDataService.getExpectedBalanceLedgerOverdraftCheck (this.accountId.value,this.amountTransaction.getRawValue(), new Date (this.dataTime.value).toDateString(), 2 , this.id.value, new Date (this.FirstOpenedAccountingDate).toDateString() ,'AccountingOverdraftAccountCheck'). subscribe(expectBalanceData => this.d_closingBalance.setValue(expectBalanceData[0].closingBalance))
+      this.AccountingDataService.getExpectedBalanceLedgerOverdraftCheck (this.accountId.value,this.amountTransaction.getRawValue(), new Date (this.dataTime.value).toDateString(), 2 , this.id.value, new Date (this.FirstOpenedAccountingDate).toDateString() ,'AccountingOverdraftAccountCheck').subscribe(expectBalanceData => this.d_closingBalance.setValue(expectBalanceData[0].closingBalance))
     }
  
   this.AccountingDataService.getExpectedBalanceLedgerOverdraftCheck (this.ledgerId.value,this.amountTransaction.getRawValue(), new Date (this.dataTime.value).toDateString(), this.xActTypeCode.getRawValue() === 0? 1: this.xActTypeCode.getRawValue(), this.id.value, new Date (this.FirstOpenedAccountingDate).toDateString() ,'AccountingOverdraftAccountCheck'). subscribe(expectBalanceData => this.d_closingLedgerBalance.setValue(expectBalanceData[0].closingBalance))
@@ -179,9 +176,6 @@ export class AppAccEntryModifyFormComponent implements OnInit, AfterViewInit {
     this.accountNo.updateValueAndValidity();
     this.ledgerNo.updateValueAndValidity();
     console.log('showAValidator');
-
-    // this.getFormValidationErrors()
-
   }
   toggleOverdraftValidator ( overdraft :any, element: string) {
     if (overdraft.checked)  { 

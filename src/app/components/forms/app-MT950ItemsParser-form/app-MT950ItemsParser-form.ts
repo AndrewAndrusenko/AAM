@@ -67,7 +67,6 @@ export class AppMT950ItemParsing  {
       } else {
         this.snack.open('Created: ' + result + ' entry','OK',{panelClass: ['snackbar-success'], duration: 3000})
         this.swift950Entry.disable();
-        this.AccountingDataService.sendReloadEntryList(1)
       }
     });
   }
