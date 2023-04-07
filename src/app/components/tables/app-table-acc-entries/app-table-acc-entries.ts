@@ -33,8 +33,8 @@ export class AppTableAccEntriesComponent  {
     'd_Debit',
     'd_Credit',
     't_dataTime', 
-    't_XactTypeCode',  
     'd_xActTypeCodeExtName', 
+    't_XactTypeCode',  
     't_amountTransaction', 
     'd_entryDetails', 
     't_extTransactionId'
@@ -43,11 +43,12 @@ export class AppTableAccEntriesComponent  {
     'debit',
     'credit',
     'dataTime', 
-    'Ledger',  
     'Code', 
+    'Ledger',  
     'amount', 
     'Details', 
-    'ExtId'
+    'ExtId',
+    'Action'
   ];
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
   dataSource: MatTableDataSource<bAccountsEntriesList>;

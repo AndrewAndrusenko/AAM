@@ -5,11 +5,11 @@ import { firstValueFrom, lastValueFrom, Subscription } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {TreeMenuSevice } from 'src/app/services/tree-menu.service';
-import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { bcParametersSchemeAccTrans, bcTransactionType_Ext, SWIFTStatement950model } from 'src/app/models/accounts-table-model';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
-import { FormBuilder, FormGroup } from '@angular/forms';
 import { AppAccEntryModifyFormComponent } from '../../forms/app-acc-entry-modify-form/app-acc-entry-modify-form';
+import { HandlingTableSelectionService } from 'src/app/services/handling-table-selection.service';
+import { SelectionModel } from '@angular/cdk/collections';
 @Component({
   selector: 'app-table-swift-950-items-process',
   templateUrl: './app-table-swift-950-items-process.html',
@@ -25,7 +25,7 @@ import { AppAccEntryModifyFormComponent } from '../../forms/app-acc-entry-modify
 export class AppTableSWIFT950ItemsComponent  implements  AfterViewInit {
   bcEntryParameters = <bcParametersSchemeAccTrans> {}
   TransactionTypes: bcTransactionType_Ext[] = [];
-  columnsToDisplay = ['id', 'amountTransaction',  'typeTransaction', 'valueDate', 'comment', 'refTransaction', 'entriesAmount' ];
+  columnsToDisplay = ['select','id', 'amountTransaction',  'typeTransaction', 'valueDate', 'comment', 'refTransaction', 'entriesAmount' ];
   columnsHeaderToDisplay = ['Id', 'amount',  'type', 'value', 'comment','ref','allocated'];
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
   dataSource: MatTableDataSource<SWIFTStatement950model>;
@@ -39,15 +39,15 @@ export class AppTableSWIFT950ItemsComponent  implements  AfterViewInit {
   action ='';
   panelDraftOpenState:boolean = false;
   panelEntryListOpenState:boolean = false;
+  selection = new SelectionModel<SWIFTStatement950model>(true, []);
+  public multiSelect: boolean = true; 
+
   constructor ( 
     private AccountingDataService:AppAccountingService, 
     private TreeMenuSevice:TreeMenuSevice, 
-    private dialog: MatDialog,
-    private fb:FormBuilder 
+    private SelectionService:HandlingTableSelectionService,
   ) {
     this.AccountingDataService.getReloadEntryList().subscribe (entryData =>{
-      console.log('AppTableSWIFT950ItemsComponent this.AccountingDataService.getReloadEntryList');
-      
       this.reloadSwiftItemsTable()})
   }
   
@@ -63,6 +63,8 @@ export class AppTableSWIFT950ItemsComponent  implements  AfterViewInit {
       this.dataSource  = new MatTableDataSource(MT950Transactions);
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
+      console.log('reloadSwiftItemsTable for parent',this.parentMsgRow.id);
+      this.AccountingDataService.sendLoadedMT950Transactions(this.parentMsgRow.id)
     })
   }
   async openEntry (row) {
@@ -86,6 +88,7 @@ export class AppTableSWIFT950ItemsComponent  implements  AfterViewInit {
         this.bcEntryParameters.cxActTypeCode_Ext = row.comment.split('/')[1];
         this.bcEntryParameters.cLedgerType = 'NostroAccount';
         this.AccountingDataService.GetEntryScheme (this.bcEntryParameters).subscribe (entryScheme => {
+          // console.log('Manual 950 sent sendEntryDraft',entryScheme);
         this.AccountingDataService.sendEntryDraft({'entryDraft' : entryScheme, 'formStateisDisabled': false, 'refTransaction': row.refTransaction});
         });
       })
@@ -97,24 +100,9 @@ export class AppTableSWIFT950ItemsComponent  implements  AfterViewInit {
     this.dataSource.filter = filterValue.trim().toLowerCase();
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
-  
+  isAllSelected() { return this.SelectionService.isAllSelected(this.dataSource, this.selection)} 
+  toggleAllRows() { 
+    return this.SelectionService.toggleAllRows(this.dataSource, this.selection)} 
+  checkboxLabel(row?: SWIFTStatement950model): string {return this.SelectionService.checkboxLabel(this.dataSource, this.selection, row)}
 
-/*   chooseStrategy (element) {
-    console.log('chose account', element);
-    this.currentStrategy = element;
-    this.modal_principal_parent.emit('CLOSE_PARENT_MODAL');
-  }
-  openStrategyForm (actionType:string, row: any ) {
-    console.log('row', row);
-    this.dialogRef = this.dialog.open(AppStrategyFormComponent ,{minHeight:'400px', maxWidth:'1000px' });
-    this.dialogRef.componentInstance.action = actionType;
-    this.dialogRef.componentInstance.title = actionType;
-    this.dialogRef.componentInstance.data = row;
-    switch (actionType) {
-      case 'Create':
-      case 'Create_Example': 
-      this.dialogRef.componentInstance.title = 'Create New';
-      break;
-    }
-  } */
 }

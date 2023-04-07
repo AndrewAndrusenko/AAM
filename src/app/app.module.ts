@@ -61,6 +61,7 @@ import {MatChipsModule as MatChipsModule} from '@angular/material/chips';
 import { AppTableBalanceSheetComponent } from './components/tables/app-table-balance-sheet/app-table-balance-sheet';
 import {MatSortModule} from '@angular/material/sort';
 import {MatListModule as MatListModule} from '@angular/material/list';
+import { CdkTableModule } from '@angular/cdk/table';
 
 
 @NgModule({
@@ -98,7 +99,8 @@ import {MatListModule as MatListModule} from '@angular/material/list';
         MatButtonModule,
         MatChipsModule,
         MatSortModule,
-        MatListModule
+        MatListModule,
+        CdkTableModule,
     ],
     declarations: [
         AppComponent,

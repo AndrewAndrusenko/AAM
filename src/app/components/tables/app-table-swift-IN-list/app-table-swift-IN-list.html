@@ -1,10 +1,69 @@
 <mat-form-field>
   <input matInput (keyup)="applyFilter($event)" placeholder="Type search string" #input>
 </mat-form-field>
+<mat-expansion-panel  class="complex-search-entries" 
+  (opened)="panelOpenState = true"
+  (closed)="panelOpenState = false" >
+  <mat-expansion-panel-header >
+    <mat-panel-title>
+      Statement processing
+    </mat-panel-title>
+    <mat-panel-description>
+      Tap to {{panelOpenState? 'hide': 'show'}} additional controls
+      <mat-icon color = 'accent'>filter_alt</mat-icon>
+    </mat-panel-description>
+  </mat-expansion-panel-header >
+
+  <form class="submit"  style="font-size: 18px;">
+    <button color = "primary" mat-raised-button 
+      style=" margin-left:1%;  font-size: 18px;"
+      (click)="ProcessSwiftStatemts(dateToProcess.value)">
+      Process all transactions
+    </button>
+
+    <mat-form-field style=" margin-left: 2%; width: 12%; font-size: 18px;" >
+      <input #dateToProcess 
+      matInput style="font-size: 18px;" [min]="FirstOpenedAccountingDate" [matDatepicker]="dateToProcessSwift" placeholder="Date to process" 
+      [value]="FirstOpenedAccountingDate" >
+      <mat-datepicker-toggle matSuffix [for]="dateToProcessSwift"></mat-datepicker-toggle>
+      <mat-datepicker  #dateToProcessSwift></mat-datepicker>
+    </mat-form-field>
+    <button color = "accent" mat-raised-button 
+      style=" margin-left:1%; font-size: 18px;"
+      (click)="toggleAllRows()">
+      Select All
+    </button>
+  </form>
+</mat-expansion-panel>
 
 <div class="mat-elevation-z8">
   <table  #strategyTable mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class="mat-elevation-z8">
-    <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i=index">
+    <ng-container   matColumnDef="select">
+      <th mat-header-cell *matHeaderCellDef>
+        
+        <mat-checkbox style="  vertical-align: top;"
+        (change)="$event ? toggleAllRows() : null;"
+                      [checked]="(!this.dataSource)? false : selection.hasValue() && isAllSelected()"
+                      [indeterminate]="selection.hasValue() && !isAllSelected()"
+                      [aria-label]="checkboxLabel()"
+                      [disabled]="!multiSelect">
+        </mat-checkbox>
+      </th>
+      <td mat-cell *matCellDef="let row; let i=dataIndex">
+        <mat-checkbox (click)="$event.stopPropagation()"
+                      (change)="$event ? toggleParentandChild (row, i): null;"
+                      
+                      [checked]="(!this.dataSource)? false : ChildhasValue(row, i) && isAllClidrenSelected(row,i)"
+                      [indeterminate]="ChildhasValue(row, i) && !isAllClidrenSelected(row,i)"
+
+                      [aria-label]="checkboxLabel(row)"
+                      [disabled]="!multiSelect">
+        </mat-checkbox>
+      </td>
+    </ng-container>
+
+    <!-- [checked]="(!this.dataSource)? false: selection.isSelected(row)" -->
+    <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay | slice:1; let i=index">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>  {{columnsHeaderToDisplay[i]  | uppercase}}</th>
       <td  mat-cell *matCellDef="let element"
       > <span [ngSwitch]="column">
@@ -40,10 +99,13 @@
     </ng-container>
 
     <tr mat-header-row *matHeaderRowDef="columnsToDisplayWithExpand"></tr>
-    <tr mat-row [cdkContextMenuTriggerFor]="instrumentcontextmenu"  *matRowDef="let element; columns: columnsToDisplayWithExpand;"
+    <tr mat-row [cdkContextMenuTriggerFor]="instrumentcontextmenu"  *matRowDef="let element; columns: columnsToDisplayWithExpand"
         class="example-element-row"
         [class.example-expanded-row]="expandedElement === element"
-        (click)="expandedElement = expandedElement === element ? null : element">
+        (click)="expandedElement = expandedElement === element ? null : element;
+       
+        ">
+
        
         <ng-template  #instrumentcontextmenu>
           <div class="tree-menu-context" cdkMenu >
@@ -72,10 +134,24 @@
         <!-- //Context menu for treeMenu element -->
 
       </tr>
-    <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"    ></tr>
+    <tr mat-row *matRowDef="let row; columns: ['expandedDetail'];" class="example-detail-row"    ></tr>
 
   </table>
 
   <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" [pageSize]="20" aria-label="Select page of users"></mat-paginator>
 </div>
+<mat-expansion-panel *ngIf="errorLogAutoProcessingALL.length" class="complex-search-entries" 
+  (opened)="errorsPpanelOpenState = true"
+  (closed)="errorsPpanelOpenState = false" >
+  <mat-expansion-panel-header >
+    <mat-panel-title>
+      Processing Errors Log
+    </mat-panel-title>
+    <mat-panel-description style="color: crimson;">
+      Tap to {{errorsPpanelOpenState? 'hide': 'show'}} errors details
+      <mat-icon color = 'accent'>sync_problem</mat-icon>
+    </mat-panel-description>
+  </mat-expansion-panel-header >
+<pre style="font-size: 16px;">{{errorLogAutoProcessingALL | json}}</pre>
+</mat-expansion-panel>
 

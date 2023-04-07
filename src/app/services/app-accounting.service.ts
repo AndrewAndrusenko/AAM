@@ -8,7 +8,9 @@ import { bAccounts, bAccountsEntriesList, bBalanceData, bBalanceFullData, bcAcco
 })
 export class AppAccountingService {
   constructor(private http:HttpClient) { }
-  private subjectName = new Subject<any>(); 
+  private subjectName = new Subject<any>();
+  private subjectEntryDraft = new Subject<any>();
+  private subjectLoadedMT950Transactions = new Subject<any>();
   private relplaySubject = new ReplaySubject(1)
   AccountsEntriesList = <bAccountsEntriesList> {
     'd_transactionType': null,
@@ -41,6 +43,13 @@ export class AppAccountingService {
     const params = {'dataRange': dataRange, 'id' :id, 'MTType': MTType,'Sender':Sender, 'Action': Action}
     return this.http.get <SWIFTStatement950model []>('/api/DEA/fGetMT950Transactions/', { params: params })
   }
+  sendLoadedMT950Transactions ( id:any) { //the component that wants to update something, calls this fn
+    this.subjectLoadedMT950Transactions.next(id); //next() will feed the value in Subject
+  }
+  getLoadedMT950Transactions(): Observable<any> { //the receiver component calls this function 
+    return this.subjectLoadedMT950Transactions.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
+  }
+
   GetTransactionType_Ext (dataRange: string, id: number, MTType:string, Sender: string, Action: string):Observable <bcTransactionType_Ext[]> {
     const params = {'dataRange': dataRange, 'id' :id, 'MTType': MTType,'Sender':Sender, 'Action': Action}
     return this.http.get <bcTransactionType_Ext []>('/api/DEA/fGetAccountingData/', { params: params })
@@ -66,25 +75,29 @@ export class AppAccountingService {
   GetEntryScheme (bcEntryParameters:any) :Observable <bcTransactionType_Ext[]> { 
     return this.http.get <bcTransactionType_Ext []>('/api/DEA/GetEntryScheme/', { params: bcEntryParameters })  
   } 
+
+
+
   sendEntryDraft (data: any) { 
     this.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe (OpenedDate => {
       let newEntryDraft = {}
       newEntryDraft['FirstOpenedAccountingDate'] = OpenedDate[0].FirstOpenedDate;
       let entryFormFields = Object.keys (this.AccountsEntriesList)
       Object.entries(data.entryDraft).forEach ((value,key) => {
-        console.log('entryDraft', value[0],value[1]);
         entryFormFields.includes('t_'+ value[0])? newEntryDraft['t_' + value[0]] = value[1]  : null;
         entryFormFields.includes('d_'+ value[0])? newEntryDraft['d_' + value[0]] = value[1] : null;
       })
       newEntryDraft['d_transactionType'] = 'AL';
-      
-      console.log('newEntryDraft', newEntryDraft);
-      data.entryDraft = newEntryDraft;
-      this.subjectName.next(data)
+      data.entryDraft = newEntryDraft; 
+      this.subjectEntryDraft.next(data)
     })
   }
-  getEntryDraft (): Observable<any> {return this.subjectName.asObservable(); }
+  getEntryDraft (): Observable<any> {return this.subjectEntryDraft.asObservable(); }
   
+
+
+
+
   sendFormState(formName: string, state: boolean) {this.subjectName.next({ formName: state })}
 
   getFormState(): Observable<any> {return this.subjectName.asObservable() }
@@ -179,7 +192,6 @@ export class AppAccountingService {
     this.relplaySubject.next(id); //next() will feed the value in Subject
   }
   getReloadEntryList(): Observable<any> { //the receiver component calls this function 
-    console.log('getReloadEntryList', this.subjectName);
     return this.relplaySubject.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
   }
 

@@ -205,3 +205,10 @@ export interface bBalanceFullData {
   OutGoingBalance : number,
    checkClosing : number 
 } 
+export interface cFormValidationLog {
+  formReference: string;
+  fieldName: string;
+  fieldDescription: string;
+  errorMsg: string;
+  kKeyError: string
+}

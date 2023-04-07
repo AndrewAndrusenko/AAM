@@ -3,8 +3,8 @@ import {
   AsyncValidatorFn,
   ValidationErrors,
 } from '@angular/forms';
-import { Observable, of } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
+import { firstValueFrom, Observable, of } from 'rxjs';
+import { catchError, first, map, take, tap } from 'rxjs/operators';
 import { AppInvestmentDataServiceService } from './app-investment-data.service.service';
 import { AppTabServiceService } from './app-tab-service.service';
 import { AppAccountingService } from './app-accounting.service';
@@ -49,7 +49,8 @@ export class customAsyncValidators {
         .GetAccountData (null,null,null, control.value, 'GetAccountData')
         .pipe(
           map ( accountExist => (control.touched && !accountExist.length ? { accountIsNotExist: true } : null)  ),
-          catchError(() => of(null))
+          catchError(() => of(null)),
+          take(1)
         );
     };
   }
@@ -59,7 +60,9 @@ export class customAsyncValidators {
         .GetAccountData (null,null,null, control.value, 'GetAccountData')
         .pipe(
           map ( accountIsTaken => (control.value !== AccountNo && accountIsTaken.length ? { accountIsTaken: true } : null)  ),
-          catchError(() => of(null))
+          catchError(() => of(null)),
+          take(1)
+
         );
     };
   }
@@ -69,7 +72,9 @@ export class customAsyncValidators {
         .GetLedgerData (null,null,null, control.value, 'GetLedgerData')
         .pipe(
           map ( accountExist => (control.touched && !accountExist.length ? { accountIsNotExist: true } : null)  ),
-          catchError(() => of(null))
+          catchError(() => of(null)),
+          take(1)
+
         );
     };
   }
@@ -79,7 +84,9 @@ export class customAsyncValidators {
         .GetLedgerData (null,null,null, control.value, 'GetLedgerData')
         .pipe(
           map ( accountIsTaken => (control.value !== AccountNo && accountIsTaken.length ? { accountIsTaken: true } : null)  ),
-          catchError(() => of(null))
+          catchError(() => of(null)),
+          take(1)
+
         );
     };
   }
@@ -92,7 +99,9 @@ export class customAsyncValidators {
         .pipe(
           tap (expectedBalance => d_closingBalance.setValue (expectedBalance[0].closingBalance ) ),
           map ( expectedBalance => (expectedBalance[0].closingBalance < 0 ? { overdraft: true } : null)  ),
-          catchError(() => of(null))
+          catchError(() => of(null)),
+          take(1)
+
           );
     };
   }
@@ -100,13 +109,14 @@ export class customAsyncValidators {
     AccountingDataService: AppAccountingService, AccountId:AbstractControl, transactionAmount: AbstractControl, transactionDate:AbstractControl, xactTypeCode:number, d_closingLedgerBalance: AbstractControl, id: AbstractControl, FirstOpenedAccountingDate : Date 
     ): AsyncValidatorFn {
     return (control: AbstractControl): Observable<ValidationErrors> => {
-      return AccountingDataService
+     return AccountingDataService
         .getExpectedBalanceLedgerOverdraftCheck (AccountId.value,transactionAmount.getRawValue(), new Date (transactionDate.value).toDateString(), xactTypeCode, id.value, new Date (FirstOpenedAccountingDate).toDateString(), 'AccountingOverdraftAccountCheck')
         .pipe(
           // tap (expectedBalance => console.log('ad', getControlName(AccountId)) ),
           tap (expectedBalance => d_closingLedgerBalance.setValue (expectedBalance[0].closingBalance ) ),
           map ( expectedBalance => (expectedBalance[0].closingBalance < 0 ? { overdraft: true } : null)  ),
-          catchError(() => of(null))
+          catchError(() => of(null)),
+          take(1)
           );
     };
   }  

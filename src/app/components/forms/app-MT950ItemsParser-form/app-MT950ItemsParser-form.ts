@@ -45,17 +45,6 @@ export class AppMT950ItemParsing  {
     private dialog: MatDialog, 
     public snack:MatSnackBar,
   ) {
-    this.AccountingDataService.getEntryDraft().subscribe (data => {
-      console.log('getEntryDraft', data);
-      this.swift950Entry.patchValue(data.entryDraft);
-      Boolean(data.formStateisDisabled)? this.swift950Entry.disable() : null;
-      this.swift950Entry.controls.XactTypeCode_Ext.setValue(Number(data.entryDraft.XactTypeCode_Ext))
-      this.swift950Entry.controls.XactTypeCode.setValue(Number(data.entryDraft.XactTypeCode))
-      this.swift950Entry.controls.dataTime.setValue(new Date(data.entryDraft.dataTime).toISOString())
-      // this.swift950Entry.controls.extTransactionId.setValue(Number(data.dataTime))
-
-    })
-      
     this.AccountingDataService.GetTransactionType_Ext('',0,'','','bcTransactionType_Ext').subscribe (data => this.TransactionTypes=data)
   }
   SubmitEntryAccounntingInsertRow () {
