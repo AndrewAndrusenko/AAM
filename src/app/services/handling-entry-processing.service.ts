@@ -13,7 +13,7 @@ export class HandlingEntryProcessingService {
     public snack:MatSnackBar
 
   ) { }
-  async openEntry (row: any, parentMsgRow:any ) {
+  async openEntry (row: any, parentMsgRow:any, autoProcessing?: boolean ) {
     if (Number(row.entriesAmount) > Number(row.amountTransaction) && ['CR','DR'].includes(row.typeTransaction)) {
       let EmptyEntry = {'entryDraft' : {}, 'formStateisDisabled': true}
       this.AccountingDataService.sendEntryDraft(EmptyEntry);
@@ -34,7 +34,7 @@ export class HandlingEntryProcessingService {
           bcEntryParameters.cxActTypeCode_Ext = row.comment.split('/')[1];
           bcEntryParameters.cLedgerType = 'NostroAccount';
           this.AccountingDataService.GetEntryScheme (bcEntryParameters).subscribe (entryScheme => {
-            this.AccountingDataService.sendEntryDraft({'entryDraft' : entryScheme, 'formStateisDisabled': false, 'refTransaction': row.refTransaction, 'autoProcessing':true});
+            this.AccountingDataService.sendEntryDraft({'entryDraft' : entryScheme, 'formStateisDisabled': false, 'refTransaction': row.refTransaction, 'autoProcessing':autoProcessing});
           });
         } else {
           this.snack.open('Error: Account No: ' +accountNo +' has not been found for ref:'+row.refTransaction,'OK',{panelClass: ['snackbar-error']}); 

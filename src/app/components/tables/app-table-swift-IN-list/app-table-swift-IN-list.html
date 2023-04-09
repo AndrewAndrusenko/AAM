@@ -2,7 +2,8 @@
   <input matInput (keyup)="applyFilter($event)" placeholder="Type search string" #input>
 </mat-form-field>
 <mat-expansion-panel  class="complex-search-entries" 
-  (opened)="panelOpenState = true"
+  (opened)="panelOpenState = true; 
+  changeProcesDate(dateToProcess.value)"
   (closed)="panelOpenState = false" >
   <mat-expansion-panel-header >
     <mat-panel-title>
@@ -20,19 +21,28 @@
       (click)="ProcessSwiftStatemts(dateToProcess.value)">
       Process all transactions
     </button>
-
-    <mat-form-field style=" margin-left: 2%; width: 12%; font-size: 18px;" >
-      <input #dateToProcess 
-      matInput style="font-size: 18px;" [min]="FirstOpenedAccountingDate" [matDatepicker]="dateToProcessSwift" placeholder="Date to process" 
-      [value]="FirstOpenedAccountingDate" >
-      <mat-datepicker-toggle matSuffix [for]="dateToProcessSwift"></mat-datepicker-toggle>
-      <mat-datepicker  #dateToProcessSwift></mat-datepicker>
-    </mat-form-field>
     <button color = "accent" mat-raised-button 
       style=" margin-left:1%; font-size: 18px;"
       (click)="toggleAllRows()">
       Select All
     </button>
+    <mat-form-field style=" margin-left: 2%; width: 12%; font-size: 18px;" >
+      <input #dateToProcess 
+      (dateChange)="changeProcesDate($event.value)"
+      matInput style="font-size: 18px;" [min]="FirstOpenedAccountingDate" [matDatepicker]="dateToProcessSwift" placeholder="Date to process" 
+      [value]="FirstOpenedAccountingDate" >
+      <mat-datepicker-toggle matSuffix [for]="dateToProcessSwift"></mat-datepicker-toggle>
+      <mat-datepicker  #dateToProcessSwift></mat-datepicker>
+    </mat-form-field>
+    <mat-slide-toggle #overdraft 
+        style="font-size:100%; letter-spacing: .05rem; margin-left: 2%;"
+        [checked]="overRideOverdraft"
+        [style.color]="overdraft.checked ? 'red':'green' "
+        (toggleChange)="overRideOverdraft"
+        >Overdraft {{overdraft.checked? 'allowed!':'forbidden'}}
+      </mat-slide-toggle>
+
+
   </form>
 </mat-expansion-panel>
 
@@ -147,7 +157,7 @@
     <mat-panel-title>
       Processing Errors Log
     </mat-panel-title>
-    <mat-panel-description style="color: crimson;">
+    <mat-panel-description style="color: rgb(178, 27, 57);">
       Tap to {{errorsPpanelOpenState? 'hide': 'show'}} errors details
       <mat-icon color = 'accent'>sync_problem</mat-icon>
     </mat-panel-description>
@@ -155,3 +165,17 @@
 <pre style="font-size: 16px;">{{errorLogAutoProcessingALL | json}}</pre>
 </mat-expansion-panel>
 
+<mat-expansion-panel *ngIf="createdLogAutoProcessingALL.length" class="complex-search-entries" 
+  (opened)="createLogPanelOpenState = true"
+  (closed)="createLogPanelOpenState = false" >
+  <mat-expansion-panel-header >
+    <mat-panel-title>
+      Processing Log
+    </mat-panel-title>
+    <mat-panel-description style="color: rgb(20, 77, 220);">
+      Tap to {{errorsPpanelOpenState? 'hide': 'show'}} created transactions
+      <mat-icon color = 'accent'>done</mat-icon>
+    </mat-panel-description>
+  </mat-expansion-panel-header >
+<pre style="font-size: 16px;">{{createdLogAutoProcessingALL | json}}</pre>
+</mat-expansion-panel>

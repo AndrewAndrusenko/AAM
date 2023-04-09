@@ -7,7 +7,7 @@ import { MatSnackBar} from '@angular/material/snack-bar';
 import { AppInvestmentDataServiceService } from 'src/app/services/app-investment-data.service.service';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
-import { bcTransactionType_Ext, cFormValidationLog } from 'src/app/models/accounts-table-model';
+import { bAccountsEntriesList, bcTransactionType_Ext, cFormValidationLog } from 'src/app/models/accounts-table-model';
 import { AppTableAccLedgerAccountsComponent } from '../../tables/app-table-acc-ledger-accounts/app-table-acc-ledger-accounts';
 import { AppTableAccAccountsComponent } from '../../tables/app-table-acc-accounts/app-table-acc-accounts';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
@@ -57,7 +57,8 @@ export class AppAccEntryModifyFormComponent implements OnInit,  OnDestroy {
     'd_ledgerNo':'Ledger Number'
   }
   errorLogAutoProcessing : cFormValidationLog [] = []
-
+  autoProcessingState : boolean = false
+  pendingStatusAP: boolean = false
   constructor (
     private fb:FormBuilder, 
     private AccountingDataService:AppAccountingService, 
@@ -90,17 +91,7 @@ export class AppAccEntryModifyFormComponent implements OnInit,  OnDestroy {
       d_closingBalance: {value:null, disabled: false}, 
       d_closingLedgerBalance: {value:null, disabled: false} 
     })
-
-    this.entryModifyForm.statusChanges.pipe(distinctUntilChanged()).subscribe(  (result) => {
-      console.log('SG',this.Ref, result,this.statusArray.length)
-      result==='PENDING'? this.ledgerNo.updateValueAndValidity(): null;
-      result==='INVALID'&&this.statusArray.length>0? this.getFormValidationErrors('full', this.Ref) : null;
-      this.statusArray.push(result)
-    })
-
-    
   }
-
 
   async AddAsyncValidators () {
     if (this.FirstOpenedAccountingDate !=null) {
@@ -155,12 +146,30 @@ export class AppAccEntryModifyFormComponent implements OnInit,  OnDestroy {
       this.AddAsyncValidators();
     
       this.amountFormat()
-      this.updateExpectedBalance()  
+      this.updateExpectedBalance() 
+      console.log('OnInit Addvalidator and Expecteed B',this.Ref, this.entryModifyForm);
+       
     }
       this.subscription = this.AccountingDataService.getEntryDraft().subscribe ( entryData => {
-        // console.log('getEntryDraft', entryData.refTransaction, this.Ref  );
+         console.log('getEntryDraft',this.Ref, this.entryModifyForm.value  );
         
         if (entryData.refTransaction === this.Ref ) {
+          if (entryData.autoProcessing === true) {
+            this.autoProcessingState = true;
+            this.entryModifyForm.statusChanges.pipe(distinctUntilChanged()).subscribe( (result ) => {
+              console.log('SG',this.Ref, result,this.statusArray.length)
+              if (result==='PENDING') {
+                console.log('IF PENDING');
+                
+                this.pendingStatusAP = true;
+                this.ledgerNo.updateValueAndValidity();
+                this.accountNo.updateValueAndValidity();
+              }
+              result==='VALID'&&this.pendingStatusAP? this.updateEntryData('Create') : null;
+              result==='INVALID'&&this.statusArray.length>0? this.getFormValidationErrors('full', this.Ref) : null;
+              this.statusArray.push(result)
+            })
+          }
           this.FirstOpenedAccountingDate = entryData.entryDraft.FirstOpenedAccountingDate
           this.entryModifyForm.patchValue(entryData.entryDraft);
           this.id.setValue(0);
@@ -170,9 +179,9 @@ export class AppAccEntryModifyFormComponent implements OnInit,  OnDestroy {
           this.action = 'Create'
           this.title = 'Create';
           this.AddAsyncValidators();
-    
           this.amountFormat()
           this.updateExpectedBalance()  
+
         }
       })
    
@@ -201,14 +210,15 @@ export class AppAccEntryModifyFormComponent implements OnInit,  OnDestroy {
       const controlErrors: ValidationErrors = this.entryModifyForm.get(key).errors;
       if (controlErrors != null) {
         Object.keys(controlErrors).forEach(keyError => {
+          console.log('this.errorLogAutoProcessing',this.errorLogAutoProcessing);
           // console.log('Key control: ' + key + ', keyError: ' + keyError + ', err value: ', controlErrors[keyError]);
-          
           element=='full'? this.errorLogAutoProcessing.push({
             formReference: refTransaction,
             fieldName: key,
             fieldDescription: this.validatorsLogDescription[key],
             errorMsg:'Key control: ' + this.validatorsLogDescription[key] + ', keyError: ' + keyError + ', err value: '+ controlErrors[keyError],
-            kKeyError: keyError
+            kKeyError: keyError,
+            errorCode: '_'+refTransaction+key+keyError
           }) : null;
           // console.log('this.errorLogAutoProcessing',this.errorLogAutoProcessing);
          });
@@ -301,12 +311,14 @@ export class AppAccEntryModifyFormComponent implements OnInit,  OnDestroy {
     this.amountTransaction.patchValue( new Intl.NumberFormat().format(this.amountTransaction.value))
     
   }
-  updateResultHandler (result :any, action: string) {
+  updateResultHandler (result :any, action: string, dataForUpdateLog?:any) {
     if (result['name']=='error') {
       this.snack.open('Error: ' + result['detail'].split("\n", 1).join(""),'OK',{panelClass: ['snackbar-error']}); 
     } else {
       this.snack.open(action +': ' + result + ' entry','OK',{panelClass: ['snackbar-success'], duration: 3000});
       this.dialog.closeAll();
+      console.log('dataForUpdateLog', dataForUpdateLog);
+      this.autoProcessingState? this.LogService.sendCreatedLogObject (dataForUpdateLog): null;
       this.AccountingDataService.sendReloadEntryList (this.id.value);
     }
     
@@ -321,9 +333,9 @@ export class AppAccEntryModifyFormComponent implements OnInit,  OnDestroy {
       case 'Create_Example':
       case 'Create':
         if (this.d_transactionType.value === 'AL') { 
-         this.AccountingDataService.fcreateEntryAccounting (dataForUpdate).then ((result) => this.updateResultHandler(result,'Created'))
+         this.AccountingDataService.fcreateEntryAccounting (dataForUpdate).then ((result) => this.updateResultHandler(result,'Created',this.entryModifyForm.value))
         } else {
-         this.AccountingDataService.createLLEntryAccounting (dataForUpdate).then ((result) => this.updateResultHandler(result, 'Created'))
+         this.AccountingDataService.createLLEntryAccounting (dataForUpdate).then ((result) => this.updateResultHandler(result, 'Created',this.entryModifyForm.value))
         }
       break;
 

@@ -210,5 +210,6 @@ export interface cFormValidationLog {
   fieldName: string;
   fieldDescription: string;
   errorMsg: string;
-  kKeyError: string
+  kKeyError: string,
+  errorCode: string
 }

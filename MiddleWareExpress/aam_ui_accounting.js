@@ -99,7 +99,7 @@ async function fGetAccountingData (request,response) {
 
       query.text ='SELECT \'AL\' AS "d_transactionType","bAccountTransaction".id AS "t_id", "entryDetails" AS "t_entryDetails", ' + 
       '"bAccountTransaction"."ledgerNoId" AS "t_ledgerNoId", "bAccountTransaction"."accountId" AS "t_accountId", ' +
-      '"dataTime"::date AS "t_dataTime", "extTransactionId" AS "t_extTransactionId", "amountTransaction" AS "t_amountTransaction", '+
+      '"dataTime"::timestamp without time zone AS "t_dataTime", "extTransactionId" AS "t_extTransactionId", "amountTransaction" AS "t_amountTransaction", '+
       '"XactTypeCode" AS "t_XactTypeCode", "bAccountTransaction"."XactTypeCode_Ext" AS "t_XactTypeCode_Ext" , '+
       '"bcTransactionType_Ext"."description" ||\': \' || "bAccountTransaction"."entryDetails" as "d_entryDetails", ' +
       'CASE "bAccountTransaction"."XactTypeCode" ' +
@@ -120,7 +120,7 @@ async function fGetAccountingData (request,response) {
       query.text += ' UNION ' +
       'SELECT \'LL\' AS "d_transactionType", "bLedgerTransactions".id AS "t_id", "entryDetails" AS "t_entryDetails", '+
       '"bLedgerTransactions"."ledgerID_Debit" AS "t_ledgerNoId", "bLedgerTransactions"."ledgerID" AS "t_accountId", '+
-      '"dateTime"::date AS "t_dataTime", "extTransactionId" AS "t_extTransactionId", "amount" AS "t_amountTransaction", '+
+      '"dateTime"::timestamp without time zone AS "t_dataTime", "extTransactionId" AS "t_extTransactionId", "amount" AS "t_amountTransaction", '+
       '0 AS "t_XactTypeCode", "bLedgerTransactions"."XactTypeCode_Ext" AS "t_XactTypeCode_Ext" , '+
       '"bcTransactionType_Ext"."description" ||\': \' || "bLedgerTransactions"."entryDetails" as "d_entryDetails", '+
       '"bLedgerDebit"."ledgerNo" AS "d_Debit", "bLedger"."ledgerNo" AS "d_Credit",'+
@@ -250,24 +250,40 @@ async function fGetAccountingData (request,response) {
 }
 async function fGetMT950Transactions (request,response) {
   const query = {text: ''}
+  console.log('req',request.query);
   switch (request.query.Action) {
     case 'GetSWIFTsList':
+      conditions = {
+        'dateMessage':{
+          1: ' ("bSWIFTGlobalMsg"."DateMsg"::timestamp without time zone = ${dateMessage}) ',
+        }
+      }
+      let bSWIFTGlobalMsg =' WHERE'
+      Object.entries(conditions).forEach(([key,value]) => {
+      if  (request.query.hasOwnProperty(key)) {
+        bSWIFTGlobalMsg +=conditions[key][1] + ' AND ';
+        }
+      });
       query.text = 'SELECT ' + 
-      ' id, "msgId", "senderBIC", "DateMsg", "typeMsg", "accountNo", "bLedger"."ledgerNo", "ledgerNoId"'+ 
+      ' id, "msgId", "senderBIC", "DateMsg"::timestamp without time zone, "typeMsg", "accountNo", '+
+      '"bLedger"."ledgerNo", "ledgerNoId"'+ 
       ' FROM public."bSWIFTGlobalMsg" ' +
-      ' LEFT JOIN public."bLedger" ON "bSWIFTGlobalMsg"."accountNo" = "bLedger"."externalAccountNo" '+
-      ' ORDER BY id; '
+      ' LEFT JOIN public."bLedger" ON "bSWIFTGlobalMsg"."accountNo" = "bLedger"."externalAccountNo" ';
+      query.text += bSWIFTGlobalMsg.slice(0,-5) + ' ORDER BY id; '
     break;
     case 'GetMT950Transactions':
       query.text ='SELECT '+
-        'id, "msgId", "amountTransaction", "typeTransaction", "valueDate", comment, "entryAllocatedId", "refTransaction", "entriesAllocated"."entriesAmount" '+
+        'id, "msgId", "amountTransaction", "typeTransaction", "valueDate"::timestamp without time zone, comment, "entryAllocatedId", "refTransaction", "entriesAllocated"."entriesAmount" '+
         'FROM public."bSWIFTStatement" ' +
         'LEFT JOIN "entriesAllocated" ON "bSWIFTStatement".id = "entriesAllocated"."extTransactionId" '+
-        'WHERE ("msgId"= $1) ORDER BY "msgId", id; '
-      query.values = [request.query.id]
+        'WHERE ("msgId"= ${id}) ORDER BY "msgId", id; '
     break;
   }
-  pool.query (query, (err, res) => {if (err) {console.log (err.stack)} else {
+  sql = pgp.as.format(query.text,request.query);
+  console.log('---------------------------------------------------------------------------------------------------------');
+  console.log(request.query.Action, sql); 
+  pool.query (sql, (err, res) => {if (err) {console.log (err.stack)} else {
+    console.log('swift',res.rows);
     return response.status(200).json((res.rows))}
   })
 }

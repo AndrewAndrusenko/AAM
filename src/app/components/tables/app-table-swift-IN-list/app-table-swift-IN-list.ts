@@ -1,11 +1,11 @@
-import {AfterViewInit, Component, EventEmitter, OnInit, Output, QueryList, ViewChild, ViewChildren} from '@angular/core';
+import {AfterViewInit, Component, EventEmitter, OnDestroy, OnInit, Output, QueryList, ViewChild, ViewChildren} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {lastValueFrom, Subscription } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {TreeMenuSevice } from 'src/app/services/tree-menu.service';
-import { cFormValidationLog, SWIFTSGlobalListmodel } from 'src/app/models/accounts-table-model';
+import { bAccountsEntriesList, cFormValidationLog, SWIFTSGlobalListmodel } from 'src/app/models/accounts-table-model';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
 import { SelectionModel } from '@angular/cdk/collections';
 import { HandlingTableSelectionService } from 'src/app/services/handling-table-selection.service';
@@ -24,7 +24,7 @@ import { LogProcessingService } from 'src/app/services/log-processing.service';
     ]),
   ],
 })
-export class AppTableSWIFTsInListsComponent  implements  AfterViewInit, OnInit {
+export class AppTableSWIFTsInListsComponent  implements  AfterViewInit, OnInit,OnDestroy {
   columnsToDisplay = ['select','msgId',  'senderBIC', 'DateMsg', 'typeMsg','accountNo', 'ledgerNo'];
   columnsHeaderToDisplay = ['msgId',  'senderBIC', 'Date', 'Type','Account','ledger'];
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
@@ -39,14 +39,17 @@ export class AppTableSWIFTsInListsComponent  implements  AfterViewInit, OnInit {
   action: string ='';
   panelOpenState:boolean = false;
   errorsPpanelOpenState:boolean = false;
+  createLogPanelOpenState:boolean = false;
   
   FirstOpenedAccountingDate: Date;
 
   selection = new SelectionModel<SWIFTSGlobalListmodel>(true, []);
   public multiSelect: boolean = true; 
+  overRideOverdraft: boolean = false;
   subscription: Subscription;
+  subscriptionCreatedLog: Subscription;
   errorLogAutoProcessingALL :cFormValidationLog[] = []
-
+  createdLogAutoProcessingALL: bAccountsEntriesList []=[]
  
   constructor (
     private AccountingDataService:AppAccountingService, 
@@ -57,30 +60,39 @@ export class AppTableSWIFTsInListsComponent  implements  AfterViewInit, OnInit {
 
   ) {
     this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data=>{
-      this.FirstOpenedAccountingDate = data[0].FirstOpenedDate})
-      
-
+      this.FirstOpenedAccountingDate = data[0].FirstOpenedDate
+    })
+    this.subscription = this.LogService.getLogObject().subscribe(logObject => {
+      logObject.forEach (logObj => 
+        this.errorLogAutoProcessingALL.filter((fullLog) => fullLog.errorCode === logObj.errorCode).length === 0? this.errorLogAutoProcessingALL.push (logObj):null )
+    })
+    this.subscriptionCreatedLog = this.LogService.geCreatedtLogObject().subscribe(logCreatedObject => {
+      console.log('geCreatedtLogObject',logCreatedObject, this.createdLogAutoProcessingALL);
+      this.createdLogAutoProcessingALL.push(logCreatedObject)
+    })  
+  }
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+    this.subscriptionCreatedLog.unsubscribe();
   }
   ngOnInit(): void {
   
   }
   async ProcessSwiftStatemts (dateToProcess:string) {
     this.errorLogAutoProcessingALL = [];
-    this.subscription = this.LogService.getLogObject().subscribe(logObject => {
-     
-      
-      this.errorLogAutoProcessingALL=[...this.errorLogAutoProcessingALL,...logObject]
-        console.log('allErrors', this.errorLogAutoProcessingALL)
-
-      })
+    this.createdLogAutoProcessingALL = [];
+   
     this.TableSwiftItems.forEach(swiftTable => {
       console.log('selected',swiftTable.selection.selected);
       swiftTable.selection.selected.forEach(element => {
-        ['CR','DR'].includes(element.typeTransaction)&&(Number(element.entriesAmount)===0)? this.EntryProcessingService.openEntry(element, swiftTable.parentMsgRow) : null
+        ['CR','DR'].includes(element.typeTransaction)&&(Number(element.entriesAmount)===0)? this.EntryProcessingService.openEntry(element, swiftTable.parentMsgRow, true) : null
       });
       swiftTable.selection.clear();
+      console.log('End AutoProcess');
+      
     })
   }
+
   async ngAfterViewInit() {
     this.columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
     let userData = JSON.parse(localStorage.getItem('userInfo'))
@@ -121,5 +133,14 @@ export class AppTableSWIFTsInListsComponent  implements  AfterViewInit, OnInit {
     return this.SelectionService.toggleAllRows(this.dataSource, this.selection)
   } 
   checkboxLabel(row?: SWIFTSGlobalListmodel): string {return this.SelectionService.checkboxLabel(this.dataSource, this.selection, row)}
+  changeProcesDate (dateToProcess) {
+    console.log('date',dateToProcess);
+    this.AccountingDataService.GetSWIFTsList (new Date(dateToProcess).toDateString(),null,null,null,'GetSWIFTsList').subscribe (SWIFTsList  => {
+      this.dataSource  = new MatTableDataSource(SWIFTsList);
+      this.dataSource.paginator = this.paginator;
+      this.dataSource.sort = this.sort;
+    })
+
+  }
 
 }

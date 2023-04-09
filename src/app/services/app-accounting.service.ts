@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, ReplaySubject, Subject} from 'rxjs';
 import { bAccounts, bAccountsEntriesList, bBalanceData, bBalanceFullData, bcAccountType_Ext, bcEnityType, bcTransactionType_Ext, bLedger, bLedgerAccounts, bLedgerBalanceData, SWIFTSGlobalListmodel, SWIFTStatement950model } from '../models/accounts-table-model';
+import { param } from 'jquery';
 
 @Injectable({
   providedIn: 'root'
@@ -34,13 +35,19 @@ export class AppAccountingService {
   }
 /* -----------------------Accountting ----------------------------------------------------- */
 
-  GetSWIFTsList (dataRange: string, id: number, MTType:string, Sender: string, Action: string):Observable <SWIFTSGlobalListmodel[]> {
-    const params = {'dataRange': dataRange, 'id' :id, 'MTType': MTType,'Sender':Sender, 'Action': Action}
+  GetSWIFTsList (dateMessage: string, id: number, MTType:string, Sender: string, Action: string):Observable <SWIFTSGlobalListmodel[]> {
+    let params = {};
+    let argName = null
+    let argumentsNames = ['dateMessage', 'id', 'MTType', 'Sender', 'Action']
+    for (let index = 0; index < arguments.length; index++) {
+      argName = argumentsNames[index];
+      arguments[index]===null? null: params[argName]= arguments[index]; 
+    }
     return this.http.get <SWIFTSGlobalListmodel []>('/api/DEA/fGetMT950Transactions/', { params: params })
   }
 
   GetMT950Transactions (dataRange: string, id: number, MTType:string, Sender: string, Action: string):Observable <SWIFTStatement950model[]> {
-    const params = {'dataRange': dataRange, 'id' :id, 'MTType': MTType,'Sender':Sender, 'Action': Action}
+   const params = {'dataRange': dataRange, 'id' :id, 'MTType': MTType,'Sender':Sender, 'Action': Action}
     return this.http.get <SWIFTStatement950model []>('/api/DEA/fGetMT950Transactions/', { params: params })
   }
   sendLoadedMT950Transactions ( id:any) { //the component that wants to update something, calls this fn
