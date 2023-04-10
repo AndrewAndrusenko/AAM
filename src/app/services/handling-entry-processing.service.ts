@@ -13,9 +13,9 @@ export class HandlingEntryProcessingService {
     public snack:MatSnackBar
 
   ) { }
-  async openEntry (row: any, parentMsgRow:any, autoProcessing?: boolean ) {
+  async openEntry (row: any, parentMsgRow:any, autoProcessing?: boolean, dateToProcess?: Date, overRideOverdraft?:boolean ) {
     if (Number(row.entriesAmount) > Number(row.amountTransaction) && ['CR','DR'].includes(row.typeTransaction)) {
-      let EmptyEntry = {'entryDraft' : {}, 'formStateisDisabled': true}
+      let EmptyEntry = {'entryDraft' : {}, 'formStateisDisabled': true, 'overRideOverdraft' :overRideOverdraft}
       this.AccountingDataService.sendEntryDraft(EmptyEntry);
     } else {
       let accountNo = row.comment.split('/')[3];
@@ -27,14 +27,16 @@ export class HandlingEntryProcessingService {
           bcEntryParameters.pLedgerNoId = parentMsgRow.ledgerNoId;
           bcEntryParameters.pExtTransactionId = row.id;
           bcEntryParameters.pAmount = row.amountTransaction;
-          bcEntryParameters.pDate_T = row.valueDate ;
+          bcEntryParameters.pDate_T = dateToProcess? new Date (dateToProcess).toDateString() : row.valueDate ;
+          console.log('rw',row.valueDate,dateToProcess,  bcEntryParameters.pDate_T);
+          
           bcEntryParameters.pSenderBIC = parentMsgRow.senderBIC;
           bcEntryParameters.pRef = row.refTransaction;
           bcEntryParameters.cxActTypeCode = row.typeTransaction;
           bcEntryParameters.cxActTypeCode_Ext = row.comment.split('/')[1];
           bcEntryParameters.cLedgerType = 'NostroAccount';
           this.AccountingDataService.GetEntryScheme (bcEntryParameters).subscribe (entryScheme => {
-            this.AccountingDataService.sendEntryDraft({'entryDraft' : entryScheme, 'formStateisDisabled': false, 'refTransaction': row.refTransaction, 'autoProcessing':autoProcessing});
+            this.AccountingDataService.sendEntryDraft({'entryDraft' : entryScheme, 'formStateisDisabled': false, 'refTransaction': row.refTransaction, 'autoProcessing':autoProcessing, 'overRideOverdraft' :overRideOverdraft});
           });
         } else {
           this.snack.open('Error: Account No: ' +accountNo +' has not been found for ref:'+row.refTransaction,'OK',{panelClass: ['snackbar-error']}); 

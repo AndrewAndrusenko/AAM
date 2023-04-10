@@ -62,6 +62,7 @@ import { AppTableBalanceSheetComponent } from './components/tables/app-table-bal
 import {MatSortModule} from '@angular/material/sort';
 import {MatListModule as MatListModule} from '@angular/material/list';
 import { CdkTableModule } from '@angular/cdk/table';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 
 @NgModule({
@@ -101,6 +102,8 @@ import { CdkTableModule } from '@angular/cdk/table';
         MatSortModule,
         MatListModule,
         CdkTableModule,
+        MatProgressBarModule,
+
     ],
     declarations: [
         AppComponent,

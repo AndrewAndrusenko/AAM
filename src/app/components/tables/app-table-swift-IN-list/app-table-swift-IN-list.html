@@ -15,30 +15,47 @@
     </mat-panel-description>
   </mat-expansion-panel-header >
 
-  <form class="submit"  style="font-size: 18px;">
+  <form class="submit"  [formGroup]="swiftProcessingFB"  style="font-size: 18px;">
     <button color = "primary" mat-raised-button 
+      [disabled]="swiftProcessingFB.invalid||swiftProcessingFB.disabled"
       style=" margin-left:1%;  font-size: 18px;"
-      (click)="ProcessSwiftStatemts(dateToProcess.value)">
+      (click)="ProcessSwiftStatemts(overdraft.checked)">
       Process all transactions
     </button>
     <button color = "accent" mat-raised-button 
       style=" margin-left:1%; font-size: 18px;"
+      [disabled]="swiftProcessingFB.disabled"
       (click)="toggleAllRows()">
       Select All
     </button>
     <mat-form-field style=" margin-left: 2%; width: 12%; font-size: 18px;" >
       <input #dateToProcess 
+      formControlName="cDateToProcessSwift"
       (dateChange)="changeProcesDate($event.value)"
-      matInput style="font-size: 18px;" [min]="FirstOpenedAccountingDate" [matDatepicker]="dateToProcessSwift" placeholder="Date to process" 
-      [value]="FirstOpenedAccountingDate" >
+      matInput style="font-size: 18px;"  [matDatepicker]="dateToProcessSwift"  placeholder="Date to process">
       <mat-datepicker-toggle matSuffix [for]="dateToProcessSwift"></mat-datepicker-toggle>
       <mat-datepicker  #dateToProcessSwift></mat-datepicker>
+      <mat-error  *ngIf="cDateToProcessSwift.invalid &&  cDateToProcessSwift.value==null">
+        The field is required or incorrect format.    
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field style=" margin-left: 2%; width: 12%; font-size: 18px; margin-bottom: 1%;" >
+      <input #dateForAccounting 
+      formControlName="cDateAccounting"
+      matInput style="font-size: 18px;" [min]="FirstOpenedAccountingDate" [matDatepicker]="dateAccounting" placeholder="Accounting Date" >
+      <mat-datepicker-toggle matSuffix [for]="dateAccounting"></mat-datepicker-toggle>
+      <mat-datepicker  #dateAccounting></mat-datepicker>
+      <mat-error  *ngIf="cDateAccounting.invalid &&  cDateAccounting.value==null">
+        The field is required or incorrect format.    
+      </mat-error>
+      <mat-error  *ngIf="cDateAccounting.hasError('matDatepickerMin')">
+        Date is in closed period!    
+      </mat-error>
     </mat-form-field>
     <mat-slide-toggle #overdraft 
         style="font-size:100%; letter-spacing: .05rem; margin-left: 2%;"
-        [checked]="overRideOverdraft"
         [style.color]="overdraft.checked ? 'red':'green' "
-        (toggleChange)="overRideOverdraft"
         >Overdraft {{overdraft.checked? 'allowed!':'forbidden'}}
       </mat-slide-toggle>
 
@@ -150,6 +167,22 @@
 
   <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" [pageSize]="20" aria-label="Select page of users"></mat-paginator>
 </div>
+<mat-progress-bar *ngIf="swiftProcessingFB.disabled" color="accent" mode="query"></mat-progress-bar>
+
+<mat-expansion-panel *ngIf="createdLogAutoProcessingALL.length" class="complex-search-entries" 
+  (opened)="statusLogPanelOpenState = true"
+  (closed)="statusLogPanelOpenState = false" >
+  <mat-expansion-panel-header >
+    <mat-panel-title>
+      Status Job Log
+    </mat-panel-title>
+    <mat-panel-description style="color: rgb(198, 255, 215);">
+      Total: Created - {{transactionsCreated}} Error - {{transactionsWithErrors}} Tap to {{errorsPpanelOpenState? 'hide': 'show'}} details
+      <mat-icon color = 'accent'>done</mat-icon>
+    </mat-panel-description>
+  </mat-expansion-panel-header >
+<pre style="font-size: 16px;">{{transactionsToProcess | json}}</pre>
+</mat-expansion-panel>
 <mat-expansion-panel *ngIf="errorLogAutoProcessingALL.length" class="complex-search-entries" 
   (opened)="errorsPpanelOpenState = true"
   (closed)="errorsPpanelOpenState = false" >
@@ -157,7 +190,7 @@
     <mat-panel-title>
       Processing Errors Log
     </mat-panel-title>
-    <mat-panel-description style="color: rgb(178, 27, 57);">
+    <mat-panel-description style="color: rgb(241, 103, 130);">
       Tap to {{errorsPpanelOpenState? 'hide': 'show'}} errors details
       <mat-icon color = 'accent'>sync_problem</mat-icon>
     </mat-panel-description>
@@ -172,7 +205,7 @@
     <mat-panel-title>
       Processing Log
     </mat-panel-title>
-    <mat-panel-description style="color: rgb(20, 77, 220);">
+    <mat-panel-description style="color: rgb(76, 120, 231);">
       Tap to {{errorsPpanelOpenState? 'hide': 'show'}} created transactions
       <mat-icon color = 'accent'>done</mat-icon>
     </mat-panel-description>

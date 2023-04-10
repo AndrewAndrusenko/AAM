@@ -12,6 +12,7 @@ import { HandlingTableSelectionService } from 'src/app/services/handling-table-s
 import { AppTableSWIFT950ItemsComponent } from '../app-table-swift-950-items-process/app-table-swift-950-items-process';
 import { HandlingEntryProcessingService } from 'src/app/services/handling-entry-processing.service';
 import { LogProcessingService } from 'src/app/services/log-processing.service';
+import { FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 @Component({
   selector: 'app-table-swift-IN-list',
   templateUrl: './app-table-swift-IN-list.html',
@@ -40,6 +41,9 @@ export class AppTableSWIFTsInListsComponent  implements  AfterViewInit, OnInit,O
   panelOpenState:boolean = false;
   errorsPpanelOpenState:boolean = false;
   createLogPanelOpenState:boolean = false;
+  statusLogPanelOpenState: boolean = false;
+  transactionsCreated: number = 0;
+  transactionsWithErrors: number = 0;
   
   FirstOpenedAccountingDate: Date;
 
@@ -50,26 +54,44 @@ export class AppTableSWIFTsInListsComponent  implements  AfterViewInit, OnInit,O
   subscriptionCreatedLog: Subscription;
   errorLogAutoProcessingALL :cFormValidationLog[] = []
   createdLogAutoProcessingALL: bAccountsEntriesList []=[]
- 
+  transactionsToProcess = []
+  swiftProcessingFB: FormGroup
   constructor (
     private AccountingDataService:AppAccountingService, 
     private TreeMenuSevice:TreeMenuSevice,  
     private SelectionService:HandlingTableSelectionService,
     private EntryProcessingService:HandlingEntryProcessingService,
     private LogService:LogProcessingService,
+    private fb : FormBuilder
 
   ) {
     this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data=>{
       this.FirstOpenedAccountingDate = data[0].FirstOpenedDate
     })
     this.subscription = this.LogService.getLogObject().subscribe(logObject => {
-      logObject.forEach (logObj => 
-        this.errorLogAutoProcessingALL.filter((fullLog) => fullLog.errorCode === logObj.errorCode).length === 0? this.errorLogAutoProcessingALL.push (logObj):null )
+      logObject.forEach (logObj => {
+        let index = this.transactionsToProcess.findIndex(elem => elem.id===logObj.t_extTransactionId)
+        this.transactionsToProcess[index].status ='Error';
+        this.errorLogAutoProcessingALL.filter((fullLog) => fullLog.errorCode === logObj.errorCode).length === 0? this.errorLogAutoProcessingALL.push (logObj):null; 
+        this.isProcessingComplete()? this.swiftProcessingFB.enable() : null ;
+        
+      })
+      console.log('st',this.transactionsToProcess);
     })
     this.subscriptionCreatedLog = this.LogService.geCreatedtLogObject().subscribe(logCreatedObject => {
       console.log('geCreatedtLogObject',logCreatedObject, this.createdLogAutoProcessingALL);
-      this.createdLogAutoProcessingALL.push(logCreatedObject)
-    })  
+      let index = this.transactionsToProcess.findIndex(elem => elem.id===logCreatedObject.t_extTransactionId)
+      this.transactionsToProcess[index].status ='Created'
+      this.createdLogAutoProcessingALL.push(logCreatedObject);
+      this.isProcessingComplete()? this.swiftProcessingFB.enable() : null ;
+      console.log('st',this.transactionsToProcess);
+
+    })
+    this.swiftProcessingFB = this.fb.group ({
+      cDateToProcessSwift:[null, [Validators.required]],
+      cDateAccounting : [null, [Validators.required]],
+      overRideOverdraft: {value:false}
+    } )
   }
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
@@ -78,17 +100,19 @@ export class AppTableSWIFTsInListsComponent  implements  AfterViewInit, OnInit,O
   ngOnInit(): void {
   
   }
-  async ProcessSwiftStatemts (dateToProcess:string) {
+  async ProcessSwiftStatemts (overdraftOverride:boolean) {
+    this.swiftProcessingFB.disable();
     this.errorLogAutoProcessingALL = [];
     this.createdLogAutoProcessingALL = [];
-   
+    this.transactionsToProcess = [];
     this.TableSwiftItems.forEach(swiftTable => {
-      console.log('selected',swiftTable.selection.selected);
       swiftTable.selection.selected.forEach(element => {
-        ['CR','DR'].includes(element.typeTransaction)&&(Number(element.entriesAmount)===0)? this.EntryProcessingService.openEntry(element, swiftTable.parentMsgRow, true) : null
+        if (['CR','DR'].includes(element.typeTransaction)&&(Number(element.entriesAmount)===0)) {
+         this.EntryProcessingService.openEntry(element, swiftTable.parentMsgRow, true, this.cDateAccounting.value, overdraftOverride);
+         this.transactionsToProcess.push(element) 
+        }
       });
       swiftTable.selection.clear();
-      console.log('End AutoProcess');
       
     })
   }
@@ -103,11 +127,18 @@ export class AppTableSWIFTsInListsComponent  implements  AfterViewInit, OnInit,O
         this.dataSource  = new MatTableDataSource(SWIFTsList);
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
+        this.cDateToProcessSwift.setValue(new Date(this.FirstOpenedAccountingDate))
+        this.cDateAccounting.setValue(new Date(this.FirstOpenedAccountingDate))
       })
     })
 
   }
-
+  isProcessingComplete():boolean {
+    this.transactionsCreated = this.transactionsToProcess.filter(elem => elem.status ==='Created').length; 
+    this.transactionsWithErrors = this.transactionsToProcess.filter(elem => elem.status ==='Error').length;
+    console.log(this.transactionsToProcess.length , this.transactionsWithErrors, this.transactionsCreated)
+    return this.transactionsToProcess.length  === (this.transactionsWithErrors + this.transactionsCreated)
+  }
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
@@ -134,7 +165,7 @@ export class AppTableSWIFTsInListsComponent  implements  AfterViewInit, OnInit,O
   } 
   checkboxLabel(row?: SWIFTSGlobalListmodel): string {return this.SelectionService.checkboxLabel(this.dataSource, this.selection, row)}
   changeProcesDate (dateToProcess) {
-    console.log('date',dateToProcess);
+    this.cDateAccounting.setValue(this.cDateToProcessSwift.value>=new Date(this.FirstOpenedAccountingDate)? this.cDateToProcessSwift.value : this.FirstOpenedAccountingDate)
     this.AccountingDataService.GetSWIFTsList (new Date(dateToProcess).toDateString(),null,null,null,'GetSWIFTsList').subscribe (SWIFTsList  => {
       this.dataSource  = new MatTableDataSource(SWIFTsList);
       this.dataSource.paginator = this.paginator;
@@ -142,5 +173,7 @@ export class AppTableSWIFTsInListsComponent  implements  AfterViewInit, OnInit,O
     })
 
   }
+  get cDateAccounting () {return this.swiftProcessingFB.get('cDateAccounting')}
+  get cDateToProcessSwift () {return this.swiftProcessingFB.get('cDateToProcessSwift')}
 
 }

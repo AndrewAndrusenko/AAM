@@ -206,6 +206,7 @@ export interface bBalanceFullData {
    checkClosing : number 
 } 
 export interface cFormValidationLog {
+  t_extTransactionId: number;
   formReference: string;
   fieldName: string;
   fieldDescription: string;
