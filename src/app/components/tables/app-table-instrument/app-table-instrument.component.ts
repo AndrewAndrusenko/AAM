@@ -1,19 +1,64 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef} from '@angular/material/dialog';
 import { AppInstrumentEditFormComponent } from '../../forms/app-instrument-edit-form/app-instrument-edit-form.component';
+import { LogProcessingService } from 'src/app/services/log-processing.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { AppAccountingService } from 'src/app/services/app-accounting.service';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AppMarketDataService } from 'src/app/services/app-market-data.service';
+export interface marketSourceSegements {
+  id:number,
+  code: string
+}
+export interface marketDataSources {
+  segemnts :marketSourceSegements [],
+  source : string
+
+}
 @Component({
   selector: 'app-app-instrument-table',
   templateUrl: './app-table-instrument.component.html',
-  styleUrls: ['./app-table-instrument.component.css']
+  styleUrls: ['./app-table-instrument.component.scss']
 })
 export class AppInstrumentTableComponent {
+  FirstOpenedAccountingDate : Date = null;
+  marketDataToLoad: any;
   isEditForm: boolean = false;
+  panelOpenStateFirst: boolean = false;
   @Input() action: string;
   public currentInstrument: any;
   @Output() public modal_principal_parent = new EventEmitter();
   dialogRef: MatDialogRef<AppInstrumentEditFormComponent>;
   dtOptions: any = {};
-  constructor(private dialog: MatDialog) {}
+  loadMarketData: FormGroup;
+  marketSources:marketDataSources[] = [
+    {source: 'MOEX',
+     segemnts: [
+      {id:1, code:'MOEX - ForeignShares'},
+      {id:2, code:'MOEX - LocalShares'} 
+     ]
+    },
+    {source : 'Baha.com',
+     segemnts: [
+      {id:3, code: 'Baha - Derivatives'},
+      {id:4, code: 'Baha - ForeignShares'}
+     ]}
+    ]   
+  constructor(
+    private dialog: MatDialog,
+    public snack:MatSnackBar,
+    private AccountingDataService:AppAccountingService, 
+    private MarketDataService:AppMarketDataService, 
+    private fb : FormBuilder
+
+) {
+    this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate)
+    this.loadMarketData = this.fb.group ({
+      dateForLoadingPrices : [new Date('2022-01-22'), Validators.required],
+      sourceCode: [[1],Validators.required],
+      overwritingCurrentData : [null]
+    })
+  }
 ngOnInit(): void {
   this.dtOptions = {
     ajax:  {
@@ -82,6 +127,16 @@ ngOnInit(): void {
   };
 }
 
+getMarketData(){
+  
+  let res = this.MarketDataService.getMarketData(['MOEX - foreignshares'], new Date(this.dateForLoadingPrices.value).toISOString().slice(0,10))
+  console.log('res',res);
+   /*  console.log('mdata',marketData[1]['history.cursor'][0]['INDEX']);
+    console.log('mdata',marketData[1]['history.cursor'][0]['PAGESIZE']);
+    console.log('mdata',marketData[1]['history.cursor'][0]['TOTAL']);
+    this.MarketDataService.insertMarketData (marketData[1]['history'],'aa').then (res => console.log('res',res))
+  }) */
+}
 openAddFileDialog(actionType) {
   console.log(actionType)
   this.dialogRef = this.dialog.open(AppInstrumentEditFormComponent ,{
@@ -100,4 +155,5 @@ chooseAccount () {
   console.log('chose account', this.currentInstrument);
   this.modal_principal_parent.emit('CLOSE_PARENT_MODAL');
 }
+get dateForLoadingPrices() {return this.loadMarketData.get('dateForLoadingPrices')}
 }

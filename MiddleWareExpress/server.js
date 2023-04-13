@@ -8,6 +8,7 @@ var LocalStrategy = require('passport-local');
 const uiAmmModule = require ('./aam_ui_module');
 const uiAmmInvestmentsModule = require ('./aam_ui_investmentsData')
 const uiAmmAccountingModule = require ('./aam_ui_accounting')
+const uiAmmMarketData = require ('./aam_ui_market_data_load')
 const auth_module = require('./auth_module');
 const bcrypt = require('bcryptjs');
 const config = require('./db_config');
@@ -170,6 +171,9 @@ appServer.get('/DEA/accountingOverdraftLedgerAccountCheck/',jsPassport.authentic
 /* >>>>>>>>>>>>>>>>>>>>>>>>Accounting Closing>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> */
 appServer.post('/DEA/accountingBalanceCloseInsert/',jsPassport.authenticate('session') , uiAmmAccountingModule.faccountingBalanceCloseInsert)
 appServer.post('/DEA/accountingBalanceDayOpen/',jsPassport.authenticate('session') , uiAmmAccountingModule.faccountingBalanceDayOpen)
+
+/*----------------------MarketData----------------------------------------------------*/
+appServer.post('/AAM/MD/importData/',jsPassport.authenticate('session') , uiAmmMarketData.finsertMarketData)
 
 appServer.listen (port,'localhost', () => {console.log (`AAM Server is running on port ${port}`)})
 

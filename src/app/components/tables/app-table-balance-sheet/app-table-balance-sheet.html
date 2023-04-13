@@ -33,29 +33,39 @@
       <mat-icon color = 'accent'>account_balance</mat-icon>
     </mat-panel-description>
   </mat-expansion-panel-header >
-  <form class="submit"   style="font-size: 18px;   margin-top: 1%;">
+  <form class="submit"   style="font-size: 18px;   margin-top: 0.5%;">
     <span style="display: flex;  justify-content: space-between;   align-items: center;">
-    <span style="display: flex;  justify-content: space-between;   align-items: center; width:22%;margin-left: 1%;">
+    <span style="display: flex;  justify-content: space-between;   align-items: center; width:25%;margin-left: 1%;">
       <button color = "primary" mat-raised-button 
       style=" margin-left:1%; font-size: 18px;"
-      (click)="accountingBalanceClose()">
+      (click)="accountingBalanceClose(overdraftClosingBalance.checked)">
       Close Balance
     </button>
-    <mat-form-field style=" margin-left: 2%;" >
-      <input matInput [min]="FirstOpenedAccountingDate" [matDatepicker]="closedate" placeholder="Operating day to close" 
+    <mat-form-field  >
+      <input style="text-align: center;"matInput [min]="FirstOpenedAccountingDate" [matDatepicker]="closedate" placeholder="Operating day to close" 
       [value]="firstClosingDate" [disabled]="true" >
       <mat-datepicker-toggle matSuffix [for]="closedate"></mat-datepicker-toggle>
       <mat-datepicker  #closedate></mat-datepicker>
     </mat-form-field>
+    
   </span>
-  <span style="display: flex;  justify-content: space-between;   align-items: center; width:54%; margin-left: 2%;"> 
+  <mat-slide-toggle #overdraftClosingBalance 
+  style="font-size:100%; letter-spacing: .05rem; margin-left: 2%;"
+  [style.color]="overdraftClosingBalance.checked ? 'red':'green' "
+  >Overdraft <br>{{overdraftClosingBalance.checked? 'allowed!':'forbidden'}}
+</mat-slide-toggle>
+  <span style="display: flex;  justify-content: space-between;   align-items: center; width:50%; margin-left: 2%;"> 
       <button color = "accent" mat-raised-button 
         style="  font-size: 18px;"
         (click)="checkBalance(iBalanceDate.value)">
         Check Balance
       </button>
       <mat-form-field style=" margin-left: 2%;" >
-        <input #iBalanceDate matInput  [matDatepicker]="balancedate" [min]="dateOfOperaationsStart" placeholder="Date to veirfy balance" 
+        <input #iBalanceDate 
+        style="text-align: center;"
+        matInput  [matDatepicker]="balancedate" 
+        [min]="dateOfOperaationsStart" 
+        placeholder="Date to veirfy balance" 
         [value]="LastClosedDate">
         <mat-datepicker-toggle matSuffix [for]="balancedate"></mat-datepicker-toggle>
         <mat-datepicker [dateClass]="dateClass" #balancedate></mat-datepicker>
@@ -82,9 +92,12 @@
     </div>
 
   </span>
-<span style="display: flex;  justify-content: space-between;   align-items: center; width:22%; margin-right: 2%;"> 
+<span style="display: flex;  justify-content: space-between;   align-items: center; width:25%; margin-right: 2%; " > 
       <mat-form-field  >
-        <input #iBalanceDateToOpen matInput  [matDatepicker]="openBalanceDatePicker" placeholder="Operating day to open" 
+        <input #iBalanceDateToOpen 
+        style="text-align: center;"
+        matInput  [matDatepicker]="openBalanceDatePicker" 
+        placeholder="Operating day to open" 
         [value]="LastClosedDate" disabled="true">
         <mat-datepicker-toggle matSuffix [for]="openBalanceDatePicker"></mat-datepicker-toggle>
         <mat-datepicker [dateClass]="dateClass" #openBalanceDatePicker></mat-datepicker>

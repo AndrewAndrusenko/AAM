@@ -214,3 +214,9 @@ export interface cFormValidationLog {
   kKeyError: string,
   errorCode: string
 }
+
+export interface moexMarketDataForiegnShres {
+  secid: string,
+  marketprice: number,
+  reportingDate: string
+}

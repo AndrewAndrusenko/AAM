@@ -311,16 +311,32 @@ export class AppTableBalanceSheetComponent  implements AfterViewInit {
       })
     }
   }
-  accountingBalanceClose () {
+  accountingBalanceClose (overdraftOverride:boolean) {
+    let balanceCanBeClosed:boolean = false;
     this.dialogRefConfirm = this.dialog.open(AppConfimActionComponent, {panelClass: 'custom-modalbox',} );
     this.dialogRefConfirm.componentInstance.actionToConfim = {'action':'Closing date: ' + new Date(this.firstClosingDate).toDateString() ,'isConfirmed': false}
     this.dialogRefConfirm.afterClosed().subscribe (actionToConfim => {
-      console.log('action', actionToConfim)
       if (actionToConfim.isConfirmed===true) {
-        this.AccountingDataService.accountingBalanceCloseInsert ({'closingDate' : new Date(this.firstClosingDate).toDateString()}).then ((result) => this.updateResultHandler(result,'Balance was closed for '+ new Date(this.firstClosingDate).toDateString()+ '. Created'))
+        this.dataSource.data = this.dataSource.data.filter(elem=>
+          new Date(elem.dateBalance).toDateString()===this.firstClosingDate.toDateString() && elem.OutGoingBalance<0
+        )
+        if (this.dataSource.data.length) {
+          if (overdraftOverride) {
+            this.dialogRefConfirm = this.dialog.open(AppConfimActionComponent, {panelClass: 'custom-modalbox',} );
+            this.dialogRefConfirm.componentInstance.actionToConfim = {'action':'Close balance with overdrafts','isConfirmed': false}
+            this.dialogRefConfirm.afterClosed().subscribe (overdraftOverrideToConfim => {
+              overdraftOverrideToConfim.isConfirmed? this.executeClosingBalance() : null;
+            })
+          } else {
+            this.snack.open('Accounts with overdrafts. Balance has not been closed','OK',{panelClass: ['snackbar-error']})
+          } 
+        }
+        else {this.executeClosingBalance()}
       }
     })
-
+  } 
+  executeClosingBalance () {
+    this.AccountingDataService.accountingBalanceCloseInsert ({'closingDate' : new Date(this.firstClosingDate).toDateString()}).then ((result) => this.updateResultHandler(result,'Balance was closed for '+ new Date(this.firstClosingDate).toDateString()+ '. Created'))
   }
   async checkBalance (dateBalance: string) {
     this.totalPassive = 0;

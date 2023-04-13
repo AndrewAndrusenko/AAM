@@ -212,23 +212,23 @@ async function fGetAccountingData (request,response) {
 
 
       query.text ='SELECT '+
-      ' "accountNo", "accountId", "accountType", "datePreviousBalance" ,"dateBalance" , "openingBalance", '+
+      ' "accountNo", "accountId", "accountType", "datePreviousBalance" ,"dateBalance"::timestamp without time zone , "openingBalance", '+
       ' "totalDebit", "totalCredit", "OutGoingBalance", "checkClosing", "xacttypecode" ' +
       ' FROM f_s_balancesheet_all() ';
        query.text += conditionsBalance.slice(0,-5);
        query.text += ' UNION '+
       ' SELECT '+
-      ' "accountNo", "accountId", \'Account\', null ,"dataTime" , "corrOpeningBalance", "totalDebit", "totalCredit", '+
+      ' "accountNo", "accountId", \'Account\', null ,"dataTime"::timestamp without time zone , "corrOpeningBalance", "totalDebit", "totalCredit", '+
       ' "corrOpeningBalance" + "signedTurnOver" AS "OutGoingBalance", 0 , "xActTypeCode"'+
       ' FROM f_bcurrentturnoversandbalncesnotclosed(${lastClosedDate}) ';
        query.text += conditionsAccountProject.slice(0,-5) ;
        query.text += ' UNION '+
       ' SELECT '   +
-      ' "accountNo", "accountId", \'Ledger\', null ,"dataTime" , "corrOpeningBalance" ,"totalDebit", "totalCredit", '  +
+      ' "accountNo", "accountId", \'Ledger\', null ,"dataTime"::timestamp without time zone , "corrOpeningBalance" ,"totalDebit", "totalCredit", '  +
       ' ("corrOpeningBalance" + "signedTurnOver") AS "OutGoingBalance" , 0, "xActTypeCode" ' +
       ' FROM f_bcurrent_ledger_turnovers_balances_notclosed(${lastClosedDate}) '; 
       query.text += conditionsLedgerProject.slice(0,-5) ;
-      query.text += ' ORDER BY "dateBalance"::date DESC;';
+      query.text += ' ORDER BY "dateBalance"::timestamp without time zone DESC;';
 
     break;
   }

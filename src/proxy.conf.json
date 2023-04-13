@@ -5,6 +5,12 @@
    "pathRewrite": {"^/api" : ""},
    "logLevel": "debug"
  },
+ "/apimoexmarketdata/*" : {
+  "target": "https://iss.moex.com/",
+  "secure": false,
+  "pathRewrite": {"^/apimoexmarketdata" : ""},
+  "logLevel": "debug"
+},
   
   "/pi2/*": {
     "target": "http://localhost:3002",
