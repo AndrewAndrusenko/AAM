@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { moexMarketDataForiegnShres } from '../models/accounts-table-model';
+import { marketData, moexMarketDataForiegnShres } from '../models/accounts-table-model';
 
 @Injectable({
   providedIn: 'root'
@@ -12,14 +12,15 @@ export class AppMarketDataService {
     responseType: 'text'
   };
   constructor(private http:HttpClient) { }
-  getMarketData (sourceCodes:string[],dateToLoad: string)  {
+  loadMarketDataExteranalSource (sourceCodes:string[],dateToLoad: string)  {
+    console.log('source',sourceCodes);
     dateToLoad = dateToLoad
     let currentPosition = 0;
     let totalRows = 0;
     let pageSize = 100;  
     let params = {
-      'date': dateToLoad,
-      'start':currentPosition,
+      'date': null,
+      'start':null,
       'iss.json': 'extended',
       'iss.meta': 'off',
       'history.columns':'BOARDID, TRADEDATE,SECID, VALUE, OPEN, LOW, HIGH, LEGALCLOSEPRICE, WAPRICE, CLOSE,'+
@@ -38,17 +39,19 @@ export class AppMarketDataService {
         this.http.get ('https://iss.moex.com/iss/history/engines/stock/markets/foreignshares/securities.json', {params:params} ).subscribe (marketData => {
          return this.insertMarketData (marketData[1]['history'],'aa').subscribe((rowLoaded) =>{
           totalLoad=totalLoad+rowLoaded
-          return totalLoad})
+          return console.log('total',  totalLoad)
+        })
         })
       }
-      
     })
   }
   insertMarketData (dataToInsert:any,sourceCode:string): Observable<number> {
     console.log('data',dataToInsert);
     return  this.http.post <number> ('/api/AAM/MD/importData/',{'dataToInsert': dataToInsert})
   }
+  getMarketData ():Observable<marketData[]> {
+    return this.http.get <marketData[]> ('/api/AAM/MD/getMarketData/')
+  }
 }
-/* this.http.get ('https://iss.moex.com/iss/history/engines/stock/markets/foreignshares/securities.json?date=2022-01-21&start=500&iss.json=extended&iss.meta=off' */
 
 

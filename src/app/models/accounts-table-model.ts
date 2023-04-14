@@ -220,3 +220,26 @@ export interface moexMarketDataForiegnShres {
   marketprice: number,
   reportingDate: string
 }
+export interface marketData {
+  boardid: string, 
+  shortname: number, 
+  secid: string, 
+  numtrades: number, 
+  value: number, 
+  open: number, 
+  low: number, 
+  high: number, 
+  legalcloseprice: number,
+  waprice: number,
+  close: number, 
+  volume: number,
+  marketprice2: number,
+  marketprice3: number, 
+  admittedquote: number, 
+  mp2valtrd: number,
+  marketprice3tradesvalue: number,
+  admittedvalue: number,
+  waval: number, 
+  tradingsession: string,
+  tradedate: string
+}

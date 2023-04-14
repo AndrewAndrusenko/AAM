@@ -174,6 +174,7 @@ appServer.post('/DEA/accountingBalanceDayOpen/',jsPassport.authenticate('session
 
 /*----------------------MarketData----------------------------------------------------*/
 appServer.post('/AAM/MD/importData/',jsPassport.authenticate('session') , uiAmmMarketData.finsertMarketData)
+appServer.get('/AAM/MD/getMarketData/',jsPassport.authenticate('session') , uiAmmMarketData.fgetMarketData)
 
 appServer.listen (port,'localhost', () => {console.log (`AAM Server is running on port ${port}`)})
 

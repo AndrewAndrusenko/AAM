@@ -63,6 +63,7 @@ import {MatSortModule} from '@angular/material/sort';
 import {MatListModule as MatListModule} from '@angular/material/list';
 import { CdkTableModule } from '@angular/cdk/table';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { AppTableMarketDataComponent } from './components/tables/app-table-market-data/app-table-market-data';
 
 
 @NgModule({
@@ -135,6 +136,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
         AppTableAccLedgerAccountsComponent,
         AppAccAccountModifyFormComponent,
         AppTableBalanceSheetComponent,
+        AppTableMarketDataComponent,
     ],
     bootstrap: [AppComponent],
     providers: [],

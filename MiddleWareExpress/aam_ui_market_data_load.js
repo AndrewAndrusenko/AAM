@@ -1,8 +1,10 @@
+const { async } = require('rxjs');
 const config = require ('./db_config');
 const Pool = require('pg').Pool;
 const pool = new Pool(config.dbConfig);
 var pgp = require ('pg-promise')({capSQL:true});
 const pg = require('pg');
+const { query } = require('express');
 pg.types.setTypeParser(1114, function(stringValue) {
   return stringValue;  //1114 for time without timezone type
 });
@@ -26,7 +28,6 @@ async function finsertMarketData (request, response) {
    ' "WAVAL" numeric, "TRADINGSESSION" numeric, 	"NUMTRADES" numeric ))'
   }
   // sql = pgp.as.format(query.text,query.values)
-  console.log('sql',query.text);
   pool.query (query.text,  (err, res) => {if (err) {
     console.log (err.stack.split("\n", 1).join(""))
     err.detail = err.stack
@@ -35,8 +36,20 @@ async function finsertMarketData (request, response) {
     return response.status(200).json(res.rowCount)}
   })  
 }
+async function fgetMarketData (request,response){
+  const query = {
+    text : 'SELECT * FROM t_moexdata_foreignshares;'
+  }
+  pool.query(query.text, (err,res) => {if (err) {
+    err.detail=err.stack;
+    return res.send(err);} else {
+      return response.status(200).send(res.rows);
+    }
+  })
+}
 module.exports = {
-  finsertMarketData
+  finsertMarketData,
+  fgetMarketData
 }
 
 

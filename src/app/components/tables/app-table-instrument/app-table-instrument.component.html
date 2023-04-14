@@ -27,63 +27,13 @@
   </div>
 </ng-template>
 
-<div [cdkContextMenuTriggerFor]="instrumentcontextmenu" class="dataTableTitle" style="display:flex; align-items: center;
-justify-content:space-between;"> 
+<div [cdkContextMenuTriggerFor]="instrumentcontextmenu" 
+  class="dataTableTitle" style="display:flex; align-items: center;
+  justify-content:space-between;"> 
   <h2> Instruments list </h2>   
   <h2 *ngIf="action=='Select'" style="color: rgb(224, 73, 73);"> Use context menu to select instrument for MP</h2>
 </div>
 
-<mat-expansion-panel class="first-expansion" 
-  (opened)="panelOpenStateFirst = true"
-  (closed)="panelOpenStateFirst = false" 
-  style="margin-bottom: 1%; width: 90%;">
-  <mat-expansion-panel-header >
-    <mat-panel-title>
-      Market Data Update
-    </mat-panel-title>
-    <mat-panel-description>
-      Tap to {{panelOpenStateFirst? 'hide': 'open'}} control elements
-      <mat-icon color = 'accent'>cloud_download</mat-icon>
-    </mat-panel-description>
-  </mat-expansion-panel-header >
-  <form class="submit"   [formGroup]="loadMarketData" style="font-size: 18px;   margin-top: 0.5%;">
-      <button color = "primary" mat-raised-button 
-      style=" margin-left:1%; font-size: 18px; margin-right: 2%;"
-      (click)="getMarketData()"
-      >
-      Get matket data 
-    </button>
-    <mat-form-field style="margin-right: 2%; width: 12%;" >
-      <input  matInput  
-      formControlName = "dateForLoadingPrices"
-      [matDatepicker]="dateForMarketData" placeholder="Date to upload" 
-       >
-      <mat-datepicker-toggle matSuffix [for]="dateForMarketData"></mat-datepicker-toggle>
-      <mat-datepicker  #dateForMarketData></mat-datepicker>
-
-    </mat-form-field> 
-    
-    <mat-form-field style="width: 20%;" >
-      <mat-label>Source Code</mat-label>
-      <mat-select  #Source Code formControlName="sourceCode" multiple > 
-        <mat-optgroup *ngFor="let marketSource of marketSources" [label]="marketSource.source">
-        <mat-option 
-          *ngFor="let segemnt of marketSource.segemnts" [value]="[segemnt.id]" >
-          {{segemnt.code}} 
-        </mat-option>
-        </mat-optgroup>
-      </mat-select>
-  
-    </mat-form-field>
-    
-    <mat-slide-toggle #overdraftClosingBalance formControlName="overwritingCurrentData"
-    style="font-size:100%; letter-spacing: .05rem; margin-left: 2%;"
-    [style.color]="overdraftClosingBalance.checked ? 'red':'green' "
-    >Update current market data <br>{{overdraftClosingBalance.checked? 'allowed!':'forbidden'}}
-  </mat-slide-toggle>
-  </form>
-  <pre>{{  marketDataToLoad | json}}</pre>
-</mat-expansion-panel>
 
 <table 
   datatable  id="mytable" [cdkContextMenuTriggerFor]="instrumentcontextmenu"[dtOptions]="dtOptions" class="row-border hover">
