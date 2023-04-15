@@ -36,7 +36,8 @@
   </mat-expansion-panel-header >
   <form class="submit"   [formGroup]="loadMarketData" style="font-size: 18px;   margin-top: 0.5%;">
     <button color = "primary" mat-raised-button 
-      style=" margin-left:1%; font-size: 18px; margin-right: 2%;">
+      style=" margin-left:1%; font-size: 18px; margin-right: 2%;"
+      (click)="getMarketData()">
       Get matket data 
     </button>
     <mat-form-field style="margin-right: 2%; width: 12%;  color: rgb(44, 43, 43);" >
@@ -58,17 +59,17 @@
         (change)="marketSource.checkedAll=!marketSource.checkedAll;
         setAll(i)"
         [checked]="marketSource.checkedAll">
-          {{marketSource.source}}
+          {{marketSource.sourceName}}
         </mat-checkbox>
       </span>
       <span class="example-list-section" >
         <ul>
-          <li *ngFor="let segemnt of marketSource.segemnts; let z=index">
+          <li *ngFor="let segment of marketSource.segments; let z=index">
             <mat-checkbox 
-                          [checked]="segemnt.checked"
-                          (change)="segemnt.checked=!segemnt.checked;
+                          [checked]="segment.checked"
+                          (change)="segment.checked=!segment.checked;
                                     updateAllComplete(i)">
-              {{segemnt.code}}
+              {{segment.description}}
             </mat-checkbox>
           </li>
         </ul>
@@ -76,6 +77,21 @@
     </section>
   </span>
   </form>
+  <mat-expansion-panel *ngIf="logLoadingData.length" class="complex-search-entries" 
+  (opened)="statusLogPanelOpenState = true"
+  (closed)="statusLogPanelOpenState = false" >
+  <mat-expansion-panel-header >
+    <mat-panel-title>
+      Status Job Log
+    </mat-panel-title>
+    <mat-panel-description style="color: rgb(198, 255, 215);">
+      Total: Created  Tap to {{statusLogPanelOpenState? 'hide': 'show'}} details
+      <mat-icon color = 'accent'>done</mat-icon>
+    </mat-panel-description>
+  </mat-expansion-panel-header >
+<pre style="font-size: 16px;">{{logLoadingData | json}}</pre>
+</mat-expansion-panel>
+
 </mat-expansion-panel>
 
 <mat-expansion-panel class="headers-align" 

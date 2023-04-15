@@ -6,7 +6,7 @@ import {MatTableDataSource as MatTableDataSource} from '@angular/material/table'
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { marketData } from 'src/app/models/accounts-table-model';
+import { marketData, marketDataSources, marketSourceSegements } from 'src/app/models/accounts-table-model';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
@@ -17,12 +17,9 @@ import { AppTableAccAccountsComponent } from '../app-table-acc-accounts/app-tabl
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AppConfimActionComponent } from '../../alerts/app-confim-action/app-confim-action.component';
 import { MatCalendarCellClassFunction } from '@angular/material/datepicker';
-import { marketDataSources } from '../app-table-instrument/app-table-instrument.component';
 import { AppMarketDataService } from 'src/app/services/app-market-data.service';
-
-export interface Fruit {
-  name: string;
-}
+/* 
+export class extends  */
 @Component({
   selector: 'app-table-market-data',
   templateUrl: './app-table-market-data.html',
@@ -37,36 +34,18 @@ export interface Fruit {
   ],
 })
 export class AppTableMarketDataComponent  implements AfterViewInit {
+
   loadMarketData: FormGroup;
-  marketSources:marketDataSources[] =  [
-    {source: 'MOEX',
-    checkedAll: false,
-    indeterminate:false,
-     segemnts: [
-      {id:'foreignshares', code:'MOEX - ForeignShares', checked: false},
-      {id:'shares', code:'MOEX - Shares', checked: false}, 
-      {id:'bonds', code:'MOEX - Bonds', checked: false}, 
-      {id:'index', code:'MOEX - Index', checked: false} 
-     ]
-    },
-    {source : 'Baha.com',
-    checkedAll: false,
-    indeterminate:false,
-     segemnts: [
-      {id:'Derivatives', code: 'Baha - Derivatives', checked: false},
-      {id:'ForeignShares', code: 'Baha - ForeignShares', checked: false}
-     ]}
-    ] 
+  marketSources:marketDataSources[] =  [] 
   marketDataToLoad: any;
-  columnsToDisplay = ['boardid','tradedate','secid','value', 'open', 'low', 'high', 'close', 'volume','marketprice2', 'marketprice3', 
-   'tradingsession'];
-  columnsHeaderToDisplay = ['boardid','tradedate','secid','value', 'open', 'low', 'high', 'close', 'volume','marketprice2', 'marketprice3', 'tradingsession'];
+  columnsToDisplay = ['globalsource','sourcecode','boardid','tradedate','secid','value', 'open', 'low', 'high', 'close','numtrades', 'volume','marketprice2', 'marketprice3', 'admittedquote', 'waprice'];
+  columnsHeaderToDisplay = ['Source','code','boardid','tradedate','secid','value', 'open', 'low', 'high', 'close', 'numtrades', 'volume','marketprice2', 'marketprice3', 'admittedquote' ,'waprice'];
   dataSource: MatTableDataSource<marketData>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
   @Output() public modal_principal_parent = new EventEmitter();
-
-
+  logLoadingData=[];
+  statusLogPanelOpenState:boolean=false;
   private subscriptionName: Subscription;
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
   
@@ -109,6 +88,11 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
     this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data=>{
       this.FirstOpenedAccountingDate = data[0].FirstOpenedDate;
     })
+    this.MarketDataService.getMarketDataSources().subscribe((marketSourcesData) => {
+      this.marketSources = marketSourcesData;
+      console.log('marketSourcesData', this.marketSources);
+      
+    })
     this.searchParametersFG = this.fb.group ({
       dataRange : this.dataRange,
       noAccountLedger: null,
@@ -116,31 +100,38 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
       entryType : {value:[], disabled:true}
     })
     this.loadMarketData = this.fb.group ({
-      dateForLoadingPrices : [new Date('2022-01-22'), Validators.required],
+      dateForLoadingPrices : [new Date('2022-01-19'), Validators.required],
       sourceCode: [[],Validators.required],
       overwritingCurrentData : [null]
     })
   }
   updateAllComplete(index:number) {
-    this.marketSources[index].checkedAll = this.marketSources[index].segemnts != null && this.marketSources[index].segemnts.every(t => t.checked); 
-    this.marketSources[index].indeterminate = this.marketSources[index].segemnts.filter(t => t.checked).length > 0 && !this.marketSources[index].checkedAll; 
+    this.marketSources[index].checkedAll = this.marketSources[index].segments != null && this.marketSources[index].segments.every(t => t.checked); 
+    this.marketSources[index].indeterminate = this.marketSources[index].segments.filter(t => t.checked).length > 0 && !this.marketSources[index].checkedAll; 
     this.showSelectedSources();
   }
   showSelectedSources() {
     let sourceIdToLoad =[]
-    this.marketSources.forEach(source => source.segemnts.forEach(segment => segment.checked? sourceIdToLoad.push(segment.id):null))
+    this.marketSources.forEach(source => source.segments.forEach(segment => segment.checked? sourceIdToLoad.push(segment):null))
     this.sourceCode.setValue(sourceIdToLoad)
     console.log('updateAllComplete', this.sourceCode.value);
   }
 
   setAll(index: number) {
-    this.marketSources[index].segemnts.forEach(t => (t.checked = this.marketSources[index].checkedAll)); 
+    this.marketSources[index].segments.forEach(t => (t.checked = this.marketSources[index].checkedAll)); 
     this.showSelectedSources();
   }
-  getMarketData(){
-    let sourceCodesList: string[] = this.sourceCode.value
+  async getMarketData(){
+    let sourceCodesList: marketSourceSegements[] = this.sourceCode.value
     let dateToLoad = new Date(this.dateForLoadingPrices.value).toISOString().slice(0,10);
-    let res = this.MarketDataService.loadMarketDataExteranalSource(sourceCodesList.flat(), dateToLoad)
+    console.log('AAAdate',this.dateForLoadingPrices.value, dateToLoad, new Date(this.dateForLoadingPrices.value).toISOString() );
+    this.logLoadingData = await this.MarketDataService.loadMarketDataExteranalSource(sourceCodesList, dateToLoad)
+    this.MarketDataService.getMarketData().subscribe (marketData => {
+      this.dataSource  = new MatTableDataSource(marketData);
+      this.dataSource.paginator = this.paginator;
+      this.dataSource.sort = this.sort;
+    })
+
      }
   async ngAfterViewInit() {
     let userData = JSON.parse(localStorage.getItem('userInfo'))

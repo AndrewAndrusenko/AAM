@@ -221,6 +221,8 @@ export interface moexMarketDataForiegnShres {
   reportingDate: string
 }
 export interface marketData {
+  globalsource:string,
+  sourcecode: string,
   boardid: string, 
   shortname: number, 
   secid: string, 
@@ -242,4 +244,26 @@ export interface marketData {
   waval: number, 
   tradingsession: string,
   tradedate: string
+}
+
+export interface marketSourceSegements {
+  id:string,
+  description: string,
+  sourceCode : string
+  checked:boolean,
+  sourceURL: string,
+  params:{
+    date: string,
+    'history.colums': string,
+    'iss.json':string,
+    'iss.meta':string,
+    start: number
+  }
+}
+export interface marketDataSources {
+  segments :marketSourceSegements [],
+  sourceName : string,
+  checkedAll:boolean,
+  indeterminate:boolean
+
 }

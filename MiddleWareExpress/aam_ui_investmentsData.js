@@ -183,7 +183,6 @@ async function fAccountCreate (request, response) {
 async function fAccountDelete (request, response) {
   const query = {text: 'DELETE FROM public.dportfolios WHERE idportfolio=${id};', values: request.body}
   sql = pgp.as.format(query.text,query.values)
-  console.log('sql',sql);
   pool.query (sql,  (err, res) => {if (err) { return response.send(err)} else { return response.status(200).json(res.rowCount) }
   }) 
 }

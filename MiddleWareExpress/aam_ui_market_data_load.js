@@ -11,12 +11,11 @@ pg.types.setTypeParser(1114, function(stringValue) {
 
 async function finsertMarketData (request, response) {
   data = request.body.dataToInsert
-//  console.log('request.body.dataToInsert',data[0]);
   const query = {
   text: 'INSERT INTO public.t_moexdata_foreignshares(' +
-   ' boardid, tradedate,  secid,  value, open, low, high, legalcloseprice, waprice, close, volume, marketprice2,'+ 
+   ' globalsource,sourcecode, boardid, tradedate,  secid,  value, open, low, high, legalcloseprice, waprice, close, volume, marketprice2,'+ 
    ' marketprice3, admittedquote, mp2valtrd, marketprice3tradesvalue, admittedvalue, waval, tradingsession,  numtrades)'+
-   ' (SELECT '+   
+   ' (SELECT \''+ request.body.gloabalSource+'\',\''+ request.body.sourceCode+'\', ' + 
       '"BOARDID", "TRADEDATE","SECID", "VALUE", "OPEN", "LOW", "HIGH", "LEGALCLOSEPRICE", "WAPRICE", "CLOSE", '+
       '"VOLUME", "MARKETPRICE2", "MARKETPRICE3", "ADMITTEDQUOTE", "MP2VALTRD", "MARKETPRICE3TRADESVALUE", '+
       '"ADMITTEDVALUE", "WAVAL", "TRADINGSESSION",  "NUMTRADES"	from  json_to_recordset( \'' + 
@@ -27,6 +26,7 @@ async function finsertMarketData (request, response) {
    ' "ADMITTEDQUOTE" numeric, "MP2VALTRD" numeric,"MARKETPRICE3TRADESVALUE" numeric,"ADMITTEDVALUE" numeric,'+
    ' "WAVAL" numeric, "TRADINGSESSION" numeric, 	"NUMTRADES" numeric ))'
   }
+  console.log (query.text)
   // sql = pgp.as.format(query.text,query.values)
   pool.query (query.text,  (err, res) => {if (err) {
     console.log (err.stack.split("\n", 1).join(""))
@@ -47,9 +47,24 @@ async function fgetMarketData (request,response){
     }
   })
 }
+async function fgetMarketDataSources (request,response) {
+  
+   sql =  'SELECT  "sourceName", false AS "checkedAll", false AS indeterminate,json_agg("icMarketDataSources".*) AS "segments" '+
+  'FROM "icMarketDataSourcesGlobal" '+
+  'LEFT JOIN "icMarketDataSources" ON "icMarketDataSources"."sourceGlobal" = "icMarketDataSourcesGlobal"."sourceCode" '+
+  'GROUP BY "sourceName" ';
+  pool.query(sql, (err,res) => {if (err) {
+    err.detail=err.stack;
+    return res.send(err)} else {
+      return response.status(200).send(res.rows)
+    }
+  })
+}
+
 module.exports = {
   finsertMarketData,
-  fgetMarketData
+  fgetMarketData,
+  fgetMarketDataSources
 }
 
 

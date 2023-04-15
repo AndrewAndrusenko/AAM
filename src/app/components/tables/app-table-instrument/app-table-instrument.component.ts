@@ -1,23 +1,11 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef} from '@angular/material/dialog';
 import { AppInstrumentEditFormComponent } from '../../forms/app-instrument-edit-form/app-instrument-edit-form.component';
-import { LogProcessingService } from 'src/app/services/log-processing.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AppMarketDataService } from 'src/app/services/app-market-data.service';
-export interface marketSourceSegements {
-  id:string,
-  code: string
-  checked:boolean
-}
-export interface marketDataSources {
-  segemnts :marketSourceSegements [],
-  source : string,
-  checkedAll:boolean,
-  indeterminate:boolean
 
-}
 @Component({
   selector: 'app-app-instrument-table',
   templateUrl: './app-table-instrument.component.html',

@@ -81,7 +81,6 @@ async function FAmmGetTreeData(request,response) {
 }
 
 async function fGetportfolioTable (request,response) {
-  console.log('request.query', request.query);
   const query = {text: "SELECT "+
     " dportfolios.idportfolio, dportfolios.idclient , dportfolios.idstategy, " + 
     " dstrategiesglobal.sname as stategy_name, dstrategiesglobal.s_description as description , "+
@@ -103,7 +102,6 @@ async function fGetportfolioTable (request,response) {
       query.values = [request.query.strategyId]
     break;
     case 'calculateAccountCode':
-      console.log('len', request.query.accountType.length); 
       query.text += ' WHERE (LEFT(public.dportfolios.portfolioname,$2) = $1) '+
                     ' ORDER BY RIGHT(public.dportfolios.portfolioname,$2)::numeric DESC LIMIT 1; '
       query.values = [request.query.accountType, request.query.accountType.length ]
@@ -111,15 +109,12 @@ async function fGetportfolioTable (request,response) {
       query.text += ';'
     break;
   }
-  console.log('query',query);
   pool.query (query, (err, res) => {if (err) {console.log (err.stack)} else {
-    console.log('res.rows',res.rows);
     return response.status(200).json((res.rows))}
   })
 }
 
 async function fGetInstrumentData(request,response) {
-  console.log('request.query',request.query);
   const query = {
     text: ' SELECT ' +
     ' secid, shortname, name,  isin,  listlevel, facevalue, faceunit,  primary_board_title, ' +
@@ -138,8 +133,6 @@ async function fGetInstrumentData(request,response) {
       query.text += ';'}
   pool.query (query, (err, res) => {
     if (err) {console.log (err.stack)} else {
-      console.log(query.text);
-      console.log(res.rows);
       return response.status(200).json((res.rows))}
   })
 }
@@ -167,7 +160,6 @@ async function fRemoveFavorite (request, response) {
 }
 
 async function fGetClientData(request,response) {
-  console.log('request.query',request.query);
   const query = {text: ' SELECT * FROM public.dclients'}
   switch (request.query.action) {
     case 'Check_clientname':
@@ -182,9 +174,7 @@ async function fGetClientData(request,response) {
       query.text += ';'
     break;
   }
-  console.log('query',query);
   pool.query (query, (err, res) => {if (err) {console.log (err.stack)} else {
-    // console.log('res.rows',res.rows);
     return response.status(200).json((res.rows))}
   })
 }
@@ -238,15 +228,12 @@ async function fCreateClientData (request, response) {
 }
 
 async function fClientDataDelete (request, response) {
-  console.log('rq', request.body)
   const query = {text: 'DELETE FROM public.dclients WHERE idclient=${idclient};', values:  request.body}
   sql = pgp.as.format(query.text,query.values)
-  console.log('sql',sql);
   pool.query (sql,  (err, res) => {if (err) {
-    console.log ('hi',err.stack)
+    console.log ('err',err.stack)
     return response.send(err)
   } else {
-    console.log('res.rowCount',res.rowCount); 
     return response.status(200).json(res.rowCount)}
   })  
 }
