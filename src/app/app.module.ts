@@ -42,7 +42,8 @@ import { AppAccEntryModifyFormComponent } from './components/forms/app-acc-entry
 import { AppTableAccAccountsComponent } from './components/tables/app-table-acc-accounts/app-table-acc-accounts';
 import { AppTableAccLedgerAccountsComponent } from './components/tables/app-table-acc-ledger-accounts/app-table-acc-ledger-accounts';
 import { AppAccAccountModifyFormComponent } from './components/forms/app-acc-account-modify-form/app-acc-account-modify-form ';
-import {MatDatepickerModule} from '@angular/material/datepicker';
+import {MatDatepickerModule } from '@angular/material/datepicker';
+import { MAT_MOMENT_DATE_ADAPTER_OPTIONS, MatMomentDateModule } from '@angular/material-moment-adapter';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import {MatTabsModule as MatTabsModule} from '@angular/material/tabs';
 import {MatSelectModule as MatSelectModule} from '@angular/material/select';
@@ -104,7 +105,8 @@ import { AppTableMarketDataComponent } from './components/tables/app-table-marke
         MatListModule,
         CdkTableModule,
         MatProgressBarModule,
-
+        MatMomentDateModule 
+        
     ],
     declarations: [
         AppComponent,
@@ -139,7 +141,7 @@ import { AppTableMarketDataComponent } from './components/tables/app-table-marke
         AppTableMarketDataComponent,
     ],
     bootstrap: [AppComponent],
-    providers: [],
+    providers: [ {provide: MAT_MOMENT_DATE_ADAPTER_OPTIONS, useValue: {strict: true}} ],
 
 })
 export class AppModule { }

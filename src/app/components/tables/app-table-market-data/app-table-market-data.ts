@@ -18,9 +18,11 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { AppConfimActionComponent } from '../../alerts/app-confim-action/app-confim-action.component';
 import { MatCalendarCellClassFunction } from '@angular/material/datepicker';
 import { AppMarketDataService } from 'src/app/services/app-market-data.service';
+import * as moment from 'moment';
 /* 
 export class extends  */
 @Component({
+  
   selector: 'app-table-market-data',
   templateUrl: './app-table-market-data.html',
   styleUrls: ['./app-table-market-data.scss'],
@@ -100,7 +102,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
       entryType : {value:[], disabled:true}
     })
     this.loadMarketData = this.fb.group ({
-      dateForLoadingPrices : [new Date('2022-01-19'), Validators.required],
+      dateForLoadingPrices : [new Date('2022-01-25').toISOString(), Validators.required],
       sourceCode: [[],Validators.required],
       overwritingCurrentData : [null]
     })
@@ -123,8 +125,9 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
   }
   async getMarketData(){
     let sourceCodesList: marketSourceSegements[] = this.sourceCode.value
-    let dateToLoad = new Date(this.dateForLoadingPrices.value).toISOString().slice(0,10);
-    console.log('AAAdate',this.dateForLoadingPrices.value, dateToLoad, new Date(this.dateForLoadingPrices.value).toISOString() );
+    let dateToLoad = this.dateForLoadingPrices.value
+    dateToLoad=(dateToLoad._d.getUTCFullYear()+'-'+dateToLoad._d.getUTCMonth()+1) + '-'+(dateToLoad._d.getDate())
+    console.log(dateToLoad);
     this.logLoadingData = await this.MarketDataService.loadMarketDataExteranalSource(sourceCodesList, dateToLoad)
     this.MarketDataService.getMarketData().subscribe (marketData => {
       this.dataSource  = new MatTableDataSource(marketData);
@@ -142,6 +145,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
         this.dataSource  = new MatTableDataSource(marketData);
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
+        this.dateForLoadingPrices.setValue(moment('Fri Jan 25 2022 00:00:00 GMT+0300 (Moscow Standard Time)'))
       })
     })
   }

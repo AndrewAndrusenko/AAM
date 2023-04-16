@@ -15,36 +15,25 @@ export class AppMarketDataService {
   loadMarketDataExteranalSource (sourceCodes:marketSourceSegements[],dateToLoad: string): any[]  {
     let logMarketDateLoading = []
     sourceCodes.forEach(source => {
-      console.log('source',source);
+      console.log('source',dateToLoad);
       let currentPosition = 0;
       let totalRows = 0;
       let pageSize = 100;  
-      let params = source.params
+      let params = source.params;
       params['date'] = dateToLoad;
-      console.log('dateToLoad',dateToLoad);
-
-      params['start'] = 0
-   /*    {
-        'date': null,
-        'start':null,
-        'iss.json': 'extended',
-        'iss.meta': 'off',
-        'history.columns':'BOARDID, TRADEDATE,SECID, VALUE, OPEN, LOW, HIGH, LEGALCLOSEPRICE, WAPRICE, CLOSE,'+
-        'VOLUME, MARKETPRICE2, MARKETPRICE3, ADMITTEDQUOTE, MP2VALTRD, MARKETPRICE3TRADESVALUE,'+
-        'ADMITTEDVALUE, WAVAL, TRADINGSESSION,  NUMTRADES'
-      }
- */
+      params['start'] = 0;
       let totalLoad = 0;
+      Object.assign(params, {'iss.only':'history.cursor'})
+      delete params['iss.only']
       return this.http.get (source.sourceURL, {params:params} ).subscribe (marketData => {
         currentPosition = marketData[1]['history.cursor'][0]['INDEX'];
         pageSize = marketData[1]['history.cursor'][0]['PAGESIZE'];
         totalRows = marketData[1]['history.cursor'][0]['TOTAL'];
-        for (let index = 0; index <= totalRows; index=index + pageSize) {
+        for (let index = 0; index < totalRows; index=index + pageSize) {
           params['start'] = index;
-          console.log('index', params);
           this.http.get (source.sourceURL, {params:params} ).subscribe (marketData => {
           return this.insertMarketData (marketData[1]['history'],source.sourceCode,'MOEXiss').subscribe((rowLoaded) =>{
-            totalLoad=totalLoad+rowLoaded
+            totalLoad=totalLoad + rowLoaded
             totalLoad>=totalRows? logMarketDateLoading.push ({
               'Source':'MOEXiss - '+ source.sourceCode,
               'Total rows loaded - ' : totalLoad,

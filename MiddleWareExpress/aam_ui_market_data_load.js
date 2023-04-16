@@ -21,7 +21,7 @@ async function finsertMarketData (request, response) {
       '"ADMITTEDVALUE", "WAVAL", "TRADINGSESSION",  "NUMTRADES"	from  json_to_recordset( \'' + 
       JSON.stringify(data) +
     '\') as x (' +
-   ' "BOARDID" text, "TRADEDATE" text, "SHORTNAME" text,"SECID" text,"VALUE" numeric,"OPEN" numeric, "LOW" numeric,  "HIGH" numeric,'+
+   ' "BOARDID" text, "TRADEDATE" date, "SHORTNAME" text,"SECID" text,"VALUE" numeric,"OPEN" numeric, "LOW" numeric,  "HIGH" numeric,'+
    ' "LEGALCLOSEPRICE" numeric,"WAPRICE" numeric,"CLOSE" numeric,"VOLUME" numeric,"MARKETPRICE2" numeric, "MARKETPRICE3" numeric,'+
    ' "ADMITTEDQUOTE" numeric, "MP2VALTRD" numeric,"MARKETPRICE3TRADESVALUE" numeric,"ADMITTEDVALUE" numeric,'+
    ' "WAVAL" numeric, "TRADINGSESSION" numeric, 	"NUMTRADES" numeric ))'
