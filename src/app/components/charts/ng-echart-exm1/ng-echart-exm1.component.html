@@ -1,0 +1,19 @@
+<nav class="navbar navbar-expand-sm navbar-dark bg-primary">
+  <a class="navbar-brand" href="#">Market Data</a>
+</nav>
+
+<div class="container-fluid"  style="background-color: azure;">
+<!--   <div class="row">
+    <div class="col-md-12">
+      <div class="form-group">
+        <label for="">Country</label>
+        <select class="form-control" name="" id="" [(ngModel)]="selectedCountry" (change)="onChangeCountry()">
+          <option *ngFor="let c of marketData" [value]="c.secid">{{c.secid}}</option>
+        </select>
+      </div>
+    </div> -->
+    <div class="col-md-12">
+      <div echarts [options]="countryCasesChartOptions" class="demo-chart"></div>
+    </div>
+  </div>
+<!-- </div> -->

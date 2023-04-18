@@ -11,7 +11,8 @@ export class AppMenuComponent {
 @Input()  treeOpened : boolean = true;
 fullscreen : boolean = false;
 
-constructor(private authService : AuthService, private appMenuService : AppMenuServiceService) { }
+constructor(
+  private authService : AuthService, private appMenuService : AppMenuServiceService) { }
 
 public getLogin = () => {
   var userData;
@@ -32,5 +33,7 @@ LogOut = () => {
 showHideTree = () => {
 this.treeOpened = !this.treeOpened
 this.appMenuService.sendToggleTree(this.treeOpened)
+}
+showChart (){
 }
 }

@@ -1,7 +1,7 @@
 import {AfterViewInit, Component, ViewEncapsulation, EventEmitter, Output, ViewChild} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
-import {lastValueFrom, Subscription } from 'rxjs';
+import {lastValueFrom, map, Observable, startWith, Subscription } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {TreeMenuSevice } from 'src/app/services/tree-menu.service';
@@ -19,6 +19,7 @@ import { AppConfimActionComponent } from '../../alerts/app-confim-action/app-con
 import { MatCalendarCellClassFunction } from '@angular/material/datepicker';
 import { AppMarketDataService } from 'src/app/services/app-market-data.service';
 import * as moment from 'moment';
+import { AtuoCompSecidService } from 'src/app/services/atuo-comp-secid.service';
 /* 
 export class extends  */
 @Component({
@@ -40,8 +41,8 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
   loadMarketData: FormGroup;
   marketSources:marketDataSources[] =  [] 
   marketDataToLoad: any;
-  columnsToDisplay = ['globalsource','sourcecode','boardid','tradedate','secid','value', 'open', 'low', 'high', 'close','numtrades', 'volume','marketprice2', 'marketprice3', 'admittedquote', 'waprice'];
-  columnsHeaderToDisplay = ['Source','code','boardid','tradedate','secid','value', 'open', 'low', 'high', 'close', 'numtrades', 'volume','marketprice2', 'marketprice3', 'admittedquote' ,'waprice'];
+  columnsToDisplay = ['globalsource','sourcecode','boardid','tradedate','secid','value', 'open', 'low', 'high', 'close','numtrades', 'volume','marketprice2', 'marketprice3', 'admittedquote'];
+  columnsHeaderToDisplay = ['Source','code','boardid','tradedate','secid','value', 'open', 'low', 'high', 'close', 'numtrades', 'volume','marketprice2', 'marketprice3', 'admittedquote'];
   dataSource: MatTableDataSource<marketData>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
@@ -64,13 +65,14 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
   psearchParameters: any;
   
   dialogChooseAccountsList: MatDialogRef<AppTableAccAccountsComponent>;
+  public filterednstrumentsLists : Observable<string[]>;
  
   
   dateOfOperaationsStart  = new Date ('2023-02-18')
   balacedDateWithEntries : Date[]
   FirstOpenedAccountingDate : Date;
   filterDateFormated : string;
-
+  boardIDs = ["AGRO", "FQBR", "INAV", "MMIX", "RTSI", "SDII", "SMAL", "SNDX", "TQBD", "TQBR", "TQCB", "TQFD", "TQFE", "TQIF", "TQIR", "TQIU", "TQOB", "TQOD", "TQOE", "TQPI", "TQRD", "TQTD", "TQTE", "TQTF"]
   searchParametersFG: FormGroup;
   filterlFormControl = new FormControl('');
   closingDate = new FormControl<Date | null>(null)
@@ -83,30 +85,38 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
     private AccountingDataService:AppAccountingService, 
     private MarketDataService: AppMarketDataService,
     private TreeMenuSevice:TreeMenuSevice, 
+    private AtuoCompService:AtuoCompSecidService,
     private dialog: MatDialog,
     private fb:FormBuilder, 
     public snack:MatSnackBar
   ) {
     this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data=>{
       this.FirstOpenedAccountingDate = data[0].FirstOpenedDate;
-    })
-    this.MarketDataService.getMarketDataSources().subscribe((marketSourcesData) => {
-      this.marketSources = marketSourcesData;
-      console.log('marketSourcesData', this.marketSources);
-      
-    })
+    });
+    this.MarketDataService.getMarketDataSources().subscribe(marketSourcesData => this.marketSources = marketSourcesData);
+    this.MarketDataService.getMarketData('GOOG-RM').subscribe (marketData => {
+      this.updateMarketDataTable(marketData);
+      this.loadMarketData.enable();
+    });      
     this.searchParametersFG = this.fb.group ({
       dataRange : this.dataRange,
-      noAccountLedger: null,
+      secidList: null,
       amount:{value:null, disabled:true},
-      entryType : {value:[], disabled:true}
-    })
+      marketSource : {value:[], disabled:false}
+    });
     this.loadMarketData = this.fb.group ({
       dateForLoadingPrices : [new Date('2022-01-25').toISOString(), Validators.required],
       sourceCode: [[],Validators.required],
       overwritingCurrentData : [null]
-    })
+    });
+    this.AtuoCompService.getSecidLists(true);
+    this.filterednstrumentsLists = this.searchParametersFG.controls['secidList'].valueChanges.pipe(
+      startWith(''),
+      map(value => this.AtuoCompService.filter(value || ''))
+    );
+    // this.searchParametersFG.controls['secidList'].valueChanges.subscribe(value=>this.instruments.push(value))
   }
+
   updateAllComplete(index:number) {
     this.marketSources[index].checkedAll = this.marketSources[index].segments != null && this.marketSources[index].segments.every(t => t.checked); 
     this.marketSources[index].indeterminate = this.marketSources[index].segments.filter(t => t.checked).length > 0 && !this.marketSources[index].checkedAll; 
@@ -116,7 +126,6 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
     let sourceIdToLoad =[]
     this.marketSources.forEach(source => source.segments.forEach(segment => segment.checked? sourceIdToLoad.push(segment):null))
     this.sourceCode.setValue(sourceIdToLoad)
-    console.log('updateAllComplete', this.sourceCode.value);
   }
 
   setAll(index: number) {
@@ -124,36 +133,40 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
     this.showSelectedSources();
   }
   async getMarketData(){
+    this.loadMarketData.disable();
     let sourceCodesList: marketSourceSegements[] = this.sourceCode.value
     let dateToLoad = this.dateForLoadingPrices.value
     dateToLoad=(dateToLoad._d.getUTCFullYear()+'-'+dateToLoad._d.getUTCMonth()+1) + '-'+(dateToLoad._d.getDate())
     console.log(dateToLoad);
     this.logLoadingData = await this.MarketDataService.loadMarketDataExteranalSource(sourceCodesList, dateToLoad)
-    this.MarketDataService.getMarketData().subscribe (marketData => {
-      this.dataSource  = new MatTableDataSource(marketData);
-      this.dataSource.paginator = this.paginator;
-      this.dataSource.sort = this.sort;
-    })
-
-     }
+  }
   async ngAfterViewInit() {
+    this.MarketDataService.getReloadMarketData().subscribe(marketData => {
+      this.loadMarketData.enable();
+      this.updateMarketDataTable(marketData)
+    });
+    this.dateForLoadingPrices.setValue(moment('Fri Jan 25 2022 00:00:00 GMT+0300 (Moscow Standard Time)'))
     let userData = JSON.parse(localStorage.getItem('userInfo'))
     await lastValueFrom (this.TreeMenuSevice.getaccessRestriction (userData.user.accessrole, 'accessToClientData'))
     .then ((accessRestrictionData) =>{
       this.accessToClientData = accessRestrictionData['elementvalue']
-      this.MarketDataService.getMarketData().subscribe (marketData => {
-        this.dataSource  = new MatTableDataSource(marketData);
-        this.dataSource.paginator = this.paginator;
-        this.dataSource.sort = this.sort;
-        this.dateForLoadingPrices.setValue(moment('Fri Jan 25 2022 00:00:00 GMT+0300 (Moscow Standard Time)'))
-      })
     })
   }
-
+  updateMarketDataTable (marketData:marketData[]) {
+    console.log('updateMarketDataTable');
+    
+    this.dataSource  = new MatTableDataSource(marketData);
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+  }
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
+  }
+  chng (value:string) {
+    console.log('event',value);
+    this.instruments[this.instruments.length-1] = value  
   }
   add(event: MatChipInputEvent): void {
     const value = (event.value || '').trim();
@@ -261,10 +274,11 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
     const index = this.balacedDateWithEntries.findIndex(x => new Date(x).toLocaleDateString() == cellDate.toLocaleDateString());
     return (index > -1)? 'date-orange' : '';
   };
-      get  gRange () {return this.searchParametersFG.get('dataRange') } 
+  get  gRange () {return this.searchParametersFG.get('dataRange') } 
   get  dateRangeStart() {return this.searchParametersFG.get('dateRangeStart') } 
   get  dateRangeEnd() {return this.searchParametersFG.get('dateRangeEnd') } 
   get  entryTypes () {return this.searchParametersFG.get('entryType') } 
+  get  secidList () {return this.searchParametersFG.get('secidList') } 
   
   get dateForLoadingPrices() {return this.loadMarketData.get('dateForLoadingPrices')}
   get sourceCode() {return this.loadMarketData.get('sourceCode')}

@@ -115,25 +115,20 @@ async function fGetportfolioTable (request,response) {
 }
 
 async function fGetInstrumentData(request,response) {
-  const query = {
+  const query = request.query.secidOnly?  {text:'SELECT ARRAY_AGG(secid) FROM public."aMoexInstruments"'} : {
     text: ' SELECT ' +
     ' secid, shortname, name,  isin,  listlevel, facevalue, faceunit,  primary_board_title, ' +
     ' is_qualified_investors,  registryclosedate,  lotsize, price, discountl0, discounth0, fullcovered, ' +
     ' typename, issuesize, is_external, rtl1, rtl2 '+
     ' FROM public."aMoexInstruments"',
   }
-
-
   if (request.query.secid !== undefined) {
     paramArr = [request.query.secid]
     query.text += ' WHERE (secid= $1);'
     query.values = paramArr;
-    } else
-    { 
-      query.text += ';'}
-  pool.query (query, (err, res) => {
-    if (err) {console.log (err.stack)} else {
-      return response.status(200).json((res.rows))}
+  } else {query.text += ';'}
+  console.log('que',query);
+  pool.query (query, (err, res) => {if (err) {console.log (err.stack)} else {return  response.status(200).json(res.rows)}
   })
 }
 

@@ -1,22 +1,15 @@
-import { AfterViewInit, Component,  Input, OnDestroy, OnInit, SimpleChanges,  } from '@angular/core';
-import { AsyncValidator, AsyncValidatorFn, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { Component,  Input, OnDestroy, OnInit, SimpleChanges,  } from '@angular/core';
+import { AsyncValidatorFn, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { AppConfimActionComponent } from '../../alerts/app-confim-action/app-confim-action.component';
-import { AppSnackMsgboxComponent } from '../../app-snack-msgbox/app-snack-msgbox.component';
-import { MatSnackBar} from '@angular/material/snack-bar';
-import { AppInvestmentDataServiceService } from 'src/app/services/app-investment-data.service.service';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
-import { bAccountsEntriesList, bcTransactionType_Ext, cFormValidationLog } from 'src/app/models/accounts-table-model';
+import { bcTransactionType_Ext, cFormValidationLog } from 'src/app/models/accounts-table-model';
 import { AppTableAccLedgerAccountsComponent } from '../../tables/app-table-acc-ledger-accounts/app-table-acc-ledger-accounts';
 import { AppTableAccAccountsComponent } from '../../tables/app-table-acc-accounts/app-table-acc-accounts';
-import {COMMA, ENTER} from '@angular/cdk/keycodes';
-import { MatChipInputEvent} from '@angular/material/chips';
-import {  distinctUntilChanged, filter, startWith, Subject, Subscription, switchMap, take, tap } from 'rxjs';
+import { COMMA, ENTER} from '@angular/cdk/keycodes';
+import { distinctUntilChanged, filter, startWith, Subject, Subscription, switchMap, take, tap } from 'rxjs';
 import { LogProcessingService } from 'src/app/services/log-processing.service';
-export interface Fruit {
-  name: string;
-}
+import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 @Component({
   selector: 'app-acc-entry-modify-form',
   templateUrl: './app-acc-entry-modify-form.html',
@@ -28,7 +21,6 @@ export class AppAccEntryModifyFormComponent implements OnInit,  OnDestroy {
   public entryModifyForm: FormGroup;
   @Input() action: string;
   @Input() Ref: string;
-  dialogRefConfirm: MatDialogRef<AppConfimActionComponent>;
   dialogChoseAccount: MatDialogRef<AppTableAccAccountsComponent>;
   dialogChoseLedger: MatDialogRef<AppTableAccLedgerAccountsComponent>;
   public validatorAccountOverdraft :AsyncValidatorFn
@@ -38,11 +30,9 @@ export class AppAccEntryModifyFormComponent implements OnInit,  OnDestroy {
   public validatorLedgerLL2Overdraft :AsyncValidatorFn
   subscription: Subscription;
   formSubmitSubject$ = new Subject();
-  private formValueAndStatusSubscription: Subscription;
   public title: string;
   public actionType : string;
   public actionToConfim = {'action':'delete_client' ,'isConfirmed': false}
-  public AppSnackMsgbox : AppSnackMsgboxComponent
   public data: any;
   selectedValue : string
   public FirstOpenedAccountingDate : Date;
@@ -63,9 +53,8 @@ export class AppAccEntryModifyFormComponent implements OnInit,  OnDestroy {
     private fb:FormBuilder, 
     private AccountingDataService:AppAccountingService, 
     private LogService:LogProcessingService,
+    private CommonDialogsService:HadlingCommonDialogsService,
     private dialog: MatDialog, 
-    public snack:MatSnackBar
-    
   ) 
   { this.AccountingDataService.GetTransactionType_Ext('',0,'','','bcTransactionType_Ext').subscribe (
     data => this.TransactionTypes=data)
@@ -307,11 +296,8 @@ export class AppAccEntryModifyFormComponent implements OnInit,  OnDestroy {
     
   }
   updateResultHandler (result :any, action: string, dataForUpdateLog?:any) {
-    if (result['name']=='error') {
-      this.snack.open('Error: ' + result['detail'].split("\n", 1).join(""),'OK',{panelClass: ['snackbar-error']}); 
-    } else {
-      this.snack.open(action +': ' + result + ' entry','OK',{panelClass: ['snackbar-success'], duration: 3000});
-      this.dialog.closeAll();
+    this.CommonDialogsService.snackResultHandler(result,action)
+    if (result['name']!=='error') {
       this.autoProcessingState? this.LogService.sendCreatedLogObject (dataForUpdateLog): null;
       this.AccountingDataService.sendReloadEntryList (this.id.value);
     }
@@ -322,7 +308,6 @@ export class AppAccEntryModifyFormComponent implements OnInit,  OnDestroy {
     let dataForUpdate = Object.assign({},this.entryModifyForm.value);
     dataForUpdate.t_dataTime = newDate.toLocaleDateString();
     dataForUpdate.t_amountTransaction = parseFloat(this.amountTransaction.value.replace(/,/g, ''));
-
     switch (action) {
       case 'Create_Example':
       case 'Create':
@@ -332,7 +317,6 @@ export class AppAccEntryModifyFormComponent implements OnInit,  OnDestroy {
          this.AccountingDataService.createLLEntryAccounting (dataForUpdate).then ((result) => this.updateResultHandler(result, 'Created',this.entryModifyForm.value))
         }
       break;
-
       case 'Edit':
         if (this.d_transactionType.value === 'AL') { 
           this.AccountingDataService.updateEntryAccountAccounting (dataForUpdate).then ((result) => this.updateResultHandler(result,'Updated'))
@@ -340,17 +324,14 @@ export class AppAccEntryModifyFormComponent implements OnInit,  OnDestroy {
           this.AccountingDataService.updateLLEntryAccountAccounting (dataForUpdate).then ((result) => this.updateResultHandler(result,'Updated'))
          }
       break;
-
       case 'Delete':
-        this.dialogRefConfirm = this.dialog.open(AppConfimActionComponent, {panelClass: 'custom-modalbox',} );
-        this.dialogRefConfirm.componentInstance.actionToConfim = {'action':'Delete Entry' ,'isConfirmed': false}
-        this.dialogRefConfirm.afterClosed().subscribe (actionToConfim => {
-          if (actionToConfim.isConfirmed===true) {
+        this.CommonDialogsService.confirmDialog('Delete Entry').subscribe(action => {
+          if (action.isConfirmed===true) {
             if (this.d_transactionType.value === 'AL') { 
               this.AccountingDataService.deleteEntryrAccountAccounting (dataForUpdate.t_id).then ((result) => this.updateResultHandler(result,'Deleted'))
-             } else {
+            } else {
               this.AccountingDataService.deleteLLEntryrAccountAccounting (dataForUpdate.t_id).then ((result) => this.updateResultHandler(result,'Deleted'))
-             }
+            }
           }
         })
       break;

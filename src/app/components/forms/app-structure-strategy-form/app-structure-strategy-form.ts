@@ -11,6 +11,7 @@ import { AppInstrumentTableComponent } from '../../tables/app-table-instrument/a
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
 import { AppTabServiceService } from 'src/app/services/app-tab-service.service';
 import { debounceTime, distinctUntilChanged, filter, map, Observable, startWith, switchMap } from 'rxjs';
+import { AtuoCompSecidService } from 'src/app/services/atuo-comp-secid.service';
 
 @Component({
   selector: 'app-structure-strategy-form',
@@ -34,7 +35,6 @@ export class AppStructureStrategyFormComponent implements OnInit {
   dialogRef: MatDialogRef<AppInstrumentTableComponent>;
   dtOptions: any = {};
   MPnames: StrategiesGlobalData [] = [];
-  public fullInstrumentsLists :string [] =[];
   public filterednstrumentsLists : Observable<string[]>;
   public title: string;
   public actionType : string;
@@ -46,21 +46,18 @@ export class AppStructureStrategyFormComponent implements OnInit {
     private fb:FormBuilder, 
     private InvestmentDataServiceService:AppInvestmentDataServiceService, 
     private AppTabServiceService: AppTabServiceService,
+    private AtuoCompService:AtuoCompSecidService,
     private dialog: MatDialog, 
     public snack:MatSnackBar,
     
   ) {}
   
   ngOnInit(): void {
-
+    this.AtuoCompService.getSecidLists(true);
     this.filterednstrumentsLists = this.editStructureStrategyForm.controls['id'].valueChanges.pipe(
       startWith(''),
-      map(value => this._filter(value || '')),
+      map(value => this.AtuoCompService.filter(value || ''))
     );
-
-    this.AppTabServiceService.getSecidLists('').subscribe (data=>{
-      this.fullInstrumentsLists = data;
-    })
     this.InvestmentDataServiceService.getGlobalStategiesList (0,'','Get_ModelPortfolios_List').subscribe (data => {
       this.MPnames = data;
     })
@@ -90,11 +87,11 @@ export class AppStructureStrategyFormComponent implements OnInit {
       this.editStructureStrategyForm.controls['id'].updateValueAndValidity();
     }
   }
-  private _filter(value: string): string[] {
+/*   private _filter(value: string): string[] {
     const filterValue = value.toLowerCase();
 
     return this.fullInstrumentsLists.filter(option => option.toLowerCase().includes(filterValue));
-  }
+  } */
 
   ngOnChanges(changes: SimpleChanges) {
     this.editStructureStrategyForm.controls['id_item'].setValue (changes['strategyId'].currentValue)

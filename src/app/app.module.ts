@@ -65,6 +65,10 @@ import {MatListModule as MatListModule} from '@angular/material/list';
 import { CdkTableModule } from '@angular/cdk/table';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { AppTableMarketDataComponent } from './components/tables/app-table-market-data/app-table-market-data';
+import { NgxChartsModule }from '@swimlane/ngx-charts';
+import * as echarts from 'echarts';
+import { NgxEchartsModule } from 'ngx-echarts';
+import { NgEchartExm1Component } from './components/charts/ng-echart-exm1/ng-echart-exm1.component';
 
 
 @NgModule({
@@ -105,8 +109,10 @@ import { AppTableMarketDataComponent } from './components/tables/app-table-marke
         MatListModule,
         CdkTableModule,
         MatProgressBarModule,
-        MatMomentDateModule 
-        
+        MatMomentDateModule,
+        NgxEchartsModule.forRoot({
+            echarts
+          })
     ],
     declarations: [
         AppComponent,
@@ -139,6 +145,7 @@ import { AppTableMarketDataComponent } from './components/tables/app-table-marke
         AppAccAccountModifyFormComponent,
         AppTableBalanceSheetComponent,
         AppTableMarketDataComponent,
+        NgEchartExm1Component
     ],
     bootstrap: [AppComponent],
     providers: [ {provide: MAT_MOMENT_DATE_ADAPTER_OPTIONS, useValue: {strict: true}} ],

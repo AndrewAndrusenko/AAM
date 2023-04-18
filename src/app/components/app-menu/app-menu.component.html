@@ -19,7 +19,8 @@
   </mat-menu>
   <button mat-flat-button mat-button color="primary" [matMenuTriggerFor]="menu3">Settings</button>
     <mat-menu #menu3="matMenu">
-    <button mat-menu-item>Settings</button>
+    <button mat-menu-item
+    (click)="showChart()">Settings</button>
     <button mat-menu-item>User profile</button>
     <button mat-menu-item
     (click)="LogOut()"

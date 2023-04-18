@@ -34,6 +34,7 @@
       >cloud_download</mat-icon>
     </mat-panel-description>
   </mat-expansion-panel-header >
+  <h2 style=" color: rgb(44, 43, 43); text-align: center;" *ngIf="loadMarketData.disabled">Loading market data...</h2>
   <form class="submit"   [formGroup]="loadMarketData" style="font-size: 18px;   margin-top: 0.5%;">
     <button color = "primary" mat-raised-button 
       style=" margin-left:1%; font-size: 18px; margin-right: 2%;"
@@ -77,6 +78,7 @@
     </section>
   </span>
   </form>
+  <mat-progress-bar *ngIf="loadMarketData.disabled" color="primary" mode="query"></mat-progress-bar>
   <mat-expansion-panel *ngIf="logLoadingData.length" class="complex-search-entries" 
   (opened)="statusLogPanelOpenState = true"
   (closed)="statusLogPanelOpenState = false" >
@@ -129,23 +131,52 @@
         </mat-date-range-input>
         <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
         <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-        <mat-date-range-picker [dateClass]="dateClass" #picker></mat-date-range-picker>
+        <mat-date-range-picker  #picker></mat-date-range-picker>
         <mat-error *ngIf="dataRange.controls.dateRangeStart.hasError('matStartDateInvalid')">Invalid start date</mat-error>
         <mat-error *ngIf="dataRange.controls.dateRangeEnd.hasError('matEndDateInvalid')">Invalid end date</mat-error>
+      </mat-form-field>
+      <mat-form-field  style="width: 25%;">
+        <mat-label>MarketDataSource</mat-label>
+        <mat-select  #marketSource formControlName="marketSource"  multiple> 
+          <mat-option #allSelected [value]="0"
+            (click)="toggleAllSelection()" >
+            ALL - {{this.allSelected.selected? 'Clear' :'Select' }} All 
+          </mat-option>
+          <mat-optgroup *ngFor="let marketSource of marketSources" [label]="marketSource.sourceName">
+          <mat-option *ngFor="let segment of marketSource.segments" [value]="segment.id">
+              {{segment.description}}
+          </mat-option>
+        </mat-optgroup>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field  style="width: 25%;">
+        <mat-label>BoardID</mat-label>
+        <mat-select  #BoardID formControlName="BoardID"  multiple> 
+          <mat-option #allSelected [value]="0"
+            (click)="toggleAllSelection()" >
+            ALL - {{this.allSelected.selected? 'Clear' :'Select' }} All 
+          </mat-option>
+         
+          <mat-option *ngFor="let board of boardIDs" [value]="board">
+              {{board}}
+          </mat-option>
+        </mat-select>
       </mat-form-field>
       <mat-form-field class="example-chip-list" appearance="fill" style="width: 40%; ">
         <mat-chip-list #chipList aria-label="Fruit selection"  >
           <mat-chip *ngFor="let account of instruments" 
           (removed)="remove(account)"
-          (click)=" clearAll($event);"        >
+          (click)=" clearAll($event);">
             {{account}}
             <button matChipRemove>
               <mat-icon>cancel</mat-icon>
             </button>
           </mat-chip>
-          <input 
-          placeholder="Add account or account,account1,account2.."
-          formControlName="noAccountLedger"
+          <input #iputForChip
+          [matAutocomplete]="auto"
+          matInput
+          placeholder="Add secid or secid,secid1,secid2.."
+          formControlName="secidList"
           [matChipInputFor]="chipList"
           [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
           [matChipInputAddOnBlur]="addOnBlur"
@@ -154,6 +185,11 @@
           <button style="font-size: 16px;" mat-raised-button matSuffix (click)="selectAccounts('ledger')">
             <mat-icon *ngIf="action!=='View'" class = "icon_search">search</mat-icon> MultiSelect </button>
         </mat-chip-list>
+        <mat-autocomplete #auto="matAutocomplete" (optionSelected)='chng($event.option.value)'>
+          <mat-option *ngFor="let secid of filterednstrumentsLists | async" [value]="secid">
+            {{secid}}
+          </mat-option>
+        </mat-autocomplete>
       </mat-form-field>
     </span>
   </form>
@@ -168,28 +204,22 @@
         mat-cell 
         *matCellDef="let element" [cdkContextMenuTriggerFor]="instrumentcontextmenu"  > 
         <span [ngSwitch]="true==true">
-          <p *ngSwitchCase="['dateBalance','datePreviousBalance'].includes(column)">
-            <button mat-stroked-button matTooltip="Entries list by account for the date"
-              *ngIf="column=='dateBalance'">
+          <p *ngSwitchCase="['tradedate'].includes(column)">
               {{ element[column] | date }}
-            </button>
-            <span *ngIf="column!=='dateBalance'">
-              {{ element[column] == null ? element['dateBalance']=='2049-12-31T21:00:00.000Z'? 'Entries': 'Day is open' : element[column] | date }}
-            </span>
           </p>          
-          <p *ngSwitchCase="['openingBalance','totalCredit', 'totalDebit', 'OutGoingBalance', 'checkClosing'].includes(column)">
+          <p *ngSwitchCase="['value','open', 'low', 'high', 'volume','marketprice2','marketprice3','admittedquote'].includes(column)">
             {{element[column] | currency}}
           </p>
-          <p *ngSwitchCase="['accountNo'].includes(column)">
+         <!--  <p *ngSwitchCase="['accountNo'].includes(column)">
             <button mat-stroked-button style="width: 80%;"  matTooltip="Account details">
               {{element[column] }}
             </button> 
-          </p>
-          
+          </p> -->
           <p *ngSwitchDefault>
-            {{element[column]}}  
+            {{element[column]}}
           </p>
         </span>
+
         <ng-template  #instrumentcontextmenu>
           <div class="tree-menu-context" *ngIf="!readOnly" cdkMenu >
             <button 

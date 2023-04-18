@@ -37,8 +37,11 @@ async function finsertMarketData (request, response) {
   })  
 }
 async function fgetMarketData (request,response){
+  let where = request.query.pms? "WHERE secid = 'GOOG-RM' and boardid='TQBD'":''
   const query = {
-    text : 'SELECT * FROM t_moexdata_foreignshares;'
+    text : 'SELECT boardid, shortname, secid, numtrades, value, open, low, high, legalcloseprice, waprice, close, volume, marketprice2, marketprice3, admittedquote, mp2valtrd, marketprice3tradesvalue, admittedvalue, waval, tradingsession, globalsource, sourcecode, tradedate::timestamp without time zone '+
+    'FROM t_moexdata_foreignshares '+ where+
+    'ORDER BY tradedate::timestamp without time zone DESC;'
   }
   pool.query(query.text, (err,res) => {if (err) {
     err.detail=err.stack;
