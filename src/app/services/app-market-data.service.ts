@@ -66,9 +66,9 @@ export class AppMarketDataService {
     return  this.http.post <number> ('/api/AAM/MD/importData/',
     {'dataToInsert': dataToInsert,'sourceCode':sourceCode, 'gloabalSource':gloabalSource})
   }
-  getMarketData (pms?:string):Observable<marketData[]> {
-    const params = {'pms': pms }
-
+  getMarketData (searchParameters?:any):Observable<marketData[]> {
+    let params = {};
+    (searchParameters !== null) ?  params = {...params,...searchParameters}: null
     return this.http.get <marketData[]> ('/api/AAM/MD/getMarketData/', { params: params } )
   }
   getMarketDataSources ():Observable<marketDataSources[]> {
@@ -82,6 +82,7 @@ export class AppMarketDataService {
   getReloadMarketData(): Observable<marketData[]> { //the receiver component calls this function 
     return this.subjectMarketData.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
   }
+  
 }
 
 
