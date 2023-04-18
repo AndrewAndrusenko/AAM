@@ -3,17 +3,17 @@
 </nav>
 
 <div class="container-fluid"  style="background-color: azure;">
-<!--   <div class="row">
+ <div class="row">
     <div class="col-md-12">
       <div class="form-group">
         <label for="">Country</label>
-        <select class="form-control" name="" id="" [(ngModel)]="selectedCountry" (change)="onChangeCountry()">
-          <option *ngFor="let c of marketData" [value]="c.secid">{{c.secid}}</option>
+        <select class="form-control" name="" id="" [(ngModel)]="secIds" (change)="onChangeCountry()">
+          <option *ngFor="let c of secIds" [value]="c">{{c}}</option>
         </select>
       </div>
-    </div> -->
-    <div class="col-md-12">
+    </div> 
+    <div class="col-md-12" style="margin-top: 1%;">
       <div echarts [options]="countryCasesChartOptions" class="demo-chart"></div>
     </div>
   </div>
-<!-- </div> -->
+</div> 

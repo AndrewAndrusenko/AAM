@@ -125,7 +125,7 @@
       </span>
       <mat-form-field appearance="fill">
         <mat-label>Enter a date range</mat-label>
-        <mat-date-range-input [formGroup]="dataRange" [min]="dateOfOperaationsStart" [rangePicker]="picker" >
+        <mat-date-range-input [formGroup]="dataRange" [rangePicker]="picker" >
           <input matStartDate  placeholder="Start date" formControlName="dateRangeStart">
           <input matEndDate  placeholder="End date" formControlName="dateRangeEnd">
         </mat-date-range-input>
@@ -143,7 +143,7 @@
             ALL - {{this.allSelected.selected? 'Clear' :'Select' }} All 
           </mat-option>
           <mat-optgroup *ngFor="let marketSource of marketSources" [label]="marketSource.sourceName">
-          <mat-option *ngFor="let segment of marketSource.segments" [value]="segment.id">
+          <mat-option *ngFor="let segment of marketSource.segments" [value]="segment.sourceCode">
               {{segment.description}}
           </mat-option>
         </mat-optgroup>
@@ -151,13 +151,12 @@
       </mat-form-field>
       <mat-form-field  style="width: 25%;">
         <mat-label>BoardID</mat-label>
-        <mat-select  #BoardID formControlName="BoardID"  multiple> 
+        <mat-select  #BoardID formControlName="boards"  multiple> 
           <mat-option #allSelected [value]="0"
             (click)="toggleAllSelection()" >
             ALL - {{this.allSelected.selected? 'Clear' :'Select' }} All 
           </mat-option>
-         
-          <mat-option *ngFor="let board of boardIDs" [value]="board">
+          <mat-option *ngFor="let board of boardIDs" [value]="board.toString()">
               {{board}}
           </mat-option>
         </mat-select>
@@ -182,10 +181,8 @@
           [matChipInputAddOnBlur]="addOnBlur"
           (matChipInputTokenEnd)="add($event)"
           matTooltip="Type account number or paste accounts list separated by comma and press enter" >
-          <button style="font-size: 16px;" mat-raised-button matSuffix (click)="selectAccounts('ledger')">
-            <mat-icon *ngIf="action!=='View'" class = "icon_search">search</mat-icon> MultiSelect </button>
         </mat-chip-list>
-        <mat-autocomplete #auto="matAutocomplete" (optionSelected)='chng($event.option.value)'>
+        <mat-autocomplete #auto="matAutocomplete" (optionSelected)='changedValueofChip($event.option.value)'>
           <mat-option *ngFor="let secid of filterednstrumentsLists | async" [value]="secid">
             {{secid}}
           </mat-option>
@@ -200,21 +197,20 @@
     <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i=index">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>  {{columnsHeaderToDisplay[i]  | titlecase}}</th>
       <td 
-        [ngStyle]="{'color': element['datePreviousBalance'] == null ? 'rgb(198, 255, 215)' : 'white'}"
+        [ngStyle]="{'color': element['currency'] == 'RUB' ? 'rgb(198, 255, 215)' : 'white'}"
+        [ngStyle]="{'color': element['percentprice'] ? 'black' : (element['currency'] == 'RUB' ? 'rgb(198, 255, 215)' : 'white')}"
         mat-cell 
         *matCellDef="let element" [cdkContextMenuTriggerFor]="instrumentcontextmenu"  > 
         <span [ngSwitch]="true==true">
           <p *ngSwitchCase="['tradedate'].includes(column)">
               {{ element[column] | date }}
           </p>          
-          <p *ngSwitchCase="['value','open', 'low', 'high', 'volume','marketprice2','marketprice3','admittedquote'].includes(column)">
-            {{element[column] | currency}}
+          <p *ngSwitchCase="['open', 'low', 'high', 'marketprice2','close','admittedquote'].includes(column)">
+            {{!element['percentprice']? (element[column] | currency:element['currency']:element['spsymbol']:'1.2-2':'fr'):(element[column] |  currency:element['currency']:'%':'1.2-2':'fr')}}
           </p>
-         <!--  <p *ngSwitchCase="['accountNo'].includes(column)">
-            <button mat-stroked-button style="width: 80%;"  matTooltip="Account details">
-              {{element[column] }}
-            </button> 
-          </p> -->
+          <p *ngSwitchCase="['value','volume'].includes(column)">
+            {{(element[column] | currency:element['currency']:element['spsymbol']:'1.2-2':'fr')}}
+          </p>
           <p *ngSwitchDefault>
             {{element[column]}}
           </p>

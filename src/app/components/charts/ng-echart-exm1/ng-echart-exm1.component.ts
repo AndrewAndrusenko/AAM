@@ -1,22 +1,27 @@
 import { Component, OnInit } from '@angular/core';
 import { marketData } from 'src/app/models/accounts-table-model';
 import { AppMarketDataService } from 'src/app/services/app-market-data.service';
+import { AtuoCompSecidService } from 'src/app/services/atuo-comp-secid.service';
 @Component({
   selector: 'app-ng-echart-exm1',
   templateUrl: './ng-echart-exm1.component.html',
   styleUrls: ['./ng-echart-exm1.component.scss']
 })
 export class NgEchartExm1Component implements OnInit {
-  selectedCountry: string;
+  secIds: string[];
   countryCasesChartOptions: any;
   marketData: marketData[] = [];
  
 
-  constructor(private MarketDataService: AppMarketDataService) {
+  constructor(
+    private MarketDataService: AppMarketDataService,
+    private AtuoCompService:AtuoCompSecidService
+    ) {
+    this.AtuoCompService.recieveSecIdList().subscribe(secIDsList=>this.secIds=secIDsList)
   }
   ngOnInit(): void {
     this.MarketDataService.getMarketData('GOOG').subscribe(mData => {
-      this.selectedCountry = mData[0].secid
+      // this.secIds = mData[0].secid
       this.marketData = mData;
 
       this.setOptions();

@@ -227,7 +227,6 @@ export class AppTableAccEntriesComponent  {
       this.entryTypes.patchValue([]);
     }
   }
-
   exportToExcel() {
     const fileName = "entriesData.xlsx";
     let obj = this.dataSource.data.map( (row,ind) =>({
