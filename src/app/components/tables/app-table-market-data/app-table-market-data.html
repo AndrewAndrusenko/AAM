@@ -46,11 +46,17 @@
       <mat-datepicker-toggle matSuffix [for]="dateForMarketData"></mat-datepicker-toggle>
       <mat-datepicker  #dateForMarketData></mat-datepicker>
     </mat-form-field> 
-    <mat-slide-toggle #overdraftClosingBalance formControlName="overwritingCurrentData"
+    <mat-slide-toggle #deleteOldMarketData formControlName="overwritingCurrentData"
     style="font-size:100%; letter-spacing: .05rem; margin-left: 2%;"
-    [style.color]="overdraftClosingBalance.checked ? 'red':'rgb(44, 43, 43)' "
-    >Update current market data <br>{{overdraftClosingBalance.checked? 'allowed!':'forbidden'}}
+    [style.color]="deleteOldMarketData.checked ? 'red':'rgb(44, 43, 43)' "
+    >Replace current market data <br>{{deleteOldMarketData.checked? 'allowed!':'forbidden'}}
   </mat-slide-toggle>
+  <div *ngIf="loadingDataState.State!='Pending'">
+    <h2 style="text-align: center;" [style.color]="loadingDataState.State=='terminated'? 'red':'rgb(44, 43, 43)'">
+      {{loadingDataState.Message}}
+    </h2>
+    <pre style="font-size: 18px;">{{loadedMarketData | json}}</pre>
+  </div>
 <span style="display: flex; ">
     <section class="example-section" style="color: rgb(44, 43, 43);"
       *ngFor="let marketSource of marketSources;let i=index" >

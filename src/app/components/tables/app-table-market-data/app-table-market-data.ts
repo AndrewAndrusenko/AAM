@@ -22,6 +22,7 @@ import * as moment from 'moment';
 import { AtuoCompSecidService } from 'src/app/services/atuo-comp-secid.service';
 import { registerLocaleData } from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
+import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 registerLocaleData(localeFr, 'fr');
 /* 
 export class extends  */
@@ -42,7 +43,8 @@ export class extends  */
 export class AppTableMarketDataComponent  implements AfterViewInit {
 
   loadMarketData: FormGroup;
-  marketSources:marketDataSources[] =  [] 
+  marketSources:marketDataSources[] =  [];
+  loadedMarketData: any []= []; 
   marketDataToLoad: any;
   columnsToDisplay = ['globalsource','sourcecode','boardid','tradedate','secid', 'open', 'low', 'high', 'close','value','numtrades', 'volume','marketprice2',  'admittedquote'];
   columnsHeaderToDisplay = ['Source','code','boardid','tradedate','secid', 'open', 'low', 'high', 'close', 'value','numtrades', 'volume','marketprice2', 'admittedquote'];
@@ -69,7 +71,6 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
   
   dialogChooseAccountsList: MatDialogRef<AppTableAccAccountsComponent>;
   public filterednstrumentsLists : Observable<string[]>;
- 
   
   dateOfOperaationsStart  = new Date ('2023-02-18')
   balacedDateWithEntries : Date[]
@@ -83,16 +84,23 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
     dateRangeStart: new FormControl<Date | null>(null),
     dateRangeEnd: new FormControl<Date | null>(null),
   });
+  marketDataDeleted: Object;
+  loadingDataState: {
+    Message: string ,
+    State:string 
+  }
 
   constructor(
     private AccountingDataService:AppAccountingService, 
     private MarketDataService: AppMarketDataService,
     private TreeMenuSevice:TreeMenuSevice, 
     private AtuoCompService:AtuoCompSecidService,
+    private CommonDialogsService:HadlingCommonDialogsService,
     private dialog: MatDialog,
     private fb:FormBuilder, 
     public snack:MatSnackBar
   ) {
+    this.loadingDataState = {Message:'',State: 'Pending'};
     this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data=>{
       this.FirstOpenedAccountingDate = data[0].FirstOpenedDate;
     });
@@ -111,7 +119,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
     this.loadMarketData = this.fb.group ({
       dateForLoadingPrices : [new Date('2022-01-25').toISOString(), Validators.required],
       sourceCode: [[],Validators.required],
-      overwritingCurrentData : [null]
+      overwritingCurrentData : [false]
     });
     this.AtuoCompService.getSecidLists(true);
     this.filterednstrumentsLists = this.searchParametersFG.controls['secidList'].valueChanges.pipe(
@@ -136,11 +144,46 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
   }
   async getMarketData(){
     this.loadMarketData.disable();
-    let sourceCodesList: marketSourceSegements[] = this.sourceCode.value
+    this.loadingDataState = {Message : 'Loading', State: 'Pending'}
+    this.loadedMarketData=null;
+    let sourcesData: marketSourceSegements[] = this.sourceCode.value
+    let sourceCodesArray:string[] = sourcesData.map(el=>{return el.sourceCode})
+    console.log('sourceCodesArray',sourceCodesArray);
     let dateToLoad = this.dateForLoadingPrices.value
     dateToLoad=(dateToLoad._d.getUTCFullYear()+'-'+dateToLoad._d.getUTCMonth()+1) + '-'+(dateToLoad._d.getDate())
     console.log(dateToLoad);
-    this.logLoadingData = await this.MarketDataService.loadMarketDataExteranalSource(sourceCodesList, dateToLoad)
+
+    this.MarketDataService.checkLoadedMarketData (sourceCodesArray,dateToLoad).subscribe(async data=>{
+      this.loadedMarketData = data;
+      if (!data.length) {
+        this.logLoadingData = await this.MarketDataService.loadMarketDataExteranalSource(sourcesData, dateToLoad);
+        this.loadMarketData.enable();
+        this.loadingDataState = {Message:'Loading is complited.', State:'Success'};
+        this.marketSources.forEach(el=>el.checkedAll=false);
+      }
+      else {
+        if (!this.overwritingCurrentData.value) { 
+          this.loadMarketData.enable();
+          this.loadingDataState = {Message:'Loading terminated. Data have been already loaded!', State : 'terminated'}
+        } else {
+          this.CommonDialogsService.confirmDialog('Delete all data for codes: ' + sourceCodesArray).subscribe(isConfirmed=>{
+            if (isConfirmed.isConfirmed){
+              this.MarketDataService.deleteOldMarketData(sourceCodesArray,dateToLoad).then(async rowsDeleted => {
+                console.log('rowsDeleted',rowsDeleted);
+                this.marketDataDeleted = rowsDeleted;
+                this.logLoadingData = await this.MarketDataService.loadMarketDataExteranalSource(sourcesData, dateToLoad);
+                this.loadMarketData.enable();
+                this.loadingDataState = {Message:'Loading is complited. Have been deleted '+rowsDeleted+' of old data', State : 'Success'}
+                this.marketSources.forEach(el=>el.checkedAll=false)
+              })
+            } else {
+              this.loadMarketData.enable()
+              this.loadingDataState = {Message: 'Loading has been canceled.', State: 'terminated'}
+            }
+          })
+        }
+      }
+    })
   }
   async ngAfterViewInit() {
     const number = 123456.789;
@@ -272,5 +315,6 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
   
   get dateForLoadingPrices() {return this.loadMarketData.get('dateForLoadingPrices')}
   get sourceCode() {return this.loadMarketData.get('sourceCode')}
-
+  get overwritingCurrentData() {return this.loadMarketData.get('overwritingCurrentData')}
+  
 }

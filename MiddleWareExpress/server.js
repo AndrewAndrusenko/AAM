@@ -177,5 +177,7 @@ appServer.post('/AAM/MD/importData/',jsPassport.authenticate('session') , uiAmmM
 appServer.get('/AAM/MD/getMarketData/',jsPassport.authenticate('session') , uiAmmMarketData.fgetMarketData)
 appServer.get('/AAM/MD/getMarketDataSources/',jsPassport.authenticate('session') , uiAmmMarketData.fgetMarketDataSources)
 
+appServer.post('/AAM/MD/deleteMarketData/',jsPassport.authenticate('session') , uiAmmMarketData.fdeleteMarketData)
+
 appServer.listen (port,'localhost', () => {console.log (`AAM Server is running on port ${port}`)})
 

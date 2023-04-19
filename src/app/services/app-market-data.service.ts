@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { marketData, marketDataSources, marketSourceSegements, moexMarketDataForiegnShres } from '../models/accounts-table-model';
+import { param } from 'jquery';
 var ROOT_PATH = 'https://echarts.apache.org/examples';
 
 @Injectable({
@@ -16,6 +17,14 @@ export class AppMarketDataService {
   constructor(private http:HttpClient) { }
   getDataForChart ():Observable<any[]>{
    return this.http.get <any[]> (ROOT_PATH + '/data/asset/data/stock-DJI.json')
+  }
+  checkLoadedMarketData (sourceCodes:string[],dateToLoad: string):Observable<any[]> {
+   const params = {'sourcecodes':sourceCodes,'dateToLoad':dateToLoad,'Action':'checkLoadedMarketData' }
+   return this.http.get <any[]>('/api/AAM/MD/getMarketData/', { params: params} )
+  }
+  deleteOldMarketData (sourceCodes:string[],dateToLoad: string) { 
+   const params = {'sourcecodes':sourceCodes,'dateToLoad':dateToLoad }
+    return this.http.post ('/api/AAM/MD/deleteMarketData/',{ params: params} ).toPromise()
   }
   loadMarketDataExteranalSource (sourceCodes:marketSourceSegements[],dateToLoad: string): any[]  {
     let logMarketDateLoading = []
