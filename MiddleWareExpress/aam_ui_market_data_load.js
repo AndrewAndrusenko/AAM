@@ -119,11 +119,27 @@ async function fgetMarketDataSources (request,response) {
     }
   })
 }
+async function fgetInstrumentsCodes (request,response) {
+  let fields = request.query.resasarray? 'json_agg(code) as code' :' secid, code, isin, mapcode'	
+  sql =  'SELECT ' + fields + '	FROM public."aInstrumentsCodes" WHERE mapcode=${mapcode};';
+ sql = pgp.as.format(sql,request.query);
+ console.log('sql',sql);
+ pool.query (sql,  (err, res) => 
+ {if (err) {
+  console.log (err.stack.split("\n", 1).join(""))
+  err.detail = err.stack
+  return response.send(err)
+  } else {
+    return response.status(200).json(res.rows)
+  }
+}) 
+}
 module.exports = {
   finsertMarketData,
   fgetMarketData,
   fgetMarketDataSources,
-  fdeleteMarketData
+  fdeleteMarketData,
+  fgetInstrumentsCodes
 }
 
 

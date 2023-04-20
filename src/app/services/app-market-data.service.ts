@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
-import { marketData, marketDataSources, marketSourceSegements, moexMarketDataForiegnShres } from '../models/accounts-table-model';
+import { Observable, Subject, repeat } from 'rxjs';
+import { InstrumentsMapCodes, marketData, marketDataSources, marketSourceSegements, moexMarketDataForiegnShres } from '../models/accounts-table-model';
 import { param } from 'jquery';
 var ROOT_PATH = 'https://echarts.apache.org/examples';
 
@@ -70,6 +70,47 @@ export class AppMarketDataService {
     });
     return logMarketDateLoading;
   }
+  loadMarketDataMarketStack (sourceCodes:marketSourceSegements[],dateToLoad: string): any[]  {
+    let logMarketDateLoading = []
+    sourceCodes.forEach(source => {
+      this.getInstrumentsCodes('SP500',true).subscribe(codesList => {
+        console.log('codelist',codesList[0].code);
+        let List = codesList[0].code
+        let firstPosition=0;
+        let index = 0;
+        let slicedCodesList = []
+        do {
+          let params = source.params;
+          params['date_from'] = dateToLoad;
+          params['date_to'] = dateToLoad;
+          firstPosition=index;
+          index = index+99 > List.length? List.length: index+99
+          slicedCodesList.push(List.slice(firstPosition,index).join())
+          params['symbols'] = slicedCodesList[slicedCodesList.length-1];
+          console.log( 'params',params);
+          this.http.get <any[]> ('source.sourceURL', {params:params} ).subscribe (marketData => {
+            /* return this.insertMarketData (marketData[1]['history'],source.sourceCode,'MOEXiss').subscribe((rowLoaded) =>{
+            totalLoad=totalLoad + rowLoaded
+            if (totalLoad>=totalRows) {
+           */source.checked = false;
+            logMarketDateLoading.push ({
+            'Source':'Marketstack - '+ source.sourceCode,
+            'Total rows loaded - ' : 0,
+            'Total rows fetched from source - ': marketData.length,
+            'Date': dateToLoad});
+            console.log('md',marketData);
+            /* sourceCodes.reduce((acc,val)=>+val.checked+acc,0)? null: this.getMarketData().subscribe (marketData => this.sendReloadMarketData (marketData)); */
+            console.log('sourceCodes',sourceCodes)
+            return logMarketDateLoading = marketData
+          })
+        } while (index < List.length);
+
+ 
+      })
+    })
+  return logMarketDateLoading
+  }
+
   insertMarketData (dataToInsert:any,sourceCode:string, gloabalSource:string): Observable<number> {
     console.log('data',dataToInsert);
     return  this.http.post <number> ('/api/AAM/MD/importData/',
@@ -83,9 +124,12 @@ export class AppMarketDataService {
   getMarketDataSources ():Observable<marketDataSources[]> {
     return this.http.get <marketDataSources[]> ('/api/AAM/MD/getMarketDataSources/')
   }
+  getInstrumentsCodes (mapcode:string, resasarray?:boolean, secid?:string):Observable<InstrumentsMapCodes[]> {
+    const params = {mapcode:mapcode,secid:secid, resasarray:resasarray}
+    return this.http.get <InstrumentsMapCodes[]> ('/api/AAM/MD/getInstrumentsCodes/',{params:params})
+  }
+
   sendReloadMarketData ( dataSet:marketData[]) { //the component that wants to update something, calls this fn
-    console.log('sendReloadMarketData');
-    
     this.subjectMarketData.next(dataSet); //next() will feed the value in Subject
   }
   getReloadMarketData(): Observable<marketData[]> { //the receiver component calls this function 

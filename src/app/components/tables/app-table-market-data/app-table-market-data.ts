@@ -142,6 +142,26 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
     this.marketSources[index].segments.forEach(t => (t.checked = this.marketSources[index].checkedAll)); 
     this.showSelectedSources();
   }
+  
+  async getMarketDataTest(){
+    this.loadMarketData.disable();
+    this.loadingDataState = {Message : 'Loading', State: 'Pending'}
+    this.loadedMarketData=null;
+    let sourcesData: marketSourceSegements[] = this.sourceCode.value
+    let sourceCodesArray:string[] = sourcesData.map(el=>{return el.sourceCode})
+    console.log('sourceCodesArray',sourceCodesArray);
+    let dateToLoad = this.dateForLoadingPrices.value
+    console.log('dd',this.dateForLoadingPrices.value);
+    dateToLoad=dateToLoad._d.getUTCFullYear()+'-'+(dateToLoad._d.getUTCMonth()+1) + '-'+dateToLoad._d.getDate()
+    console.log(dateToLoad);
+
+
+        this.logLoadingData = await this.MarketDataService.loadMarketDataMarketStack(sourcesData, dateToLoad);
+        this.loadMarketData.enable();
+        this.loadingDataState = {Message:'Loading is complited.', State:'Success'};
+        this.marketSources.forEach(el=>el.checkedAll=false);
+
+  }
   async getMarketData(){
     this.loadMarketData.disable();
     this.loadingDataState = {Message : 'Loading', State: 'Pending'}
@@ -150,7 +170,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
     let sourceCodesArray:string[] = sourcesData.map(el=>{return el.sourceCode})
     console.log('sourceCodesArray',sourceCodesArray);
     let dateToLoad = this.dateForLoadingPrices.value
-    dateToLoad=(dateToLoad._d.getUTCFullYear()+'-'+dateToLoad._d.getUTCMonth()+1) + '-'+(dateToLoad._d.getDate())
+    dateToLoad=dateToLoad._d.getUTCFullYear()+'-'+(dateToLoad._d.getUTCMonth()+1) + '-'+(dateToLoad._d.getDate())
     console.log(dateToLoad);
 
     this.MarketDataService.checkLoadedMarketData (sourceCodesArray,dateToLoad).subscribe(async data=>{
@@ -194,7 +214,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
       this.loadMarketData.enable();
       this.updateMarketDataTable(marketData)
     });
-    this.dateForLoadingPrices.setValue(moment('Fri Jan 25 2022 00:00:00 GMT+0300 (Moscow Standard Time)'))
+    this.dateForLoadingPrices.setValue(moment('Mon Apr 10 2023 00:00:00 GMT+0300 (Moscow Standard Time)'))
     let userData = JSON.parse(localStorage.getItem('userInfo'))
     await lastValueFrom (this.TreeMenuSevice.getaccessRestriction (userData.user.accessrole, 'accessToClientData'))
     .then ((accessRestrictionData) =>{

@@ -267,3 +267,9 @@ export interface marketDataSources {
   indeterminate:boolean
 
 }
+export interface InstrumentsMapCodes {
+  secid:string,
+  code:string[],
+  isin:string,
+  mapcode:string
+}

@@ -176,6 +176,7 @@ appServer.post('/DEA/accountingBalanceDayOpen/',jsPassport.authenticate('session
 appServer.post('/AAM/MD/importData/',jsPassport.authenticate('session') , uiAmmMarketData.finsertMarketData)
 appServer.get('/AAM/MD/getMarketData/',jsPassport.authenticate('session') , uiAmmMarketData.fgetMarketData)
 appServer.get('/AAM/MD/getMarketDataSources/',jsPassport.authenticate('session') , uiAmmMarketData.fgetMarketDataSources)
+appServer.get('/AAM/MD/getInstrumentsCodes/',jsPassport.authenticate('session') , uiAmmMarketData.fgetInstrumentsCodes)
 
 appServer.post('/AAM/MD/deleteMarketData/',jsPassport.authenticate('session') , uiAmmMarketData.fdeleteMarketData)
 
