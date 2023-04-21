@@ -46,8 +46,8 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
   marketSources:marketDataSources[] =  [];
   loadedMarketData: any []= []; 
   marketDataToLoad: any;
-  columnsToDisplay = ['globalsource','sourcecode','boardid','tradedate','secid', 'open', 'low', 'high', 'close','value','numtrades', 'volume','marketprice2',  'admittedquote'];
-  columnsHeaderToDisplay = ['Source','code','boardid','tradedate','secid', 'open', 'low', 'high', 'close', 'value','numtrades', 'volume','marketprice2', 'admittedquote'];
+  columnsToDisplay = ['globalsource','sourcecode','boardid','tradedate','secid', 'open', 'low', 'high', 'close','volume','marketprice2',  'admittedquote', 'numtrades' ];
+  columnsHeaderToDisplay = ['Source','code','boardid','tradedate','secid', 'open', 'low', 'high', 'close', 'volume','market P2', 'admitted P', 'Qty Tr' ];
   dataSource: MatTableDataSource<marketData>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
@@ -76,7 +76,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
   balacedDateWithEntries : Date[]
   FirstOpenedAccountingDate : Date;
   filterDateFormated : string;
-  boardIDs:string[] = ["AGRO", "FQBR", "INAV", "MMIX", "RTSI", "SDII", "SMAL", "SNDX", "TQBD", "TQBR", "TQCB", "TQFD", "TQFE", "TQIF", "TQIR", "TQIU", "TQOB", "TQOD", "TQOE", "TQPI", "TQRD", "TQTD", "TQTE", "TQTF"]
+  boardIDs:string[] = ["XNAS", "AGRO", "FQBR", "INAV", "MMIX", "RTSI", "SDII", "SMAL", "SNDX", "TQBD", "TQBR", "TQCB", "TQFD", "TQFE", "TQIF", "TQIR", "TQIU", "TQOB", "TQOD", "TQOE", "TQPI", "TQRD", "TQTD", "TQTE", "TQTF"]
   searchParametersFG: FormGroup;
   filterlFormControl = new FormControl('');
   closingDate = new FormControl<Date | null>(null)
@@ -127,11 +127,26 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
       map(value => this.AtuoCompService.filter(value || ''))
     );
   }
-
+  formatDate (dateToFormat:any):string {
+    let d = dateToFormat,
+    month = '' + (d._d.getMonth() + 1),
+    day = '' + d._d.getDate(),
+    year = d._d.getFullYear();
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+    return [year, month, day].join('-');
+  }
   updateAllComplete(index:number) {
+
     this.marketSources[index].checkedAll = this.marketSources[index].segments != null && this.marketSources[index].segments.every(t => t.checked); 
     this.marketSources[index].indeterminate = this.marketSources[index].segments.filter(t => t.checked).length > 0 && !this.marketSources[index].checkedAll; 
+    this.disableAllexceptOne(index);
     this.showSelectedSources();
+  }
+  disableAllexceptOne(index:number) {
+    let disableOtherSources = this.marketSources[index].checkedAll||this.marketSources[index].indeterminate? true:false;
+    console.log('disableAllexceptOne',this.marketSources[index].checkedAll,this.marketSources[index].indeterminate,disableOtherSources);
+    this.marketSources.forEach((el, i)=>{i===index? null : el.disabled = disableOtherSources})
   }
   showSelectedSources() {
     let sourceIdToLoad =[]
@@ -139,7 +154,9 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
     this.sourceCode.setValue(sourceIdToLoad)
   }
   setAll(index: number) {
+    this.marketSources[index].indeterminate=false;
     this.marketSources[index].segments.forEach(t => (t.checked = this.marketSources[index].checkedAll)); 
+    this.disableAllexceptOne(index);
     this.showSelectedSources();
   }
   
@@ -149,12 +166,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
     this.loadedMarketData=null;
     let sourcesData: marketSourceSegements[] = this.sourceCode.value
     let sourceCodesArray:string[] = sourcesData.map(el=>{return el.sourceCode})
-    console.log('sourceCodesArray',sourceCodesArray);
-    let dateToLoad = this.dateForLoadingPrices.value
-    console.log('dd',this.dateForLoadingPrices.value);
-    dateToLoad=dateToLoad._d.getUTCFullYear()+'-'+(dateToLoad._d.getUTCMonth()+1) + '-'+dateToLoad._d.getDate()
-    console.log(dateToLoad);
-
+    let dateToLoad = this.formatDate(this.dateForLoadingPrices.value)
 
         this.logLoadingData = await this.MarketDataService.loadMarketDataMarketStack(sourcesData, dateToLoad);
         this.loadMarketData.enable();
@@ -163,20 +175,28 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
 
   }
   async getMarketData(){
-    this.loadMarketData.disable();
+    let functionToLoadData:any;
+    let dateToLoad = this.formatDate(this.dateForLoadingPrices.value)
     this.loadingDataState = {Message : 'Loading', State: 'Pending'}
     this.loadedMarketData=null;
     let sourcesData: marketSourceSegements[] = this.sourceCode.value
+    this.loadMarketData.disable();
     let sourceCodesArray:string[] = sourcesData.map(el=>{return el.sourceCode})
-    console.log('sourceCodesArray',sourceCodesArray);
-    let dateToLoad = this.dateForLoadingPrices.value
-    dateToLoad=dateToLoad._d.getUTCFullYear()+'-'+(dateToLoad._d.getUTCMonth()+1) + '-'+(dateToLoad._d.getDate())
-    console.log(dateToLoad);
+    console.log('sb',sourcesData[0].sourceGlobal);
+    switch (sourcesData[0].sourceGlobal) {
+      case 'marketstack.com':
+        functionToLoadData = this.MarketDataService.loadMarketDataMarketStack.bind(this.MarketDataService)
+      break;
+      case 'iss.moex.com':
+        functionToLoadData = this.MarketDataService.loadMarketDataMOEXiss.bind(this.MarketDataService)
+      break;
+
+    }
 
     this.MarketDataService.checkLoadedMarketData (sourceCodesArray,dateToLoad).subscribe(async data=>{
       this.loadedMarketData = data;
       if (!data.length) {
-        this.logLoadingData = await this.MarketDataService.loadMarketDataExteranalSource(sourcesData, dateToLoad);
+        this.logLoadingData = await functionToLoadData(sourcesData, dateToLoad);
         this.loadMarketData.enable();
         this.loadingDataState = {Message:'Loading is complited.', State:'Success'};
         this.marketSources.forEach(el=>el.checkedAll=false);
@@ -191,7 +211,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
               this.MarketDataService.deleteOldMarketData(sourceCodesArray,dateToLoad).then(async rowsDeleted => {
                 console.log('rowsDeleted',rowsDeleted);
                 this.marketDataDeleted = rowsDeleted;
-                this.logLoadingData = await this.MarketDataService.loadMarketDataExteranalSource(sourcesData, dateToLoad);
+                this.logLoadingData = await functionToLoadData(sourcesData, dateToLoad);
                 this.loadMarketData.enable();
                 this.loadingDataState = {Message:'Loading is complited. Have been deleted '+rowsDeleted+' of old data', State : 'Success'}
                 this.marketSources.forEach(el=>el.checkedAll=false)

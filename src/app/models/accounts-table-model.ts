@@ -248,8 +248,9 @@ export interface marketData {
 
 export interface marketSourceSegements {
   id:string,
+  sourceGlobal:string,
   description: string,
-  sourceCode : string
+  sourceCode : string,
   checked:boolean,
   sourceURL: string,
   params:{
@@ -261,6 +262,7 @@ export interface marketSourceSegements {
   }
 }
 export interface marketDataSources {
+  disabled:boolean,
   segments :marketSourceSegements [],
   sourceName : string,
   checkedAll:boolean,

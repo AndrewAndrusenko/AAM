@@ -38,7 +38,7 @@
   <form class="submit"   [formGroup]="loadMarketData" style="font-size: 18px;   margin-top: 0.5%;">
     <button color = "primary" mat-raised-button 
       style=" margin-left:1%; font-size: 18px; margin-right: 2%;"
-      (click)="getMarketDataTest()">
+      (click)="getMarketData()">
       Get matket data 
     </button>
     <mat-form-field style="margin-right: 2%; width: 12%;  color: rgb(44, 43, 43);" >
@@ -65,14 +65,15 @@
         [indeterminate]="marketSource.indeterminate"
         (change)="marketSource.checkedAll=!marketSource.checkedAll;
         setAll(i)"
-        [checked]="marketSource.checkedAll">
+        [checked]="marketSource.checkedAll"
+        [disabled]="marketSource.disabled">
           {{marketSource.sourceName}}
         </mat-checkbox>
       </span>
       <span class="example-list-section" >
         <ul>
           <li *ngFor="let segment of marketSource.segments; let z=index">
-            <mat-checkbox 
+            <mat-checkbox [disabled]="marketSource.disabled"
                           [checked]="segment.checked"
                           (change)="segment.checked=!segment.checked;
                                     updateAllComplete(i)">

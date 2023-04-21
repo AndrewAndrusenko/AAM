@@ -26,7 +26,8 @@ export class AppMarketDataService {
    const params = {'sourcecodes':sourceCodes,'dateToLoad':dateToLoad }
     return this.http.post ('/api/AAM/MD/deleteMarketData/',{ params: params} ).toPromise()
   }
-  loadMarketDataExteranalSource (sourceCodes:marketSourceSegements[],dateToLoad: string): any[]  {
+  loadMarketDataMOEXiss (sourceCodes:marketSourceSegements[],dateToLoad: string): any[]  {
+    console.log('loadMarketDataMOEXiss');
     let logMarketDateLoading = []
     console.log('sourceCodes',sourceCodes);
     sourceCodes.forEach(source => {
@@ -56,24 +57,22 @@ export class AppMarketDataService {
               'Total rows loaded - ' : totalLoad,
               'Total rows fetched from source - ': totalRows,
               'Date': dateToLoad});
-
               sourceCodes.reduce((acc,val)=>+val.checked+acc,0)? null: this.getMarketData().subscribe (marketData => this.sendReloadMarketData (marketData));
-              
               console.log('sourceCodes',  sourceCodes)
             }
             return logMarketDateLoading
           })
           })
-
         }
       })
     });
     return logMarketDateLoading;
   }
   loadMarketDataMarketStack (sourceCodes:marketSourceSegements[],dateToLoad: string): any[]  {
+    console.log('loadMarketDataMarketStack');
     let logMarketDateLoading = []
     sourceCodes.forEach(source => {
-      this.getInstrumentsCodes('SP500',true).subscribe(codesList => {
+      this.getInstrumentsCodes('msFS',true).subscribe(codesList => {
         console.log('codelist',codesList[0].code);
         let List = codesList[0].code
         let firstPosition=0;
@@ -88,31 +87,28 @@ export class AppMarketDataService {
           slicedCodesList.push(List.slice(firstPosition,index).join())
           params['symbols'] = slicedCodesList[slicedCodesList.length-1];
           console.log( 'params',params);
-          this.http.get <any[]> ('source.sourceURL', {params:params} ).subscribe (marketData => {
-            /* return this.insertMarketData (marketData[1]['history'],source.sourceCode,'MOEXiss').subscribe((rowLoaded) =>{
-            totalLoad=totalLoad + rowLoaded
-            if (totalLoad>=totalRows) {
-           */source.checked = false;
-            logMarketDateLoading.push ({
-            'Source':'Marketstack - '+ source.sourceCode,
-            'Total rows loaded - ' : 0,
-            'Total rows fetched from source - ': marketData.length,
-            'Date': dateToLoad});
-            console.log('md',marketData);
-            /* sourceCodes.reduce((acc,val)=>+val.checked+acc,0)? null: this.getMarketData().subscribe (marketData => this.sendReloadMarketData (marketData)); */
-            console.log('sourceCodes',sourceCodes)
-            return logMarketDateLoading = marketData
-          })
+          this.http.get <any[]> (source.sourceURL, {params:params} ).subscribe (marketData => {
+            return this.insertMarketData (marketData['data'],source.sourceCode,'MScom').subscribe((rowLoaded) =>{
+              source.checked = false;
+              logMarketDateLoading.push ({
+                'Source':'Marketstack - '+ source.sourceCode,
+                'Total rows loaded - ' : rowLoaded,
+                'Total rows fetched from source - ': marketData.length,
+                'Date': dateToLoad
+              });
+              console.log('md',marketData);
+              this.getMarketData().subscribe (marketData => this.sendReloadMarketData (marketData)); 
+              return logMarketDateLoading = marketData
+            })
+          }) 
         } while (index < List.length);
-
- 
       })
     })
-  return logMarketDateLoading
+    return logMarketDateLoading;
   }
 
   insertMarketData (dataToInsert:any,sourceCode:string, gloabalSource:string): Observable<number> {
-    console.log('data',dataToInsert);
+    console.log('insertMarketData',dataToInsert);
     return  this.http.post <number> ('/api/AAM/MD/importData/',
     {'dataToInsert': dataToInsert,'sourceCode':sourceCode, 'gloabalSource':gloabalSource})
   }
