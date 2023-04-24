@@ -136,7 +136,7 @@ async function fgetMarketData (request,response){
       'where "aInstrumentsCodes".mapcode = \'msFS\'  ';
       query.text +=conditionsmsFS.slice(0,-3);
 
-      query.text += ' ORDER BY tradedate DESC;'
+      query.text += ' ORDER BY tradedate ASC;'
     break;
   }
   console.log('request.query)',request.query);

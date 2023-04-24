@@ -62,13 +62,13 @@ import {MatChipsModule as MatChipsModule} from '@angular/material/chips';
 import { AppTableBalanceSheetComponent } from './components/tables/app-table-balance-sheet/app-table-balance-sheet';
 import {MatSortModule} from '@angular/material/sort';
 import {MatListModule as MatListModule} from '@angular/material/list';
-import { CdkTableModule } from '@angular/cdk/table';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { AppTableMarketDataComponent } from './components/tables/app-table-market-data/app-table-market-data';
-import { NgxChartsModule }from '@swimlane/ngx-charts';
+import {CdkTableModule } from '@angular/cdk/table';
+import {MatProgressBarModule } from '@angular/material/progress-bar';
+import {AppTableMarketDataComponent } from './components/tables/app-table-market-data/app-table-market-data';
 import * as echarts from 'echarts';
-import { NgxEchartsModule } from 'ngx-echarts';
-import { NgEchartExm1Component } from './components/charts/ng-echart-exm1/ng-echart-exm1.component';
+import {NgxEchartsModule } from 'ngx-echarts';
+import {NgEchartMarketDataLineComponent } from './components/charts/chart-line-marketdata/echart-marketdata-line';
+import { NgEchartMarketDataCandleComponent } from './components/charts/chart-candle-marketdata/echart-marketdata-candle';
 
 
 @NgModule({
@@ -145,7 +145,8 @@ import { NgEchartExm1Component } from './components/charts/ng-echart-exm1/ng-ech
         AppAccAccountModifyFormComponent,
         AppTableBalanceSheetComponent,
         AppTableMarketDataComponent,
-        NgEchartExm1Component
+        NgEchartMarketDataLineComponent,
+        NgEchartMarketDataCandleComponent
     ],
     bootstrap: [AppComponent],
     providers: [ {provide: MAT_MOMENT_DATE_ADAPTER_OPTIONS, useValue: {strict: true}} ],

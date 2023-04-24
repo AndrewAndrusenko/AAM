@@ -10,14 +10,12 @@ var ROOT_PATH = 'https://echarts.apache.org/examples';
 })
 export class AppMarketDataService {
   private subjectMarketData = new Subject<marketData[]> ()
+  private subjectCharMarketData = new Subject<marketData[]> ()
   private httpOptions = {
     headers: new HttpHeaders({}),
     responseType: 'text'
   };
   constructor(private http:HttpClient) { }
-  getDataForChart ():Observable<any[]>{
-   return this.http.get <any[]> (ROOT_PATH + '/data/asset/data/stock-DJI.json')
-  }
   checkLoadedMarketData (sourceCodes:string[],dateToLoad: string):Observable<any[]> {
    const params = {'sourcecodes':sourceCodes,'dateToLoad':dateToLoad,'Action':'checkLoadedMarketData' }
    return this.http.get <any[]>('/api/AAM/MD/getMarketData/', { params: params} )
@@ -131,7 +129,12 @@ export class AppMarketDataService {
   getReloadMarketData(): Observable<marketData[]> { //the receiver component calls this function 
     return this.subjectMarketData.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
   }
-  
+  sendMarketDataForChart ( dataSet:marketData[]) { //the component that wants to update something, calls this fn
+    this.subjectCharMarketData.next(dataSet); //next() will feed the value in Subject
+  }
+  getMarketDataForChart(): Observable<marketData[]> { //the receiver component calls this function 
+    return this.subjectCharMarketData.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
+  }
 }
 
 

@@ -1,0 +1,14 @@
+<nav class="navbar navbar-expand-sm navbar-dark bg-primary"  style="align-items: center;">
+  <div style="margin-left: 1%" >
+    <select class="form-control" name="" (change)="onChangeCountry($event.target)">
+      <option *ngFor="let c of secIds" [value]="c">{{c}}</option>
+    </select>
+  </div>
+  <a class=" navbar-brand mx-auto" style="align-items: center;">Market Data</a>
+</nav>
+
+<div *ngIf="seriesCandle.length!==0" style="background-color: azure;">
+<div style="width: 98%; top: 1%;" >
+  <div echarts [options]="countryCasesChartOptions" style="width: 100%; min-height: 700px" class="demo-chart"></div>
+</div>
+</div> 

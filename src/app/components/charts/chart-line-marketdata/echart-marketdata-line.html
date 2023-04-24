@@ -7,7 +7,7 @@
     <div class="col-md-12">
       <div class="form-group">
         <label for="">Instrument</label>
-        <select class="form-control" name="" id="" [(ngModel)]="secIds" (change)="onChangeCountry()">
+        <select class="form-control" name="" (change)="onChangeCountry($event.target)">
           <option *ngFor="let c of secIds" [value]="c">{{c}}</option>
         </select>
       </div>

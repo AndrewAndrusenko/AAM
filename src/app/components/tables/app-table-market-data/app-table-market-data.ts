@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ViewEncapsulation, EventEmitter, Output, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ViewEncapsulation, EventEmitter, Output, ViewChild, Input} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {lastValueFrom, map, Observable, startWith, Subscription } from 'rxjs';
@@ -41,7 +41,7 @@ export class extends  */
   ],
 })
 export class AppTableMarketDataComponent  implements AfterViewInit {
-
+  @Input() FormMode:string = 'Full'
   loadMarketData: FormGroup;
   marketSources:marketDataSources[] =  [];
   loadedMarketData: any []= []; 
@@ -296,6 +296,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
       this.instruments.unshift('ClearAll')
+      this.FormMode==='ChartMode'? this.MarketDataService.sendMarketDataForChart(marketData) : null;
       resolve(marketData) 
     })
   })

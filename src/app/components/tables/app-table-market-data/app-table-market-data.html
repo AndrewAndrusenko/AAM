@@ -1,4 +1,4 @@
-<span> 
+<span *ngIf="FormMode==='Full'"> 
   <mat-form-field class="example-form-field" class = "filterText">
     <mat-label class="colorLabel">Type to search...</mat-label>
     <input 
@@ -19,7 +19,8 @@
     Save as XLS 
   </button>
 </span>
-<mat-expansion-panel class="first-expansion" 
+<mat-expansion-panel *ngIf="FormMode==='Full'"
+   class="first-expansion" 
   (opened)="panelOpenStateFirst = true"
   (closed)="panelOpenStateFirst = false" 
   style="width: 100%;">
