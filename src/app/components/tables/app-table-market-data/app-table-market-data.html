@@ -35,10 +35,11 @@
       >cloud_download</mat-icon>
     </mat-panel-description>
   </mat-expansion-panel-header >
-  <h2 style=" color: rgb(44, 43, 43); text-align: center;" *ngIf="loadMarketData.disabled">Loading market data...</h2>
+  <h2 style=" color: rgb(44, 43, 43); text-align: center;" *ngIf="loadingDataState.State==='Pending'">Loading market data...</h2>
   <form class="submit"   [formGroup]="loadMarketData" style="font-size: 18px;   margin-top: 0.5%;">
     <button color = "primary" mat-raised-button 
       style=" margin-left:1%; font-size: 18px; margin-right: 2%;"
+      [disabled]="loadMarketData.disabled || loadMarketData.invalid"
       (click)="getMarketData()">
       Get matket data 
     </button>
@@ -52,7 +53,7 @@
     [style.color]="deleteOldMarketData.checked ? 'red':'rgb(44, 43, 43)' "
     >Replace current market data <br>{{deleteOldMarketData.checked? 'allowed!':'forbidden'}}
   </mat-slide-toggle>
-  <div *ngIf="loadingDataState.State!='Pending'">
+  <div *ngIf="loadingDataState.State!=='Pending'">
     <h2 style="text-align: center;" [style.color]="loadingDataState.State=='terminated'? 'red':'rgb(44, 43, 43)'">
       {{loadingDataState.Message}}
     </h2>

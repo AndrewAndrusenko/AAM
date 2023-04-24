@@ -45,16 +45,17 @@ export class NgEchartMarketDataCandleComponent implements OnInit {
     const downColor = '#ec0000';
     let seriesMarketPrice :number [] = []
     let seriesLow :number [] = []
-    let seriesVolumes :number [] = []
+    let seriesVolumes :number [][] = []
     let seriesHigh :number [] = []
     let seriesDate :string [] = []
-    this.marketData.forEach(el=>{
+    this.marketData.forEach((el,i)=>{
       if (el.secid===secid) {
         this.seriesCandle.push([el.open,el.close,el.low,el.high])
         seriesMarketPrice.push(el.marketprice2)
         seriesLow.push(el.low)
         seriesHigh.push(el.high)
-        seriesVolumes.push(el.volume)
+        seriesVolumes.push([seriesVolumes.length, el.volume, el.close < el.open ? 1 : -1]);
+        // seriesVolumes.push(el.volume)
         seriesDate.push(new Date(el.tradedate).toLocaleDateString())
       }
     })
@@ -65,9 +66,11 @@ export class NgEchartMarketDataCandleComponent implements OnInit {
       title: {
         text: secid + ' Prices CHART',
       },
- /*      legend: {
-        data: ['admittedquote', 'high', 'low']
-      }, */
+      legend: {
+        bottom: 10,
+        left: 'center',
+        data: [secid + ' candles','MarketPrice', 'MA5', 'MA10', 'MA20']
+      },
       tooltip: {
       },
       axisPointer: {
@@ -185,7 +188,7 @@ export class NgEchartMarketDataCandleComponent implements OnInit {
         }
       ],
       series: [
-        { name: 'Candles',
+        { name: secid + ' candles',
           type: 'candlestick',
           data: this.seriesCandle,
           itemStyle: {
@@ -200,6 +203,33 @@ export class NgEchartMarketDataCandleComponent implements OnInit {
           type:'line',
           data:seriesMarketPrice
         },
+        {
+          name: 'MA5',
+          type: 'line',
+          data: this.MarketDataService.calculateMA(5, seriesMarketPrice),
+          smooth: true,
+          lineStyle: {
+            opacity: 0.5
+          }
+        },
+        {
+          name: 'MA10',
+          type: 'line',
+          data:  this.MarketDataService.calculateMA(10, seriesMarketPrice),
+          smooth: true,
+          lineStyle: {
+            opacity: 0.5
+        }
+      },
+      {
+        name: 'MA20',
+        type: 'line',
+        data: this.MarketDataService.calculateMA(20, seriesMarketPrice),
+        smooth: true,
+        lineStyle: {
+          opacity: 0.5
+        }
+      },
         {
           name: 'Volume',
           type: 'bar',

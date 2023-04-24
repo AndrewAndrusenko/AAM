@@ -107,7 +107,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
     this.MarketDataService.getMarketDataSources().subscribe(marketSourcesData => this.marketSources = marketSourcesData);
     this.MarketDataService.getMarketData('GOOG-RM').subscribe (marketData => {
       this.updateMarketDataTable(marketData);
-      this.loadMarketData.enable();
+
     });      
     this.searchParametersFG = this.fb.group ({
       dataRange : this.dataRange,
@@ -160,7 +160,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
     this.showSelectedSources();
   }
   
-  async getMarketDataTest(){
+/*   async getMarketDataTest(){
     this.loadMarketData.disable();
     this.loadingDataState = {Message : 'Loading', State: 'Pending'}
     this.loadedMarketData=null;
@@ -173,7 +173,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
         this.loadingDataState = {Message:'Loading is complited.', State:'Success'};
         this.marketSources.forEach(el=>el.checkedAll=false);
 
-  }
+  } */
   async getMarketData(){
     let functionToLoadData:any;
     let dateToLoad = this.formatDate(this.dateForLoadingPrices.value)
@@ -197,8 +197,8 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
       this.loadedMarketData = data;
       if (!data.length) {
         this.logLoadingData = await functionToLoadData(sourcesData, dateToLoad);
-        this.loadMarketData.enable();
-        this.loadingDataState = {Message:'Loading is complited.', State:'Success'};
+        console.log('this.loadMarketData.enable()')
+        // this.loadingDataState = {Message:'Loading is complited.', State:'Success'};
         this.marketSources.forEach(el=>el.checkedAll=false);
       }
       else {
@@ -212,8 +212,8 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
                 console.log('rowsDeleted',rowsDeleted);
                 this.marketDataDeleted = rowsDeleted;
                 this.logLoadingData = await functionToLoadData(sourcesData, dateToLoad);
-                this.loadMarketData.enable();
-                this.loadingDataState = {Message:'Loading is complited. Have been deleted '+rowsDeleted+' of old data', State : 'Success'}
+                // this.loadMarketData.enable();
+                this.loadingDataState = {Message:'Have been deleted '+rowsDeleted+' of old data', State : 'Success'}
                 this.marketSources.forEach(el=>el.checkedAll=false)
               })
             } else {
@@ -231,8 +231,10 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
 
 
     this.MarketDataService.getReloadMarketData().subscribe(marketData => {
+      // this.loadMarketData.enable();
+      this.updateMarketDataTable(marketData);
+      this.loadingDataState = {State:'Success', Message:'Loading is complited'};
       this.loadMarketData.enable();
-      this.updateMarketDataTable(marketData)
     });
     this.dateForLoadingPrices.setValue(moment('Mon Apr 10 2023 00:00:00 GMT+0300 (Moscow Standard Time)'))
     let userData = JSON.parse(localStorage.getItem('userInfo'))

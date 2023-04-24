@@ -16,6 +16,23 @@ export class AppMarketDataService {
     responseType: 'text'
   };
   constructor(private http:HttpClient) { }
+  calculateMA(dayCount:number, data:number[]) {
+    console.log('calculateMA', data);
+    let result = [];
+    for (let i = 0, len = data.length; i < len; i++) {
+      if (i < dayCount) {
+        result.push('-');
+        continue;
+      }
+      let sum:number = 0;
+      for (let j = 0; j < dayCount; j++) {
+        sum += + data[i - j];
+      }
+      console.log('ma',sum,dayCount,sum / dayCount);
+      result.push(sum / dayCount).toFixed(3);
+    }
+    return result;
+  }
   checkLoadedMarketData (sourceCodes:string[],dateToLoad: string):Observable<any[]> {
    const params = {'sourcecodes':sourceCodes,'dateToLoad':dateToLoad,'Action':'checkLoadedMarketData' }
    return this.http.get <any[]>('/api/AAM/MD/getMarketData/', { params: params} )
@@ -24,7 +41,7 @@ export class AppMarketDataService {
    const params = {'sourcecodes':sourceCodes,'dateToLoad':dateToLoad }
     return this.http.post ('/api/AAM/MD/deleteMarketData/',{ params: params} ).toPromise()
   }
-  loadMarketDataMOEXiss (sourceCodes:marketSourceSegements[],dateToLoad: string): any[]  {
+  async loadMarketDataMOEXiss (sourceCodes:marketSourceSegements[],dateToLoad: string)  {
     console.log('loadMarketDataMOEXiss');
     let logMarketDateLoading = []
     console.log('sourceCodes',sourceCodes);
@@ -55,8 +72,12 @@ export class AppMarketDataService {
               'Total rows loaded - ' : totalLoad,
               'Total rows fetched from source - ': totalRows,
               'Date': dateToLoad});
-              sourceCodes.reduce((acc,val)=>+val.checked+acc,0)? null: this.getMarketData().subscribe (marketData => this.sendReloadMarketData (marketData));
-              console.log('sourceCodes',  sourceCodes)
+              let updone = sourceCodes.reduce((acc,val)=>+val.checked+acc,0)
+              updone? null: this.getMarketData().subscribe (marketData => {
+              console.log('updone',updone);
+                console.log('sourceCodes',  sourceCodes)
+                this.sendReloadMarketData (marketData)});
+              
             }
             return logMarketDateLoading
           })
