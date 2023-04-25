@@ -388,6 +388,7 @@ async function fupdateAccountAccounting (request, response) {
 
 async function fcreateLedgerAccountAccounting (request, response) {
   paramArr = request.body.data
+  console.log('param',paramArr);
   const query = {
   text: 'INSERT INTO public."bLedger" ' +
   ' ("accountTypeID", "name", "clientID", "entityTypeCode", "ledgerNo", "currecyCode", "ledgerNoCptyCode", "ledgerNoTrade", "externalAccountNo") ' +

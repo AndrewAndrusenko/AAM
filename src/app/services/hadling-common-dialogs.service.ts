@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarVerticalPosition } from '@angular/material/snack-bar';
 import { AppConfimActionComponent } from '../components/alerts/app-confim-action/app-confim-action.component';
 import { Observable } from 'rxjs/internal/Observable';
 
@@ -9,23 +9,32 @@ import { Observable } from 'rxjs/internal/Observable';
 })
 export class HadlingCommonDialogsService {
   dialogRefConfirm: MatDialogRef<AppConfimActionComponent>;
-
+  verticalPosition: MatSnackBarVerticalPosition = 'bottom';
   constructor(
     private snack:MatSnackBar,
     private dialog: MatDialog, 
-  ) { 
-    
+  ) {}
+  dialogCloseAll () {
+    this.dialog.closeAll()
   }
   confirmDialog (actionToConfim:string):Observable<any> {
     this.dialogRefConfirm = this.dialog.open(AppConfimActionComponent, {panelClass: 'custom-modalbox',} );
     this.dialogRefConfirm.componentInstance.actionToConfim = {'action':actionToConfim ,'isConfirmed': false}
     return this.dialogRefConfirm.afterClosed()
-    }
-  snackResultHandler (result :any, action: string, dataForUpdateLog?:any) {
-    if (result['name']=='error') {
-      this.snack.open('Error: ' + result['detail'].split("\n", 1).join(""),'OK',{panelClass: ['snackbar-error']}); 
+  }
+  snackResultHandler (result :any, action?: string, postion:any = 'top') {
+    this.verticalPosition=postion;
+    if (result['name']=='error') { 
+      this.snack.open('Error: ' + result['detail'].split("\n", 1).join(""),'OK',{
+        panelClass: ['snackbar-error'],
+        verticalPosition: this.verticalPosition
+      }); 
     } else {
-      this.snack.open(action +': ' + result + ' entry','OK',{panelClass: ['snackbar-success'], duration: 3000});
+      this.snack.open(action +': ' + result['detail'] ,'OK',{
+        panelClass: ['snackbar-success'], 
+        verticalPosition: this.verticalPosition, 
+        duration: 3000
+      });
       this.dialog.closeAll();
     }
   }

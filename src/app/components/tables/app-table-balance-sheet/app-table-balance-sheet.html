@@ -24,8 +24,8 @@
 <mat-expansion-panel class="first-expansion" 
   (opened)="panelOpenStateFirst = true"
   (closed)="panelOpenStateFirst = false" >
-  <mat-expansion-panel-header >
-    <mat-panel-title>
+  <mat-expansion-panel-header>
+    <mat-panel-title [style.color]="menuColorGl">
       Balance closing procedure
     </mat-panel-title>
     <mat-panel-description>
@@ -120,7 +120,8 @@
   (opened)="panelOpenStateSecond = true"
   (closed)="panelOpenStateSecond = false" >
   <mat-expansion-panel-header >
-    <mat-panel-title>
+    <mat-panel-title  
+    [style.color]="menuColorGl">
       Complex search
     </mat-panel-title>
     <mat-panel-description>

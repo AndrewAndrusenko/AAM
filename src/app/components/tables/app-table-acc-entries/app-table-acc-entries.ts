@@ -15,6 +15,7 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { AppTableAccAccountsComponent } from '../app-table-acc-accounts/app-table-acc-accounts';
 import { MatOption } from '@angular/material/core';
 import * as XLSX from 'xlsx'
+import { menuColorGl } from 'src/app/models/constants';
 
 @Component({
   selector: 'app-table-acc-entries',
@@ -63,6 +64,7 @@ export class AppTableAccEntriesComponent  {
   dialogRef: MatDialogRef<AppAccEntryModifyFormComponent>;
   private subscriptionName: Subscription;
   public FirstOpenedAccountingDate : Date;
+  menuColorGl=menuColorGl
  
   filterlFormControl = new FormControl('');
   

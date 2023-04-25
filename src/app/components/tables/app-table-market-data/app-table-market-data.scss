@@ -25,7 +25,7 @@ ul {
   justify-content: space-between;
   align-items: center;
   color:rgb(19, 55, 132);
-  font-weight: bold;
+  // font-weight: bold;
   font-size: 18px;
 }
 .first-expansion {
@@ -35,7 +35,7 @@ ul {
   justify-content: space-between;
   align-items: center;
   color: rgb(44, 43, 43);
-  font-weight: bold;
+  // font-weight: bold;
   font-size: 20px;
 }
 
@@ -45,15 +45,12 @@ ul {
 .headers-align .mat-expansion-panel-header-description {
   justify-content: space-between;
   align-items: center;
-  color: rgb(241, 136, 136);
-  font-weight: bold;
-  font-size: 18px;
+  font-size: 20px;
 }
 .headers-align .mat-expansion-panel-header-title {
   justify-content: space-between;
   align-items: center;
   color: rgb(210, 205, 205);
-  font-weight: bold;
   font-size: 20px;
 }
 .filterText {

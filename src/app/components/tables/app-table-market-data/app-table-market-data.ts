@@ -23,6 +23,7 @@ import { AtuoCompSecidService } from 'src/app/services/atuo-comp-secid.service';
 import { registerLocaleData } from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
+import { menuColorGl } from 'src/app/models/constants';
 registerLocaleData(localeFr, 'fr');
 /* 
 export class extends  */
@@ -46,8 +47,8 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
   marketSources:marketDataSources[] =  [];
   loadedMarketData: any []= []; 
   marketDataToLoad: any;
-  columnsToDisplay = ['globalsource','sourcecode','boardid','tradedate','secid', 'open', 'low', 'high', 'close','volume','marketprice2',  'admittedquote', 'numtrades' ];
-  columnsHeaderToDisplay = ['Source','code','boardid','tradedate','secid', 'open', 'low', 'high', 'close', 'volume','market P2', 'admitted P', 'Qty Tr' ];
+  columnsToDisplay = ['globalsource','sourcecode','boardid','tradedate','secid', 'open', 'low', 'high', 'close','value','volume','marketprice2',  'admittedquote', 'numtrades' ];
+  columnsHeaderToDisplay = ['Source','code','boardid','tradedate','secid', 'open', 'low', 'high', 'close', 'value','volume','market P2', 'admitted P', 'Qty Tr' ];
   dataSource: MatTableDataSource<marketData>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
@@ -58,7 +59,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
   
   @ViewChild('allSelected') private allSelected: MatOption;
-
+  menuColorGl=menuColorGl
   public readOnly: boolean = false; 
   addOnBlur = true;
   panelOpenStateFirst = false;
@@ -105,9 +106,8 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
       this.FirstOpenedAccountingDate = data[0].FirstOpenedDate;
     });
     this.MarketDataService.getMarketDataSources().subscribe(marketSourcesData => this.marketSources = marketSourcesData);
-    this.MarketDataService.getMarketData('GOOG-RM').subscribe (marketData => {
+    this.MarketDataService.getMarketData().subscribe (marketData => {
       this.updateMarketDataTable(marketData);
-
     });      
     this.searchParametersFG = this.fb.group ({
       dataRange : this.dataRange,
@@ -293,7 +293,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
       'dateRangeEnd': new Date (this.gRange.get('dateRangeEnd').value).toDateString()});
     ( this.marketSource.value != null&&this.marketSource.value.length !=0)? Object.assign (searchObj , {'sourcecode': this.marketSource.value}): null;
     ( this.boards.value != null&&this.boards.value.length !=0)? Object.assign (searchObj , {'boardid': this.boards.value}): null;
-    this.MarketDataService.getMarketData(searchObj).subscribe (marketData  => {
+    this.MarketDataService.getMarketData(10000,this.FormMode==='ChartMode'? 'tradedate ASC':undefined,searchObj).subscribe (marketData  => {
       this.dataSource  = new MatTableDataSource(marketData);
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;

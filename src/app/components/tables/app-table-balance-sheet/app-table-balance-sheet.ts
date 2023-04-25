@@ -18,6 +18,7 @@ import { AppTableAccEntriesComponent } from '../app-table-acc-entries/app-table-
 import { AppAccAccountModifyFormComponent } from '../../forms/app-acc-account-modify-form/app-acc-account-modify-form ';
 import { MatCalendarCellClassFunction } from '@angular/material/datepicker';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
+import { menuColorGl } from 'src/app/models/constants';
 
 export interface Fruit {
   name: string;
@@ -67,7 +68,7 @@ export class AppTableBalanceSheetComponent  implements AfterViewInit {
   @ViewChild(MatSort) sort: MatSort;
   @Output() public modal_principal_parent = new EventEmitter();
   expandedElement: bAccountsEntriesList  | null;
-
+  menuColorGl=menuColorGl
   private subscriptionName: Subscription;
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
   

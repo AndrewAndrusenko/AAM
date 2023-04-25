@@ -67,7 +67,6 @@ import {MatProgressBarModule } from '@angular/material/progress-bar';
 import {AppTableMarketDataComponent } from './components/tables/app-table-market-data/app-table-market-data';
 import * as echarts from 'echarts';
 import {NgxEchartsModule } from 'ngx-echarts';
-import {NgEchartMarketDataLineComponent } from './components/charts/chart-line-marketdata/echart-marketdata-line';
 import { NgEchartMarketDataCandleComponent } from './components/charts/chart-candle-marketdata/echart-marketdata-candle';
 
 
@@ -145,7 +144,6 @@ import { NgEchartMarketDataCandleComponent } from './components/charts/chart-can
         AppAccAccountModifyFormComponent,
         AppTableBalanceSheetComponent,
         AppTableMarketDataComponent,
-        NgEchartMarketDataLineComponent,
         NgEchartMarketDataCandleComponent
     ],
     bootstrap: [AppComponent],

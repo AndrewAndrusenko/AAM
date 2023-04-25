@@ -29,7 +29,7 @@ color: #d3d3d3;
   justify-content: space-between;
   align-items: center;
   color:rgb(198, 255, 215);
-  font-weight: bold;
+  // font-weight: bold;
   font-size: 18px;
   // margin-left: 1%;
 
@@ -39,7 +39,6 @@ color: #d3d3d3;
   justify-content: space-between;
   align-items: center;
   color: rgb(239, 237, 237);
-  font-weight: bold;
   font-size: 20px;
   // margin-left: 1%;
 
@@ -60,9 +59,9 @@ color: #d3d3d3;
 .headers-align .mat-expansion-panel-header-description {
   justify-content: space-between;
   align-items: center;
-  color: rgb(241, 136, 136);
-  font-weight: bold;
-  font-size: 18px;
+  // color: rgb(241, 136, 136);
+  // font-weight: bold;
+  font-size: 20px;
   // margin-left: 1%;
 
 
@@ -71,7 +70,6 @@ color: #d3d3d3;
   justify-content: space-between;
   align-items: center;
   color: rgb(94, 93, 93);
-  font-weight: bold;
   font-size: 20px;
   // margin-left: 1%;
 
@@ -81,9 +79,7 @@ color: #d3d3d3;
   width: 20%;
   font-size: 20px;
 }
-.mat-expansion-panel {
-// margin-left: 1%;
-}
+
 .tree-menu-context {
   display: inline-flex;
   flex-direction: column;

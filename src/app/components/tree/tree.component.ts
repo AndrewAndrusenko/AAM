@@ -1,13 +1,12 @@
 import {CollectionViewer, SelectionChange, DataSource} from '@angular/cdk/collections';
 import {FlatTreeControl} from '@angular/cdk/tree';
-import { NgSwitch, UpperCasePipe } from '@angular/common';
-import {Component, Injectable, Input, OnChanges, SimpleChanges, ViewChild} from '@angular/core';
-import {BehaviorSubject, firstValueFrom, merge, Observable, Subscription} from 'rxjs';
+import {Component, Injectable, ViewChild} from '@angular/core';
+import {BehaviorSubject,  merge, Observable, Subscription} from 'rxjs';
 import {map} from 'rxjs/operators';
-import { AppMenuComponent } from '../app-menu/app-menu.component';
 import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { MatMenuTrigger as MatMenuTrigger } from '@angular/material/menu';
 import { lastValueFrom } from 'rxjs';
+import { rootNodesColor } from 'src/app/models/constants';
 /** Flat node with expandable and level information */
 export class DynamicFlatNode {
   constructor(
@@ -17,7 +16,8 @@ export class DynamicFlatNode {
     public isLoading = false,
     public nodeRoot: string,
     public favoriteRoot:string, 
-    public id : string
+    public id : string,
+    public color: string
   ) {}
 }
 /**
@@ -26,32 +26,13 @@ export class DynamicFlatNode {
  */
 @Injectable({providedIn: 'root'})
 export class DynamicDatabase {
-  constructor (private TreeMenuSevice:TreeMenuSevice, ){
-   }
+  constructor (private TreeMenuSevice:TreeMenuSevice, ){}
   public dataMap = new Map;
   public rootLevelNodes = [] ;
-  /** Initial data from database */
- public async initialDatagetTreeData() {
-    /* let userData = JSON.parse(localStorage.getItem('userInfo'))
-    this.TreeMenuSevice.getTreeData( userData.user.id).subscribe (treeData =>{
-    this.dataMap = new Map (treeData.map(object => {return [object[0], object[1]]}))    ;
-    }) */
-  }
-  getChildren(node: string): string[] | undefined {
-    return this.dataMap.get(node);
-  }
-
-  isExpandable(node: string): boolean {
-    return this.dataMap.has(node);
-  }
+  getChildren(node: string): string[] | undefined {return this.dataMap.get(node); }
+  isExpandable(node: string): boolean {return this.dataMap.has(node);}
 }
-/**
- * File database, it can build a tree structured Json object from string.
- * Each node in Json object represents a file or a directory. For a file, it has filename and type.
- * For a directory, it has filename and children (a list of files or directories).
- * The input will be a json object string, and the output is a list of `FileNode` with nested
- * structure.
- */
+
 export class DynamicDataSource implements DataSource<DynamicFlatNode> {
   dataChange = new BehaviorSubject<DynamicFlatNode[]>([]);
 
@@ -107,7 +88,7 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
     }
 
     node.isLoading = true;
-
+    let nodeColor:string;
     setTimeout(() => {
       if (expand) {
         const nodes = children.map(
@@ -120,9 +101,11 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
             }
             if (node.item == 'Favorites' ) {
               console.log('ff', name);
-              return new DynamicFlatNode(name, node.level + 1, this._database.isExpandable(name), false, node.item, favoriteRoot, name[1] )
+              return new DynamicFlatNode(name, node.level + 1, this._database.isExpandable(name), false, node.item, favoriteRoot, name[1],null )
             } else {
-              return new DynamicFlatNode(name[0], node.level + 1, this._database.isExpandable(name), false, Root, favoriteRoot, name[1])
+              console.log('root',Root);
+              rootNodesColor.forEach(el=> el.nodes.includes(Root)? nodeColor = el.colorChild : null)
+              return new DynamicFlatNode(name[0], node.level + 1, this._database.isExpandable(name), false, Root, favoriteRoot, name[1], nodeColor)
             }
           }
         );
@@ -158,7 +141,6 @@ export class TreeComponent {
     this.treeControl = new FlatTreeControl<DynamicFlatNode>(this.getLevel, this.isExpandable);
     this.dataSource = new DynamicDataSource(this.treeControl, database);
     this.databaseM = database
-    this.databaseM.initialDatagetTreeData();
     this.initialData();
   }
   @ViewChild(MatMenuTrigger) trigger: MatMenuTrigger;
@@ -170,7 +152,7 @@ export class TreeComponent {
   public opened : boolean = true;
   public activeNode : DynamicFlatNode;
   public rootLevelNodes: [];
-
+  rootAccountingNodes = rootNodesColor
   getLevel = (node: DynamicFlatNode) => node.level;
 
   isExpandable = (node: DynamicFlatNode) => node.expandable;
@@ -186,13 +168,15 @@ export class TreeComponent {
     let userData = JSON.parse(localStorage.getItem('userInfo'))
     await lastValueFrom (this.TreeMenuSevice.getaccessRestriction (userData.user.accessrole, 'rootLevelNodes'))
     .then ((accessRestrictionData) =>{
+      let nodeColor:string
       this.rootLevelNodes = accessRestrictionData['elementvalue'].split('_');
-      this.dataSource.data =  this.rootLevelNodes.map(name => new DynamicFlatNode(name, 0, true, false, name + '_Root','',''));
-      
-      this.TreeMenuSevice.getTreeData( userData.user.id,  this.rootLevelNodes).subscribe (treeData =>{
-        this.databaseM.dataMap = new Map (treeData.map( (object)  => {
-          return [object[0], object[1]]}))    ;
-        })
+      this.dataSource.data =  this.rootLevelNodes.map(name => {
+        rootNodesColor.forEach(el=> el.nodes.includes(name)? nodeColor = el.color : null)
+        return new DynamicFlatNode(name, 0, true, false, name + '_Root','','', nodeColor)
+      });
+      this.TreeMenuSevice.getTreeData( userData.user.id,  this.rootLevelNodes).subscribe ( treeData =>
+        this.databaseM.dataMap = new Map (treeData.map (object  => [object[0], object[1]] ))  
+      )
     })
   }
   //
@@ -265,7 +249,7 @@ export class TreeComponent {
     this.handleAddFavUpdate()
   }
 
-    handleDeleteFavoriteClick(){
+  handleDeleteFavoriteClick(){
     let userData = JSON.parse(localStorage.getItem('userInfo'))
     console.log('activeNode.',this.activeNode);
     this.TreeMenuSevice.removeItemFromFavorites (this.activeNode.item , userData.user.id, this.activeNode.id)

@@ -59,7 +59,8 @@ matInput type="text" #SearchTree  name="SearchTree">
 <div class="tree-menu" >
 <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
   <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding>
-    <button mat-flat-button [cdkContextMenuTriggerFor]="treecontextmenu"  
+    <button mat-flat-button [cdkContextMenuTriggerFor]="treecontextmenu" 
+    [style.background-color] = "node.color? node.color : 'white'"
     class="tree-button" 
     (click)="sendMessage(node); 
     activeNode = node;"
@@ -71,7 +72,7 @@ matInput type="text" #SearchTree  name="SearchTree">
   <mat-tree-node *matTreeNodeDef="let node; when: hasChild" matTreeNodePadding>
     <button 
       mat-flat-button class="tree-button" 
-      color="primary" 
+      [style.background-color] = "node.color? node.color : 'white'"
       (click)="sendMessage(node); 
       activeNode = node;"
       [ngClass]="{ 'background-highlight': activeNode === node }"  

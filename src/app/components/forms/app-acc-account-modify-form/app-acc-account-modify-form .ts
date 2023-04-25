@@ -3,17 +3,14 @@ import { FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/f
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { AppConfimActionComponent } from '../../alerts/app-confim-action/app-confim-action.component';
 import { AppSnackMsgboxComponent } from '../../app-snack-msgbox/app-snack-msgbox.component';
-import { MatSnackBar as MatSnackBar} from '@angular/material/snack-bar';
-import { AppInvestmentDataServiceService } from 'src/app/services/app-investment-data.service.service';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
 import { bcAccountType_Ext, bcEnityType, bcTransactionType_Ext } from 'src/app/models/accounts-table-model';
-import { AppTableAccLedgerAccountsComponent } from '../../tables/app-table-acc-ledger-accounts/app-table-acc-ledger-accounts';
-import { AppTableAccAccountsComponent } from '../../tables/app-table-acc-accounts/app-table-acc-accounts';
 import { AppClientsTableComponent } from '../../tables/app-table-clients/app-table-clients.component';
 import { TableAccounts } from '../../tables/app-table-accout/app-table-accout.component';
 import { Subscription } from 'rxjs';
 import { MatTabGroup as MatTabGroup } from '@angular/material/tabs';
+import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 
 @Component({
   selector: 'app-acc-account-modify-form',
@@ -45,9 +42,9 @@ export class AppAccAccountModifyFormComponent implements OnInit, AfterViewInit {
   private subscriptionName: Subscription
   constructor (
     private fb:FormBuilder, 
-    private AccountingDataService:AppAccountingService, 
     private dialog: MatDialog, 
-    public snack:MatSnackBar,
+    private AccountingDataService:AppAccountingService, 
+    private CommonDialogsService:HadlingCommonDialogsService,
   ) 
   { 
      this.AccountingDataService.GetEntityTypeList('',0,'','','bcEnityType').subscribe (
@@ -153,54 +150,34 @@ export class AppAccAccountModifyFormComponent implements OnInit, AfterViewInit {
    let accType = (this.AccountTypes[ind].xActTypeCode == 1) ? 'Active' : 'Passive'
    this.accountLedgerModifyForm.controls['d_APType'].patchValue(accType)
   }
+  snacksBox(result:any, action?:string){
+    if (result['name']=='error') {
+      this.CommonDialogsService.snackResultHandler(result)
+    } else {
+      this.CommonDialogsService.snackResultHandler({name:'success', detail: result + 'account'}, action)
+      this.AccountingDataService.sendReloadAccontList (this.accountModifyForm.controls['accountId']);
+    }
+    this.formDisabledFields.forEach(elem => this.accountModifyForm.controls[elem].disable())
+  }
   updateAccountData(action:string){
     console.log('action',action);
+    this.formDisabledFields.forEach(elem => this.accountModifyForm.controls[elem].enable())
     switch (action) {
       case 'Create_Example':
       case 'Create':
-        this.formDisabledFields.forEach(elem => this.accountModifyForm.controls[elem].enable())
-        this.AccountingDataService.createAccountAccounting (this.accountModifyForm.value).then ( (result) => {
-          if (result['name']=='error') {
-            this.snack.open('Error: ' + result['detail'].split("\n", 1).join(""),'OK',{panelClass: ['snackbar-error']}); 
-          } else {
-            this.snack.open('Created: ' + result + ' account','OK',{panelClass: ['snackbar-success'], duration: 3000});
-            this.AccountingDataService.sendReloadAccontList (this.accountModifyForm.controls['accountId']);
-          }
-        })
-        this.formDisabledFields.forEach(elem => this.accountModifyForm.controls[elem].disable())
+        this.AccountingDataService.createAccountAccounting(this.accountModifyForm.value).then((result)=>{this.snacksBox(result,'Created')})
       break;
-
       case 'Edit':
-        this.formDisabledFields.forEach(elem => this.accountModifyForm.controls[elem].enable())
-        this.AccountingDataService.updateAccountAccounting (this.accountModifyForm.value).then ( (result) => {
-          if (result['name']=='error') {
-            this.snack.open('Error: ' + result['detail'].split("\n", 1).join(""),'OK',{panelClass: ['snackbar-error']} ) 
-          } else {
-            this.snack.open('Updated: ' + result + ' account','OK',{panelClass: ['snackbar-success'], duration: 3000})
-            this.AccountingDataService.sendReloadAccontList (this.accountModifyForm.controls['accountId']);
-          }
-        this.formDisabledFields.forEach(elem => this.accountModifyForm.controls[elem].disable())
-
-        })
+        this.AccountingDataService.updateAccountAccounting (this.accountModifyForm.value).then((result)=>{this.snacksBox(result,'Updated')})
       break;
-
       case 'Delete':
-        this.dialogRefConfirm = this.dialog.open(AppConfimActionComponent, {panelClass: 'custom-modalbox',} );
-        this.dialogRefConfirm.componentInstance.actionToConfim = {'action':'Delete Account' ,'isConfirmed': false}
-        this.dialogRefConfirm.afterClosed().subscribe (actionToConfim => {
-          console.log('action', actionToConfim)
-          if (actionToConfim.isConfirmed===true) {
-          this.accountModifyForm.controls['accountId'].enable()
-          this.AccountingDataService.deleteAccountAccounting (this.accountModifyForm.value['accountId']).then ((result) =>{
-            if (result['name']=='error') {
-              this.snack.open('Error: ' + result['detail'],'OK',{panelClass: ['snackbar-error']} ) 
-            } else {
-              this.snack.open('Deleted: ' + result + ' account','OK',{panelClass: ['snackbar-success'], duration: 3000})
-              this.AccountingDataService.sendReloadAccontList (this.accountModifyForm.controls['accountId']);
-              this.dialog.closeAll();
-            }
-          })
-         
+        this.CommonDialogsService.confirmDialog('Delete Account ' + this.accountNo.value).subscribe(isConfirmed=>{
+          if (isConfirmed.isConfirmed) {
+            this.accountModifyForm.controls['accountId'].enable()
+            this.AccountingDataService.deleteAccountAccounting (this.accountModifyForm.value['accountId']).then ((result) =>{
+              this.snacksBox(result,'Deleted')
+              this.CommonDialogsService.dialogCloseAll();
+            })
           }
         })
       break;
@@ -208,51 +185,23 @@ export class AppAccAccountModifyFormComponent implements OnInit, AfterViewInit {
   }
   updateLedgerAccountData (action:string){
     console.log('action',action);
+    this.formLedgerDisabledFields.forEach(elem => this.accountLedgerModifyForm.controls[elem].enable())
     switch (action) {
       case 'Create_Example':
       case 'Create':
-        this.formLedgerDisabledFields.forEach(elem => this.accountLedgerModifyForm.controls[elem].enable())
-        this.AccountingDataService.createLedgerAccountAccounting (this.accountLedgerModifyForm.value).then ( (result) => {
-          if (result['name']=='error') {
-            this.snack.open('Error: ' + result['detail'].split("\n", 1).join(""),'OK',{panelClass: ['snackbar-error']}); 
-          } else {
-            this.snack.open('Created: ' + result + ' account','OK',{panelClass: ['snackbar-success'], duration: 3000});
-            this.AccountingDataService.sendReloadLedgerAccontList (this.ledgerNoId.value);
-          }
-        })
-        this.formLedgerDisabledFields.forEach(elem => this.accountLedgerModifyForm.controls[elem].disable())
+        this.AccountingDataService.createLedgerAccountAccounting(this.accountLedgerModifyForm.value).then((result)=>{this.snacksBox(result,'Created')})
       break;
-
       case 'Edit':
-        this.formLedgerDisabledFields.forEach(elem => this.accountLedgerModifyForm.controls[elem].enable())
-        this.AccountingDataService.updateLedgerAccountAccounting (this.accountLedgerModifyForm.value).then ( (result) => {
-          if (result['name']=='error') {
-            this.snack.open('Error: ' + result['detail'].split("\n", 1).join(""),'OK',{panelClass: ['snackbar-error']} ) 
-          } else {
-            this.snack.open('Updated: ' + result + ' account','OK',{panelClass: ['snackbar-success'], duration: 3000})
-            this.AccountingDataService.sendReloadLedgerAccontList (this.ledgerNoId.value);
-          }
-        this.formLedgerDisabledFields.forEach(elem => this.accountLedgerModifyForm.controls[elem].disable())
-        })
+        this.AccountingDataService.updateLedgerAccountAccounting (this.accountLedgerModifyForm.value).then((result)=>{this.snacksBox(result,'Updated')})
       break;
-
       case 'Delete':
-        this.dialogRefConfirm = this.dialog.open(AppConfimActionComponent, {panelClass: 'custom-modalbox',} );
-        this.dialogRefConfirm.componentInstance.actionToConfim = {'action':'Delete Account' ,'isConfirmed': false}
-        this.dialogRefConfirm.afterClosed().subscribe (actionToConfim => {
-          console.log('action', actionToConfim)
-          if (actionToConfim.isConfirmed===true) {
-          this.ledgerNoId.enable()
-          this.AccountingDataService.deleteLedgerAccountAccounting (this.ledgerNoId.value).then ((result) =>{
-            if (result['name']=='error') {
-              this.snack.open('Error: ' + result['detail'],'OK',{panelClass: ['snackbar-error']} ) 
-            } else {
-              this.snack.open('Deleted: ' + result + ' account','OK',{panelClass: ['snackbar-success'], duration: 3000})
-              this.AccountingDataService.sendReloadLedgerAccontList (this.ledgerNoId.value);
-              this.dialog.closeAll();
-            }
-          })
-         
+        this.CommonDialogsService.confirmDialog('Delete Account ' + this.ledgerNo.value).subscribe(isConfirmed=>{
+          if (isConfirmed.isConfirmed) {
+            this.ledgerNoId.enable()
+            this.AccountingDataService.deleteLedgerAccountAccounting (this.ledgerNoId.value).then ((result) =>{
+              this.snacksBox(result,'Deleted')
+              this.CommonDialogsService.dialogCloseAll();
+            })
           }
         })
       break;

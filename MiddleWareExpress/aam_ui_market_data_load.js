@@ -135,8 +135,7 @@ async function fgetMarketData (request,response){
       'left join "aInstrumentsCodes" on "aInstrumentsCodes".code=t_marketstack_eod.symbol '+
       'where "aInstrumentsCodes".mapcode = \'msFS\'  ';
       query.text +=conditionsmsFS.slice(0,-3);
-
-      query.text += ' ORDER BY tradedate ASC;'
+      query.text += ' ORDER BY ${sorting:raw} LIMIT ${rowslimit:raw};'
     break;
   }
   console.log('request.query)',request.query);

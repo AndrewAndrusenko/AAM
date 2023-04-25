@@ -312,25 +312,25 @@ export class AppAccEntryModifyFormComponent implements OnInit,  OnDestroy {
       case 'Create_Example':
       case 'Create':
         if (this.d_transactionType.value === 'AL') { 
-         this.AccountingDataService.fcreateEntryAccounting (dataForUpdate).then ((result) => this.updateResultHandler(result,'Created',this.entryModifyForm.value))
+         this.AccountingDataService.fcreateEntryAccounting (dataForUpdate).then ((result) => this.updateResultHandler({detail: result + ' entry'},'Created',this.entryModifyForm.value))
         } else {
-         this.AccountingDataService.createLLEntryAccounting (dataForUpdate).then ((result) => this.updateResultHandler(result, 'Created',this.entryModifyForm.value))
+         this.AccountingDataService.createLLEntryAccounting (dataForUpdate).then ((result) => this.updateResultHandler({detail: result + ' entry'}, 'Created',this.entryModifyForm.value))
         }
       break;
       case 'Edit':
         if (this.d_transactionType.value === 'AL') { 
-          this.AccountingDataService.updateEntryAccountAccounting (dataForUpdate).then ((result) => this.updateResultHandler(result,'Updated'))
+          this.AccountingDataService.updateEntryAccountAccounting (dataForUpdate).then ((result) => this.updateResultHandler({detail: result + ' entry'},'Updated'))
          } else {
-          this.AccountingDataService.updateLLEntryAccountAccounting (dataForUpdate).then ((result) => this.updateResultHandler(result,'Updated'))
+          this.AccountingDataService.updateLLEntryAccountAccounting (dataForUpdate).then ((result) => this.updateResultHandler({detail: result + ' entry'},'Updated'))
          }
       break;
       case 'Delete':
         this.CommonDialogsService.confirmDialog('Delete Entry').subscribe(action => {
           if (action.isConfirmed===true) {
             if (this.d_transactionType.value === 'AL') { 
-              this.AccountingDataService.deleteEntryrAccountAccounting (dataForUpdate.t_id).then ((result) => this.updateResultHandler(result,'Deleted'))
+              this.AccountingDataService.deleteEntryrAccountAccounting (dataForUpdate.t_id).then ((result) => this.updateResultHandler({detail: result + ' entry'},'Deleted'))
             } else {
-              this.AccountingDataService.deleteLLEntryrAccountAccounting (dataForUpdate.t_id).then ((result) => this.updateResultHandler(result,'Deleted'))
+              this.AccountingDataService.deleteLLEntryrAccountAccounting (dataForUpdate.t_id).then ((result) => this.updateResultHandler({detail: result + ' entry'},'Deleted'))
             }
           }
         })

@@ -131,9 +131,11 @@ export class AppMarketDataService {
     return  this.http.post <number> ('/api/AAM/MD/importData/',
     {'dataToInsert': dataToInsert,'sourceCode':sourceCode, 'gloabalSource':gloabalSource})
   }
-  getMarketData (searchParameters?:any):Observable<marketData[]> {
+  getMarketData (rowslimit:number=4000,sorting:string=' tradedate DESC', searchParameters?:any):Observable<marketData[]> {
     let params = {};
-    (searchParameters !== null) ?  params = {...params,...searchParameters}: null
+    (searchParameters !== null) ?  params = {...params,...searchParameters}: null;
+    (rowslimit !== null) ?  Object.assign(params,{'rowslimit':rowslimit}): null;
+    (sorting !== null) ?  Object.assign(params,{'sorting':sorting}): null;
     return this.http.get <marketData[]> ('/api/AAM/MD/getMarketData/', { params: params } )
   }
   getMarketDataSources ():Observable<marketDataSources[]> {

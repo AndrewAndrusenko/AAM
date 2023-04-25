@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { menuColorGl } from 'src/app/models/constants';
 import { AppMenuServiceService } from 'src/app/services/app-menu-service.service';
 import { AuthService } from 'src/app/services/auth.service';
 
@@ -10,7 +11,7 @@ import { AuthService } from 'src/app/services/auth.service';
 export class AppMenuComponent {
 @Input()  treeOpened : boolean = true;
 fullscreen : boolean = false;
-
+public menuColor = menuColorGl
 constructor(
   private authService : AuthService, private appMenuService : AppMenuServiceService) { }
 

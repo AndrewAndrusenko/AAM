@@ -1,13 +1,14 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component } from '@angular/core';
 import { marketData } from 'src/app/models/accounts-table-model';
 import { AppMarketDataService } from 'src/app/services/app-market-data.service';
 import { AtuoCompSecidService } from 'src/app/services/atuo-comp-secid.service';
+import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 @Component({
   selector: 'app-echart-marketdata-candle',
   templateUrl: './echart-marketdata-candle.html',
   styleUrls: ['./echart-marketdata-candle.scss']
 })
-export class NgEchartMarketDataCandleComponent implements OnInit {
+export class NgEchartMarketDataCandleComponent  {
   secIds: string[];
   countryCasesChartOptions: any;
   dispatchAction: any;
@@ -17,7 +18,9 @@ export class NgEchartMarketDataCandleComponent implements OnInit {
 
   constructor(
     private MarketDataService: AppMarketDataService,
-    private AtuoCompService:AtuoCompSecidService
+    private AtuoCompService:AtuoCompSecidService,
+    private CommonDialogsService:HadlingCommonDialogsService,
+
     ) {
     this.AtuoCompService.recieveSecIdList().subscribe(secIDsList=>this.secIds=secIDsList)
     this.MarketDataService.getMarketDataForChart().subscribe(marketData=>{
@@ -26,12 +29,6 @@ export class NgEchartMarketDataCandleComponent implements OnInit {
       console.log('secIds',this.secIds);
 
     })
-  }
-  ngOnInit(): void {
-/*     this.MarketDataService.getMarketData('GOOG').subscribe(mData => {
-      this.marketData = mData;
-      this.setOptions();
-    }) */
   }
   onChangeCountry(target:any) {
     console.log('event',target.value);
@@ -59,6 +56,12 @@ export class NgEchartMarketDataCandleComponent implements OnInit {
         seriesDate.push(new Date(el.tradedate).toLocaleDateString())
       }
     })
+    if (seriesDate.length !== new Set (seriesDate).size) {
+      this.CommonDialogsService.snackResultHandler({name:'error', detail:'There are multipule quotes for one date. Try to filter data by board or exchange'},'Chart','top')
+      // this.CommonDialogsService.snackResultHandler({name:'success', detail:'Try to filter data by board or exchange'},'Chart','top')
+      this.seriesCandle=[]
+      return;
+    }
     let minLow:number = Math.min(...seriesLow)*0.992
     let maxHigh:number = Math.max(...seriesHigh)*1.008
 
@@ -246,7 +249,6 @@ export class NgEchartMarketDataCandleComponent implements OnInit {
         }
       ]
     };
-    console.log('fin setopt',this.countryCasesChartOptions);
   }
 }
 
