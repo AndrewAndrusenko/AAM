@@ -141,6 +141,9 @@ export class AppMarketDataService {
   getMarketDataSources ():Observable<marketDataSources[]> {
     return this.http.get <marketDataSources[]> ('/api/AAM/MD/getMarketDataSources/')
   }
+  getMoexInstrumentsList ():Observable<any[]> {
+    return this.http.get <any[]> ('/api/AAM/MD/getMoexInstrumentsList/')
+  }
   getInstrumentsCodes (mapcode:string, resasarray?:boolean, secid?:string):Observable<InstrumentsMapCodes[]> {
     const params = {mapcode:mapcode,secid:secid, resasarray:resasarray}
     return this.http.get <InstrumentsMapCodes[]> ('/api/AAM/MD/getInstrumentsCodes/',{params:params})

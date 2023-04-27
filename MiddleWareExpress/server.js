@@ -180,5 +180,7 @@ appServer.get('/AAM/MD/getInstrumentsCodes/',jsPassport.authenticate('session') 
 
 appServer.post('/AAM/MD/deleteMarketData/',jsPassport.authenticate('session') , uiAmmMarketData.fdeleteMarketData)
 
+appServer.get('/AAM/MD/getMoexInstrumentsList/',jsPassport.authenticate('session') , uiAmmMarketData.fgetMoexInstrumentsList)
+
 appServer.listen (port,'localhost', () => {console.log (`AAM Server is running on port ${port}`)})
 

@@ -1,10 +1,12 @@
 const { async } = require('rxjs');
+const https = require('https');
 const config = require ('./db_config');
 const Pool = require('pg').Pool;
 const pool = new Pool(config.dbConfig);
 var pgp = require ('pg-promise')({capSQL:true});
 const pg = require('pg');
 const { query } = require('express');
+const { log } = require('console');
 pg.types.setTypeParser(1114, function(stringValue) {
   return stringValue;  //1114 for time without timezone type
 });
@@ -179,12 +181,45 @@ async function fgetInstrumentsCodes (request,response) {
   }
 }) 
 }
+async function fgetMoexInstrumentsList (request, response){
+  let rowsretrived = 100
+  // for (let index = 0; rowsretrived === 100; index=+100) {
+  for (let index = 0; index < 400; index=index+100) {
+    
+  console.log('fgetMoexInstrumentsList');
+  let url='https://iss.moex.com/iss/securities.json?iss.json=extended&limit=900&lang=en&iss.meta=off&start='+index.toString()
+  console.log('url',url,index);
+  https.get(url, (resp) => {
+      let data = '';
+    resp.on('data', (chunk) => {
+      data += chunk;
+      // console.log('ch',chunk,index-100);
+    });
+    resp.on('end', () => {
+      console.log(JSON.parse(data)[1].securities.length);
+      rowsretrived = JSON.parse(data)[1].securities.length;
+      sql ='insert into mmoexsecurities select * from json_populate_recordset(null::mmoexsecurities, \'' + JSON.stringify(JSON.parse(data)[1].securities)+'\');'
+      pool.query (sql,  (err, res) => {
+        if (err) {
+          console.log (err.stack.split("\n", 1).join(""))
+          err.detail = err.stack
+          return response.send(err)
+        } else {
+          console.log('inserted',res.rowCount)
+        }
+      })  
+    });
+  })
+}
+}
+
 module.exports = {
   finsertMarketData,
   fgetMarketData,
   fgetMarketDataSources,
   fdeleteMarketData,
-  fgetInstrumentsCodes
+  fgetInstrumentsCodes,
+  fgetMoexInstrumentsList
 }
 
 

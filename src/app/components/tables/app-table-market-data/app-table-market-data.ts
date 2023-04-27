@@ -319,31 +319,15 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
    XLSX.utils.book_append_sheet(wb, ws, "marketData");
    XLSX.writeFile(wb, fileName);
   }
-  async updateResultHandler (result :any, action: string) {
-    console.log('res',result);
-    if (result['name']=='error') {
-      this.snack.open('Error: ' + result['detail'].split("\n", 1).join(""),'OK',{panelClass: ['snackbar-error']}); 
-    } else {
-      this.snack.open(action +': ' + result + ' entry','OK',{panelClass: ['snackbar-success'], duration: 3000});
-      this.dialog.closeAll();
-      await this.submitQuery();
-      this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data=>{
-        this.FirstOpenedAccountingDate = data[0].FirstOpenedDate;
-      })
-      this.AccountingDataService.GetbbalacedDateWithEntries('GetbbalacedDateWithEntries').subscribe(data => {
-        this.balacedDateWithEntries = data.flat()
-        console.log('date',this.balacedDateWithEntries);
-      })
-      this.AccountingDataService.GetbAccountingDateToClose('GetbAccountingDateToClose').subscribe(data => {
-      })
-    }
-  }
   dateClass: MatCalendarCellClassFunction<Date> = (cellDate, view) => {
     let result :string
     // console.log('dc',cellDate.toLocaleDateString(), new Date(this.balacedDateWithEntries[1]).toLocaleDateString());
     const index = this.balacedDateWithEntries.findIndex(x => new Date(x).toLocaleDateString() == cellDate.toLocaleDateString());
     return (index > -1)? 'date-orange' : '';
   };
+  getMoexSecurities (){
+    this.MarketDataService.getMoexInstrumentsList().subscribe(data=>console.log('inserted - ',data))
+  }
   get  gRange () {return this.searchParametersFG.get('dataRange') } 
   get  dateRangeStart() {return this.searchParametersFG.get('dateRangeStart') } 
   get  dateRangeEnd() {return this.searchParametersFG.get('dateRangeEnd') } 
