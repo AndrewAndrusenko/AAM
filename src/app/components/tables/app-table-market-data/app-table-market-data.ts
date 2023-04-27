@@ -159,21 +159,6 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
     this.disableAllexceptOne(index);
     this.showSelectedSources();
   }
-  
-/*   async getMarketDataTest(){
-    this.loadMarketData.disable();
-    this.loadingDataState = {Message : 'Loading', State: 'Pending'}
-    this.loadedMarketData=null;
-    let sourcesData: marketSourceSegements[] = this.sourceCode.value
-    let sourceCodesArray:string[] = sourcesData.map(el=>{return el.sourceCode})
-    let dateToLoad = this.formatDate(this.dateForLoadingPrices.value)
-
-        this.logLoadingData = await this.MarketDataService.loadMarketDataMarketStack(sourcesData, dateToLoad);
-        this.loadMarketData.enable();
-        this.loadingDataState = {Message:'Loading is complited.', State:'Success'};
-        this.marketSources.forEach(el=>el.checkedAll=false);
-
-  } */
   async getMarketData(){
     let functionToLoadData:any;
     let dateToLoad = this.formatDate(this.dateForLoadingPrices.value)
@@ -228,10 +213,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
   async ngAfterViewInit() {
     const number = 123456.789;
     console.log(new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(number));
-
-
     this.MarketDataService.getReloadMarketData().subscribe(marketData => {
-      // this.loadMarketData.enable();
       this.updateMarketDataTable(marketData);
       this.loadingDataState = {State:'Success', Message:'Loading is complited'};
       this.loadMarketData.enable();
@@ -307,21 +289,34 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
    
   }
   exportToExcel() {
-   const fileName = "balancesData.xlsx";
+   const fileName = "marketData.xlsx";
    let obj = this.dataSource.data.map( (row,ind) =>({
-/*     'accountId': Number(row.accountId),
-    'accountNo' : row.accountNo,
-    'dateBalance' : new Date (row.dateBalance),
-    'openingBalance': Number(row.openingBalance),
-    'totalDebit': Number(row.totalDebit),
-    'totalCredit': Number(row.totalCredit),
-    'outBalance' : Number(row.OutGoingBalance),
-    'xacttypecode': (row.accountType) */
+    globalsource: row.globalsource,
+    sourcecode: row. sourcecode,
+    boardid: row. boardid, 
+    secid: row. secid, 
+    numtrades: Number(row.numtrades), 
+    value: Number(row.value), 
+    open: Number(row.open), 
+    low: Number(row.low), 
+    high: Number(row.high), 
+    legalcloseprice: Number(row.legalcloseprice),
+    waprice: Number(row.waprice),
+    close: Number(row.close), 
+    volume: Number(row.volume),
+    marketprice2: Number(row.marketprice2),
+    marketprice3: Number(row.marketprice3), 
+    admittedquote: Number(row.admittedquote), 
+    mp2valtrd: Number(row.mp2valtrd),
+    admittedvalue: Number(row.admittedvalue),
+    waval: Number(row.waval), 
+    tradingsession: row. tradingsession,
+    tradedate: new Date(row.tradedate)
   }))
 
    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(obj);
    const wb: XLSX.WorkBook = XLSX.utils.book_new();
-   XLSX.utils.book_append_sheet(wb, ws, "balancesData");
+   XLSX.utils.book_append_sheet(wb, ws, "marketData");
    XLSX.writeFile(wb, fileName);
   }
   async updateResultHandler (result :any, action: string) {

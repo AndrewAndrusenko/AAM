@@ -8,7 +8,7 @@
 <div class="mat-elevation-z8">
   <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class="mat-elevation-z8">
     <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay">
-      <th mat-header-cell *matHeaderCellDef> {{column | uppercase}}</th>
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> {{column | uppercase}}</th>
       <td 
         (click)="chooseAccount(element)"
         mat-cell *matCellDef="let element"> {{element[column]}} 

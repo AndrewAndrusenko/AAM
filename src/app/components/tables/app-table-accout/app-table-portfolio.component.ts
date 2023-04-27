@@ -8,12 +8,12 @@ import {AccountsTableModel } from 'src/app/models/accounts-table-model';
 import {AppTabServiceService} from 'src/app/services/app-tab-service.service';
 import {TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { AppNewAccountComponent } from '../../forms/app-new-account/app-new-account.component';
+import { AppNewAccountComponent } from '../../forms/app-new-account/app-portfolio.component';
 import { AppInvestmentDataServiceService } from 'src/app/services/app-investment-data.service.service';
 @Component({
-  selector: 'app-app-accout-tablee',
-  templateUrl: './app-table-accout.component.html',
-  styleUrls: ['./app-table-accout.component.css'],
+  selector: 'app-app-portfolio-tablee',
+  templateUrl: './app-table-portfolio.component.html',
+  styleUrls: ['./app-table-portfolio.component.css'],
   animations: [
     trigger('detailExpand', [
       state('collapsed', style({height: '0px', minHeight: '0'})),
@@ -48,7 +48,6 @@ export class TableAccounts implements AfterViewInit {
     this.subscriptionName= this.InvestmentDataService.getReloadStrategyList().subscribe ( (id) => {
       console.log('messageAA', id )
       this.AppTabServiceService.getAccountsData (this.clientId,this.strategyId,'', this.actionOnAccountTable).subscribe (portfoliosData => {
-        console.log('portfoliosData', portfoliosData);
         this.dataSource  = new MatTableDataSource(portfoliosData);
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
@@ -92,7 +91,7 @@ export class TableAccounts implements AfterViewInit {
     this.dialogRef = this.dialog.open(AppNewAccountComponent ,{minHeight:'400px', maxWidth:'1000px' });
     this.dialogRef.componentInstance.action = actionType;
     this.dialogRef.componentInstance.title = actionType;
-    this.dialogRef.componentInstance.clientData = row;
+    this.dialogRef.componentInstance.portfolioData = row;
     switch (actionType) {
       case 'Create':
       case 'Create_Example': 

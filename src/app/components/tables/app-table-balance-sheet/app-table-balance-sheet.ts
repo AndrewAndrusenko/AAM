@@ -320,6 +320,8 @@ export class AppTableBalanceSheetComponent  implements AfterViewInit {
     this.totalPassive = 0;
     this.totalActive = 0;
     this.totalDebit = 0;
+    this.searchParametersFG.reset();
+    this.accounts=[];
     this.gRange.get('dateRangeStart').setValue(new Date(dateBalance))  
     this.gRange.get('dateRangeEnd').setValue(new Date(dateBalance))
      await this.submitQuery();

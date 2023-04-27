@@ -1,7 +1,7 @@
 .example-container {
   width: 210vh;
   height: 95vh;
-  border: 1px solid rgba(0, 0, 0, 0.5);
+  /* border: 1px solid rgba(0, 0, 0, 0.5); */
   /* background: var(--color-primary); */
 
 }

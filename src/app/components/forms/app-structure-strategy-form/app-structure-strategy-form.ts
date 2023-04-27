@@ -2,16 +2,14 @@ import { Component,  Input, OnInit, SimpleChanges,  } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup,  ValidationErrors,  Validators } from '@angular/forms';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { AppConfimActionComponent } from '../../alerts/app-confim-action/app-confim-action.component';
-import { AppSnackMsgboxComponent } from '../../app-snack-msgbox/app-snack-msgbox.component';
-import { MatSnackBar as MatSnackBar} from '@angular/material/snack-bar';
 import { AppInvestmentDataServiceService } from 'src/app/services/app-investment-data.service.service';
 import { StrategiesGlobalData } from 'src/app/models/accounts-table-model';
-import { formatPercent } from '@angular/common';
 import { AppInstrumentTableComponent } from '../../tables/app-table-instrument/app-table-instrument.component';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
 import { AppTabServiceService } from 'src/app/services/app-tab-service.service';
-import { debounceTime, distinctUntilChanged, filter, map, Observable, startWith, switchMap } from 'rxjs';
+import { map, Observable, startWith } from 'rxjs';
 import { AtuoCompSecidService } from 'src/app/services/atuo-comp-secid.service';
+import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 
 @Component({
   selector: 'app-structure-strategy-form',
@@ -39,7 +37,6 @@ export class AppStructureStrategyFormComponent implements OnInit {
   public title: string;
   public actionType : string;
   public actionToConfim = {'action':'delete_client' ,'isConfirmed': false}
-  public AppSnackMsgbox : AppSnackMsgboxComponent
   public showStrateryStructure: boolean;
   public data: any;
   constructor (
@@ -47,9 +44,8 @@ export class AppStructureStrategyFormComponent implements OnInit {
     private InvestmentDataServiceService:AppInvestmentDataServiceService, 
     private AppTabServiceService: AppTabServiceService,
     private AtuoCompService:AtuoCompSecidService,
+    private CommonDialogsService:HadlingCommonDialogsService,
     private dialog: MatDialog, 
-    public snack:MatSnackBar,
-    
   ) {}
   
   ngOnInit(): void {
@@ -87,12 +83,6 @@ export class AppStructureStrategyFormComponent implements OnInit {
       this.editStructureStrategyForm.controls['id'].updateValueAndValidity();
     }
   }
-/*   private _filter(value: string): string[] {
-    const filterValue = value.toLowerCase();
-
-    return this.fullInstrumentsLists.filter(option => option.toLowerCase().includes(filterValue));
-  } */
-
   ngOnChanges(changes: SimpleChanges) {
     this.editStructureStrategyForm.controls['id_item'].setValue (changes['strategyId'].currentValue)
     if (this.MP==true) {
@@ -103,62 +93,45 @@ export class AppStructureStrategyFormComponent implements OnInit {
       this.editStructureStrategyForm.controls['id'].updateValueAndValidity();
     }
   }
+  snacksBox(result:any, action?:string){
+    if (result['name']=='error') {
+      this.CommonDialogsService.snackResultHandler(result)
+    } else {
+      this.CommonDialogsService.snackResultHandler({name:'success', detail: result + 'item'}, action);
+      this.InvestmentDataServiceService.sendReloadStrategyStructure(Number(this.strategyId));
+      this.CommonDialogsService.dialogCloseAll();
+    }
+  }
   updateStrategyStructureData (action:string){
     switch (action) {
       case 'Create':
         this.editStructureStrategyForm.controls['id_strategy_parent'].setValue(this.strategyId)
-        this.InvestmentDataServiceService.createStrategyStructure (this.editStructureStrategyForm.value).then ( (result) => {
-          if (result['name']=='error') {
-            this.snack.open('Error: ' + result['detail'].split("\n", 1).join(""),'OK',{panelClass: ['snackbar-error']} ) 
-          } else {
-            this.snack.open('Created: ' + result + ' strategy','OK',{panelClass: ['snackbar-success'], duration: 3000})
-            this.editStructureStrategyForm.controls['id'].setValue(null)
-            this.editStructureStrategyForm.controls['weight_of_child'].setValue('')
-            this.InvestmentDataServiceService.sendReloadStrategyStructure(Number(this.strategyId))
-            this.editStructureStrategyForm.controls['weight_of_child'].markAsPending()
-            this.editStructureStrategyForm.controls['id'].markAsPending()
-            this.dialog.closeAll();
-          }
+        this.InvestmentDataServiceService.createStrategyStructure (this.editStructureStrategyForm.value).then(result=>{
+          this.snacksBox(result,'Created');
+          this.editStructureStrategyForm.controls['id'].setValue(null);
+          this.editStructureStrategyForm.controls['weight_of_child'].setValue('');
+          this.editStructureStrategyForm.controls['weight_of_child'].markAsPending();
+          this.editStructureStrategyForm.controls['id'].markAsPending();
         })
       break;
-
       case 'Edit':
         this.editStructureStrategyForm.addControl('id_strategy_parent',new FormControl(this.strategyId, Validators.required))
-        this.InvestmentDataServiceService.updateStrategyStructure (this.editStructureStrategyForm.value).then ( (result) => {
-          if (result['name']=='error') {
-            this.snack.open('Error: ' + result['detail'].split("\n", 1).join(""),'OK',{panelClass: ['snackbar-error']} ) 
-          } else {
-            this.snack.open('Updated: ' + result + ' strategy','OK',{panelClass: ['snackbar-success'], duration: 3000})
-            this.InvestmentDataServiceService.sendReloadStrategyStructure(Number(this.strategyId))
-            this.dialog.closeAll();
-          }
+        this.InvestmentDataServiceService.updateStrategyStructure (this.editStructureStrategyForm.value).then(result=>{
+          this.snacksBox(result,'Updated');
         })
       break;
-
       case 'Delete':
-        this.dialogRefConfirm = this.dialog.open(AppConfimActionComponent, {panelClass: 'custom-modalbox',} );
-        this.dialogRefConfirm.componentInstance.actionToConfim = {'action':'Delete Item' ,'isConfirmed': false}
-        this.dialogRefConfirm.afterClosed().subscribe (actionToConfim => {
-          if (actionToConfim.isConfirmed===true) {
-          this.InvestmentDataServiceService.deleteStrategyStructure (this.editStructureStrategyForm.value['id_item']).then ((result) =>{
-            if (result['name']=='error') {
-              this.snack.open('Error: ' + result['detail'],'OK',{panelClass: ['snackbar-error']} ) 
-            } else {
-              this.snack.open('Deleted: ' + result + ' item','OK',{panelClass: ['snackbar-success'], duration: 3000})
-              this.InvestmentDataServiceService.sendReloadStrategyStructure(Number(this.strategyId))
-              this.dialog.closeAll();
-            }
-          })
+        this.CommonDialogsService.confirmDialog('Delete ' + this.sname.value).subscribe(isConfirmed => {
+          if (isConfirmed.isConfirmed) {
+            this.InvestmentDataServiceService.deleteStrategyStructure (this.editStructureStrategyForm.value['id_item']).then (result =>{
+              this.snacksBox(result,'Deleted')
+              this.CommonDialogsService.dialogCloseAll();
+            })
           }
         })
       break;
     }
   }
- /*  onKey (value) {
-    console.log('value', value.value);
-    this.filterednstrumentsLists = this.fullInstrumentsLists.filter(elem=>elem.includes(value.value)) ;
-  }
-  */ 
   getFormValidationErrors() {
     Object.keys(this.editStructureStrategyForm.controls).forEach(key => {
       const controlErrors: ValidationErrors = this.editStructureStrategyForm.get(key).errors;

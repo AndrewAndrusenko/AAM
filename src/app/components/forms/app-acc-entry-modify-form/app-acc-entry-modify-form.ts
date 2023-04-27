@@ -105,44 +105,20 @@ export class AppAccEntryModifyFormComponent implements OnInit,  OnDestroy {
     
 
   }
-
   ngOnInit(): void {
-
     if (this.FirstOpenedAccountingDate !=null) {
-      console.log('onInt');
       this.title = this.action;
-      switch (this.action) {
-        case 'Create': 
-        this.entryModifyForm.patchValue({})
-        this.d_transactionType.patchValue ('AL')
-        break;
-        case 'Create_Example':
-          this.title = 'Create';
-          this.entryModifyForm.patchValue(this.data);
-          this.id.setValue(0);
-        break;
-        case 'Create_On_Draft':
-          this.title = 'Create';
-        break;
-        default:
-          this.entryModifyForm.patchValue(this.data);
-        break; 
-      }  
-
-      
+      this.entryModifyForm.patchValue(this.data);
       this.dataTime.setValue(new Date(this.data.t_dataTime));
       this.xActTypeCode.setValue(Number(this.data.t_XactTypeCode));
       this.xActTypeCode_Ext.setValue(Number(this.data.t_XactTypeCode_Ext));
       this.AddAsyncValidators(false);
       this.accountNo.updateValueAndValidity();
       this.ledgerNo.updateValueAndValidity();
-    
       this.amountFormat()
       this.updateExpectedBalance() 
-       
     }
       this.subscription = this.AccountingDataService.getEntryDraft().subscribe ( entryData => {
-        
         if (entryData.refTransaction === this.Ref ) {
           if (entryData.autoProcessing === true) {
             this.autoProcessingState = true;
@@ -169,16 +145,12 @@ export class AppAccEntryModifyFormComponent implements OnInit,  OnDestroy {
           this.AddAsyncValidators(entryData.overRideOverdraft)
           this.amountFormat()
           this.updateExpectedBalance()  
-
         }
       })
-   
   }
-  
   ngOnDestroy() {
    this.subscription.unsubscribe();
   }
-
   updateExpectedBalance () {
     
     if (this.d_transactionType.value === 'AL') { 
@@ -213,7 +185,6 @@ export class AppAccEntryModifyFormComponent implements OnInit,  OnDestroy {
       }
     });
   }
-
   showAValidator (){
     this.entryModifyForm.markAllAsTouched()
     this.accountNo.updateValueAndValidity();
@@ -301,7 +272,6 @@ export class AppAccEntryModifyFormComponent implements OnInit,  OnDestroy {
       this.autoProcessingState? this.LogService.sendCreatedLogObject (dataForUpdateLog): null;
       this.AccountingDataService.sendReloadEntryList (this.id.value);
     }
-    
   }
   updateEntryData (action:string){
     let newDate = new Date(this.dataTime.value)

@@ -100,10 +100,9 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
               Root = node.item.split('_')[1];
             }
             if (node.item == 'Favorites' ) {
-              console.log('ff', name);
-              return new DynamicFlatNode(name, node.level + 1, this._database.isExpandable(name), false, node.item, favoriteRoot, name[1],null )
+              rootNodesColor.forEach(el=> el.nodes.includes('Favorites')? nodeColor = el.colorChild : null)
+              return new DynamicFlatNode(name, node.level + 1, this._database.isExpandable(name), false, node.item, favoriteRoot, name[1],nodeColor )
             } else {
-              console.log('root',Root);
               rootNodesColor.forEach(el=> el.nodes.includes(Root)? nodeColor = el.colorChild : null)
               return new DynamicFlatNode(name[0], node.level + 1, this._database.isExpandable(name), false, Root, favoriteRoot, name[1], nodeColor)
             }

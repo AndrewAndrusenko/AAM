@@ -1,13 +1,13 @@
-import { AfterViewInit, Component,  EventEmitter,  Input, OnInit, Output, SimpleChanges, ViewChild,  } from '@angular/core';
-import { FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { AfterViewInit, Component,  EventEmitter,  Input, OnInit, Output, ViewChild,  } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { AppConfimActionComponent } from '../../alerts/app-confim-action/app-confim-action.component';
 import { AppSnackMsgboxComponent } from '../../app-snack-msgbox/app-snack-msgbox.component';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
-import { bcAccountType_Ext, bcEnityType, bcTransactionType_Ext } from 'src/app/models/accounts-table-model';
+import { bcAccountType_Ext, bcEnityType } from 'src/app/models/accounts-table-model';
 import { AppClientsTableComponent } from '../../tables/app-table-clients/app-table-clients.component';
-import { TableAccounts } from '../../tables/app-table-accout/app-table-accout.component';
+import { TableAccounts } from '../../tables/app-table-accout/app-table-portfolio.component';
 import { Subscription } from 'rxjs';
 import { MatTabGroup as MatTabGroup } from '@angular/material/tabs';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
@@ -83,7 +83,6 @@ export class AppAccAccountModifyFormComponent implements OnInit, AfterViewInit {
       d_APType: {value:null, disabled: true},
     })
   }
-
   ngOnInit(): void {
     this.title = this.action;
     switch (this.action) {
@@ -104,7 +103,6 @@ export class AppAccAccountModifyFormComponent implements OnInit, AfterViewInit {
       this.accountLedgerModifyForm.disable();
     }
   }
-
   ngAfterViewInit(): void {
     let accType = this.d_APTypeCodeAccount.value == 1 ? 'Active' : 'Passive'
     this.accountLedgerModifyForm.controls['d_APType'].patchValue(accType)
@@ -160,21 +158,20 @@ export class AppAccAccountModifyFormComponent implements OnInit, AfterViewInit {
     this.formDisabledFields.forEach(elem => this.accountModifyForm.controls[elem].disable())
   }
   updateAccountData(action:string){
-    console.log('action',action);
     this.formDisabledFields.forEach(elem => this.accountModifyForm.controls[elem].enable())
     switch (action) {
       case 'Create_Example':
       case 'Create':
-        this.AccountingDataService.createAccountAccounting(this.accountModifyForm.value).then((result)=>{this.snacksBox(result,'Created')})
+        this.AccountingDataService.createAccountAccounting(this.accountModifyForm.value).then(result => this.snacksBox(result,'Created'))
       break;
       case 'Edit':
-        this.AccountingDataService.updateAccountAccounting (this.accountModifyForm.value).then((result)=>{this.snacksBox(result,'Updated')})
+        this.AccountingDataService.updateAccountAccounting (this.accountModifyForm.value).then(result => this.snacksBox(result,'Updated'))
       break;
       case 'Delete':
-        this.CommonDialogsService.confirmDialog('Delete Account ' + this.accountNo.value).subscribe(isConfirmed=>{
+        this.CommonDialogsService.confirmDialog('Delete Account ' + this.accountNo.value).subscribe(isConfirmed => {
           if (isConfirmed.isConfirmed) {
             this.accountModifyForm.controls['accountId'].enable()
-            this.AccountingDataService.deleteAccountAccounting (this.accountModifyForm.value['accountId']).then ((result) =>{
+            this.AccountingDataService.deleteAccountAccounting (this.accountModifyForm.value['accountId']).then (result =>{
               this.snacksBox(result,'Deleted')
               this.CommonDialogsService.dialogCloseAll();
             })
@@ -189,16 +186,16 @@ export class AppAccAccountModifyFormComponent implements OnInit, AfterViewInit {
     switch (action) {
       case 'Create_Example':
       case 'Create':
-        this.AccountingDataService.createLedgerAccountAccounting(this.accountLedgerModifyForm.value).then((result)=>{this.snacksBox(result,'Created')})
+        this.AccountingDataService.createLedgerAccountAccounting(this.accountLedgerModifyForm.value).then(result => this.snacksBox(result,'Created'))
       break;
       case 'Edit':
-        this.AccountingDataService.updateLedgerAccountAccounting (this.accountLedgerModifyForm.value).then((result)=>{this.snacksBox(result,'Updated')})
+        this.AccountingDataService.updateLedgerAccountAccounting (this.accountLedgerModifyForm.value).then(result => this.snacksBox(result,'Updated'))
       break;
       case 'Delete':
         this.CommonDialogsService.confirmDialog('Delete Account ' + this.ledgerNo.value).subscribe(isConfirmed=>{
           if (isConfirmed.isConfirmed) {
             this.ledgerNoId.enable()
-            this.AccountingDataService.deleteLedgerAccountAccounting (this.ledgerNoId.value).then ((result) =>{
+            this.AccountingDataService.deleteLedgerAccountAccounting (this.ledgerNoId.value).then (result =>{
               this.snacksBox(result,'Deleted')
               this.CommonDialogsService.dialogCloseAll();
             })

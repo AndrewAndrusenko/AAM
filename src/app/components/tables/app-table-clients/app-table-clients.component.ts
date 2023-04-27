@@ -2,7 +2,7 @@ import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef} from '@angular/material/dialog';
 import * as XLSX from 'xlsx'
 import { AppClientFormComponent } from '../../forms/app-client-form/app-client-form.component';
-import { AppNewAccountComponent } from '../../forms/app-new-account/app-new-account.component';
+import { AppNewAccountComponent } from '../../forms/app-new-account/app-portfolio.component';
 @Component({
   selector: 'app-app-clients-table',
   templateUrl: './app-table-clients.component.html',
@@ -94,7 +94,7 @@ openAccountDialog(actionType) {
   this.dialogAccountRef.componentInstance.action = actionType;
   this.dialogAccountRef.componentInstance.title = actionType;
   let data = $('#mytable').DataTable().row({ selected: true }).data();
-  this.dialogAccountRef.componentInstance.clientData = data
+  this.dialogAccountRef.componentInstance.portfolioData = data
   switch (actionType) {
     case 'Create':
     case 'Create_Example': 

@@ -141,8 +141,6 @@ export class AppTableAccEntriesComponent  {
       }
     })
   }
-
-
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
@@ -151,13 +149,17 @@ export class AppTableAccEntriesComponent  {
   openEntryModifyForm (actionType:string, row: any ) {
     this.dialogRef = this.dialog.open(AppAccEntryModifyFormComponent ,{minHeight:'400px', maxWidth:'1000px' });
     this.dialogRef.componentInstance.action = actionType;
-    this.dialogRef.componentInstance.title = actionType;
-    this.dialogRef.componentInstance.data = row;
+    this.dialogRef.componentInstance.title = ['Create','CreateLL','Create_Example'].includes(actionType)? actionType: 'Create New';
+    this.dialogRef.componentInstance.data =  row;
     this.dialogRef.componentInstance.FirstOpenedAccountingDate = this.FirstOpenedAccountingDate;
     switch (actionType) {
       case 'Create':
-      case 'Create_Example': 
-      this.dialogRef.componentInstance.title = 'Create New';
+        this.dialogRef.componentInstance.data = {t_XactTypeCode:1, d_transactionType:'AL'};
+      break;
+      case 'CreateLL':
+        this.dialogRef.componentInstance.action = 'Create';
+        this.dialogRef.componentInstance.title = 'Create';
+        this.dialogRef.componentInstance.data = {t_XactTypeCode:0, d_transactionType:'LL'} 
       break;
       case 'View':
         this.dialogRef.componentInstance.entryModifyForm.disable()
@@ -188,7 +190,6 @@ export class AppTableAccEntriesComponent  {
     this.dataSource.filter = ''
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
   }
-
   submitQuery () {
     let searchObj = {};
     let accountsList = [];

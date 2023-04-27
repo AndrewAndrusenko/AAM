@@ -1,12 +1,11 @@
-import { AfterViewInit, Component,  Input, OnInit, SimpleChanges,  } from '@angular/core';
-import { FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
-import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
+import { Component,  Input, OnInit, SimpleChanges,  } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { AppConfimActionComponent } from '../../alerts/app-confim-action/app-confim-action.component';
-import { AppSnackMsgboxComponent } from '../../app-snack-msgbox/app-snack-msgbox.component';
-import { MatSnackBar as MatSnackBar} from '@angular/material/snack-bar';
 import { AppInvestmentDataServiceService } from 'src/app/services/app-investment-data.service.service';
-import { TableAccounts } from '../../tables/app-table-accout/app-table-accout.component';
+import { TableAccounts } from '../../tables/app-table-accout/app-table-portfolio.component';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
+import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 interface Level {
   value: number;
   viewValue: string;
@@ -16,7 +15,7 @@ interface Level {
   templateUrl: './app-strategy-form.component.html',
   styleUrls: ['./app-strategy-form.component.scss'],
 })
-export class AppStrategyFormComponent implements OnInit, AfterViewInit {
+export class AppStrategyFormComponent implements OnInit {
   levels: Level[] = [
     {value: 1, viewValue: 'Model Portfolio'},
     {value: 2, viewValue: 'Strategy (based on MP)'},
@@ -34,16 +33,14 @@ export class AppStrategyFormComponent implements OnInit, AfterViewInit {
   public strategyId : any;
   public MP : boolean;
   public actionToConfim = {'action':'delete_client' ,'isConfirmed': false}
-  public AppSnackMsgbox : AppSnackMsgboxComponent
   public showStrateryStructure: boolean;
   public data: any;
   constructor (
-    private fb:FormBuilder, private InvestmentDataServiceService:AppInvestmentDataServiceService, private dialog: MatDialog, public snack:MatSnackBar
+    private fb:FormBuilder, 
+    private dialog: MatDialog, 
+    private InvestmentDataServiceService:AppInvestmentDataServiceService, 
+    private CommonDialogsService:HadlingCommonDialogsService,
   ) {}
-  ngAfterViewInit(): void {
-
-  }
- 
   ngOnInit(): void {
     this.panelOpenState = true;
 
@@ -81,7 +78,6 @@ export class AppStrategyFormComponent implements OnInit, AfterViewInit {
     )  
     // this.editStrategyForm.controls['name'].updateValueAndValidity();
   }
-
   ngOnChanges(changes: SimpleChanges) {
     console.log('changes', changes);
     this.InvestmentDataServiceService.getGlobalStategiesList(changes['client'].currentValue, null, 'Get_Strategy_Data').subscribe(data => {
@@ -97,77 +93,52 @@ export class AppStrategyFormComponent implements OnInit, AfterViewInit {
      this.editStrategyForm.controls['name'].updateValueAndValidity();
     })
   }
-
+  snacksBox(result:any, action?:string){
+    if (result['name']=='error') {
+      this.CommonDialogsService.snackResultHandler(result)
+    } else {
+      this.CommonDialogsService.snackResultHandler({name:'success', detail: result + 'strategy'}, action)
+      this.InvestmentDataServiceService.sendReloadStrategyList (this.editStrategyForm.controls['id']);
+    }
+    this.editStrategyForm.controls['s_benchmark_account'].disable()
+    this.editStrategyForm.controls['id'].disable()
+  }
   updateStrategyData(action:string){
-    console.log('action',action);
     switch (action) {
       case 'Create_Example':
       case 'Create':
         this.editStrategyForm.controls['s_benchmark_account'].enable()
-        this.InvestmentDataServiceService.createStrategy (this.editStrategyForm.value).then ( (result) => {
-          if (result['name']=='error') {
-            this.snack.open('Error: ' + result['detail'].split("\n", 1).join(""),'OK',{panelClass: ['snackbar-error']}); 
-          } else {
-            this.snack.open('Created: ' + result + ' strategy','OK',{panelClass: ['snackbar-success'], duration: 3000});
-            this.InvestmentDataServiceService.sendReloadStrategyList (this.editStrategyForm.controls['id']);
-          }
-        })
+        this.InvestmentDataServiceService.createStrategy(this.editStrategyForm.value).then(result => this.snacksBox(result,'Created '))
         this.editStrategyForm.controls['id'].disable()
         this.editStrategyForm.controls['s_benchmark_account'].enable()
       break;
-
       case 'Edit':
         this.editStrategyForm.controls['s_benchmark_account'].enable()
         this.editStrategyForm.controls['id'].enable()
-        this.InvestmentDataServiceService.updateStrategy (this.editStrategyForm.value).then ( (result) => {
-          if (result['name']=='error') {
-            this.snack.open('Error: ' + result['detail'].split("\n", 1).join(""),'OK',{panelClass: ['snackbar-error']} ) 
-          } else {
-            this.snack.open('Updated: ' + result + ' strategy','OK',{panelClass: ['snackbar-success'], duration: 3000})
-            this.InvestmentDataServiceService.sendReloadStrategyList (this.editStrategyForm.controls['id']);
-          }
-        })
-        this.editStrategyForm.controls['s_benchmark_account'].disable()
-        this.editStrategyForm.controls['id'].disable()
+        this.InvestmentDataServiceService.updateStrategy(this.editStrategyForm.value).then(result => this.snacksBox(result,'Updated '))
       break;
-
       case 'Delete':
-        this.dialogRefConfirm = this.dialog.open(AppConfimActionComponent, {panelClass: 'custom-modalbox',} );
-        this.dialogRefConfirm.componentInstance.actionToConfim = {'action':'Delete Strategy' ,'isConfirmed': false}
-        this.dialogRefConfirm.afterClosed().subscribe (actionToConfim => {
-          console.log('action', actionToConfim)
-          if (actionToConfim.isConfirmed===true) {
-          this.editStrategyForm.controls['id'].enable()
-          this.InvestmentDataServiceService.deleteStrategy (this.editStrategyForm.value['id']).then ((result) =>{
-            if (result['name']=='error') {
-              this.snack.open('Error: ' + result['detail'],'OK',{panelClass: ['snackbar-error']} ) 
-            } else {
-              this.snack.open('Deleted: ' + result + ' strategy','OK',{panelClass: ['snackbar-success'], duration: 3000})
-              this.InvestmentDataServiceService.sendReloadStrategyList (this.editStrategyForm.controls['id']);
-              this.dialog.closeAll();
-            }
-          })
-          this.editStrategyForm.controls['id'].disable()
-         
+        this.CommonDialogsService.confirmDialog('Delete strategy ' + this.name.value).subscribe(isConfirmed => {
+          if (isConfirmed.isConfirmed) {
+            this.editStrategyForm.controls['id'].enable()
+            this.InvestmentDataServiceService.deleteStrategy (this.editStrategyForm.value['id']).then (result =>{
+              this.snacksBox(result,'Deleted')
+              this.CommonDialogsService.dialogCloseAll();
+            })
           }
         })
       break;
     }
   }
-
   selectBenchmarkAccount () {
     this.dialogRef = this.dialog.open(TableAccounts ,{minHeight:'400px', minWidth:'900px', autoFocus: false, maxHeight: '90vh'});
     this.dialogRef.componentInstance.action = 'Select_Benchmark';
     this.dialogRef.componentInstance.modal_principal_parent.subscribe ((item)=>{
       this.data = this.dialogRef.componentInstance.currentAccout;
-      console.log('close',this.data);
-      console.log('id comp',this.id.value,this.dialogRef.componentInstance.currentAccout['idstategy']);
-      
       if (this.id.value !== this.dialogRef.componentInstance.currentAccout['idstategy']) {
         this.dialogRefConfirm = this.dialog.open(AppConfimActionComponent, {panelClass: 'custom-modalbox',} );
         this.dialogRefConfirm.componentInstance.actionToConfim = {'action':'Select account with different strategy' ,'isConfirmed': false}
         this.dialogRefConfirm.afterClosed().subscribe (actionToConfim => {
-          console.log('action', actionToConfim)
           if (actionToConfim.isConfirmed===true) {
             this.dialogRef.close(); 
             this.editStrategyForm.controls['s_benchmark_account'].patchValue(this.data['idportfolio'])
@@ -180,12 +151,6 @@ export class AppStrategyFormComponent implements OnInit, AfterViewInit {
       }
       this.dialogRef.close(); 
     });
-    console.log('action',this.actionType);
-    switch (this.actionType) {
-      case 'Create':
-      case 'Create_Example': 
-      break;
-  }
   }
 ​
   get  id ()   {return this.editStrategyForm.get('id') } 

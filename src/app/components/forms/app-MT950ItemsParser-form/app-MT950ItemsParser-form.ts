@@ -1,12 +1,12 @@
-import { Component,  Input, OnInit, SimpleChanges,  } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup,  ValidationErrors,  Validators } from '@angular/forms';
+import { Component,  Input  } from '@angular/core';
+import { FormBuilder } from '@angular/forms';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { AppConfimActionComponent } from '../../alerts/app-confim-action/app-confim-action.component';
 import { AppSnackMsgboxComponent } from '../../app-snack-msgbox/app-snack-msgbox.component';
-import { MatSnackBar as MatSnackBar} from '@angular/material/snack-bar';
 import { bcTransactionType_Ext } from 'src/app/models/accounts-table-model';
 import { AppInstrumentTableComponent } from '../../tables/app-table-instrument/app-table-instrument.component';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
+import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 
 @Component({
   selector: 'app-MT950ItemsParser-form',
@@ -42,22 +42,23 @@ export class AppMT950ItemParsing  {
   constructor (
     private fb:FormBuilder, 
     private AccountingDataService:AppAccountingService, 
-    private dialog: MatDialog, 
-    public snack:MatSnackBar,
+    private CommonDialogsService:HadlingCommonDialogsService,
   ) {
     this.AccountingDataService.GetTransactionType_Ext('',0,'','','bcTransactionType_Ext').subscribe (data => this.TransactionTypes=data)
+  }
+  snacksBox(result:any, action?:string){
+    if (result['name']=='error') {
+      this.CommonDialogsService.snackResultHandler(result)
+    } else {
+      this.CommonDialogsService.snackResultHandler({name:'success', detail: result + ' entry'}, action);
+      $('#mytable').DataTable().ajax.reload();
+    }
   }
   SubmitEntryAccounntingInsertRow () {
     this.ledgerNo.disable();
     this.accountNo.disable();
-    this.AccountingDataService.CreateEntryAccountingInsertRow(this.swift950Entry.value).then ((result) => {
-      if (result['name']=='error') {
-        this.snack.open('Error: ' + result['detail'].split("\n", 1).join(""),'OK',{panelClass: ['snackbar-error']} ) 
-      } else {
-        this.snack.open('Created: ' + result + ' entry','OK',{panelClass: ['snackbar-success'], duration: 3000})
-        this.swift950Entry.disable();
-      }
-    });
+    this.AccountingDataService.CreateEntryAccountingInsertRow(this.swift950Entry.value).then (result => this.snacksBox(result,'Created'))
+    this.swift950Entry.disable();
   }
 
   public get  amountTransaction ()   {return this.swift950Entry.get('amountTransaction') } 
