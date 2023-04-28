@@ -1,0 +1,2 @@
+copy public.mmoexbondscorpactions ( isin, secname, issuevolume,  date, notinal, notinalcurrency, unredemeedvalue, couponrate, couponamount,couponamountrur) 
+FROM 'C:/JS/MOEX_C~1.CSV' DELIMITER ';' CSV HEADER
