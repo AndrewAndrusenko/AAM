@@ -115,8 +115,6 @@ appServer.get ('/AAM/treeMenu/',  jsPassport.authenticate('session') ,  uiAmmMod
 // -------------Get Tree for Tree Menu UI----------------------
 appServer.get ('/AAM/portfolioTable/',  jsPassport.authenticate('session') ,  uiAmmModule.fGetportfolioTable)
 
-appServer.get ('/AAM/InstrumentData/',  jsPassport.authenticate('session') ,  uiAmmModule.fGetInstrumentData)
-
 appServer.get ('/AAM/ClientData/',  jsPassport.authenticate('session') ,  uiAmmModule.fGetClientData)
 
 appServer.post('/AAM/ClientDataEdit/',jsPassport.authenticate('session') , uiAmmModule.fEditClientData)
@@ -181,6 +179,10 @@ appServer.get('/AAM/MD/getInstrumentsCodes/',jsPassport.authenticate('session') 
 appServer.post('/AAM/MD/deleteMarketData/',jsPassport.authenticate('session') , uiAmmMarketData.fdeleteMarketData)
 
 appServer.get('/AAM/MD/getMoexInstrumentsList/',jsPassport.authenticate('session') , uiAmmMarketData.fimportMoexInstrumentsList)
+appServer.get('/AAM/MD/getMoexInstruments/',jsPassport.authenticate('session') , uiAmmMarketData.fGetMoexInstruments)
+appServer.get('/AAM/MD/getInstrumentDataGeneral/',jsPassport.authenticate('session') , uiAmmMarketData.fgetInstrumentDataGeneral)
+
+
 
 appServer.listen (port,'localhost', () => {console.log (`AAM Server is running on port ${port}`)})
 

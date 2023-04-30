@@ -17,9 +17,9 @@ export class AtuoCompSecidService {
     console.log('filet',value,this.fullInstrumentsLists);
     return this.fullInstrumentsLists.filter(option => option.toLowerCase().includes(filterValue));
   }
-  getSecidLists (secidOnly: boolean) {
-    const params = {'secidOnly':secidOnly}
-   this.http.get <string[]> ('/api/AAM/InstrumentData/',{params:params}).subscribe (data=>{
+  getSecidLists (Action: string) {
+    const params = {Action:Action}
+   this.http.get <string[]> ('/api/AAM/MD/getMoexInstruments/',{params:params}).subscribe (data=>{
      this.fullInstrumentsLists = data[0]['array_agg']
      this.sendSecIdList(this.fullInstrumentsLists);
    })

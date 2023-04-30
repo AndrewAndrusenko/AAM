@@ -114,7 +114,7 @@ async function fGetportfolioTable (request,response) {
   })
 }
 
-async function fGetInstrumentData(request,response) {
+/* async function fGetInstrumentData(request,response) {
   const query = request.query.secidOnly?  {text:'SELECT ARRAY_AGG(secid) FROM public."aMoexInstruments"'} : {
     text: ' SELECT ' +
     ' secid, shortname, name,  isin,  listlevel, facevalue, faceunit,  primary_board_title, ' +
@@ -130,7 +130,7 @@ async function fGetInstrumentData(request,response) {
   console.log('que',query);
   pool.query (query, (err, res) => {if (err) {console.log (err.stack)} else {return  response.status(200).json(res.rows)}
   })
-}
+} */
 
 async function fPutNewFavorite (request, response) {
     paramArr = [request.body.nodename, request.body.nodeparent, request.body.userId, request.body.idelement]
@@ -238,7 +238,6 @@ module.exports = {
   fGetportfolioTable,
   fPutNewFavorite,
   fRemoveFavorite,
-  fGetInstrumentData,
   fGetClientData,
   fEditClientData,
   fClientDataDelete,

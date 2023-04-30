@@ -26,8 +26,6 @@ import { AppConfimActionComponent } from './components/alerts/app-confim-action/
 import { AppSnackMsgboxComponent } from './components/app-snack-msgbox/app-snack-msgbox.component';
 import { TableAccounts } from './components/tables/app-table-accout/app-table-portfolio.component';
 import { tradesDataTable } from './components/tables/app-table-trades/app-table-trades.component';
-import { AppInstrumentTableComponent } from './components/tables/app-table-instrument/app-table-instrument.component';
-import { AppInstrumentEditFormComponent } from './components/forms/app-instrument-edit-form/app-instrument-edit-form.component';
 import { AppClientsTableComponent } from './components/tables/app-table-clients/app-table-clients.component';
 import {MatSlideToggle as MatSlideToggle, MatSlideToggleModule as MatSlideToggleModule} from '@angular/material/slide-toggle';
 import { AppTableStrategiesComponentComponent } from './components/tables/app-table-strategies.component/app-table-strategies.component.component'; 
@@ -68,6 +66,7 @@ import {AppTableMarketDataComponent } from './components/tables/app-table-market
 import * as echarts from 'echarts';
 import {NgxEchartsModule } from 'ngx-echarts';
 import { NgEchartMarketDataCandleComponent } from './components/charts/chart-candle-marketdata/echart-marketdata-candle';
+import { AppInstrumentTableComponent } from './components/tables/app-table-instrument/app-table-instrument.component';
 
 
 @NgModule({
@@ -124,7 +123,6 @@ import { NgEchartMarketDataCandleComponent } from './components/charts/chart-can
         TableAccounts,
         tradesDataTable,
         AppInstrumentTableComponent,
-        AppInstrumentEditFormComponent,
         AppClientsTableComponent,
         AppNewAccountComponent,
         AppClientFormComponent,

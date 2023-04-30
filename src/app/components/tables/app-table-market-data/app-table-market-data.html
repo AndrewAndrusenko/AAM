@@ -171,7 +171,7 @@
         </mat-select>
       </mat-form-field>
       <mat-form-field class="example-chip-list" appearance="fill" style="width: 40%; ">
-        <mat-chip-list #chipList aria-label="Fruit selection"  >
+        <mat-chip-list #chipList  >
           <mat-chip *ngFor="let account of instruments" 
           (removed)="remove(account)"
           (click)=" clearAll($event);">

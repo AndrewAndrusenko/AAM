@@ -1,10 +1,11 @@
 
 const accountingNodeColor = 'rebeccapurple'
 const accountingNodeColorChild = 'rgb(77, 38, 117)'
-const investmentNodeColor = 'crimson'
-const investmentNodeColorChild = 'rgb(184, 28, 59)'
-const faovritesNodeColor = 'rgb(53, 153, 168)'
+export const investmentNodeColor = 'crimson'
+export const investmentNodeColorChild = 'rgb(184, 28, 59)'
+export const faovritesNodeColor = 'rgb(53, 153, 168)'
 const faovritesNodeColorChild = 'rgb(53, 153, 168)'
+export const additionalLightGreen = 'rgb(198, 255, 215)'
  
 export const menuColorGl = 'crimson'
 

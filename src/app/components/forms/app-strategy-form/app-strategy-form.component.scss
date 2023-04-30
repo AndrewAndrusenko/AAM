@@ -1,6 +1,11 @@
 input.ng-invalid.ng-touched {
   color: rgb(158, 0, 0);
 }
+mat-expansion-panel
+mat-expansion-panel-header {
+  background: #c2185b;
+  font-size: 18px;
+}
 .mat-error {
   color: rgb(158, 0, 0);
   transform: (1.1);

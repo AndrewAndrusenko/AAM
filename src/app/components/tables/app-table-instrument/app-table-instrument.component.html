@@ -1,40 +1,192 @@
-
-<ng-template  #instrumentcontextmenu>
-  <div class="tree-menu-context" cdkMenu >
-    <button 
-      (click)="openAddFileDialog('Create')"
-      class="tree-menu-item" cdkMenuItem >
-      <mat-icon class="menu-icon" matPrefix>add_circle</mat-icon>      
-      New Imstrument</button>
-    <button 
-      (click)="openAddFileDialog('Edit')"
-      class="tree-menu-item" cdkMenuItem>
-      <mat-icon class="menu-icon" matPrefix>edit</mat-icon>      
-      Edit Instrument
+<span *ngIf="FormMode==='Full'"> 
+  <mat-form-field  class = "filterText" style="font-size: 22px;">
+    <mat-label class="colorLabel">Search by SecID..</mat-label>
+    <input 
+      (keyup)="applyFilter($event,'secid')"
+      [formControl]="filterlFormControl" 
+      matInput type="text" #SearchTree  name="tableFilter"
+      matTooltip="Use context menu to add filter">
+    <button matSuffix 
+      mat-icon-button aria-label="Clear" 
+      (click)="clearFilter()">
+      <mat-icon>close</mat-icon>
     </button>
-    <button 
-     (click)="openAddFileDialog('Delete')"
-      class="tree-menu-item" cdkMenuItem>
-      <mat-icon class="menu-icon" matPrefix>delete</mat-icon> 
-      Delete Instrument
-    </button> 
-    <button 
-    (click)="chooseAccount()"
-     class="tree-menu-item" cdkMenuItem>
-     <mat-icon class="menu-icon" matPrefix>done</mat-icon> 
-     Select Instrument
-   </button> 
-  </div>
-</ng-template>
+  </mat-form-field>
+  <mat-form-field  style="width: 20%;">
+    <mat-label>BoardID</mat-label>
+    <mat-select  #BoardID formControlName="boardsOne" > 
+      <mat-option 
+        *ngFor="let board of boardIDs" 
+        [value]="board.boardid.toString()"
+        (onSelectionChange)="applyFilter($event)">
+          {{board.boardid}} - {{board.board_title}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field class = "filterText" style="font-size: 22px;">
+    <mat-label class="colorLabel">Search (all columns)...</mat-label>
+    <input 
+      (keyup)="applyFilter($event)"
+      [formControl]="filterlFormControl" 
+      matInput type="text" #SearchTree  name="tableFilter"
+      matTooltip="Use context menu to add filter"
+     >
+    <button matSuffix 
+      mat-icon-button aria-label="Clear" 
+      (click)="clearFilter()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </mat-form-field>
+  <button color = "accent" mat-raised-button 
+    style=" margin-left:1%; font-size: 18px;"
+    (click)="exportToExcel()">
+    Save as XLS 
+  </button>
+</span>
+<mat-expansion-panel class="headers-align" 
+  (opened)="panelOpenStateSecond = true"
+  (closed)="panelOpenStateSecond = false" >
+  <mat-expansion-panel-header >
+    <mat-panel-title [style.color]="menuColorGl">
+      Complex search
+    </mat-panel-title>
+    <mat-panel-description>
+      Tap to {{panelOpenStateSecond? 'hide': 'open'}} additional parameters
+      <mat-icon color = 'accent'>filter_alt</mat-icon>
+    </mat-panel-description>
+  </mat-expansion-panel-header >
+  <form class="submit" [formGroup]="searchParametersFG"  style="font-size: 18px; ">
+    <span style="display: flex;  justify-content: space-between;   align-items:flex-start;  margin-right: 1%;margin-top: 0.2%;">
+      <span style="display:grid; width: 15%;">
+        <button color = "primary"  class= "button-color" mat-raised-button 
+          style="margin:1%; font-size: 18px;"
+          (click)="submitQuery()">
+          Submit
+        </button>
+        <button color = "accent" mat-raised-button 
+          style="margin:1%; font-size: 18px;"
+          (click)="searchParametersFG.reset();
+           instruments=['ClearAll']">
+          ClearAll
+        </button>
+      </span>
+      <mat-form-field  style="width: 25%;">
+        <mat-label>MarketDataSource</mat-label>
+        <mat-select  #marketSource formControlName="marketSource"  multiple> 
+          <mat-option #allSelected [value]="0"
+            (click)="toggleAllSelection()" >
+            ALL - {{this.allSelected.selected? 'Clear' :'Select' }} All 
+          </mat-option>
+          <mat-optgroup *ngFor="let marketSource of marketSources" [label]="marketSource.sourceName">
+          <mat-option *ngFor="let segment of marketSource.segments" [value]="segment.sourceCode">
+              {{segment.description}}
+          </mat-option>
+        </mat-optgroup>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field  style="width: 25%;">
+        <mat-label>BoardID</mat-label>
+        <mat-select  #BoardID formControlName="boards"  multiple> 
+          <mat-option #allSelected [value]="0"
+            (click)="toggleAllSelection()" >
+            ALL - {{this.allSelected.selected? 'Clear' :'Select' }} All 
+          </mat-option>
+          <mat-option *ngFor="let board of boardIDs" [value]="board.boardid.toString()">
+            {{board.boardid}} - {{board.board_title}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field class="example-chip-list" appearance="fill" style="width: 40%; ">
+        <mat-chip-list #chipList aria-label="Fruit selection"  >
+          <mat-chip *ngFor="let account of instruments" 
+          (removed)="remove(account)"
+          (click)=" clearAll($event);">
+            {{account}}
+            <button matChipRemove>
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </mat-chip>
+          <input #iputForChip
+          [matAutocomplete]="auto"
+          matInput
+          placeholder="Add secid or secid,secid1,secid2.."
+          formControlName="secidList"
+          [matChipInputFor]="chipList"
+          [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+          [matChipInputAddOnBlur]="addOnBlur"
+          (matChipInputTokenEnd)="add($event)"
+          matTooltip="Type account number or paste accounts list separated by comma and press enter" >
+        </mat-chip-list>
+        <mat-autocomplete #auto="matAutocomplete" (optionSelected)='changedValueofChip($event.option.value)'>
+          <mat-option *ngFor="let secid of filterednstrumentsLists | async" [value]="secid">
+            {{secid}}
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+    </span>
+  </form>
+</mat-expansion-panel>
 
-<div [cdkContextMenuTriggerFor]="instrumentcontextmenu" 
-  class="dataTableTitle" style="display:flex; align-items: center;
-  justify-content:space-between;"> 
-  <h2> Instruments list </h2>   
-  <h2 *ngIf="action=='Select'" style="color: rgb(224, 73, 73);"> Use context menu to select instrument for MP</h2>
+<div class="mat-elevation-z8">
+  <table  #strategyTable mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class="mat-elevation-z8">
+    <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i=index">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>  {{columnsHeaderToDisplay[i] }}</th>
+      <td 
+        mat-cell 
+        *matCellDef="let element" [cdkContextMenuTriggerFor]="instrumentcontextmenu"  > 
+        <span [ngSwitch]="true==true">
+          <p *ngSwitchCase="['tradedate'].includes(column)">
+              {{ element[column] | date }}
+          </p>          
+          <p style="text-align:center" *ngSwitchCase="['primary_boardid','emitent_inn'].includes(column) "
+          [style.color]="additionalLightGreen">
+             {{element[column] }}
+          </p>
+          <p *ngSwitchCase="['secid'].includes(column)">
+            <button mat-stroked-button style="width: 80%; font-size: 18px;"  matTooltip="Instrument details"
+            [style.background-color] =  "investmentNodeColor"
+            (click)="instrumentDetails(element)">
+              {{element[column] }}
+            </button> 
+          </p>
+          <p *ngSwitchDefault>
+            {{element[column]}}
+          </p>
+        </span>
+        <ng-template  #instrumentcontextmenu>
+          <div class="tree-menu-context" cdkMenu >
+            <button 
+              (click)="
+                updateFilter($event, element[column],column);
+                "
+              class="tree-menu-item" cdkMenuItem>
+              <mat-icon class="menu-icon" matPrefix>filter_list</mat-icon> 
+              Add to filter
+            </button> 
+            <button 
+              (click)="addChips( element[column], column)"
+              class="tree-menu-item" cdkMenuItem>
+              <mat-icon class="menu-icon" matPrefix>filter_alt</mat-icon> 
+              ComplexFilter
+            </button> 
+          </div>
+        </ng-template>   
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="expand">
+      <th mat-header-cell *matHeaderCellDef aria-label="row actions">&nbsp;</th>
+      <td mat-cell *matCellDef="let element"></td>
+    </ng-container>
+    
+<!--     <ng-container matColumnDef="expandedDetail" >
+      <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplayWithExpand.length"></td>
+    </ng-container> -->
+
+    <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+    <tr mat-row  *matRowDef="let element; columns: columnsToDisplay"
+    >
+    </tr>
+    <!-- <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"></tr> -->
+  </table>
+  <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" [pageSize]="20" aria-label="Select page of users"></mat-paginator>
 </div>
-
-
-<table 
-  datatable  id="mytable" [cdkContextMenuTriggerFor]="instrumentcontextmenu"[dtOptions]="dtOptions" class="row-border hover">
-</table>

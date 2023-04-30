@@ -18,14 +18,12 @@ async function fdeleteMarketData (request,response) {
   }
   console.log('body',request.body.params);
   sql = pgp.as.format(query.text,request.body.params);
-  console.log('sql',sql);
   pool.query (sql,  (err, res) => 
   {if (err) {
    console.log (err.stack.split("\n", 1).join(""))
    err.detail = err.stack
    return response.send(err)
    } else {
-console.log('res',res[0].rowCount);
      return response.status(200).json(res[0].rowCount + res[1].rowCount )
    }
   })  
@@ -144,7 +142,6 @@ async function fgetMarketData (request,response){
   console.log('request.query)',request.query);
   
   sql = pgp.as.format(query.text,request.query);
-   console.log('sql',sql);
    pool.query (sql,  (err, res) => 
    {if (err) {
     console.log (err.stack.split("\n", 1).join(""))
@@ -171,7 +168,6 @@ async function fgetInstrumentsCodes (request,response) {
   let fields = request.query.resasarray? 'json_agg(code) as code' :' secid, code, isin, mapcode'	
   sql =  'SELECT ' + fields + '	FROM public."aInstrumentsCodes" WHERE mapcode=${mapcode};';
  sql = pgp.as.format(sql,request.query);
- console.log('sql',sql);
  pool.query (sql,  (err, res) => 
  {if (err) {
   console.log (err.stack.split("\n", 1).join(""))
@@ -214,14 +210,108 @@ async function fimportMoexInstrumentsList (request, response){
     typeof(res)===Number? console.log('inserted ', res,' rows'): console.log('error ', res);
   } 
 }
+function fGetMoexInstruments(request,response) {
+  let conditions = {}
+  const query = {text: '', values:[]}
+  conditions = {
+    'secid':{
+      1: ' (secid = ANY(array[${secid:raw}]))',
+      2: ' (secid = ANY(array[${secid:raw}]))',
+    },
+    'dateRangeStart': {
+      1: '(tradedate::timestamp without time zone >= ${dateRangeStart}::date )',
+      2: '(date >= ${dateRangeStart}::date )',
+    },
+    'dateRangeEnd': {
+      1: '(tradedate::timestamp without time zone <= ${dateRangeEnd}::date) ',
+      2: '(date <= ${dateRangeEnd}::date) ',
+    },
+    'boardid' : {
+      1: '(boardid = ANY(array[${boardid}]))',
+      2: '(exchange = ANY(array[${boardid}]))',
+    },
+    'sourcecode' : {
+      1: '(sourcecode = ANY(array[${sourcecode}]))  ',
+      2: '(sourcecode = ANY(array[${sourcecode}]))  '
+    }
+  }
 
+  
+  let conditionsMOEXiss =' WHERE'
+  let conditionsmsFS = 'AND'
+  Object.entries(conditions).forEach(([key,value]) => {
+  if  (request.query.hasOwnProperty(key)) {
+    query.values.push(request.query[key]);
+    conditionsMOEXiss +=conditions[key][1] + ' AND ';
+    conditionsmsFS +=conditions[key][2] + ' AND';
+    }
+  });
+  switch (request.query.Action) {
+    case 'checkLoadedMarketData':
+    break;
+    case 'get_secid_array' :
+      query.text = "SELECT ARRAY_AGG(secid) FROM public.mmoexsecurities " +
+      "LEFT JOIN mmoexsecuritytypes ON mmoexsecurities.type=mmoexsecuritytypes.security_type_name " +
+      "WHERE mmoexsecuritytypes.trade_engine_name !='futures'"
+    break;
+    default :  
+      query.text = 
+      "SELECT mmoexsecurities.id, secid, security_type_title, stock_type, security_type_name, shortname, "+ 
+      " primary_boardid, board_title, mmoexboardgroups.title,mmoexboardgroups.category, mmoexsecurities.name, "+
+      " mmoexsecurities.isin, emitent_title, emitent_inn, type, \"group\", marketprice_boardid "+
+      "FROM public.mmoexsecurities " +
+      "LEFT JOIN mmoexsecuritytypes ON mmoexsecurities.type=mmoexsecuritytypes.security_type_name "+
+      "LEFT JOIN mmoexboards ON mmoexboards.boardid = mmoexsecurities.primary_boardid "+
+      "LEFT JOIN mmoexboardgroups ON mmoexboardgroups.board_group_id = mmoexboards.board_group_id "
+      query.text += ' ORDER BY ${sorting:raw} LIMIT ${rowslimit:raw};'
+    break;
+  }
+  console.log('request.query)',request.query);
+  
+  sql = pgp.as.format(query.text,request.query);
+   console.log('sql',sql);
+   pool.query (sql,  (err, res) => {
+    if (err) {
+      console.log (err.stack.split("\n", 1).join(""))
+      err.detail = err.stack
+      return response.send(err)
+    } else {
+      return response.status(200).json(res.rows)
+    }
+  }) 
+}
+function fgetInstrumentDataGeneral(request,response) {
+  console.log('request.query.', request.query,);
+  const query = {text: '', values:[]}
+  switch (request.query.dataType) {
+    case 'getBoardsDataFromInstruments':
+      query.text = "SELECT DISTINCT boardid, board_title FROM public.mmoexsecurities " +
+      "LEFT JOIN mmoexboards ON mmoexboards.boardid = mmoexsecurities.primary_boardid "+
+      "WHERE boardid NOTNULL " +
+      "ORDER BY boardid ASC;"
+    break;
+  }
+  sql = pgp.as.format(query.text,request.query);
+  console.log('sql',sql);
+  pool.query (sql,  (err, res) => {
+    if (err) {
+      console.log (err.stack.split("\n", 1).join(""))
+      err.detail = err.stack
+      return response.send(err)
+    } else {
+      return response.status(200).json(res.rows)
+    }
+}) 
+}
 module.exports = {
   finsertMarketData,
   fgetMarketData,
   fgetMarketDataSources,
   fdeleteMarketData,
   fgetInstrumentsCodes,
-  fimportMoexInstrumentsList
+  fimportMoexInstrumentsList,
+  fGetMoexInstruments,
+  fgetInstrumentDataGeneral
 }
 
 

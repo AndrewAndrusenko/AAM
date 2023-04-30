@@ -121,7 +121,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
       sourceCode: [[],Validators.required],
       overwritingCurrentData : [false]
     });
-    this.AtuoCompService.getSecidLists(true);
+    this.AtuoCompService.getSecidLists('get_secid_array');
     this.filterednstrumentsLists = this.searchParametersFG.controls['secidList'].valueChanges.pipe(
       startWith(''),
       map(value => this.AtuoCompService.filter(value || ''))

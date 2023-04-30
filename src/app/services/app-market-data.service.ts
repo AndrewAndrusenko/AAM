@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, Subject, repeat } from 'rxjs';
-import { InstrumentsMapCodes, marketData, marketDataSources, marketSourceSegements, moexMarketDataForiegnShres } from '../models/accounts-table-model';
+import { Instruments, InstrumentsMapCodes, marketData, marketDataSources, marketSourceSegements, moexMarketDataForiegnShres } from '../models/accounts-table-model';
 import { param } from 'jquery';
 var ROOT_PATH = 'https://echarts.apache.org/examples';
 
@@ -148,7 +148,17 @@ export class AppMarketDataService {
     const params = {mapcode:mapcode,secid:secid, resasarray:resasarray}
     return this.http.get <InstrumentsMapCodes[]> ('/api/AAM/MD/getInstrumentsCodes/',{params:params})
   }
-
+  getInstrumentDataGeneral (dataType:string): Observable <any[]> {
+    const params = {dataType:dataType}
+    return this.http.get <any[]> ('/api/AAM/MD/getInstrumentDataGeneral/',{params:params})
+  }
+  getMoexInstruments (rowslimit:number=50000,sorting:string=' secid ASC', searchParameters?:any):Observable<Instruments[]> {
+    let params = {};
+    (searchParameters !== null) ?  params = {...params,...searchParameters}: null;
+    (rowslimit !== null) ?  Object.assign(params,{'rowslimit':rowslimit}): null;
+    (sorting !== null) ?  Object.assign(params,{'sorting':sorting}): null;
+    return this.http.get <Instruments[]> ('/api/AAM/MD/getMoexInstruments/',{params:params})
+  }
   sendReloadMarketData ( dataSet:marketData[]) { //the component that wants to update something, calls this fn
     this.subjectMarketData.next(dataSet); //next() will feed the value in Subject
   }

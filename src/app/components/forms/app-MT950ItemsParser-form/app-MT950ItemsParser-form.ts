@@ -4,9 +4,9 @@ import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/m
 import { AppConfimActionComponent } from '../../alerts/app-confim-action/app-confim-action.component';
 import { AppSnackMsgboxComponent } from '../../app-snack-msgbox/app-snack-msgbox.component';
 import { bcTransactionType_Ext } from 'src/app/models/accounts-table-model';
-import { AppInstrumentTableComponent } from '../../tables/app-table-instrument/app-table-instrument.component';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
+import { AppInstrumentTableComponent } from '../../tables/app-table-instrument/app-table-instrument.component';
 
 @Component({
   selector: 'app-MT950ItemsParser-form',

@@ -1,3 +1,5 @@
+import { number } from "echarts";
+
 export interface AccountsTableModel {
  idportfolio:number;
  idclient:number;
@@ -274,4 +276,23 @@ export interface InstrumentsMapCodes {
   code:string[],
   isin:string,
   mapcode:string
+}
+export interface Instruments  {
+  id :number,
+  secid: string, 
+  security_type_title: string,
+  stock_type: number, 
+  security_type_name: string, 
+  shortname: string, 
+  primary_boardid: string, 
+  board_title: string, 
+  title: string,
+  category: string, 
+  name: string, 
+  isin: string, 
+  emitent_title: string, 
+  emitent_inn: string, 
+  type: string, 
+  group: string, 
+  marketprice_boardid: string
 }

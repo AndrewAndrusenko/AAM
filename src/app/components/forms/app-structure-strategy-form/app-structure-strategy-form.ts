@@ -4,12 +4,12 @@ import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/m
 import { AppConfimActionComponent } from '../../alerts/app-confim-action/app-confim-action.component';
 import { AppInvestmentDataServiceService } from 'src/app/services/app-investment-data.service.service';
 import { StrategiesGlobalData } from 'src/app/models/accounts-table-model';
-import { AppInstrumentTableComponent } from '../../tables/app-table-instrument/app-table-instrument.component';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
 import { AppTabServiceService } from 'src/app/services/app-tab-service.service';
 import { map, Observable, startWith } from 'rxjs';
 import { AtuoCompSecidService } from 'src/app/services/atuo-comp-secid.service';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
+import { AppInstrumentTableComponent } from '../../tables/app-table-instrument/app-table-instrument.component';
 
 @Component({
   selector: 'app-structure-strategy-form',
@@ -49,7 +49,7 @@ export class AppStructureStrategyFormComponent implements OnInit {
   ) {}
   
   ngOnInit(): void {
-    this.AtuoCompService.getSecidLists(true);
+    this.AtuoCompService.getSecidLists('get_secid_array');
     this.filterednstrumentsLists = this.editStructureStrategyForm.controls['id'].valueChanges.pipe(
       startWith(''),
       map(value => this.AtuoCompService.filter(value || ''))
@@ -144,9 +144,9 @@ export class AppStructureStrategyFormComponent implements OnInit {
   }
   selectInstrument () {
     this.dialogRef = this.dialog.open(AppInstrumentTableComponent ,{minHeight:'400px', minWidth:'900px', autoFocus: false, maxHeight: '90vh'});
-    this.dialogRef.componentInstance.action="Select";
+    this.dialogRef.componentInstance.FormMode="Select";
     this.dialogRef.componentInstance.modal_principal_parent.subscribe ((item)=>{
-      this.editStructureStrategyForm.controls['id'].patchValue(this.dialogRef.componentInstance.currentInstrument['secid'])
+      // this.editStructureStrategyForm.controls['id'].patchValue(this.dialogRef.componentInstance.currentInstrument['secid'])
       this.dialogRef.close(); 
     });
   }
