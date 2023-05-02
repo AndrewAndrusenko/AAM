@@ -67,6 +67,7 @@ import * as echarts from 'echarts';
 import {NgxEchartsModule } from 'ngx-echarts';
 import { NgEchartMarketDataCandleComponent } from './components/charts/chart-candle-marketdata/echart-marketdata-candle';
 import { AppInstrumentTableComponent } from './components/tables/app-table-instrument/app-table-instrument.component';
+import { AppInvInstrumentModifyFormComponent } from './components/forms/app-inv-instrument-modify-form/app-inv-instrument-modify-form';
 
 
 @NgModule({
@@ -142,7 +143,8 @@ import { AppInstrumentTableComponent } from './components/tables/app-table-instr
         AppAccAccountModifyFormComponent,
         AppTableBalanceSheetComponent,
         AppTableMarketDataComponent,
-        NgEchartMarketDataCandleComponent
+        NgEchartMarketDataCandleComponent,
+        AppInvInstrumentModifyFormComponent
     ],
     bootstrap: [AppComponent],
     providers: [ {provide: MAT_MOMENT_DATE_ADAPTER_OPTIONS, useValue: {strict: true}} ],

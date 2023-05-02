@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, Subject, repeat } from 'rxjs';
-import { Instruments, InstrumentsMapCodes, marketData, marketDataSources, marketSourceSegements, moexMarketDataForiegnShres } from '../models/accounts-table-model';
+import { Instruments, InstrumentsMapCodes, instrumentCorpActions, instrumentDetails, marketData, marketDataSources, marketSourceSegements, moexMarketDataForiegnShres } from '../models/accounts-table-model';
 import { param } from 'jquery';
 var ROOT_PATH = 'https://echarts.apache.org/examples';
 
@@ -159,6 +159,13 @@ export class AppMarketDataService {
     (sorting !== null) ?  Object.assign(params,{'sorting':sorting}): null;
     return this.http.get <Instruments[]> ('/api/AAM/MD/getMoexInstruments/',{params:params})
   }
+  getInstrumentDataDetails (): Observable <instrumentDetails[]> {
+    return this.http.get <instrumentDetails[]> ('/api/AAM/MD/getInstrumentDetails/')
+  }
+  getInstrumentDataCorpActions (): Observable <instrumentCorpActions[]> {
+    return this.http.get <instrumentCorpActions[]> ('/api/AAM/MD/getInstrumentDataCorpActions/')
+  }
+  
   sendReloadMarketData ( dataSet:marketData[]) { //the component that wants to update something, calls this fn
     this.subjectMarketData.next(dataSet); //next() will feed the value in Subject
   }

@@ -6,6 +6,8 @@ import { AppInvestmentDataServiceService } from 'src/app/services/app-investment
 import { TableAccounts } from '../../tables/app-table-accout/app-table-portfolio.component';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
+import { menuColorGl } from 'src/app/models/constants';
+
 interface Level {
   value: number;
   viewValue: string;
@@ -20,6 +22,7 @@ export class AppStrategyFormComponent implements OnInit {
     {value: 1, viewValue: 'Model Portfolio'},
     {value: 2, viewValue: 'Strategy (based on MP)'},
   ];
+  menuColorGl = menuColorGl
   public panelOpenState = true;
   public editStrategyForm: FormGroup;
   @Input()  client : number;

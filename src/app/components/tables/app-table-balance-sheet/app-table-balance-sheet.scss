@@ -2,12 +2,9 @@
   font-size: 18px;
 }
 .wrapper {
-  
   display: flex;  justify-content: space-between;   align-items: center; width:23%; margin-right: 3%;
-
 }
 .cl-space-evenly {
- 
   display:inline-flex;  
 }
 button.date-orange  {
@@ -19,7 +16,6 @@ color: #d3d3d3;
 }
 .mat-flat-button {
   font-size: 18px;
-  
 }
 .icon_search {
   color: rgb(143, 140, 239);
@@ -29,31 +25,19 @@ color: #d3d3d3;
   justify-content: space-between;
   align-items: center;
   color:rgb(198, 255, 215);
-  // font-weight: bold;
   font-size: 18px;
-  // margin-left: 1%;
-
-
 }
 .first-expansion  .mat-expansion-panel-header-title {
   justify-content: space-between;
   align-items: center;
   color: rgb(239, 237, 237);
   font-size: 20px;
-  // margin-left: 1%;
-
-
 }
 .first-expansion  .mat-expansion-panel-header {
   background-color: #807f7f;
-  // margin-left: 1%;
-
 }
-
 .headers-align  .mat-expansion-panel-header {
   background-color: #302f2f;
-  // margin-left: 1%;
-
 }
 
 .headers-align .mat-expansion-panel-header-description {

@@ -1,14 +1,13 @@
 <mat-toolbar style="margin-left: 1%;" color="primary" >
   {{title}} Strategy
 </mat-toolbar>
-
 <mat-expansion-panel 
-style="margin-left: 1%; margin-right: -1%; padding: 0px;" 
+style="margin-left: 1%; margin-right: -1%; " 
       [expanded]="true"
       (opened)="panelOpenState = true"  
       (closed)="panelOpenState = false" >
       <mat-expansion-panel-header >
-      <mat-panel-title >
+      <mat-panel-title style="margin-bottom: 1%;" >
       Strategy details
       </mat-panel-title>
       <mat-panel-description  >

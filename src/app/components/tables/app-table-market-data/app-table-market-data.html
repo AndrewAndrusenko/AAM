@@ -60,10 +60,10 @@
     <pre style="font-size: 18px;">{{loadedMarketData | json}}</pre>
   </div>
 <span style="display: flex; ">
-    <section class="example-section" style="color: rgb(44, 43, 43);"
+    <section class="marketSource-section" style="color: rgb(44, 43, 43);"
       *ngFor="let marketSource of marketSources;let i=index" >
       <span class="example-list-section" >
-        <mat-checkbox  class="example-margin"
+        <mat-checkbox  class="marketSource-margin"
         [indeterminate]="marketSource.indeterminate"
         (change)="marketSource.checkedAll=!marketSource.checkedAll;
         setAll(i)"

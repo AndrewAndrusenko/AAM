@@ -181,6 +181,8 @@ appServer.post('/AAM/MD/deleteMarketData/',jsPassport.authenticate('session') , 
 appServer.get('/AAM/MD/getMoexInstrumentsList/',jsPassport.authenticate('session') , uiAmmMarketData.fimportMoexInstrumentsList)
 appServer.get('/AAM/MD/getMoexInstruments/',jsPassport.authenticate('session') , uiAmmMarketData.fGetMoexInstruments)
 appServer.get('/AAM/MD/getInstrumentDataGeneral/',jsPassport.authenticate('session') , uiAmmMarketData.fgetInstrumentDataGeneral)
+appServer.get('/AAM/MD/getInstrumentDetails/',jsPassport.authenticate('session') , uiAmmMarketData.fgetInstrumentDetails)
+appServer.get('/AAM/MD/getInstrumentDataCorpActions/',jsPassport.authenticate('session') , uiAmmMarketData.fgetInstrumentDataCorpActions)
 
 
 

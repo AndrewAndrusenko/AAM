@@ -8,7 +8,7 @@
       matTooltip="Use context menu to add filter">
     <button matSuffix 
       mat-icon-button aria-label="Clear" 
-      (click)="clearFilter()">
+      (click)="clearFilter(filterlFormControl)">
       <mat-icon>close</mat-icon>
     </button>
   </mat-form-field>
@@ -27,13 +27,13 @@
     <mat-label class="colorLabel">Search (all columns)...</mat-label>
     <input 
       (keyup)="applyFilter($event)"
-      [formControl]="filterlFormControl" 
-      matInput type="text" #SearchTree  name="tableFilter"
+      [formControl]="filterlAllFormControl" 
+      matInput type="text" #SearchTreeALL  name="tableFilter"
       matTooltip="Use context menu to add filter"
      >
     <button matSuffix 
       mat-icon-button aria-label="Clear" 
-      (click)="clearFilter()">
+      (click)="clearFilter(filterlAllFormControl)">
       <mat-icon>close</mat-icon>
     </button>
   </mat-form-field>
@@ -145,7 +145,7 @@
           <p *ngSwitchCase="['secid'].includes(column)">
             <button mat-stroked-button style="width: 80%; font-size: 18px;"  matTooltip="Instrument details"
             [style.background-color] =  "investmentNodeColor"
-            (click)="instrumentDetails(element)">
+            (click)="openInstrumentModifyForm('Edit',element)">
               {{element[column] }}
             </button> 
           </p>
@@ -156,9 +156,7 @@
         <ng-template  #instrumentcontextmenu>
           <div class="tree-menu-context" cdkMenu >
             <button 
-              (click)="
-                updateFilter($event, element[column],column);
-                "
+              (click)="updateFilter($event, element[column],column)"
               class="tree-menu-item" cdkMenuItem>
               <mat-icon class="menu-icon" matPrefix>filter_list</mat-icon> 
               Add to filter
@@ -168,6 +166,30 @@
               class="tree-menu-item" cdkMenuItem>
               <mat-icon class="menu-icon" matPrefix>filter_alt</mat-icon> 
               ComplexFilter
+            </button> 
+            <button 
+              class="tree-menu-item" cdkMenuItem 
+              (click)="openInstrumentModifyForm('Create', element)">
+              <mat-icon class="menu-icon" matPrefix>add_circle</mat-icon>      
+              New Instrument
+            </button>
+            <button 
+              class="tree-menu-item" cdkMenuItem 
+              (click)="openInstrumentModifyForm('Create_Example', element)">
+              <mat-icon class="menu-icon" matPrefix>add_circle</mat-icon>      
+              New Instrument (on sample)
+            </button>
+            <button 
+              class="tree-menu-item" cdkMenuItem
+              (click)="openInstrumentModifyForm('Edit', element)">
+              <mat-icon class="menu-icon" matPrefix>edit</mat-icon>      
+              Edit Instrument
+            </button>
+            <button 
+              class="tree-menu-item" cdkMenuItem
+              (click)="openInstrumentModifyForm('Delete', element)">
+              <mat-icon class="menu-icon" matPrefix>delete</mat-icon> 
+              Delete Instrument
             </button> 
           </div>
         </ng-template>   

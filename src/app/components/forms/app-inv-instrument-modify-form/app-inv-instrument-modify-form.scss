@@ -1,9 +1,12 @@
 input.ng-invalid.ng-touched {
   color: rgb(158, 0, 0);
 }
-mat-expansion-panel
-mat-expansion-panel-header {
-  font-size: 20px;
+.example-spacer {
+  flex: 1 1 auto;
+}
+.icon_search {
+  color: blue;
+  // transform: scale (4);
 }
 .mat-error {
   color: rgb(158, 0, 0);

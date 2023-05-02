@@ -9,6 +9,7 @@ import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/m
 import { AppStructureStrategyFormComponent } from '../../forms/app-structure-strategy-form/app-structure-strategy-form';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { additionalLightGreen } from 'src/app/models/constants';
 @Component({
   selector: 'app-table-strategy_structure',
   templateUrl: './app-table-strategy_structure.component.html',
@@ -33,6 +34,7 @@ export class AppTableStrategyComponent  implements AfterViewInit {
   private subscriptionName: Subscription;
   columnsToDisplay = ['id','sname', 'description', 'weight_of_child'];
   public columnsHToDisplay = ['id','sname', 'description', 'weight'];
+  additionalLightGreen = additionalLightGreen;
 
   panelOpenState = false;
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];

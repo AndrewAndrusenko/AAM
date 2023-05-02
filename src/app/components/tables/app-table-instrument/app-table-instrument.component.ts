@@ -1,21 +1,18 @@
 import {AfterViewInit, Component, ViewEncapsulation, EventEmitter, Output, ViewChild, Input, OnInit} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
-import {lastValueFrom, Observable, Subscription } from 'rxjs';
+import {Observable, Subscription } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
-import {TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { Instruments, marketDataSources } from 'src/app/models/accounts-table-model';
-import { AppAccountingService } from 'src/app/services/app-accounting.service';
+import { Instruments, instrumentCorpActions, instrumentDetails, marketDataSources } from 'src/app/models/accounts-table-model';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import * as XLSX from 'xlsx'
-import { MatOption } from '@angular/material/core';
-import { AppTableAccAccountsComponent } from '../app-table-acc-accounts/app-table-acc-accounts';
 import { AppMarketDataService } from 'src/app/services/app-market-data.service';
 import { menuColorGl,investmentNodeColor, investmentNodeColorChild, additionalLightGreen } from 'src/app/models/constants';
+import { AppInvInstrumentModifyFormComponent } from '../../forms/app-inv-instrument-modify-form/app-inv-instrument-modify-form';
 @Component({
   selector: 'app-app-instrument-table',
   templateUrl: './app-table-instrument.component.html',
@@ -62,7 +59,8 @@ export class AppInstrumentTableComponent  implements AfterViewInit,OnInit {
   menuColorGl=menuColorGl
   addOnBlur = true;
   panelOpenStateSecond = false;
-  
+  instrumentDetailsArr:instrumentDetails[] = [];
+  instrumentCorpActions:instrumentCorpActions[] = [];
   accessToClientData: string = 'true';
   instruments: string[] = ['ClearAll'];
   investmentNodeColor = investmentNodeColorChild;
@@ -74,13 +72,12 @@ export class AppInstrumentTableComponent  implements AfterViewInit,OnInit {
   filterlFormControl = new FormControl('');
   filterlAllFormControl = new FormControl('');
 
+  dialogInstrumentModify: MatDialogRef<AppInvInstrumentModifyFormComponent>;
 
   defaultFilterPredicate?: (data: any, filter: string) => boolean;
   secidfilter?: (data: any, filter: string) => boolean;
   constructor(
-    private AccountingDataService:AppAccountingService, 
     private MarketDataService: AppMarketDataService,
-    private TreeMenuSevice:TreeMenuSevice, 
     private dialog: MatDialog,
     private fb:FormBuilder, 
   ) {
@@ -97,19 +94,31 @@ export class AppInstrumentTableComponent  implements AfterViewInit,OnInit {
       boards : {value:null, disabled:false}
     });
   }
-  instrumentDetails (elemnt:Instruments) {
-
+  openInstrumentModifyForm (action:string, element:any) {
+    this.dialogInstrumentModify = this.dialog.open (AppInvInstrumentModifyFormComponent,{minHeight:'600px', minWidth:'1300px', autoFocus: false, maxHeight: '90vh'})
+    this.dialogInstrumentModify.componentInstance.action = action;
+    this.dialogInstrumentModify.componentInstance.data = element;
+    this.dialogInstrumentModify.componentInstance.instrumentDetails = this.instrumentDetailsArr.filter(el=> el.secid==element.secid)
+    this.dialogInstrumentModify.componentInstance.instrumentCorpActions = this.instrumentCorpActions.filter(el=> el.isin==element.isin)
   }
-
   ngOnInit(): void {
     this.defaultFilterPredicate = this.dataSource.filterPredicate;
   }
   async ngAfterViewInit() {
+    this.MarketDataService.getInstrumentDataDetails().subscribe(instrumentDetails => {
+      this.instrumentDetailsArr = instrumentDetails
+      console.log('instrumentDetails',this.instrumentDetailsArr);
+    })
+    this.MarketDataService.getInstrumentDataCorpActions().subscribe(instrumentCorpActions => {
+      this.instrumentCorpActions = instrumentCorpActions
+      console.log('instrumentCorpActions',this.instrumentCorpActions);
+    })
+    /* 
     let userData = JSON.parse(localStorage.getItem('userInfo'))
     await lastValueFrom (this.TreeMenuSevice.getaccessRestriction (userData.user.accessrole, 'accessToClientData'))
     .then ((accessRestrictionData) =>{
       this.accessToClientData = accessRestrictionData['elementvalue']
-    })
+    }) */
   }
   updateInstrumentDataTable (instrumentData:Instruments[]) {
     this.dataSource  = new MatTableDataSource(instrumentData);
@@ -148,12 +157,12 @@ export class AppInstrumentTableComponent  implements AfterViewInit,OnInit {
   }
   addChips (el: any, column: string) {(['accountNo'].includes(column))? this.instruments.push(el):null;}
   updateFilter (event:Event, el: any, column: string) {
-    this.filterlFormControl.patchValue(el);
+    this.filterlAllFormControl.patchValue(el);
     this.dataSource.filter = el.trim();
     (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
   }
-  clearFilter () {
-    this.filterlFormControl.patchValue('')
+  clearFilter (fFormControl : FormControl) {
+    fFormControl.patchValue('')
     this.dataSource.filter = ''
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
   }
