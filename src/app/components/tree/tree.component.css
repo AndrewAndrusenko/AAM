@@ -1,26 +1,31 @@
   .mat-tree {
     background-color:rgb(77, 76, 76);
-    
+  }
+  .mat-form-field {
+    margin-left: 10px;
+    font-size: 18px;
+    height: 5%;
+  }
+  .filterText {
+    width: 65%;
+    font-size: 20px;
+
+  }
+  .colorLabel {
+    color: white;
+    font-size: 18px;
   }
   .mat-flat-button {
     font-size:large;
-    background-color:rgb(196, 97, 97);
     color: rgb(255, 255, 255);
-    margin-left: 8px;
-  }
-  .example-form-field {
-    width: 200px;
-    font-size: large;
   }
   .SelectNode:hover{
     color: rgb(36, 36, 36);
     cursor: pointer;
   }
-  
   .background-highlight{
     background: rgb(142, 156, 212);
   }
-
   .tree-menu-context {
     display: inline-flex;
     flex-direction: column;
@@ -30,7 +35,6 @@
     padding: 1px 0;
     font-size: 18px;
   }
-  
   .tree-menu-item {
     background-color: transparent;
     cursor: pointer;
@@ -40,34 +44,27 @@
     min-width: 64px;
     line-height: 36px;
     padding: 6px;
-  
     display: flex;
     align-items: center;
     flex-direction: row;
     flex: 1;
   }
-  
   .tree-menu-item:hover {
     background-color: rgb(237, 162, 162);
   }
-  
   .tree-menu-item:active {
     background-color: rgb(147, 128, 128);
   }
-
-  .menu-icon {
+/*   .menu-icon {
     margin-left: 0px;
     margin-right: 5px;
-  }
-
+  } */
   .example-viewport {
     height: 84vh;
     width:max-content;
     min-width: 350px;
-  /* background: var(--color-primary); */
-
   }
-  .icon-display {
+/*   .icon-display {
     transform: scale(1.2);
-  }
+  } */
   

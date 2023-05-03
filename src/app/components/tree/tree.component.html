@@ -30,28 +30,30 @@
 <!-- //Context menu for treeMenu element -->
 
 <!-- ---Search Tree input------- -->
-<mat-form-field class="example-form-field">
-<mat-label>Search tree</mat-label>
+<mat-form-field class = "filterText" style="font-size: 22px; ">
+<mat-label class="colorLabel">Search tree</mat-label>
 <input 
 (keyup.enter)="searchByTree(SearchTree.value)"
 matInput type="text" #SearchTree  name="SearchTree">
 <button matSuffix mat-icon-button aria-label="Clear" (click)="SearchTree.value=''">
   <mat-icon>close</mat-icon>
 </button>
-</mat-form-field>
-<!-- ---Search Tree input------- -->
 
-<!-- ---Expand All / Collapse Tree menu button------- -->
-<button mat-raised-button
+</mat-form-field>
+<button mat-flat-button 
     disableRipple    
     matTooltip="{{isExpanded? 'Collapse Tree':'Expand Tree'}}"
-    style ="font-size: larger; border-width: 2px; margin-left: 6px;"
+    style ="font-size: 18px;"
     aria-label="TreeExpandCollapse"
     (click)="isExpanded=!isExpanded;
     ToggleTree();">
     {{isExpanded? 'Tree':'Tree'}}
     <mat-icon>{{isExpanded? 'unfold_less':'unfold_more'}}</mat-icon>
 </button>
+<!-- ---Search Tree input------- -->
+
+<!-- ---Expand All / Collapse Tree menu button------- -->
+
 <!-- ---Expand All / Collapse Tree menu button------- -->
 
 <!-- ---Tree Menu items with scrolling area------- -->

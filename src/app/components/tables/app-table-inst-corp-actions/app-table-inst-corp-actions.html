@@ -1,0 +1,99 @@
+<span *ngIf="FormMode==='Full'" style="color: antiquewhite;"> 
+  <mat-form-field class="example-form-field" class = "filterText">
+    <mat-label class="colorLabel">Type to search...</mat-label>
+    <input 
+      (keyup)="applyFilter($event)"
+      [formControl]="filterlFormControl" 
+      matInput type="text" #SearchTree  name="tableFilter"
+      matTooltip="Use context menu to add filter"
+     >
+    <button matSuffix 
+      mat-icon-button aria-label="Clear" 
+      >
+      <mat-icon>close</mat-icon>
+    </button>
+  </mat-form-field>
+  <button color = "accent" mat-raised-button 
+    style=" margin-left:1%; font-size: 18px;"
+    (click)="exportToExcel()">
+    Save as XLS 
+  </button>
+</span>
+
+
+<div class="mat-elevation-z8">
+  <table  #strategyTable mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class="mat-elevation-z8">
+    <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i=index">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>  {{columnsHeaderToDisplay[i]  | titlecase}}</th>
+      <td 
+        mat-cell 
+        *matCellDef="let element" [cdkContextMenuTriggerFor]="instrumentcontextmenu"  > 
+        <span [ngSwitch]="true==true">
+          <p *ngSwitchCase="['date'].includes(column)">
+              {{ element[column] | date }}
+          </p>          
+          <p *ngSwitchCase="['open', 'low', 'high', 'marketprice2','close','admittedquote'].includes(column)">
+            {{!element['percentprice']? (element[column] | currency:element['currency']:element['spsymbol']:'1.2-2':'fr'):(element[column] |  currency:element['currency']:'%':'1.2-2':'fr')}}
+          </p>
+          <p *ngSwitchCase="['value'].includes(column)">
+            {{(element[column] | currency:element['currency']:element['spsymbol']:'1.2-2':'fr')}}
+          </p>
+          <p *ngSwitchCase="['action'].includes(column)">
+            
+      <button   
+      mat-icon-button 
+      aria-label="expand row" color="accent"
+      matTooltip="Edit entry"
+      (click)="openCorpActionForm(element,'Edit')">
+      <mat-icon >edit</mat-icon>
+    </button>
+    <button 
+      mat-icon-button 
+      style="margin-left: 5%;" aria-label="expand row" color="accent" 
+      matTooltip="Delete entry"
+      (click)="openCorpActionForm(element,'Delete')">
+      <mat-icon >delete</mat-icon>
+    </button>
+          </p>
+          <p *ngSwitchDefault>
+            {{element[column]}}
+          </p>
+        </span>
+
+        <ng-template  #instrumentcontextmenu>
+          <div class="tree-menu-context" cdkMenu >
+            <button 
+              (click)="
+                updateFilter($event, element[column],column);
+                "
+              class="tree-menu-item" cdkMenuItem>
+              <mat-icon class="menu-icon" matPrefix>filter_list</mat-icon> 
+              Add to filter
+            </button> 
+ 
+          </div>
+        </ng-template>   
+     
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="expand">
+      <th mat-header-cell *matHeaderCellDef aria-label="row actions">&nbsp;</th>
+      <td mat-cell *matCellDef="let element">
+
+
+      </td>
+
+    </ng-container>
+    
+<!--     <ng-container matColumnDef="expandedDetail" >
+      <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplayWithExpand.length"></td>
+    </ng-container> -->
+
+    <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+    <tr mat-row  *matRowDef="let element; columns: columnsToDisplay"
+    >
+    </tr>
+    <!-- <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"></tr> -->
+  </table>
+  <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" [pageSize]="20" aria-label="Select page of users"></mat-paginator>
+</div>

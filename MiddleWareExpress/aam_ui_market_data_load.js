@@ -197,25 +197,20 @@ function fGetMoexInstruments(request,response) {
   const query = {text: '', values:[]}
   conditions = {
     'secid':{
-      1: ' (secid = ANY(array[${secid:raw}]))',
-      2: ' (secid = ANY(array[${secid:raw}]))',
+      1: ' (secid = ANY(${secid:raw}))',
     },
     'boardid' : {
       1: '(boardid = ANY(array[${boardid}]))',
-      2: '(exchange = ANY(array[${boardid}]))',
     },
     'sourcecode' : {
       1: '(sourcecode = ANY(array[${sourcecode}]))  ',
-      2: '(sourcecode = ANY(array[${sourcecode}]))  '
     }
   }
   let conditionsMOEXiss =' WHERE'
-  let conditionsmsFS = 'AND'
   Object.entries(conditions).forEach(([key,value]) => {
     if  (request.query.hasOwnProperty(key)) {
       query.values.push(request.query[key]);
       conditionsMOEXiss +=conditions[key][1] + ' AND ';
-      conditionsmsFS +=conditions[key][2] + ' AND';
     }
   });
   switch (request.query.Action) {
@@ -230,33 +225,39 @@ function fGetMoexInstruments(request,response) {
       query.text = 
       "SELECT mmoexsecurities.id, secid, security_type_title, stock_type, security_type_name, shortname, "+ 
       " primary_boardid, board_title, mmoexboardgroups.title,mmoexboardgroups.category, mmoexsecurities.name, "+
-      " mmoexsecurities.isin, emitent_title, emitent_inn, type, \"group\", marketprice_boardid "+
+      " mmoexsecurities.isin, emitent_title, emitent_inn, type, \"group\", marketprice_boardid, mmoexsecuritygroups.title as group_title, security_group_name, 0 as action "+
       "FROM public.mmoexsecurities " +
       "LEFT JOIN mmoexsecuritytypes ON mmoexsecurities.type=mmoexsecuritytypes.security_type_name "+
+      "LEFT JOIN mmoexsecuritygroups ON mmoexsecuritygroups.name=mmoexsecuritytypes.security_group_name "+
       "LEFT JOIN mmoexboards ON mmoexboards.boardid = mmoexsecurities.primary_boardid "+
       "LEFT JOIN mmoexboardgroups ON mmoexboardgroups.board_group_id = mmoexboards.board_group_id "
-      query.text += ' ORDER BY ${sorting:raw} LIMIT ${rowslimit:raw};'
+      query.text +=conditionsMOEXiss.slice (0,-5)
+      query.text += '  LIMIT ${rowslimit:raw};'
     break;
   }
   sql = pgp.as.format(query.text,request.query);
   queryExecute (sql, response);
 }
 function fgetInstrumentDetails (request,response) {
-  let sql = 'SELECT * FROM public.mmoexinstrumentdetails;' 
+  let sql = "SELECT secid, boardid, shortname, lotsize, facevalue, status, boardname, decimals, matdate::timestamp without time zone, secname, couponperiod, issuesize, remarks, marketcode, instrid, sectorid, minstep, faceunit, isin, latname, regnumber, currencyid, sectype, listlevel, issuesizeplaced, couponpercent, lotvalue, nextcoupon, issuesize*facevalue as issuevolume "+ 
+  'FROM public.mmoexinstrumentdetails '
+  sql += request.query.secid? "WHERE secid ='"   +request.query.secid +"';": ";" 
   queryExecute (sql, response);
 }
 function fgetInstrumentDataCorpActions (request,response) {
-  let sql = 'SELECT * FROM public.mmoexbondscorpactions;' 
+  let sql = "SELECT id, isin, issuevolume, secname, notinal, notinalcurrency, unredemeedvalue, couponrate, couponamount, actiontype, couponamountrur, to_date(date,'DD.MM.YYYY')::timestamp without time zone as date, 0 as action FROM public.mmoexbondscorpactions ";
+  sql += request.query.isin? "WHERE isin ='"   +request.query.isin +"' ": "";
+  sql += " ORDER BY to_date(date,'DD.MM.YYYY')::timestamp without time zone; "
+  
   queryExecute (sql, response);
 }
 function fgetInstrumentDataGeneral(request,response) {
   const query = {text: '', values:[]}
   switch (request.query.dataType) {
     case 'getBoardsDataFromInstruments':
-      query.text = "SELECT DISTINCT boardid, board_title FROM public.mmoexsecurities " +
-      "LEFT JOIN mmoexboards ON mmoexboards.boardid = mmoexsecurities.primary_boardid "+
+      query.text = "SELECT boardid, board_title FROM public.mmoexboards " +
       "WHERE boardid NOTNULL " +
-      "ORDER BY boardid ASC;"
+      "ORDER BY row_num asc;"
     break;
   }
   sql = pgp.as.format(query.text,request.query);

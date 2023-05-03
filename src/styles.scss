@@ -3,7 +3,13 @@
 @import "@angular/material/prebuilt-themes/pink-bluegrey.css";
 @import url("https://fonts.googleapis.com/icon?family=Material+Icons");
 
+:root 
+{
+--blue: #00b; // or any global you wish to share with components 
+--faovritesNodeColor: rgb(53, 153, 168);
+--faovritesDarkNodeColor: rgb(34, 104, 114);
 
+}
 
 // Add in style.scss as we are overriding css of global mat-select class which is part of other module.
 .mat-select-disabled .mat-select-value {
@@ -23,7 +29,11 @@
   transform: 1.2 !important;
   font-size:x-large !important;
  }
-
+ .mat-form-field-label {
+  color:rgb(15, 15, 15) !important;
+/*   transform: 1.2 !important;
+  font-size:x-large !important; */
+ }
 .mat-tab-label {
   font-size: 20px !important;
 } 

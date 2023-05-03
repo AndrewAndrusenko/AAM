@@ -3,7 +3,10 @@
   width: 1100px;
   height: 90vh;
  }
-  
+ .instrument_form {
+  width: 78vw;
+
+ }
   .mat-tab-label-active{
     background-color: rgb(67, 79, 79);
     border-radius: 5px;

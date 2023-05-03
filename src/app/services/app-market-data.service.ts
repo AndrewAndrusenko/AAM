@@ -11,6 +11,7 @@ var ROOT_PATH = 'https://echarts.apache.org/examples';
 export class AppMarketDataService {
   private subjectMarketData = new Subject<marketData[]> ()
   private subjectCharMarketData = new Subject<marketData[]> ()
+  private subjectCorpData = new Subject<instrumentCorpActions[]> ()
   private httpOptions = {
     headers: new HttpHeaders({}),
     responseType: 'text'
@@ -157,13 +158,18 @@ export class AppMarketDataService {
     (searchParameters !== null) ?  params = {...params,...searchParameters}: null;
     (rowslimit !== null) ?  Object.assign(params,{'rowslimit':rowslimit}): null;
     (sorting !== null) ?  Object.assign(params,{'sorting':sorting}): null;
+    console.log('params', params);
     return this.http.get <Instruments[]> ('/api/AAM/MD/getMoexInstruments/',{params:params})
   }
-  getInstrumentDataDetails (): Observable <instrumentDetails[]> {
-    return this.http.get <instrumentDetails[]> ('/api/AAM/MD/getInstrumentDetails/')
+  getInstrumentDataDetails (secid?:string): Observable <instrumentDetails[]> {
+    let params = {};
+    secid?  Object.assign(params,{secid:secid}): null;
+    return this.http.get <instrumentDetails[]> ('/api/AAM/MD/getInstrumentDetails/',{params:params})
   }
-  getInstrumentDataCorpActions (): Observable <instrumentCorpActions[]> {
-    return this.http.get <instrumentCorpActions[]> ('/api/AAM/MD/getInstrumentDataCorpActions/')
+  getInstrumentDataCorpActions (isin?:string): Observable <instrumentCorpActions[]> {
+    let params = {};
+    isin?  Object.assign(params,{isin:isin}): null;
+    return this.http.get <instrumentCorpActions[]> ('/api/AAM/MD/getInstrumentDataCorpActions/',{params:params})
   }
   
   sendReloadMarketData ( dataSet:marketData[]) { //the component that wants to update something, calls this fn
@@ -177,6 +183,12 @@ export class AppMarketDataService {
   }
   getMarketDataForChart(): Observable<marketData[]> { //the receiver component calls this function 
     return this.subjectCharMarketData.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
+  }
+  sendCorpActionData ( dataSet:instrumentCorpActions[]) { //the component that wants to update something, calls this fn
+    this.subjectCorpData.next(dataSet); //next() will feed the value in Subject
+  }
+  getCorpActionData(): Observable<instrumentCorpActions[]> { //the receiver component calls this function 
+    return this.subjectCorpData.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
   }
 }
 

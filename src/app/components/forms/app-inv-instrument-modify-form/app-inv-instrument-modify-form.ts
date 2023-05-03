@@ -1,16 +1,14 @@
-import { AfterViewInit, Component,  EventEmitter,  Input, OnInit, Output, ViewChild,  } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AfterViewInit, Component,  EventEmitter,  Input, OnInit, Output, SimpleChanges, ViewChild,  } from '@angular/core';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { AppConfimActionComponent } from '../../alerts/app-confim-action/app-confim-action.component';
-import { AppSnackMsgboxComponent } from '../../app-snack-msgbox/app-snack-msgbox.component';
-import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
-import { bcAccountType_Ext, bcEnityType, instrumentCorpActions, instrumentDetails } from 'src/app/models/accounts-table-model';
-import { AppClientsTableComponent } from '../../tables/app-table-clients/app-table-clients.component';
+import { instrumentCorpActions, instrumentDetails } from 'src/app/models/accounts-table-model';
 import { TableAccounts } from '../../tables/app-table-accout/app-table-portfolio.component';
 import { Subscription } from 'rxjs';
 import { MatTabGroup as MatTabGroup } from '@angular/material/tabs';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
+import { menuColorGl } from 'src/app/models/constants';
+import { AppMarketDataService } from 'src/app/services/app-market-data.service';
 
 @Component({
   selector: 'app-inv-instrument-modify-form',
@@ -21,8 +19,10 @@ export class AppInvInstrumentModifyFormComponent implements OnInit, AfterViewIni
 
   public panelOpenState = true;
   public instrumentModifyForm: FormGroup;
+  public instrumentDetailsForm: FormGroup;
   @Input() action: string;
   @Input() moexBoards = []
+  @Input() secidParam:string;
   instrumentDetails:instrumentDetails[] = [];
   instrumentCorpActions:instrumentCorpActions[] = [];
   dialogChoseAccount: MatDialogRef<TableAccounts>;
@@ -33,29 +33,25 @@ export class AppInvInstrumentModifyFormComponent implements OnInit, AfterViewIni
   @ViewChild(MatTabGroup) tabGroup: MatTabGroup;
   formDisabledFields: string[] = [];
   private subscriptionName: Subscription
+  panelOpenStateFirst = false;
+  panelOpenStateSecond = false;
+  menuColorGl=menuColorGl
+
   constructor (
     private fb:FormBuilder, 
     private dialog: MatDialog, 
     private AccountingDataService:AppAccountingService, 
     private CommonDialogsService:HadlingCommonDialogsService,
+    private MarketDataService: AppMarketDataService,
+
   ) 
   { 
     this.formDisabledFields = ['clientId', 'accountId', 'idportfolio']
     this.instrumentModifyForm = this.fb.group ({
-/*       accountNo: [null, {validators: [Validators.required], updateOn:'blur' } ],   
-      accountTypeExt:[null, [Validators.required]] ,  
-      Information: {value:null, disabled: false},  
-      clientId: {value:null, disabled: false},  
-      currencyCode: [null, [Validators.required, Validators.pattern('[0-9]*') ]],  
-      entityTypeCode: [null, [Validators.required]], 
-      accountId: {value:null, disabled: false},
-      idportfolio: {value:null, disabled: false},
-      d_clientname: {value:null, disabled: false}, 
-      d_portfolioCode: {value:null, disabled: false} */
       id : {value:null, disabled: false},
       secid:  {value:null, disabled: false}, 
       security_type_title:  {value:null, disabled: false},
-      stock_type:  {value:null, disabled: false}, 
+      security_group_name:  {value:null, disabled: false}, 
       security_type_name:  {value:null, disabled: false}, 
       shortname:  {value:null, disabled: false}, 
       primary_boardid:  {value:null, disabled: false}, 
@@ -68,11 +64,16 @@ export class AppInvInstrumentModifyFormComponent implements OnInit, AfterViewIni
       emitent_inn:  {value:null, disabled: false}, 
       type:  {value:null, disabled: false}, 
       group:  {value:null, disabled: false}, 
-      marketprice_boardid:  {value:null, disabled: false}
+      marketprice_boardid:  {value:null, disabled: false},
+      group_title:  {value:null, disabled: false}
+    })
+    this.instrumentDetailsForm = this.fb.group ({
+      secid: {value:null, disabled: false}, boardid: {value:null, disabled: false}, shortname: {value:null, disabled: false}, lotsize: {value:null, disabled: false}, facevalue: {value:null, disabled: false}, status: {value:null, disabled: false}, boardname: {value:null, disabled: false}, decimals: {value:null, disabled: false}, matdate: {value:null, disabled: false}, secname: {value:null, disabled: false}, couponperiod: {value:null, disabled: false}, issuesize: {value:0, disabled: false}, remarks: {value:null, disabled: false}, marketcode: {value:null, disabled: false}, instrid: {value:null, disabled: false}, sectorid: {value:null, disabled: false}, minstep: {value:null, disabled: false}, faceunit: {value:null, disabled: false}, isin: {value:null, disabled: false}, latname: {value:null, disabled: false}, regnumber: {value:null, disabled: false}, currencyid: {value:null, disabled: false}, sectype: {value:null, disabled: false}, listlevel: {value:null, disabled: false}, issuesizeplaced: {value:null, disabled: false}, couponpercent: {value:null, disabled: false}, lotvalue: {value:null, disabled: false}, nextcoupon: {value:null, disabled: false}, issuevolume:{value:null, disabled: true}
     })
   }
   ngOnInit(): void {
     this.title = this.action;
+    this.secidParam?  this.MarketDataService.getMoexInstruments(undefined,undefined, {secid:[this.secidParam,this.secidParam]}).subscribe (instrumentData => this.instrumentModifyForm.patchValue(instrumentData[0])) :null;   
     switch (this.action) {
       case 'Create': 
       break;
@@ -83,31 +84,31 @@ export class AppInvInstrumentModifyFormComponent implements OnInit, AfterViewIni
       break;
       default :
        this.instrumentModifyForm.patchValue(this.data)
+ 
       break;
     } 
     if (this.action == 'View') {
       this.instrumentModifyForm.disable();
     }
   }
+  ngOnChanges(changes: SimpleChanges) {
+    console.log('changes', changes);
+    this.MarketDataService.getMoexInstruments(undefined,undefined, {secid:[changes['secidParam'].currentValue,changes['secidParam'].currentValue]}).subscribe (instrumentData => {
+      this.instrumentModifyForm.patchValue(instrumentData[0]);
+      this.MarketDataService.getInstrumentDataCorpActions(instrumentData[0].isin).subscribe(instrumentCorpActions => {
+        this.MarketDataService.sendCorpActionData(instrumentCorpActions)
+      })
+    });  
+    this.MarketDataService.getInstrumentDataDetails(changes['secidParam'].currentValue).subscribe(instrumentDetails => this.instrumentDetailsForm.patchValue(instrumentDetails[0]));
+
+
+  }
   ngAfterViewInit(): void {
-/*     let accountNoToCheck = (this.action !== 'Create_Example') ? this.accountNo.value : null
-    this.accountNo.setAsyncValidators (
-      customAsyncValidators.AccountingUniqueAccountNoAsyncValidator(this.AccountingDataService, accountNoToCheck) 
-    )
-    this.accountNo.updateValueAndValidity();   */
+    this.instrumentDetailsForm.patchValue(this.instrumentDetails[0])
+
   }
   selectPortfolio () {
-/*     this.dialogChoseAccount = this.dialog.open(TableAccounts ,{minHeight:'600px', minWidth:'1300px', autoFocus: false, maxHeight: '90vh'});
-    this.dialogChoseAccount.componentInstance.action = "Select";
-    this.dialogChoseAccount.componentInstance.readOnly = true;
-    this.dialogChoseAccount.componentInstance.clientId = this.clientId.value;
-    this.dialogChoseAccount.componentInstance.actionOnAccountTable = "Get_Accounts_By_CientId";
-    
-    this.dialogChoseAccount.componentInstance.modal_principal_parent.subscribe ((item)=>{
-      this.instrumentModifyForm.controls['idportfolio'].patchValue(this.dialogChoseAccount.componentInstance.selectedRow['idportfolio'])
-      this.instrumentModifyForm.controls['d_portfolioCode'].patchValue(this.dialogChoseAccount.componentInstance.selectedRow['portfolioname'])
-      this.dialogChoseAccount.close(); 
-    }); */
+
   }
   snacksBox(result:any, action?:string){
     if (result['name']=='error') {
@@ -149,6 +150,11 @@ export class AppInvInstrumentModifyFormComponent implements OnInit, AfterViewIni
   get  primary_boardid ()   {return this.instrumentModifyForm.get('primary_boardid') } 
   get  board_title ()   {return this.instrumentModifyForm.get('board_title') } 
   get  name ()   {return this.instrumentModifyForm.get('name') } 
-  get  emitent_inn ()   {return this.instrumentModifyForm.get('emitent_inn') } 
-
+  get  emitent_inn ()   {return this.instrumentModifyForm.get('emitent_inn') }
+  
+  get  issuesize ()   {return this.instrumentDetailsForm.get('issuesize') } 
+  get  facevalue ()   {return this.instrumentDetailsForm.get('facevalue') } 
+  get  lotsize ()   {return this.instrumentDetailsForm.get('lotsize') } 
+  get  issuevolume ()   {return this.instrumentDetailsForm.get('issuevolume') } 
+  
 }

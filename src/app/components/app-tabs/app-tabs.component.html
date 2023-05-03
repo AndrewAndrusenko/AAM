@@ -31,25 +31,31 @@
 
 <!-- <mat-icon [matMenuTriggerFor]="menu" >more_vert</mat-icon>   -->
 <mat-tab-group *ngIf="messageReceived.text=='Instruments'" mat-stretch-tabs #InstrumentInfo>
-  <mat-tab label="Instrments table" >
+  <mat-tab label="Instrment Details" >
+    <div class="instrument_form">
+    
+      <br>
+      <app-inv-instrument-modify-form
+      [action] = "Edit"
+      [secidParam]="messageReceived.name"
+      (change)="handleChange($event)">
+      </app-inv-instrument-modify-form> 
+    </div>
+<!--     <app-app-instrument-edit-form
+    [secid]="messageReceived.name"
+    (change)="handleChange($event)"
+    ></app-app-instrument-edit-form>  -->
+  </mat-tab>  
+  <mat-tab label="MarketData & Charts" >
+  <mat-tab label="Positions"> Detailed positions with deviations versus model Portfolio  </mat-tab>
+  <mat-tab label="Trades by Instrument"> Trades history by Instrument</mat-tab>
     <br>
 <!--     <app-app-instrument-edit-form
     [secid]="messageReceived.name"
     (change)="handleChange($event)"
     ></app-app-instrument-edit-form>  -->
   </mat-tab>  
-  <mat-tab label="Positions"> Detailed positions with deviations versus model Portfolio  </mat-tab>
-  <mat-tab label="Trades by Instrument"> Trades history by Instrument</mat-tab>
-  strumentInfo>
-  <mat-tab label="Quotes table" >
-    <br>
-<!--     <app-app-instrument-edit-form
-    [secid]="messageReceived.name"
-    (change)="handleChange($event)"
-    ></app-app-instrument-edit-form>  -->
-  </mat-tab>  
-  <mat-tab label="Positions"> Detailed positions with deviations versus model Portfolio  </mat-tab>
-  <mat-tab label="Trades by Instrument"> Trades history by Instrument</mat-tab>
+
 </mat-tab-group>
 
 <mat-tab-group *ngIf="messageReceived.text=='Strategies'" #StrategiesInfo mat-stretch-tabs>

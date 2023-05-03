@@ -13,7 +13,7 @@
     </button>
   </mat-form-field>
   <mat-form-field  style="width: 20%;">
-    <mat-label>BoardID</mat-label>
+    <mat-label class="colorLabel">BoardID</mat-label>
     <mat-select  #BoardID formControlName="boardsOne" > 
       <mat-option 
         *ngFor="let board of boardIDs" 
@@ -135,9 +135,23 @@
         mat-cell 
         *matCellDef="let element" [cdkContextMenuTriggerFor]="instrumentcontextmenu"  > 
         <span [ngSwitch]="true==true">
-          <p *ngSwitchCase="['tradedate'].includes(column)">
-              {{ element[column] | date }}
-          </p>          
+          <p *ngSwitchCase="['action'].includes(column)">
+            
+            <button   
+            mat-icon-button 
+            aria-label="expand row" color="accent"
+            matTooltip="Edit entry"
+            (click)="openInstrumentModifyForm('Edit',element)">
+            <mat-icon >edit</mat-icon>
+          </button>
+          <button 
+            mat-icon-button 
+            style="margin-left: 5%;" aria-label="expand row" color="accent" 
+            matTooltip="Delete entry"
+            (click)="openInstrumentModifyForm('Delete',element)">
+            <mat-icon >delete</mat-icon>
+          </button>
+                </p>        
           <p style="text-align:center" *ngSwitchCase="['primary_boardid','emitent_inn'].includes(column) "
           [style.color]="additionalLightGreen">
              {{element[column] }}
@@ -162,10 +176,10 @@
               Add to filter
             </button> 
             <button 
-              (click)="addChips( element[column], column)"
+              (click)="handleNewFavoriteClick( element)"
               class="tree-menu-item" cdkMenuItem>
-              <mat-icon class="menu-icon" matPrefix>filter_alt</mat-icon> 
-              ComplexFilter
+              <mat-icon class="menu-icon" matPrefix>favorite</mat-icon> 
+              Favorites
             </button> 
             <button 
               class="tree-menu-item" cdkMenuItem 

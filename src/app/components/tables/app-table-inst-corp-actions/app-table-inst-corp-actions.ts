@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ViewEncapsulation, EventEmitter, Output, ViewChild, Input, OnInit} from '@angular/core';
+import {AfterViewInit, Component, ViewEncapsulation, EventEmitter, Output, ViewChild, Input} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {Observable, Subscription } from 'rxjs';
@@ -13,11 +13,10 @@ import * as XLSX from 'xlsx'
 import { AppMarketDataService } from 'src/app/services/app-market-data.service';
 import { menuColorGl,investmentNodeColor, investmentNodeColorChild, additionalLightGreen } from 'src/app/models/constants';
 import { AppInvInstrumentModifyFormComponent } from '../../forms/app-inv-instrument-modify-form/app-inv-instrument-modify-form';
-import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
 @Component({
-  selector: 'app-app-instrument-table',
-  templateUrl: './app-table-instrument.component.html',
-  styleUrls: ['./app-table-instrument.component.scss'],
+  selector: 'app-table-inst-corp-actions',
+  templateUrl: './app-table-inst-corp-actions.html',
+  styleUrls: ['./app-table-inst-corp-actions.scss'],
   encapsulation: ViewEncapsulation.None,
   animations: [
     trigger('detailExpand', [
@@ -27,32 +26,14 @@ import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
     ]),
   ],
 })
-export class AppInstrumentTableComponent  implements AfterViewInit,OnInit {
+export class AppTableCorporateActionsComponent  implements AfterViewInit {
   @Input() FormMode:string = 'Full'
   marketSources:marketDataSources[] =  [];
-  columnsToDisplay = [ 
-    'secid', 
-    'security_type_title',
-    'shortname', 
-    'isin', 
-    'primary_boardid', 
-    'board_title', 
-    'name', 
-    'emitent_inn', 
-    'action'
-  ];
-  columnsHeaderToDisplay = [ 
-    'SECID', 
-    'Security_Type',
-    'Short Name', 
-    'ISIN', 
-    'Primary_Board', 
-    'Board Title', 
-    'Issuer', 
-    'Issuer INN', 
-    'action'
-  ];
-  dataSource: MatTableDataSource<Instruments>;
+    columnsToDisplay = ['date','actiontype','unredemeedvalue','couponrate','couponamount', 'notinal', 'notinalcurrency', 'issuevolume', 'action'];
+  columnsHeaderToDisplay = ['date','type','unredemeed','rate','coupon amount', 'notinal', 'notinal currency', 'issue volume','action' ];
+  columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
+
+  dataSource: MatTableDataSource<instrumentCorpActions>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
   @Output() public modal_principal_parent = new EventEmitter();
@@ -74,29 +55,27 @@ export class AppInstrumentTableComponent  implements AfterViewInit,OnInit {
   searchParametersFG: FormGroup;
   filterlFormControl = new FormControl('');
   filterlAllFormControl = new FormControl('');
-
+  @Input () coprData:instrumentCorpActions[] = [];
   dialogInstrumentModify: MatDialogRef<AppInvInstrumentModifyFormComponent>;
 
   defaultFilterPredicate?: (data: any, filter: string) => boolean;
   secidfilter?: (data: any, filter: string) => boolean;
   constructor(
     private MarketDataService: AppMarketDataService,
-    private TreeMenuSevice:TreeMenuSevice,
     private dialog: MatDialog,
     private fb:FormBuilder, 
   ) {
     let c = investmentNodeColor
     this.MarketDataService.getInstrumentDataGeneral('getBoardsDataFromInstruments').subscribe(boardsData => this.boardIDs=boardsData)
     this.MarketDataService.getMarketDataSources().subscribe(marketSourcesData => this.marketSources = marketSourcesData);
-    this.MarketDataService.getMoexInstruments().subscribe (instrumentData => {
-      this.updateInstrumentDataTable(instrumentData);
-    });      
+    
     this.searchParametersFG = this.fb.group ({
       secidList: null,
       amount:{value:null, disabled:true},
       marketSource : {value:null, disabled:false},
       boards : {value:null, disabled:false}
     });
+    this.MarketDataService.getCorpActionData().subscribe(corpActionData => this.updateInstrumentDataTable(corpActionData))
   }
   openInstrumentModifyForm (action:string, element:any) {
     this.dialogInstrumentModify = this.dialog.open (AppInvInstrumentModifyFormComponent,{minHeight:'600px', minWidth:'1300px', autoFocus: false, maxHeight: '90vh'})
@@ -105,18 +84,11 @@ export class AppInstrumentTableComponent  implements AfterViewInit,OnInit {
     this.dialogInstrumentModify.componentInstance.instrumentDetails = this.instrumentDetailsArr.filter(el=> el.secid===element.secid&&element.primary_boardid===el.boardid)
     this.dialogInstrumentModify.componentInstance.instrumentCorpActions = this.instrumentCorpActions.filter(el=> el.isin===element.isin)
   }
-  ngOnInit(): void {
-    this.defaultFilterPredicate = this.dataSource.filterPredicate;
-  }
+
   async ngAfterViewInit() {
-    this.MarketDataService.getInstrumentDataDetails().subscribe(instrumentDetails => {
-      this.instrumentDetailsArr = instrumentDetails
-      console.log('instrumentDetails',this.instrumentDetailsArr);
-    })
-    this.MarketDataService.getInstrumentDataCorpActions().subscribe(instrumentCorpActions => {
-      this.instrumentCorpActions = instrumentCorpActions
-      console.log('instrumentCorpActions',this.instrumentCorpActions);
-    })
+    this.updateInstrumentDataTable(this.coprData)
+    console.log('corp',this.coprData);
+
     /* 
     let userData = JSON.parse(localStorage.getItem('userInfo'))
     await lastValueFrom (this.TreeMenuSevice.getaccessRestriction (userData.user.accessrole, 'accessToClientData'))
@@ -124,20 +96,17 @@ export class AppInstrumentTableComponent  implements AfterViewInit,OnInit {
       this.accessToClientData = accessRestrictionData['elementvalue']
     }) */
   }
-  handleNewFavoriteClick(elem:Instruments){
-    console.log('elem',elem);
-    let userData = JSON.parse(localStorage.getItem('userInfo'))
-    this.TreeMenuSevice.addItemToFavorites (elem.secid , 'Instruments', userData.user.id, elem.id.toString())
-    .then((response) => { console.log('Added to Favorites')})
+  openCorpActionForm (elem:instrumentCorpActions, action:string) {
+
   }
-  updateInstrumentDataTable (instrumentData:Instruments[]) {
+  updateInstrumentDataTable (instrumentData:instrumentCorpActions[]) {
     this.dataSource  = new MatTableDataSource(instrumentData);
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
     this.defaultFilterPredicate = this.dataSource.filterPredicate;
     
     this.dataSource.filterPredicate = function(data, filter: string): boolean {
-      return data.secid.toLowerCase().includes(filter) 
+      return true
     };
     this.secidfilter = this.dataSource.filterPredicate;
   }
@@ -177,7 +146,7 @@ export class AppInstrumentTableComponent  implements AfterViewInit,OnInit {
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
   }
   async submitQuery () {
-    return new Promise((resolve, reject) => {
+/*     return new Promise((resolve, reject) => {
     let searchObj = {};
     let instrumentsList = [];
     (this.instruments.indexOf('ClearAll') !== -1)? this.instruments.splice(this.instruments.indexOf('ClearAll'),1) : null;
@@ -192,16 +161,16 @@ export class AppInstrumentTableComponent  implements AfterViewInit,OnInit {
       this.instruments.unshift('ClearAll')
       resolve(marketData) 
     })
-  })
+  }) */
   }
   toggleAllSelection() {
    
   }
   exportToExcel() {
-    const fileName = "instrumentData.xlsx";
+    const fileName = "corpActionsData.xlsx";
     const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(this.dataSource.data);
     const wb: XLSX.WorkBook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "instrumentData");
+    XLSX.utils.book_append_sheet(wb, ws, "corpActionsData");
     XLSX.writeFile(wb, fileName);
   }
   get  marketSource () {return this.searchParametersFG.get('marketSource') } 
