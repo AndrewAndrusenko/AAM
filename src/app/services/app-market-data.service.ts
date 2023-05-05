@@ -4,14 +4,19 @@ import { Observable, Subject, repeat } from 'rxjs';
 import { Instruments, InstrumentsMapCodes, instrumentCorpActions, instrumentDetails, marketData, marketDataSources, marketSourceSegements, moexMarketDataForiegnShres } from '../models/accounts-table-model';
 import { param } from 'jquery';
 var ROOT_PATH = 'https://echarts.apache.org/examples';
-
+interface InstrumentDataSet {
+  data:Instruments[],
+  action:string
+}
 @Injectable({
   providedIn: 'root'
 })
+
 export class AppMarketDataService {
   private subjectMarketData = new Subject<marketData[]> ()
   private subjectCharMarketData = new Subject<marketData[]> ()
   private subjectCorpData = new Subject<instrumentCorpActions[]> ()
+  private subjectInstrument = new Subject<InstrumentDataSet> ()
   private httpOptions = {
     headers: new HttpHeaders({}),
     responseType: 'text'
@@ -158,7 +163,6 @@ export class AppMarketDataService {
     (searchParameters !== null) ?  params = {...params,...searchParameters}: null;
     (rowslimit !== null) ?  Object.assign(params,{'rowslimit':rowslimit}): null;
     (sorting !== null) ?  Object.assign(params,{'sorting':sorting}): null;
-    console.log('params', params);
     return this.http.get <Instruments[]> ('/api/AAM/MD/getMoexInstruments/',{params:params})
   }
   getInstrumentDataDetails (secid?:string): Observable <instrumentDetails[]> {
@@ -190,6 +194,26 @@ export class AppMarketDataService {
   getCorpActionData(): Observable<instrumentCorpActions[]> { //the receiver component calls this function 
     return this.subjectCorpData.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
   }
-}
 
+  createInstrument (data:any) { 
+    console.log('cre',data);
+    return this.http.post  <Instruments[]> ('/api/AAM/MD/InstrumentCreate/',{'data': data}).toPromise()
+  } 
+  deleteInstrument (id:string) { 
+    return this.http.post  <Instruments[]> ('/api/AAM/MD/InstrumentDelete/',{'id': id}).toPromise()
+  } 
+  updateInstrument (data:any) { 
+    return this.http.post <Instruments[]> ('/api/AAM/MD/InstrumentEdit/',{'data': data}).toPromise()
+  }
+  sendInstrumentData ( data:Instruments[], action: string) { //the component that wants to update something, calls this fn
+    let dataSet = {
+      data: data,
+      action:action
+    }
+    this.subjectInstrument.next(dataSet); //next() will feed the value in Subject
+  }
+  getInstrumentData(): Observable<InstrumentDataSet> { //the receiver component calls this function 
+    return this.subjectInstrument.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
+  }
+}
 

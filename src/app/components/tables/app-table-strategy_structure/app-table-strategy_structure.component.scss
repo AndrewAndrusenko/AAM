@@ -1,8 +1,6 @@
 
-mat-expansion-panel
-mat-expansion-panel-header {
-  // background: #c2185b;
-  font-size: 20px;
+.headers-align  .mat-expansion-panel-header {
+  background-color: var(--faovritesDarkNodeColor);
 }
 .mat-form-field {
   font-size: 12px;
@@ -11,10 +9,22 @@ mat-expansion-panel-header {
    margin-right: 10px;
   }
 
-.mat-expansion-panel-header-description {
-  justify-content: space-between;
-  align-items: center;
-}
+  .headers-align .mat-expansion-panel-header-description {
+    justify-content: space-between;
+    align-items: center;
+    // color: rgb(241, 136, 136);
+    font-weight:lighter;
+    font-size: 20px;
+    // margin-left: 1%;
+  
+  
+  }
+  .headers-align .mat-expansion-panel-header-title {
+    justify-content: space-between;
+    align-items: center;
+    font-size: 20px;
+    font-weight:lighter;
+  }
 
 .example-spacer {
   flex: 1 1 auto;

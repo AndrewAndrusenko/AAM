@@ -8,165 +8,179 @@
   </mat-checkbox>
   <button mat-raised-button color="accent" 
     [disabled]="!(instrumentModifyForm.valid && submitbox.checked)"
-    (click)="updateAccountData(action)"
+    (click)="updateInstrumentData(action)"
     style="margin-top: 1px; width: 30%; font-size: 18px; margin-left: 1%;">
     {{title}} Instrument
   </button>
 
 </mat-toolbar>
 
-  <form class="submit" [formGroup]="instrumentModifyForm">
+<form class="submit" [formGroup]="instrumentModifyForm">
   <h3 style="color:rgb(177, 174, 174)" *ngIf="instrumentModifyForm.valid"> 
     To save data please select 'Submit data' check and then press button 
   </h3>
-  <p>
+  <mat-form-field style="width: 10%;">
+    <input matInput placeholder="SecID" formControlName="secid">
+  </mat-form-field>
+  <mat-form-field  style="width: 26%;">
+    <mat-label>Main Type Code</mat-label>
+    <mat-select  #securityGroup formControlName="group" 
+    (selectionChange)="filtersecurityType($event.value)" > 
+      <ng-container *ngFor="let securityGroup of securityGroups">
+      <mat-option  [value]="securityGroup.name">
+          {{securityGroup.name }} - {{securityGroup.title}}
+      </mat-option>
+      </ng-container>
+    </mat-select>
+    <mat-error  *ngIf="security_group_name.invalid && security_group_name.touched && security_group_name.value==''">
+      The field is required.    
+    </mat-error>
+  </mat-form-field>
+  <mat-form-field  style="width: 24%;">
+    <mat-label>Security Type Code</mat-label>
+    <mat-select  #securityType formControlName="type"  > 
+      <ng-container *ngFor="let securityType of securityTypesFiltered">
+      <mat-option  [value]="securityType.security_type_name">
+          {{securityType.security_type_name }} - {{securityType.security_type_title}}
+      </mat-option>
+      </ng-container>
+    </mat-select>
+    <mat-error  *ngIf="security_type_name.invalid && security_type_name.touched && security_type_name.value==''">
+      The field is required.    
+    </mat-error>
+  </mat-form-field>
+  <mat-form-field style = "width: 29%;">
+    <input matInput placeholder = "Shortname" formControlName="shortname">
+    <mat-error  *ngIf="shortname.invalid && shortname.touched && shortname.value !== '' ">
+      Only dights   
+    </mat-error>
+    <mat-error  *ngIf="shortname.invalid  && shortname.value == ''">
+      Required!    
+    </mat-error>
+  </mat-form-field>
+  <mat-form-field style = "width: 15%;">
+    <input matInput placeholder = "ISIN" formControlName="isin">
+    <mat-error  *ngIf="isin.invalid && isin.touched && shortname.value !== '' ">
+      Only dights   
+    </mat-error>
+    <mat-error  *ngIf="isin.invalid  && isin.value == ''">
+      Required!    
+    </mat-error>
+  </mat-form-field>
 
-    <mat-form-field style="width: 10%;">
-      <input matInput placeholder="SecID" formControlName="secid">
-    </mat-form-field>
-    <mat-form-field style="width: 10%;" >
-      <input matInput placeholder="Main Type Code" formControlName="security_group_name" >
-    </mat-form-field>
-    <mat-form-field style="width: 10%;" >
-      <input matInput placeholder="Main Type Title" formControlName="group_title" >
-    </mat-form-field>
-    <mat-form-field style="width: 8%;" >
-      <input matInput placeholder="Security Type Code" formControlName="security_type_name" >
-    </mat-form-field>
+  <mat-form-field  style="width: 26%;">
+    <mat-label>Main Board Code</mat-label>
+    <mat-select  #mainBoard formControlName="primary_boardid"  > 
+      <ng-container *ngFor="let moexBoard of moexBoards">
+      <mat-option  [value]="moexBoard.boardid">
+          {{moexBoard.boardid }} - {{moexBoard.board_title}}
+      </mat-option>
+      </ng-container>
+    </mat-select>
+    <mat-error  *ngIf="security_group_name.invalid && security_group_name.touched && security_group_name.value==''">
+      The field is required.    
+    </mat-error>
+  </mat-form-field>
 
-    <mat-form-field style="width: 13%;">
-      <input matInput placeholder="Security Type Title" formControlName="security_type_title">
-      <mat-error  *ngIf="security_type_title.invalid && security_type_title.value !== '' ">
-        security_type_title number ins't unique      
-      </mat-error>
-      <mat-error  *ngIf="security_type_title.invalid  && security_type_title.value == '' "> 
-        The field is required.    
-      </mat-error>
-    </mat-form-field>
+  <mat-form-field  style="width: 26%;">
+    <mat-label>Market Price Board</mat-label>
+    <mat-select  #mainBoard formControlName="marketprice_boardid"  > 
+      <ng-container *ngFor="let moexBoard of moexBoards">
+      <mat-option  [value]="moexBoard.boardid">
+          {{moexBoard.boardid }} - {{moexBoard.board_title}}
+      </mat-option>
+      </ng-container>
+    </mat-select>
+    <mat-error  *ngIf="security_group_name.invalid && security_group_name.touched && security_group_name.value==''">
+      The field is required.    
+    </mat-error>
+  </mat-form-field>
+ 
+  <mat-form-field style="width: 35%;" >
+    <input matInput placeholder="Instrument Name" formControlName="name" >   
+    <mat-error  *ngIf="name.invalid && name.value!==''">
+      Incorrect client number. Use search loop.    
+    </mat-error>
+    <mat-error  *ngIf="name.invalid && name.touched && name.value==''">
+      The field is required.    
+    </mat-error>
+  </mat-form-field>
+  <mat-form-field style="width: 15%;" >
+    <input matInput placeholder="INN" formControlName="emitent_inn" >
+  </mat-form-field>
+  <mat-form-field style="width: 35%;" >
+    <input matInput placeholder="Emitent Title" formControlName="emitent_title" >
+  </mat-form-field>
 
-    
-    <mat-form-field style = "width: 35%;">
-      <input matInput placeholder = "Shortname" formControlName="shortname">
-      <mat-error  *ngIf="shortname.invalid && shortname.touched && shortname.value !== '' ">
-        Only dights   
-      </mat-error>
-      <mat-error  *ngIf="shortname.invalid  && shortname.value == ''">
-        Required!    
-      </mat-error>
-    </mat-form-field>
+  <br>
+  <br>
+  
 
-    <mat-form-field style = "width: 15%;">
-      <input matInput placeholder = "ISIN" formControlName="isin">
-      <mat-error  *ngIf="isin.invalid && isin.touched && shortname.value !== '' ">
-        Only dights   
-      </mat-error>
-      <mat-error  *ngIf="isin.invalid  && isin.value == ''">
-        Required!    
-      </mat-error>
-    </mat-form-field>
-    <mat-form-field style="width: 7%;" >
-      <input matInput placeholder="Primary Boardid" formControlName="primary_boardid" >
-    </mat-form-field>
-    
-    <mat-form-field style="width: 30%;" >
-      <input matInput placeholder="Board Title" formControlName="board_title" >   
-      <mat-error  *ngIf="board_title.invalid && board_title.value!==''">
-        Incorrect client number. Use search loop.    
-      </mat-error>
-      <mat-error  *ngIf="board_title.invalid && board_title.touched && board_title.value==''">
-        The field is required.    
-      </mat-error>
-    </mat-form-field>
-
-    <mat-form-field style="width: 35%;" >
-      <input matInput placeholder="Instrument Name" formControlName="name" >   
-      <mat-error  *ngIf="name.invalid && name.value!==''">
-        Incorrect client number. Use search loop.    
-      </mat-error>
-      <mat-error  *ngIf="name.invalid && name.touched && name.value==''">
-        The field is required.    
-      </mat-error>
-    </mat-form-field>
-
-    <mat-form-field style="width: 15%;" >
-      <input matInput placeholder="INN" formControlName="emitent_inn" >
-    </mat-form-field>
-    <mat-form-field style="width: 35%;" >
-      <input matInput placeholder="Emitent Title" formControlName="emitent_title" >
-    </mat-form-field>
-    <br>
-    <br>
-    <mat-expansion-panel class="headers-align" 
-    (opened)="panelOpenStateFirst = true"
-    (closed)="panelOpenStateFirst = false" >
-    <mat-expansion-panel-header >
-      <mat-panel-title >
-        Details
-      </mat-panel-title>
-      <mat-panel-description>
-        Tap to {{panelOpenStateFirst? 'hide': 'open'}} additional parameters
-        <mat-icon color = 'accent'>list</mat-icon>
-      </mat-panel-description>
-    </mat-expansion-panel-header >
-
-    <form class="submit" [formGroup]="instrumentDetailsForm">
-      <mat-form-field style="width: 3%;" >
-        <input matInput placeholder="Level" formControlName="listlevel" >
-      </mat-form-field>
-      <mat-form-field style="width: 6%;" >
-        <input matInput placeholder="Face Value" formControlName="facevalue" [value]="facevalue.value | number: '1.0-0'">
-      </mat-form-field>    
-      <mat-form-field style="width: 9%;" >
-        <input matInput placeholder="Issue Size" formControlName="issuesize" [value]="issuesize.value | number: '1.0-0'">
-      </mat-form-field>  
-      <mat-form-field style="width: 11%;" >
-        <input matInput placeholder="Issue Volume" formControlName="issuevolume" [value]="issuevolume.value | number: '1.0-0'">
-      </mat-form-field>  
-
-      <mat-form-field class="example-full-width" style="width: 13%;" >
-        <input matInput  [matDatepicker]="picker" placeholder="Maturity Date"  formControlName="matdate" >
- <!--        (dateChange)="showAValidator();
-                      updateExpectedBalance();"
-        > -->
-        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-        <mat-datepicker #picker></mat-datepicker>
-      </mat-form-field>
-
-    <mat-form-field style="width: 10%;" >
-      <input matInput placeholder="Regnumber" formControlName="regnumber" >
-    </mat-form-field>
-    <mat-form-field style="width: 6%;" >
-      <input matInput placeholder="Currency" formControlName="currencyid" >
-    </mat-form-field>
-    <mat-form-field style="width: 5%;" >
-      <input matInput placeholder="Lot Size" formControlName="lotsize" >
-    </mat-form-field>
-    <mat-form-field style="width: 5%;" >
-      <input matInput placeholder="Minstep" formControlName="minstep" >
-    </mat-form-field>  
-      <mat-form-field style="width: 5%;" >
-        <input matInput placeholder="Decimals" formControlName="decimals" >
-      </mat-form-field>    
-    <mat-form-field style="width: 5%;" >
-      <input matInput placeholder="Code" formControlName="marketcode" >
-    </mat-form-field>       
-    <mat-form-field style="width: 5%;" >
-      <input matInput placeholder="Instrid" formControlName="instrid" >
-    </mat-form-field>
-
-    <details style="font-size: 16px; margin-bottom: 1%;">
-      <summary>More</summary>
+  <h3 style="color:rgb(252, 113, 113)" *ngIf="instrumentModifyForm.invalid"> Please check the form. Data is invalid</h3>
+</form>
+<mat-expansion-panel class="headers-align" 
+(opened)="panelOpenStateFirst = true"
+(closed)="panelOpenStateFirst = false" >
+<mat-expansion-panel-header style="margin-bottom: 1%;">
+  <mat-panel-title >
+    Details
+  </mat-panel-title>
+  <mat-panel-description>
+    Tap to {{panelOpenStateFirst? 'hide': 'open'}} additional parameters
+    <mat-icon color = 'accent'>list</mat-icon>
+  </mat-panel-description>
+</mat-expansion-panel-header >
+<div class="form_detais">
+<form class="submit" [formGroup]="instrumentDetailsForm">
+  <mat-form-field style="width: 3%;" >
+    <input matInput placeholder="Level" formControlName="listlevel" >
+  </mat-form-field>
+  <mat-form-field style="width: 6%;" >
+    <input matInput placeholder="Face Value" formControlName="facevalue" [value]="facevalue.value | number: '1.0-0'">
+  </mat-form-field>    
+  <mat-form-field style="width: 9%;" >
+    <input matInput placeholder="Issue Size" formControlName="issuesize" [value]="issuesize.value | number: '1.0-0'">
+  </mat-form-field>  
+  <mat-form-field style="width: 11%;" >
+    <input matInput placeholder="Issue Volume" formControlName="issuevolume" [value]="issuevolume.value | number: '1.0-0'">
+  </mat-form-field>  
+  <mat-form-field class="example-full-width" style="width: 13%;" >
+    <input matInput  [matDatepicker]="picker" placeholder="Maturity Date"  formControlName="matdate" >
+<!--        (dateChange)="showAValidator();
+                  updateExpectedBalance();"
+    > -->
+    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-datepicker #picker></mat-datepicker>
+  </mat-form-field>
+  <mat-form-field style="width: 10%;" >
+    <input matInput placeholder="Regnumber" formControlName="regnumber" >
+  </mat-form-field>
+  <mat-form-field style="width: 6%;" >
+    <input matInput placeholder="Currency" formControlName="currencyid" >
+  </mat-form-field>
+  <mat-form-field style="width: 5%;" >
+    <input matInput placeholder="Lot Size" formControlName="lotsize" >
+  </mat-form-field>
+  <mat-form-field style="width: 5%;" >
+    <input matInput placeholder="Minstep" formControlName="minstep" >
+  </mat-form-field>  
+  <mat-form-field style="width: 5%;" >
+    <input matInput placeholder="Decimals" formControlName="decimals" >
+  </mat-form-field>    
+  <mat-form-field style="width: 5%;" >
+    <input matInput placeholder="Code" formControlName="marketcode" >
+  </mat-form-field>       
+  <mat-form-field style="width: 5%;" >
+    <input matInput placeholder="Instrid" formControlName="instrid" >
+  </mat-form-field>
+  <details style="font-size: 16px; margin-bottom: 1%;">
+    <summary>More</summary>
     <mat-form-field style="width: 15%;" >
       <input matInput placeholder="REMARKS" formControlName="remarks" >
     </mat-form-field>  
-
-
-
-
     <mat-form-field style="width: 5%;" >
       <input matInput placeholder="sectorid" formControlName="sectorid" >
     </mat-form-field>   
-  
     <mat-form-field style="width: 5%;" >
       <input matInput placeholder="lotvalue" formControlName="lotvalue" >
     </mat-form-field>  
@@ -179,27 +193,25 @@
     <mat-form-field style="width: 5%;" >
       <input matInput placeholder="COUPON" formControlName="couponpercent" >
     </mat-form-field>
-
   </details>
-
-
-    
-    </form>
-  </mat-expansion-panel>
-
-  <mat-expansion-panel class="headers-align" 
-  (opened)="panelOpenStateSecond = true"
-  (closed)="panelOpenStateSecond = false" >
-    <mat-expansion-panel-header >
-      <mat-panel-title>
-        Corporate Actions
-      </mat-panel-title>
-      <mat-panel-description>
-        Tap to {{panelOpenStateSecond? 'hide': 'open'}} additional details
-        <mat-icon color = 'accent'>event</mat-icon>
-      </mat-panel-description>
-    </mat-expansion-panel-header >
-    <app-table-inst-corp-actions [coprData]="instrumentCorpActions"> </app-table-inst-corp-actions>
-  </mat-expansion-panel>
-    <h3 style="color:rgb(252, 113, 113)" *ngIf="instrumentModifyForm.invalid"> Please check the form. Data is invalid</h3>
-  </form>
+</form>
+</div>
+</mat-expansion-panel>
+<mat-expansion-panel class="headers-align" style="width: 100%;"
+(opened)="panelOpenStateSecond = true"
+(closed)="panelOpenStateSecond = false" >
+<mat-expansion-panel-header >
+  <mat-panel-title>
+    Corporate Actions
+  </mat-panel-title>
+  <mat-panel-description>
+    Tap to {{panelOpenStateSecond? 'hide': 'open'}} additional details
+    <mat-icon color = 'accent'>event</mat-icon>
+  </mat-panel-description>
+</mat-expansion-panel-header >
+<div style="width: 90%;">
+<app-table-inst-corp-actions 
+  [coprData]="instrumentCorpActions"  > 
+</app-table-inst-corp-actions>
+</div>
+</mat-expansion-panel>

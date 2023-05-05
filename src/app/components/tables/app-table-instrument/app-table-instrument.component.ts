@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ViewEncapsulation, EventEmitter, Output, ViewChild, Input, OnInit} from '@angular/core';
+import {AfterViewInit, Component, ViewEncapsulation, EventEmitter, Output, ViewChild, Input} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {Observable, Subscription } from 'rxjs';
@@ -27,7 +27,7 @@ import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
     ]),
   ],
 })
-export class AppInstrumentTableComponent  implements AfterViewInit,OnInit {
+export class AppInstrumentTableComponent  implements AfterViewInit {
   @Input() FormMode:string = 'Full'
   marketSources:marketDataSources[] =  [];
   columnsToDisplay = [ 
@@ -74,6 +74,7 @@ export class AppInstrumentTableComponent  implements AfterViewInit,OnInit {
   searchParametersFG: FormGroup;
   filterlFormControl = new FormControl('');
   filterlAllFormControl = new FormControl('');
+  boardsOne = new FormControl('');
 
   dialogInstrumentModify: MatDialogRef<AppInvInstrumentModifyFormComponent>;
 
@@ -85,12 +86,29 @@ export class AppInstrumentTableComponent  implements AfterViewInit,OnInit {
     private dialog: MatDialog,
     private fb:FormBuilder, 
   ) {
-    let c = investmentNodeColor
     this.MarketDataService.getInstrumentDataGeneral('getBoardsDataFromInstruments').subscribe(boardsData => this.boardIDs=boardsData)
     this.MarketDataService.getMarketDataSources().subscribe(marketSourcesData => this.marketSources = marketSourcesData);
     this.MarketDataService.getMoexInstruments().subscribe (instrumentData => {
       this.updateInstrumentDataTable(instrumentData);
     });      
+    this.MarketDataService.getInstrumentData().subscribe(data =>{
+     let index =  this.dataSource.data.findIndex(elem=>elem.id===data.data[0].id)
+      switch (data.action) {
+        case 'Deleted':
+          // console.log('index del', index, this.dataSource.data.length);
+          this.dataSource.data.splice(index,1)
+          // console.log('da del',  this.dataSource.data.length, this.dataSource.data);
+        break;
+        case 'Created':
+          this.dataSource.data.unshift(data.data[0])
+        break;
+        case 'Updated':
+          this.dataSource.data[index] = {...data.data[0]}
+        break;
+      }
+     this.dataSource.paginator = this.paginator;
+     this.dataSource.sort = this.sort;
+    })
     this.searchParametersFG = this.fb.group ({
       secidList: null,
       amount:{value:null, disabled:true},
@@ -100,29 +118,19 @@ export class AppInstrumentTableComponent  implements AfterViewInit,OnInit {
   }
   openInstrumentModifyForm (action:string, element:any) {
     this.dialogInstrumentModify = this.dialog.open (AppInvInstrumentModifyFormComponent,{minHeight:'600px', minWidth:'1300px', autoFocus: false, maxHeight: '90vh'})
+    this.dialogInstrumentModify.componentInstance.moexBoards = this.boardIDs;
     this.dialogInstrumentModify.componentInstance.action = action;
     this.dialogInstrumentModify.componentInstance.data = element;
     this.dialogInstrumentModify.componentInstance.instrumentDetails = this.instrumentDetailsArr.filter(el=> el.secid===element.secid&&element.primary_boardid===el.boardid)
     this.dialogInstrumentModify.componentInstance.instrumentCorpActions = this.instrumentCorpActions.filter(el=> el.isin===element.isin)
   }
-  ngOnInit(): void {
-    this.defaultFilterPredicate = this.dataSource.filterPredicate;
-  }
   async ngAfterViewInit() {
     this.MarketDataService.getInstrumentDataDetails().subscribe(instrumentDetails => {
       this.instrumentDetailsArr = instrumentDetails
-      console.log('instrumentDetails',this.instrumentDetailsArr);
     })
     this.MarketDataService.getInstrumentDataCorpActions().subscribe(instrumentCorpActions => {
       this.instrumentCorpActions = instrumentCorpActions
-      console.log('instrumentCorpActions',this.instrumentCorpActions);
     })
-    /* 
-    let userData = JSON.parse(localStorage.getItem('userInfo'))
-    await lastValueFrom (this.TreeMenuSevice.getaccessRestriction (userData.user.accessrole, 'accessToClientData'))
-    .then ((accessRestrictionData) =>{
-      this.accessToClientData = accessRestrictionData['elementvalue']
-    }) */
   }
   handleNewFavoriteClick(elem:Instruments){
     console.log('elem',elem);
@@ -141,15 +149,13 @@ export class AppInstrumentTableComponent  implements AfterViewInit,OnInit {
     };
     this.secidfilter = this.dataSource.filterPredicate;
   }
- 
   applyFilter(event: any, col?:string) {
-    console.log('event',event);
+    console.log('event',event, col);
     this.dataSource.filterPredicate = col === undefined? this.defaultFilterPredicate : this.secidfilter
     const filterValue = event.hasOwnProperty('isUserInput')?  event.source.value :  (event.target as HTMLInputElement).value 
     !event.hasOwnProperty('isUserInput') || event.isUserInput ? this.dataSource.filter = filterValue.trim().toLowerCase() : null;
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
-
   changedValueofChip (value:string) {this.instruments[this.instruments.length-1] = value}
   add(event: MatChipInputEvent): void {
     const value = (event.value || '').trim();

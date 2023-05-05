@@ -9,13 +9,19 @@
     <app-table-market-data></app-table-market-data> 
     <!-- <app-table-acc-accounts style="width: 150%;"></app-table-acc-accounts> -->
   </mat-tab>  
-  <mat-tab label="Positions"></mat-tab>>
-  <mat-tab   label="Charts"> 
+    <mat-tab   label="Charts"> 
     <app-echart-marketdata-candle  style="height: 100%;"> </app-echart-marketdata-candle>
     <app-table-market-data
       FormMode="ChartMode"
     ></app-table-market-data> 
   </mat-tab>
+  <mat-tab label="Corporate Actions">
+
+    <app-table-inst-corp-actions></app-table-inst-corp-actions>
+  </mat-tab>
+
+  <mat-tab label="Positions"></mat-tab>
+
 </mat-tab-group>
 
 

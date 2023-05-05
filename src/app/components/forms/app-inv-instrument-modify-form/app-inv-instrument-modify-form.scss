@@ -1,3 +1,11 @@
+.form_detais .mat-form-field{
+  font-size: 16px;
+  border-radius: 9px;
+  width: 400px;
+  background-color: var(--formFieldLightGray);
+  margin: 2px;
+  padding:4px;
+}
 .headers-align  .mat-expansion-panel-header {
   background-color: var(--faovritesDarkNodeColor);
 }
@@ -56,10 +64,7 @@ margin: 10px;
 padding:10px;
 }
 
-.content-container {
-  display: flex;
-  flex-direction: column;
-}
+
 
 .dialog-headline{
 font-weight: 500;

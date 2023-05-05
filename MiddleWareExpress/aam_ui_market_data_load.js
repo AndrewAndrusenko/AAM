@@ -246,9 +246,8 @@ function fgetInstrumentDetails (request,response) {
 }
 function fgetInstrumentDataCorpActions (request,response) {
   let sql = "SELECT id, isin, issuevolume, secname, notinal, notinalcurrency, unredemeedvalue, couponrate, couponamount, actiontype, couponamountrur, to_date(date,'DD.MM.YYYY')::timestamp without time zone as date, 0 as action FROM public.mmoexbondscorpactions ";
-  sql += request.query.isin? "WHERE isin ='"   +request.query.isin +"' ": "";
+  sql += request.query.isin? "WHERE isin ='"   + request.query.isin +"' ": "";
   sql += " ORDER BY to_date(date,'DD.MM.YYYY')::timestamp without time zone; "
-  
   queryExecute (sql, response);
 }
 function fgetInstrumentDataGeneral(request,response) {
@@ -256,12 +255,68 @@ function fgetInstrumentDataGeneral(request,response) {
   switch (request.query.dataType) {
     case 'getBoardsDataFromInstruments':
       query.text = "SELECT boardid, board_title FROM public.mmoexboards " +
-      "WHERE boardid NOTNULL " +
+      "WHERE row_num NOTNULL and is_traded=1 " +
       "ORDER BY row_num asc;"
     break;
+    case 'getMoexSecurityTypes':
+      query.text = "SELECT id, security_type_name, security_type_title,security_group_name FROM public.mmoexsecuritytypes; " 
+    break;
+    case 'getMoexSecurityGroups':
+      query.text = "SELECT name, title  FROM public.mmoexsecuritygroups;"
+    break;
+
   }
   sql = pgp.as.format(query.text,request.query);
   queryExecute (sql, response);
+}
+async function fInstrumentCreate (request, response) {
+  const query = {
+  text: 'INSERT INTO public.mmoexsecurities ' +
+        '(secid, shortname, name, isin,  emitent_title, emitent_inn, type, "group", primary_boardid, marketprice_boardid)' +
+        ' VALUES (${secid},${shortname},${name},${isin},${emitent_title},${emitent_inn},${type},${group},${primary_boardid},${marketprice_boardid}) RETURNING *;',
+  }
+  sql = pgp.as.format(query.text,request.body.data)
+  pool.query (sql,  (err, res) => {if (err) {
+    console.log (err.stack.split("\n", 1).join(""))
+    err.detail = err.stack
+    return response.send(err)
+  } else {
+    return response.status(200).json(res.rows)}
+  })  
+}
+
+async function fInstrumentDelete (request, response) {
+  const query = {text: 'DELETE FROM public.mmoexsecurities WHERE id=${id} RETURNING *;', values: request.body}
+  sql = pgp.as.format(query.text,query.values)
+
+  pool.query (sql,  (err, res) => {if (err) { return response.send(err)} else { return response.status(200).json(res.rows) }
+  }) 
+}
+
+async function fInstrumentEdit (request, response) {
+  const query = {
+    text: 'UPDATE public.mmoexsecurities ' +
+    'SET  ' +
+    'secid=${secid}, '+
+    'name=${name}, '+
+    'shortname=${shortname}, '+
+    'emitent_title=${emitent_title}, '+
+    'isin=${isin}, '+
+    'emitent_inn=${emitent_inn}, '+
+    'type=${type}, '+
+    '"group"=${group}, '+
+    'primary_boardid=${primary_boardid}, '+
+    'marketprice_boardid=${marketprice_boardid} '+
+    'WHERE id=${id} RETURNING *;',
+  } 
+  sql = pgp.as.format(query.text,request.body.data)
+   pool.query (sql,  (err, res) => {if (err) {
+    console.log (err.stack.split("\n", 1).join(""))
+    err.detail = err.stack
+    return response.send(err)
+  } else {
+    return response.status(200).json(res.rows)}
+  })   
 }
 module.exports = {
   finsertMarketData,
@@ -273,7 +328,10 @@ module.exports = {
   fGetMoexInstruments,
   fgetInstrumentDataGeneral,
   fgetInstrumentDetails,
-  fgetInstrumentDataCorpActions
+  fgetInstrumentDataCorpActions,
+  fInstrumentCreate,
+  fInstrumentEdit,
+  fInstrumentDelete
 }
 
 

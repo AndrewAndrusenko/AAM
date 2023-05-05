@@ -212,7 +212,6 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
   }
   async ngAfterViewInit() {
     const number = 123456.789;
-    console.log(new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(number));
     this.MarketDataService.getReloadMarketData().subscribe(marketData => {
       this.updateMarketDataTable(marketData);
       this.loadingDataState = {State:'Success', Message:'Loading is complited'};

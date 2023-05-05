@@ -184,7 +184,8 @@ appServer.get('/AAM/MD/getInstrumentDataGeneral/',jsPassport.authenticate('sessi
 appServer.get('/AAM/MD/getInstrumentDetails/',jsPassport.authenticate('session') , uiAmmMarketData.fgetInstrumentDetails)
 appServer.get('/AAM/MD/getInstrumentDataCorpActions/',jsPassport.authenticate('session') , uiAmmMarketData.fgetInstrumentDataCorpActions)
 
-
+appServer.post('/AAM/MD/InstrumentCreate/',jsPassport.authenticate('session') , uiAmmMarketData.fInstrumentCreate)
+appServer.post('/AAM/MD/InstrumentDelete/',jsPassport.authenticate('session') , uiAmmMarketData.fInstrumentDelete)
+appServer.post('/AAM/MD/InstrumentEdit/',jsPassport.authenticate('session') , uiAmmMarketData.fInstrumentEdit)
 
 appServer.listen (port,'localhost', () => {console.log (`AAM Server is running on port ${port}`)})
-

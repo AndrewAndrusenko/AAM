@@ -29,8 +29,8 @@ import { AppInvInstrumentModifyFormComponent } from '../../forms/app-inv-instrum
 export class AppTableCorporateActionsComponent  implements AfterViewInit {
   @Input() FormMode:string = 'Full'
   marketSources:marketDataSources[] =  [];
-    columnsToDisplay = ['date','actiontype','unredemeedvalue','couponrate','couponamount', 'notinal', 'notinalcurrency', 'issuevolume', 'action'];
-  columnsHeaderToDisplay = ['date','type','unredemeed','rate','coupon amount', 'notinal', 'notinal currency', 'issue volume','action' ];
+    columnsToDisplay = ['date', 'isin','actiontype','unredemeedvalue','couponrate','couponamount', 'notinal', 'notinalcurrency', 'issuevolume', 'action'];
+  columnsHeaderToDisplay = ['date','isin','type','unredemeed','rate','coupon amount', 'notinal', 'notinal currency', 'issue volume','action' ];
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
 
   dataSource: MatTableDataSource<instrumentCorpActions>;
@@ -40,15 +40,12 @@ export class AppTableCorporateActionsComponent  implements AfterViewInit {
   private subscriptionName: Subscription;
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
   
-  menuColorGl=menuColorGl
   addOnBlur = true;
   panelOpenStateSecond = false;
   instrumentDetailsArr:instrumentDetails[] = [];
   instrumentCorpActions:instrumentCorpActions[] = [];
   accessToClientData: string = 'true';
   instruments: string[] = ['ClearAll'];
-  investmentNodeColor = investmentNodeColorChild;
-  additionalLightGreen = additionalLightGreen;
   public filterednstrumentsLists : Observable<string[]>;
   
   boardIDs =[]
@@ -63,108 +60,32 @@ export class AppTableCorporateActionsComponent  implements AfterViewInit {
   constructor(
     private MarketDataService: AppMarketDataService,
     private dialog: MatDialog,
-    private fb:FormBuilder, 
   ) {
-    let c = investmentNodeColor
-    this.MarketDataService.getInstrumentDataGeneral('getBoardsDataFromInstruments').subscribe(boardsData => this.boardIDs=boardsData)
-    this.MarketDataService.getMarketDataSources().subscribe(marketSourcesData => this.marketSources = marketSourcesData);
-    
-    this.searchParametersFG = this.fb.group ({
-      secidList: null,
-      amount:{value:null, disabled:true},
-      marketSource : {value:null, disabled:false},
-      boards : {value:null, disabled:false}
-    });
     this.MarketDataService.getCorpActionData().subscribe(corpActionData => this.updateInstrumentDataTable(corpActionData))
   }
-  openInstrumentModifyForm (action:string, element:any) {
-    this.dialogInstrumentModify = this.dialog.open (AppInvInstrumentModifyFormComponent,{minHeight:'600px', minWidth:'1300px', autoFocus: false, maxHeight: '90vh'})
-    this.dialogInstrumentModify.componentInstance.action = action;
-    this.dialogInstrumentModify.componentInstance.data = element;
-    this.dialogInstrumentModify.componentInstance.instrumentDetails = this.instrumentDetailsArr.filter(el=> el.secid===element.secid&&element.primary_boardid===el.boardid)
-    this.dialogInstrumentModify.componentInstance.instrumentCorpActions = this.instrumentCorpActions.filter(el=> el.isin===element.isin)
-  }
-
   async ngAfterViewInit() {
-    this.updateInstrumentDataTable(this.coprData)
-    console.log('corp',this.coprData);
-
-    /* 
-    let userData = JSON.parse(localStorage.getItem('userInfo'))
-    await lastValueFrom (this.TreeMenuSevice.getaccessRestriction (userData.user.accessrole, 'accessToClientData'))
-    .then ((accessRestrictionData) =>{
-      this.accessToClientData = accessRestrictionData['elementvalue']
-    }) */
+    this.dataSource? null : this.MarketDataService.getInstrumentDataCorpActions().subscribe(data=>this.updateInstrumentDataTable(data));
   }
   openCorpActionForm (elem:instrumentCorpActions, action:string) {
-
+    this.dialogInstrumentModify = this.dialog.open (AppInvInstrumentModifyFormComponent,{minHeight:'600px', minWidth:'1300px', autoFocus: false, maxHeight: '90vh'})
+    this.dialogInstrumentModify.componentInstance.action = action;
+    // this.dialogInstrumentModify.componentInstance.data = element;
   }
-  updateInstrumentDataTable (instrumentData:instrumentCorpActions[]) {
-    this.dataSource  = new MatTableDataSource(instrumentData);
+  updateInstrumentDataTable (corpActionData:instrumentCorpActions[]) {
+    this.dataSource  = new MatTableDataSource(corpActionData);
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
-    this.defaultFilterPredicate = this.dataSource.filterPredicate;
-    
-    this.dataSource.filterPredicate = function(data, filter: string): boolean {
-      return true
-    };
-    this.secidfilter = this.dataSource.filterPredicate;
+    console.log('cor',corpActionData);
   }
- 
   applyFilter(event: any, col?:string) {
-    console.log('event',event);
-    this.dataSource.filterPredicate = col === undefined? this.defaultFilterPredicate : this.secidfilter
-    const filterValue = event.hasOwnProperty('isUserInput')?  event.source.value :  (event.target as HTMLInputElement).value 
-    !event.hasOwnProperty('isUserInput') || event.isUserInput ? this.dataSource.filter = filterValue.trim().toLowerCase() : null;
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
-  }
-
-  changedValueofChip (value:string) {this.instruments[this.instruments.length-1] = value}
-  add(event: MatChipInputEvent): void {
-    const value = (event.value || '').trim();
-    const valueArray = event.value.split(',');
-    (value)? this.instruments = [...this.instruments,...valueArray] : null;
-    event.chipInput!.clear();
-  }
-  remove(account: string): void {
-    const index = this.instruments.indexOf(account);
-   (index >= 0)? this.instruments.splice(index, 1) : null
-  }
-  clearAll(event) {
-    console.log('event', event.target.textContent);
-    event.target.textContent.trim() === 'ClearAll cancel'? this.instruments = ['ClearAll']: null;
-  }
-  addChips (el: any, column: string) {(['accountNo'].includes(column))? this.instruments.push(el):null;}
-  updateFilter (event:Event, el: any, column: string) {
-    this.filterlAllFormControl.patchValue(el);
-    this.dataSource.filter = el.trim();
-    (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
   }
   clearFilter (fFormControl : FormControl) {
     fFormControl.patchValue('')
     this.dataSource.filter = ''
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
-  }
-  async submitQuery () {
-/*     return new Promise((resolve, reject) => {
-    let searchObj = {};
-    let instrumentsList = [];
-    (this.instruments.indexOf('ClearAll') !== -1)? this.instruments.splice(this.instruments.indexOf('ClearAll'),1) : null;
-    (this.instruments.length===1)? instrumentsList = [...this.instruments,...this.instruments]: instrumentsList = this.instruments;
-    (this.instruments.length)? Object.assign (searchObj , {'secid': instrumentsList}): null;
-    ( this.marketSource.value != null&&this.marketSource.value.length !=0)? Object.assign (searchObj , {'sourcecode': this.marketSource.value}): null;
-    ( this.boards.value != null&&this.boards.value.length !=0)? Object.assign (searchObj , {'boardid': this.boards.value}): null;
-    this.MarketDataService.getMoexInstruments(10000,this.FormMode==='ChartMode'? 'secid ASC':undefined,searchObj).subscribe (marketData  => {
-      this.dataSource  = new MatTableDataSource(marketData);
-      this.dataSource.paginator = this.paginator;
-      this.dataSource.sort = this.sort;
-      this.instruments.unshift('ClearAll')
-      resolve(marketData) 
-    })
-  }) */
-  }
-  toggleAllSelection() {
-   
   }
   exportToExcel() {
     const fileName = "corpActionsData.xlsx";

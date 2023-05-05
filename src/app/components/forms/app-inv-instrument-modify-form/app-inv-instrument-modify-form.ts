@@ -2,13 +2,14 @@ import { AfterViewInit, Component,  EventEmitter,  Input, OnInit, Output, Simple
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
-import { instrumentCorpActions, instrumentDetails } from 'src/app/models/accounts-table-model';
+import { Instruments, instrumentCorpActions, instrumentDetails } from 'src/app/models/accounts-table-model';
 import { TableAccounts } from '../../tables/app-table-accout/app-table-portfolio.component';
 import { Subscription } from 'rxjs';
 import { MatTabGroup as MatTabGroup } from '@angular/material/tabs';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { menuColorGl } from 'src/app/models/constants';
 import { AppMarketDataService } from 'src/app/services/app-market-data.service';
+import { MatSelectChange } from '@angular/material/select';
 
 @Component({
   selector: 'app-inv-instrument-modify-form',
@@ -36,6 +37,9 @@ export class AppInvInstrumentModifyFormComponent implements OnInit, AfterViewIni
   panelOpenStateFirst = false;
   panelOpenStateSecond = false;
   menuColorGl=menuColorGl
+  securityTypes: any[];
+  securityTypesFiltered: any[];
+  securityGroups: any;
 
   constructor (
     private fb:FormBuilder, 
@@ -73,18 +77,29 @@ export class AppInvInstrumentModifyFormComponent implements OnInit, AfterViewIni
   }
   ngOnInit(): void {
     this.title = this.action;
-    this.secidParam?  this.MarketDataService.getMoexInstruments(undefined,undefined, {secid:[this.secidParam,this.secidParam]}).subscribe (instrumentData => this.instrumentModifyForm.patchValue(instrumentData[0])) :null;   
+    this.secidParam?  this.MarketDataService.getMoexInstruments(undefined,undefined, {secid:[this.secidParam,this.secidParam]}).subscribe (instrumentData => {
+      this.MarketDataService.getInstrumentDataGeneral('getBoardsDataFromInstruments').subscribe(dataBoard => {
+        this.moexBoards = dataBoard;
+        console.log('boards',this.moexBoards);
+      });
+      this.instrumentModifyForm.patchValue(instrumentData[0]);
+
+    }) :null;  
+    this.MarketDataService.getInstrumentDataGeneral('getMoexSecurityTypes').subscribe(securityTypesData => {
+      this.securityTypes = securityTypesData;
+      this.filtersecurityType(this.group.value)
+    })
+    
+    this.MarketDataService.getInstrumentDataGeneral('getMoexSecurityGroups').subscribe(securityGroupsData => this.securityGroups = securityGroupsData );
     switch (this.action) {
       case 'Create': 
       break;
       case 'Create_Example':
-        this.data['id'] = null;
         this.instrumentModifyForm.patchValue(this.data)
         this.title = 'Create';
-      break;
-      default :
-       this.instrumentModifyForm.patchValue(this.data)
- 
+        break;
+        default :
+        this.instrumentModifyForm.patchValue(this.data)
       break;
     } 
     if (this.action == 'View') {
@@ -92,20 +107,20 @@ export class AppInvInstrumentModifyFormComponent implements OnInit, AfterViewIni
     }
   }
   ngOnChanges(changes: SimpleChanges) {
-    console.log('changes', changes);
     this.MarketDataService.getMoexInstruments(undefined,undefined, {secid:[changes['secidParam'].currentValue,changes['secidParam'].currentValue]}).subscribe (instrumentData => {
       this.instrumentModifyForm.patchValue(instrumentData[0]);
+      this.filtersecurityType(this.group.value)
       this.MarketDataService.getInstrumentDataCorpActions(instrumentData[0].isin).subscribe(instrumentCorpActions => {
         this.MarketDataService.sendCorpActionData(instrumentCorpActions)
       })
     });  
     this.MarketDataService.getInstrumentDataDetails(changes['secidParam'].currentValue).subscribe(instrumentDetails => this.instrumentDetailsForm.patchValue(instrumentDetails[0]));
-
-
   }
   ngAfterViewInit(): void {
     this.instrumentDetailsForm.patchValue(this.instrumentDetails[0])
-
+  }
+  filtersecurityType (filter:string) {
+    this.securityTypesFiltered = this.securityTypes.filter (elem => elem.security_group_name===filter)
   }
   selectPortfolio () {
 
@@ -114,27 +129,38 @@ export class AppInvInstrumentModifyFormComponent implements OnInit, AfterViewIni
     if (result['name']=='error') {
       this.CommonDialogsService.snackResultHandler(result)
     } else {
-      this.CommonDialogsService.snackResultHandler({name:'success', detail: result + 'account'}, action)
+      this.CommonDialogsService.snackResultHandler({name:'success', detail: result + ' instrument'}, action)
       this.AccountingDataService.sendReloadAccontList (this.instrumentModifyForm.controls['id']);
     }
     this.formDisabledFields.forEach(elem => this.instrumentModifyForm.controls[elem].disable())
   }
-  updateAccountData(action:string){
-    this.formDisabledFields.forEach(elem => this.instrumentModifyForm.controls[elem].enable())
+  addJoinedFieldsToResult (result:Instruments[]):Instruments[] {
+    result[0].board_title = this.moexBoards.find(el=>el.boardid===result[0].primary_boardid).board_title;
+    result[0].security_type_title = this.securityTypes.find(el=>el.security_type_name===result[0].type).security_type_title
+    return result;
+  }
+  updateInstrumentData(action:string){
     switch (action) {
       case 'Create_Example':
       case 'Create':
-        this.AccountingDataService.createAccountAccounting(this.instrumentModifyForm.value).then(result => this.snacksBox(result,'Created'))
+        this.MarketDataService.createInstrument(this.instrumentModifyForm.value).then(result => {
+          this.MarketDataService.sendInstrumentData(this.addJoinedFieldsToResult(result),'Created')
+          this.snacksBox(result.length,'Created');
+        })
       break;
       case 'Edit':
-        this.AccountingDataService.updateAccountAccounting (this.instrumentModifyForm.value).then(result => this.snacksBox(result,'Updated'))
+        this.MarketDataService.updateInstrument (this.instrumentModifyForm.value).then(result => {
+          this.MarketDataService.sendInstrumentData(this.addJoinedFieldsToResult(result),'Updated')
+          this.snacksBox(result.length,'Updated')
+        })
       break;
       case 'Delete':
         this.CommonDialogsService.confirmDialog('Delete Instrument ' + this.secid.value).subscribe(isConfirmed => {
           if (isConfirmed.isConfirmed) {
             this.instrumentModifyForm.controls['id'].enable()
-            this.AccountingDataService.deleteAccountAccounting (this.instrumentModifyForm.value['id']).then (result =>{
-              this.snacksBox(result,'Deleted')
+            this.MarketDataService.deleteInstrument (this.instrumentModifyForm.value['id']).then (result =>{
+              this.MarketDataService.sendInstrumentData(result,'Deleted')
+              this.snacksBox(result.length,'Deleted')
               this.CommonDialogsService.dialogCloseAll();
             })
           }
@@ -151,6 +177,9 @@ export class AppInvInstrumentModifyFormComponent implements OnInit, AfterViewIni
   get  board_title ()   {return this.instrumentModifyForm.get('board_title') } 
   get  name ()   {return this.instrumentModifyForm.get('name') } 
   get  emitent_inn ()   {return this.instrumentModifyForm.get('emitent_inn') }
+  get  security_group_name ()   {return this.instrumentModifyForm.get('security_group_name') }
+  get  security_type_name ()   {return this.instrumentModifyForm.get('security_type_name') }
+  get  group ()   {return this.instrumentModifyForm.get('group') }
   
   get  issuesize ()   {return this.instrumentDetailsForm.get('issuesize') } 
   get  facevalue ()   {return this.instrumentDetailsForm.get('facevalue') } 
