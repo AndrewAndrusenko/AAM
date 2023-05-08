@@ -28,7 +28,7 @@ import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
   ],
 })
 export class AppInstrumentTableComponent  implements AfterViewInit {
-  @Input() FormMode:string = 'Full'
+  @Input() FormMode:string
   marketSources:marketDataSources[] =  [];
   columnsToDisplay = [ 
     'secid', 
@@ -88,9 +88,7 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
   ) {
     this.MarketDataService.getInstrumentDataGeneral('getBoardsDataFromInstruments').subscribe(boardsData => this.boardIDs=boardsData)
     this.MarketDataService.getMarketDataSources().subscribe(marketSourcesData => this.marketSources = marketSourcesData);
-    this.MarketDataService.getMoexInstruments().subscribe (instrumentData => {
-      this.updateInstrumentDataTable(instrumentData);
-    });      
+   
     this.MarketDataService.getInstrumentData().subscribe(data =>{
      let index =  this.dataSource.data.findIndex(elem=>elem.id===data.data[0].id)
       switch (data.action) {
@@ -125,6 +123,14 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
     this.dialogInstrumentModify.componentInstance.instrumentCorpActions = this.instrumentCorpActions.filter(el=> el.isin===element.isin)
   }
   async ngAfterViewInit() {
+    console.log('formMode',this.FormMode);
+    if (this.FormMode==='Redis') {
+      console.log('getRedisMoexInstruments');
+      this.MarketDataService.getRedisMoexInstruments().subscribe((data)=>this.updateInstrumentDataTable(data))   
+    } else {
+      console.log('getMoexInstruments');
+      this.MarketDataService.getMoexInstruments().subscribe (instrumentData => this.updateInstrumentDataTable(instrumentData))  
+    }
     this.MarketDataService.getInstrumentDataDetails().subscribe(instrumentDetails => {
       this.instrumentDetailsArr = instrumentDetails
     })

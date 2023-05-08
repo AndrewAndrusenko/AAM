@@ -9,6 +9,7 @@ const uiAmmModule = require ('./aam_ui_module');
 const uiAmmInvestmentsModule = require ('./aam_ui_investmentsData')
 const uiAmmAccountingModule = require ('./aam_ui_accounting')
 const uiAmmMarketData = require ('./aam_ui_market_data_load')
+const RedisService = require ('./redis')
 const auth_module = require('./auth_module');
 const bcrypt = require('bcryptjs');
 const config = require('./db_config');
@@ -188,4 +189,7 @@ appServer.post('/AAM/MD/InstrumentCreate/',jsPassport.authenticate('session') , 
 appServer.post('/AAM/MD/InstrumentDelete/',jsPassport.authenticate('session') , uiAmmMarketData.fInstrumentDelete)
 appServer.post('/AAM/MD/InstrumentEdit/',jsPassport.authenticate('session') , uiAmmMarketData.fInstrumentEdit)
 
+RedisService.TestRedis();
+RedisService.redisSetInstrumentList();
+appServer.get('/AAM/Redis/getMoexInstrumentsList/',jsPassport.authenticate('session') , RedisService.redisGetInstrumentList)
 appServer.listen (port,'localhost', () => {console.log (`AAM Server is running on port ${port}`)})

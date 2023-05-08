@@ -159,11 +159,15 @@ export class AppMarketDataService {
     return this.http.get <any[]> ('/api/AAM/MD/getInstrumentDataGeneral/',{params:params})
   }
   getMoexInstruments (rowslimit:number=50000,sorting:string=' secid ASC', searchParameters?:any):Observable<Instruments[]> {
+    console.log('Service fGetMoexInstruments');
     let params = {};
     (searchParameters !== null) ?  params = {...params,...searchParameters}: null;
     (rowslimit !== null) ?  Object.assign(params,{'rowslimit':rowslimit}): null;
     (sorting !== null) ?  Object.assign(params,{'sorting':sorting}): null;
     return this.http.get <Instruments[]> ('/api/AAM/MD/getMoexInstruments/',{params:params})
+  }
+  getRedisMoexInstruments ():Observable<Instruments[]> {
+    return this.http.get <Instruments[]> ('/api/AAM/Redis/getMoexInstrumentsList/')
   }
   getInstrumentDataDetails (secid?:string): Observable <instrumentDetails[]> {
     let params = {};

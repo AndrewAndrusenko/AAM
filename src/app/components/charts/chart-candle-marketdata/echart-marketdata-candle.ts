@@ -24,6 +24,8 @@ export class NgEchartMarketDataCandleComponent  {
     ) {
     this.AtuoCompService.recieveSecIdList().subscribe(secIDsList=>this.secIds=secIDsList)
     this.MarketDataService.getMarketDataForChart().subscribe(marketData=>{
+      console.log('Chart getMarketDataForChart', Date.now());
+
       this.marketData=marketData;
       this.secIds = [...new Set(marketData.map(el=>(el.secid)))]
       console.log('secIds',this.secIds);

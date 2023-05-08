@@ -12,15 +12,20 @@ pg.types.setTypeParser(1114, function(stringValue) {
   return stringValue;  //1114 for time without timezone type
 });
 async function queryExecute (sql,response) {
-  pool.query (sql,  (err, res) => {
-    if (err) {
-      console.log (err.stack.split("\n", 1).join(""))
-      err.detail = err.stack
-      return response.send(err)
-    } else {
-      return response.status(200).json(res.rows)
-    }
-  }) 
+  return new Promise ((resolve,reject) => {
+    pool.query (sql,  (err, res) => {
+      console.log('sql',sql);
+      if (err) {
+        console.log (err.stack.split("\n", 1).join(""))
+        err.detail = err.stack
+        reject(console.log('err',err))
+        // return response.send(err)
+      } else {
+        resolve(res.rows)
+        // return response.status(200).json(res.rows)
+      }
+    })
+  })
 }
 async function fdeleteMarketData (request,response) {
   const query = {
@@ -147,20 +152,23 @@ async function fgetMarketData (request,response){
     break;
   }
   sql = pgp.as.format(query.text,request.query);
-  queryExecute (sql, response);
+  let data = await queryExecute (sql, response);
+  return response.status(200).send(data)
 }
 async function fgetMarketDataSources (request,response) {
    sql =  'SELECT  "sourceName", false AS "checkedAll", false AS indeterminate, false as disabled, json_agg("icMarketDataSources".*) AS "segments" '+
   'FROM "icMarketDataSourcesGlobal" '+
   'LEFT JOIN "icMarketDataSources" ON "icMarketDataSources"."sourceGlobal" = "icMarketDataSourcesGlobal"."sourceCode" '+
   'GROUP BY "sourceName" ';
-  queryExecute (sql, response);
+  let data = await queryExecute (sql, response);
+  return response.status(200).send(data);
 }
 async function fgetInstrumentsCodes (request,response) {
   let fields = request.query.resasarray? 'json_agg(code) as code' :' secid, code, isin, mapcode'	
   sql =  'SELECT ' + fields + '	FROM public."aInstrumentsCodes" WHERE mapcode=${mapcode};';
   sql = pgp.as.format(sql,request.query);
-  queryExecute (sql, response);
+  let data = await queryExecute (sql, response);
+  return response.status(200).send(data);
 }
 async function fgetMoexIssSecuritiesList (start) {
   let url='https://iss.moex.com/iss/securities.json?iss.json=extended&limit=100&lang=en&iss.meta=off&is_trading=true&start='+start.toString()
@@ -193,64 +201,79 @@ async function fimportMoexInstrumentsList (request, response){
   } 
 }
 function fGetMoexInstruments(request,response) {
-  let conditions = {}
-  const query = {text: '', values:[]}
-  conditions = {
-    'secid':{
-      1: ' (secid = ANY(${secid:raw}))',
-    },
-    'boardid' : {
-      1: '(boardid = ANY(array[${boardid}]))',
-    },
-    'sourcecode' : {
-      1: '(sourcecode = ANY(array[${sourcecode}]))  ',
+  return new Promise  (async (resolve) => {
+    let conditions = {}
+    const query = {text: '', values:[]}
+    conditions = {
+      'secid':{
+        1: ' (secid = ANY(${secid:raw}))',
+      },
+      'boardid' : {
+        1: '(boardid = ANY(array[${boardid}]))',
+      },
+      'sourcecode' : {
+        1: '(sourcecode = ANY(array[${sourcecode}]))  ',
+      }
     }
-  }
-  let conditionsMOEXiss =' WHERE'
-  Object.entries(conditions).forEach(([key,value]) => {
-    if  (request.query.hasOwnProperty(key)) {
-      query.values.push(request.query[key]);
-      conditionsMOEXiss +=conditions[key][1] + ' AND ';
+    let conditionsMOEXiss =' WHERE'
+    Object.entries(conditions).forEach(([key,value]) => {
+      if  (request.query.hasOwnProperty(key)) {
+        query.values.push(request.query[key]);
+        conditionsMOEXiss +=conditions[key][1] + ' AND ';
+      }
+    });
+    switch (request.query.Action) {
+      case 'checkLoadedMarketData':
+      break;
+      case 'get_secid_array' :
+        query.text = "SELECT ARRAY_AGG(secid) FROM public.mmoexsecurities " +
+        "LEFT JOIN mmoexsecuritytypes ON mmoexsecurities.type=mmoexsecuritytypes.security_type_name " +
+        "WHERE mmoexsecuritytypes.trade_engine_name !='futures'"
+      break;
+      default :  
+        query.text = 
+        "SELECT mmoexsecurities.id, secid, security_type_title, stock_type, security_type_name, shortname, "+ 
+        " primary_boardid, board_title, mmoexboardgroups.title,mmoexboardgroups.category, mmoexsecurities.name, "+
+        " mmoexsecurities.isin, emitent_title, emitent_inn, type, \"group\", marketprice_boardid, mmoexsecuritygroups.title as group_title, security_group_name, 0 as action "+
+        "FROM public.mmoexsecurities " +
+        "LEFT JOIN mmoexsecuritytypes ON mmoexsecurities.type=mmoexsecuritytypes.security_type_name "+
+        "LEFT JOIN mmoexsecuritygroups ON mmoexsecuritygroups.name=mmoexsecuritytypes.security_group_name "+
+        "LEFT JOIN mmoexboards ON mmoexboards.boardid = mmoexsecurities.primary_boardid "+
+        "LEFT JOIN mmoexboardgroups ON mmoexboardgroups.board_group_id = mmoexboards.board_group_id "
+        query.text +=conditionsMOEXiss.slice (0,-5)
+        query.text += '  LIMIT ${rowslimit:raw};'
+      break;
     }
-  });
-  switch (request.query.Action) {
-    case 'checkLoadedMarketData':
-    break;
-    case 'get_secid_array' :
-      query.text = "SELECT ARRAY_AGG(secid) FROM public.mmoexsecurities " +
-      "LEFT JOIN mmoexsecuritytypes ON mmoexsecurities.type=mmoexsecuritytypes.security_type_name " +
-      "WHERE mmoexsecuritytypes.trade_engine_name !='futures'"
-    break;
-    default :  
-      query.text = 
-      "SELECT mmoexsecurities.id, secid, security_type_title, stock_type, security_type_name, shortname, "+ 
-      " primary_boardid, board_title, mmoexboardgroups.title,mmoexboardgroups.category, mmoexsecurities.name, "+
-      " mmoexsecurities.isin, emitent_title, emitent_inn, type, \"group\", marketprice_boardid, mmoexsecuritygroups.title as group_title, security_group_name, 0 as action "+
-      "FROM public.mmoexsecurities " +
-      "LEFT JOIN mmoexsecuritytypes ON mmoexsecurities.type=mmoexsecuritytypes.security_type_name "+
-      "LEFT JOIN mmoexsecuritygroups ON mmoexsecuritygroups.name=mmoexsecuritytypes.security_group_name "+
-      "LEFT JOIN mmoexboards ON mmoexboards.boardid = mmoexsecurities.primary_boardid "+
-      "LEFT JOIN mmoexboardgroups ON mmoexboardgroups.board_group_id = mmoexboards.board_group_id "
-      query.text +=conditionsMOEXiss.slice (0,-5)
-      query.text += '  LIMIT ${rowslimit:raw};'
-    break;
-  }
-  sql = pgp.as.format(query.text,request.query);
-  queryExecute (sql, response);
+    console.log('fGetMoexInstruments');
+    sql = pgp.as.format(query.text,request.query);
+    await queryExecute (sql, response).then (data => {
+      // console.log('data Ins', data);
+      if (response) {
+        console.log('status', 200);
+        resolve(response.status(200).send(data))
+      } else {
+          console.log('nosend',0);
+          resolve(data)
+        }
+    })
+  })
 }
-function fgetInstrumentDetails (request,response) {
+async function fgetInstrumentDetails (request,response) {
   let sql = "SELECT secid, boardid, shortname, lotsize, facevalue, status, boardname, decimals, matdate::timestamp without time zone, secname, couponperiod, issuesize, remarks, marketcode, instrid, sectorid, minstep, faceunit, isin, latname, regnumber, currencyid, sectype, listlevel, issuesizeplaced, couponpercent, lotvalue, nextcoupon, issuesize*facevalue as issuevolume "+ 
   'FROM public.mmoexinstrumentdetails '
   sql += request.query.secid? "WHERE secid ='"   +request.query.secid +"';": ";" 
-  queryExecute (sql, response);
+  let data = await queryExecute (sql, response);
+  return response.status(200).send(data);
 }
-function fgetInstrumentDataCorpActions (request,response) {
+async function fgetInstrumentDataCorpActions (request,response) {
   let sql = "SELECT id, isin, issuevolume, secname, notinal, notinalcurrency, unredemeedvalue, couponrate, couponamount, actiontype, couponamountrur, to_date(date,'DD.MM.YYYY')::timestamp without time zone as date, 0 as action FROM public.mmoexbondscorpactions ";
   sql += request.query.isin? "WHERE isin ='"   + request.query.isin +"' ": "";
   sql += " ORDER BY to_date(date,'DD.MM.YYYY')::timestamp without time zone; "
-  queryExecute (sql, response);
+  let data = await queryExecute (sql, response);
+  return response.status(200).send(data);
+  // queryExecute (sql, response);
 }
-function fgetInstrumentDataGeneral(request,response) {
+async function fgetInstrumentDataGeneral(request,response) {
   const query = {text: '', values:[]}
   switch (request.query.dataType) {
     case 'getBoardsDataFromInstruments':
@@ -267,7 +290,9 @@ function fgetInstrumentDataGeneral(request,response) {
 
   }
   sql = pgp.as.format(query.text,request.query);
-  queryExecute (sql, response);
+  let data = await queryExecute (sql, response);
+  return response.status(200).send(data)
+  // queryExecute (sql, response);
 }
 async function fInstrumentCreate (request, response) {
   const query = {
@@ -284,7 +309,6 @@ async function fInstrumentCreate (request, response) {
     return response.status(200).json(res.rows)}
   })  
 }
-
 async function fInstrumentDelete (request, response) {
   const query = {text: 'DELETE FROM public.mmoexsecurities WHERE id=${id} RETURNING *;', values: request.body}
   sql = pgp.as.format(query.text,query.values)
@@ -292,7 +316,6 @@ async function fInstrumentDelete (request, response) {
   pool.query (sql,  (err, res) => {if (err) { return response.send(err)} else { return response.status(200).json(res.rows) }
   }) 
 }
-
 async function fInstrumentEdit (request, response) {
   const query = {
     text: 'UPDATE public.mmoexsecurities ' +
@@ -331,7 +354,8 @@ module.exports = {
   fgetInstrumentDataCorpActions,
   fInstrumentCreate,
   fInstrumentEdit,
-  fInstrumentDelete
+  fInstrumentDelete,
+  queryExecute
 }
 
 

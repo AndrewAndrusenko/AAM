@@ -2,11 +2,14 @@
 
 
 <mat-tab-group  *ngIf="messageReceived.text=='Instruments_Root'" mat-stretch-tabs>
-  <mat-tab label="Instruments List"> 
-    <app-app-instrument-table ></app-app-instrument-table >  
+  <mat-tab label="Instruments List (DB)"> 
+    <app-app-instrument-table [FormMode]="'DB'"></app-app-instrument-table >  
   </mat-tab>
+ 
   <mat-tab  label="Market Data" >
-    <app-table-market-data></app-table-market-data> 
+    <app-table-market-data
+    FormMode="QuotesMode"
+    ></app-table-market-data> 
     <!-- <app-table-acc-accounts style="width: 150%;"></app-table-acc-accounts> -->
   </mat-tab>  
     <mat-tab   label="Charts"> 
@@ -117,8 +120,10 @@
   <mat-tab label="Positions"> Positions table  </mat-tab>
 </mat-tab-group>
 
-<app-app-trades-table *ngIf="messageReceived.text=='Trades & Orders_Root'">
-</app-app-trades-table>
+<app-app-instrument-table 
+  *ngIf="messageReceived.text=='Trades & Orders_Root'"
+  [FormMode]="'Redis'">
+</app-app-instrument-table >  
 
 <app-app-clients-table *ngIf="messageReceived.text=='Clients_Root'">
 </app-app-clients-table>    

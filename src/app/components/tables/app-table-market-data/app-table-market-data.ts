@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ViewEncapsulation, EventEmitter, Output, ViewChild, Input} from '@angular/core';
+import { Component, ViewEncapsulation, EventEmitter, Output, ViewChild, Input, AfterViewInit} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {lastValueFrom, map, Observable, startWith, Subscription } from 'rxjs';
@@ -105,10 +105,8 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
     this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data=>{
       this.FirstOpenedAccountingDate = data[0].FirstOpenedDate;
     });
-    this.MarketDataService.getMarketDataSources().subscribe(marketSourcesData => this.marketSources = marketSourcesData);
-    this.MarketDataService.getMarketData().subscribe (marketData => {
-      this.updateMarketDataTable(marketData);
-    });      
+
+    
     this.searchParametersFG = this.fb.group ({
       dataRange : this.dataRange,
       secidList: null,
@@ -127,6 +125,9 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
       map(value => this.AtuoCompService.filter(value || ''))
     );
   }
+
+
+
   formatDate (dateToFormat:any):string {
     let d = dateToFormat,
     month = '' + (d._d.getMonth() + 1),
@@ -212,7 +213,16 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
   }
   async ngAfterViewInit() {
     const number = 123456.789;
+    this.MarketDataService.getMarketDataSources().subscribe(marketSourcesData => this.marketSources = marketSourcesData);
+    if (this.FormMode==='QuotesMode') {
+    this.MarketDataService.getMarketData().subscribe (marketData => {
+      console.log('MarketData getMarketData', Date.now());
+      this.updateMarketDataTable(marketData);
+    }) } else {console.log('formmode',this.FormMode) }
+
     this.MarketDataService.getReloadMarketData().subscribe(marketData => {
+      console.log('MarketData getReloadMarketData', 0);
+
       this.updateMarketDataTable(marketData);
       this.loadingDataState = {State:'Success', Message:'Loading is complited'};
       this.loadMarketData.enable();
