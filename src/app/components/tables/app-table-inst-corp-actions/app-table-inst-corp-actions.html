@@ -1,9 +1,7 @@
-<span *ngIf="FormMode==='Full'" style="color: antiquewhite;"> 
   <mat-form-field class="example-form-field" class = "filterText">
     <mat-label class="colorLabel">Type to search...</mat-label>
     <input 
       (keyup)="applyFilter($event)"
-      [formControl]="filterlFormControl" 
       matInput type="text" #SearchTree  name="tableFilter"
       matTooltip="Use context menu to add filter">
     <button matSuffix 
@@ -16,7 +14,6 @@
     (click)="exportToExcel()">
     Save as XLS 
   </button>
-</span>
 
 <div class="mat-elevation-z8">
   <table  #strategyTable mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class="mat-elevation-z8">

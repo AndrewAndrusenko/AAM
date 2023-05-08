@@ -1,10 +1,7 @@
 const uiAmmMarketData = require ('./aam_ui_market_data_load')
-
 const redis = require('redis');
 const client = redis.createClient();
 client.on('error', err => console.log('Redis Client Error', err));
-
-
 async function TestRedis (request,response) {
   await client.connect();
   // await client.hDel('age')
@@ -13,8 +10,13 @@ async function TestRedis (request,response) {
   })
 }
 async function redisSetInstrumentList (request, response) {
+  console.log('1  redisSetInstrumentList');
   let instrumentsData = await uiAmmMarketData.fGetMoexInstruments(request={query:{rowslimit:50000}},response);
+  console.log('2  redisSetInstrumentList');
+
   await client.hSet('user-session:123', {data:JSON.stringify(instrumentsData)} ).then (async data => {
+  console.log('3  redisSetInstrumentList');
+
     let instrumentsData = await client.hGetAll('user-session:123');
     console.log('SetInstrumentList ',JSON.parse(instrumentsData.data).length);
   })

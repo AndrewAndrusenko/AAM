@@ -1,4 +1,3 @@
-<span *ngIf="FormMode==='Full'"> 
   <mat-form-field  class = "filterText" style="font-size: 22px;">
     <mat-label class="colorLabel">Search by SecID..</mat-label>
     <input 
@@ -42,7 +41,6 @@
     (click)="exportToExcel()">
     Save as XLS 
   </button>
-</span>
 <mat-expansion-panel class="headers-align" 
   (opened)="panelOpenStateSecond = true"
   (closed)="panelOpenStateSecond = false" >

@@ -8,6 +8,7 @@ import { catchError, first, map, take, tap } from 'rxjs/operators';
 import { AppInvestmentDataServiceService } from './app-investment-data.service.service';
 import { AppTabServiceService } from './app-tab-service.service';
 import { AppAccountingService } from './app-accounting.service';
+import { AppMarketDataService } from './app-market-data.service';
 export class customAsyncValidators {
 
   static clientNameCustomAsyncValidator(userService: AppTabServiceService, clientId:number): AsyncValidatorFn {
@@ -120,6 +121,17 @@ export class customAsyncValidators {
           );
     };
   }  
+  static MD_SecidUniqueAsyncValidator (AppMarketDataService: AppMarketDataService, secid:string): AsyncValidatorFn {
+    return (control: AbstractControl): Observable<ValidationErrors> => {
+      return AppMarketDataService
+        .getInstrumentDataGeneral('validateSecidForUnique',control.value)
+        .pipe(
+          map ( secidIsTaken => (control.value !== secid && secidIsTaken.length ? { secidIsTaken: true } : null)  ),
+          catchError(() => of(null)),
+          take(1)
+        );
+    };
+  }
 }
 function getControlName(c: AbstractControl): string | null {
   const formGroup = c.parent.controls;

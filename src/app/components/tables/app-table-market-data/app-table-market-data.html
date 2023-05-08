@@ -1,4 +1,4 @@
-<span *ngIf="FormMode==='Full'"> 
+<span *ngIf="FormMode==='QuotesMode'" title="TableFilterGroup"> 
   <mat-form-field class="example-form-field" class = "filterText">
     <mat-label class="colorLabel">Type to search...</mat-label>
     <input 
@@ -19,8 +19,8 @@
     Save as XLS 
   </button>
 </span>
-<mat-expansion-panel *ngIf="FormMode==='Full'"
-   class="first-expansion" 
+<mat-expansion-panel *ngIf="FormMode==='QuotesMode'" title="MarketDataUploadingPanel"
+  class="first-expansion" 
   (opened)="panelOpenStateFirst = true"
   (closed)="panelOpenStateFirst = false" 
   style="width: 100%;">
@@ -37,75 +37,80 @@
   </mat-expansion-panel-header >
   <h2 style=" color: rgb(44, 43, 43); text-align: center;" *ngIf="loadingDataState.State==='Pending'">Loading market data...</h2>
   <form class="submit"   [formGroup]="loadMarketData" style="font-size: 18px;   margin-top: 0.5%;">
-    <button color = "primary" mat-raised-button 
+    <button color = "primary" mat-raised-button title="getMarketData"
       style=" margin-left:1%; font-size: 18px; margin-right: 2%;"
       [disabled]="loadMarketData.disabled || loadMarketData.invalid"
       (click)="getMarketData()">
       Get matket data 
     </button>
-    <mat-form-field style="margin-right: 2%; width: 12%;  color: rgb(44, 43, 43);" >
+    <mat-form-field style="margin-right: 2%; width: 12%;  color: rgb(44, 43, 43);" title="dateForLoadingPrices">
       <input matInput formControlName = "dateForLoadingPrices" [matDatepicker]="dateForMarketData" placeholder="Date to upload">
       <mat-datepicker-toggle matSuffix [for]="dateForMarketData"></mat-datepicker-toggle>
       <mat-datepicker  #dateForMarketData></mat-datepicker>
     </mat-form-field> 
     <mat-slide-toggle #deleteOldMarketData formControlName="overwritingCurrentData"
-    style="font-size:100%; letter-spacing: .05rem; margin-left: 2%;"
-    [style.color]="deleteOldMarketData.checked ? 'red':'rgb(44, 43, 43)' "
-    >Replace current market data <br>{{deleteOldMarketData.checked? 'allowed!':'forbidden'}}
-  </mat-slide-toggle>
-  <div *ngIf="loadingDataState.State!=='Pending'">
-    <h2 style="text-align: center;" [style.color]="loadingDataState.State=='terminated'? 'red':'rgb(44, 43, 43)'">
-      {{loadingDataState.Message}}
-    </h2>
-    <pre style="font-size: 18px;">{{loadedMarketData | json}}</pre>
-  </div>
-<span style="display: flex; ">
-    <section class="marketSource-section" style="color: rgb(44, 43, 43);"
-      *ngFor="let marketSource of marketSources;let i=index" >
-      <span class="example-list-section" >
-        <mat-checkbox  class="marketSource-margin"
-        [indeterminate]="marketSource.indeterminate"
-        (change)="marketSource.checkedAll=!marketSource.checkedAll;
-        setAll(i)"
-        [checked]="marketSource.checkedAll"
-        [disabled]="marketSource.disabled">
-          {{marketSource.sourceName}}
-        </mat-checkbox>
-      </span>
-      <span class="example-list-section" >
-        <ul>
-          <li *ngFor="let segment of marketSource.segments; let z=index">
-            <mat-checkbox [disabled]="marketSource.disabled"
-                          [checked]="segment.checked"
-                          (change)="segment.checked=!segment.checked;
-                                    updateAllComplete(i)">
-              {{segment.description}}
-            </mat-checkbox>
-          </li>
-        </ul>
-      </span> 
-    </section>
-  </span>
+      style="font-size:100%; letter-spacing: .05rem; margin-left: 2%;"
+      [style.color]="deleteOldMarketData.checked ? 'red':'rgb(44, 43, 43)' "
+      >Replace current market data <br>{{deleteOldMarketData.checked? 'allowed!':'forbidden'}}
+    </mat-slide-toggle>
+    <div *ngIf="loadingDataState.State==='Success'||loadingDataState.State==='terminated'" title="loadingDataState">
+      <h2 style="text-align: center;" [style.color]="loadingDataState.State=='terminated'? 'red':'rgb(44, 43, 43)'">
+        {{loadingDataState.Message}}
+      </h2>
+      <pre  style="font-size: 18px;">{{loadedMarketData | json}}</pre>
+    </div>
+    <span style="display: flex; " title="marketSource-section">
+      <section class="marketSource-section" style="color: rgb(44, 43, 43);"
+        *ngFor="let marketSource of marketSources;let i=index" >
+        <span class="example-list-section" >
+          <mat-checkbox  class="marketSource-margin"
+          [indeterminate]="marketSource.indeterminate"
+          (change)="marketSource.checkedAll=!marketSource.checkedAll;
+          setAll(i)"
+          [checked]="marketSource.checkedAll"
+          [disabled]="marketSource.disabled">
+            {{marketSource.sourceName}}
+          </mat-checkbox>
+        </span>
+        <span class="example-list-section" >
+          <ul>
+            <li *ngFor="let segment of marketSource.segments; let z=index">
+              <mat-checkbox [disabled]="marketSource.disabled"
+                            [checked]="segment.checked"
+                            (change)="segment.checked=!segment.checked;
+                                      updateAllComplete(i)">
+                {{segment.description}}
+              </mat-checkbox>
+            </li>
+          </ul>
+        </span> 
+      </section>
+      <button color = "primary" mat-raised-button [disabled]="true" title="getMoexSecurities"
+        style=" margin-left:1%; height: 5%; align-items:flex-end; font-size: 14px; margin-right: 2%;"
+        (click)="getMoexSecurities()">
+        Get moex securities list 
+      </button>
+    </span>
   </form>
   <mat-progress-bar *ngIf="loadMarketData.disabled" color="primary" mode="query"></mat-progress-bar>
-  <mat-expansion-panel *ngIf="logLoadingData.length" class="complex-search-entries" 
-  (opened)="statusLogPanelOpenState = true"
-  (closed)="statusLogPanelOpenState = false" >
-  <mat-expansion-panel-header >
-    <mat-panel-title>
-      Status Job Log
-    </mat-panel-title>
-    <mat-panel-description style="color: rgb(198, 255, 215);">
-      Total: Created  Tap to {{statusLogPanelOpenState? 'hide': 'show'}} details
-      <mat-icon color = 'accent'>done</mat-icon>
-    </mat-panel-description>
-  </mat-expansion-panel-header >
-<pre style="font-size: 18px;">{{logLoadingData | json}}</pre>
+  <mat-expansion-panel *ngIf="logLoadingData.length" class="complex-search-entries" title="logLoadingData"
+    (opened)="statusLogPanelOpenState = true"
+    (closed)="statusLogPanelOpenState = false" >
+    <mat-expansion-panel-header >
+      <mat-panel-title>
+        Status Job Log
+      </mat-panel-title>
+      <mat-panel-description style="color: rgb(198, 255, 215);">
+        Total: Created  Tap to {{statusLogPanelOpenState? 'hide': 'show'}} details
+        <mat-icon color = 'accent'>done</mat-icon>
+      </mat-panel-description>
+    </mat-expansion-panel-header >
+    <pre style="font-size: 18px;">{{logLoadingData | json}}</pre>
+  </mat-expansion-panel>
 </mat-expansion-panel>
 
-</mat-expansion-panel>
-
-<mat-expansion-panel class="headers-align" 
+<mat-expansion-panel class="headers-align" title="ComplexSearchPanel"
+  [expanded]="1"
   (opened)="panelOpenStateSecond = true"
   (closed)="panelOpenStateSecond = false" >
   <mat-expansion-panel-header >
@@ -165,8 +170,9 @@
             (click)="toggleAllSelection()" >
             ALL - {{this.allSelected.selected? 'Clear' :'Select' }} All 
           </mat-option>
-          <mat-option *ngFor="let board of boardIDs" [value]="board.toString()">
-              {{board}}
+          <mat-option *ngFor="let board of boardIDs" [value]="board.boardid.toString()">
+            {{board.boardid}} - {{board.board_title}}
+              
           </mat-option>
         </mat-select>
       </mat-form-field>
@@ -198,11 +204,6 @@
         </mat-autocomplete>
       </mat-form-field>
     </span>
-    <button color = "primary" mat-raised-button 
-    style=" margin-left:1%; font-size: 18px; margin-right: 2%;"
-    (click)="getMoexSecurities()">
-    Get moex securities list 
-  </button>
   </form>
 </mat-expansion-panel>
 
@@ -215,7 +216,7 @@
         [ngStyle]="{'color': element['percentprice'] ? 'black' : (element['currency'] == 'RUB' ? 'rgb(198, 255, 215)' : 'white')}"
         mat-cell 
         *matCellDef="let element" [cdkContextMenuTriggerFor]="instrumentcontextmenu"  > 
-        <span [ngSwitch]="true==true">
+        <span [ngSwitch]="true==true" title ="TableColumnFormatting">
           <p *ngSwitchCase="['tradedate'].includes(column)">
               {{ element[column] | date }}
           </p>          
@@ -232,8 +233,7 @@
             {{element[column]}}
           </p>
         </span>
-
-        <ng-template  #instrumentcontextmenu>
+        <ng-template  #instrumentcontextmenu title="TableContextMenu">
           <div class="tree-menu-context" *ngIf="!readOnly" cdkMenu >
             <button 
               (click)="
@@ -251,23 +251,14 @@
             </button> 
           </div>
         </ng-template>   
-     
       </td>
     </ng-container>
     <ng-container matColumnDef="expand">
       <th mat-header-cell *matHeaderCellDef aria-label="row actions">&nbsp;</th>
       <td mat-cell *matCellDef="let element"></td>
     </ng-container>
-    
-<!--     <ng-container matColumnDef="expandedDetail" >
-      <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplayWithExpand.length"></td>
-    </ng-container> -->
-
     <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
-    <tr mat-row  *matRowDef="let element; columns: columnsToDisplay"
-    >
-    </tr>
-    <!-- <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"></tr> -->
+    <tr mat-row  *matRowDef="let element; columns: columnsToDisplay"></tr>
   </table>
   <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" [pageSize]="20" aria-label="Select page of users"></mat-paginator>
 </div>

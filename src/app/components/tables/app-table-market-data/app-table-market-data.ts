@@ -15,7 +15,6 @@ import * as XLSX from 'xlsx'
 import { MatOption } from '@angular/material/core';
 import { AppTableAccAccountsComponent } from '../app-table-acc-accounts/app-table-acc-accounts';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { AppConfimActionComponent } from '../../alerts/app-confim-action/app-confim-action.component';
 import { MatCalendarCellClassFunction } from '@angular/material/datepicker';
 import { AppMarketDataService } from 'src/app/services/app-market-data.service';
 import * as moment from 'moment';
@@ -63,7 +62,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
   public readOnly: boolean = false; 
   addOnBlur = true;
   panelOpenStateFirst = false;
-  panelOpenStateSecond = false;
+  panelOpenStateSecond = true;
   
   accessToClientData: string = 'true';
   action ='';
@@ -77,7 +76,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
   balacedDateWithEntries : Date[]
   FirstOpenedAccountingDate : Date;
   filterDateFormated : string;
-  boardIDs:string[] = ["XNAS", "AGRO", "FQBR", "INAV", "MMIX", "RTSI", "SDII", "SMAL", "SNDX", "TQBD", "TQBR", "TQCB", "TQFD", "TQFE", "TQIF", "TQIR", "TQIU", "TQOB", "TQOD", "TQOE", "TQPI", "TQRD", "TQTD", "TQTE", "TQTF"]
+  boardIDs = []
   searchParametersFG: FormGroup;
   filterlFormControl = new FormControl('');
   closingDate = new FormControl<Date | null>(null)
@@ -87,10 +86,9 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
   });
   marketDataDeleted: Object;
   loadingDataState: {
-    Message: string ,
+    Message: string,
     State:string 
   }
-
   constructor(
     private AccountingDataService:AppAccountingService, 
     private MarketDataService: AppMarketDataService,
@@ -101,12 +99,13 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
     private fb:FormBuilder, 
     public snack:MatSnackBar
   ) {
-    this.loadingDataState = {Message:'',State: 'Pending'};
+    this.MarketDataService.getInstrumentDataGeneral('getBoardsDataFromInstruments').subscribe(boardsData => this.boardIDs=boardsData)
+    this.MarketDataService.getMarketDataSources().subscribe(marketSourcesData => this.marketSources = marketSourcesData);
+
+    this.loadingDataState = {Message:'',State: 'None'};
     this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data=>{
       this.FirstOpenedAccountingDate = data[0].FirstOpenedDate;
     });
-
-    
     this.searchParametersFG = this.fb.group ({
       dataRange : this.dataRange,
       secidList: null,
@@ -125,9 +124,6 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
       map(value => this.AtuoCompService.filter(value || ''))
     );
   }
-
-
-
   formatDate (dateToFormat:any):string {
     let d = dateToFormat,
     month = '' + (d._d.getMonth() + 1),
@@ -184,7 +180,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
       if (!data.length) {
         this.logLoadingData = await functionToLoadData(sourcesData, dateToLoad);
         console.log('this.loadMarketData.enable()')
-        // this.loadingDataState = {Message:'Loading is complited.', State:'Success'};
+        this.loadingDataState = {Message:'Loading is complited.', State:'Success'};
         this.marketSources.forEach(el=>el.checkedAll=false);
       }
       else {
@@ -213,16 +209,15 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
   }
   async ngAfterViewInit() {
     const number = 123456.789;
-    this.MarketDataService.getMarketDataSources().subscribe(marketSourcesData => this.marketSources = marketSourcesData);
     if (this.FormMode==='QuotesMode') {
-    this.MarketDataService.getMarketData().subscribe (marketData => {
-      console.log('MarketData getMarketData', Date.now());
-      this.updateMarketDataTable(marketData);
-    }) } else {console.log('formmode',this.FormMode) }
-
+      // this.panelOpenStateSecond=false;
+      this.MarketDataService.getMarketData().subscribe (marketData => {
+        console.log('MarketData getMarketData', this.panelOpenStateSecond);
+        this.updateMarketDataTable(marketData);
+      }) 
+    } 
     this.MarketDataService.getReloadMarketData().subscribe(marketData => {
       console.log('MarketData getReloadMarketData', 0);
-
       this.updateMarketDataTable(marketData);
       this.loadingDataState = {State:'Success', Message:'Loading is complited'};
       this.loadMarketData.enable();

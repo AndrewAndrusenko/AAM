@@ -1,9 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, Subject, repeat } from 'rxjs';
-import { Instruments, InstrumentsMapCodes, instrumentCorpActions, instrumentDetails, marketData, marketDataSources, marketSourceSegements, moexMarketDataForiegnShres } from '../models/accounts-table-model';
-import { param } from 'jquery';
-var ROOT_PATH = 'https://echarts.apache.org/examples';
+import { Observable, Subject } from 'rxjs';
+import { Instruments, InstrumentsMapCodes, instrumentCorpActions, instrumentDetails, marketData, marketDataSources, marketSourceSegements } from '../models/accounts-table-model';
 interface InstrumentDataSet {
   data:Instruments[],
   action:string
@@ -11,7 +9,6 @@ interface InstrumentDataSet {
 @Injectable({
   providedIn: 'root'
 })
-
 export class AppMarketDataService {
   private subjectMarketData = new Subject<marketData[]> ()
   private subjectCharMarketData = new Subject<marketData[]> ()
@@ -154,8 +151,9 @@ export class AppMarketDataService {
     const params = {mapcode:mapcode,secid:secid, resasarray:resasarray}
     return this.http.get <InstrumentsMapCodes[]> ('/api/AAM/MD/getInstrumentsCodes/',{params:params})
   }
-  getInstrumentDataGeneral (dataType:string): Observable <any[]> {
+  getInstrumentDataGeneral (dataType:string, secid?:string): Observable <any[]> {
     const params = {dataType:dataType}
+    secid? Object.assign(params,{secid:secid}) : null;
     return this.http.get <any[]> ('/api/AAM/MD/getInstrumentDataGeneral/',{params:params})
   }
   getMoexInstruments (rowslimit:number=50000,sorting:string=' secid ASC', searchParameters?:any):Observable<Instruments[]> {

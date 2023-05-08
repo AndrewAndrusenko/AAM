@@ -1,5 +1,5 @@
 import { AfterViewInit, Component,  EventEmitter,  Input, OnInit, Output, SimpleChanges, ViewChild,  } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { AsyncValidatorFn, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
 import { Instruments, instrumentCorpActions, instrumentDetails } from 'src/app/models/accounts-table-model';
@@ -10,6 +10,7 @@ import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dia
 import { menuColorGl } from 'src/app/models/constants';
 import { AppMarketDataService } from 'src/app/services/app-market-data.service';
 import { MatSelectChange } from '@angular/material/select';
+import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
 
 @Component({
   selector: 'app-inv-instrument-modify-form',
@@ -40,11 +41,12 @@ export class AppInvInstrumentModifyFormComponent implements OnInit, AfterViewIni
   securityTypes: any[];
   securityTypesFiltered: any[];
   securityGroups: any;
+  SecidUniqueAsyncValidator :AsyncValidatorFn;
 
   constructor (
     private fb:FormBuilder, 
     private dialog: MatDialog, 
-    private AccountingDataService:AppAccountingService, 
+    // private AccountingDataService:AppAccountingService, 
     private CommonDialogsService:HadlingCommonDialogsService,
     private MarketDataService: AppMarketDataService,
 
@@ -53,7 +55,7 @@ export class AppInvInstrumentModifyFormComponent implements OnInit, AfterViewIni
     this.formDisabledFields = ['clientId', 'accountId', 'idportfolio']
     this.instrumentModifyForm = this.fb.group ({
       id : {value:null, disabled: false},
-      secid:  {value:null, disabled: false}, 
+      secid: [null, { validators:  Validators.required, asyncValidators: null, updateOn: 'blur' }], 
       security_type_title:  {value:null, disabled: false},
       security_group_name:  {value:null, disabled: false}, 
       security_type_name:  {value:null, disabled: false}, 
@@ -118,6 +120,8 @@ export class AppInvInstrumentModifyFormComponent implements OnInit, AfterViewIni
   }
   ngAfterViewInit(): void {
     this.instrumentDetailsForm.patchValue(this.instrumentDetails[0])
+    this.SecidUniqueAsyncValidator = customAsyncValidators.MD_SecidUniqueAsyncValidator (this.MarketDataService, this.secid.value);
+     this.secid.setAsyncValidators([this.SecidUniqueAsyncValidator])
   }
   filtersecurityType (filter:string) {
     this.securityTypesFiltered = this.securityTypes.filter (elem => elem.security_group_name===filter)
@@ -130,7 +134,6 @@ export class AppInvInstrumentModifyFormComponent implements OnInit, AfterViewIni
       this.CommonDialogsService.snackResultHandler(result)
     } else {
       this.CommonDialogsService.snackResultHandler({name:'success', detail: result + ' instrument'}, action)
-      this.AccountingDataService.sendReloadAccontList (this.instrumentModifyForm.controls['id']);
     }
     this.formDisabledFields.forEach(elem => this.instrumentModifyForm.controls[elem].disable())
   }
