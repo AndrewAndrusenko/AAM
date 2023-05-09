@@ -20,6 +20,7 @@ async function queryExecute (sql, response) {
         err.detail = err.stack
         resolve (response? response.send(err):err)
       } else {
+        console.log('**********************QTY rows',res.rows.length);
         resolve (response? response.status(200).json(res.rows):res.rows)
       }
     })
@@ -257,7 +258,7 @@ async function fgetInstrumentDataCorpActions (request,response) {
   sql += " ORDER BY to_date(date,'DD.MM.YYYY')::timestamp without time zone; "
   queryExecute (sql, response);
 }
-async function fgetInstrumentDataGeneral(request,response) {
+async function fgetInstrumentDataGeneral(request,response) { 
   const query = {text: '', values:[]}
   switch (request.query.dataType) {
     case 'getBoardsDataFromInstruments':
@@ -272,7 +273,10 @@ async function fgetInstrumentDataGeneral(request,response) {
       query.text = "SELECT name, title  FROM public.mmoexsecuritygroups;"
     break;
     case 'validateSecidForUnique':
-      query.text = "SELECT secid  FROM public.mmoexsecurities where secid=${secid};"
+      query.text = "SELECT secid  FROM public.mmoexsecurities where UPPER(secid)=${fieldtoCheck};"
+    break;
+    case 'validateISINForUnique':
+      query.text = "SELECT isin  FROM public.mmoexsecurities where UPPER(isin)=${fieldtoCheck};"
     break;
 
   }
@@ -283,7 +287,7 @@ async function fInstrumentCreate (request, response) {
   const query = {
   text: 'INSERT INTO public.mmoexsecurities ' +
         '(secid, shortname, name, isin,  emitent_title, emitent_inn, type, "group", primary_boardid, marketprice_boardid)' +
-        ' VALUES (${secid},${shortname},${name},${isin},${emitent_title},${emitent_inn},${type},${group},${primary_boardid},${marketprice_boardid}) RETURNING *;',
+        ' VALUES (UPPER(${secid}),${shortname},${name},UPPER(${isin}),${emitent_title},${emitent_inn},${type},${group},${primary_boardid},${marketprice_boardid}) RETURNING *;',
   }
   sql = pgp.as.format(query.text,request.body.data)
   queryExecute (sql, response);
@@ -297,11 +301,11 @@ async function fInstrumentEdit (request, response) {
   const query = {
     text: 'UPDATE public.mmoexsecurities ' +
     'SET  ' +
-    'secid=${secid}, '+
+    'secid=UPPER(${secid}), '+
     'name=${name}, '+
     'shortname=${shortname}, '+
     'emitent_title=${emitent_title}, '+
-    'isin=${isin}, '+
+    'isin=UPPER(${isin}), '+
     'emitent_inn=${emitent_inn}, '+
     'type=${type}, '+
     '"group"=${group}, '+
