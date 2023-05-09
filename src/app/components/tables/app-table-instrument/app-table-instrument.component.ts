@@ -37,7 +37,6 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
     'isin', 
     'primary_boardid', 
     'board_title', 
-    'name', 
     'emitent_inn', 
     'action'
   ];
@@ -48,7 +47,6 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
     'ISIN', 
     'Primary_Board', 
     'Board Title', 
-    'Issuer', 
     'Issuer INN', 
     'action'
   ];
@@ -115,7 +113,7 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
     });
   }
   openInstrumentModifyForm (action:string, element:any) {
-    this.dialogInstrumentModify = this.dialog.open (AppInvInstrumentModifyFormComponent,{minHeight:'600px', minWidth:'1300px', autoFocus: false, maxHeight: '90vh'})
+    this.dialogInstrumentModify = this.dialog.open (AppInvInstrumentModifyFormComponent,{minHeight:'600px', minWidth:'800px', maxWidth:'60vw', autoFocus: false, maxHeight: '90vh'})
     this.dialogInstrumentModify.componentInstance.moexBoards = this.boardIDs;
     this.dialogInstrumentModify.componentInstance.action = action;
     this.dialogInstrumentModify.componentInstance.data = element;

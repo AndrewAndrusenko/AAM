@@ -66,7 +66,7 @@ export class AppInvInstrumentModifyFormComponent implements OnInit, AfterViewIni
       title:  {value:null, disabled: false},
       category:  {value:null, disabled: false}, 
       name:  {value:null, disabled: false}, 
-      isin: [null, { validators:  Validators.required, asyncValidators: null, updateOn: 'blur' }], 
+      isin: ['', {  asyncValidators: null, updateOn: 'blur' }], 
       emitent_title:  {value:null, disabled: false}, 
       emitent_inn:  {value:null, disabled: false}, 
       type:  {value:null, disabled: false}, 
@@ -109,9 +109,23 @@ export class AppInvInstrumentModifyFormComponent implements OnInit, AfterViewIni
       this.instrumentModifyForm.disable();
     }
   }
+  addAsyncValidators(action:string) {
+    if (['Create','Create_Example'].includes(this.action)) {
+      this.SecidUniqueAsyncValidator = customAsyncValidators.MD_SecidUniqueAsyncValidator (this.MarketDataService, '');
+      this.ISINuniqueAsyncValidator = customAsyncValidators.MD_ISINuniqueAsyncValidator (this.MarketDataService, '');
+    } else {
+      this.SecidUniqueAsyncValidator = customAsyncValidators.MD_SecidUniqueAsyncValidator (this.MarketDataService, this.secid.value);
+      this.ISINuniqueAsyncValidator = customAsyncValidators.MD_ISINuniqueAsyncValidator (this.MarketDataService, this.isin.value);
+    }
+    this.secid.setAsyncValidators([this.SecidUniqueAsyncValidator]);
+    this.isin.setAsyncValidators([this.ISINuniqueAsyncValidator]);
+    this.secid.updateValueAndValidity();
+    this.isin.updateValueAndValidity();
+  }
   ngOnChanges(changes: SimpleChanges) {
     this.MarketDataService.getMoexInstruments(undefined,undefined, {secid:[changes['secidParam'].currentValue,changes['secidParam'].currentValue]}).subscribe (instrumentData => {
       this.instrumentModifyForm.patchValue(instrumentData[0]);
+      this.addAsyncValidators('Edit');
       this.filtersecurityType(this.group.value)
       this.MarketDataService.getInstrumentDataCorpActions(instrumentData[0].isin).subscribe(instrumentCorpActions => {
         this.MarketDataService.sendCorpActionData(instrumentCorpActions)
@@ -121,23 +135,10 @@ export class AppInvInstrumentModifyFormComponent implements OnInit, AfterViewIni
   }
   ngAfterViewInit(): void {
     this.instrumentDetailsForm.patchValue(this.instrumentDetails[0]);
-    if (['Create','Create_Example'].includes(this.action)) {
-      this.SecidUniqueAsyncValidator = customAsyncValidators.MD_SecidUniqueAsyncValidator (this.MarketDataService, '');
-      this.ISINuniqueAsyncValidator = customAsyncValidators.MD_ISINuniqueAsyncValidator (this.MarketDataService, '');
-    } else {
-      this.SecidUniqueAsyncValidator = customAsyncValidators.MD_SecidUniqueAsyncValidator (this.MarketDataService, this.secid.value);
-      this.ISINuniqueAsyncValidator = customAsyncValidators.MD_ISINuniqueAsyncValidator (this.MarketDataService, this.isin.value);
-    }
-     this.secid.setAsyncValidators([this.SecidUniqueAsyncValidator])
-     this.isin.setAsyncValidators([this.ISINuniqueAsyncValidator])
-     this.secid.updateValueAndValidity()
-     this.isin.updateValueAndValidity()
+    this.addAsyncValidators(this.action);
   }
   filtersecurityType (filter:string) {
     this.securityTypesFiltered = this.securityTypes.filter (elem => elem.security_group_name===filter)
-  }
-  selectPortfolio () {
-
   }
   snacksBox(result:any, action?:string){
     if (result['name']=='error') {
@@ -152,6 +153,8 @@ export class AppInvInstrumentModifyFormComponent implements OnInit, AfterViewIni
     return result;
   }
   updateInstrumentData(action:string){
+    this.instrumentModifyForm.updateValueAndValidity();
+    if (this.instrumentModifyForm.invalid) {return}
     switch (action) {
       case 'Create_Example':
       case 'Create':
@@ -180,7 +183,28 @@ export class AppInvInstrumentModifyFormComponent implements OnInit, AfterViewIni
       break;
     }
   }
-
+/*   updateInstrumentDetailsData(action:string){
+    switch (action) {
+      case 'Edit':
+        this.MarketDataService.upsertInstrumentDetails (this.instrumentDetailsForm.value).subscribe(result => {
+          // this.MarketDataService.sendInstrumentData(this.addJoinedFieldsToResult(result),'Updated')
+          this.snacksBox(result.length,'Updated')
+        })
+      break;
+      case 'Delete':
+        this.CommonDialogsService.confirmDialog('Delete Instrument Details for ' + this.secid.value).subscribe(isConfirmed => {
+          if (isConfirmed.isConfirmed) {
+            this.instrumentModifyForm.controls['id'].enable()
+            this.MarketDataService.deleteInstrumentDetails (this.instrumentDetailsForm.value['id']).subscribe (result =>{
+              // this.MarketDataService.sendInstrumentData(result,'Deleted')
+              this.snacksBox(result.length,'Deleted')
+              this.CommonDialogsService.dialogCloseAll();
+            })
+          }
+        })
+      break;
+    }
+  } */
   get  secid() {return this.instrumentModifyForm.get('secid')}​
   get  security_type_title() {return this.instrumentModifyForm.get('security_type_title')}​
   get  shortname ()   {return this.instrumentModifyForm.get('shortname') } 

@@ -231,7 +231,7 @@ function fGetMoexInstruments(request,response) {
         query.text = 
         "SELECT mmoexsecurities.id, secid, security_type_title, stock_type, security_type_name, shortname, "+ 
         " primary_boardid, board_title, mmoexboardgroups.title,mmoexboardgroups.category, mmoexsecurities.name, "+
-        " mmoexsecurities.isin, emitent_title, emitent_inn, type, \"group\", marketprice_boardid, mmoexsecuritygroups.title as group_title, security_group_name, 0 as action "+
+        " COALESCE(mmoexsecurities.isin,'') as isin, emitent_title, emitent_inn, type, \"group\", marketprice_boardid, mmoexsecuritygroups.title as group_title, security_group_name, 0 as action "+
         "FROM public.mmoexsecurities " +
         "LEFT JOIN mmoexsecuritytypes ON mmoexsecurities.type=mmoexsecuritytypes.security_type_name "+
         "LEFT JOIN mmoexsecuritygroups ON mmoexsecuritygroups.name=mmoexsecuritytypes.security_group_name "+
@@ -316,6 +316,24 @@ async function fInstrumentEdit (request, response) {
   sql = pgp.as.format(query.text,request.body.data)
   queryExecute (sql, response);
 }
+
+async function fInstrumentDetailsDelete (request, response) {
+  const query = {text: 'DELETE FROM public.mmoexinstrumentdetails WHERE id=${id} RETURNING *;', values: request.body}
+  sql = pgp.as.format(query.text,query.values)
+  queryExecute (sql, response);
+}
+async function fInstrumentDetailsUPSERT (request, response) {
+  let fields = 'secid, boardid, shortname, lotsize, facevalue, status, boardname, decimals, matdate, secname, couponperiod, issuesize, remarks, marketcode, instrid, sectorid, minstep, faceunit, isin, latname, regnumber, currencyid, sectype, listlevel, issuesizeplaced, couponpercent, lotvalue, nextcoupon'
+  console.log('fields.split()',fields.split(','));
+  let values = fields.split(',').map(el=>'${'+el+'}')
+  let updatePairs = fields.split(',').map(el=> el+'=${'+el+'}')
+  const query = {text:'INSERT INTO public.mmoexinstrumentdetails ('+ fields +') VALUES ('+ values + ') ON CONFLICT (secid) DO UPDATE SET  ' + updatePairs + ' WHERE secid=${secid} RETURNING *;',
+  } 
+  console.log('query.text', query.text);
+  sql = pgp.as.format(query.text,request.body.data)
+  queryExecute (sql, response);
+}
+
 module.exports = {
   finsertMarketData,
   fgetMarketData,
@@ -330,7 +348,8 @@ module.exports = {
   fInstrumentCreate,
   fInstrumentEdit,
   fInstrumentDelete,
-  queryExecute
+  fInstrumentDetailsDelete,
+  fInstrumentDetailsUPSERT
 }
 
 

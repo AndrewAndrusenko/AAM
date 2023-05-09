@@ -152,7 +152,7 @@ export class AppMarketDataService {
   }
   getInstrumentDataGeneral (dataType:string, fieldtoCheck?:string): Observable <any[]> {
     const params = {dataType:dataType}
-    fieldtoCheck? Object.assign(params,{fieldtoCheck:fieldtoCheck}) : null;
+    fieldtoCheck!==null? Object.assign(params,{fieldtoCheck:fieldtoCheck}) : null;
     return this.http.get <any[]> ('/api/AAM/MD/getInstrumentDataGeneral/',{params:params})
   }
   getMoexInstruments (rowslimit:number=50000,sorting:string=' secid ASC', searchParameters?:any):Observable<Instruments[]> {
@@ -175,7 +175,6 @@ export class AppMarketDataService {
     isin?  Object.assign(params,{isin:isin}): null;
     return this.http.get <instrumentCorpActions[]> ('/api/AAM/MD/getInstrumentDataCorpActions/',{params:params})
   }
-  
   sendReloadMarketData ( dataSet:marketData[]) { //the component that wants to update something, calls this fn
     this.subjectMarketData.next(dataSet); //next() will feed the value in Subject
   }
@@ -212,6 +211,12 @@ export class AppMarketDataService {
   }
   getInstrumentData(): Observable<InstrumentDataSet> { //the receiver component calls this function 
     return this.subjectInstrument.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
+  }
+  deleteInstrumentDetails (id:string): Observable<instrumentDetails[]> { 
+    return this.http.post  <instrumentDetails[]> ('/api/AAM/MD/InstrumentDetailsDelete/',{'id': id})
+  } 
+  upsertInstrumentDetails (data:any):  Observable<instrumentDetails[]>  { 
+    return this.http.post <instrumentDetails[]> ('/api/AAM/MD/InstrumentDetailsUPSERT/',{'data': data})
   }
 }
 

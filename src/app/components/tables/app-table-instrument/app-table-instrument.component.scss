@@ -12,7 +12,6 @@
 }
 .colorLabel {
   color: white;
-
 }
 .headers-align  .mat-expansion-panel-header {
   background-color: #504f4f;
@@ -73,5 +72,7 @@ tr:hover {
 tr:active {
   background: rgb(43, 43, 245);
 }
-
+.mat-sort-header {
+  padding: 0px;
+}
 

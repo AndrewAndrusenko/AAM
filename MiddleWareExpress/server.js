@@ -189,6 +189,9 @@ appServer.post('/AAM/MD/InstrumentCreate/',jsPassport.authenticate('session') , 
 appServer.post('/AAM/MD/InstrumentDelete/',jsPassport.authenticate('session') , uiAmmMarketData.fInstrumentDelete)
 appServer.post('/AAM/MD/InstrumentEdit/',jsPassport.authenticate('session') , uiAmmMarketData.fInstrumentEdit)
 
+appServer.post('/AAM/MD/InstrumentDetailsDelete/',jsPassport.authenticate('session') , uiAmmMarketData.fInstrumentDetailsDelete)
+appServer.post('/AAM/MD/InstrumentDetailsUPSERT/',jsPassport.authenticate('session') , uiAmmMarketData.fInstrumentDetailsUPSERT)
+
 RedisService.TestRedis();
 RedisService.redisSetInstrumentList();
 appServer.get('/AAM/Redis/getMoexInstrumentsList/',jsPassport.authenticate('session') , RedisService.redisGetInstrumentList)
