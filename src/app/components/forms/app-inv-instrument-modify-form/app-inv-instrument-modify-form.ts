@@ -42,6 +42,7 @@ export class AppInvInstrumentModifyFormComponent implements OnInit, AfterViewIni
   securityTypesFiltered: any[];
   securityGroups: any;
   SecidUniqueAsyncValidator :AsyncValidatorFn;
+  ISINuniqueAsyncValidator :AsyncValidatorFn;
 
   constructor (
     private fb:FormBuilder, 
@@ -65,7 +66,7 @@ export class AppInvInstrumentModifyFormComponent implements OnInit, AfterViewIni
       title:  {value:null, disabled: false},
       category:  {value:null, disabled: false}, 
       name:  {value:null, disabled: false}, 
-      isin:  {value:null, disabled: false}, 
+      isin: [null, { validators:  Validators.required, asyncValidators: null, updateOn: 'blur' }], 
       emitent_title:  {value:null, disabled: false}, 
       emitent_inn:  {value:null, disabled: false}, 
       type:  {value:null, disabled: false}, 
@@ -119,9 +120,18 @@ export class AppInvInstrumentModifyFormComponent implements OnInit, AfterViewIni
     this.MarketDataService.getInstrumentDataDetails(changes['secidParam'].currentValue).subscribe(instrumentDetails => this.instrumentDetailsForm.patchValue(instrumentDetails[0]));
   }
   ngAfterViewInit(): void {
-    this.instrumentDetailsForm.patchValue(this.instrumentDetails[0])
-    this.SecidUniqueAsyncValidator = customAsyncValidators.MD_SecidUniqueAsyncValidator (this.MarketDataService, this.secid.value);
+    this.instrumentDetailsForm.patchValue(this.instrumentDetails[0]);
+    if (['Create','Create_Example'].includes(this.action)) {
+      this.SecidUniqueAsyncValidator = customAsyncValidators.MD_SecidUniqueAsyncValidator (this.MarketDataService, '');
+      this.ISINuniqueAsyncValidator = customAsyncValidators.MD_ISINuniqueAsyncValidator (this.MarketDataService, '');
+    } else {
+      this.SecidUniqueAsyncValidator = customAsyncValidators.MD_SecidUniqueAsyncValidator (this.MarketDataService, this.secid.value);
+      this.ISINuniqueAsyncValidator = customAsyncValidators.MD_ISINuniqueAsyncValidator (this.MarketDataService, this.isin.value);
+    }
      this.secid.setAsyncValidators([this.SecidUniqueAsyncValidator])
+     this.isin.setAsyncValidators([this.ISINuniqueAsyncValidator])
+     this.secid.updateValueAndValidity()
+     this.isin.updateValueAndValidity()
   }
   filtersecurityType (filter:string) {
     this.securityTypesFiltered = this.securityTypes.filter (elem => elem.security_group_name===filter)
@@ -135,7 +145,6 @@ export class AppInvInstrumentModifyFormComponent implements OnInit, AfterViewIni
     } else {
       this.CommonDialogsService.snackResultHandler({name:'success', detail: result + ' instrument'}, action)
     }
-    this.formDisabledFields.forEach(elem => this.instrumentModifyForm.controls[elem].disable())
   }
   addJoinedFieldsToResult (result:Instruments[]):Instruments[] {
     result[0].board_title = this.moexBoards.find(el=>el.boardid===result[0].primary_boardid).board_title;
@@ -146,13 +155,13 @@ export class AppInvInstrumentModifyFormComponent implements OnInit, AfterViewIni
     switch (action) {
       case 'Create_Example':
       case 'Create':
-        this.MarketDataService.createInstrument(this.instrumentModifyForm.value).then(result => {
+        this.MarketDataService.createInstrument(this.instrumentModifyForm.value).subscribe(result => {
           this.MarketDataService.sendInstrumentData(this.addJoinedFieldsToResult(result),'Created')
           this.snacksBox(result.length,'Created');
         })
       break;
       case 'Edit':
-        this.MarketDataService.updateInstrument (this.instrumentModifyForm.value).then(result => {
+        this.MarketDataService.updateInstrument (this.instrumentModifyForm.value).subscribe(result => {
           this.MarketDataService.sendInstrumentData(this.addJoinedFieldsToResult(result),'Updated')
           this.snacksBox(result.length,'Updated')
         })
@@ -161,7 +170,7 @@ export class AppInvInstrumentModifyFormComponent implements OnInit, AfterViewIni
         this.CommonDialogsService.confirmDialog('Delete Instrument ' + this.secid.value).subscribe(isConfirmed => {
           if (isConfirmed.isConfirmed) {
             this.instrumentModifyForm.controls['id'].enable()
-            this.MarketDataService.deleteInstrument (this.instrumentModifyForm.value['id']).then (result =>{
+            this.MarketDataService.deleteInstrument (this.instrumentModifyForm.value['id']).subscribe (result =>{
               this.MarketDataService.sendInstrumentData(result,'Deleted')
               this.snacksBox(result.length,'Deleted')
               this.CommonDialogsService.dialogCloseAll();

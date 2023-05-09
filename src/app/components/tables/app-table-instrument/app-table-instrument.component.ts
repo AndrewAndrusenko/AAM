@@ -128,7 +128,6 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
       console.log('getRedisMoexInstruments');
       this.MarketDataService.getRedisMoexInstruments().subscribe((data)=>this.updateInstrumentDataTable(data))   
     } else {
-      console.log('getMoexInstruments');
       this.MarketDataService.getMoexInstruments().subscribe (instrumentData => this.updateInstrumentDataTable(instrumentData))  
     }
     this.MarketDataService.getInstrumentDataDetails().subscribe(instrumentDetails => {
@@ -156,7 +155,6 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
     this.secidfilter = this.dataSource.filterPredicate;
   }
   applyFilter(event: any, col?:string) {
-    console.log('event',event, col);
     this.dataSource.filterPredicate = col === undefined? this.defaultFilterPredicate : this.secidfilter
     const filterValue = event.hasOwnProperty('isUserInput')?  event.source.value :  (event.target as HTMLInputElement).value 
     !event.hasOwnProperty('isUserInput') || event.isUserInput ? this.dataSource.filter = filterValue.trim().toLowerCase() : null;

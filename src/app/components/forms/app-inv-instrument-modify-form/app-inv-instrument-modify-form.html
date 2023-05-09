@@ -19,10 +19,16 @@
   <h3 style="color:rgb(177, 174, 174)" *ngIf="instrumentModifyForm.valid"> 
     To save data please select 'Submit data' check and then press button 
   </h3>
-  <mat-form-field style="width: 10%;">
+  <mat-form-field style="width: 10%;" title="secid">
     <input matInput placeholder="SecID" formControlName="secid">
+    <mat-error  *ngIf="secid.invalid && secid.touched && secid.value==''">
+      The field is required.    
+    </mat-error>
+    <mat-error  *ngIf="secid.hasError('secidIsTaken')">
+      SecID must be unique!    
+    </mat-error>
   </mat-form-field>
-  <mat-form-field  style="width: 26%;">
+  <mat-form-field  style="width: 26%;" title="SecurityGroupCode">
     <mat-label>Main Type Code</mat-label>
     <mat-select  #securityGroup formControlName="group" 
     (selectionChange)="filtersecurityType($event.value)" > 
@@ -36,7 +42,7 @@
       The field is required.    
     </mat-error>
   </mat-form-field>
-  <mat-form-field  style="width: 24%;">
+  <mat-form-field  style="width: 24%;" title="SecurityTypeCode">
     <mat-label>Security Type Code</mat-label>
     <mat-select  #securityType formControlName="type"  > 
       <ng-container *ngFor="let securityType of securityTypesFiltered">
@@ -49,7 +55,7 @@
       The field is required.    
     </mat-error>
   </mat-form-field>
-  <mat-form-field style = "width: 29%;">
+  <mat-form-field style = "width: 29%;" title="Shortname">
     <input matInput placeholder = "Shortname" formControlName="shortname">
     <mat-error  *ngIf="shortname.invalid && shortname.touched && shortname.value !== '' ">
       Only dights   
@@ -58,13 +64,13 @@
       Required!    
     </mat-error>
   </mat-form-field>
-  <mat-form-field style = "width: 15%;">
+  <mat-form-field style = "width: 15%;" title="ISIN">
     <input matInput placeholder = "ISIN" formControlName="isin">
-    <mat-error  *ngIf="isin.invalid && isin.touched && shortname.value !== '' ">
-      Only dights   
+    <mat-error  *ngIf="isin.invalid && isin.touched && isin.value==''">
+      The field is required.    
     </mat-error>
-    <mat-error  *ngIf="isin.invalid  && isin.value == ''">
-      Required!    
+    <mat-error  *ngIf="isin.hasError('isinIsTaken')">
+      ISIN must be unique!    
     </mat-error>
   </mat-form-field>
 

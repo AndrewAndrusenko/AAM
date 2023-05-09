@@ -130,7 +130,6 @@ export class AppMarketDataService {
   }
 
   insertMarketData (dataToInsert:any,sourceCode:string, gloabalSource:string): Observable<number> {
-    console.log('insertMarketData',dataToInsert);
     return  this.http.post <number> ('/api/AAM/MD/importData/',
     {'dataToInsert': dataToInsert,'sourceCode':sourceCode, 'gloabalSource':gloabalSource})
   }
@@ -151,13 +150,12 @@ export class AppMarketDataService {
     const params = {mapcode:mapcode,secid:secid, resasarray:resasarray}
     return this.http.get <InstrumentsMapCodes[]> ('/api/AAM/MD/getInstrumentsCodes/',{params:params})
   }
-  getInstrumentDataGeneral (dataType:string, secid?:string): Observable <any[]> {
+  getInstrumentDataGeneral (dataType:string, fieldtoCheck?:string): Observable <any[]> {
     const params = {dataType:dataType}
-    secid? Object.assign(params,{secid:secid}) : null;
+    fieldtoCheck? Object.assign(params,{fieldtoCheck:fieldtoCheck}) : null;
     return this.http.get <any[]> ('/api/AAM/MD/getInstrumentDataGeneral/',{params:params})
   }
   getMoexInstruments (rowslimit:number=50000,sorting:string=' secid ASC', searchParameters?:any):Observable<Instruments[]> {
-    console.log('Service fGetMoexInstruments');
     let params = {};
     (searchParameters !== null) ?  params = {...params,...searchParameters}: null;
     (rowslimit !== null) ?  Object.assign(params,{'rowslimit':rowslimit}): null;
@@ -196,16 +194,14 @@ export class AppMarketDataService {
   getCorpActionData(): Observable<instrumentCorpActions[]> { //the receiver component calls this function 
     return this.subjectCorpData.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
   }
-
-  createInstrument (data:any) { 
-    console.log('cre',data);
-    return this.http.post  <Instruments[]> ('/api/AAM/MD/InstrumentCreate/',{'data': data}).toPromise()
+  createInstrument (data:any): Observable<Instruments[]>  { 
+    return this.http.post  <Instruments[]> ('/api/AAM/MD/InstrumentCreate/',{'data': data})
   } 
-  deleteInstrument (id:string) { 
-    return this.http.post  <Instruments[]> ('/api/AAM/MD/InstrumentDelete/',{'id': id}).toPromise()
+  deleteInstrument (id:string): Observable<Instruments[]> { 
+    return this.http.post  <Instruments[]> ('/api/AAM/MD/InstrumentDelete/',{'id': id})
   } 
-  updateInstrument (data:any) { 
-    return this.http.post <Instruments[]> ('/api/AAM/MD/InstrumentEdit/',{'data': data}).toPromise()
+  updateInstrument (data:any):  Observable<Instruments[]>  { 
+    return this.http.post <Instruments[]> ('/api/AAM/MD/InstrumentEdit/',{'data': data})
   }
   sendInstrumentData ( data:Instruments[], action: string) { //the component that wants to update something, calls this fn
     let dataSet = {

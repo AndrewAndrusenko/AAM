@@ -124,9 +124,20 @@ export class customAsyncValidators {
   static MD_SecidUniqueAsyncValidator (AppMarketDataService: AppMarketDataService, secid:string): AsyncValidatorFn {
     return (control: AbstractControl): Observable<ValidationErrors> => {
       return AppMarketDataService
-        .getInstrumentDataGeneral('validateSecidForUnique',control.value)
+        .getInstrumentDataGeneral('validateSecidForUnique', control.value.toUpperCase())
         .pipe(
-          map ( secidIsTaken => (control.value !== secid && secidIsTaken.length ? { secidIsTaken: true } : null)  ),
+          map ( secidIsTaken => (control.value.toUpperCase() !== secid.toUpperCase() && secidIsTaken.length ? { secidIsTaken: true } : null)  ),
+          catchError(() => of(null)),
+          take(1)
+        );
+    };
+  }
+  static MD_ISINuniqueAsyncValidator (AppMarketDataService: AppMarketDataService, isin:string): AsyncValidatorFn {
+    return (control: AbstractControl): Observable<ValidationErrors> => {
+      return AppMarketDataService
+        .getInstrumentDataGeneral('validateISINForUnique', control.value.toUpperCase())
+        .pipe(
+          map ( isinIsTaken => (control.value.toUpperCase() !== isin.toUpperCase() && isinIsTaken.length ? { isinIsTaken: true } : null)  ),
           catchError(() => of(null)),
           take(1)
         );
