@@ -316,13 +316,7 @@ async function fInstrumentEdit (request, response) {
   sql = pgp.as.format(query.text,request.body.data)
   queryExecute (sql, response);
 }
-
-async function fInstrumentDetailsDelete (request, response) {
-  const query = {text: 'DELETE FROM public.mmoexinstrumentdetails WHERE id=${id} RETURNING *;', values: request.body}
-  sql = pgp.as.format(query.text,query.values)
-  queryExecute (sql, response);
-}
-async function fInstrumentDetailsUPSERT (request, response) {
+async function fUpdateInstrumentDetails (request, response) {
   let fields = 'secid, boardid, shortname, lotsize, facevalue, status, boardname, decimals, matdate, secname, couponperiod, issuesize, remarks, marketcode, instrid, sectorid, minstep, faceunit, isin, latname, regnumber, currencyid, sectype, listlevel, issuesizeplaced, couponpercent, lotvalue, nextcoupon'
   console.log('fields.split()',fields.split(','));
   let values = fields.split(',').map(el=>'${'+el+'}')
@@ -348,8 +342,7 @@ module.exports = {
   fInstrumentCreate,
   fInstrumentEdit,
   fInstrumentDelete,
-  fInstrumentDetailsDelete,
-  fInstrumentDetailsUPSERT
+  fUpdateInstrumentDetails
 }
 
 

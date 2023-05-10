@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { TreeComponent } from './components/tree/tree.component';
+import { TreeComponent } from './components/main-page/tree/tree.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {MatTreeModule} from '@angular/material/tree' ;
 import {MatIconModule} from '@angular/material/icon'; 
@@ -10,36 +10,33 @@ import {CdkMenuModule} from '@angular/cdk/menu';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatNativeDateModule} from '@angular/material/core';
 import {HttpClientModule} from '@angular/common/http';
-import { AppMenuComponent } from './components/app-menu/app-menu.component';
-import { AppTabsComponent } from './components/app-tabs/app-tabs.component';
-import { LoginComponent } from './components/login/login.component';
-import { DashboardComponent } from './general/dashboard/dashboard.component';
+import { AppMenuComponent } from './components/main-page/app-menu/app-menu.component';
+import { AppTabsComponent } from './components/main-page/app-tabs/app-tabs.component';
+import { DashboardComponent } from './components/main-page/root-page/root-page';
 import {MatFormFieldModule as MatFormFieldModule} from '@angular/material/form-field';
-import { AppLoginComponent } from './components/app-login/app-login.component';
 import {MatInputModule as MatInputModule} from '@angular/material/input'; 
 import {ScrollingModule} from '@angular/cdk/scrolling';
 import { DataTablesModule } from "angular-datatables";
 import { MatDialogModule as MatDialogModule} from "@angular/material/dialog";
-import { AppClientFormComponent } from './components/forms/app-client-form/app-client-form.component';
-import { AppNewAccountComponent } from './components/forms/app-new-account/app-portfolio.component';
-import { AppConfimActionComponent } from './components/alerts/app-confim-action/app-confim-action.component';
-import { AppSnackMsgboxComponent } from './components/app-snack-msgbox/app-snack-msgbox.component';
-import { TableAccounts } from './components/tables/app-table-accout/app-table-portfolio.component';
-import { tradesDataTable } from './components/tables/app-table-trades/app-table-trades.component';
-import { AppClientsTableComponent } from './components/tables/app-table-clients/app-table-clients.component';
+import { AppClientFormComponent } from './components/forms/client-form/client-form';
+import { AppNewAccountComponent } from './components/forms/new-account-form/new-account-form';
+import { AppConfimActionComponent } from './components/common-forms/app-confim-action/app-confim-action.component';
+import { AppSnackMsgboxComponent } from './components/common-forms/app-snack-msgbox/app-snack-msgbox.component';
+import { tradesDataTable } from './components/tables/z-ds-trades-table/z-ds-trades-table';
+import { AppClientsTableComponent } from './components/tables/clients-table/clients-table';
 import {MatSlideToggle as MatSlideToggle, MatSlideToggleModule as MatSlideToggleModule} from '@angular/material/slide-toggle';
-import { AppTableStrategiesComponentComponent } from './components/tables/app-table-strategies.component/app-table-strategies.component.component'; 
-import { AppStrategyFormComponent } from './components/forms/app-strategy-form/app-strategy-form.component';
-import { AppTableStrategyComponent } from './components/tables/app-table-strategy_structure/app-table-strategy_structure.component';
-import { AppStructureStrategyFormComponent } from './components/forms/app-structure-strategy-form/app-structure-strategy-form';
-import { AppTableSWIFTsInListsComponent } from './components/tables/app-table-swift-IN-list/app-table-swift-IN-list';
-import { AppTableSWIFT950ItemsComponent } from './components/tables/app-table-swift-950-items-process/app-table-swift-950-items-process';
-import { AppMT950ItemParsing } from './components/forms/app-MT950ItemsParser-form/app-MT950ItemsParser-form';
-import { AppTableAccEntriesComponent } from './components/tables/app-table-acc-entries/app-table-acc-entries';
-import { AppAccEntryModifyFormComponent } from './components/forms/app-acc-entry-modify-form/app-acc-entry-modify-form';
-import { AppTableAccAccountsComponent } from './components/tables/app-table-acc-accounts/app-table-acc-accounts';
-import { AppTableAccLedgerAccountsComponent } from './components/tables/app-table-acc-ledger-accounts/app-table-acc-ledger-accounts';
-import { AppAccAccountModifyFormComponent } from './components/forms/app-acc-account-modify-form/app-acc-account-modify-form ';
+import { AppTableStrategiesComponentComponent } from './components/tables/strategies-table/strategies-table'; 
+import { AppStrategyFormComponent } from './components/forms/strategy-form/strategy-form';
+import { AppTableStrategyComponent } from './components/tables/strategy_structure-table/strategy_structure-table';
+import { AppStructureStrategyFormComponent } from './components/forms/strategy-structure-form/strategy-structure-form';
+import { AppTableSWIFTsInListsComponent } from './components/tables/swift-IN-table/swift-IN-table';
+import { AppTableSWIFT950ItemsComponent } from './components/tables/swift-950-table/swift-950-table';
+import { AppMT950ItemParsing } from './components/forms/SWIFT-MT950Items-form/SWIFT-MT950Items-form';
+import { AppTableAccEntriesComponent } from './components/tables/acc-entries-table/acc-entries-table';
+import { AppAccEntryModifyFormComponent } from './components/forms/acc-entry-form/acc-entry-form';
+import { AppTableAccAccountsComponent } from './components/tables/acc-accounts-table/acc-accounts-table';
+import { AppTableAccLedgerAccountsComponent } from './components/tables/acc-ledger-accounts-table/acc-ledger-accounts-table';
+import { AppAccAccountModifyFormComponent } from './components/forms/acc-account-form/acc-account-form';
 import {MatDatepickerModule } from '@angular/material/datepicker';
 import { MAT_MOMENT_DATE_ADAPTER_OPTIONS, MatMomentDateModule } from '@angular/material-moment-adapter';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
@@ -57,19 +54,22 @@ import {MatMenuModule as MatMenuModule} from '@angular/material/menu';
 import {MatSnackBarModule as MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatButtonModule as MatButtonModule} from '@angular/material/button';
 import {MatChipsModule as MatChipsModule} from '@angular/material/chips';
-import { AppTableBalanceSheetComponent } from './components/tables/app-table-balance-sheet/app-table-balance-sheet';
+import { AppTableBalanceSheetComponent } from './components/tables/acc-balance-sheet-table/acc-balance-sheet-table';
 import {MatSortModule} from '@angular/material/sort';
 import {MatListModule as MatListModule} from '@angular/material/list';
 import {CdkTableModule } from '@angular/cdk/table';
 import {MatProgressBarModule } from '@angular/material/progress-bar';
-import {AppTableMarketDataComponent } from './components/tables/app-table-market-data/app-table-market-data';
+import {AppTableMarketDataComponent } from './components/tables/market-data-table/market-data-table';
 import * as echarts from 'echarts';
 import {NgxEchartsModule } from 'ngx-echarts';
 import { NgEchartMarketDataCandleComponent } from './components/charts/chart-candle-marketdata/echart-marketdata-candle';
-import { AppInstrumentTableComponent } from './components/tables/app-table-instrument/app-table-instrument.component';
-import { AppInvInstrumentModifyFormComponent } from './components/forms/app-inv-instrument-modify-form/app-inv-instrument-modify-form';
-import { AppTableCorporateActionsComponent } from './components/tables/app-table-inst-corp-actions/app-table-inst-corp-actions';
-import { AppTableInstrumentDetailsComponent } from './components/tables/app-table-instrument-details/app-table-instrument-details';
+import { AppInstrumentTableComponent } from './components/tables/instrument-table/instrument-table';
+import { AppInvInstrumentModifyFormComponent } from './components/forms/instrument-form/instrument-form';
+import { AppTableCorporateActionsComponent } from './components/tables/instrument-corp-actions-table/instrument-corp-actions-table';
+import { AppTableInstrumentDetailsComponent } from './components/tables/instrument-details-table/instrument-details-table';
+import { AppInvInstrumentDetailsFormComponent } from './components/forms/instrument-details-form/instrument-details-form';
+import { TablePortfolios } from './components/tables/portfolios-table/portfolios-table';
+import { LoginComponent } from './components/main-page/login/login.component';
 
 
 @NgModule({
@@ -117,13 +117,10 @@ import { AppTableInstrumentDetailsComponent } from './components/tables/app-tabl
     ],
     declarations: [
         AppComponent,
-        LoginComponent,
         DashboardComponent,
         TreeComponent,
         AppMenuComponent,
         AppTabsComponent,
-        AppLoginComponent,
-        TableAccounts,
         tradesDataTable,
         AppInstrumentTableComponent,
         AppClientsTableComponent,
@@ -148,7 +145,10 @@ import { AppTableInstrumentDetailsComponent } from './components/tables/app-tabl
         NgEchartMarketDataCandleComponent,
         AppInvInstrumentModifyFormComponent,
         AppTableCorporateActionsComponent,
-        AppTableInstrumentDetailsComponent
+        AppTableInstrumentDetailsComponent,
+        AppInvInstrumentDetailsFormComponent,
+        TablePortfolios,
+        LoginComponent
     ],
     bootstrap: [AppComponent],
     providers: [ {provide: MAT_MOMENT_DATE_ADAPTER_OPTIONS, useValue: {strict: true}} ],

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarVerticalPosition } from '@angular/material/snack-bar';
-import { AppConfimActionComponent } from '../components/alerts/app-confim-action/app-confim-action.component';
+import { AppConfimActionComponent } from '../components/common-forms/app-confim-action/app-confim-action.component';
 import { Observable } from 'rxjs/internal/Observable';
 
 @Injectable({

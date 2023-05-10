@@ -212,11 +212,8 @@ export class AppMarketDataService {
   getInstrumentData(): Observable<InstrumentDataSet> { //the receiver component calls this function 
     return this.subjectInstrument.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
   }
-  deleteInstrumentDetails (id:string): Observable<instrumentDetails[]> { 
-    return this.http.post  <instrumentDetails[]> ('/api/AAM/MD/InstrumentDetailsDelete/',{'id': id})
-  } 
-  upsertInstrumentDetails (data:any):  Observable<instrumentDetails[]>  { 
-    return this.http.post <instrumentDetails[]> ('/api/AAM/MD/InstrumentDetailsUPSERT/',{'data': data})
+  updateInstrumentDetails (data:any, action:string):  Observable<instrumentDetails[]>  { 
+    return this.http.post <instrumentDetails[]> ('/api/AAM/MD/UpdateInstrumentDetails/',{data:data, action:action})
   }
 }
 

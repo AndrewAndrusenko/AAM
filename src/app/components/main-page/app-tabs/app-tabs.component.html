@@ -1,0 +1,119 @@
+<app-app-portfolio-tablee *ngIf="messageReceived.text=='Portfolios_Root'"></app-app-portfolio-tablee>   
+<app-app-clients-table *ngIf="messageReceived.text=='Clients_Root'"> </app-app-clients-table>    
+<app-table-strategies *ngIf="messageReceived.text=='Strategies_Root'"></app-table-strategies>     
+<mat-tab-group  *ngIf="messageReceived.text=='Instruments_Root'" mat-stretch-tabs>
+  <mat-tab label="Instruments List"> 
+    <app-app-instrument-table [FormMode]="'DB'"></app-app-instrument-table >  
+  </mat-tab>
+  <mat-tab  label="Market Data" >
+    <app-table-market-data
+    FormMode="QuotesMode"
+    ></app-table-market-data> 
+    <!-- <app-table-acc-accounts style="width: 150%;"></app-table-acc-accounts> -->
+  </mat-tab>  
+    <mat-tab   label="Charts"> 
+    <app-echart-marketdata-candle  style="height: 100%;"> </app-echart-marketdata-candle>
+    <app-table-market-data
+      FormMode="ChartMode"
+    ></app-table-market-data> 
+  </mat-tab>
+  <mat-tab label="Corporate Actions">
+    <app-table-inst-corp-actions></app-table-inst-corp-actions>
+  </mat-tab>
+  <mat-tab label="Positions"></mat-tab>
+</mat-tab-group>
+<app-app-instrument-table *ngIf="messageReceived.text=='Trades & Orders_Root'" [FormMode]="'Redis'"></app-app-instrument-table >  
+<mat-tab-group  *ngIf="messageReceived.name=='Accounts'" mat-stretch-tabs>
+  <mat-tab label="Balance Sheets"> 
+    <app-table-balance-sheet></app-table-balance-sheet>  
+  </mat-tab>
+  <mat-tab  label="Client Accounts" >
+    <app-table-acc-accounts style="width: 150%;"></app-table-acc-accounts>
+  </mat-tab>  
+  <mat-tab   label="Ledger Accounts"> 
+    <app-table-acc-ledger-accounts style="width: 150%;"></app-table-acc-ledger-accounts>
+  </mat-tab>
+</mat-tab-group>
+<mat-tab-group  *ngIf="messageReceived.name=='Transactions'" mat-stretch-tabs>
+  <mat-tab  label="Transactions List" >
+    <app-table-acc-entries style="width: 150%;"></app-table-acc-entries>
+  </mat-tab>  
+  <mat-tab   label="SWIFT Statements processing "> 
+    <app-table-swift-IN-list style="width: 150%;"></app-table-swift-IN-list>
+  </mat-tab>
+  <mat-tab label="Statement Reconcilation"> Statement Reconcilation  </mat-tab>
+</mat-tab-group>
+  
+<mat-tab-group  *ngIf="messageReceived.text=='Portfolios'" mat-stretch-tabs #AccountInfo >
+  <mat-tab label="Account Summary" > </mat-tab>  
+  <mat-tab label="Portfolio Details"> Detailed positions with PnL data </mat-tab>
+  <mat-tab label="Trades by Account"> Trades history by Account </mat-tab>
+</mat-tab-group  >
+<mat-tab-group  *ngIf="messageReceived.text=='Clients'" mat-stretch-tabs #ClientInfo>
+  <mat-tab label="Client Summary" >
+    <div class="client_form">
+      <br>
+      <app-app-client-form
+      [action] = "Edit"
+      [client]="messageReceived.id">
+      </app-app-client-form> 
+    </div>
+  </mat-tab>  
+  <mat-tab label="Client Portfolios">
+    <app-app-portfolio-tablee 
+      [clientId]="messageReceived.id"
+      [actionOnAccountTable]="'Get_Accounts_By_CientId'">
+    </app-app-portfolio-tablee> 
+  </mat-tab>
+  <mat-tab label="Positions"> Positions table  </mat-tab>
+</mat-tab-group>
+<mat-tab-group *ngIf="messageReceived.text=='Strategies'" #StrategiesInfo mat-stretch-tabs>
+  <mat-tab label="Strategy Structure" >
+    <div class="client_form">
+      <br>
+      <app-app-strategy-form
+      [action] = "Edit"
+      [client]="messageReceived.id">
+      </app-app-strategy-form> 
+    </div>
+  </mat-tab>  
+  <mat-tab label="Positions by Strategy"> 
+    <ng-template #context_menu>
+      <div class="example-menu" cdkMenu>
+        <button class="example-menu-item" cdkMenuItem>Cut</button>
+        <button class="example-menu-item" cdkMenuItem>Copy</button>
+        <button class="example-menu-item" cdkMenuItem>Link</button>
+      </div>
+    </ng-template>
+      </mat-tab>
+  <mat-tab label="Trades by Strategy"> Trades by Strategy history  </mat-tab>
+  <mat-tab label="Orders by Strategy"> Orders by Strategy history  </mat-tab>
+</mat-tab-group>
+<mat-tab-group *ngIf="messageReceived.text=='Instruments'" mat-stretch-tabs #InstrumentInfo>
+  <mat-tab label="Instrment Details" >
+    <div class="instrument_form">
+      <br>
+      <app-inv-instrument-modify-form
+      [action] = "Edit"
+      [secidParam]="messageReceived.name">
+      </app-inv-instrument-modify-form> 
+    </div>
+  </mat-tab>  
+  <mat-tab label="MarketData & Charts" > </mat-tab> 
+  <mat-tab label="Positions"> Detailed positions with deviations versus model Portfolio  </mat-tab>
+  <mat-tab label="Trades by Instrument"> Trades history by Instrument</mat-tab>
+</mat-tab-group>
+<mat-tab-group  *ngIf="messageReceived.text=='Trades & Orders'" mat-stretch-tabs #TradesOrdersInfo>
+  <mat-tab label="Orders" >OrdersTable</mat-tab>  
+  <mat-tab label="Trades"> Trades table</mat-tab>
+  <mat-tab label="Positions"> Positions table</mat-tab>
+  <mat-tab label="Orders by Strategy"> Orders history</mat-tab>
+</mat-tab-group>
+
+
+
+
+
+
+  
+
