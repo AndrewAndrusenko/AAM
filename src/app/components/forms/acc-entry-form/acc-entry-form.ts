@@ -3,7 +3,7 @@ import { AsyncValidatorFn, FormBuilder, FormGroup, ValidationErrors, Validators 
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
-import { bcTransactionType_Ext, cFormValidationLog } from 'src/app/models/accounts-table-model';
+import { bcTransactionType_Ext, cFormValidationLog } from 'src/app/models/intefaces';
 import { AppTableAccLedgerAccountsComponent } from '../../tables/acc-ledger-accounts-table/acc-ledger-accounts-table';
 import { AppTableAccAccountsComponent } from '../../tables/acc-accounts-table/acc-accounts-table';
 import { COMMA, ENTER} from '@angular/cdk/keycodes';

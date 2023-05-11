@@ -70,8 +70,7 @@ import { AppTableInstrumentDetailsComponent } from './components/tables/instrume
 import { AppInvInstrumentDetailsFormComponent } from './components/forms/instrument-details-form/instrument-details-form';
 import { TablePortfolios } from './components/tables/portfolios-table/portfolios-table';
 import { LoginComponent } from './components/main-page/login/login.component';
-
-
+import { NgxIndexedDBModule } from 'ngx-indexed-db';
 @NgModule({
     imports: [
         BrowserModule,
@@ -113,7 +112,8 @@ import { LoginComponent } from './components/main-page/login/login.component';
         MatMomentDateModule,
         NgxEchartsModule.forRoot({
             echarts
-          })
+          }),
+        NgxIndexedDBModule.forRoot(indexDbConfigAAM)
     ],
     declarations: [
         AppComponent,
@@ -154,4 +154,5 @@ import { LoginComponent } from './components/main-page/login/login.component';
     providers: [ {provide: MAT_MOMENT_DATE_ADAPTER_OPTIONS, useValue: {strict: true}} ],
 
 })
-export class AppModule { }
+export class AppModule { }import { indexDbConfigAAM } from './models/intefaces';
+

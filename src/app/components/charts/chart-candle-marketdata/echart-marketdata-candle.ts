@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { marketData } from 'src/app/models/accounts-table-model';
+import { marketData } from 'src/app/models/intefaces';
 import { AppMarketDataService } from 'src/app/services/app-market-data.service';
 import { AtuoCompSecidService } from 'src/app/services/atuo-comp-secid.service';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';

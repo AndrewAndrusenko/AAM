@@ -1,8 +1,8 @@
 import { HttpClient, HttpParams  } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { map, Observable, Subject } from 'rxjs';
-import { AccountsTableModel } from "../models/accounts-table-model";
-import { InstrumentData, ClientData } from "../models/accounts-table-model";
+import { AccountsTableModel } from "../models/intefaces";
+import { InstrumentData, ClientData } from "../models/intefaces";
 
 @Injectable({
   providedIn: 'root'

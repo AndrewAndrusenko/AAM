@@ -5,7 +5,7 @@ import { AppConfimActionComponent } from '../../common-forms/app-confim-action/a
 import { AppSnackMsgboxComponent } from '../../common-forms/app-snack-msgbox/app-snack-msgbox.component';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
-import { bcAccountType_Ext, bcEnityType } from 'src/app/models/accounts-table-model';
+import { bcAccountType_Ext, bcEnityType } from 'src/app/models/intefaces';
 import { AppClientsTableComponent } from '../../tables/clients-table/clients-table';
 import { TablePortfolios } from '../../tables/portfolios-table/portfolios-table';
 import { Subscription } from 'rxjs';

@@ -15,26 +15,27 @@ public menuColor = menuColorGl
 constructor(
   private authService : AuthService, private appMenuService : AppMenuServiceService) { }
 
-public getLogin = () => {
-  var userData;
-  userData = JSON.parse(localStorage.getItem ('userInfo'));
-  return userData.user.login +" (AR: " +userData.user.accessrole+ ")"
-}
-
-toggleFullscreenMode = () => {
-  var elem = document.documentElement;
-  this.fullscreen ? document.exitFullscreen() : elem.requestFullscreen();
-  this.fullscreen=!this.fullscreen;
-}
-LogOut = () => {
-  this.authService.LogOut();
-  window.location.reload();
-}
-
-showHideTree = () => {
-this.treeOpened = !this.treeOpened
-this.appMenuService.sendToggleTree(this.treeOpened)
-}
-showChart (){
-}
+  public getLogin = () => {
+    let userData = JSON.parse(localStorage.getItem ('userInfo'));
+    return userData.user.login +" (AR: " +userData.user.accessrole+ ")"
+  }
+  toggleFullscreenMode = () => {
+    var elem = document.documentElement;
+    this.fullscreen ? document.exitFullscreen() : elem.requestFullscreen();
+    this.fullscreen=!this.fullscreen;
+  }
+  LogOut = () => {
+    this.authService.LogOut();
+    window.location.reload();
+  }
+  showHideTree = () => {
+    this.treeOpened = !this.treeOpened
+    this.appMenuService.sendToggleTree(this.treeOpened)
+  }
+  showChart () {}
+  localStorageclear (){
+    let userData = localStorage.getItem ('userInfo');
+    localStorage.clear();
+    localStorage.setItem('userInfo',userData)
+  }
 }

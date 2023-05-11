@@ -1,7 +1,7 @@
-import { AfterViewInit, Component,  EventEmitter,  Input, OnInit, Output, SimpleChanges, ViewChild,  } from '@angular/core';
+import { AfterContentInit, Component,  EventEmitter,  Input, OnInit, Output, SimpleChanges, ViewChild,  } from '@angular/core';
 import { AsyncValidatorFn, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { Instruments, instrumentCorpActions, instrumentDetails } from 'src/app/models/accounts-table-model';
+import { Instruments, instrumentCorpActions, instrumentDetails } from 'src/app/models/intefaces';
 import { Subscription } from 'rxjs';
 import { MatTabGroup as MatTabGroup } from '@angular/material/tabs';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
@@ -14,7 +14,7 @@ import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
   templateUrl: './instrument-form.html',
   styleUrls: ['./instrument-form.scss'],
 })
-export class AppInvInstrumentModifyFormComponent implements OnInit, AfterViewInit {
+export class AppInvInstrumentModifyFormComponent implements OnInit, AfterContentInit  {
 
   public panelOpenState = true;
   public instrumentModifyForm: FormGroup;
@@ -74,6 +74,7 @@ export class AppInvInstrumentModifyFormComponent implements OnInit, AfterViewIni
       secid: {value:null, disabled: false}, boardid: {value:null, disabled: false}, shortname: {value:null, disabled: false}, lotsize: {value:null, disabled: false}, facevalue: {value:null, disabled: false}, status: {value:null, disabled: false}, boardname: {value:null, disabled: false}, decimals: {value:null, disabled: false}, matdate: {value:null, disabled: false}, secname: {value:null, disabled: false}, couponperiod: {value:null, disabled: false}, issuesize: {value:0, disabled: false}, remarks: {value:null, disabled: false}, marketcode: {value:null, disabled: false}, instrid: {value:null, disabled: false}, sectorid: {value:null, disabled: false}, minstep: {value:null, disabled: false}, faceunit: {value:null, disabled: false}, isin: {value:null, disabled: false}, latname: {value:null, disabled: false}, regnumber: {value:null, disabled: false}, currencyid: {value:null, disabled: false}, sectype: {value:null, disabled: false}, listlevel: {value:null, disabled: false}, issuesizeplaced: {value:null, disabled: false}, couponpercent: {value:null, disabled: false}, lotvalue: {value:null, disabled: false}, nextcoupon: {value:null, disabled: false}, issuevolume:{value:null, disabled: true}
     })
   }
+
   ngOnInit(): void {
     this.title = this.action;
     this.secidParam?  this.MarketDataService.getMoexInstruments(undefined,undefined, {secid:[this.secidParam,this.secidParam]}).subscribe (instrumentData => {
@@ -129,7 +130,7 @@ export class AppInvInstrumentModifyFormComponent implements OnInit, AfterViewIni
     });  
     this.MarketDataService.getInstrumentDataDetails(changes['secidParam'].currentValue).subscribe(instrumentDetails => this.instrumentDetailsForm.patchValue(instrumentDetails[0]));
   }
-  ngAfterViewInit(): void {
+  ngAfterContentInit (): void {
     this.instrumentDetailsForm.patchValue(this.instrumentDetails[0]);
     this.addAsyncValidators(this.action);
   }
@@ -155,13 +156,13 @@ export class AppInvInstrumentModifyFormComponent implements OnInit, AfterViewIni
       case 'Create_Example':
       case 'Create':
         this.MarketDataService.createInstrument(this.instrumentModifyForm.value).subscribe(result => {
-          this.MarketDataService.sendInstrumentData(this.addJoinedFieldsToResult(result),'Created')
+          this.MarketDataService.sendInstrumentDataToUpdateTableSource(this.addJoinedFieldsToResult(result),'Created')
           this.snacksBox(result.length,'Created');
         })
       break;
       case 'Edit':
         this.MarketDataService.updateInstrument (this.instrumentModifyForm.value).subscribe(result => {
-          this.MarketDataService.sendInstrumentData(this.addJoinedFieldsToResult(result),'Updated')
+          this.MarketDataService.sendInstrumentDataToUpdateTableSource(this.addJoinedFieldsToResult(result),'Updated')
           this.snacksBox(result.length,'Updated')
         })
       break;
@@ -170,7 +171,7 @@ export class AppInvInstrumentModifyFormComponent implements OnInit, AfterViewIni
           if (isConfirmed.isConfirmed) {
             this.instrumentModifyForm.controls['id'].enable()
             this.MarketDataService.deleteInstrument (this.instrumentModifyForm.value['id']).subscribe (result =>{
-              this.MarketDataService.sendInstrumentData(result,'Deleted')
+              this.MarketDataService.sendInstrumentDataToUpdateTableSource(result,'Deleted')
               this.snacksBox(result.length,'Deleted')
               this.CommonDialogsService.dialogCloseAll();
             })
@@ -179,28 +180,6 @@ export class AppInvInstrumentModifyFormComponent implements OnInit, AfterViewIni
       break;
     }
   }
-/*   updateInstrumentDetailsData(action:string){
-    switch (action) {
-      case 'Edit':
-        this.MarketDataService.upsertInstrumentDetails (this.instrumentDetailsForm.value).subscribe(result => {
-          // this.MarketDataService.sendInstrumentData(this.addJoinedFieldsToResult(result),'Updated')
-          this.snacksBox(result.length,'Updated')
-        })
-      break;
-      case 'Delete':
-        this.CommonDialogsService.confirmDialog('Delete Instrument Details for ' + this.secid.value).subscribe(isConfirmed => {
-          if (isConfirmed.isConfirmed) {
-            this.instrumentModifyForm.controls['id'].enable()
-            this.MarketDataService.deleteInstrumentDetails (this.instrumentDetailsForm.value['id']).subscribe (result =>{
-              // this.MarketDataService.sendInstrumentData(result,'Deleted')
-              this.snacksBox(result.length,'Deleted')
-              this.CommonDialogsService.dialogCloseAll();
-            })
-          }
-        })
-      break;
-    }
-  } */
   get  secid() {return this.instrumentModifyForm.get('secid')}​
   get  security_type_title() {return this.instrumentModifyForm.get('security_type_title')}​
   get  shortname ()   {return this.instrumentModifyForm.get('shortname') } 

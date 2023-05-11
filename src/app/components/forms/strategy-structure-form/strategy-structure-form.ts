@@ -3,7 +3,7 @@ import { FormBuilder, FormControl, FormGroup,  ValidationErrors,  Validators } f
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { AppConfimActionComponent } from '../../common-forms/app-confim-action/app-confim-action.component';
 import { AppInvestmentDataServiceService } from 'src/app/services/app-investment-data.service.service';
-import { StrategiesGlobalData } from 'src/app/models/accounts-table-model';
+import { StrategiesGlobalData } from 'src/app/models/intefaces';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
 import { AppTabServiceService } from 'src/app/services/app-tab-service.service';
 import { map, Observable, startWith } from 'rxjs';

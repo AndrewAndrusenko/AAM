@@ -4,7 +4,7 @@ import {MatSort} from '@angular/material/sort';
 import {lastValueFrom, Subscription } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
-import { StrategiesGlobalData } from 'src/app/models/accounts-table-model';
+import { StrategiesGlobalData } from 'src/app/models/intefaces';
 import {TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { AppInvestmentDataServiceService } from 'src/app/services/app-investment-data.service.service';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';

@@ -1,7 +1,7 @@
 import { Component, Input, OnInit, SimpleChanges, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { accountTypes } from 'src/app/models/accounts-table-model';
+import { accountTypes } from 'src/app/models/intefaces';
 import { AppInvestmentDataServiceService } from 'src/app/services/app-investment-data.service.service';
 import { AppTabServiceService } from 'src/app/services/app-tab-service.service';
 import { AppTableStrategiesComponentComponent } from '../../tables/strategies-table/strategies-table';

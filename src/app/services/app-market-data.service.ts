@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
-import { Instruments, InstrumentsMapCodes, instrumentCorpActions, instrumentDetails, marketData, marketDataSources, marketSourceSegements } from '../models/accounts-table-model';
+import { Instruments, InstrumentsMapCodes, instrumentCorpActions, instrumentDetails, marketData, marketDataSources, marketSourceSegements } from '../models/intefaces';
 interface InstrumentDataSet {
   data:Instruments[],
   action:string
@@ -202,14 +202,14 @@ export class AppMarketDataService {
   updateInstrument (data:any):  Observable<Instruments[]>  { 
     return this.http.post <Instruments[]> ('/api/AAM/MD/InstrumentEdit/',{'data': data})
   }
-  sendInstrumentData ( data:Instruments[], action: string) { //the component that wants to update something, calls this fn
+  sendInstrumentDataToUpdateTableSource ( data:Instruments[], action: string) { //the component that wants to update something, calls this fn
     let dataSet = {
       data: data,
       action:action
     }
     this.subjectInstrument.next(dataSet); //next() will feed the value in Subject
   }
-  getInstrumentData(): Observable<InstrumentDataSet> { //the receiver component calls this function 
+  getInstrumentDataToUpdateTableSource(): Observable<InstrumentDataSet> { //the receiver component calls this function 
     return this.subjectInstrument.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
   }
   updateInstrumentDetails (data:any, action:string):  Observable<instrumentDetails[]>  { 

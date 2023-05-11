@@ -7,8 +7,8 @@
         mat-cell 
         *matCellDef="let element" > 
         <span [ngSwitch]="true==true">
-          <p *ngSwitchCase="['matdate'].includes(column)">
-              {{ element[column] | date }}
+          <p *ngSwitchCase="['issuesize','facevalue'].includes(column)">
+              {{ element[column] | number:'1.0-0' }}
           </p>          
           <p *ngSwitchCase="['action'].includes(column)">
             <button   

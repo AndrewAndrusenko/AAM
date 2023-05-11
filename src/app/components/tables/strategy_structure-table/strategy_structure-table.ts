@@ -3,7 +3,7 @@ import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
-import {StrategyStructure } from 'src/app/models/accounts-table-model';
+import {StrategyStructure } from 'src/app/models/intefaces';
 import {AppInvestmentDataServiceService } from 'src/app/services/app-investment-data.service.service';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { AppStructureStrategyFormComponent } from '../../forms/strategy-structure-form/strategy-structure-form';

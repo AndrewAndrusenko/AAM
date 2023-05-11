@@ -5,10 +5,11 @@ import {Subscription } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { instrumentCorpActions, marketDataSources } from 'src/app/models/accounts-table-model';
+import { instrumentCorpActions, marketDataSources } from 'src/app/models/intefaces';
 import { FormControl, FormGroup} from '@angular/forms';
 import * as XLSX from 'xlsx'
 import { AppMarketDataService } from 'src/app/services/app-market-data.service';
+import { indexDBService } from 'src/app/services/indexDB.service';
 @Component({
   selector: 'app-table-inst-corp-actions',
   templateUrl: './instrument-corp-actions-table.html',
@@ -41,11 +42,13 @@ export class AppTableCorporateActionsComponent  implements AfterViewInit {
   constructor(
     private MarketDataService: AppMarketDataService,
     private dialog: MatDialog,
+    private indexDBServiceS:indexDBService,
+
   ) {
-    this.MarketDataService.getCorpActionData().subscribe(corpActionData => this.updateInstrumentDataTable(corpActionData))
+    // this.MarketDataService.getCorpActionData().subscribe(corpActionData => this.updateInstrumentDataTable(corpActionData))
   }
   async ngAfterViewInit() {
-    this.dataSource? null : this.MarketDataService.getInstrumentDataCorpActions().subscribe(data=>this.updateInstrumentDataTable(data));
+    this.indexDBServiceS.getIndexDBInstrumentStaticTables('getInstrumentDataCorpActions').then((data)=>this.updateInstrumentDataTable(data['data']));
   }
   openCorpActionForm (elem:instrumentCorpActions, action:string) {
  /*    this.dialogInstrumentModify = this.dialog.open (AppInvInstrumentModifyFormComponent,{minHeight:'600px', minWidth:'1300px', autoFocus: false, maxHeight: '90vh'})

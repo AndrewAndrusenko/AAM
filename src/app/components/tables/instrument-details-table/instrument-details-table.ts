@@ -4,9 +4,11 @@ import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { instrumentCorpActions, instrumentDetails, marketDataSources } from 'src/app/models/accounts-table-model';
+import { instrumentCorpActions, instrumentDetails, marketDataSources } from 'src/app/models/intefaces';
 import { FormControl, FormGroup} from '@angular/forms';
 import { AppMarketDataService } from 'src/app/services/app-market-data.service';
+import { AppInvInstrumentDetailsFormComponent } from '../../forms/instrument-details-form/instrument-details-form';
+import { indexDBService } from 'src/app/services/indexDB.service';
 @Component({
   selector: 'app-table-instrument-details',
   templateUrl: './instrument-details-table.html',
@@ -21,8 +23,8 @@ import { AppMarketDataService } from 'src/app/services/app-market-data.service';
   ],
 })
 export class AppTableInstrumentDetailsComponent  implements AfterViewInit {
-  columnsToDisplay = ['status','boardid', 'boardname', 'listlevel','issuesize','facevalue','matdate','regnumber', 'currencyid', 'lotsize', 'minstep', 'decimals','action' ];
-  columnsHeaderToDisplay = ['status','boardid', 'boardname', 'listlevel','issuesize','facevalue','matdate','regnumber', 'currencyid', 'lotsize', 'minstep', 'decimals','action' ];
+  columnsToDisplay = ['status','boardid', 'boardname', 'listlevel','issuesize','facevalue','matdate','regnumber', 'currencyid', 'lotsize', 'minstep', 'action' ];
+  columnsHeaderToDisplay = ['status','board', 'board name', 'listlevel','issue','facevalue','maturity','regnumber', 'cur', 'lot', 'step', 'action' ];
   dataSource: MatTableDataSource<instrumentDetails>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
@@ -30,20 +32,23 @@ export class AppTableInstrumentDetailsComponent  implements AfterViewInit {
   @Input () instrumentDetails:instrumentDetails[] = [];
   @Input () secid:string;
   panelOpenStateSecond = false;
+  dialogInstrumentDetails: MatDialogRef<AppInvInstrumentDetailsFormComponent>;
 
   constructor(
     private MarketDataService: AppMarketDataService,
+    private indexDBServiceS:indexDBService,
     private dialog: MatDialog,
   ) {
-    this.MarketDataService.getInstrumentDataDetails().subscribe(instrumentDetails => this.updateInstrumentDataTable(instrumentDetails))
+    // this.MarketDataService.getInstrumentDataDetails().subscribe(instrumentDetails => this.updateInstrumentDataTable(instrumentDetails))
   }
+
   async ngAfterViewInit() {
-    this.dataSource? null : this.MarketDataService.getInstrumentDataDetails().subscribe(data=>this.updateInstrumentDataTable(data));
+    this.indexDBServiceS.getIndexDBInstrumentStaticTables('getInstrumentDataDetails').then ((data)=>this.updateInstrumentDataTable (data['data']))
   }
-  openInstrumentDetailsForm (elem:instrumentCorpActions, action:string) {
- /*    this.dialogInstrumentModify = this.dialog.open (AppInvInstrumentModifyFormComponent,{minHeight:'600px', minWidth:'1300px', autoFocus: false, maxHeight: '90vh'})
-    this.dialogInstrumentModify.componentInstance.action = action; */
-    // this.dialogInstrumentModify.componentInstance.data = element;
+  openInstrumentDetailsForm (element:instrumentDetails, action:string) {
+    this.dialogInstrumentDetails = this.dialog.open (AppInvInstrumentDetailsFormComponent,{minHeight:'30vh', minWidth:'1300px', autoFocus: false, maxHeight: '90vh'})
+    this.dialogInstrumentDetails.componentInstance.action = action; 
+    this.dialogInstrumentDetails.componentInstance.data = element;
   }
   updateInstrumentDataTable (corpActionData:instrumentDetails[]) {
     this.dataSource  = new MatTableDataSource(corpActionData);

@@ -5,7 +5,7 @@ import {Observable, Subscription } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { Instruments, instrumentCorpActions, instrumentDetails, marketDataSources } from 'src/app/models/accounts-table-model';
+import { Instruments, instrumentCorpActions, instrumentDetails, marketDataSources } from 'src/app/models/intefaces';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
@@ -14,6 +14,7 @@ import { AppMarketDataService } from 'src/app/services/app-market-data.service';
 import { menuColorGl,investmentNodeColor, investmentNodeColorChild, additionalLightGreen } from 'src/app/models/constants';
 import { AppInvInstrumentModifyFormComponent } from '../../forms/instrument-form/instrument-form';
 import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
+import { indexDBService } from 'src/app/services/indexDB.service';
 @Component({
   selector: 'app-app-instrument-table',
   templateUrl: './instrument-table.html',
@@ -81,19 +82,23 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
   constructor(
     private MarketDataService: AppMarketDataService,
     private TreeMenuSevice:TreeMenuSevice,
+    private indexDBServiceS:indexDBService,
     private dialog: MatDialog,
     private fb:FormBuilder, 
   ) {
-    this.MarketDataService.getInstrumentDataGeneral('getBoardsDataFromInstruments').subscribe(boardsData => this.boardIDs=boardsData)
-    this.MarketDataService.getMarketDataSources().subscribe(marketSourcesData => this.marketSources = marketSourcesData);
-   
-    this.MarketDataService.getInstrumentData().subscribe(data =>{
+    this.searchParametersFG = this.fb.group ({
+      secidList: null,
+      amount:{value:null, disabled:true},
+      marketSource : {value:null, disabled:false},
+      boards : {value:null, disabled:false}
+    });
+     this.indexDBServiceS.getIndexDBInstrumentStaticTables('getBoardsDataFromInstruments').then ((data)=>this.boardIDs = data['data'])
+     this.MarketDataService.getMarketDataSources().subscribe(marketSourcesData => this.marketSources = marketSourcesData);
+     this.MarketDataService.getInstrumentDataToUpdateTableSource().subscribe(data =>{
      let index =  this.dataSource.data.findIndex(elem=>elem.id===data.data[0].id)
       switch (data.action) {
         case 'Deleted':
-          // console.log('index del', index, this.dataSource.data.length);
           this.dataSource.data.splice(index,1)
-          // console.log('da del',  this.dataSource.data.length, this.dataSource.data);
         break;
         case 'Created':
           this.dataSource.data.unshift(data.data[0])
@@ -105,12 +110,7 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
      this.dataSource.paginator = this.paginator;
      this.dataSource.sort = this.sort;
     })
-    this.searchParametersFG = this.fb.group ({
-      secidList: null,
-      amount:{value:null, disabled:true},
-      marketSource : {value:null, disabled:false},
-      boards : {value:null, disabled:false}
-    });
+
   }
   openInstrumentModifyForm (action:string, element:any) {
     this.dialogInstrumentModify = this.dialog.open (AppInvInstrumentModifyFormComponent,{minHeight:'600px', minWidth:'800px', maxWidth:'60vw', autoFocus: false, maxHeight: '90vh'})
@@ -128,12 +128,9 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
     } else {
       this.MarketDataService.getMoexInstruments().subscribe (instrumentData => this.updateInstrumentDataTable(instrumentData))  
     }
-    this.MarketDataService.getInstrumentDataDetails().subscribe(instrumentDetails => {
-      this.instrumentDetailsArr = instrumentDetails
-    })
-    this.MarketDataService.getInstrumentDataCorpActions().subscribe(instrumentCorpActions => {
-      this.instrumentCorpActions = instrumentCorpActions
-    })
+    this.indexDBServiceS.getIndexDBInstrumentStaticTables('getInstrumentDataDetails').then ((data)=>this.instrumentDetailsArr = data['data']);
+    this.indexDBServiceS.getIndexDBInstrumentStaticTables('getInstrumentDataCorpActions').then ((data)=>this.instrumentCorpActions = data['data']);
+
   }
   handleNewFavoriteClick(elem:Instruments){
     console.log('elem',elem);

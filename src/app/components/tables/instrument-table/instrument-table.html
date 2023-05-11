@@ -125,7 +125,7 @@
   </form>
 </mat-expansion-panel>
 
-<div class="mat-elevation-z8" style="width: 98%;">
+<div class="mat-elevation-z8" >
   <table  #strategyTable mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class="mat-elevation-z8">
     <ng-container matColumnDef="{{column}}"  *ngFor="let column of columnsToDisplay; let i=index">
       <th mat-header-cell *matHeaderCellDef mat-sort-header >  {{columnsHeaderToDisplay[i] }}</th>

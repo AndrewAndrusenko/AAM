@@ -4,7 +4,7 @@ import {MatSort} from '@angular/material/sort';
 import {lastValueFrom, Subscription } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
-import {AccountsTableModel } from 'src/app/models/accounts-table-model';
+import {AccountsTableModel } from 'src/app/models/intefaces';
 import {AppTabServiceService} from 'src/app/services/app-tab-service.service';
 import {TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';

@@ -20,11 +20,18 @@
   <button mat-flat-button mat-button [style.background-color] ="menuColor"  [matMenuTriggerFor]="menu3">Settings</button>
     <mat-menu #menu3="matMenu">
     <button mat-menu-item
-    (click)="showChart()">Settings</button>
+      (click)="showChart()">
+      Settings
+    </button>
+    <button mat-menu-item
+    (click)="localStorageclear()">
+    Local Storage Clear
+  </button>
     <button mat-menu-item>User profile</button>
     <button mat-menu-item
-    (click)="LogOut()"
-    >Sign out</button>
+      (click)="LogOut()">
+      Sign out
+    </button>
   
   </mat-menu>
 

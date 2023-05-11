@@ -45,6 +45,7 @@
     "jszip": "^3.10.1",
     "moment": "^2.29.4",
     "ngx-echarts": "^15.0.3",
+    "ngx-indexed-db": "^16.0.0",
     "passport": "^0.6.0",
     "passport-local": "^1.0.0",
     "pg": "^8.8.0",
