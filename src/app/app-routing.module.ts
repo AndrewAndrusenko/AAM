@@ -2,15 +2,37 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AuthGuardService } from './services/auth-guard.service';
 import { LoginComponent } from './components/main-page/login/login.component';
-
-const routes: Routes = [
- { path: 'login', component: LoginComponent },
-  { 
-    path: 'general', 
-    canActivate : [AuthGuardService ],
-    loadChildren: () => import('./components/main-page/general.module').then(m => m.GeneralModule) 
+import { DashboardComponent } from './components/main-page/root-page/root-page';
+import { InstrumentTabComponent } from './components/main-page/tabs/instrument-tab/instrument-tab.component';
+import { StrategiesTabComponent } from './components/main-page/tabs/strateries-tab/strateries-tab';
+import { AccAccountsTabComponent } from './components/main-page/tabs/accounting-tab/acc-accounts-tab';
+import { AccTransactionsTabComponent } from './components/main-page/tabs/transactions-tab/transactions-tab';
+export const routesTreeMenu =[
+  {
+    path: "Instruments",
+    data: { reuse: true },
+    component: InstrumentTabComponent
   },
-  { path: '', redirectTo : 'login', pathMatch:'full' }
+  {
+    path: "Strategies",
+    data: { reuse: true },
+    component: StrategiesTabComponent
+  },
+  {
+    path: "Accounts",
+    data: { reuse: true },
+    component: AccAccountsTabComponent
+  },
+  {
+    path: "Transactions",
+    data: { reuse: true },
+    component: AccTransactionsTabComponent
+  }
+]
+export const routes: Routes = [
+ { path: 'login', component: LoginComponent },
+ { path: 'tree', component: DashboardComponent,  canActivate : [AuthGuardService ], children: routesTreeMenu,  data: { reuse: true } },
+ { path: '', redirectTo : 'login', pathMatch:'full' }
 ];
 
 @NgModule({

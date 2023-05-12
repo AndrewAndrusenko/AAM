@@ -42,7 +42,7 @@ export class LoginComponent implements OnInit {
      console.log(response)
      //console.log(response)
       this.authService.setUserInfo({'user' : response ['username']});
-      this.router.navigate(['general']);    
+      this.router.navigate(['tree']);    
     })
     .catch ((error) => {
      console.log(error.error.text)
