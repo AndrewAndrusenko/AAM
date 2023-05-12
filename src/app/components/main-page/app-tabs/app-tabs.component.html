@@ -1,48 +1,8 @@
+<!-- <div><a routerLink="instrumenttab"><h2>instruments</h2></a></div> -->
+
 <app-app-portfolio-tablee *ngIf="messageReceived.text=='Portfolios_Root'"></app-app-portfolio-tablee>   
 <app-app-clients-table *ngIf="messageReceived.text=='Clients_Root'"> </app-app-clients-table>    
-<app-table-strategies *ngIf="messageReceived.text=='Strategies_Root'"></app-table-strategies>     
-<mat-tab-group  *ngIf="messageReceived.text=='Instruments_Root'" mat-stretch-tabs>
-  <mat-tab label="Instruments List"> 
-    <app-app-instrument-table [FormMode]="'DB'"></app-app-instrument-table >  
-  </mat-tab>
-  <mat-tab  label="Market Data" >
-    <app-table-market-data
-    FormMode="QuotesMode"
-    ></app-table-market-data> 
-    <!-- <app-table-acc-accounts style="width: 150%;"></app-table-acc-accounts> -->
-  </mat-tab>  
-    <mat-tab   label="Charts"> 
-    <app-echart-marketdata-candle  style="height: 100%;"> </app-echart-marketdata-candle>
-    <app-table-market-data
-      FormMode="ChartMode"
-    ></app-table-market-data> 
-  </mat-tab>
-  <mat-tab label="Corporate Actions">
-    <app-table-inst-corp-actions></app-table-inst-corp-actions>
-  </mat-tab>
-  <mat-tab label="Positions"></mat-tab>
-</mat-tab-group>
 <app-app-instrument-table *ngIf="messageReceived.text=='Trades & Orders_Root'" [FormMode]="'Redis'"></app-app-instrument-table >  
-<mat-tab-group  *ngIf="messageReceived.name=='Accounts'" mat-stretch-tabs>
-  <mat-tab label="Balance Sheets"> 
-    <app-table-balance-sheet></app-table-balance-sheet>  
-  </mat-tab>
-  <mat-tab  label="Client Accounts" >
-    <app-table-acc-accounts style="width: 150%;"></app-table-acc-accounts>
-  </mat-tab>  
-  <mat-tab   label="Ledger Accounts"> 
-    <app-table-acc-ledger-accounts style="width: 150%;"></app-table-acc-ledger-accounts>
-  </mat-tab>
-</mat-tab-group>
-<mat-tab-group  *ngIf="messageReceived.name=='Transactions'" mat-stretch-tabs>
-  <mat-tab  label="Transactions List" >
-    <app-table-acc-entries style="width: 150%;"></app-table-acc-entries>
-  </mat-tab>  
-  <mat-tab   label="SWIFT Statements processing "> 
-    <app-table-swift-IN-list style="width: 150%;"></app-table-swift-IN-list>
-  </mat-tab>
-  <mat-tab label="Statement Reconcilation"> Statement Reconcilation  </mat-tab>
-</mat-tab-group>
   
 <mat-tab-group  *ngIf="messageReceived.text=='Portfolios'" mat-stretch-tabs #AccountInfo >
   <mat-tab label="Account Summary" > </mat-tab>  
@@ -109,6 +69,7 @@
   <mat-tab label="Positions"> Positions table</mat-tab>
   <mat-tab label="Orders by Strategy"> Orders history</mat-tab>
 </mat-tab-group>
+<router-outlet></router-outlet>
 
 
 

@@ -148,11 +148,23 @@ import { NgxIndexedDBModule } from 'ngx-indexed-db';
         AppTableInstrumentDetailsComponent,
         AppInvInstrumentDetailsFormComponent,
         TablePortfolios,
-        LoginComponent
-    ],
+        LoginComponent,
+        InstrumentTabComponent,
+        AccountsTabComponent,
+        StrategiesTabComponent,
+        AccAccountsTabComponent,
+        AccTransactionsTabComponent  
+     ],
     bootstrap: [AppComponent],
-    providers: [ {provide: MAT_MOMENT_DATE_ADAPTER_OPTIONS, useValue: {strict: true}} ],
+    providers: [ {provide: MAT_MOMENT_DATE_ADAPTER_OPTIONS, useValue: {strict: true}}, {provide: RouteReuseStrategy, useClass: MaltsevRouteReuseStrategy} ],
 
 })
 export class AppModule { }import { indexDbConfigAAM } from './models/intefaces';
+import { RouteReuseStrategy } from '@angular/router';
+import { MaltsevRouteReuseStrategy } from './services/reuse-strategy';
+import { InstrumentTabComponent } from './components/main-page/tabs/instrument-tab/instrument-tab.component';
+import { AccountsTabComponent } from './component/main-page/tabs/accounts-tab/accounts-tab.component';
+import { StrategiesTabComponent } from './components/main-page/tabs/strateries-tab/strateries-tab';
+import { AccAccountsTabComponent } from './components/main-page/tabs/accounting-tab/acc-accounts-tab';
+import { AccTransactionsTabComponent } from './components/main-page/tabs/transactions-tab/transactions-tab';
 

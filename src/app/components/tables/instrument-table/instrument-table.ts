@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ViewEncapsulation, EventEmitter, Output, ViewChild, Input} from '@angular/core';
+import {AfterViewInit, Component, ViewEncapsulation, EventEmitter, Output, ViewChild, Input, ChangeDetectionStrategy} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {Observable, Subscription } from 'rxjs';
@@ -17,6 +17,8 @@ import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
 @Component({
   selector: 'app-app-instrument-table',
+  
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './instrument-table.html',
   styleUrls: ['./instrument-table.scss'],
   encapsulation: ViewEncapsulation.None,

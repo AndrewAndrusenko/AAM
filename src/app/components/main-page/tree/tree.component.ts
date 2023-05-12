@@ -7,6 +7,8 @@ import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { MatMenuTrigger as MatMenuTrigger } from '@angular/material/menu';
 import { lastValueFrom } from 'rxjs';
 import { rootNodesColor } from 'src/app/models/constants';
+import { routesTreeMenu} from 'src/app/app-routing.module'
+import { Router } from '@angular/router';
 /** Flat node with expandable and level information */
 export class DynamicFlatNode {
   constructor(
@@ -135,11 +137,12 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
   styleUrls: ['tree.component.css'],
 })
 export class TreeComponent {
+  routesPathsTreeMenu = routesTreeMenu.map (el=>el.path)
   dataChange: any;
-  constructor(database: DynamicDatabase, private TreeMenuSevice:TreeMenuSevice)  {
+  constructor(database: DynamicDatabase, private TreeMenuSevice:TreeMenuSevice, private router: Router)  {
     this.treeControl = new FlatTreeControl<DynamicFlatNode>(this.getLevel, this.isExpandable);
     this.dataSource = new DynamicDataSource(this.treeControl, database);
-    this.databaseM = database
+    this.databaseM = database;
     this.initialData();
   }
   @ViewChild(MatMenuTrigger) trigger: MatMenuTrigger;
@@ -160,10 +163,14 @@ export class TreeComponent {
 
   // SendMessage: when node is selected method sends node rootTypeName to the Tab component to show relevant information structure     
   sendMessage = (node: DynamicFlatNode) => {
+    let route = node.item.toLowerCase();
+    console.log('route',route);
+    this.routesPathsTreeMenu.includes(node.item)? this.router.navigate(['tree/'+node.item]) : null;
     this.TreeMenuSevice.sendUpdate(node.nodeRoot, node.item, +node.id)
   }
 
   public async initialData() {
+    console.log(' routesTreeMenu', routesTreeMenu);
     let userData = JSON.parse(localStorage.getItem('userInfo'))
     await lastValueFrom (this.TreeMenuSevice.getaccessRestriction (userData.user.accessrole, 'rootLevelNodes'))
     .then ((accessRestrictionData) =>{
@@ -218,6 +225,7 @@ export class TreeComponent {
         this.treeControl.expand(this.treeControl.dataNodes[i])
         parentIndex = i; 
       }
+      
     }
     
     // Continue to loop through nodes to find given child item. Then emulate a click on the item to get relevant tab component
