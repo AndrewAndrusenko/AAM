@@ -279,7 +279,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
       'dateRangeEnd': new Date (this.gRange.get('dateRangeEnd').value).toDateString()});
     ( this.marketSource.value != null&&this.marketSource.value.length !=0)? Object.assign (searchObj , {'sourcecode': this.marketSource.value}): null;
     ( this.boards.value != null&&this.boards.value.length !=0)? Object.assign (searchObj , {'boardid': this.boards.value}): null;
-    this.MarketDataService.getMarketData(10000,this.FormMode==='ChartMode'? 'tradedate ASC':undefined,searchObj).subscribe (marketData  => {
+    this.MarketDataService.getMarketData(undefined,this.FormMode==='ChartMode'? 'tradedate ASC':undefined,searchObj).subscribe (marketData  => {
       this.dataSource  = new MatTableDataSource(marketData);
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;

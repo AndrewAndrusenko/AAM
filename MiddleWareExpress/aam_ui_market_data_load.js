@@ -263,7 +263,7 @@ async function fgetInstrumentDataGeneral(request,response) {
   switch (request.query.dataType) {
     case 'getBoardsDataFromInstruments':
       query.text = "SELECT boardid, board_title FROM public.mmoexboards " +
-      "WHERE row_num NOTNULL and is_traded=1 " +
+      "WHERE is_traded=1 " +
       "ORDER BY row_num asc;"
     break;
     case 'getMoexSecurityTypes':

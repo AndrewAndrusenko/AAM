@@ -10,7 +10,7 @@ async function TestRedis (request,response) {
   })
 }
 async function redisSetInstrumentList (request, response) {
-  let instrumentsData = await uiAmmMarketData.fGetMoexInstruments(request={query:{rowslimit:50000}},response);
+  let instrumentsData = await uiAmmMarketData.fGetMoexInstruments(request={query:{rowslimit:1000000}},response);
   await client.hSet('user-session:123', {data:JSON.stringify(instrumentsData)} ).then (async data => {
     let instrumentsData = await client.hGetAll('user-session:123');
     console.log('SetInstrumentList ',JSON.parse(instrumentsData.data).length);

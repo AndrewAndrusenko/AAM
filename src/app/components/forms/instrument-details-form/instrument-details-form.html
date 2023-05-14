@@ -43,7 +43,7 @@
     <input matInput placeholder="Currency" formControlName="currencyid" >
   </mat-form-field>
   <mat-form-field style="width: 15%;" title="issuevolume"  >
-    <input matInput placeholder="Issue Volume" formControlName="" [disabled]="true" [value]="issuesize.value*facevalue.value | number" >
+    <input matInput placeholder="Issue Volume" formControlName="issuevolume" [disabled]="true" [value]="issuesize.value*facevalue.value | number" >
     <mat-hint class="number-format">{{issuesize.value*facevalue.value | number}}</mat-hint>
   </mat-form-field>
   <mat-form-field style="width: 10%;" title="issuesize">

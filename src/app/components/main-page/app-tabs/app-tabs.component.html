@@ -1,9 +1,4 @@
-<!-- <div><a routerLink="instrumenttab"><h2>instruments</h2></a></div> -->
-
-<app-app-portfolio-tablee *ngIf="messageReceived.text=='Portfolios_Root'"></app-app-portfolio-tablee>   
-<app-app-clients-table *ngIf="messageReceived.text=='Clients_Root'"> </app-app-clients-table>    
 <app-app-instrument-table *ngIf="messageReceived.text=='Trades & Orders_Root'" [FormMode]="'Redis'"></app-app-instrument-table >  
-  
 <mat-tab-group  *ngIf="messageReceived.text=='Portfolios'" mat-stretch-tabs #AccountInfo >
   <mat-tab label="Account Summary" > </mat-tab>  
   <mat-tab label="Portfolio Details"> Detailed positions with PnL data </mat-tab>

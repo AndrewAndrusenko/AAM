@@ -153,7 +153,9 @@ import { NgxIndexedDBModule } from 'ngx-indexed-db';
         AccountsTabComponent,
         StrategiesTabComponent,
         AccAccountsTabComponent,
-        AccTransactionsTabComponent  
+        AccTransactionsTabComponent,
+        PortfoliosTabComponent,  
+        ClientsTabComponent,
      ],
     bootstrap: [AppComponent],
     providers: [ {provide: MAT_MOMENT_DATE_ADAPTER_OPTIONS, useValue: {strict: true}}, {provide: RouteReuseStrategy, useClass: MaltsevRouteReuseStrategy} ],
@@ -167,4 +169,6 @@ import { AccountsTabComponent } from './component/main-page/tabs/accounts-tab/ac
 import { StrategiesTabComponent } from './components/main-page/tabs/strateries-tab/strateries-tab';
 import { AccAccountsTabComponent } from './components/main-page/tabs/accounting-tab/acc-accounts-tab';
 import { AccTransactionsTabComponent } from './components/main-page/tabs/transactions-tab/transactions-tab';
+import { PortfoliosTabComponent } from './components/main-page/tabs/portfolios-tab/portfolios-tab';
+import { ClientsTabComponent } from './components/main-page/tabs/clients-tab/clients-tab';
 

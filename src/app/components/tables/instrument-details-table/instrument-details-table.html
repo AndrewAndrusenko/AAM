@@ -5,7 +5,7 @@
       <th mat-header-cell *matHeaderCellDef mat-sort-header>  {{columnsHeaderToDisplay[i]  | titlecase}}</th>
       <td 
         mat-cell 
-        *matCellDef="let element" > 
+        *matCellDef="let element" [cdkContextMenuTriggerFor]="instrumentcontextmenu"> 
         <span [ngSwitch]="true==true">
           <p *ngSwitchCase="['issuesize','facevalue'].includes(column)">
               {{ element[column] | number:'1.0-0' }}
@@ -15,14 +15,14 @@
               mat-icon-button 
               aria-label="expand row" color="accent"
               matTooltip="Edit entry"
-              (click)="openInstrumentDetailsForm(element,'Edit')">
+              (click)="openInstrumentDetailsForm('Edit', element)">
               <mat-icon >edit</mat-icon>
             </button>
             <button 
               mat-icon-button 
               style="margin-left: 5%;" aria-label="expand row" color="accent" 
               matTooltip="Delete entry"
-              (click)="openInstrumentDetailsForm(element,'Delete')">
+              (click)="openInstrumentDetailsForm('Delete', element)">
               <mat-icon >delete</mat-icon>
             </button>
           </p>
@@ -30,6 +30,34 @@
             {{element[column]}}
           </p>
         </span>
+        <ng-template  #instrumentcontextmenu>
+          <div class="tree-menu-context" cdkMenu >
+            <button 
+              class="tree-menu-item" cdkMenuItem 
+              (click)="openInstrumentDetailsForm('Create', element)">
+              <mat-icon class="menu-icon" matPrefix>add_circle</mat-icon>      
+              New Instrument Details
+            </button>
+            <button 
+              class="tree-menu-item" cdkMenuItem 
+              (click)="openInstrumentDetailsForm('Create_Example', element)">
+              <mat-icon class="menu-icon" matPrefix>add_circle</mat-icon>      
+              New Instrument Details (on sample)
+            </button>
+            <button 
+              class="tree-menu-item" cdkMenuItem
+              (click)="openInstrumentDetailsForm('Edit', element)">
+              <mat-icon class="menu-icon" matPrefix>edit</mat-icon>      
+              Edit Instrument Details
+            </button>
+            <button 
+              class="tree-menu-item" cdkMenuItem
+              (click)="openInstrumentDetailsForm('Delete', element)">
+              <mat-icon class="menu-icon" matPrefix>delete</mat-icon> 
+              Delete Instrument Details
+            </button> 
+          </div>
+        </ng-template> 
       </td>
     </ng-container>
     <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>

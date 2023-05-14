@@ -5,6 +5,7 @@ import { Subscription } from 'rxjs';
 import { MatTabGroup as MatTabGroup } from '@angular/material/tabs';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AppMarketDataService } from 'src/app/services/app-market-data.service';
+import { indexDBService } from 'src/app/services/indexDB.service';
 
 @Component({
   selector: 'app-instrument-details-form',
@@ -27,6 +28,7 @@ export class AppInvInstrumentDetailsFormComponent implements OnInit {
     private fb:FormBuilder, 
     private CommonDialogsService:HadlingCommonDialogsService,
     private MarketDataService: AppMarketDataService,
+    private indexDBServiceS: indexDBService,
   ) 
   {   
     this.instrumentDetailsForm = this.fb.group ({
@@ -45,6 +47,8 @@ export class AppInvInstrumentDetailsFormComponent implements OnInit {
       decimals: {value:null, disabled: false},
       marketcode: {value:null, disabled: false}
     })
+    this.indexDBServiceS.getIndexDBInstrumentStaticTables('getBoardsDataFromInstruments').then (data=>this.moexBoards=data['data'])
+    
   }
   ngOnInit(): void {
    this.title = this.action;

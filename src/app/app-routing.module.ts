@@ -7,6 +7,8 @@ import { InstrumentTabComponent } from './components/main-page/tabs/instrument-t
 import { StrategiesTabComponent } from './components/main-page/tabs/strateries-tab/strateries-tab';
 import { AccAccountsTabComponent } from './components/main-page/tabs/accounting-tab/acc-accounts-tab';
 import { AccTransactionsTabComponent } from './components/main-page/tabs/transactions-tab/transactions-tab';
+import { PortfoliosTabComponent } from './components/main-page/tabs/portfolios-tab/portfolios-tab';
+import { ClientsTabComponent } from './components/main-page/tabs/clients-tab/clients-tab';
 export const routesTreeMenu =[
   {
     path: "Instruments",
@@ -27,7 +29,17 @@ export const routesTreeMenu =[
     path: "Transactions",
     data: { reuse: true },
     component: AccTransactionsTabComponent
-  }
+  },
+  {
+    path: "Portfolios",
+    data: { reuse: true },
+    component: PortfoliosTabComponent
+  },
+  {
+    path: "Clients",
+    data: { reuse: true },
+    component: ClientsTabComponent
+  },
 ]
 export const routes: Routes = [
  { path: 'login', component: LoginComponent },

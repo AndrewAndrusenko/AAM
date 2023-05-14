@@ -45,7 +45,7 @@ export class AppTableInstrumentDetailsComponent  implements AfterViewInit {
   async ngAfterViewInit() {
     this.indexDBServiceS.getIndexDBInstrumentStaticTables('getInstrumentDataDetails').then ((data)=>this.updateInstrumentDataTable (data['data']))
   }
-  openInstrumentDetailsForm (element:instrumentDetails, action:string) {
+  openInstrumentDetailsForm (action:string, element:instrumentDetails) {
     this.dialogInstrumentDetails = this.dialog.open (AppInvInstrumentDetailsFormComponent,{minHeight:'30vh', minWidth:'1300px', autoFocus: false, maxHeight: '90vh'})
     this.dialogInstrumentDetails.componentInstance.action = action; 
     this.dialogInstrumentDetails.componentInstance.data = element;

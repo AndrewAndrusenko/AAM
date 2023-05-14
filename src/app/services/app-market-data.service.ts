@@ -133,7 +133,7 @@ export class AppMarketDataService {
     return  this.http.post <number> ('/api/AAM/MD/importData/',
     {'dataToInsert': dataToInsert,'sourceCode':sourceCode, 'gloabalSource':gloabalSource})
   }
-  getMarketData (rowslimit:number=4000,sorting:string=' tradedate DESC', searchParameters?:any):Observable<marketData[]> {
+  getMarketData (rowslimit:number=1000000,sorting:string=' tradedate DESC', searchParameters?:any):Observable<marketData[]> {
     let params = {};
     (searchParameters !== null) ?  params = {...params,...searchParameters}: null;
     (rowslimit !== null) ?  Object.assign(params,{'rowslimit':rowslimit}): null;
@@ -155,7 +155,7 @@ export class AppMarketDataService {
     fieldtoCheck!==null? Object.assign(params,{fieldtoCheck:fieldtoCheck}) : null;
     return this.http.get <any[]> ('/api/AAM/MD/getInstrumentDataGeneral/',{params:params})
   }
-  getMoexInstruments (rowslimit:number=50000,sorting:string=' secid ASC', searchParameters?:any):Observable<Instruments[]> {
+  getMoexInstruments (rowslimit:number=100000,sorting:string=' secid ASC', searchParameters?:any):Observable<Instruments[]> {
     let params = {};
     (searchParameters !== null) ?  params = {...params,...searchParameters}: null;
     (rowslimit !== null) ?  Object.assign(params,{'rowslimit':rowslimit}): null;
