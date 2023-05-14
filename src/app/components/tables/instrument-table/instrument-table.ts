@@ -131,7 +131,7 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
       this.MarketDataService.getMoexInstruments().subscribe (instrumentData => this.updateInstrumentDataTable(instrumentData))  
     }
     this.indexDBServiceS.getIndexDBInstrumentStaticTables('getInstrumentDataDetails').then ((data)=>this.instrumentDetailsArr = data['data']);
-    this.indexDBServiceS.getIndexDBInstrumentStaticTables('getInstrumentDataCorpActions').then ((data)=>this.instrumentCorpActions = data['data']);
+    // this.indexDBServiceS.getIndexDBInstrumentStaticTables('getInstrumentDataCorpActions').then ((data)=>this.instrumentCorpActions = data['data']); -- corporate actions data will be cached by CoprActionTable
 
   }
   handleNewFavoriteClick(elem:Instruments){

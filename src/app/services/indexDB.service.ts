@@ -35,6 +35,12 @@ export class indexDBService {
         case 'getInstrumentDataCorpActions':
           this.MarketDataService.getInstrumentDataCorpActions().subscribe(data=>resolve(data))
         break;
+        case 'getMoexSecurityGroups':
+          this.MarketDataService.getInstrumentDataGeneral('getMoexSecurityGroups').subscribe(data=>resolve(data))
+        break;
+        case 'getMoexSecurityTypes':
+          this.MarketDataService.getInstrumentDataGeneral('getMoexSecurityTypes').subscribe(data=>resolve(data))
+        break;
       }
     })
   }

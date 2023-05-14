@@ -9,6 +9,7 @@ import { AppInvestmentDataServiceService } from './app-investment-data.service.s
 import { AppTabServiceService } from './app-tab-service.service';
 import { AppAccountingService } from './app-accounting.service';
 import { AppMarketDataService } from './app-market-data.service';
+import { registerUpdateLifecycle } from 'echarts';
 export class customAsyncValidators {
 
   static clientNameCustomAsyncValidator(userService: AppTabServiceService, clientId:number): AsyncValidatorFn {
@@ -32,7 +33,6 @@ export class customAsyncValidators {
         );
     };
   }
-  
   static strategyCodeCustomAsyncValidator (userService: AppInvestmentDataServiceService, Id:number): AsyncValidatorFn {
     return (control: AbstractControl): Observable<ValidationErrors> => {
       return userService
@@ -43,7 +43,6 @@ export class customAsyncValidators {
         );
     };
   }
-
   static AccountingAccountNoCustomAsyncValidator (AccountingDataService: AppAccountingService, AccountNo:string): AsyncValidatorFn {
     return (control: AbstractControl): Observable<ValidationErrors> => {
       return AccountingDataService
@@ -63,7 +62,6 @@ export class customAsyncValidators {
           map ( accountIsTaken => (control.value !== AccountNo && accountIsTaken.length ? { accountIsTaken: true } : null)  ),
           catchError(() => of(null)),
           take(1)
-
         );
     };
   }
@@ -123,28 +121,37 @@ export class customAsyncValidators {
   }  
   static MD_SecidUniqueAsyncValidator (AppMarketDataService: AppMarketDataService, secid:string): AsyncValidatorFn {
     return (control: AbstractControl): Observable<ValidationErrors> => {
-      return AppMarketDataService
-        .getInstrumentDataGeneral('validateSecidForUnique', control.value.toUpperCase())
-        .pipe(
-          map ( secidIsTaken => (control.value.toUpperCase() !== secid.toUpperCase() && secidIsTaken.length ? { secidIsTaken: true } : null)  ),
-          catchError(() => of(null)),
-          take(1)
-        );
+      if (control.dirty) {
+        return AppMarketDataService
+          .getInstrumentDataGeneral('validateSecidForUnique', control.value.toUpperCase())
+          .pipe(
+            map ( secidIsTaken => (control.value.toUpperCase() !== secid.toUpperCase() && secidIsTaken.length ? { secidIsTaken: true } : null)  ),
+            catchError(() => of(null)),
+            take(1)
+          );
+        } else {
+          return of(null);
+        }
     };
   }
   static MD_ISINuniqueAsyncValidator (AppMarketDataService: AppMarketDataService, isin:string): AsyncValidatorFn {
     return (control: AbstractControl): Observable<ValidationErrors> => {
-      return AppMarketDataService
-        .getInstrumentDataGeneral('validateISINForUnique', control.value.toUpperCase())
-        .pipe(
-          map ( isinIsTaken => (control.value.toUpperCase() !== isin.toUpperCase() && isinIsTaken.length ? { isinIsTaken: true } : null)  ),
-          catchError(() => of(null)),
-          take(1)
-        );
+      console.log('isin dirty',control.dirty,'touched', control.touched);
+      if (control.dirty) {
+        return AppMarketDataService
+          .getInstrumentDataGeneral('validateISINForUnique', control.value.toUpperCase())
+          .pipe(
+            map ( isinIsTaken => (control.value.toUpperCase() !== isin.toUpperCase() && isinIsTaken.length ? { isinIsTaken: true } : null)  ),
+            catchError(() => of(null)),
+            take(1)
+          );
+        } else {
+          return of(null);
+        }
     };
   }
 }
-function getControlName(c: AbstractControl): string | null {
+/* function getControlName(c: AbstractControl): string | null {
   const formGroup = c.parent.controls;
   return Object.keys(formGroup).find(name => c === formGroup[name]) || null;
-}
+} */
