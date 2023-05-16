@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, EventEmitter, Output, ViewChild} from '@angular/core';
+import { Component, EventEmitter, Output, ViewChild} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {lastValueFrom, Subscription } from 'rxjs';
@@ -6,14 +6,16 @@ import {MatTableDataSource as MatTableDataSource} from '@angular/material/table'
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { bAccounts, bLedgerAccounts } from 'src/app/models/intefaces';
+import { bLedgerAccounts } from 'src/app/models/intefaces';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
-import { AppAccEntryModifyFormComponent } from '../../forms/acc-entry-form/acc-entry-form';
 import { AppAccAccountModifyFormComponent } from '../../forms/acc-account-form/acc-account-form';
+import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
+import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
+import { formatNumber } from '@angular/common';
 @Component({
   selector: 'app-table-acc-ledger-accounts',
-  templateUrl: './acc-ledger-accounts-table.html',
-  styleUrls: ['./acc-ledger-accounts-table.scss'],
+  templateUrl: './acc-accounts-ledger-table.html',
+  styleUrls: ['./acc-accounts-ledger-table.scss'],
   animations: [
     trigger('detailExpand', [
       state('collapsed', style({height: '0px', minHeight: '0'})),
@@ -22,7 +24,7 @@ import { AppAccAccountModifyFormComponent } from '../../forms/acc-account-form/a
     ]),
   ],
 })
-export class AppTableAccLedgerAccountsComponent  implements AfterViewInit {
+export class AppTableAccLedgerAccountsComponent {
   columnsToDisplay = [
     'ledgerNo',  
     'd_APTypeCodeAccount', 
@@ -50,39 +52,47 @@ export class AppTableAccLedgerAccountsComponent  implements AfterViewInit {
   public selectedRow : bLedgerAccounts  | null;
   accessToClientData: string = 'true';
   public readOnly: boolean = false; 
-  action ='';
+  action ='GetLedgerAccountsDataWholeList';
   dialogRef: MatDialogRef<AppAccAccountModifyFormComponent>;
-  private subscriptionName: Subscription;
-
-
-  constructor(private AccountingDataService:AppAccountingService, private TreeMenuSevice:TreeMenuSevice, private dialog: MatDialog ) {
-    this.subscriptionName= this.AccountingDataService.getReloadAccontList().subscribe ( (id) => {
-      this.AccountingDataService.GetLedgerAccountsListAccounting (null,null,null,null,'GetLedgerAccountsDataWholeList').subscribe (AccountsList  => {
+  constructor(    
+    private AccountingDataService:AppAccountingService, 
+    private CommonDialogsService:HadlingCommonDialogsService,
+    private TreeMenuSevice:TreeMenuSevice, 
+    private dialog: MatDialog ,
+    private HandlingCommonTasksS:HandlingCommonTasksService 
+  ) {
+    this.AccountingDataService.getReloadAccontList().subscribe ( (id) => this.updateAccountsData(this.action));
+    this.updateAccountsData(this.action);
+  }
+  async updateAccountsData (action: string) {
+    return new Promise<number> (async (resolve,reject) => {
+    let userData = JSON.parse(localStorage.getItem('userInfo'))
+    await lastValueFrom (this.TreeMenuSevice.getaccessRestriction (userData.user.accessrole, 'accessToClientData')).then ((accessRestrictionData) =>{
+      this.dataSource? this.dataSource.data=null : null;
+      this.accessToClientData = accessRestrictionData['elementvalue']
+      this.AccountingDataService.GetLedgerAccountsListAccounting (null,null,null,null,this.action).subscribe (AccountsList  => {
         this.dataSource  = new MatTableDataSource(AccountsList);
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
-      })
-    } )
-  }
-
-  async ngAfterViewInit() {
-    this.columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
-    let userData = JSON.parse(localStorage.getItem('userInfo'))
-    await lastValueFrom (this.TreeMenuSevice.getaccessRestriction (userData.user.accessrole, 'accessToClientData'))
-    .then ((accessRestrictionData) =>{
-      this.accessToClientData = accessRestrictionData['elementvalue']
-      this.AccountingDataService.GetLedgerAccountsListAccounting (null,null,null,null,'GetLedgerAccountsDataWholeList').subscribe (LedgerAccountsList  => {
-        this.dataSource  = new MatTableDataSource(LedgerAccountsList);
-        this.dataSource.paginator = this.paginator;
-        this.dataSource.sort = this.sort;
+        resolve (AccountsList.length)
       })
     })
+  })
   }
-
+  async submitQuery () {
+    await this.updateAccountsData(this.action).then ((rowsCount) => {
+      this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (rowsCount,'en-US') + ' rows loaded'})
+    })
+  }
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
+  }
+  clearFilter (input:HTMLInputElement) {
+    input.value=''
+    this.dataSource.filter = ''
+    if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
   }
   chooseAccount (element) {
     this.selectedRow = element;
@@ -102,4 +112,7 @@ export class AppTableAccLedgerAccountsComponent  implements AfterViewInit {
       break;
     }
   }
+  exportToExcel ()  {
+    this.HandlingCommonTasksS.exportToExcel (this.dataSource.data,"accountLedgerData")
+  }  
 }

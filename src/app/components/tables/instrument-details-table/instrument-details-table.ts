@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ViewEncapsulation, EventEmitter, Output, ViewChild, Input} from '@angular/core';
+import {AfterViewInit, Component, ViewEncapsulation, EventEmitter, Output, ViewChild, Input, SimpleChanges} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
@@ -38,12 +38,12 @@ export class AppTableInstrumentDetailsComponent  implements AfterViewInit {
     private MarketDataService: AppMarketDataService,
     private indexDBServiceS:indexDBService,
     private dialog: MatDialog,
-  ) {
-    // this.MarketDataService.getInstrumentDataDetails().subscribe(instrumentDetails => this.updateInstrumentDataTable(instrumentDetails))
-  }
-
+  ) {}
   async ngAfterViewInit() {
     this.indexDBServiceS.getIndexDBInstrumentStaticTables('getInstrumentDataDetails').then ((data)=>this.updateInstrumentDataTable (data['data']))
+  }
+  ngOnChanges(changes: SimpleChanges) {
+    this.applyFilter(undefined, this.secid);
   }
   openInstrumentDetailsForm (action:string, element:instrumentDetails) {
     this.dialogInstrumentDetails = this.dialog.open (AppInvInstrumentDetailsFormComponent,{minHeight:'30vh', minWidth:'1300px', autoFocus: false, maxHeight: '90vh'})
@@ -57,9 +57,9 @@ export class AppTableInstrumentDetailsComponent  implements AfterViewInit {
     this.secid? this.dataSource.filter=this.secid : null;
 
   }
-  applyFilter(event: any, col?:string) {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
+  applyFilter(event: any, manualValue?:string) {
+    const filterValue =  manualValue || (event.target as HTMLInputElement).value;
+    this.dataSource? this.dataSource.filter = filterValue.trim().toLowerCase():null
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
   clearFilter (fFormControl : FormControl) {

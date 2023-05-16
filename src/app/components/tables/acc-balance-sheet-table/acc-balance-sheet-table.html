@@ -1,6 +1,6 @@
 <span> 
-  <mat-form-field  class = "filterText">
-    <mat-label class="colorLabel">Type to search...</mat-label>
+  <mat-form-field class = "filterField">
+    <mat-label class="whiteTextFilter">Type to search...</mat-label>
     <input 
       (keyup)="applyFilter($event)"
       [formControl]="filterlFormControl" 
@@ -13,11 +13,17 @@
       <mat-icon>close</mat-icon>
     </button>
   </mat-form-field>
-  
   <button color = "accent" mat-raised-button 
     style=" margin-left:1%; font-size: 18px;"
     (click)="exportToExcel()">
     Save as XLS 
+    <mat-icon matSuffix >save_alt</mat-icon>
+  </button>
+  <button color = "accent" mat-raised-button 
+    style=" margin-left:1%; font-size: 18px;"
+    (click)="submitQuery()">
+    Reload 
+    <mat-icon matSuffix >refresh</mat-icon>
   </button>
 </span>
 
@@ -266,11 +272,10 @@
 
     <tr mat-header-row *matHeaderRowDef="columnsToDisplayWithExpand"></tr>
     <tr mat-row  *matRowDef="let element; columns: columnsToDisplayWithExpand;"
-      class="example-element-row"
+      class="element-row"
       [class.example-expanded-row]="expandedElement === element"
       (click)="expandedElement = expandedElement === element ? null : element">
     </tr>
-    <!-- <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"></tr> -->
   </table>
   <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" [pageSize]="20" aria-label="Select page of users"></mat-paginator>
 </div>

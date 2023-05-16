@@ -1,6 +1,24 @@
-<mat-form-field>
+<mat-form-field class = "filterField">
   <input matInput (keyup)="applyFilter($event)" placeholder="Type search string" #input>
+  <button matSuffix 
+  mat-icon-button aria-label="Clear" 
+  (click)="clearFilter(input)">
+  <mat-icon>close</mat-icon>
+</button>
+  <mat-label class="whiteTextFilter">Type to search...</mat-label>
 </mat-form-field>
+<button color = "accent" mat-raised-button 
+  style=" margin-left:1%; font-size: 18px;"
+  (click)="exportToExcel()">
+  Save as XLS 
+  <mat-icon matSuffix >save_alt</mat-icon>
+</button>
+<button color = "accent" mat-raised-button 
+  style=" margin-left:1%; font-size: 18px;"
+  (click)="submitQuery()">
+  Reload 
+  <mat-icon matSuffix >refresh</mat-icon>
+</button>
 <mat-form-field 
   *ngIf="readOnly"
   class="example-chip-list"  style="width: 60%; "    >
@@ -84,7 +102,7 @@ Select
 
     <tr mat-header-row *matHeaderRowDef="columnsToDisplayWithExpand"></tr>
     <tr mat-row [cdkContextMenuTriggerFor]="instrumentcontextmenu"  *matRowDef="let element; columns: columnsToDisplayWithExpand;"
-        class="example-element-row"
+        class="element-row"
         [class.example-expanded-row]="expandedElement === element"
         (click)="readOnly ? chooseAccount(element) : null">
         <ng-template  #instrumentcontextmenu>
@@ -131,7 +149,6 @@ Select
           </div>
         </ng-template>
       </tr>
-    <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"    ></tr>
   </table>
   <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" [pageSize]="20" aria-label="Select page of users"></mat-paginator>
 </div>

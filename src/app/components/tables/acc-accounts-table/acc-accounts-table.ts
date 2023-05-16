@@ -1,17 +1,21 @@
-import {AfterViewInit, Component, EventEmitter, OnInit, Output, ViewChild} from '@angular/core';
+import {Component, EventEmitter, OnInit, Output, ViewChild} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
-import {lastValueFrom, Subscription } from 'rxjs';
+import {lastValueFrom } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { bAccounts, bAccountsEntriesList } from 'src/app/models/intefaces';
+import { bAccounts } from 'src/app/models/intefaces';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
 import { AppAccAccountModifyFormComponent } from '../../forms/acc-account-form/acc-account-form';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatChipInputEvent } from '@angular/material/chips';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
+import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
+import { formatNumber } from '@angular/common';
+import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
+
 @Component({
   selector: 'app-table-acc-accounts',
   templateUrl: './acc-accounts-table.html',
@@ -24,7 +28,7 @@ import { COMMA, ENTER } from '@angular/cdk/keycodes';
     ]),
   ],
 })
-export class AppTableAccAccountsComponent  implements OnInit, AfterViewInit {
+export class AppTableAccAccountsComponent  implements OnInit {
   columnsToDisplay = [
     'select',
     'accountNo',  
@@ -44,7 +48,6 @@ export class AppTableAccAccountsComponent  implements OnInit, AfterViewInit {
     'Portfolio', 
     'Entity', 
   ];
-  private subscriptionName: Subscription;
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
   dataSource: MatTableDataSource<bAccounts>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -63,68 +66,69 @@ export class AppTableAccAccountsComponent  implements OnInit, AfterViewInit {
   accounts: string[] = [];
   addOnBlur = true;
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
-  // GetAccountDataWholeList
-  constructor(private AccountingDataService:AppAccountingService, private TreeMenuSevice:TreeMenuSevice, private dialog: MatDialog ) {
-      
-    this.subscriptionName= this.AccountingDataService.getReloadAccontList().subscribe ( (id) => {
-      this.AccountingDataService.GetAccountsListAccounting (null,null,null,null, this.action).subscribe (AccountsList  => {
-        this.dataSource  = new MatTableDataSource(AccountsList);
-        this.dataSource.paginator = this.paginator;
-        this.dataSource.sort = this.sort;
-      })
-    } )
-  }
-  ngOnInit(): void {
-
-    this.AccountingDataService.GetAccountsListAccounting (null,null,null,null,this.action).subscribe (AccountsList  => {
-
-      this.dataSource  = new MatTableDataSource(AccountsList);
-      this.dataSource.paginator = this.paginator;
-      this.dataSource.sort = this.sort;
+  constructor(
+    private AccountingDataService:AppAccountingService, 
+    private CommonDialogsService:HadlingCommonDialogsService,
+    private TreeMenuSevice:TreeMenuSevice, 
+    private dialog: MatDialog ,
+    private HandlingCommonTasksS:HandlingCommonTasksService
+  ) {
+    this.AccountingDataService.getReloadAccontList().subscribe ( (id) => {
+      this.updateAccountsData(this.action)
     })
   }
-
-  async ngAfterViewInit() {
-    this.columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
+  async updateAccountsData (action: string) {
+    return new Promise<number> (async (resolve,reject) => {
     let userData = JSON.parse(localStorage.getItem('userInfo'))
-    await lastValueFrom (this.TreeMenuSevice.getaccessRestriction (userData.user.accessrole, 'accessToClientData'))
-    .then ((accessRestrictionData) =>{
+    await lastValueFrom (this.TreeMenuSevice.getaccessRestriction (userData.user.accessrole, 'accessToClientData')).then ((accessRestrictionData) =>{
+      this.dataSource? this.dataSource.data=null : null;
       this.accessToClientData = accessRestrictionData['elementvalue']
       this.AccountingDataService.GetAccountsListAccounting (null,null,null,null,this.action).subscribe (AccountsList  => {
         this.dataSource  = new MatTableDataSource(AccountsList);
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
+        resolve (AccountsList.length)
       })
     })
+  })
   }
-
+  ngOnInit(): void {
+    this.updateAccountsData(this.action)
+  }
+  async submitQuery () {
+    await this.updateAccountsData(this.action).then ((rowsCount) => {
+      this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (rowsCount,'en-US') + ' rows loaded'})
+    })
+  }
+  exportToExcel () {
+    this.HandlingCommonTasksS.exportToExcel (this.dataSource.data,"accountData")
+  }
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
-  
+  clearFilter (input:HTMLInputElement) {
+    input.value=''
+    this.dataSource.filter = ''
+    if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
+  }
   chooseAccount (element) {
-    console.log('sele',this.selection);
     this.selectedRow = element;
     this.modal_principal_parent.emit('CLOSE_PARENT_MODAL');
   }
    selectAccountsArray() {
-/*     console.log('sele',this.selection);
-    this.accounts = this.accounts */
     this.modal_principal_parent.emit('CLOSE_PARENT_MODAL');
   }
   openAccountModifyForm (actionType:string, row: any ) {
     this.dialogRef = this.dialog.open(AppAccAccountModifyFormComponent ,{minHeight:'400px', maxWidth:'1000px' });
     this.dialogRef.componentInstance.action = actionType;
     this.dialogRef.componentInstance.title = actionType;
-    // this.dialogRef.componentInstance.accountType = 'Account';
-
     this.dialogRef.componentInstance.data = row;
     switch (actionType) {
       case 'Create':
       case 'Create_Example': 
-      this.dialogRef.componentInstance.title = 'Create New';
+        this.dialogRef.componentInstance.title = 'Create New';
       break;
       break;
       case 'View':
@@ -138,25 +142,19 @@ export class AppTableAccAccountsComponent  implements OnInit, AfterViewInit {
     const numRows = this.dataSource.data.length||null;
     return numSelected === numRows;
   }
-
-  /** Selects all rows if they are not all selected; otherwise clear selection. */
   toggleAllRows() {
     if (this.isAllSelected()) {
       this.selection.clear();
       return;
     }
-
     this.selection.select(...this.dataSource.data);
   }
-
-  /** The label for the checkbox on the passed row */
   checkboxLabel(row?: bAccounts): string {
     if (!row) {
       return `${this.isAllSelected() ? 'deselect' : 'select'} all`;
     }
     return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${ 1}`;
   }
-
   add(event: MatChipInputEvent): void {
     const value = (event.value || '').trim();
     (value)? this.accounts.push(value) : null;
@@ -170,5 +168,4 @@ export class AppTableAccAccountsComponent  implements OnInit, AfterViewInit {
     this.accounts = selection.selected.map((accountRow) => {return accountRow['accountNo']}) 
     console.log('acc', this.accounts);
   }
- 
 }

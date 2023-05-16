@@ -16,6 +16,8 @@ import { AppTableAccAccountsComponent } from '../acc-accounts-table/acc-accounts
 import { MatOption } from '@angular/material/core';
 import * as XLSX from 'xlsx'
 import { menuColorGl } from 'src/app/models/constants';
+import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
+import { formatNumber } from '@angular/common';
 
 @Component({
   selector: 'app-table-acc-entries',
@@ -78,19 +80,16 @@ export class AppTableAccEntriesComponent  {
   public searchParametersFG: FormGroup;
   public searchParameters: any;
   accounts: string[] = ['ClearAll'];
-  
   dialogChooseAccountsList: MatDialogRef<AppTableAccAccountsComponent>;
-
   TransactionTypes: bcTransactionType_Ext[] = [];
   filterEntryTypes:string[] = ['ClearAll'];
-  
   paramRowData : any = null;
   constructor(
     private AccountingDataService:AppAccountingService, 
+    private CommonDialogsService:HadlingCommonDialogsService,
     private TreeMenuSevice:TreeMenuSevice, 
     private dialog: MatDialog,
     private fb:FormBuilder 
-
   ) {
     this.searchParametersFG = this.fb.group ({
       dataRange : this.dataRange,
@@ -198,17 +197,14 @@ export class AppTableAccEntriesComponent  {
       'dateRangeStart':new Date (this.gRange.get('dateRangeStart').value).toDateString()});
     (this.gRange.get('dateRangeEnd').value)===null? null : Object.assign (searchObj , {
       'dateRangeEnd': new Date (this.gRange.get('dateRangeEnd').value).toDateString()});
-
     ( this.entryTypes.value != null&&this.entryTypes.value.length !=0)? Object.assign (searchObj , {'entryTypes': [this.entryTypes.value]}): null;
-
     (this.ExtId.value) == null?  null : Object.assign (searchObj , {'extTransactionId': this.ExtId.value});
-
-
     this.AccountingDataService.GetAccountsEntriesListAccounting(searchObj,null,null, null, 'GetAccountsEntriesListAccounting').subscribe (EntriesList  => {
       this.dataSource  = new MatTableDataSource(EntriesList);
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
       this.accounts.unshift('ClearAll')
+      this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (EntriesList.length,'en-US') + ' rows loaded'});
     })
   }
   selectAccounts (typeAccount: string) {

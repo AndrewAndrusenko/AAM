@@ -19,7 +19,7 @@ import { MatCalendarCellClassFunction } from '@angular/material/datepicker';
 import { AppMarketDataService } from 'src/app/services/app-market-data.service';
 import * as moment from 'moment';
 import { AtuoCompSecidService } from 'src/app/services/atuo-comp-secid.service';
-import { registerLocaleData } from '@angular/common';
+import { formatNumber, registerLocaleData } from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { menuColorGl } from 'src/app/models/constants';
@@ -268,6 +268,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
   }
   async submitQuery () {
     return new Promise((resolve, reject) => {
+    this.dataSource.data=null;
     let searchObj = {};
     let instrumentsList = [];
     (this.instruments.indexOf('ClearAll') !== -1)? this.instruments.splice(this.instruments.indexOf('ClearAll'),1) : null;
@@ -285,6 +286,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
       this.dataSource.sort = this.sort;
       this.instruments.unshift('ClearAll')
       this.FormMode==='ChartMode'? this.MarketDataService.sendMarketDataForChart(marketData) : null;
+      this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (marketData.length,'en-US') + ' rows loaded'});
       resolve(marketData) 
     })
   })

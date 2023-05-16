@@ -128,11 +128,7 @@ export class AppInvInstrumentModifyFormComponent implements OnInit, AfterContent
       this.instrumentModifyForm.patchValue(instrumentData[0]);
       this.addAsyncValidators('Edit');
       this.filtersecurityType(this.group.value)
-      this.MarketDataService.getInstrumentDataCorpActions(instrumentData[0].isin).subscribe(instrumentCorpActions => {
-        this.MarketDataService.sendCorpActionData(instrumentCorpActions)
-      })
     });  
-    this.MarketDataService.getInstrumentDataDetails(changes['secidParam'].currentValue).subscribe(instrumentDetails => this.instrumentDetailsForm.patchValue(instrumentDetails[0]));
   }
   ngAfterContentInit (): void {
     this.instrumentDetailsForm.patchValue(this.instrumentDetails[0]);

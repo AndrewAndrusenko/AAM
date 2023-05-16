@@ -11,7 +11,6 @@ import { AppAccountingService } from 'src/app/services/app-accounting.service';
 import { COMMA, ENTER} from '@angular/cdk/keycodes';
 import { MatChipInputEvent} from '@angular/material/chips';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import * as XLSX from 'xlsx'
 import { MatOption } from '@angular/material/core';
 import { AppTableAccAccountsComponent } from '../acc-accounts-table/acc-accounts-table';
 import { AppTableAccEntriesComponent } from '../acc-entries-table/acc-entries-table';
@@ -19,6 +18,8 @@ import { AppAccAccountModifyFormComponent } from '../../forms/acc-account-form/a
 import { MatCalendarCellClassFunction } from '@angular/material/datepicker';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { menuColorGl } from 'src/app/models/constants';
+import { formatNumber } from '@angular/common';
+import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 
 export interface Fruit {
   name: string;
@@ -113,6 +114,7 @@ export class AppTableBalanceSheetComponent  implements AfterViewInit {
     private AccountingDataService:AppAccountingService, 
     private TreeMenuSevice:TreeMenuSevice, 
     private CommonDialogsService:HadlingCommonDialogsService,
+    private HandlingCommonTasksS:HandlingCommonTasksService, 
     private dialog: MatDialog,
     private fb:FormBuilder, 
   ) {
@@ -201,6 +203,7 @@ export class AppTableBalanceSheetComponent  implements AfterViewInit {
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
       this.accounts.unshift('ClearAll')
+      this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (Balances.length,'en-US') + ' rows loaded'});
       resolve(Balances) 
     })
   })
@@ -227,7 +230,6 @@ export class AppTableBalanceSheetComponent  implements AfterViewInit {
     this.dialogShowEntriesList.componentInstance.paramRowData = row; 
     this.dialogShowEntriesList.componentInstance.action = 'ShowEntriesForBalanceSheet';
     this.dialogShowEntriesList.componentInstance.modal_principal_parent.subscribe ((item)=>{
-      // this.accounts = [...this.accounts,...this.dialogShowEntriesList.componentInstance.accounts]
       this.dialogChooseAccountsList.close(); 
     });
   }
@@ -256,7 +258,7 @@ export class AppTableBalanceSheetComponent  implements AfterViewInit {
   }
   exportToExcel() {
     const fileName = "balancesData.xlsx";
-    let obj = this.dataSource.data.map( (row,ind) =>({
+    let data = this.dataSource.data.map( (row,ind) =>({
       'accountId': Number(row.accountId),
       'accountNo' : row.accountNo,
       'dateBalance' : new Date (row.dateBalance),
@@ -266,10 +268,7 @@ export class AppTableBalanceSheetComponent  implements AfterViewInit {
       'outBalance' : Number(row.OutGoingBalance),
       'xacttypecode': (row.accountType)
     }))
-    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(obj);
-    const wb: XLSX.WorkBook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "balancesData");
-    XLSX.writeFile(wb, fileName);
+    this.HandlingCommonTasksS.exportToExcel (data,"balancesData")
   }
   async updateResultHandler (result :any, action: string) {
     this.CommonDialogsService.snackResultHandler(result, action)

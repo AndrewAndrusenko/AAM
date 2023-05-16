@@ -9,9 +9,58 @@
 --faovritesNodeColor: rgb(53, 153, 168);
 --faovritesDarkNodeColor: rgb(34, 104, 114);
 --formFieldLightGray: rgb(139, 139, 139);
-
 }
 
+.whiteTextFilter {
+  color: white;
+  font-size: 18px;
+}
+.filterField {
+  margin-left: 10px;
+  font-size: 18px;
+  width: 20%;
+}
+.tree-menu-context {
+  display: inline-flex;
+  flex-direction: column;
+  min-width: 180px;
+  max-width: 350px;
+  background-color: rgb(184, 184, 184);
+  padding: 3px 0;
+  font-size: 18px;
+}
+.tree-menu-item {
+  background-color: transparent;
+  cursor: pointer;
+  border: none;
+  user-select: none;
+  min-width: 64px;
+  line-height: 36px;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  flex: 1;
+}
+.tree-menu-item:hover {
+  background-color: rgb(237, 162, 162);
+}
+.tree-menu-item:active {
+  background-color: rgb(147, 128, 128);
+}
+.menu-icon {
+  margin-left: 0px;
+  margin-right: 5px;
+}
+tr.element-row:not(.example-expanded-row):hover {
+  background: rgb(43, 43, 245);
+}
+tr.element-row:not(.example-expanded-row):active {
+  background: rgb(43, 43, 245);
+}
+.mat-cell {
+  font-size: 18px;
+}
 // Add in style.scss as we are overriding css of global mat-select class which is part of other module.
 .mat-select-disabled .mat-select-value {
   color: black;

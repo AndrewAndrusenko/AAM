@@ -35,7 +35,7 @@ import { AppMT950ItemParsing } from './components/forms/SWIFT-MT950Items-form/SW
 import { AppTableAccEntriesComponent } from './components/tables/acc-entries-table/acc-entries-table';
 import { AppAccEntryModifyFormComponent } from './components/forms/acc-entry-form/acc-entry-form';
 import { AppTableAccAccountsComponent } from './components/tables/acc-accounts-table/acc-accounts-table';
-import { AppTableAccLedgerAccountsComponent } from './components/tables/acc-ledger-accounts-table/acc-ledger-accounts-table';
+import { AppTableAccLedgerAccountsComponent } from './components/tables/acc-accounts-ledger-table/acc-accounts-ledger-table';
 import { AppAccAccountModifyFormComponent } from './components/forms/acc-account-form/acc-account-form';
 import {MatDatepickerModule } from '@angular/material/datepicker';
 import { MAT_MOMENT_DATE_ADAPTER_OPTIONS, MatMomentDateModule } from '@angular/material-moment-adapter';

@@ -8,13 +8,15 @@ import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/m
 import { Instruments, instrumentCorpActions, instrumentDetails, marketDataSources } from 'src/app/models/intefaces';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
 import * as XLSX from 'xlsx'
 import { AppMarketDataService } from 'src/app/services/app-market-data.service';
 import { menuColorGl,investmentNodeColor, investmentNodeColorChild, additionalLightGreen } from 'src/app/models/constants';
 import { AppInvInstrumentModifyFormComponent } from '../../forms/instrument-form/instrument-form';
 import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
+import { formatNumber } from '@angular/common';
+import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 @Component({
   selector: 'app-app-instrument-table',
   
@@ -85,6 +87,7 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
     private MarketDataService: AppMarketDataService,
     private TreeMenuSevice:TreeMenuSevice,
     private indexDBServiceS:indexDBService,
+    private CommonDialogsService:HadlingCommonDialogsService,
     private dialog: MatDialog,
     private fb:FormBuilder, 
   ) {
@@ -185,6 +188,7 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
   }
   async submitQuery () {
     return new Promise((resolve, reject) => {
+    this.dataSource.data = null;
     let searchObj = {};
     let instrumentsList = [];
     (this.instruments.indexOf('ClearAll') !== -1)? this.instruments.splice(this.instruments.indexOf('ClearAll'),1) : null;
@@ -192,12 +196,13 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
     (this.instruments.length)? Object.assign (searchObj , {'secid': instrumentsList}): null;
     ( this.marketSource.value != null&&this.marketSource.value.length !=0)? Object.assign (searchObj , {'sourcecode': this.marketSource.value}): null;
     ( this.boards.value != null&&this.boards.value.length !=0)? Object.assign (searchObj , {'boardid': this.boards.value}): null;
-    this.MarketDataService.getMoexInstruments(10000,this.FormMode==='ChartMode'? 'secid ASC':undefined,searchObj).subscribe (marketData  => {
-      this.dataSource  = new MatTableDataSource(marketData);
+    this.MarketDataService.getMoexInstruments(undefined,this.FormMode==='ChartMode'? 'secid ASC':undefined,searchObj).subscribe (instrmenttData  => {
+      this.dataSource  = new MatTableDataSource(instrmenttData);
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
       this.instruments.unshift('ClearAll')
-      resolve(marketData) 
+      this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (instrmenttData.length,'en-US') + ' rows loaded'});
+      resolve(instrmenttData) 
     })
   })
   }

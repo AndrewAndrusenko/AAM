@@ -1,19 +1,26 @@
-  <mat-form-field class="example-form-field" class = "filterText">
-    <mat-label class="colorLabel">Type to search...</mat-label>
-    <input 
-      (keyup)="applyFilter($event)"
-      matInput type="text" #SearchTree  name="tableFilter"
-      matTooltip="Use context menu to add filter">
-    <button matSuffix 
-      mat-icon-button aria-label="Clear" >
-      <mat-icon>close</mat-icon>
-    </button>
-  </mat-form-field>
-  <button color = "accent" mat-raised-button 
-    style=" margin-left:1%; font-size: 18px;"
-    (click)="exportToExcel()">
-    Save as XLS 
+<mat-form-field class="example-form-field" class = "filterText">
+  <mat-label class="colorLabel">Type to search...</mat-label>
+  <input 
+    (keyup)="applyFilter($event)"
+    matInput type="text" #SearchTree  name="tableFilter"
+    matTooltip="Use context menu to add filter">
+  <button matSuffix 
+    mat-icon-button aria-label="Clear" >
+    <mat-icon>close</mat-icon>
   </button>
+</mat-form-field>
+<button color = "accent" mat-raised-button 
+  style=" margin-left:1%; font-size: 18px;"
+  (click)="exportToExcel()">
+  Save as XLS 
+  <mat-icon matSuffix >save_alt</mat-icon>
+</button>
+<button color = "accent" mat-raised-button 
+  style=" margin-left:1%; font-size: 18px;"
+  (click)="submitQuery()">
+  Reload 
+  <mat-icon matSuffix >refresh</mat-icon>
+</button>
 
 <div class="mat-elevation-z8">
   <table  #strategyTable mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class="mat-elevation-z8">

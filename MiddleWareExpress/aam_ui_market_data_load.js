@@ -11,7 +11,7 @@ const { resolve } = require('path');
 pg.types.setTypeParser(1114, function(stringValue) {
   return stringValue;  //1114 for time without timezone type
 });
-async function queryExecute (sql, response) {
+async function queryExecute (sql, response, responseType) {//General query to postgres execution via pool
   return new Promise ((resolve) => {
     pool.query (sql,  (err, res) => {
       console.log('sql',sql);
@@ -20,13 +20,14 @@ async function queryExecute (sql, response) {
         err.detail = err.stack
         resolve (response? response.send(err):err)
       } else {
-        console.log('**********************QTY rows',res.rows.length);
-        resolve (response? response.status(200).json(res.rows):res.rows)
+        console.log('**********************QTY rows',responseType==='rowCount'? res.rowCount:res.rows.length)
+        let result = responseType==='rowCount'? res.rowCount : res.rows;
+        resolve (response? response.status(200).json(result):result)
       }
     })
   })
 }
-async function fdeleteMarketData (request,response) {
+async function fdeleteMarketData (request,response) {//Delete market data if a user decided to overwirte it
   const query = {
     text: 'DELETE FROM public.t_moexdata_foreignshares WHERE (sourcecode = ANY(array[${sourcecodes}]) AND tradedate::timestamp without time zone = ${dateToLoad}::date);'+
     'DELETE FROM  public.t_marketstack_eod WHERE (sourcecode = ANY(array[${sourcecodes}]) AND "date"::timestamp without time zone = ${dateToLoad}::date);'
@@ -34,17 +35,18 @@ async function fdeleteMarketData (request,response) {
   sql = pgp.as.format(query.text,request.body.params);
   pool.query (sql,  (err, res) => 
   {if (err) {
-   console.log (err.stack.split("\n", 1).join(""))
-   err.detail = err.stack
-   return response.send(err)
-   } else {
-     return response.status(200).json(res[0].rowCount + res[1].rowCount )
-   }
+    console.log (err.stack.split("\n", 1).join(""))
+    err.detail = err.stack
+    return response.send(err)
+    } else {
+      return response.status(200).json(res[0].rowCount + res[1].rowCount )
+    }
   })  
 }
-async function finsertMarketData (request, response) {
+async function finsertMarketData (request, response) {//Insert market data recieved form moex iss or MScom
   let sql = '';
   data = request.body.dataToInsert
+  console.log('data',request.body.dataToInsert);
   switch (request.body.gloabalSource) {
     case 'MOEXiss':
     sql =  ''+
@@ -84,15 +86,10 @@ async function finsertMarketData (request, response) {
     default:
     break;
   }
-  pool.query (sql,  (err, res) => {if (err) {
-    console.log (err.stack.split("\n", 1).join(""))
-    err.detail = err.stack
-    return response.send(err)
-  } else {
-    return response.status(200).json(res.rowCount)}
-  })  
+  console.log('execute',);
+  queryExecute (sql, response,'rowCount');
 }
-async function fgetMarketData (request,response){
+async function fgetMarketData (request,response){//Get market data such as market prices, volumes, high, low quotes and etc
   let conditions = {}
   const query = {text: '', values:[]}
   conditions = {
@@ -153,21 +150,22 @@ async function fgetMarketData (request,response){
   sql = pgp.as.format(query.text,request.query);
   queryExecute (sql, response);
 }
-async function fgetMarketDataSources (request,response) {
+async function fgetMarketDataSources (request,response) {//Get market sources. Needs to be moved to General data function
    sql =  'SELECT  "sourceName", false AS "checkedAll", false AS indeterminate, false as disabled, json_agg("icMarketDataSources".*) AS "segments" '+
   'FROM "icMarketDataSourcesGlobal" '+
   'LEFT JOIN "icMarketDataSources" ON "icMarketDataSources"."sourceGlobal" = "icMarketDataSourcesGlobal"."sourceCode" '+
   'GROUP BY "sourceName" ';
    queryExecute (sql, response);
 }
-async function fgetInstrumentsCodes (request,response) {
+async function fgetInstrumentsCodes (request,response) {//Get additional instruments codes, for example to import quotes from global market data source
   let fields = request.query.resasarray? 'json_agg(code) as code' :' secid, code, isin, mapcode'	
   sql =  'SELECT ' + fields + '	FROM public."aInstrumentsCodes" WHERE mapcode=${mapcode};';
   sql = pgp.as.format(sql,request.query);
-  let data = await queryExecute (sql, response);
-  return response.status(200).send(data);
+   queryExecute (sql, response);
+  // console.log('-------------------------',data);
+  // return response.status(200).send(data);
 }
-async function fgetMoexIssSecuritiesList (start) {
+async function fgetMoexIssSecuritiesList (start) {//Get instrument dictionary from moex iss
   let url='https://iss.moex.com/iss/securities.json?iss.json=extended&limit=100&lang=en&iss.meta=off&is_trading=true&start='+start.toString()
   console.log('url',url,start);
   return new Promise ((resolve) => {
@@ -183,21 +181,21 @@ async function fgetMoexIssSecuritiesList (start) {
             err.detail = err.stack
             resolve(err)
           } else {
-            resolve(res.rowCount)
+            resolve(res['data'].rowCount, res)
           }
         })  
       });
     })
   })
 }
-async function fimportMoexInstrumentsList (request, response){
+async function fimportMoexInstrumentsList (request, response){ //Update instrument table based on MOEX data
   let rowsretrived = 100
   for (let index = 0; rowsretrived === 100&&index<50000; index=index+100) {
     res = await fgetMoexIssSecuritiesList(index);
     typeof(res)===Number? console.log('inserted ', res,' rows'): console.log('error ', res);
   } 
 }
-function fGetMoexInstruments(request,response) {
+function fGetMoexInstruments(request,response) { //Get general instruments list
   return new Promise  (async (resolve) => {
     let conditions = {}
     const query = {text: '', values:[]}

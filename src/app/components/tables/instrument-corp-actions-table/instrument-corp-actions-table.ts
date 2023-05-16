@@ -1,15 +1,16 @@
-import {AfterViewInit, Component, ViewEncapsulation, EventEmitter, Output, ViewChild, Input} from '@angular/core';
+import {AfterViewInit, Component, ViewEncapsulation, EventEmitter, Output, ViewChild, Input, SimpleChanges} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
-import {Subscription } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { instrumentCorpActions, marketDataSources } from 'src/app/models/intefaces';
+import { instrumentCorpActions } from 'src/app/models/intefaces';
 import { FormControl, FormGroup} from '@angular/forms';
 import * as XLSX from 'xlsx'
 import { AppMarketDataService } from 'src/app/services/app-market-data.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
+import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
+import { formatNumber } from '@angular/common';
 @Component({
   selector: 'app-table-inst-corp-actions',
   templateUrl: './instrument-corp-actions-table.html',
@@ -43,13 +44,19 @@ export class AppTableCorporateActionsComponent  implements AfterViewInit {
     private MarketDataService: AppMarketDataService,
     private dialog: MatDialog,
     private indexDBServiceS:indexDBService,
+    private CommonDialogsService:HadlingCommonDialogsService,
 
   ) {
-    // this.MarketDataService.getCorpActionData().subscribe(corpActionData => this.updateInstrumentDataTable(corpActionData))
   }
   async ngAfterViewInit() {
-    this.indexDBServiceS.getIndexDBInstrumentStaticTables('getInstrumentDataCorpActions').then((data)=>this.updateInstrumentDataTable(data['data']));
+    this.indexDBServiceS.getIndexDBInstrumentStaticTables('getInstrumentDataCorpActions').then((data)=>{
+      this.updateInstrumentDataTable(data['data']);
+    });
   }
+  ngOnChanges(changes: SimpleChanges) {
+    this.applyFilter(undefined, this.isin);
+  }
+
   openCorpActionForm (elem:instrumentCorpActions, action:string) {
  /*    this.dialogInstrumentModify = this.dialog.open (AppInvInstrumentModifyFormComponent,{minHeight:'600px', minWidth:'1300px', autoFocus: false, maxHeight: '90vh'})
     this.dialogInstrumentModify.componentInstance.action = action; */
@@ -59,18 +66,25 @@ export class AppTableCorporateActionsComponent  implements AfterViewInit {
     this.dataSource  = new MatTableDataSource(corpActionData);
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
-    this.isin? this.dataSource.filter=this.isin : null;
-
+    this.isin? this.applyFilter(undefined,this.isin) : null;
   }
-  applyFilter(event: any, col?:string) {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
+  applyFilter(event?: any, manualValue?:string) {
+    const filterValue =  manualValue || (event.target as HTMLInputElement).value;
+    this.dataSource? this.dataSource.filter = filterValue.trim().toLowerCase():null
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
   clearFilter (fFormControl : FormControl) {
     fFormControl.patchValue('')
     this.dataSource.filter = ''
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
+  }
+  submitQuery () {
+    this.dataSource.data=null;
+    this.MarketDataService.getInstrumentDataCorpActions().subscribe(corpActionData => {
+      this.updateInstrumentDataTable(corpActionData);
+      this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (corpActionData.length,'en-US') + ' rows loaded'});
+
+    })
   }
   exportToExcel() {
     const fileName = "corpActionsData.xlsx";

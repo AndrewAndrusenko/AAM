@@ -63,7 +63,7 @@ export class AppMarketDataService {
         currentPosition = marketData[1]['history.cursor'][0]['INDEX'];
         pageSize = marketData[1]['history.cursor'][0]['PAGESIZE'];
         totalRows = marketData[1]['history.cursor'][0]['TOTAL'];
-        for (let index = 0; index < totalRows; index=index + pageSize) {
+        for (let index = 0; index <= totalRows; index=index + pageSize) {
           params['start'] = index;
           this.http.get (source.sourceURL, {params:params} ).subscribe (marketData => {
           return this.insertMarketData (marketData[1]['history'],source.sourceCode,'MOEXiss').subscribe((rowLoaded) =>{
@@ -110,6 +110,7 @@ export class AppMarketDataService {
           params['symbols'] = slicedCodesList[slicedCodesList.length-1];
           console.log( 'params',params);
           this.http.get <any[]> (source.sourceURL, {params:params} ).subscribe (marketData => {
+            console.log('marketData', marketData);
             return this.insertMarketData (marketData['data'],source.sourceCode,'MScom').subscribe((rowLoaded) =>{
               source.checked = false;
               logMarketDateLoading.push ({

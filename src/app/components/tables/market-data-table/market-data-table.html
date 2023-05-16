@@ -17,7 +17,14 @@
     style=" margin-left:1%; font-size: 18px;"
     (click)="exportToExcel()">
     Save as XLS 
+    <mat-icon matSuffix >save_alt</mat-icon>
   </button>
+  <button color = "accent" mat-raised-button 
+  style=" margin-left:1%; font-size: 18px;"
+  (click)="submitQuery()">
+  Reload 
+  <mat-icon matSuffix >refresh</mat-icon>
+</button>
 </span>
 <mat-expansion-panel *ngIf="FormMode==='QuotesMode'" title="MarketDataUploadingPanel"
   class="first-expansion" 
