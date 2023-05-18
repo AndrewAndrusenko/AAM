@@ -1,7 +1,7 @@
-import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
-import {lastValueFrom, Subscription } from 'rxjs';
+import {lastValueFrom } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {TreeMenuSevice } from 'src/app/services/tree-menu.service';
@@ -14,10 +14,11 @@ import {MatChipInputEvent} from '@angular/material/chips';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { AppTableAccAccountsComponent } from '../acc-accounts-table/acc-accounts-table';
 import { MatOption } from '@angular/material/core';
-import * as XLSX from 'xlsx'
 import { menuColorGl } from 'src/app/models/constants';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { formatNumber } from '@angular/common';
+import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
+import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
   selector: 'app-table-acc-entries',
@@ -31,7 +32,9 @@ import { formatNumber } from '@angular/common';
     ]),
   ],
 })
-export class AppTableAccEntriesComponent  {
+export class AppTableAccEntriesComponent implements OnInit {
+  accessState: string = 'none';
+  disabledControlElements: boolean = false;
   columnsToDisplay = [
     'd_Debit',
     'd_Credit',
@@ -57,14 +60,14 @@ export class AppTableAccEntriesComponent  {
   dataSource: MatTableDataSource<bAccountsEntriesList>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
+  @ViewChild('filter',{static:false}) filter: ElementRef;
   @Output() public modal_principal_parent = new EventEmitter();
   expandedElement: bAccountsEntriesList  | null;
   accessToClientData: string = 'true';
   @Input() readOnly: boolean = false; 
-  @Input() action :string = '';
+  @Input() action :string;
   @Input() externalId: number = null;
   dialogRef: MatDialogRef<AppAccEntryModifyFormComponent>;
-  private subscriptionName: Subscription;
   public FirstOpenedAccountingDate : Date;
   menuColorGl=menuColorGl
   filterlFormControl = new FormControl('');
@@ -87,7 +90,8 @@ export class AppTableAccEntriesComponent  {
   constructor(
     private AccountingDataService:AppAccountingService, 
     private CommonDialogsService:HadlingCommonDialogsService,
-    private TreeMenuSevice:TreeMenuSevice, 
+    private AuthServiceS:AuthService,  
+    private HandlingCommonTasksS:HandlingCommonTasksService,
     private dialog: MatDialog,
     private fb:FormBuilder 
   ) {
@@ -98,46 +102,40 @@ export class AppTableAccEntriesComponent  {
       entryType : {value:[], disabled:false},
       ExtID:{value:null, disabled:false}
     })
+    this.AuthServiceS.verifyAccessRestrictions('accessToEntriesData').subscribe ((accessData) => {
+      console.log('access',accessData);
+      this.accessState=accessData.elementvalue;
+      this.disabledControlElements = this.accessState === 'full'? false : true;
+    })
     this.columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
-
     this.AccountingDataService.GetTransactionType_Ext('',0,'','','bcTransactionType_Ext').subscribe (
       data => this.TransactionTypes = data)
     this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate)
     this.AccountingDataService.getReloadEntryList().subscribe(data => this.submitQuery())
   }
-  async ngOnInit() {
+  ngOnInit(): void {
     switch (this.action) {
       case 'ShowEntriesForBalanceSheet':
         this.accounts = [this.paramRowData.accountNo];
         this.dataRange.controls['dateRangeStart'].setValue(new Date (this.paramRowData.dateBalance))
         this.dataRange.controls['dateRangeEnd'].setValue(new Date (this.paramRowData.dateBalance))
+        this.submitQuery(false);
       break;
       case 'ViewEntriesByExternalId':
         this.ExtId.setValue(this.externalId)
+        this.submitQuery(false);
       break;
+      default :
+      this.AccountingDataService.GetAccountsEntriesListAccounting (null,null,null,null,'GetAccountsEntriesListAccounting').subscribe (EntriesList  => {
+        this.dataSource  = new MatTableDataSource(EntriesList);
+        this.dataSource.paginator = this.paginator;
+        this.dataSource.sort = this.sort;
+      })
+    break;
     }
-
-    let userData = JSON.parse(localStorage.getItem('userInfo'))
-    await lastValueFrom (this.TreeMenuSevice.getaccessRestriction (userData.user.accessrole, 'accessToClientData'))
-    .then ((accessRestrictionData) =>{
-      this.accessToClientData = accessRestrictionData['elementvalue']
-      switch (this.action) {
-        case 'ShowEntriesForBalanceSheet': 
-          this.submitQuery();
-        break;
-        case 'ViewEntriesByExternalId': 
-          this.submitQuery();
-        break;
-        default :
-          this.AccountingDataService.GetAccountsEntriesListAccounting (null,null,null,null,'GetAccountsEntriesListAccounting').subscribe (EntriesList  => {
-            this.dataSource  = new MatTableDataSource(EntriesList);
-            this.dataSource.paginator = this.paginator;
-            this.dataSource.sort = this.sort;
-          })
-        break;
-      }
-    })
+    
   }
+
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
@@ -177,17 +175,18 @@ export class AppTableAccEntriesComponent  {
   event.target.textContent.trim() === 'ClearAll cancel'? this.accounts = ['ClearAll']: null;
   }
   addChips (el: any, column: string) {(['d_Debit', 'd_Credit'].includes(column))? this.accounts.push(el):null;}
-  updateFilter (event:Event, el: any) {
-    this.filterlFormControl.patchValue(el);
+  updateFilter ( el: any) {
+    this.filter.nativeElement.value = el;
     this.dataSource.filter = el.trim();
     (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
   }
-  clearFilter () {
-    this.filterlFormControl.patchValue('')
-    this.dataSource.filter = ''
+  clearFilter (input: HTMLInputElement) {
+    input.value='';
+    this.dataSource.filter = '';
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
   }
-  submitQuery () {
+  submitQuery (notification:boolean=true) {
+    this.dataSource? this.dataSource.data = null: null;
     let searchObj = {};
     let accountsList = [];
     (this.accounts.indexOf('ClearAll') !== -1)? this.accounts.splice(this.accounts.indexOf('ClearAll'),1) : null;
@@ -204,7 +203,7 @@ export class AppTableAccEntriesComponent  {
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
       this.accounts.unshift('ClearAll')
-      this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (EntriesList.length,'en-US') + ' rows loaded'});
+      notification? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (EntriesList.length,'en-US') + ' rows'},'Loaded '):null;
     })
   }
   selectAccounts (typeAccount: string) {
@@ -225,8 +224,7 @@ export class AppTableAccEntriesComponent  {
     }
   }
   exportToExcel() {
-    const fileName = "entriesData.xlsx";
-    let obj = this.dataSource.data.map( (row,ind) =>({
+    let data = this.dataSource.data.map( (row,ind) =>({
       'Date': new Date (row.t_dataTime),
       'Debit' : row.d_Debit,
       'Credit' : row.d_Credit,
@@ -236,10 +234,7 @@ export class AppTableAccEntriesComponent  {
       'TrCode' : row.t_XactTypeCode,
       't_XactTypeCode_Ext': (row.t_XactTypeCode_Ext)
     }))
-    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(obj);
-    const wb: XLSX.WorkBook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "entriesData");
-    XLSX.writeFile(wb, fileName);
+    this.HandlingCommonTasksS.exportToExcel (data,"entriesData")
   }
   get  gRange () {return this.searchParametersFG.get('dataRange') } 
   get  dateRangeStart() {return this.searchParametersFG.get('dateRangeStart') } 

@@ -1,15 +1,15 @@
+<ng-container *ngIf="accessState!=='none'">
+
 <span *ngIf="!readOnly"> 
-  <mat-form-field class = "filterText" style="font-size: 22px;">
-    <mat-label class="colorLabel">Type to search...</mat-label>
+  <mat-form-field  class = "filterField" >
+    <mat-label class="whiteTextFilter">Type to search...</mat-label>
     <input 
       (keyup)="applyFilter($event)"
-      [formControl]="filterlFormControl" 
-      matInput type="text" #SearchTree  name="tableFilter"
-    matTooltip="Use context menu to add filter"
-    >
+      matInput type="text" #filter  
+      matTooltip="Use context menu to add filter">
     <button matSuffix 
       mat-icon-button aria-label="Clear" 
-      (click)="clearFilter()">
+      (click)="clearFilter(filter)">
       <mat-icon>close</mat-icon>
     </button>
   </mat-form-field>
@@ -114,9 +114,6 @@
     </p>
   </form>
 </mat-expansion-panel>
-
-
-
 <div class="mat-elevation-z8">
   <table  #strategyTable mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class="mat-elevation-z8">
     <ng-container  matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i=index">
@@ -149,7 +146,7 @@
           </p>
         </span>
         <ng-template  #instrumentcontextmenu>
-          <div class="tree-menu-context" *ngIf="!readOnly" cdkMenu >
+          <div class="tree-menu-context" *ngIf="!readOnly&&!disabledControlElements" cdkMenu >
             <button 
               (click)="openEntryModifyForm('Create', element)"
               class="tree-menu-item" cdkMenuItem >
@@ -181,68 +178,58 @@
               Delete Entry
             </button> 
             <button *ngIf="(element.t_dataTime<FirstOpenedAccountingDate)"
-            (click)="openEntryModifyForm('View', element)"
-            class="tree-menu-item" cdkMenuItem>
-            <mat-icon class="menu-icon" matPrefix>pageview</mat-icon> 
-            View entry (day is closed)
+              (click)="openEntryModifyForm('View', element)"
+              class="tree-menu-item" cdkMenuItem>
+              <mat-icon class="menu-icon" matPrefix>pageview</mat-icon> 
+              View entry (day is closed)
             </button> 
             <button 
-            (click)="updateFilter($event, element[column])"
-            class="tree-menu-item" cdkMenuItem>
-            <mat-icon class="menu-icon" matPrefix>filter_list</mat-icon> 
-            Add to filter
+              (click)="updateFilter(element[column])"
+              class="tree-menu-item" cdkMenuItem>
+              <mat-icon class="menu-icon" matPrefix>filter_list</mat-icon> 
+              Add to filter
             </button> 
             <button 
-            (click)="addChips( element[column], column)"
-            class="tree-menu-item" cdkMenuItem>
-            <mat-icon class="menu-icon" matPrefix>filter_alt</mat-icon> 
-             ComplexFilter
+              (click)="addChips( element[column], column)"
+              class="tree-menu-item" cdkMenuItem>
+              <mat-icon class="menu-icon" matPrefix>filter_alt</mat-icon> 
+              ComplexFilter
             </button> 
           </div>
         </ng-template>   
-     
-     
       </td>
     </ng-container>
     <ng-container matColumnDef="expand">
       <th mat-header-cell *matHeaderCellDef aria-label="row actions" mat-sort-header></th>
-      <td mat-cell *matCellDef="let element" style="width:7%">
-        <button  *ngIf="element.t_dataTime<FirstOpenedAccountingDate" mat-icon-button 
+      <td mat-cell *matCellDef="let element" style="width:10%">
+        <button  *ngIf="element.t_dataTime<FirstOpenedAccountingDate||disabledControlElements" mat-icon-button 
           aria-label="expand row" color="accent"
           mat-icon-button aria-label="expand row" color="accent"
           matTooltip="View entry (day is closed)"
           (click)="openEntryModifyForm('View', element)">
           <mat-icon >pageview</mat-icon>
         </button>
-        <button  *ngIf="element.t_dataTime>FirstOpenedAccountingDate ||element.t_dataTime==FirstOpenedAccountingDate" 
-          mat-icon-button 
-          aria-label="expand row" color="accent"
-          matTooltip="Edit entry"
-          (click)="openEntryModifyForm('Edit', element)">
-          <mat-icon >edit</mat-icon>
-        </button>
-        <button *ngIf="element.t_dataTime>FirstOpenedAccountingDate ||element.t_dataTime==FirstOpenedAccountingDate" 
-          mat-icon-button 
-          style="margin-left: 5%;" aria-label="expand row" color="accent" 
-          matTooltip="Delete entry"
-          (click)="openEntryModifyForm('Delete', element)">
-          <mat-icon >delete</mat-icon>
-        </button>
+        <ng-container *ngIf="!disabledControlElements">
+          <button  *ngIf="element.t_dataTime>FirstOpenedAccountingDate ||element.t_dataTime==FirstOpenedAccountingDate" 
+            mat-icon-button 
+            aria-label="expand row" color="accent"
+            matTooltip="Edit entry"
+            (click)="openEntryModifyForm('Edit', element)">
+            <mat-icon >edit</mat-icon>
+          </button>
+          <button *ngIf="element.t_dataTime>FirstOpenedAccountingDate ||element.t_dataTime==FirstOpenedAccountingDate" 
+            mat-icon-button 
+            style="margin-left: 5%;" aria-label="expand row" color="accent" 
+            matTooltip="Delete entry"
+            (click)="openEntryModifyForm('Delete', element)">
+            <mat-icon >delete</mat-icon>
+          </button>
+        </ng-container>
       </td>
     </ng-container>
-    
-    <ng-container matColumnDef="expandedDetail" >
-      <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplayWithExpand.length"></td>
-    </ng-container>
-
     <tr mat-header-row *matHeaderRowDef="columnsToDisplayWithExpand"></tr>
-    <tr mat-row  *matRowDef="let element; columns: columnsToDisplayWithExpand;"
-        class="example-element-row"
-        [class.example-expanded-row]="expandedElement === element"
-        (click)="expandedElement = expandedElement === element ? null : element">
-
-      </tr>
-    <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"    ></tr>
+    <tr mat-row  *matRowDef="let element; columns: columnsToDisplayWithExpand;"></tr>
   </table>
   <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" [pageSize]="20" aria-label="Select page of users"></mat-paginator>
 </div>
+</ng-container>

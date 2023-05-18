@@ -1,11 +1,4 @@
 
-.mat-flat-button {
-  font-size: 18px;
-}
-.icon_search {
-  color: rgb(143, 140, 239);
-  transform: scale(1.3) !important
-}
 .first-expansion .mat-expansion-panel-header-description {
   justify-content: space-between;
   align-items: center;
@@ -25,38 +18,6 @@
   width: 20%;
   font-size: 20px;
 }
-.tree-menu-context {
-  display: inline-flex;
-  flex-direction: column;
-  min-width: 180px;
-  max-width: 350px;
-  background-color: rgb(184, 184, 184);
-  padding: 3px 0;
-  font-size: 18px;
-}
-.tree-menu-item {
-  background-color: transparent;
-  cursor: pointer;
-  border: none;
-  user-select: none;
-  min-width: 64px;
-  line-height: 36px;
-  padding: 6px;
-  display: flex;
-  align-items: center;
-  flex-direction: row;
-  flex: 1;
-}
-.tree-menu-item:hover {
-  background-color: rgb(237, 162, 162);
-}
-.tree-menu-item:active {
-  background-color: rgb(147, 128, 128);
-}
-.menu-icon {
-  margin-left: 0px;
-  margin-right: 5px;
-}
 .mat-table {
   background-color:#4f4e4e;
   width: 100%;
@@ -65,18 +26,9 @@
   font-size: 20px;
   background-color:#393737;
 }
-.mat-form-field {
-  margin-left: 1%;
-  font-size: 22px;
-}
-.mat-cell {
-  font-size: 18px;
-}
-tr:hover {
-  background: rgb(43, 43, 245);
-}
-tr:active {
-  background: rgb(43, 43, 245);
-}
-
-
+.mat-column-action {
+  width: 11%;
+} 
+.mat-column-facevalue {
+  text-align: center;
+} 

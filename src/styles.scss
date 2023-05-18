@@ -52,10 +52,10 @@
   margin-left: 0px;
   margin-right: 5px;
 }
-tr.element-row:not(.example-expanded-row):hover {
+tr:hover {
   background: rgb(43, 43, 245);
 }
-tr.element-row:not(.example-expanded-row):active {
+tr:active {
   background: rgb(43, 43, 245);
 }
 .mat-cell {

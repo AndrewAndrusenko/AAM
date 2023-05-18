@@ -5,12 +5,13 @@ import {MatTableDataSource as MatTableDataSource} from '@angular/material/table'
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { instrumentCorpActions } from 'src/app/models/intefaces';
-import { FormControl, FormGroup} from '@angular/forms';
-import * as XLSX from 'xlsx'
+import { FormGroup} from '@angular/forms';
 import { AppMarketDataService } from 'src/app/services/app-market-data.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { formatNumber } from '@angular/common';
+import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
+import { AuthService } from 'src/app/services/auth.service';
 @Component({
   selector: 'app-table-inst-corp-actions',
   templateUrl: './instrument-corp-actions-table.html',
@@ -25,15 +26,15 @@ import { formatNumber } from '@angular/common';
   ],
 })
 export class AppTableCorporateActionsComponent  implements AfterViewInit {
+  accessState: string = 'none';
+  disabledControlElements: boolean = false;
   columnsToDisplay = ['date', 'isin','actiontype','unredemeedvalue','couponrate','couponamount', 'notinal', 'notinalcurrency', 'issuevolume', 'action'];
-  columnsHeaderToDisplay = ['date','isin','type','unredemeed','rate','coupon amount', 'notinal', 'notinal currency', 'issue volume','action' ];
+  columnsHeaderToDisplay = ['date','ISIN','type','unredemeed','rate','coupon', 'notinal', 'currency', 'issue','action' ];
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
-
   dataSource: MatTableDataSource<instrumentCorpActions>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
   @Output() public modal_principal_parent = new EventEmitter();
-  
   panelOpenStateSecond = false;
   instruments: string[] = ['ClearAll'];
   searchParametersFG: FormGroup;
@@ -42,11 +43,17 @@ export class AppTableCorporateActionsComponent  implements AfterViewInit {
 
   constructor(
     private MarketDataService: AppMarketDataService,
-    private dialog: MatDialog,
+    private AuthServiceS:AuthService,  
+    private HandlingCommonTasksS:HandlingCommonTasksService,
     private indexDBServiceS:indexDBService,
     private CommonDialogsService:HadlingCommonDialogsService,
-
+    private dialog: MatDialog,
   ) {
+    this.AuthServiceS.verifyAccessRestrictions('accessToInstrumentData').subscribe ((accessData) => {
+      console.log('access',accessData);
+      this.accessState=accessData.elementvalue;
+      this.disabledControlElements = this.accessState === 'full'? false : true;
+    })
   }
   async ngAfterViewInit() {
     this.indexDBServiceS.getIndexDBInstrumentStaticTables('getInstrumentDataCorpActions').then((data)=>{
@@ -54,11 +61,10 @@ export class AppTableCorporateActionsComponent  implements AfterViewInit {
     });
   }
   ngOnChanges(changes: SimpleChanges) {
-    this.applyFilter(undefined, this.isin);
+    this.dataSource? this.applyFilter(undefined, this.isin) : null;
   }
-
-  openCorpActionForm (elem:instrumentCorpActions, action:string) {
- /*    this.dialogInstrumentModify = this.dialog.open (AppInvInstrumentModifyFormComponent,{minHeight:'600px', minWidth:'1300px', autoFocus: false, maxHeight: '90vh'})
+  openCorpActionForm (action:string, elem:instrumentCorpActions) {
+    /*    this.dialogInstrumentModify = this.dialog.open (AppInvInstrumentModifyFormComponent,{minHeight:'600px', minWidth:'1300px', autoFocus: false, maxHeight: '90vh'})
     this.dialogInstrumentModify.componentInstance.action = action; */
     // this.dialogInstrumentModify.componentInstance.data = element;
   }
@@ -73,25 +79,20 @@ export class AppTableCorporateActionsComponent  implements AfterViewInit {
     this.dataSource? this.dataSource.filter = filterValue.trim().toLowerCase():null
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
-  clearFilter (fFormControl : FormControl) {
-    fFormControl.patchValue('')
-    this.dataSource.filter = ''
+  clearFilter (input : HTMLInputElement) {
+    input.value='';
+    this.dataSource.filter = '';
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
   }
   submitQuery () {
     this.dataSource.data=null;
     this.MarketDataService.getInstrumentDataCorpActions().subscribe(corpActionData => {
       this.updateInstrumentDataTable(corpActionData);
-      this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (corpActionData.length,'en-US') + ' rows loaded'});
-
+      this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (corpActionData.length,'en-US') + ' rows'}, 'Loaded ');
     })
   }
   exportToExcel() {
-    const fileName = "corpActionsData.xlsx";
-    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(this.dataSource.data);
-    const wb: XLSX.WorkBook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "corpActionsData");
-    XLSX.writeFile(wb, fileName);
+    this.HandlingCommonTasksS.exportToExcel (this.dataSource.data,"corpActionsData")
   }
   get  marketSource () {return this.searchParametersFG.get('marketSource') } 
   get  boards () {return this.searchParametersFG.get('boards') } 

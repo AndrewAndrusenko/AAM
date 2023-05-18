@@ -52,19 +52,12 @@ export class AppTableStrategyComponent  implements AfterViewInit {
 
   constructor(private InvestmentDataService:AppInvestmentDataServiceService, private dialog: MatDialog, private fb:FormBuilder ) {
     this.subscriptionName= this.InvestmentDataService.getReloadStrategyStructure().subscribe ( (id) => {
-      console.log('messageAA', id )
-      this.InvestmentDataService.getStrategyStructure (id,'0','0').subscribe (portfoliosData => {
-        console.log('portfoliosData', portfoliosData);
+/*       this.InvestmentDataService.getStrategyStructure (id,'0','0').subscribe (portfoliosData => {
         this.dataSource  = new MatTableDataSource(portfoliosData);
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
-      })
+      }) */
     } )
-  }
-  ngOnInit(): void {
-    if (this.MP==true) { this.columnsToDisplay = ['id','isin', 'shortname', 'weight_of_child'] }
-  }
-  async ngAfterViewInit() {
     this.editStructureStrategyForm=this.fb.group ({
       id: {value:''},
       sname: [null, { updateOn: 'blur'} ],
@@ -80,6 +73,10 @@ export class AppTableStrategyComponent  implements AfterViewInit {
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
       })
+  }
+
+  async ngAfterViewInit() {
+
   }
   ngOnChanges(changes: SimpleChanges) {
     this.columnsToDisplay = ['id','sname', 'description', 'weight_of_child'];
@@ -114,6 +111,6 @@ export class AppTableStrategyComponent  implements AfterViewInit {
     }
   }
   getTotalWeight () {
-   return this.dataSource.data.map(t => t.weight_of_child).reduce((acc, value) => acc + Number(value)/100, 0);
+   return this.dataSource? this.dataSource.data.map(t => t.weight_of_child).reduce((acc, value) => acc + Number(value)/100, 0):0;
   }
 }

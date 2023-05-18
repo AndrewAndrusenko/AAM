@@ -16,11 +16,12 @@ import { DBConfig } from "ngx-indexed-db";
       { name: 'couponrate', keypath: 'email', options: { unique: false } },
       { name: 'couponamount', keypath: 'email', options: { unique: false } },
       { name: 'actiontype', keypath: 'email', options: { unique: false } },
-      { name: 'date', keypath: 'email', options: { unique: false } },
-      { name: 'action', keypath: 'email', options: { unique: false } }
+      { name: 'date', keypath: 'email', options: { unique: false } },accessRestriction
+      { name: 'action':string, keypath: 'email', options: { unique: false } }
     ]
   }]
 };  */
+
 export const indexDbConfigAAM: DBConfig  = {
   name: 'AAMdb',
   version: 1,
@@ -41,6 +42,15 @@ export interface AccountsTableModel {
  sname:string;
  portfolioname:string;
  portleverage:number; 
+}
+export interface accessRestriction {
+id:string, 
+accessrole:string, 
+elementid:string, 
+tsmodule:string, 
+htmltemplate:string, 
+elementtype:string, 
+elementvalue:string
 }
 export interface InstrumentData {
   secid :string, 
@@ -166,6 +176,7 @@ export interface bAccountsList extends bAccounts {
   d_accTypeDescription: string,
   d_entityTypeCode: string,
   d_entityTypeDescription: string,
+  action:string
 }
 export interface bLedger {
   ledgerNoId: number,
@@ -183,7 +194,8 @@ export interface bLedger {
 export interface bLedgerAccounts extends bLedger {
   d_Account_Type: string,
   d_Client: string,
-  d_APTypeCodeAccount: string
+  d_APTypeCodeAccount: string,
+  action:string
 }
 export interface bAccountsEntriesList {
   d_transactionType:string,

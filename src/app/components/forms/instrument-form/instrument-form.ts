@@ -1,26 +1,26 @@
-import { AfterContentInit, Component,  EventEmitter,  Input, OnInit, Output, SimpleChanges, ViewChild,  } from '@angular/core';
+import { AfterContentInit, Component,  EventEmitter,  Input, Output, SimpleChanges, ViewChild} from '@angular/core';
 import { AsyncValidatorFn, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { Instruments, instrumentCorpActions, instrumentDetails } from 'src/app/models/intefaces';
-import { Subscription } from 'rxjs';
 import { MatTabGroup as MatTabGroup } from '@angular/material/tabs';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { menuColorGl } from 'src/app/models/constants';
 import { AppMarketDataService } from 'src/app/services/app-market-data.service';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
 import { indexDBService } from 'src/app/services/indexDB.service';
+import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
   selector: 'app-inv-instrument-modify-form',
   templateUrl: './instrument-form.html',
   styleUrls: ['./instrument-form.scss'],
 })
-export class AppInvInstrumentModifyFormComponent implements OnInit, AfterContentInit  {
-
+export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
+  accessState: string = 'none';
+  disabledControlElements: boolean = false;
+  @Input() action: string = 'View';
   public panelOpenState = true;
   public instrumentModifyForm: FormGroup;
   public instrumentDetailsForm: FormGroup;
-  @Input() action: string;
   @Input() moexBoards = []
   @Input() secidParam:string;
   instrumentDetails:instrumentDetails[] = [];
@@ -31,7 +31,6 @@ export class AppInvInstrumentModifyFormComponent implements OnInit, AfterContent
   public data: any;
   @ViewChild(MatTabGroup) tabGroup: MatTabGroup;
   formDisabledFields: string[] = [];
-  private subscriptionName: Subscription
   panelOpenStateFirst = false;
   panelOpenStateSecond = false;
   menuColorGl=menuColorGl
@@ -43,12 +42,41 @@ export class AppInvInstrumentModifyFormComponent implements OnInit, AfterContent
 
   constructor (
     private fb:FormBuilder, 
-    private dialog: MatDialog, 
+    private AuthServiceS:AuthService,  
     private CommonDialogsService:HadlingCommonDialogsService,
     private MarketDataService: AppMarketDataService,
     private indexDBServiceS:indexDBService,
   ) 
   { 
+    this.AuthServiceS.verifyAccessRestrictions('accessToInstrumentData').subscribe ((accessData) => {
+      this.accessState=accessData.elementvalue;
+      if (this.accessState === 'full')  {
+        this.disabledControlElements = true;
+        this.action='Edit'
+      }
+        this.title = this.action;
+        if (this.secidParam) {
+          this.MarketDataService.getMoexInstruments(undefined,undefined, {secid:[this.secidParam,this.secidParam]}).subscribe (instrumentData => {
+            this.indexDBServiceS.getIndexDBInstrumentStaticTables('getBoardsDataFromInstruments').then ((data)=>this.moexBoards = data['data'])
+            this.instrumentModifyForm.patchValue(instrumentData[0]);
+          }) 
+        };  
+        console.log('constructor', this.action);
+        switch (this.action) {
+          case 'Create': 
+          break;
+          case 'Create_Example':
+            this.instrumentModifyForm.patchValue(this.data);
+            this.title = 'Create';
+            break;
+            default :
+            this.instrumentModifyForm.patchValue(this.data)
+          break;
+        } 
+        if (this.action == 'View') {
+          this.instrumentModifyForm.disable();
+        }
+    })
     this.formDisabledFields = ['clientId', 'accountId', 'idportfolio']
     this.instrumentModifyForm = this.fb.group ({
       id : {value:null, disabled: false},
@@ -77,33 +105,17 @@ export class AppInvInstrumentModifyFormComponent implements OnInit, AfterContent
     this.indexDBServiceS.getIndexDBInstrumentStaticTables('getMoexSecurityTypes').then ((data)=>{
       this.securityTypes = data['data'];
       this.filtersecurityType(this.group.value);
-    
+      if (this.action==='Create_Example') {
+        this.isin.setErrors({isinIsTaken:true})
+        this.secid.setErrors({'secidIsTaken':true})
+      }
     })
   }
-
-  ngOnInit(): void {
-    this.title = this.action;
-    this.secidParam?  this.MarketDataService.getMoexInstruments(undefined,undefined, {secid:[this.secidParam,this.secidParam]}).subscribe (instrumentData => {
-      this.indexDBServiceS.getIndexDBInstrumentStaticTables('getBoardsDataFromInstruments').then ((data)=>this.moexBoards = data['data'])
-      this.instrumentModifyForm.patchValue(instrumentData[0]);
-    }) :null;  
-
-    switch (this.action) {
-      case 'Create': 
-      break;
-      case 'Create_Example':
-        this.instrumentModifyForm.patchValue(this.data)
-        this.title = 'Create';
-        break;
-        default :
-        this.instrumentModifyForm.patchValue(this.data)
-      break;
-    } 
-    if (this.action == 'View') {
-      this.instrumentModifyForm.disable();
-    }
+  ngAfterContentInit (): void {
+    this.instrumentDetailsForm.patchValue(this.instrumentDetails[0]);
+    this.addAsyncValidators(this.action);
   }
-  addAsyncValidators(action:string) {
+  async addAsyncValidators(action:string) {
     if (['Create','Create_Example'].includes(this.action)) {
       this.SecidUniqueAsyncValidator = customAsyncValidators.MD_SecidUniqueAsyncValidator (this.MarketDataService, '');
       this.ISINuniqueAsyncValidator = customAsyncValidators.MD_ISINuniqueAsyncValidator (this.MarketDataService, '');
@@ -123,16 +135,13 @@ export class AppInvInstrumentModifyFormComponent implements OnInit, AfterContent
     this.isin.removeAsyncValidators([this.ISINuniqueAsyncValidator]); 
   }
   ngOnChanges(changes: SimpleChanges) {
+    console.log('ngOnChanges', true);
     this.revomeAsyncValidators();
     this.MarketDataService.getMoexInstruments(undefined,undefined, {secid:[changes['secidParam'].currentValue,changes['secidParam'].currentValue]}).subscribe (instrumentData => {
       this.instrumentModifyForm.patchValue(instrumentData[0]);
       this.addAsyncValidators('Edit');
       this.filtersecurityType(this.group.value)
     });  
-  }
-  ngAfterContentInit (): void {
-    this.instrumentDetailsForm.patchValue(this.instrumentDetails[0]);
-    this.addAsyncValidators(this.action);
   }
   filtersecurityType (filter:string) {
     this.securityTypes? this.securityTypesFiltered = this.securityTypes.filter (elem => elem.security_group_name===filter) : null;

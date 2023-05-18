@@ -10,28 +10,40 @@
           <p *ngSwitchCase="['issuesize','facevalue'].includes(column)">
               {{ element[column] | number:'1.0-0' }}
           </p>          
+          <p *ngSwitchCase="['matdate'].includes(column)">
+            {{ element[column] | date }}
+          </p>     
           <p *ngSwitchCase="['action'].includes(column)">
-            <button   
-              mat-icon-button 
+            <button  *ngIf="disabledControlElements" mat-icon-button 
               aria-label="expand row" color="accent"
-              matTooltip="Edit entry"
-              (click)="openInstrumentDetailsForm('Edit', element)">
-              <mat-icon >edit</mat-icon>
+              mat-icon-button aria-label="expand row" color="accent"
+              matTooltip="View entry (day is closed)"
+              (click)="openInstrumentDetailsForm('View', element )">
+              <mat-icon >pageview</mat-icon>
             </button>
-            <button 
-              mat-icon-button 
-              style="margin-left: 5%;" aria-label="expand row" color="accent" 
-              matTooltip="Delete entry"
-              (click)="openInstrumentDetailsForm('Delete', element)">
-              <mat-icon >delete</mat-icon>
-            </button>
+            <ng-container  *ngIf="!disabledControlElements">
+              <button   
+                mat-icon-button 
+                aria-label="expand row" color="accent"
+                matTooltip="Edit entry"
+                (click)="openInstrumentDetailsForm('Edit', element)">
+                <mat-icon >edit</mat-icon>
+              </button>
+              <button 
+                mat-icon-button 
+                style="margin-left: 5%;" aria-label="expand row" color="accent" 
+                matTooltip="Delete entry"
+                (click)="openInstrumentDetailsForm('Delete', element)">
+                <mat-icon >delete</mat-icon>
+              </button>
+            </ng-container>
           </p>
           <p *ngSwitchDefault>
             {{element[column]}}
           </p>
         </span>
-        <ng-template  #instrumentcontextmenu>
-          <div class="tree-menu-context" cdkMenu >
+        <ng-template  #instrumentcontextmenu >
+          <div class="tree-menu-context" cdkMenu  *ngIf="!disabledControlElements">
             <button 
               class="tree-menu-item" cdkMenuItem 
               (click)="openInstrumentDetailsForm('Create', element)">

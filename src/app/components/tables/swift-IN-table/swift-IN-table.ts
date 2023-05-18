@@ -1,10 +1,9 @@
 import {AfterViewInit, Component, EventEmitter, OnDestroy, OnInit, Output, QueryList, ViewChild, ViewChildren} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
-import {lastValueFrom, Subscription } from 'rxjs';
+import {Subscription } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
-import {TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { bAccountsEntriesList, cFormValidationLog, SWIFTSGlobalListmodel } from 'src/app/models/intefaces';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -12,7 +11,11 @@ import { HandlingTableSelectionService } from 'src/app/services/handling-table-s
 import { AppTableSWIFT950ItemsComponent } from '../swift-950-table/swift-950-table';
 import { HandlingEntryProcessingService } from 'src/app/services/handling-entry-processing.service';
 import { LogProcessingService } from 'src/app/services/log-processing.service';
-import { FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
+import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
+import { formatNumber } from '@angular/common';
+import { AuthService } from 'src/app/services/auth.service';
 @Component({
   selector: 'app-table-swift-IN-list',
   templateUrl: './swift-IN-table.html',
@@ -26,6 +29,8 @@ import { FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } fro
   ],
 })
 export class AppTableSWIFTsInListsComponent  implements  AfterViewInit, OnInit,OnDestroy {
+  accessState: string = 'none';
+  disabledControlElements: boolean = false;
   columnsToDisplay = ['select','msgId',  'senderBIC', 'DateMsg', 'typeMsg','accountNo', 'ledgerNo'];
   columnsHeaderToDisplay = ['msgId',  'senderBIC', 'Date', 'Type','Account','ledger'];
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
@@ -36,7 +41,6 @@ export class AppTableSWIFTsInListsComponent  implements  AfterViewInit, OnInit,O
 
   @Output() public modal_principal_parent = new EventEmitter();
   expandedElement: SWIFTSGlobalListmodel  | null;
-  accessToClientData: string = 'true';
   action: string ='';
   panelOpenState:boolean = false;
   errorsPpanelOpenState:boolean = false;
@@ -58,9 +62,11 @@ export class AppTableSWIFTsInListsComponent  implements  AfterViewInit, OnInit,O
   swiftProcessingFB: FormGroup
   constructor (
     private AccountingDataService:AppAccountingService, 
-    private TreeMenuSevice:TreeMenuSevice,  
+    private AuthServiceS:AuthService,  
     private SelectionService:HandlingTableSelectionService,
     private EntryProcessingService:HandlingEntryProcessingService,
+    private CommonDialogsService:HadlingCommonDialogsService,
+    private HandlingCommonTasksS:HandlingCommonTasksService,
     private LogService:LogProcessingService,
     private fb : FormBuilder
 
@@ -98,7 +104,29 @@ export class AppTableSWIFTsInListsComponent  implements  AfterViewInit, OnInit,O
     this.subscriptionCreatedLog.unsubscribe();
   }
   ngOnInit(): void {
-  
+    this.swiftProcessingFB.enable()
+    this.AuthServiceS.verifyAccessRestrictions('accessToSWIFTData').subscribe ((accessData) => {
+      console.log('access',accessData);
+      this.accessState=accessData.elementvalue;
+      this.disabledControlElements = this.accessState === 'full'? false : true;
+    })
+  }
+  async updateSwiftsData (action: string) {
+    return new Promise<number> (async (resolve,reject) => {
+    this.AuthServiceS.verifyAccessRestrictions('accessToSWIFTData').subscribe ((accessData) => {
+
+    })
+
+
+/*       this.accessToClientData = accessRestrictionData['elementvalue']
+      this.AccountingDataService.GetAccountsListAccounting (null,null,null,null,this.action).subscribe (AccountsList  => {
+        this.dataSource  = new MatTableDataSource(AccountsList);
+        this.dataSource.paginator = this.paginator;
+        this.dataSource.sort = this.sort;
+        resolve (AccountsList.length)
+      })
+    }) */
+  })
   }
   async ProcessSwiftStatemts (overdraftOverride:boolean) {
     this.swiftProcessingFB.disable();
@@ -116,22 +144,14 @@ export class AppTableSWIFTsInListsComponent  implements  AfterViewInit, OnInit,O
       
     })
   }
-
   async ngAfterViewInit() {
-    this.columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
-    let userData = JSON.parse(localStorage.getItem('userInfo'))
-    await lastValueFrom (this.TreeMenuSevice.getaccessRestriction (userData.user.accessrole, 'accessToClientData'))
-    .then ((accessRestrictionData) =>{
-      this.accessToClientData = accessRestrictionData['elementvalue']
       this.AccountingDataService.GetSWIFTsList (null,null,null,null,'GetSWIFTsList').subscribe (SWIFTsList  => {
         this.dataSource  = new MatTableDataSource(SWIFTsList);
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
         this.cDateToProcessSwift.setValue(new Date(this.FirstOpenedAccountingDate))
         this.cDateAccounting.setValue(new Date(this.FirstOpenedAccountingDate))
-      })
     })
-
   }
   isProcessingComplete():boolean {
     this.transactionsCreated = this.transactionsToProcess.filter(elem => elem.status ==='Created').length; 
@@ -144,7 +164,11 @@ export class AppTableSWIFTsInListsComponent  implements  AfterViewInit, OnInit,O
     this.dataSource.filter = filterValue.trim().toLowerCase();
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
-
+  clearFilter (input: HTMLInputElement) {
+    input.value='';
+    this.dataSource.filter = '';
+    if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
+  }
   toggleParentandChild (row:any, rowIndex: any) {
     this.selection.toggle(row);
     let TableSwiftItem = this.TableSwiftItems.filter((element, index) => index === rowIndex);
@@ -171,7 +195,15 @@ export class AppTableSWIFTsInListsComponent  implements  AfterViewInit, OnInit,O
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
     })
-
+  }
+  async submitQuery () {
+    this.dataSource.data=null;
+    await this.updateSwiftsData(this.action).then ((rowsCount) => {
+      this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (rowsCount,'en-US') + ' rows'},'Loaded ')
+    })
+  }
+  exportToExcel() {
+    this.HandlingCommonTasksS.exportToExcel (this.dataSource.data,"SWIFT950")
   }
   get cDateAccounting () {return this.swiftProcessingFB.get('cDateAccounting')}
   get cDateToProcessSwift () {return this.swiftProcessingFB.get('cDateToProcessSwift')}

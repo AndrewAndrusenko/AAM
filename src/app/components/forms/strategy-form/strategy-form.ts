@@ -1,4 +1,4 @@
-import { Component,  Input, OnInit, SimpleChanges,  } from '@angular/core';
+import { Component,  ElementRef,  Input, OnInit, SimpleChanges, ViewChild,  } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { AppConfimActionComponent } from '../../common-forms/app-confim-action/app-confim-action.component';
@@ -7,7 +7,8 @@ import { TablePortfolios } from '../../tables/portfolios-table/portfolios-table'
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { menuColorGl } from 'src/app/models/constants';
-
+import { MatTableDataSource } from '@angular/material/table';
+import { AppTableStrategyComponent } from '../../tables/strategy_structure-table/strategy_structure-table';
 interface Level {
   value: number;
   viewValue: string;
@@ -18,6 +19,8 @@ interface Level {
   styleUrls: ['./strategy-form.scss'],
 })
 export class AppStrategyFormComponent implements OnInit {
+  @ViewChild(AppTableStrategyComponent) strategyStructureTable: AppTableStrategyComponent;
+
   levels: Level[] = [
     {value: 1, viewValue: 'Model Portfolio'},
     {value: 2, viewValue: 'Strategy (based on MP)'},
@@ -41,10 +44,9 @@ export class AppStrategyFormComponent implements OnInit {
   constructor (
     private fb:FormBuilder, 
     private dialog: MatDialog, 
-    private InvestmentDataServiceService:AppInvestmentDataServiceService, 
+    private InvestmentDataService:AppInvestmentDataServiceService, 
     private CommonDialogsService:HadlingCommonDialogsService,
-  ) {}
-  ngOnInit(): void {
+  ) {
     this.panelOpenState = true;
 
     this.editStrategyForm=this.fb.group ({
@@ -57,33 +59,37 @@ export class AppStrategyFormComponent implements OnInit {
     })
    switch (this.action) {
     case 'Create': 
+    this.editStrategyForm.patchValue({})
     break;
     case 'Create_Example':
       this.data['id']='';
-      this.editStrategyForm.patchValue(this.data);
       this.name.markAsTouched();
     break;
-    case 'Delete': 
-      this.editStrategyForm.patchValue(this.data);
-    break;
-    default :
-      this.editStrategyForm.patchValue(this.data);
-      this.title = "Edit"
-      this.editStrategyForm.patchValue(this.data);
-      
-    break; 
    }  
-    this.editStrategyForm.controls['name'].addValidators ( [Validators.required])
-    this.editStrategyForm.controls['description'].addValidators ( [Validators.required])
-    this.editStrategyForm.controls['level'].addValidators ( [Validators.required, Validators.pattern('[0-9]*')])
+    this.editStrategyForm.controls['name'].addValidators ( [Validators.required]);
+    this.editStrategyForm.controls['description'].addValidators ( [Validators.required]);
+    this.editStrategyForm.controls['level'].addValidators ( [Validators.required, Validators.pattern('[0-9]*')]);
     this.editStrategyForm.controls['name'].setAsyncValidators (
-      customAsyncValidators.strategyCodeCustomAsyncValidator(this.InvestmentDataServiceService, this.id.value), 
-    )  
+      customAsyncValidators.strategyCodeCustomAsyncValidator(this.InvestmentDataService, this.id.value), 
+    );  
+
+  }
+  updateStrategyStructure () {
+    console.log('id',this.editStrategyForm.value);
+
+    this.InvestmentDataService.getStrategyStructure (this.id.value,'0','0').subscribe (portfoliosData => {
+
+      console.log('portfoliosData', portfoliosData,this.id.value);
+      this.strategyStructureTable.dataSource = new MatTableDataSource (portfoliosData)
+    })
+  }
+  ngOnInit(): void {
+
     // this.editStrategyForm.controls['name'].updateValueAndValidity();
   }
   ngOnChanges(changes: SimpleChanges) {
     console.log('changes', changes);
-    this.InvestmentDataServiceService.getGlobalStategiesList(changes['client'].currentValue, null, 'Get_Strategy_Data').subscribe(data => {
+    this.InvestmentDataService.getGlobalStategiesList(changes['client'].currentValue, null, 'Get_Strategy_Data').subscribe(data => {
       this.editStrategyForm.patchValue(data[0])
       this.strategyId = this.editStrategyForm.controls['id'].value
       this.MP = (this.editStrategyForm.controls['level'].value == 1 ) ? true : false
@@ -91,7 +97,7 @@ export class AppStrategyFormComponent implements OnInit {
       console.log('strategyId',this.strategyId);
       this.showStrateryStructure = true;
       this.editStrategyForm.controls['name'].setAsyncValidators(
-        customAsyncValidators.strategyCodeCustomAsyncValidator(this.InvestmentDataServiceService, this.id.value)
+        customAsyncValidators.strategyCodeCustomAsyncValidator(this.InvestmentDataService, this.id.value)
       ) 
      this.editStrategyForm.controls['name'].updateValueAndValidity();
     })
@@ -101,7 +107,7 @@ export class AppStrategyFormComponent implements OnInit {
       this.CommonDialogsService.snackResultHandler(result)
     } else {
       this.CommonDialogsService.snackResultHandler({name:'success', detail: result + 'strategy'}, action)
-      this.InvestmentDataServiceService.sendReloadStrategyList (this.editStrategyForm.controls['id']);
+      this.InvestmentDataService.sendReloadStrategyList (this.editStrategyForm.controls['id']);
     }
     this.editStrategyForm.controls['s_benchmark_account'].disable()
     this.editStrategyForm.controls['id'].disable()
@@ -111,20 +117,20 @@ export class AppStrategyFormComponent implements OnInit {
       case 'Create_Example':
       case 'Create':
         this.editStrategyForm.controls['s_benchmark_account'].enable()
-        this.InvestmentDataServiceService.createStrategy(this.editStrategyForm.value).then(result => this.snacksBox(result,'Created '))
+        this.InvestmentDataService.createStrategy(this.editStrategyForm.value).then(result => this.snacksBox(result,'Created '))
         this.editStrategyForm.controls['id'].disable()
         this.editStrategyForm.controls['s_benchmark_account'].enable()
       break;
       case 'Edit':
         this.editStrategyForm.controls['s_benchmark_account'].enable()
         this.editStrategyForm.controls['id'].enable()
-        this.InvestmentDataServiceService.updateStrategy(this.editStrategyForm.value).then(result => this.snacksBox(result,'Updated '))
+        this.InvestmentDataService.updateStrategy(this.editStrategyForm.value).then(result => this.snacksBox(result,'Updated '))
       break;
       case 'Delete':
         this.CommonDialogsService.confirmDialog('Delete strategy ' + this.name.value).subscribe(isConfirmed => {
           if (isConfirmed.isConfirmed) {
             this.editStrategyForm.controls['id'].enable()
-            this.InvestmentDataServiceService.deleteStrategy (this.editStrategyForm.value['id']).then (result =>{
+            this.InvestmentDataService.deleteStrategy (this.editStrategyForm.value['id']).then (result =>{
               this.snacksBox(result,'Deleted')
               this.CommonDialogsService.dialogCloseAll();
             })

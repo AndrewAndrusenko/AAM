@@ -4,11 +4,11 @@ import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { instrumentCorpActions, instrumentDetails, marketDataSources } from 'src/app/models/intefaces';
-import { FormControl, FormGroup} from '@angular/forms';
+import { instrumentDetails } from 'src/app/models/intefaces';
 import { AppMarketDataService } from 'src/app/services/app-market-data.service';
 import { AppInvInstrumentDetailsFormComponent } from '../../forms/instrument-details-form/instrument-details-form';
 import { indexDBService } from 'src/app/services/indexDB.service';
+import { AuthService } from 'src/app/services/auth.service';
 @Component({
   selector: 'app-table-instrument-details',
   templateUrl: './instrument-details-table.html',
@@ -23,8 +23,10 @@ import { indexDBService } from 'src/app/services/indexDB.service';
   ],
 })
 export class AppTableInstrumentDetailsComponent  implements AfterViewInit {
+  accessState: string = 'none';
+  disabledControlElements: boolean = false;
   columnsToDisplay = ['status','boardid', 'boardname', 'listlevel','issuesize','facevalue','matdate','regnumber', 'currencyid', 'lotsize', 'minstep', 'action' ];
-  columnsHeaderToDisplay = ['status','board', 'board name', 'listlevel','issue','facevalue','maturity','regnumber', 'cur', 'lot', 'step', 'action' ];
+  columnsHeaderToDisplay = ['status','board', 'board name', 'list','issue','facevalue','maturity','regnumber', 'cur', 'lot', 'step', 'action' ];
   dataSource: MatTableDataSource<instrumentDetails>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
@@ -33,17 +35,28 @@ export class AppTableInstrumentDetailsComponent  implements AfterViewInit {
   @Input () secid:string;
   panelOpenStateSecond = false;
   dialogInstrumentDetails: MatDialogRef<AppInvInstrumentDetailsFormComponent>;
-
   constructor(
+    private AuthServiceS:AuthService,  
     private MarketDataService: AppMarketDataService,
     private indexDBServiceS:indexDBService,
     private dialog: MatDialog,
-  ) {}
+  ) {
+    this.AuthServiceS.verifyAccessRestrictions('accessToInstrumentData').subscribe ((accessData) => {
+      console.log('access',accessData);
+      this.accessState=accessData.elementvalue;
+      this.disabledControlElements = this.accessState === 'full'? false : true;
+    })
+  }
   async ngAfterViewInit() {
     this.indexDBServiceS.getIndexDBInstrumentStaticTables('getInstrumentDataDetails').then ((data)=>this.updateInstrumentDataTable (data['data']))
   }
   ngOnChanges(changes: SimpleChanges) {
-    this.applyFilter(undefined, this.secid);
+    this.dataSource? this.applyFilter(undefined, this.secid) : null;
+  }
+  applyFilter(event?: any, manualValue?:string) {
+    const filterValue =  manualValue || (event.target as HTMLInputElement).value;
+    this.dataSource? this.dataSource.filter = filterValue.trim().toLowerCase():null
+    if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
   openInstrumentDetailsForm (action:string, element:instrumentDetails) {
     this.dialogInstrumentDetails = this.dialog.open (AppInvInstrumentDetailsFormComponent,{minHeight:'30vh', minWidth:'1300px', autoFocus: false, maxHeight: '90vh'})
@@ -54,17 +67,6 @@ export class AppTableInstrumentDetailsComponent  implements AfterViewInit {
     this.dataSource  = new MatTableDataSource(corpActionData);
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
-    this.secid? this.dataSource.filter=this.secid : null;
-
-  }
-  applyFilter(event: any, manualValue?:string) {
-    const filterValue =  manualValue || (event.target as HTMLInputElement).value;
-    this.dataSource? this.dataSource.filter = filterValue.trim().toLowerCase():null
-    if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
-  }
-  clearFilter (fFormControl : FormControl) {
-    fFormControl.patchValue('')
-    this.dataSource.filter = ''
-    if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
+    this.secid? this.applyFilter(undefined,this.secid) : null;
   }
 }

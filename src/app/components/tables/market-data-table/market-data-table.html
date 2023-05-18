@@ -1,15 +1,15 @@
 <span *ngIf="FormMode==='QuotesMode'" title="TableFilterGroup"> 
-  <mat-form-field class="example-form-field" class = "filterText">
-    <mat-label class="colorLabel">Type to search...</mat-label>
+  <mat-form-field  class = "filterField" >
+    <mat-label class="whiteTextFilter">Type to search...</mat-label>
     <input 
       (keyup)="applyFilter($event)"
       [formControl]="filterlFormControl" 
-      matInput type="text" #SearchTree  name="tableFilter"
+      matInput type="text" #filter  name="tableFilter"
       matTooltip="Use context menu to add filter"
      >
     <button matSuffix 
       mat-icon-button aria-label="Clear" 
-      (click)="clearFilter()">
+      (click)="clearFilter(filter)">
       <mat-icon>close</mat-icon>
     </button>
   </mat-form-field>
@@ -26,7 +26,7 @@
   <mat-icon matSuffix >refresh</mat-icon>
 </button>
 </span>
-<mat-expansion-panel *ngIf="FormMode==='QuotesMode'" title="MarketDataUploadingPanel"
+<mat-expansion-panel *ngIf="FormMode==='QuotesMode'&&!disabledControlElements" title="MarketDataUploadingPanel"
   class="first-expansion" 
   (opened)="panelOpenStateFirst = true"
   (closed)="panelOpenStateFirst = false" 

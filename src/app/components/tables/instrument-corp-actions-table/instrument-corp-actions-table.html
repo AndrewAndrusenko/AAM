@@ -1,11 +1,12 @@
-<mat-form-field class="example-form-field" class = "filterText">
-  <mat-label class="colorLabel">Type to search...</mat-label>
+<mat-form-field  class = "filterField" >
+  <mat-label class="whiteTextFilter">Type to search...</mat-label>
   <input 
     (keyup)="applyFilter($event)"
-    matInput type="text" #SearchTree  name="tableFilter"
+    matInput type="text" #filter  name="tableFilter"
     matTooltip="Use context menu to add filter">
   <button matSuffix 
-    mat-icon-button aria-label="Clear" >
+    mat-icon-button aria-label="Clear" 
+    (click)="clearFilter(filter)">
     <mat-icon>close</mat-icon>
   </button>
 </mat-form-field>
@@ -26,33 +27,77 @@
   <table  #strategyTable mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class="mat-elevation-z8">
     <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i=index">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>  {{columnsHeaderToDisplay[i]  | titlecase}}</th>
-      <td 
-        mat-cell 
-        *matCellDef="let element" > 
+      <td mat-cell *matCellDef="let element" [cdkContextMenuTriggerFor]="instrumentcontextmenu"> 
         <span [ngSwitch]="true==true">
           <p *ngSwitchCase="['date'].includes(column)">
               {{ element[column] | date }}
-          </p>          
+          </p>   
+          <p *ngSwitchCase="['unredemeedvalue','notinal','issuevolume','couponamount'].includes(column)">
+            {{ element[column] | number }}
+          </p>        
           <p *ngSwitchCase="['action'].includes(column)">
-            <button   
-              mat-icon-button 
+            <button  *ngIf="disabledControlElements" mat-icon-button 
               aria-label="expand row" color="accent"
-              matTooltip="Edit entry"
-              (click)="openCorpActionForm(element,'Edit')">
-              <mat-icon >edit</mat-icon>
+              mat-icon-button aria-label="expand row" color="accent"
+              matTooltip="View entry (day is closed)"
+              (click)="openCorpActionForm('View', element )">
+              <mat-icon >pageview</mat-icon>
             </button>
-            <button 
-              mat-icon-button 
-              style="margin-left: 5%;" aria-label="expand row" color="accent" 
-              matTooltip="Delete entry"
-              (click)="openCorpActionForm(element,'Delete')">
-              <mat-icon >delete</mat-icon>
-            </button>
+            <ng-container  *ngIf="!disabledControlElements">
+              <button   
+                mat-icon-button 
+                aria-label="expand row" color="accent"
+                matTooltip="Edit entry"
+                (click)="openCorpActionForm('Edit', element)">
+                <mat-icon >edit</mat-icon>
+              </button>
+              <button 
+                mat-icon-button 
+                style="margin-left: 5%;" aria-label="expand row" color="accent" 
+                matTooltip="Delete entry"
+                (click)="openCorpActionForm('Delete', element)">
+                <mat-icon >delete</mat-icon>
+              </button>
+            </ng-container>
           </p>
           <p *ngSwitchDefault>
             {{element[column]}}
           </p>
         </span>
+        <ng-template  #instrumentcontextmenu>
+          <div class="tree-menu-context" cdkMenu *ngIf="!disabledControlElements">
+              <button 
+                (click)="openCorpActionForm('View', element)"
+                class="tree-menu-item" cdkMenuItem>
+                <mat-icon class="menu-icon" matPrefix>pageview</mat-icon> 
+                View CorpAction
+              </button> 
+              <button 
+                class="tree-menu-item" cdkMenuItem 
+                (click)="openCorpActionForm('Create', element)">
+                <mat-icon class="menu-icon" matPrefix>add_circle</mat-icon>      
+                New CorpAction
+              </button>
+              <button 
+                class="tree-menu-item" cdkMenuItem 
+                (click)="openCorpActionForm('Create_Example', element)">
+                <mat-icon class="menu-icon" matPrefix>add_circle</mat-icon>      
+                New CorpAction (on sample)
+              </button>
+              <button 
+                class="tree-menu-item" cdkMenuItem
+                (click)="openCorpActionForm('Edit', element)">
+                <mat-icon class="menu-icon" matPrefix>edit</mat-icon>      
+                Edit CorpAction
+              </button>
+              <button 
+                class="tree-menu-item" cdkMenuItem
+                (click)="openCorpActionForm('Delete', element)">
+                <mat-icon class="menu-icon" matPrefix>delete</mat-icon> 
+                Delete CorpAction
+              </button> 
+          </div>
+        </ng-template>   
       </td>
     </ng-container>
     <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>

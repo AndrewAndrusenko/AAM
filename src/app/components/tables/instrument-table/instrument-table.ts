@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ViewEncapsulation, EventEmitter, Output, ViewChild, Input, ChangeDetectionStrategy} from '@angular/core';
+import {AfterViewInit, Component, ViewEncapsulation, EventEmitter, Output, ViewChild, Input, ChangeDetectionStrategy, ElementRef} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {Observable, Subscription } from 'rxjs';
@@ -8,15 +8,16 @@ import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/m
 import { Instruments, instrumentCorpActions, instrumentDetails, marketDataSources } from 'src/app/models/intefaces';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
-import { FormBuilder, FormControl, FormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
-import * as XLSX from 'xlsx'
+import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { AppMarketDataService } from 'src/app/services/app-market-data.service';
-import { menuColorGl,investmentNodeColor, investmentNodeColorChild, additionalLightGreen } from 'src/app/models/constants';
+import { menuColorGl, investmentNodeColorChild, additionalLightGreen } from 'src/app/models/constants';
 import { AppInvInstrumentModifyFormComponent } from '../../forms/instrument-form/instrument-form';
 import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
 import { formatNumber } from '@angular/common';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
+import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
+import { AuthService } from 'src/app/services/auth.service';
 @Component({
   selector: 'app-app-instrument-table',
   
@@ -33,6 +34,8 @@ import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dia
   ],
 })
 export class AppInstrumentTableComponent  implements AfterViewInit {
+  accessState: string = 'none';
+  disabledControlElements: boolean = false;
   @Input() FormMode:string
   marketSources:marketDataSources[] =  [];
   columnsToDisplay = [ 
@@ -50,14 +53,15 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
     'Security_Type',
     'Short Name', 
     'ISIN', 
-    'Primary_Board', 
+    'Board', 
     'Board Title', 
     'Issuer INN', 
-    'action'
+    'Action'
   ];
   dataSource: MatTableDataSource<Instruments>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
+  @ViewChild('filterALL', { static: false }) filterALL: ElementRef;
   @Output() public modal_principal_parent = new EventEmitter();
   private subscriptionName: Subscription;
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
@@ -75,8 +79,6 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
   
   boardIDs =[]
   searchParametersFG: FormGroup;
-  filterlFormControl = new FormControl('');
-  filterlAllFormControl = new FormControl('');
   boardsOne = new FormControl('');
 
   dialogInstrumentModify: MatDialogRef<AppInvInstrumentModifyFormComponent>;
@@ -86,11 +88,17 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
   constructor(
     private MarketDataService: AppMarketDataService,
     private TreeMenuSevice:TreeMenuSevice,
+    private AuthServiceS:AuthService,  
     private indexDBServiceS:indexDBService,
+    private HandlingCommonTasksS:HandlingCommonTasksService,
     private CommonDialogsService:HadlingCommonDialogsService,
     private dialog: MatDialog,
     private fb:FormBuilder, 
   ) {
+    this.AuthServiceS.verifyAccessRestrictions('accessToInstrumentData').subscribe ((accessData) => {
+      this.accessState=accessData.elementvalue;
+      this.disabledControlElements = this.accessState === 'full'? false : true;
+    })
     this.searchParametersFG = this.fb.group ({
       secidList: null,
       amount:{value:null, disabled:true},
@@ -124,6 +132,7 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
     this.dialogInstrumentModify.componentInstance.data = element;
     this.dialogInstrumentModify.componentInstance.instrumentDetails = this.instrumentDetailsArr.filter(el=> el.secid===element.secid&&element.primary_boardid===el.boardid)
     this.dialogInstrumentModify.componentInstance.instrumentCorpActions = this.instrumentCorpActions.filter(el=> el.isin===element.isin)
+    action=== 'View'? this.dialogInstrumentModify.componentInstance.instrumentModifyForm.disable() : null;
   }
   async ngAfterViewInit() {
     console.log('formMode',this.FormMode);
@@ -176,13 +185,13 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
     event.target.textContent.trim() === 'ClearAll cancel'? this.instruments = ['ClearAll']: null;
   }
   addChips (el: any, column: string) {(['accountNo'].includes(column))? this.instruments.push(el):null;}
-  updateFilter (event:Event, el: any, column: string) {
-    this.filterlAllFormControl.patchValue(el);
+  updateFilter (el: any) {
+    this.filterALL.nativeElement.value = el
     this.dataSource.filter = el.trim();
     (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
   }
-  clearFilter (fFormControl : FormControl) {
-    fFormControl.patchValue('')
+  clearFilter (input:HTMLInputElement) {
+    input.value=''
     this.dataSource.filter = ''
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
   }
@@ -201,7 +210,7 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
       this.instruments.unshift('ClearAll')
-      this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (instrmenttData.length,'en-US') + ' rows loaded'});
+      this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (instrmenttData.length,'en-US') + ' rows'}, 'Loaded ');
       resolve(instrmenttData) 
     })
   })
@@ -210,11 +219,7 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
    
   }
   exportToExcel() {
-    const fileName = "instrumentData.xlsx";
-    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(this.dataSource.data);
-    const wb: XLSX.WorkBook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "instrumentData");
-    XLSX.writeFile(wb, fileName);
+    this.HandlingCommonTasksS.exportToExcel (this.dataSource.data,"instrumentData")
   }
   get  marketSource () {return this.searchParametersFG.get('marketSource') } 
   get  boards () {return this.searchParametersFG.get('boards') } 

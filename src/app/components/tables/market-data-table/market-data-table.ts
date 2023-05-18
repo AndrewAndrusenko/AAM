@@ -5,13 +5,11 @@ import {lastValueFrom, map, Observable, startWith, Subscription } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {TreeMenuSevice } from 'src/app/services/tree-menu.service';
-import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { marketData, marketDataSources, marketSourceSegements } from 'src/app/models/intefaces';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import * as XLSX from 'xlsx'
 import { MatOption } from '@angular/material/core';
 import { AppTableAccAccountsComponent } from '../acc-accounts-table/acc-accounts-table';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -23,6 +21,8 @@ import { formatNumber, registerLocaleData } from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { menuColorGl } from 'src/app/models/constants';
+import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
+import { AuthService } from 'src/app/services/auth.service';
 registerLocaleData(localeFr, 'fr');
 /* 
 export class extends  */
@@ -41,6 +41,8 @@ export class extends  */
   ],
 })
 export class AppTableMarketDataComponent  implements AfterViewInit {
+  accessState: string = 'none';
+  disabledControlElements: boolean = false;
   @Input() FormMode:string = 'Full'
   loadMarketData: FormGroup;
   marketSources:marketDataSources[] =  [];
@@ -54,7 +56,6 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
   @Output() public modal_principal_parent = new EventEmitter();
   logLoadingData=[];
   statusLogPanelOpenState:boolean=false;
-  private subscriptionName: Subscription;
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
   
   @ViewChild('allSelected') private allSelected: MatOption;
@@ -69,7 +70,6 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
   instruments: string[] = ['ClearAll'];
   psearchParameters: any;
   
-  dialogChooseAccountsList: MatDialogRef<AppTableAccAccountsComponent>;
   public filterednstrumentsLists : Observable<string[]>;
   
   dateOfOperaationsStart  = new Date ('2023-02-18')
@@ -93,12 +93,18 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
     private AccountingDataService:AppAccountingService, 
     private MarketDataService: AppMarketDataService,
     private TreeMenuSevice:TreeMenuSevice, 
+    private AuthServiceS:AuthService,  
     private AtuoCompService:AtuoCompSecidService,
+    private HandlingCommonTasksS:HandlingCommonTasksService,
     private CommonDialogsService:HadlingCommonDialogsService,
-    private dialog: MatDialog,
     private fb:FormBuilder, 
     public snack:MatSnackBar
   ) {
+    this.AuthServiceS.verifyAccessRestrictions('accessToInstrumentData').subscribe ((accessData) => {
+      console.log('access',accessData);
+      this.accessState=accessData.elementvalue;
+      this.disabledControlElements = this.accessState === 'full'? false : true;
+    })
     this.MarketDataService.getInstrumentDataGeneral('getBoardsDataFromInstruments').subscribe(boardsData => this.boardIDs=boardsData)
     this.MarketDataService.getMarketDataSources().subscribe(marketSourcesData => this.marketSources = marketSourcesData);
 
@@ -261,9 +267,9 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
     this.dataSource.filter = el.trim();
     (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
   }
-  clearFilter () {
-    this.filterlFormControl.patchValue('')
-    this.dataSource.filter = ''
+  clearFilter (input:HTMLInputElement) {
+    input.value = '';
+    this.dataSource.filter = '';
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
   }
   async submitQuery () {
@@ -286,7 +292,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
       this.dataSource.sort = this.sort;
       this.instruments.unshift('ClearAll')
       this.FormMode==='ChartMode'? this.MarketDataService.sendMarketDataForChart(marketData) : null;
-      this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (marketData.length,'en-US') + ' rows loaded'});
+      this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (marketData.length,'en-US') + ' rows'},'Loaded ');
       resolve(marketData) 
     })
   })
@@ -296,7 +302,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
   }
   exportToExcel() {
    const fileName = "marketData.xlsx";
-   let obj = this.dataSource.data.map( (row,ind) =>({
+   let data = this.dataSource.data.map( (row,ind) =>({
     globalsource: row.globalsource,
     sourcecode: row. sourcecode,
     boardid: row. boardid, 
@@ -319,12 +325,8 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
     tradingsession: row. tradingsession,
     tradedate: new Date(row.tradedate)
   }))
-
-   const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(obj);
-   const wb: XLSX.WorkBook = XLSX.utils.book_new();
-   XLSX.utils.book_append_sheet(wb, ws, "marketData");
-   XLSX.writeFile(wb, fileName);
-  }
+  this.HandlingCommonTasksS.exportToExcel (data,"marketData")
+ }
   dateClass: MatCalendarCellClassFunction<Date> = (cellDate, view) => {
     let result :string
     // console.log('dc',cellDate.toLocaleDateString(), new Date(this.balacedDateWithEntries[1]).toLocaleDateString());

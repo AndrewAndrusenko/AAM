@@ -1,10 +1,9 @@
-import { AfterViewInit, Component, ViewEncapsulation, EventEmitter, Output, ViewChild} from '@angular/core';
+import { Component, ViewEncapsulation, EventEmitter, Output, ViewChild} from '@angular/core';
 import { MatPaginator as MatPaginator} from '@angular/material/paginator';
 import { MatSort} from '@angular/material/sort';
-import { lastValueFrom, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import { animate, state, style, transition, trigger} from '@angular/animations';
-import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { bAccountsEntriesList, bBalanceFullData, bcTransactionType_Ext } from 'src/app/models/intefaces';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
@@ -20,6 +19,7 @@ import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dia
 import { menuColorGl } from 'src/app/models/constants';
 import { formatNumber } from '@angular/common';
 import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
+import { AuthService } from 'src/app/services/auth.service';
 
 export interface Fruit {
   name: string;
@@ -37,7 +37,9 @@ export interface Fruit {
     ]),
   ],
 })
-export class AppTableBalanceSheetComponent  implements AfterViewInit {
+export class AppTableBalanceSheetComponent   {
+  accessState: string = 'none';
+  disabledControlElements: boolean = false;
   columnsToDisplay = [
     'accountNo' , 
     'accountType' , 
@@ -112,15 +114,25 @@ export class AppTableBalanceSheetComponent  implements AfterViewInit {
   entriesTotal: number = 0;
   constructor(
     private AccountingDataService:AppAccountingService, 
-    private TreeMenuSevice:TreeMenuSevice, 
+    private AuthServiceS:AuthService,  
     private CommonDialogsService:HadlingCommonDialogsService,
     private HandlingCommonTasksS:HandlingCommonTasksService, 
     private dialog: MatDialog,
     private fb:FormBuilder, 
   ) {
+    this.AuthServiceS.verifyAccessRestrictions('accessToBalanceData').subscribe ((accessData) => {
+      console.log('access',accessData);
+      this.accessState=accessData.elementvalue;
+      this.disabledControlElements = this.accessState === 'full'? false : true;
+    })
     this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data=>{
       this.FirstOpenedAccountingDate = data[0].FirstOpenedDate;
       this.LastClosedDate = data[0].LastClosedDate;
+      this.AccountingDataService.GetALLClosedBalances  (null, null, new Date(this.FirstOpenedAccountingDate).toDateString(),null,'GetALLClosedBalances').subscribe (Balances  => {
+        this.dataSource  = new MatTableDataSource(Balances);
+        this.dataSource.paginator = this.paginator;
+        this.dataSource.sort = this.sort;
+      })
     })
     this.AccountingDataService.GetbbalacedDateWithEntries('GetbbalacedDateWithEntries').subscribe(data => {
       this.balacedDateWithEntries = data.flat()
@@ -143,19 +155,7 @@ export class AppTableBalanceSheetComponent  implements AfterViewInit {
       entryType : {value:[], disabled:true}
     })
   }
-  async ngAfterViewInit() {
-    this.columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
-    let userData = JSON.parse(localStorage.getItem('userInfo'))
-    await lastValueFrom (this.TreeMenuSevice.getaccessRestriction (userData.user.accessrole, 'accessToClientData'))
-    .then ((accessRestrictionData) =>{
-      this.accessToClientData = accessRestrictionData['elementvalue']
-      this.AccountingDataService.GetALLClosedBalances  (null, null, new Date(this.FirstOpenedAccountingDate).toDateString(),null,'GetALLClosedBalances').subscribe (Balances  => {
-        this.dataSource  = new MatTableDataSource(Balances);
-        this.dataSource.paginator = this.paginator;
-        this.dataSource.sort = this.sort;
-      })
-    })
-  }
+
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
@@ -188,6 +188,7 @@ export class AppTableBalanceSheetComponent  implements AfterViewInit {
   }
   async submitQuery () {
     return new Promise((resolve, reject) => {
+    this.dataSource.data=null;
     let searchObj = {};
     let accountsList = [];
     (this.accounts.indexOf('ClearAll') !== -1)? this.accounts.splice(this.accounts.indexOf('ClearAll'),1) : null;
@@ -203,7 +204,7 @@ export class AppTableBalanceSheetComponent  implements AfterViewInit {
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
       this.accounts.unshift('ClearAll')
-      this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (Balances.length,'en-US') + ' rows loaded'});
+      this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (Balances.length,'en-US') + ' rows'}, 'Loaded');
       resolve(Balances) 
     })
   })

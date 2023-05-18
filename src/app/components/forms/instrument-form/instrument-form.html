@@ -17,7 +17,7 @@
 
 <form class="submit" [formGroup]="instrumentModifyForm">
   <h3 style="color:rgb(177, 174, 174)" *ngIf="instrumentModifyForm.valid"> 
-    To save data please select 'Submit data' check and then press button 
+    To save data please select 'Submit data' check and then press button {{secid.hasError('secidIsTaken')}}
   </h3>
   <mat-form-field style="width: 10%;" title="SecID">
     <input matInput placeholder="SecID" formControlName="secid">

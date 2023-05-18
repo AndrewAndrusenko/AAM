@@ -1,10 +1,8 @@
 import { Component, EventEmitter, Output, ViewChild} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
-import {lastValueFrom, Subscription } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
-import {TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { bLedgerAccounts } from 'src/app/models/intefaces';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
@@ -12,6 +10,7 @@ import { AppAccAccountModifyFormComponent } from '../../forms/acc-account-form/a
 import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { formatNumber } from '@angular/common';
+import { AuthService } from 'src/app/services/auth.service';
 @Component({
   selector: 'app-table-acc-ledger-accounts',
   templateUrl: './acc-accounts-ledger-table.html',
@@ -25,6 +24,8 @@ import { formatNumber } from '@angular/common';
   ],
 })
 export class AppTableAccLedgerAccountsComponent {
+  accessState: string = 'none';
+  disabledControlElements: boolean = false;
   columnsToDisplay = [
     'ledgerNo',  
     'd_APTypeCodeAccount', 
@@ -33,6 +34,7 @@ export class AppTableAccLedgerAccountsComponent {
     'externalAccountNo',
     'd_Account_Type',
     'ledgerNoTrade',  
+    'action'
   ]
   columnsHeaderToDisplay = [
     'No',
@@ -42,8 +44,8 @@ export class AppTableAccLedgerAccountsComponent {
     'external No', 
     'Type', 
     'Trade', 
+    'Action'
   ];
-  columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
   dataSource: MatTableDataSource<bLedgerAccounts>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
@@ -57,19 +59,22 @@ export class AppTableAccLedgerAccountsComponent {
   constructor(    
     private AccountingDataService:AppAccountingService, 
     private CommonDialogsService:HadlingCommonDialogsService,
-    private TreeMenuSevice:TreeMenuSevice, 
+    private AuthServiceS:AuthService,  
     private dialog: MatDialog ,
     private HandlingCommonTasksS:HandlingCommonTasksService 
   ) {
-    this.AccountingDataService.getReloadAccontList().subscribe ( (id) => this.updateAccountsData(this.action));
-    this.updateAccountsData(this.action);
+    this.AuthServiceS.verifyAccessRestrictions('accessToBalanceData').subscribe ((accessData) => {
+      this.accessState=accessData.elementvalue;
+      this.disabledControlElements = this.accessState === 'full'? false : true;
+      if (this.accessState !=='none') {
+        this.AccountingDataService.getReloadAccontList().subscribe ( (id) => this.updateAccountsData(this.action));
+        this.updateAccountsData(this.action);
+      }
+    })
   }
   async updateAccountsData (action: string) {
     return new Promise<number> (async (resolve,reject) => {
-    let userData = JSON.parse(localStorage.getItem('userInfo'))
-    await lastValueFrom (this.TreeMenuSevice.getaccessRestriction (userData.user.accessrole, 'accessToClientData')).then ((accessRestrictionData) =>{
       this.dataSource? this.dataSource.data=null : null;
-      this.accessToClientData = accessRestrictionData['elementvalue']
       this.AccountingDataService.GetLedgerAccountsListAccounting (null,null,null,null,this.action).subscribe (AccountsList  => {
         this.dataSource  = new MatTableDataSource(AccountsList);
         this.dataSource.paginator = this.paginator;
@@ -77,11 +82,11 @@ export class AppTableAccLedgerAccountsComponent {
         resolve (AccountsList.length)
       })
     })
-  })
   }
   async submitQuery () {
+    this.dataSource.data = null;
     await this.updateAccountsData(this.action).then ((rowsCount) => {
-      this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (rowsCount,'en-US') + ' rows loaded'})
+      this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (rowsCount,'en-US') + ' rows'}, ' Loaded')
     })
   }
   applyFilter(event: Event) {
@@ -108,7 +113,10 @@ export class AppTableAccLedgerAccountsComponent {
     switch (actionType) {
       case 'Create':
       case 'Create_Example': 
-      this.dialogRef.componentInstance.title = 'Create New';
+        this.dialogRef.componentInstance.title = 'Create New';
+      break;
+      case 'View': 
+        this.dialogRef.componentInstance.accountModifyForm.disable();
       break;
     }
   }
