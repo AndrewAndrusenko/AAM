@@ -41,13 +41,11 @@ export class AppTableStrategiesComponentComponent  implements AfterViewInit {
   dataSource: MatTableDataSource<StrategiesGlobalData>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
-  @Output() public modal_principal_parent = new EventEmitter();
+  @Output() modal_principal_parent = new EventEmitter();
   expandedElement: StrategiesGlobalData  | null;
-  accessToClientData: string = 'true';
-  dialogRef: MatDialogRef<AppStrategyFormComponent>;
-  dtOptions: any = {};
+  StrategyForm: MatDialogRef<AppStrategyFormComponent>;
   action ='';
-  public currentStrategy: any;
+  currentStrategy: any;
 
   constructor(
     private InvestmentDataService:AppInvestmentDataServiceService,
@@ -84,22 +82,19 @@ export class AppTableStrategiesComponentComponent  implements AfterViewInit {
     this.currentStrategy = element;
     this.modal_principal_parent.emit('CLOSE_PARENT_MODAL');
   }
-  openStrategyForm (actionType:string, row: any ) {
+  openStrategyForm (actionType:string, row: StrategiesGlobalData ) {
     console.log('openStrategyForm',actionType);
-    this.dialogRef = this.dialog.open(AppStrategyFormComponent ,{minHeight:'400px', maxWidth:'1000px' });
-    this.dialogRef.componentInstance.action = actionType;
-    this.dialogRef.componentInstance.title = actionType;
-    this.dialogRef.componentInstance.data = row;
-    this.dialogRef.componentInstance.editStrategyForm.patchValue (row);
-    this.dialogRef.componentInstance.updateStrategyStructure();
-
+    this.StrategyForm = this.dialog.open(AppStrategyFormComponent ,{minHeight:'400px', maxWidth:'1000px' });
+    this.StrategyForm.componentInstance.action = actionType;
+    this.StrategyForm.componentInstance.title = actionType;
+    this.StrategyForm.componentInstance.strategyId = row['id']
     switch (actionType) {
       case 'Create':
       case 'Create_Example': 
-        this.dialogRef.componentInstance.title = 'Create New';
+        this.StrategyForm.componentInstance.title = 'Create New';
       break;
       case 'View': 
-        this.dialogRef.componentInstance.editStrategyForm.disable();
+        this.StrategyForm.componentInstance.editStrategyForm.disable();
         console.log('disable');
       break;
     }

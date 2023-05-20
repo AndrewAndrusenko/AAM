@@ -22,7 +22,7 @@ export class HadlingCommonDialogsService {
     this.dialogRefConfirm.componentInstance.actionToConfim = {'action':actionToConfim ,'isConfirmed': false}
     return this.dialogRefConfirm.afterClosed()
   }
-  snackResultHandler (result :any, action?: string, postion:any = 'top') {
+  snackResultHandler (result :any, action?: string, postion:any = 'top', closeAll:boolean=true) {
     this.verticalPosition=postion;
     if (result['name']=='error') { 
       this.snack.open('Error: ' + result['detail'].split("\n", 1).join(""),'OK',{
@@ -35,7 +35,7 @@ export class HadlingCommonDialogsService {
         verticalPosition: this.verticalPosition, 
         duration: 3000
       });
-      this.dialog.closeAll();
+      closeAll? this.dialog.closeAll(): null;
     }
   }
 }

@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, Input, SimpleChanges, ViewChild} from '@angular/core';
+import {Component, Input, SimpleChanges, ViewChild} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
@@ -8,8 +8,6 @@ import {AppInvestmentDataServiceService } from 'src/app/services/app-investment-
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { AppStructureStrategyFormComponent } from '../../forms/strategy-structure-form/strategy-structure-form';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { Subscription } from 'rxjs';
-import { additionalLightGreen } from 'src/app/models/constants';
 @Component({
   selector: 'app-table-strategy_structure',
   templateUrl: './strategy_structure-table.html',
@@ -22,42 +20,30 @@ import { additionalLightGreen } from 'src/app/models/constants';
     ]),
   ],
 })
-export class AppTableStrategyComponent  implements AfterViewInit {
-  StrategiesGlobalDataC = (): StrategyStructure => ( {
-    id_strategy_parent: 0, 
-    id : 0, 
-    sname : '',
-    description: '',
-    weight_of_child : 0,
-    id_item:0,
-   });
-  private subscriptionName: Subscription;
+export class AppTableStrategyComponent   {
   columnsToDisplay = ['id','sname', 'description', 'weight_of_child'];
-  public columnsHToDisplay = ['id','sname', 'description', 'weight'];
-  additionalLightGreen = additionalLightGreen;
+  columnsHToDisplay = ['id','sname', 'description', 'weight'];
   panelOpenState = false;
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
   dataSource: MatTableDataSource<StrategyStructure>;
-  accessToClientData: string = 'true';
+  expandedElement: StrategyStructure  | null;
   dialogRef: MatDialogRef<AppStructureStrategyFormComponent>;
-  dtOptions: any = {};
   action ='';
-  public row: any;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
-  expandedElement: StrategyStructure  | null;
   @Input() parentStrategyId: any;
-  @Input() MP: boolean;
-  public editStructureStrategyForm: FormGroup;
+  @Input() ModelPortfolio: number;
+  @Input() accessState: string = 'none';
+  @Input() disabledControlElements: boolean = false;
 
-  constructor(private InvestmentDataService:AppInvestmentDataServiceService, private dialog: MatDialog, private fb:FormBuilder ) {
-    this.subscriptionName= this.InvestmentDataService.getReloadStrategyStructure().subscribe ( (id) => {
-/*       this.InvestmentDataService.getStrategyStructure (id,'0','0').subscribe (portfoliosData => {
-        this.dataSource  = new MatTableDataSource(portfoliosData);
-        this.dataSource.paginator = this.paginator;
-        this.dataSource.sort = this.sort;
-      }) */
-    } )
+  editStructureStrategyForm: FormGroup;
+
+  constructor(
+    private InvestmentDataService:AppInvestmentDataServiceService, 
+    private dialog: MatDialog, 
+    private fb:FormBuilder,
+  ) 
+  {
     this.editStructureStrategyForm=this.fb.group ({
       id: {value:''},
       sname: [null, { updateOn: 'blur'} ],
@@ -65,52 +51,47 @@ export class AppTableStrategyComponent  implements AfterViewInit {
       weight_of_child: {value:'', disabled: false},
       id_item: {value:'', disabled: false},
     })
-    console.log('parentStrategyId',this.parentStrategyId);
-    this.columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
-      this.InvestmentDataService.getStrategyStructure(this.parentStrategyId,'0','0').subscribe (portfoliosData => {
-        console.log('portfoliosData', portfoliosData);
-        this.dataSource  = new MatTableDataSource(portfoliosData);
+    this.InvestmentDataService.getReloadStrategyStructure().subscribe ((id) => this.updateStrategyStructure(id));
+  }
+  ngOnChanges(changes: SimpleChanges) {
+    console.log('Structure Changes',changes); 
+    this.updateStrategyStructure(changes['parentStrategyId'].currentValue);
+  }
+  updateStrategyStructure (id:number) {
+    if (this.accessState !== 'none') {
+      this.InvestmentDataService.getStrategyStructure (id,'0','0').subscribe (strategyItems => {
+        console.log('ModelPortfolio',this.ModelPortfolio);
+        if (this.ModelPortfolio===1) { 
+          this.columnsToDisplay = ['id','isin', 'shortname', 'weight_of_child'] 
+        } else {
+          this.columnsToDisplay = ['id','sname', 'description', 'weight_of_child'];
+        }
+        this.columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
+        this.dataSource = new MatTableDataSource (strategyItems);
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
       })
-  }
-
-  async ngAfterViewInit() {
-
-  }
-  ngOnChanges(changes: SimpleChanges) {
-    this.columnsToDisplay = ['id','sname', 'description', 'weight_of_child'];
-    if (this.MP==true) { this.columnsToDisplay = ['id','isin', 'shortname', 'weight_of_child'] }
-
-    console.log('changes', changes);
-    this.columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
-    let newId = changes['parentStrategyId'].currentValue
-    console.log('OK', newId);
-
-    this.InvestmentDataService.getStrategyStructure(this.parentStrategyId,'0','0').subscribe (portfoliosData => {
-      console.log('portfoliosData', portfoliosData);
-      this.dataSource  = new MatTableDataSource(portfoliosData);
-      this.dataSource.paginator = this.paginator;
-      this.dataSource.sort = this.sort;
-    })
+    }
   }
   openStrategyStructureForm (actionType:string, row: any ) {
-    console.log('row', row, this.parentStrategyId);
     this.dialogRef = this.dialog.open(AppStructureStrategyFormComponent ,{minHeight:'150px', minWidth:'800px' });
-    this.dialogRef.componentInstance.MP = this.MP;
+    this.dialogRef.componentInstance.MP = this.ModelPortfolio;
     this.dialogRef.componentInstance.action = actionType;
     this.dialogRef.componentInstance.title = actionType;
     this.dialogRef.componentInstance.data = row;
     this.dialogRef.componentInstance.strategyId=this.parentStrategyId;
-    console.log('action',actionType);
+
     switch (actionType) {
       case 'Create':
       case 'Create_Example': 
       this.dialogRef.componentInstance.title = 'Create New';
       break;
     }
-  }
+    this.dialogRef.componentInstance.modal_principal_parent.subscribe ((item)=>{
+      this.dialogRef.close();
+    })
+}
   getTotalWeight () {
-   return this.dataSource? this.dataSource.data.map(t => t.weight_of_child).reduce((acc, value) => acc + Number(value)/100, 0):0;
+    return this.dataSource? this.dataSource.data.map(t => t.weight_of_child).reduce((acc, value) => acc + Number(value)/100, 0):0;
   }
 }

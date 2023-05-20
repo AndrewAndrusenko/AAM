@@ -35,6 +35,10 @@ export const indexDbConfigAAM: DBConfig  = {
     ]
   }]
 }; 
+export const portfolioTypes :portfolioType [] = [
+  {value: 1, viewValue: 'Model Portfolio'},
+  {value: 2, viewValue: 'Strategy (based on MP)'},
+]
 export interface AccountsTableModel {
  idportfolio:number;
  idclient:number;
@@ -81,6 +85,11 @@ export interface ClientData {
   phone: string,
   code : string,
 }
+interface portfolioType {
+  value: number;
+  viewValue: string;
+}
+
 export interface StrategiesGlobalData {
   id: number, 
   name : string, 

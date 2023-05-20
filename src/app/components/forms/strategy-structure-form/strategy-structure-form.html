@@ -1,5 +1,5 @@
 <form class="submit" [formGroup]="editStructureStrategyForm">
-  <mat-form-field *ngIf="!MP" style="width: 45%;"  enabled  appearance="fill">
+  <mat-form-field *ngIf="MP!==1" style="width: 45%;"  enabled  appearance="fill">
     <mat-label>Model Portfolio</mat-label>
     <mat-select   formControlName="id"  > 
       <mat-option *ngFor="let MPname of MPnames" [value]="MPname.id.toString()">
@@ -10,19 +10,7 @@
       The field is required.    
    </mat-error>
   </mat-form-field>
-
-
-<!--   <mat-form-field  *ngIf="MP"  style="width: 25%; height: 5%; font-size: 18px;" >
-    <mat-select   formControlName="id"  > 
-      <input (keyup)="onKey($event.target)"> 
-      <mat-option>None</mat-option>
-      <mat-option *ngFor="let secid of filterednstrumentsLists " [value]="secid">
-        {{secid}}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
- -->
-  <mat-form-field  *ngIf="MP"  style="width: 25%; height: 5%; font-size: 18px;" appearance="fill">
+  <mat-form-field  *ngIf="MP===1"  style="width: 25%; height: 5%; font-size: 18px;" appearance="fill">
     <mat-label>SecID</mat-label>
     <input type="text"
            placeholder="Choose SecID"

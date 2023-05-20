@@ -1,4 +1,4 @@
-import { Component,  ElementRef,  Input, OnInit, SimpleChanges, ViewChild,  } from '@angular/core';
+import { Component,  Input, SimpleChanges, ViewChild,  } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { AppConfimActionComponent } from '../../common-forms/app-confim-action/app-confim-action.component';
@@ -6,49 +6,46 @@ import { AppInvestmentDataServiceService } from 'src/app/services/app-investment
 import { TablePortfolios } from '../../tables/portfolios-table/portfolios-table';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
-import { menuColorGl } from 'src/app/models/constants';
 import { MatTableDataSource } from '@angular/material/table';
 import { AppTableStrategyComponent } from '../../tables/strategy_structure-table/strategy_structure-table';
-interface Level {
-  value: number;
-  viewValue: string;
-}
+import { AuthService } from 'src/app/services/auth.service';
+import { portfolioTypes } from 'src/app/models/intefaces';
+
 @Component({
   selector: 'app-app-strategy-form',
   templateUrl: './strategy-form.html',
   styleUrls: ['./strategy-form.scss'],
 })
-export class AppStrategyFormComponent implements OnInit {
+export class AppStrategyFormComponent {
+  accessState: string = 'none';
+  disabledControlElements: boolean = false;
   @ViewChild(AppTableStrategyComponent) strategyStructureTable: AppTableStrategyComponent;
-
-  levels: Level[] = [
-    {value: 1, viewValue: 'Model Portfolio'},
-    {value: 2, viewValue: 'Strategy (based on MP)'},
-  ];
-  menuColorGl = menuColorGl
-  public panelOpenState = true;
-  public editStrategyForm: FormGroup;
-  @Input()  client : number;
+  portfolioTypes = portfolioTypes;
+  @Input()  strategyId : number;
   @Input() action: string;
+  panelOpenState = true;
+  editStrategyForm: FormGroup;
   dialogRefConfirm: MatDialogRef<AppConfimActionComponent>;
   isEditForm: boolean = false;
   dialogRef: MatDialogRef<TablePortfolios>;
-  dtOptions: any = {};
-  public title: string;
-  public actionType : string;
-  public strategyId : any;
-  public MP : boolean;
-  public actionToConfim = {'action':'delete_client' ,'isConfirmed': false}
-  public showStrateryStructure: boolean;
-  public data: any;
+  title: string;
+  actionType : string;
+  showStrateryStructure: boolean;
+  data: any;
   constructor (
     private fb:FormBuilder, 
     private dialog: MatDialog, 
+    private AuthServiceS:AuthService,  
     private InvestmentDataService:AppInvestmentDataServiceService, 
     private CommonDialogsService:HadlingCommonDialogsService,
   ) {
-    this.panelOpenState = true;
-
+    this.AuthServiceS.verifyAccessRestrictions('accessToStrategyData').subscribe ((accessData) => {
+      this.accessState=accessData.elementvalue;
+      this.disabledControlElements = this.accessState === 'full'? false : true;
+      this.disabledControlElements? this.editStrategyForm.disable() : null;
+      
+      this.getStrategyData (this.strategyId);
+    })
     this.editStrategyForm=this.fb.group ({
       id: {value:'', disabled: true }, 
       name :[null, { updateOn: 'blur'} ], 
@@ -57,6 +54,8 @@ export class AppStrategyFormComponent implements OnInit {
       s_benchmark_account: {value:'', disabled: true},
       'Benchmark Account': {value:'', disabled: true},
     })
+    console.log('action',this.action);
+
    switch (this.action) {
     case 'Create': 
     this.editStrategyForm.patchValue({})
@@ -72,35 +71,31 @@ export class AppStrategyFormComponent implements OnInit {
     this.editStrategyForm.controls['name'].setAsyncValidators (
       customAsyncValidators.strategyCodeCustomAsyncValidator(this.InvestmentDataService, this.id.value), 
     );  
-
   }
-  updateStrategyStructure () {
-    console.log('id',this.editStrategyForm.value);
-
-    this.InvestmentDataService.getStrategyStructure (this.id.value,'0','0').subscribe (portfoliosData => {
-
-      console.log('portfoliosData', portfoliosData,this.id.value);
+  getStrategyData (strategyId:number) {
+    if (this.accessState !=='none') {
+      this.InvestmentDataService.getGlobalStategiesList(strategyId, null, 'Get_Strategy_Data').subscribe(data => {
+        this.editStrategyForm.patchValue(data[0])
+        this.showStrateryStructure = true;
+        this.editStrategyForm.controls['name'].setAsyncValidators(
+          customAsyncValidators.strategyCodeCustomAsyncValidator(this.InvestmentDataService, this.id.value)
+        ) 
+        this.strategyStructureTable.parentStrategyId = data[0].id;
+        this.strategyStructureTable.ModelPortfolio = data[0]['level'];
+        this.strategyStructureTable.accessState = this.accessState;
+        this.strategyStructureTable.disabledControlElements = this.disabledControlElements;
+      })
+    }
+  }
+/*   updateStrategyStructure (strategyId:number) {
+    console.log('strategyId',strategyId);
+    this.InvestmentDataService.getStrategyStructure (strategyId,'0','0').subscribe (portfoliosData => {
       this.strategyStructureTable.dataSource = new MatTableDataSource (portfoliosData)
     })
-  }
-  ngOnInit(): void {
-
-    // this.editStrategyForm.controls['name'].updateValueAndValidity();
-  }
+  } */
   ngOnChanges(changes: SimpleChanges) {
     console.log('changes', changes);
-    this.InvestmentDataService.getGlobalStategiesList(changes['client'].currentValue, null, 'Get_Strategy_Data').subscribe(data => {
-      this.editStrategyForm.patchValue(data[0])
-      this.strategyId = this.editStrategyForm.controls['id'].value
-      this.MP = (this.editStrategyForm.controls['level'].value == 1 ) ? true : false
-      console.log('level', this.MP);
-      console.log('strategyId',this.strategyId);
-      this.showStrateryStructure = true;
-      this.editStrategyForm.controls['name'].setAsyncValidators(
-        customAsyncValidators.strategyCodeCustomAsyncValidator(this.InvestmentDataService, this.id.value)
-      ) 
-     this.editStrategyForm.controls['name'].updateValueAndValidity();
-    })
+    this.getStrategyData (changes['strategyId'].currentValue);
   }
   snacksBox(result:any, action?:string){
     if (result['name']=='error') {
@@ -113,6 +108,7 @@ export class AppStrategyFormComponent implements OnInit {
     this.editStrategyForm.controls['id'].disable()
   }
   updateStrategyData(action:string){
+    console.log('action',this.action);
     switch (action) {
       case 'Create_Example':
       case 'Create':

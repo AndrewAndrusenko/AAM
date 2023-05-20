@@ -11,6 +11,7 @@ export class AppInvestmentDataServiceService {
   constructor(private http:HttpClient) { }
   
   private subjectName = new Subject<any>(); 
+  private subjectReloadStrategyStructure = new Subject<any>(); 
   sendReloadAccountList ( id:number) { //the component that wants to update something, calls this fn
     this.subjectName.next(id); //next() will feed the value in Subject
   }
@@ -19,10 +20,10 @@ export class AppInvestmentDataServiceService {
   }
 
   sendReloadStrategyStructure ( id:number) { //the component that wants to update something, calls this fn
-    this.subjectName.next(id); //next() will feed the value in Subject
+    this.subjectReloadStrategyStructure.next(id); //next() will feed the value in Subject
   }
   getReloadStrategyStructure(): Observable<any> { //the receiver component calls this function 
-    return this.subjectName.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
+    return this.subjectReloadStrategyStructure.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
   }
 
   sendReloadStrategyList ( id:any) { //the component that wants to update something, calls this fn

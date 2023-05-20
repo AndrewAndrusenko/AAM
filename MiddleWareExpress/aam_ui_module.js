@@ -5,7 +5,22 @@ const pool = new Pool(config.dbConfig);
 var pgp = require('pg-promise')({
   capSQL: true // to capitalize all generated SQL
 });
-
+async function queryExecute (sql, response, responseType) {//General query to postgres execution via pool
+  return new Promise ((resolve) => {
+    pool.query (sql,  (err, res) => {
+      console.log('sql',sql);
+      if (err) {
+        console.log (err.stack.split("\n", 1).join(""))
+        err.detail = err.stack
+        resolve (response? response.send(err):err)
+      } else {
+        console.log('UI_Module**********************',responseType==='rowCount'? res.rowCount:res.rows.length)
+        let result = responseType==='rowCount'? res.rowCount : res.rows;
+        resolve (response? response.status(200).json(result):result)
+      }
+    })
+  })
+}
 async function TreeSQLQueryExc (RootNode, userId, nodeParentFavorite) {
   RootNode = RootNode.split('_')
   pool.QueryArrayConfig = {values: [], rowMode: "array" }
@@ -114,23 +129,6 @@ async function fGetportfolioTable (request,response) {
   })
 }
 
-/* async function fGetInstrumentData(request,response) {
-  const query = request.query.secidOnly?  {text:'SELECT ARRAY_AGG(secid) FROM public."aMoexInstruments"'} : {
-    text: ' SELECT ' +
-    ' secid, shortname, name,  isin,  listlevel, facevalue, faceunit,  primary_board_title, ' +
-    ' is_qualified_investors,  registryclosedate,  lotsize, price, discountl0, discounth0, fullcovered, ' +
-    ' typename, issuesize, is_external, rtl1, rtl2 '+
-    ' FROM public."aMoexInstruments"',
-  }
-  if (request.query.secid !== undefined) {
-    paramArr = [request.query.secid]
-    query.text += ' WHERE (secid= $1);'
-    query.values = paramArr;
-  } else {query.text += ';'}
-  console.log('que',query);
-  pool.query (query, (err, res) => {if (err) {console.log (err.stack)} else {return  response.status(200).json(res.rows)}
-  })
-} */
 
 async function fPutNewFavorite (request, response) {
     paramArr = [request.body.nodename, request.body.nodeparent, request.body.userId, request.body.idelement]
@@ -169,9 +167,9 @@ async function fGetClientData(request,response) {
       query.text += ';'
     break;
   }
-  pool.query (query, (err, res) => {if (err) {console.log (err.stack)} else {
-    return response.status(200).json((res.rows))}
-  })
+  
+  sql = pgp.as.format(query.text,query.values)
+  queryExecute (sql, response);
 }
 
 async function fEditClientData (request, response) {

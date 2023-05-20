@@ -3,6 +3,22 @@ const Pool = require('pg').Pool;
 const pool = new Pool(config.dbConfig);
 var pgp = require ('pg-promise')({capSQL:true});
 
+async function queryExecute (sql, response, responseType) {//General query to postgres execution via pool
+  return new Promise ((resolve) => {
+    pool.query (sql,  (err, res) => {
+      console.log('sql',sql);
+      if (err) {
+        console.log (err.stack.split("\n", 1).join(""))
+        err.detail = err.stack
+        resolve (response? response.send(err):err)
+      } else {
+        console.log('InvestmentModule**********************QTY rows',responseType==='rowCount'? res.rowCount:res.rows.length)
+        let result = responseType==='rowCount'? res.rowCount : res.rows;
+        resolve (response? response.status(200).json(result):result)
+      }
+    })
+  })
+}
 async function fGetStrategiesList (request,response) {
   const query = {text: 'SELECT id, sname as Name, s_level_id as Level, s_description as Description, s_benchmark_account, dportfolios.portfolioname as "Benchmark Account"' +
 	' FROM public.dstrategiesglobal LEFT JOIN public.dportfolios ' + 
@@ -33,9 +49,11 @@ async function fGetStrategiesList (request,response) {
       query.text += ';'
     break;
   }
-  pool.query (query, (err, res) => {if (err) {console.log (err.stack)} else {
+  sql = pgp.as.format(query.text,query.values)
+  queryExecute (sql, response);
+/*   pool.query (query, (err, res) => {if (err) {console.log (err.stack)} else {
     return response.status(200).json((res.rows))}
-  })
+  }) */
 }
 
 async function fGetStrategyStructure (request,response) {
@@ -48,6 +66,7 @@ async function fGetStrategyStructure (request,response) {
     ' LEFT JOIN public."aMoexInstruments"  ' +
     ' ON public."aMoexInstruments".secid = dstrategies_global_structure.id_strategy_child '+
     ' WHERE id_strategy_parent = $1'}
+    console.log('request.query.id',request.query,request.query.id);
     query.values = [Number(request.query.id)] 
   switch (request.query.action) {
     case 'Check_Name':
@@ -62,10 +81,12 @@ async function fGetStrategyStructure (request,response) {
       query.text += ';'
     break;
   }
-  console.log('query', query);
+  sql = pgp.as.format(query.text,query.values)
+  queryExecute (sql, response);
+/*   console.log('query', query);
   pool.query (query, (err, res) => {if (err) {console.log (err.stack)} else {
     return response.status(200).json((res.rows))}
-  })
+  }) */
 }
 
 async function fEditStrategyData (request, response) {
@@ -95,8 +116,10 @@ async function fEditStrategyData (request, response) {
 async function fStrategyGlobalDataDelete (request, response) {
   const query = {text: 'DELETE FROM public.dstrategiesglobal WHERE id=${id};', values: request.body}
   sql = pgp.as.format(query.text,query.values)
+  queryExecute (sql, response);
+ /*  sql = pgp.as.format(query.text,query.values)
   pool.query (sql,  (err, res) => {if (err) { return response.send(err)} else { return response.status(200).json(res.rowCount) }
-  }) 
+  })  */
 }
 
 async function fStrategyGlobalDataCreate (request, response) {

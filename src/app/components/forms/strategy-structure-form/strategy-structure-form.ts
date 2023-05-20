@@ -1,4 +1,4 @@
-import { Component,  Input, OnInit, SimpleChanges,  } from '@angular/core';
+import { Component,  EventEmitter,  Input, OnInit, Output, SimpleChanges,  } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup,  ValidationErrors,  Validators } from '@angular/forms';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { AppConfimActionComponent } from '../../common-forms/app-confim-action/app-confim-action.component';
@@ -27,16 +27,16 @@ export class AppStructureStrategyFormComponent implements OnInit {
   })
   @Input() action: string;
   @Input() strategyId: string;
-  @Input() MP: boolean;
+  @Input() MP: number;
   dialogRefConfirm: MatDialogRef<AppConfimActionComponent>;
   isEditForm: boolean = false;
   dialogRef: MatDialogRef<AppInstrumentTableComponent>;
-  dtOptions: any = {};
   MPnames: StrategiesGlobalData [] = [];
+  @Output() public modal_principal_parent = new EventEmitter();
+
   public filterednstrumentsLists : Observable<string[]>;
   public title: string;
   public actionType : string;
-  public actionToConfim = {'action':'delete_client' ,'isConfirmed': false}
   public showStrateryStructure: boolean;
   public data: any;
   constructor (
@@ -78,14 +78,14 @@ export class AppStructureStrategyFormComponent implements OnInit {
       break; 
     }  
     this.editStructureStrategyForm.controls['weight_of_child'].addValidators ( [Validators.required, Validators.pattern('[0-9]*')]);
-    if (this.MP==true) {
+    if (this.MP===1) {
       this.editStructureStrategyForm.controls['id'].setAsyncValidators(customAsyncValidators.secidCustomAsyncValidator(this.AppTabServiceService, this.id.value));
       this.editStructureStrategyForm.controls['id'].updateValueAndValidity();
     }
   }
   ngOnChanges(changes: SimpleChanges) {
     this.editStructureStrategyForm.controls['id_item'].setValue (changes['strategyId'].currentValue)
-    if (this.MP==true) {
+    if (this.MP===1) {
       this.editStructureStrategyForm.controls['id'].setAsyncValidators(customAsyncValidators.secidCustomAsyncValidator(this.AppTabServiceService, this.id.value));
       this.editStructureStrategyForm.controls['id'].updateValueAndValidity();
     } else {
@@ -97,9 +97,8 @@ export class AppStructureStrategyFormComponent implements OnInit {
     if (result['name']=='error') {
       this.CommonDialogsService.snackResultHandler(result)
     } else {
-      this.CommonDialogsService.snackResultHandler({name:'success', detail: result + 'item'}, action);
+      this.CommonDialogsService.snackResultHandler({name:'success', detail: result + 'item'}, action, undefined, false);
       this.InvestmentDataServiceService.sendReloadStrategyStructure(Number(this.strategyId));
-      this.CommonDialogsService.dialogCloseAll();
     }
   }
   updateStrategyStructureData (action:string){
@@ -117,15 +116,18 @@ export class AppStructureStrategyFormComponent implements OnInit {
       case 'Edit':
         this.editStructureStrategyForm.addControl('id_strategy_parent',new FormControl(this.strategyId, Validators.required))
         this.InvestmentDataServiceService.updateStrategyStructure (this.editStructureStrategyForm.value).then(result=>{
+          console.log('result',result);
           this.snacksBox(result,'Updated');
+          this.modal_principal_parent.emit('CLOSE_PARENT_MODAL');
+
         })
       break;
       case 'Delete':
-        this.CommonDialogsService.confirmDialog('Delete ' + this.sname.value).subscribe(isConfirmed => {
+        this.CommonDialogsService.confirmDialog( this.MP!==1? 'Delete ' + this.sname.value : 'Delete ' + this.id.value).subscribe(isConfirmed => {
           if (isConfirmed.isConfirmed) {
             this.InvestmentDataServiceService.deleteStrategyStructure (this.editStructureStrategyForm.value['id_item']).then (result =>{
-              this.snacksBox(result,'Deleted')
-              this.CommonDialogsService.dialogCloseAll();
+              this.snacksBox(result,'Deleted')          
+              this.modal_principal_parent.emit('CLOSE_PARENT_MODAL');
             })
           }
         })

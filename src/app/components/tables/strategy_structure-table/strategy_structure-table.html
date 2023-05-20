@@ -14,7 +14,7 @@
 
     <app-structure-strategy-form
     [strategyId] = parentStrategyId
-    [MP] = MP
+    [MP] = ModelPortfolio
     > </app-structure-strategy-form> 
 
   </mat-expansion-panel>
@@ -28,14 +28,16 @@
     <ng-container matColumnDef="expand">
       <th mat-header-cell *matHeaderCellDef aria-label="row actions">&nbsp; Actions</th>
       <td mat-cell *matCellDef="let element">
-        <button  mat-icon-button aria-label="expand row" color="accent"
-        (click)="openStrategyStructureForm('Edit', element)">
-        <mat-icon >edit</mat-icon>
-        </button>
-        <button mat-icon-button style="margin-left: 5%;" aria-label="expand row" color="accent" 
-        (click)="openStrategyStructureForm('Delete', element)">
-        <mat-icon >delete</mat-icon>
-        </button>
+        <ng-container *ngIf="!disabledControlElements">
+          <button  mat-icon-button aria-label="expand row" color="accent"
+            (click)="openStrategyStructureForm('Edit', element)">
+            <mat-icon >edit</mat-icon>
+          </button>
+          <button mat-icon-button style="margin-left: 5%;" aria-label="expand row" color="accent" 
+            (click)="openStrategyStructureForm('Delete', element)">
+            <mat-icon >delete</mat-icon>
+          </button>
+        </ng-container>
       </td>
       <td mat-footer-cell *matFooterCellDef > <h2 style="margin-top: 5%;">Total weight: {{getTotalWeight() | percent }} </h2></td>
     </ng-container>
