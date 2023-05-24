@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AppMenuServiceService } from 'src/app/services/app-menu-service.service';
+import { AuthService } from 'src/app/services/auth.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
 @Component({
   selector: 'app-dashboard',
@@ -14,11 +15,13 @@ export class DashboardComponent implements OnDestroy,OnInit {
   checked = false;
   constructor (
     private appMenuService : AppMenuServiceService,
-    private indexDBServiceS:indexDBService
+    private indexDBServiceS:indexDBService,
+    private AuthServiceS:AuthService,  
+
     ) {
     this.subscriptionName= this.appMenuService.getToggleTree().subscribe (message => this.opened = message.text );
   }
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this.indexDBServiceS.indexdbDeleteAllCache('AAMCache')
   }
   ngOnDestroy() { 

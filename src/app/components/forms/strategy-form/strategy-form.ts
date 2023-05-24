@@ -87,12 +87,6 @@ export class AppStrategyFormComponent {
       })
     }
   }
-/*   updateStrategyStructure (strategyId:number) {
-    console.log('strategyId',strategyId);
-    this.InvestmentDataService.getStrategyStructure (strategyId,'0','0').subscribe (portfoliosData => {
-      this.strategyStructureTable.dataSource = new MatTableDataSource (portfoliosData)
-    })
-  } */
   ngOnChanges(changes: SimpleChanges) {
     console.log('changes', changes);
     this.getStrategyData (changes['strategyId'].currentValue);

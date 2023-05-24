@@ -55,7 +55,6 @@ async function fGetStrategiesList (request,response) {
     return response.status(200).json((res.rows))}
   }) */
 }
-
 async function fGetStrategyStructure (request,response) {
   const query = {text: 'SELECT '+
     ' id_strategy_parent, id_strategy_child as id, dstrategiesglobal.sname, dstrategiesglobal.s_description as description,  ' +
@@ -88,7 +87,6 @@ async function fGetStrategyStructure (request,response) {
     return response.status(200).json((res.rows))}
   }) */
 }
-
 async function fEditStrategyData (request, response) {
   paramArr = request.body.data
   const query = {
@@ -112,7 +110,6 @@ async function fEditStrategyData (request, response) {
     return response.status(200).json(res.rowCount)}
   })   
 }
-
 async function fStrategyGlobalDataDelete (request, response) {
   const query = {text: 'DELETE FROM public.dstrategiesglobal WHERE id=${id};', values: request.body}
   sql = pgp.as.format(query.text,query.values)
@@ -121,7 +118,6 @@ async function fStrategyGlobalDataDelete (request, response) {
   pool.query (sql,  (err, res) => {if (err) { return response.send(err)} else { return response.status(200).json(res.rowCount) }
   })  */
 }
-
 async function fStrategyGlobalDataCreate (request, response) {
   paramArr = request.body.data
   const query = {
@@ -138,7 +134,6 @@ async function fStrategyGlobalDataCreate (request, response) {
   } else {return response.status(200).json(res.rowCount)}
   })  
 }
-
 async function fStrategyStructureCreate (request, response) {
   paramArr = request.body.data
   const query = {
@@ -155,14 +150,12 @@ async function fStrategyStructureCreate (request, response) {
   } else {return response.status(200).json(res.rowCount)}
   })  
 }
-
 async function fStrategyStructureDelete (request, response) {
   const query = {text: 'DELETE FROM public.dstrategies_global_structure WHERE id=${id};', values: request.body}
   sql = pgp.as.format(query.text,query.values)
   pool.query (sql,  (err, res) => {if (err) { return response.send(err)} else { return response.status(200).json(res.rowCount) }
   }) 
 }
-
 async function fStrategyStructureEdit (request, response) {
   paramArr = request.body.data
   const query = {
@@ -183,7 +176,6 @@ async function fStrategyStructureEdit (request, response) {
     return response.status(200).json(res.rowCount)}
   })   
 }
-
 async function fAccountCreate (request, response) {
   paramArr = request.body.data
   const query = {
@@ -202,14 +194,12 @@ async function fAccountCreate (request, response) {
     return response.status(200).json(res.rowCount)}
   })  
 }
-
 async function fAccountDelete (request, response) {
   const query = {text: 'DELETE FROM public.dportfolios WHERE idportfolio=${id};', values: request.body}
   sql = pgp.as.format(query.text,query.values)
   pool.query (sql,  (err, res) => {if (err) { return response.send(err)} else { return response.status(200).json(res.rowCount) }
   }) 
 }
-
 async function fAccountEdit (request, response) {
   paramArr = request.body.data
   const query = {

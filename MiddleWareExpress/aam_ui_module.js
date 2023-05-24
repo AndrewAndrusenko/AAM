@@ -96,25 +96,30 @@ async function FAmmGetTreeData(request,response) {
 }
 
 async function fGetportfolioTable (request,response) {
-  const query = {text: "SELECT "+
+  console.log('request.query fGetportfolioTable',request.query);
+  const clientDataFields = ", dclients.clientname, dclients.isclientproffesional , dclients.address, dclients.contact_person, dclients.email, dclients.phone" ;
+  const query = { text: "SELECT "+
     " dportfolios.idportfolio, dportfolios.idclient , dportfolios.idstategy, " + 
     " dstrategiesglobal.sname as stategy_name, dstrategiesglobal.s_description as description , "+
-    " dportfolios.portfolioname, dportfolios.portleverage , " +
-    " dclients.clientname, dclients.isclientproffesional , dclients.address, " +
-    " dclients.contact_person, dclients.email, dclients.phone" +
-    " FROM public.dportfolios "+
+    " dportfolios.portfolioname, dportfolios.portleverage " 
+  }
+    request.query.accessToClientData!=='none'? query.text += clientDataFields: null;
+    query.text += " FROM public.dportfolios "+
     " LEFT JOIN public.dstrategiesglobal ON dportfolios.idstategy = public.dstrategiesglobal.id " +
     " LEFT JOIN public.dclients ON dportfolios.idclient = public.dclients.idclient "
-  }
-
+  
   switch (request.query.actionOnAccountTable) {
-    case 'Get_Accounts_By_CientId':
+    case 'Get_Portfolios_By_CientId':
       query.text += ' WHERE (dportfolios.idclient = $1);'
       query.values = [request.query.clientId]
     break;
-    case 'Get_Accounts_By_StrategyId':
+    case 'Get_Portfolios_By_StrategyId':
       query.text += ' WHERE (public.dstrategiesglobal.id= $1);'
       query.values = [request.query.strategyId]
+    break;
+    case 'Get_Portfolios_By_idPortfolio':
+      query.text += ' WHERE (public.dportfolios.idportfolio= $1);'
+      query.values = [request.query.idportfolio]
     break;
     case 'calculateAccountCode':
       query.text += ' WHERE (LEFT(public.dportfolios.portfolioname,$2) = $1) '+
@@ -125,6 +130,7 @@ async function fGetportfolioTable (request,response) {
     break;
   }
   pool.query (query, (err, res) => {if (err) {console.log (err.stack)} else {
+    console.log('res',res.rows);
     return response.status(200).json((res.rows))}
   })
 }
@@ -191,7 +197,6 @@ async function fEditClientData (request, response) {
   pool.query (sql,  (err, res) => {if (err) {
     console.log (err.stack.split("\n", 1).join(""))
     err.detail = err.stack
-
     return response.send(err)
   } else {
     return response.status(200).json(res.rowCount)}

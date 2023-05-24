@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { filter} from 'rxjs';
+import { NavigationStart, Router } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -6,6 +8,13 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent  {
-  constructor () {}
-  title = 'AAM';
-}
+  constructor (
+    private router:Router  
+  ) {}
+ /*  ngOnInit() {
+    this.router.events
+    .pipe(
+      filter(event => event instanceof NavigationStart),
+      ).subscribe (ev => console.log('NavigationStart'))
+  }
+ */}

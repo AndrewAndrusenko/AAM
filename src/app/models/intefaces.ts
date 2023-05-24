@@ -1,26 +1,4 @@
-import { number } from "echarts";
 import { DBConfig } from "ngx-indexed-db";
-/* export const indexDbConfigAAM: DBConfig  = {
-  name: 'AAMdb',
-  version: 1,
-  objectStoresMeta: [{
-    store: 'instrumentCorpActions',
-    storeConfig: { keyPath: 'id', autoIncrement: true },
-    storeSchema: [
-      { name: 'id', keypath: 'name', options: { unique: false } },
-      { name: 'isin', keypath: 'email', options: { unique: false } },
-      { name: 'secname', keypath: 'email', options: { unique: false } },
-      { name: 'notinal', keypath: 'email', options: { unique: false } },
-      { name: 'notinalcurrency', keypath: 'email', options: { unique: false } },
-      { name: 'unredemeedvalue', keypath: 'email', options: { unique: false } },
-      { name: 'couponrate', keypath: 'email', options: { unique: false } },
-      { name: 'couponamount', keypath: 'email', options: { unique: false } },
-      { name: 'actiontype', keypath: 'email', options: { unique: false } },
-      { name: 'date', keypath: 'email', options: { unique: false } },accessRestriction
-      { name: 'action':string, keypath: 'email', options: { unique: false } }
-    ]
-  }]
-};  */
 
 export const indexDbConfigAAM: DBConfig  = {
   name: 'AAMdb',
@@ -84,6 +62,7 @@ export interface ClientData {
   email: string,
   phone: string,
   code : string,
+  action:number
 }
 interface portfolioType {
   value: number;

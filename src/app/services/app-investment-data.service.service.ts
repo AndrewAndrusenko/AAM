@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
-import { accountTypes, StrategiesGlobalData, StrategyStructure } from '../models/intefaces';
+import { AccountsTableModel, accountTypes, ClientData, InstrumentData, StrategiesGlobalData, StrategyStructure } from '../models/intefaces';
 
 @Injectable({
   providedIn: 'root'
@@ -12,25 +12,58 @@ export class AppInvestmentDataServiceService {
   
   private subjectName = new Subject<any>(); 
   private subjectReloadStrategyStructure = new Subject<any>(); 
-  sendReloadAccountList ( id:number) { //the component that wants to update something, calls this fn
-    this.subjectName.next(id); //next() will feed the value in Subject
+  private subjectReloadPortfoliosData = new Subject<any>(); 
+
+  getPortfoliosData (accountType:string, idportfolio: number, clientId: number, strategyId: number, action:string, accessToClientData:string='none'):Observable <AccountsTableModel[]> {
+    const params = {
+      accountType: accountType,
+      idportfolio: idportfolio,
+      clientId: clientId, 
+      strategyId :strategyId, 
+      actionOnAccountTable: action,
+      accessToClientData:accessToClientData
+    }
+    return this.http.get <AccountsTableModel []>('/api/AAM/portfolioTable/', { params: params })
   }
-  getReloadAccountList(): Observable<any> { //the receiver component calls this function 
-    return this.subjectName.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
+  sendReloadPortfoliosData (data:any) { 
+    this.subjectReloadPortfoliosData.next(data); 
+  }
+  getReloadPortfoliosData(): Observable<any> { 
+    return this.subjectReloadPortfoliosData.asObservable(); 
+  }
+  getInstrumentData (secid: string): Observable <InstrumentData[]>  {
+    const params = {'secid': secid}
+    return this.http.get <InstrumentData[]> ('/api/AAM/InstrumentData/',{ params: params } )
   }
 
-  sendReloadStrategyStructure ( id:number) { //the component that wants to update something, calls this fn
-    this.subjectReloadStrategyStructure.next(id); //next() will feed the value in Subject
-  }
-  getReloadStrategyStructure(): Observable<any> { //the receiver component calls this function 
-    return this.subjectReloadStrategyStructure.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
+  getClientData (client: number, clientname: string, action: string) : Observable <ClientData[]>  {
+    const params = {'client': client, 'clientname' :clientname, 'action':action }
+    return this.http.get <ClientData[]> ('/api/AAM/ClientData/', { params: params } )
   }
 
-  sendReloadStrategyList ( id:any) { //the component that wants to update something, calls this fn
-    this.subjectName.next(id); //next() will feed the value in Subject
+  updateClient (data:any) { 
+    return this.http.post ('/api/AAM/ClientDataEdit/',{'data': data}).toPromise()
   }
-  getReloadStrategyList(): Observable<any> { //the receiver component calls this function 
-    return this.subjectName.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
+  deleteClient (id:string) {
+    return this.http.post ('/api/AAM/ClientDataDelete/',{'idclient': id}).toPromise()
+  }
+  createClient (data:any) { 
+    return this.http.post ('/api/AAM/ClientDataCreate/',{'data': data}).toPromise()
+  }
+
+
+  sendReloadStrategyStructure ( id:number) { 
+    this.subjectReloadStrategyStructure.next(id);
+  }
+  getReloadStrategyStructure(): Observable<any> { 
+    return this.subjectReloadStrategyStructure.asObservable(); 
+  }
+
+  sendReloadStrategyList ( id:any) { 
+    this.subjectName.next(id);
+  }
+  getReloadStrategyList(): Observable<any> {
+    return this.subjectName.asObservable(); 
   }
 
   getGlobalStategiesList (id:number, Name:string, action:string) : Observable <StrategiesGlobalData[]>  {

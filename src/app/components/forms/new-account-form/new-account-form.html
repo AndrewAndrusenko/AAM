@@ -1,22 +1,31 @@
-<mat-toolbar color="primary" style="margin-bottom:10px; border-radius: 8px; width: 95%">
+<mat-toolbar color="primary" style="margin-left: 1%;margin-bottom:10px; border-radius: 8px; width: 95%">
   {{title}} account
 </mat-toolbar>
 
 <form class="submit" [formGroup]="newAccountForm">
+  <div>
+    <button mat-flat-button color="primary" type="submit" 
+      [disabled]="!(newAccountForm.valid && submitbox.checked)"
+      (click)='updatePortfolioData(action)'
+      style="margin-top: 1px; width: 200px; font-size: 18px; margin-left: 1%;">
+        {{title}} account
+    </button>
+    <mat-checkbox color="primary"  #submitbox checked="false"
+    (click)="newAccountForm.markAllAsTouched()"
+    >Submit Data</mat-checkbox>
+  </div>
   <mat-form-field style="width: 55%;"  enabled>
-    <mat-select   placeholder="Select Account Type" formControlName="account_type" 
+    <mat-select   placeholder="Select Portfolio Type" formControlName="account_type" 
     (selectionChange)="calculateAccountCode()" > 
       <mat-option *ngFor="let accountType of accountTypes" [value]="accountType.typeValue">
         {{accountType.typeValue}}: {{accountType.typeDescription}}
       </mat-option>
     </mat-select>
-
   </mat-form-field>
-
   <mat-form-field style="width: 20%">
-    <input matInput placeholder="AccountCode" formControlName="portfolioname" [readonly]="true">
+    <input matInput placeholder="PortfolioCode" formControlName="portfolioname" [readonly]="true">
   </mat-form-field>
-  <div>
+  <div *ngIf="accessToClientData!=='none'">
     <mat-form-field style="width: 15%">
       <input matInput placeholder="ClientID" formControlName="idclient">
     </mat-form-field>
@@ -41,19 +50,7 @@
   <mat-form-field style="width: 85%">
     <input matInput placeholder="Stategy Description" formControlName="description" [readonly]="true">
   </mat-form-field>
-
   <mat-form-field>
     <input matInput placeholder="portleverage" formControlName="portleverage">
   </mat-form-field>
-  <div>
-    <button mat-flat-button color="primary" type="submit" 
-      [disabled]="!(newAccountForm.valid && submitbox.checked)"
-      (click)='updatePortfolioData(action)'
-      style="margin-top: 10px; width: 200px; font-size: 18px;">
-        {{title}} account
-    </button>
-    <mat-checkbox color="primary"  #submitbox checked="false" style="margin-left: 5%;" 
-    (click)="newAccountForm.markAllAsTouched()"
-    >Submit Data</mat-checkbox>
-  </div>
 </form>

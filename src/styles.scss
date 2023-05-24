@@ -52,16 +52,12 @@
   margin-left: 0px;
   margin-right: 5px;
 }
-tr:hover {
-  background: rgb(43, 43, 245);
-}
-tr:active {
+.element-row:hover {
   background: rgb(43, 43, 245);
 }
 .mat-cell {
   font-size: 18px;
 }
-// Add in style.scss as we are overriding css of global mat-select class which is part of other module.
 .mat-select-disabled .mat-select-value {
   color: black;
 }

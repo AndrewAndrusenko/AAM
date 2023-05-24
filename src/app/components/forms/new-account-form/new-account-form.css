@@ -1,26 +1,6 @@
-input.ng-invalid.ng-touched {
-  color: rgb(158, 0, 0);
-}
-.mat-error {
-  color: rgb(158, 0, 0);
-  transform: (1.1);
-  height: 110%;
-  font-size: 16px;
-  font-style: italic;
-}
 .mat-checkbox {
   transform: scale(1.2);
   margin-left:2%;
-}
-input:disabled {
-  color: black;
-}
-
-select:disabled {
-  color: black;
-}
-.tab-group {
-  border: 1px solid #e8e8e8;
 }
 .mat-form-field {
 font-size: 18px;
@@ -30,54 +10,3 @@ background-color: rgb(111, 110, 110);
 margin: 10px;
 padding:10px;
 }
-.mat-form-field input {}
-.tab-content {
-  padding: 16px;
-}
-.content-container {
-  display: flex;
-  flex-direction: column;
-}
-.content-container > * {
-  width: 100%;
-}
-
-.dialog-headline{
-font-weight: 500;
-margin-top: -1em;
-margin-left: -1em;
-margin-bottom: 0;
-padding: 1em;
-text-align: center;
-font-size: 1.5em;
-background-color: dodgerblue;
-color:white;
-}
-.mat-dialog-container {
-padding: 24px 0 0 0 !important;
-}
-.tab-group {
-   border: 1px solid #e8e8e8;
-}
-
-.tab-content {
-  padding: 16px;
-}
-.content-container {
-  display: flex;
-  flex-direction: column;
-}
-.content-container > * {
-  width: 100%;
-}
-
-.tab-content-height{
-  height: 160px;
-}
-.mat-dialog-actions {
-  flex-direction: row-reverse;
-}
-.close-icon{
-  cursor: pointer;
-}
-

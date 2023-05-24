@@ -6,13 +6,12 @@ import {
 import { firstValueFrom, Observable, of } from 'rxjs';
 import { catchError, first, map, take, tap } from 'rxjs/operators';
 import { AppInvestmentDataServiceService } from './app-investment-data.service.service';
-import { AppTabServiceService } from './app-tab-service.service';
 import { AppAccountingService } from './app-accounting.service';
 import { AppMarketDataService } from './app-market-data.service';
 import { registerUpdateLifecycle } from 'echarts';
 export class customAsyncValidators {
 
-  static clientNameCustomAsyncValidator(userService: AppTabServiceService, clientId:number): AsyncValidatorFn {
+  static clientNameCustomAsyncValidator(userService: AppInvestmentDataServiceService, clientId:number): AsyncValidatorFn {
     return (control: AbstractControl): Observable<ValidationErrors> => {
       return userService
         .getClientData(clientId, control.value, 'Check_clientname')
@@ -22,7 +21,7 @@ export class customAsyncValidators {
         );
     };
   }
-  static secidCustomAsyncValidator (userService: AppTabServiceService, secid:string): AsyncValidatorFn {
+  static secidCustomAsyncValidator (userService: AppInvestmentDataServiceService, secid:string): AsyncValidatorFn {
     return (control: AbstractControl): Observable<ValidationErrors> => {
       console.log('ID', secid , control.value, 'Check_secid');
       return userService

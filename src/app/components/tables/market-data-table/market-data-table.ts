@@ -101,7 +101,6 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
     public snack:MatSnackBar
   ) {
     this.AuthServiceS.verifyAccessRestrictions('accessToInstrumentData').subscribe ((accessData) => {
-      console.log('access',accessData);
       this.accessState=accessData.elementvalue;
       this.disabledControlElements = this.accessState === 'full'? false : true;
     })

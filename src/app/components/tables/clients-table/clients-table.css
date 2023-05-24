@@ -1,126 +1,23 @@
-.tree-menu-context {
-  display: inline-flex;
-  flex-direction: column;
-  min-width: 180px;
-  max-width: 350px;
-  background-color: rgb(184, 184, 184);
-  padding: 3px 0;
-  font-size: 18px;
+.mat-table {
+  background-color:#313131;
+  width: 100%;
+  font-size: 26px;
 }
-
-.tree-menu-item {
-  background-color: transparent;
-  cursor: pointer;
-  border: none;
-
-  user-select: none;
-  min-width: 64px;
-  line-height: 36px;
-  padding: 6px;
-
-  display: flex;
-  align-items: center;
-  flex-direction: row;
-  flex: 1;
-}
-.tree-menu-item:hover {
-  background-color: rgb(237, 162, 162);
-}
-.tree-menu-item:active {
-  background-color: rgb(147, 128, 128);
-}
-.menu-icon {
-  margin-left: 0px;
-  margin-right: 5px;
-}
-:host ::ng-deep .sorting {
-  text-align: center !important;
-  background-color: #666966; 
-  font-size: 20PX;
-}
-:host ::ng-deep .dataTables_wrapper {
-  margin-left: 10px !important;
-}
-.dataTableTitle {
-  display: contents;
-  text-align: center;
-  justify-content: center;
-  color:#c1b9b9;
-}
-.dataTable {   
-  font-size: 18px;
-  background-color:#4f4e4e;
-  color: lightgrey;
-  text-align: center;
-}
-:host ::ng-deep th  {
+.mat-header-cell {
+  margin-left: 10px;
   font-size: 20px;
-  background-color:#4f4e4e;
-  line-height: 30px;
-  text-align: center;
+  background-color:#393737;
 }
-
-:host ::ng-deep tr {
-  text-align: center;
+tr.detail-row {
+  height: 0;
 }
-:host ::ng-deep .dt-control {
-  background-color: #c3c8e2;
-  color:#666966;
+.element-row td {
+  border-bottom-width: 0;
 }
-:host ::ng-deep  .btn.btn-rounded {
-  width: 150px;
-  height: 50px;
-  margin-right: 10px;
-  background-color: #5063ef;
-  padding-left: 5px;
-  padding-right: 5px;
-  padding-bottom: 5px;
-  margin-bottom: 25px; 
-  font-size: 18px; 
-  border-width: 0px;
-  font-weight: 500;
-  color:#c1b9b9;
-} 
-/* >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Styling Buttons to Rounded  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
-:host ::ng-deep  .btn.styled 
-{    box-shadow: inset 2px 2px 3px rgba(255, 255, 255, .6),
-    inset -2px -2px 3px rgba(0, 0, 0, .6);
+.element-detail {
+  overflow: hidden;
+  display: flex;
 }
-:host ::ng-deep  .btn.pressed {background-color: rgba(131, 127, 127, 0.801);}  
-
-:host ::ng-deep .btn.btn-info {font-size: 0.85rem}  /*=====================Button with "Show N_Qty rows" font downsizing ============*/
-.fa-2x {margin-bottom: 10px} /*=====================Separating Icons within the buttons from Text ===================*/
-
-
-/* >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Rows Styling >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
-/*===================================== ChildRows Styling ==================================================*/
-[id="childtable"] thead tr th {background: #4f5053a8;}
-[id="childtable"] tbody tr td {background-color: #caa8d1a8;}
-/* >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ChildRows Styling >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
-/* >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> DataTable Styling >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>*/
-:host ::ng-deep .dataTables_filter {
-  float: right!important;
-  margin-right: 10px;
-  margin-top: 1px;
-  font-size: x-large;    
+.mat-column-address {
+  color: rgb(85, 167, 238)
 }
-
-:host ::ng-deep div.dataTables_wrapper div.dataTables_filter input {
-  background-color:#666966;
-  font-size: x-large;
-  color: lightgrey;
-  border-color:#080808;
-  border-width: 1px;   
-}
- 
-div.dtsp-title {
-  margin-right: 0px !important;
-  margin-top: 23px !important;
-}
- 
-input.dtsp-search {
-  min-width: 0px !important;
-  padding-left: 0px !important;
-  margin: 0px !important;     
-} 
- 

@@ -1,34 +1,37 @@
 const Module = require('module')
 const bcrypt = require('bcryptjs');
 const config = require('./db_config');
+const { log } = require('console');
 const Pool = require('pg').Pool;
 const pool = new Pool(config.dbConfig);
 var pgp = require('pg-promise')({
   capSQL: true // to capitalize all generated SQL
 });
 
-async function encryptPsw (accessRole, login , password) {
+async function encryptPsw (accessRole, login , password, response) {
   var hashedPassword;
   bcrypt.genSalt(10, (err,Salt) => {
     bcrypt.hash(password, Salt, (err, hash) => {
       if (err) {return console.log ('Cannot encrypt');}
       hashedPassword=hash;
-      return new Promise ((resolve) => { 
+      return new Promise ((resolve) => {  
         respArr =[accessRole, login, hashedPassword]
-        resolve (respArr)
         const query = {
           text: "INSERT INTO public.dusers(accessrole, login, hashed_password) VALUES ($1, $2, $3) RETURNING *",
           values: respArr,
-          rowMode: 'array'
         }
-        pool.query (query, (err, res) => {if (err) {console.log (err.stack)}})
+         pool.query (query, (err, res) => {if (err) {response.status(403).json(err.stack)} else {
+          console.log(' query encryptPsw',res.rows[0]);
+          response.status(200).json(res.rows[0])
+          resolve ( res.rows[0])
+        }})
       })
     })
   })
 }
 
 async function addNewUser (request,response) {
-response =  await encryptPsw (request.body.accessrole, request.body.username, request.body.password)
+  encryptPsw (request.body.accessrole, request.body.username, request.body.password,response)
 }
 
 async function getUserRoles (request,response) {
@@ -38,14 +41,22 @@ async function getUserRoles (request,response) {
 }
 
 async function getAccessRestriction (request,response) {
+  console.log('request.query.elementid',request.query.elementid);
   const query = {
     text: ' SELECT id, accessrole, elementid, tsmodule, htmltemplate, elementtype, elementvalue ' +
     ' FROM public."aAccessConstraints"' + 
-    ' WHERE accessrole = $1 and elementid = $2',
-    values : [request.query.accessRole, request.query.elementid]
+    ' WHERE accessrole = $1',
+    values : [request.query.accessRole]
+  }
+  if (request.query.elementid) {
+    query.text +=' AND elementid=$2';
+    query.values.push(request.query.elementid)
   }
   sql = pgp.as.format(query.text,query.values)
-  pool.query ({text:sql,values:""}, (err, res) => {if (err) {console.log (err.stack)} else {return response.status(200).json(res.rows[0])}
+  pool.query ({text:sql,values:""}, (err, res) => {if (err) {console.log (err.stack)} else {
+    console.log('res.rows',res.rows.length);
+    return request.query.elementid?  response.status(200).json(res.rows[0]) : response.status(200).json(res.rows)
+  }
   })
 }
 

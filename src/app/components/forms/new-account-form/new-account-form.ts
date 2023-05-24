@@ -1,21 +1,25 @@
-import { Component, Input, OnInit, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, Input, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { accountTypes } from 'src/app/models/intefaces';
+import { AccountsTableModel, accountTypes } from 'src/app/models/intefaces';
 import { AppInvestmentDataServiceService } from 'src/app/services/app-investment-data.service.service';
-import { AppTabServiceService } from 'src/app/services/app-tab-service.service';
 import { AppTableStrategiesComponentComponent } from '../../tables/strategies-table/strategies-table';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
+import { AuthService } from 'src/app/services/auth.service';
 @Component({
   selector: 'app-app-portfolio',
   templateUrl: './new-account-form.html',
   styleUrls: ['./new-account-form.css']
 })
-export class AppNewAccountComponent implements OnInit {
+export class AppNewAccountComponent {
+  accessState: string = 'none';
+  disabledControlElements: boolean = false;
+  accessToClientData: string = 'none';
+  portfolioData:AccountsTableModel;
   newAccountForm: FormGroup;
-  public action: string;
-  @Input() client : number;
-  @Input() portfolioData:any;
+  @Input() portfolioCode: number;
+  @Input() ClientID: number;
+  @Input() action: string;
   dialogTableStrategiesRef: MatDialogRef<AppTableStrategiesComponentComponent>;
   title: any;
   accountTypes: accountTypes [] = [];
@@ -23,66 +27,70 @@ export class AppNewAccountComponent implements OnInit {
 
   constructor (
     private fb:FormBuilder, 
-    private AppTabServiceService:AppTabServiceService, 
     private CommonDialogsService:HadlingCommonDialogsService,
-    private InvestmentDataServiceService : AppInvestmentDataServiceService,   
+    private InvestmentDataService : AppInvestmentDataServiceService,   
+    private AuthServiceS:AuthService,  
     private dialog: MatDialog, 
-    ) {}
-  ngOnInit(): void {
-    this.newAccountForm=this.fb.group ({
-      idportfolio: {value:'', disabled: true, }, 
-      account_type: [{value:'', disabled: false}],
-      idclient: {value: null, disabled: true}, 
-      clientname: {value: null, disabled: true}, 
-      idstategy: {value:'', disabled: true}, 
-      stategy_name: [{value:'', disabled: false}, [Validators.required]],
-      description: {value:'', disabled: false}, 
-      portfolioname:[{value:'', disabled: false}, [Validators.required]],
-      portleverage: [ {value:0, disabled: false}, [Validators.required, Validators.pattern('[0-9]*')]]
-    })
-    this.InvestmentDataServiceService.getAccountTypesList (0,'','Get_AccountTypes_List').subscribe (data => {
-      this.accountTypes = data;
-    })
-    switch (this.action) {
-      case 'Open': 
-      this.newAccountForm.controls['idclient'].setValue(this.portfolioData['idclient'])
-      this.newAccountForm.controls['clientname'].setValue(this.portfolioData['clientname'])
-      break;
-      case 'Create': 
-      this.newAccountForm.controls['idclient'].setValue(this.portfolioData['idclient'])
-      this.newAccountForm.controls['clientname'].setValue(this.portfolioData['clientname'])
-      break;
-      case 'Create_Example':
-        this.portfolioData['account_id']='';
-        this.newAccountForm.patchValue(this.portfolioData);
-      break;
-      case 'Edit':
-        this.title = "Edit"
-        this.action="Edit"
-        this.newAccountForm.patchValue(this.portfolioData);
-      break;   
-      case 'Delete': 
-        this.newAccountForm.patchValue(this.portfolioData);
-        this.newAccountForm.controls['account_type'].disable()
-
-      break;
-      default :
-        this.title = "Create"
-        this.action = "Create"
-      break; 
-     }  
-  }
+    ) {
+      this.newAccountForm=this.fb.group ({
+        idportfolio: {value:'', disabled: true, }, 
+        account_type: [{value:'', disabled: false}],
+        idclient: {value: null, disabled: true}, 
+        clientname: {value: null, disabled: true}, 
+        idstategy: {value:'', disabled: true}, 
+        stategy_name: [{value:'', disabled: false}, [Validators.required]],
+        description: {value:'', disabled: true}, 
+        portfolioname:[{value:'', disabled: false}, [Validators.required]],
+        portleverage: [ {value:0, disabled: false}, [Validators.required, Validators.pattern('[0-9]*')]]
+      })
+      this.InvestmentDataService.getAccountTypesList (0,'','Get_AccountTypes_List').subscribe (data => {
+        this.accountTypes = data;
+      })
+      this.AuthServiceS.verifyAccessRestrictions('accessToClientData').subscribe ((accessData) => {
+        this.accessToClientData = accessData.elementvalue;
+        this.AuthServiceS.verifyAccessRestrictions('accessToPortfolioData').subscribe ((accessData) => {
+          this.accessState=accessData.elementvalue;
+          this.disabledControlElements = this.accessState === 'full'? false : true;
+          if (this.accessState !=='none') {
+            this.InvestmentDataService.getPortfoliosData('',this.portfolioCode,0,0,'Get_Accounts_By_idPortfolio', this.accessToClientData).subscribe (data => {
+              this.portfolioData=data[0];
+              this.title = this.action
+              this.action = this.action
+              this.newAccountForm.patchValue(this.portfolioData);
+              switch (this.action) {
+                case 'Open':
+                case 'Create':  
+                this.newAccountForm.reset();
+                this.newAccountForm.controls['idclient'].setValue(this.portfolioData['idclient'])
+                this.newAccountForm.controls['clientname'].setValue(this.portfolioData['clientname'])
+                break;
+                case 'Create_Example':
+                  this.newAccountForm.controls['portfolioname'].setValue(null);
+                  this.title = "Create"
+                  this.action = "Create"
+                break;
+                case 'Delete': 
+                case 'View': 
+                  this.newAccountForm.disable();
+                break;
+               }  
+            })
+          }
+        })
+      })
+    }
   ngOnChanges(changes: SimpleChanges) {
-    this.AppTabServiceService.getClientData(changes['client'].currentValue,null,'Get_Client_Data').subscribe(data => {
-      this.newAccountForm.patchValue(data[0])
-    })
+    if (this.accessState !=='none') {
+      this.InvestmentDataService.getPortfoliosData('',changes['portfolioCode'].currentValue,0,0, 'Get_Accounts_By_idPortfolio', this.accessToClientData).subscribe (portfoliosData => {
+        this.newAccountForm.patchValue(portfoliosData[0])})
+    }
   }
   snacksBox(result:any, action?:string) {
     if (result['name']=='error') {
       this.CommonDialogsService.snackResultHandler(result)
     } else {
       this.CommonDialogsService.snackResultHandler({name:'success', detail: result + 'portfolio'}, action)
-      this.InvestmentDataServiceService.sendReloadAccountList (Number(this.newAccountForm.controls['idportfolio']));
+      this.InvestmentDataService.sendReloadPortfoliosData (Number(this.newAccountForm.controls['idportfolio']));
     }
     this.formDisabledFields.forEach(elem => this.newAccountForm.controls[elem].disable())
   }
@@ -92,15 +100,15 @@ export class AppNewAccountComponent implements OnInit {
       case 'Create':
       case 'Create_Example':
       case 'Open':
-        this.InvestmentDataServiceService.createAccount (this.newAccountForm.value).then (result => this.snacksBox(result,'Created'))
+        this.InvestmentDataService.createAccount (this.newAccountForm.value).then (result => this.snacksBox(result,'Created'))
       break;
       case 'Edit':
-        this.InvestmentDataServiceService.updateAccount (this.newAccountForm.value).then (result => this.snacksBox(result,'Updated'))
+        this.InvestmentDataService.updateAccount (this.newAccountForm.value).then (result => this.snacksBox(result,'Updated'))
       break;
       case 'Delete':
         this.CommonDialogsService.confirmDialog('Delete Portfolio ' + this.newAccountForm.value['portfolioname']).subscribe(isConfirmed => {
           if (isConfirmed.isConfirmed) {
-            this.InvestmentDataServiceService.deleteAccount (this.newAccountForm.value['idportfolio']).then (result =>{
+            this.InvestmentDataService.deleteAccount (this.newAccountForm.value['idportfolio']).then (result =>{
               this.snacksBox(result,'Deleted')
               this.CommonDialogsService.dialogCloseAll();
             })
@@ -122,7 +130,7 @@ export class AppNewAccountComponent implements OnInit {
   calculateAccountCode () {
     let newNumberS : string;
     let accountType = this.newAccountForm.controls['account_type'].value
-    this.AppTabServiceService.getAccountsData (0,0, accountType ,'calculateAccountCode').subscribe( (dataA) => {
+    this.InvestmentDataService.getPortfoliosData (accountType, 0,0,0, 'calculateAccountCode',this.accessToClientData).subscribe( (dataA) => {
       if (dataA.length === 0) {newNumberS = "001"} else {
         let data = dataA[0]
         let newNumber = Number (data['portfolioname'].substr(accountType.length)) + 1

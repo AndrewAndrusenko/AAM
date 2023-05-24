@@ -1,6 +1,14 @@
 <app-app-instrument-table *ngIf="messageReceived.text=='Trades & Orders_Root'" [FormMode]="'Redis'"></app-app-instrument-table >  
 <mat-tab-group  *ngIf="messageReceived.text=='Portfolios'" mat-stretch-tabs #AccountInfo >
-  <mat-tab label="Account Summary" > </mat-tab>  
+  <mat-tab label="Account Summary" > 
+    <div class="instrument_form">
+      <br>
+      <app-app-portfolio
+      [action]="'Edit'"
+      [portfolioCode]="messageReceived.id">
+      </app-app-portfolio> 
+    </div>
+  </mat-tab>  
   <mat-tab label="Portfolio Details"> Detailed positions with PnL data </mat-tab>
   <mat-tab label="Trades by Account"> Trades history by Account </mat-tab>
 </mat-tab-group  >

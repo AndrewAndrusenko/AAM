@@ -1,10 +1,8 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import {MatFormFieldModule as MatFormFieldModule} from '@angular/material/form-field';
-
-import {MatInputModule as MatInputModule} from '@angular/material/input'; 
 import { AuthService } from 'src/app/services/auth.service';
+import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 interface userRoles {
   value: string;
 }
@@ -15,63 +13,42 @@ interface userRoles {
 /*   encapsulation: ViewEncapsulation.None */
 })
 export class LoginComponent implements OnInit {  
-  userrole:string;
-  username:string;
-  password:string;
+  signInForm=this.fb.group ({
+    login: [null, {validators: [Validators.required]}],
+    password: [null, {validators: [Validators.required]}],
+  })
+  addNewUserForm=this.fb.group ({
+    userrole: [null, {validators: [Validators.required]}],
+    login: [null, {validators: [Validators.required]}],
+    password: [null, {validators: [Validators.required]}],
+  })
   hide : boolean = true;
-  errorMsg="";
   userroles:userRoles[] 
-/*   foods: Food[] = [
-    {value: 'steak-0', viewValue: 'Steak'},
-    {value: 'pizza-1', viewValue: 'Pizza'},
-    {value: 'tacos-2', viewValue: 'Tacos'},
-  ]; */
-  
-  myFunction() {
-    this.hide = !this.hide;
-  }
-  constructor(private authService : AuthService, private router : Router) { }
-
+  constructor(
+    private authService : AuthService, 
+    private router : Router,
+    private CommonDialogsService:HadlingCommonDialogsService,
+    private fb:FormBuilder, 
+  ) {}
   ngOnInit(): void {
    this.authService.getUsersRoles().subscribe (UsersRolesData => this.userroles=UsersRolesData)
   }
-
   handleLoginClick(){
-    this.authService.validate(this.username, this.password)
-    .then((response) => {
-     console.log(response)
-     //console.log(response)
+    this.authService.validate(this.login.value, this.password.value)
+    .then(response => {
       this.authService.setUserInfo({'user' : response ['username']});
       this.router.navigate(['tree']);    
     })
-    .catch ((error) => {
-     console.log(error.error.text)
-
-      this.errorMsg = error.error.text
-      
-    })
-   
+    .catch (error => this.CommonDialogsService.snackResultHandler({name:'error', detail: error.error.text}));
   }
-
-  authenticateUser(userName){
-    sessionStorage.setItem("user", userName);
-    if(userName == "admin"){
-      this.router.navigate(['/admin']);
-    } else if(userName == "manager"){ 
-      this.router.navigate(['/manage']);
-    } else if(userName == "officer"){
-      this.router.navigate(['/general'])
-    }
-  }
-
   handleNewUserClick(){
-    this.authService.createNewUser (this.userrole, this.username, this.password)
-    .then((response) => {
-      console.log(response)
-  /*     this.authService.setUserInfo({'user' : response ['user']});
-      this.router.navigate(['general']); */
-    })
-   
+    this.authService.createNewUser (this.userroleCreate.value, this.loginCreate.value, this.passwordCreate.value)
+      .then(response => this.CommonDialogsService.snackResultHandler({name:'success', detail: response['login'] + '  with ID ' + response['id']}, 'Created user login: ', undefined,undefined, 6000))
+      .catch(err => this.CommonDialogsService.snackResultHandler({name:'error', detail:err.error.split("\n", 1).join("")}));
   }
-
+  get  userroleCreate ()   {return this.addNewUserForm.get('userrole') } 
+  get  loginCreate ()   {return this.addNewUserForm.get('login') } 
+  get  passwordCreate ()   {return this.addNewUserForm.get('password') } 
+  get  login ()   {return this.signInForm.get('login') } 
+  get  password ()   {return this.signInForm.get('password') } 
 }

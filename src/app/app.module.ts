@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { APP_INITIALIZER, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -71,6 +71,12 @@ import { AppInvInstrumentDetailsFormComponent } from './components/forms/instrum
 import { TablePortfolios } from './components/tables/portfolios-table/portfolios-table';
 import { LoginComponent } from './components/main-page/login/login.component';
 import { NgxIndexedDBModule } from 'ngx-indexed-db';
+const appInitializerFn = (accessRestirictions:AuthService) => {
+    return () => {
+        //return accessRestirictions.getAllAccessRestrictions()
+        return true
+    }
+}
 @NgModule({
     imports: [
         BrowserModule,
@@ -158,7 +164,17 @@ import { NgxIndexedDBModule } from 'ngx-indexed-db';
         ClientsTabComponent,
      ],
     bootstrap: [AppComponent],
-    providers: [ {provide: MAT_MOMENT_DATE_ADAPTER_OPTIONS, useValue: {strict: true}}, {provide: RouteReuseStrategy, useClass: MaltsevRouteReuseStrategy} ],
+    providers: [ 
+        AuthService,
+        {
+            provide: APP_INITIALIZER,
+            useFactory: appInitializerFn,
+            multi: true,
+            deps: [AuthService]
+        },
+        {provide: MAT_MOMENT_DATE_ADAPTER_OPTIONS, useValue: {strict: true}}, 
+        {provide: RouteReuseStrategy, useClass: MaltsevRouteReuseStrategy} 
+    ],
 
 })
 export class AppModule { }import { indexDbConfigAAM } from './models/intefaces';
@@ -171,4 +187,5 @@ import { AccAccountsTabComponent } from './components/main-page/tabs/accounting-
 import { AccTransactionsTabComponent } from './components/main-page/tabs/transactions-tab/transactions-tab';
 import { PortfoliosTabComponent } from './components/main-page/tabs/portfolios-tab/portfolios-tab';
 import { ClientsTabComponent } from './components/main-page/tabs/clients-tab/clients-tab';
+import { AuthService } from './services/auth.service';
 

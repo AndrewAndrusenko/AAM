@@ -1,11 +1,11 @@
 import { Component, Input, OnInit, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AppTabServiceService } from 'src/app/services/app-tab-service.service';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { AppConfimActionComponent } from '../../common-forms/app-confim-action/app-confim-action.component';
 import { AppSnackMsgboxComponent } from '../../common-forms/app-snack-msgbox/app-snack-msgbox.component';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
+import { AppInvestmentDataServiceService } from 'src/app/services/app-investment-data.service.service';
 @Component({
   selector: 'app-app-client-form',
   templateUrl: './client-form.html',
@@ -21,8 +21,9 @@ export class AppClientFormComponent implements OnInit {
   public AppSnackMsgbox : AppSnackMsgboxComponent
   constructor (
     private fb:FormBuilder, 
-    private AppTabServiceService:AppTabServiceService, 
     private CommonDialogsService:HadlingCommonDialogsService,
+    private InvestmentDataServiceService : AppInvestmentDataServiceService,   
+
   ) {}
   ngOnInit(): void {
     this.editClienttForm=this.fb.group ({
@@ -54,15 +55,15 @@ export class AppClientFormComponent implements OnInit {
     break; 
    }
    this.editClienttForm.controls['clientname'].setAsyncValidators(
-    customAsyncValidators.clientNameCustomAsyncValidator(this.AppTabServiceService, this.clientId.value)
+    customAsyncValidators.clientNameCustomAsyncValidator(this.InvestmentDataServiceService, this.clientId.value)
   )
   this.editClienttForm.controls['clientname'].updateValueAndValidity();
   }
   ngOnChanges(changes: SimpleChanges) {
-    this.AppTabServiceService.getClientData(changes['client'].currentValue, null, 'Get_Client_Data').subscribe(data => {
+    this.InvestmentDataServiceService.getClientData(changes['client'].currentValue, null, 'Get_Client_Data').subscribe(data => {
       this.editClienttForm.patchValue(data[0])
       this.editClienttForm.controls['clientname'].setAsyncValidators(
-        customAsyncValidators.clientNameCustomAsyncValidator(this.AppTabServiceService, this.clientId.value)
+        customAsyncValidators.clientNameCustomAsyncValidator(this.InvestmentDataServiceService, this.clientId.value)
       )
       this.editClienttForm.controls['clientname'].updateValueAndValidity();
       this.editClienttForm.updateValueAndValidity();
@@ -83,20 +84,20 @@ export class AppClientFormComponent implements OnInit {
     switch (action) {
       case 'Create_Example':
       case 'Create':
-        this.AppTabServiceService.createClient (this.editClienttForm.value).then (result => this.snacksBox(result,'Created') )
+        this.InvestmentDataServiceService.createClient (this.editClienttForm.value).then (result => this.snacksBox(result,'Created') )
         this.editClienttForm.controls['clientname'].markAsDirty;
         this.editClienttForm.controls['idclient'].disable()
       break;
       case 'Edit':
         this.editClienttForm.controls['idclient'].enable()
-        this.AppTabServiceService.updateClient (this.editClienttForm.value).then (result => this.snacksBox(result,'Updated'))
+        this.InvestmentDataServiceService.updateClient (this.editClienttForm.value).then (result => this.snacksBox(result,'Updated'))
         this.editClienttForm.controls['idclient'].disable()
       break;
       case 'Delete':
         this.CommonDialogsService.confirmDialog('Delete ' + this.clientname.value).subscribe(isConfirmed => {
           if (isConfirmed.isConfirmed) {
             this.editClienttForm.controls['idclient'].enable()
-            this.AppTabServiceService.deleteClient (this.editClienttForm.value['idclient']).then (result =>{
+            this.InvestmentDataServiceService.deleteClient (this.editClienttForm.value['idclient']).then (result =>{
               this.snacksBox(result,'Deleted')
               this.CommonDialogsService.dialogCloseAll();
             })

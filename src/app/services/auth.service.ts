@@ -10,11 +10,22 @@ interface userRoles {
 })
 export class AuthService {
   constructor(private http : HttpClient) { }
+  accessRestrictions: accessRestriction[] = [];
+
   public isAuthenticated() : Boolean {
     let userData= localStorage.getItem('userInfo')
-    if (userData && JSON.parse(userData)) {
-    return true}
-    return false;
+    return userData && JSON.parse(userData) && JSON.parse(userData).user.accessrole !=='testRole'?  true : false;
+  }
+  async getAllAccessRestrictions () {
+    return new Promise <boolean> ((resolve,reject) => { 
+    let userData = JSON.parse(localStorage.getItem('userInfo'))
+    const params = {'accessRole': userData.user.accessrole}
+    this.http.get <accessRestriction[]>('/api/accessRestriction/',{ params: params }).subscribe((data) => {
+     this.accessRestrictions = data;
+     console.log('length',this.accessRestrictions);
+     data.length? resolve(true) : reject(false)
+    })
+  })
   }
   verifyAccessRestrictions (elementid:string ):Observable <accessRestriction>  {
     let userData = JSON.parse(localStorage.getItem('userInfo'))
@@ -43,9 +54,5 @@ export class AuthService {
   }
   getUsersRoles(): Observable < userRoles[]>{
     return this.http.get < userRoles[]> ('/api/auth/userRoles/')
-  }
-  getaccessRestriction ( accessRole: string, elementid: string ):Observable < string[]>{
-    const params = {'accessRole': accessRole, 'elementid': elementid}
-    return this.http.get <string[]>('/api/accessRestriction/',{ params: params } ) 
   }
 }

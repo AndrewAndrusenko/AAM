@@ -1,82 +1,103 @@
-<div class="tableHeader" style="display:flex; align-items: center; justify-content:space-between;">
-<mat-form-field style="width: 30%;">
-  <mat-label>Filter</mat-label>
-  <input matInput (keyup)="applyFilter($event)" placeholder="Type search string" #input>
-</mat-form-field>
-<h2 *ngIf="action=='Select_Benchmark'" style="color: rgb(224, 73, 73);">Use double click to select benchmark account</h2>
-</div>
-<div class="mat-elevation-z8">
-  <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class="mat-elevation-z8">
-    <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header> {{column | uppercase}}</th>
-      <td 
-        (click)="chooseAccount(element)"
-        mat-cell *matCellDef="let element"> {{element[column]}} 
-      </td>
-    </ng-container>
-
-    <ng-container   matColumnDef="expand">
-      <th  mat-header-cell *matHeaderCellDef aria-label="row actions">&nbsp;</th>
-      <td  mat-cell *matCellDef="let element">
-        <button style="width: 5%;" mat-icon-button aria-label="expand row" (click)="(expandedElement = expandedElement === element ? null : element); $event.stopPropagation()">
-          <mat-icon *ngIf="expandedElement !== element">keyboard_arrow_down</mat-icon>
-          <mat-icon *ngIf="expandedElement === element">keyboard_arrow_up</mat-icon>
-        </button>
-      </td>
-    </ng-container>
-    
-    <ng-container matColumnDef="expandedDetail" >
-      <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplayWithExpand.length">
-        <div class="example-element-detail"
-          [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
-          <div class="example-element-description" *ngIf="accessToClientData=='true'">
-            <span class="row_field_name">Client:  </span> {{element.clientname}} 
-            <span class="row_field_name">Address: </span>  {{element.address}} 
-            <span class="row_field_name">  Proffesional: </span> {{element.isclientproffesional}}
+<ng-container *ngIf="accessState!=='none'">
+  <mat-form-field style="width: 30%;" class = "filterField">
+    <mat-label class="whiteTextFilter">Type search string..</mat-label>
+    <input matInput (keyup)="applyFilter($event)" placeholder="Type search string" #input>
+  </mat-form-field>
+  <button color = "accent" mat-raised-button title="Export To Excel"
+    style=" margin-left:1%; font-size: 18px;"
+    (click)="exportToExcel()">
+    Save as XLS 
+    <mat-icon matSuffix >save_alt</mat-icon>
+  </button>
+  <button color = "accent" mat-raised-button title="Reload Table"
+    style=" margin-left:1%; font-size: 18px;"
+    (click)="submitQuery()">
+    Reload 
+    <mat-icon matSuffix >refresh</mat-icon>
+  </button>
+  <h2 *ngIf="action=='Select_Benchmark'" style="color: rgb(224, 73, 73);">Use double click to select benchmark Portfolio</h2>
+  <div class="mat-elevation-z8">
+    <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class="mat-elevation-z8">
+      <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i=index">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> {{columnsToHeaderDisplay[i]}}</th>
+        <td 
+          (click)="chooseAccount(element)"
+          mat-cell *matCellDef="let element"> {{element[column]}} 
+        </td>
+      </ng-container>
+      <ng-container   matColumnDef="expand">
+        <th  mat-header-cell *matHeaderCellDef aria-label="row actions">More</th>
+        <td  mat-cell *matCellDef="let element">
+          <button style="width: 5%;" mat-icon-button aria-label="expand row" (click)="(expandedElement = expandedElement === element ? null : element); $event.stopPropagation()">
+            <mat-icon *ngIf="expandedElement !== element">keyboard_arrow_down</mat-icon>
+            <mat-icon *ngIf="expandedElement === element">keyboard_arrow_up</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="expandedDetail" >
+        <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplayWithExpand.length">
+          <div class="element-detail"
+            [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
+            <div class="element-description" *ngIf="accessToClientData!=='none'">
+              <span class="row_field_name">Client:  </span> {{element.clientname}} 
+              <span class="row_field_name">Address: </span>  {{element.address}} 
+              <span class="row_field_name">  Proffesional: </span> {{element.isclientproffesional}}
+            </div>
           </div>
-        </div>
-      </td>
-    </ng-container>
+        </td>
+      </ng-container>
 
-    <tr mat-header-row *matHeaderRowDef="columnsToDisplayWithExpand"></tr>
-    <tr mat-row [cdkContextMenuTriggerFor]="instrumentcontextmenu"  *matRowDef="let element; columns: columnsToDisplayWithExpand;"
-      class="example-element-row"
-      [class.example-expanded-row]="expandedElement === element"
-      (click)="expandedElement = expandedElement === element ? null : element">
-      
-      <ng-template  #instrumentcontextmenu>
-        <div class="tree-menu-context" cdkMenu >
-          <button 
-            (click)="openAccountForm('Create', element)"
-            class="tree-menu-item" cdkMenuItem >
-            <mat-icon class="menu-icon" matPrefix>account_box</mat-icon>      
-            Open Account
-          </button>
-          <button 
-            (click)="openAccountForm('Create_Example', element)"
-            class="tree-menu-item" cdkMenuItem >
-            <mat-icon class="menu-icon" matPrefix>account_box</mat-icon>      
-            New Account (on sample)
-          </button>
-          <button 
-            (click)="openAccountForm('Edit', element)"
-            class="tree-menu-item" cdkMenuItem>
-            <mat-icon class="menu-icon" matPrefix>edit</mat-icon>      
-            Edit Account
-          </button>
-          <button 
-            (click)="openAccountForm('Delete', element)"
-            class="tree-menu-item" cdkMenuItem>
-            <mat-icon class="menu-icon" matPrefix>delete</mat-icon> 
-            Delete Account
-          </button> 
-        </div>
-      </ng-template>
+      <tr mat-header-row *matHeaderRowDef="columnsToDisplayWithExpand"></tr>
+      <tr mat-row [cdkContextMenuTriggerFor]="instrumentcontextmenu"  *matRowDef="let element; columns: columnsToDisplayWithExpand;"
+        class="element-row"
+        [class.expanded-row]="expandedElement === element"
+        (click)="expandedElement = expandedElement === element ? null : element">
+        
+        <ng-template  #instrumentcontextmenu>
+          <div class="tree-menu-context" cdkMenu >
+          <ng-container *ngIf="disabledControlElements">
+            <button 
+              (click)="openAccountForm('View', element)"
+              class="tree-menu-item" cdkMenuItem >
+              <mat-icon class="menu-icon" matPrefix>pageview</mat-icon>      
+              View Portfolio
+            </button>
+          </ng-container>
+          <ng-container *ngIf="!disabledControlElements">
 
-    </tr>
-    <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"></tr>
-  </table>
-  <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" [pageSize]="20" aria-label="Select page of users"></mat-paginator>
-</div>
+            <button 
+              (click)="openAccountForm('Create', element)"
+              class="tree-menu-item" cdkMenuItem >
+              <mat-icon class="menu-icon" matPrefix>account_box</mat-icon>      
+              Open Portfolio
+            </button>
+            <button 
+              (click)="openAccountForm('Create_Example', element)"
+              class="tree-menu-item" cdkMenuItem >
+              <mat-icon class="menu-icon" matPrefix>account_box</mat-icon>      
+              New Portfolio (on sample)
+            </button>
+            <button 
+              (click)="openAccountForm('Edit', element)"
+              class="tree-menu-item" cdkMenuItem>
+              <mat-icon class="menu-icon" matPrefix>edit</mat-icon>      
+              Edit Portfolio
+            </button>
+            <button 
+              (click)="openAccountForm('Delete', element)"
+              class="tree-menu-item" cdkMenuItem>
+              <mat-icon class="menu-icon" matPrefix>delete</mat-icon> 
+              Delete Portfolio
+            </button> 
+          </ng-container>
 
+          </div>
+        </ng-template>
+
+      </tr>
+      <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row"></tr>
+    </table>
+    <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" [pageSize]="20" aria-label="Select page of users"></mat-paginator>
+  </div>
+</ng-container>
 
