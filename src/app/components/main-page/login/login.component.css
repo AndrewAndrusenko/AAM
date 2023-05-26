@@ -13,13 +13,13 @@
 } 
 .mat-form-field {
   color: #000;
-  width: 20vw;
-  height: 9vh;
+  width: 80%;
+  min-height: 7.8vh;
   border-radius: 15px;
   border-color: black;
   border-style: groove;
   border-width: 3px;
-  margin-bottom: 2%;
+  margin-bottom: 5%;
 }
 .disabledButton {
   background-color: transparent;
@@ -45,7 +45,7 @@
   color: rgb(90, 1, 1);
   transform: (1.1);
   height: 110%;
-  font-size: 18px;
+  font-size:1.5vh;
   font-style: italic;
 }
  .buttons-signin  { 

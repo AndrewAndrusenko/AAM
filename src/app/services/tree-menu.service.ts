@@ -8,10 +8,6 @@ export class TreeMenuSevice {
   constructor (private http:HttpClient) {    
   }
   
-  getaccessRestriction ( accessRole: string, elementid: string ):Observable < string[]>{
-    const params = {'accessRole': accessRole, 'elementid': elementid}
-    return this.http.get <string[]>('/api/accessRestriction/',{ params: params } ) 
-  }
   getTreeData ( userId:number, paramList: string[] ):Observable < string[]>{
     const params = {'userId': userId, 'paramList': paramList}
     return this.http.get <string[]>('/api/AAM/treeMenu/',{ params: params } ) 

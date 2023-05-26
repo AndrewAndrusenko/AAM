@@ -52,7 +52,11 @@ export class AuthService {
     localStorage.removeItem('userInfo')
     this.http.post ('/api/logout/',{}).toPromise()
   }
-  getUsersRoles(): Observable < userRoles[]>{
+  getUsersRoles(): Observable <userRoles[]>{
     return this.http.get < userRoles[]> ('/api/auth/userRoles/')
   }
+  getloginsArray(): Observable <string[]>{
+    return this.http.get <string[]> ('/api/auth/loginsArray/')
+  }
+  
 }

@@ -1,17 +1,15 @@
 import { Component, ViewEncapsulation, EventEmitter, Output, ViewChild, Input, AfterViewInit} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
-import {lastValueFrom, map, Observable, startWith, Subscription } from 'rxjs';
+import {map, Observable, startWith } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
-import {TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { marketData, marketDataSources, marketSourceSegements } from 'src/app/models/intefaces';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatOption } from '@angular/material/core';
-import { AppTableAccAccountsComponent } from '../acc-accounts-table/acc-accounts-table';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatCalendarCellClassFunction } from '@angular/material/datepicker';
 import { AppMarketDataService } from 'src/app/services/app-market-data.service';
@@ -27,7 +25,6 @@ registerLocaleData(localeFr, 'fr');
 /* 
 export class extends  */
 @Component({
-  
   selector: 'app-table-market-data',
   templateUrl: './market-data-table.html',
   styleUrls: ['./market-data-table.scss'],
@@ -92,7 +89,6 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
   constructor(
     private AccountingDataService:AppAccountingService, 
     private MarketDataService: AppMarketDataService,
-    private TreeMenuSevice:TreeMenuSevice, 
     private AuthServiceS:AuthService,  
     private AtuoCompService:AtuoCompSecidService,
     private HandlingCommonTasksS:HandlingCommonTasksService,
@@ -100,13 +96,10 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
     private fb:FormBuilder, 
     public snack:MatSnackBar
   ) {
-    this.AuthServiceS.verifyAccessRestrictions('accessToInstrumentData').subscribe ((accessData) => {
-      this.accessState=accessData.elementvalue;
-      this.disabledControlElements = this.accessState === 'full'? false : true;
-    })
+    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToInstrumentData')[0].elementvalue;
+    this.disabledControlElements = this.accessState === 'full'? false : true;
     this.MarketDataService.getInstrumentDataGeneral('getBoardsDataFromInstruments').subscribe(boardsData => this.boardIDs=boardsData)
     this.MarketDataService.getMarketDataSources().subscribe(marketSourcesData => this.marketSources = marketSourcesData);
-
     this.loadingDataState = {Message:'',State: 'None'};
     this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data=>{
       this.FirstOpenedAccountingDate = data[0].FirstOpenedDate;
@@ -139,7 +132,6 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
     return [year, month, day].join('-');
   }
   updateAllComplete(index:number) {
-
     this.marketSources[index].checkedAll = this.marketSources[index].segments != null && this.marketSources[index].segments.every(t => t.checked); 
     this.marketSources[index].indeterminate = this.marketSources[index].segments.filter(t => t.checked).length > 0 && !this.marketSources[index].checkedAll; 
     this.disableAllexceptOne(index);
@@ -177,9 +169,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
       case 'iss.moex.com':
         functionToLoadData = this.MarketDataService.loadMarketDataMOEXiss.bind(this.MarketDataService)
       break;
-
     }
-
     this.MarketDataService.checkLoadedMarketData (sourceCodesArray,dateToLoad).subscribe(async data=>{
       this.loadedMarketData = data;
       if (!data.length) {
@@ -215,24 +205,14 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
   async ngAfterViewInit() {
     const number = 123456.789;
     if (this.FormMode==='QuotesMode') {
-      // this.panelOpenStateSecond=false;
-      this.MarketDataService.getMarketData().subscribe (marketData => {
-        console.log('MarketData getMarketData', this.panelOpenStateSecond);
-        this.updateMarketDataTable(marketData);
-      }) 
+      this.MarketDataService.getMarketData().subscribe (marketData => this.updateMarketDataTable(marketData)) 
     } 
     this.MarketDataService.getReloadMarketData().subscribe(marketData => {
-      console.log('MarketData getReloadMarketData', 0);
       this.updateMarketDataTable(marketData);
       this.loadingDataState = {State:'Success', Message:'Loading is complited'};
       this.loadMarketData.enable();
     });
-    this.dateForLoadingPrices.setValue(moment('Mon Apr 10 2023 00:00:00 GMT+0300 (Moscow Standard Time)'))
-    let userData = JSON.parse(localStorage.getItem('userInfo'))
-    await lastValueFrom (this.TreeMenuSevice.getaccessRestriction (userData.user.accessrole, 'accessToClientData'))
-    .then ((accessRestrictionData) =>{
-      this.accessToClientData = accessRestrictionData['elementvalue']
-    })
+    this.dateForLoadingPrices.setValue(moment(this.FirstOpenedAccountingDate))
   }
   updateMarketDataTable (marketData:marketData[]) {
     this.dataSource  = new MatTableDataSource(marketData);

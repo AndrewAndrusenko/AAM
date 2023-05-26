@@ -1,5 +1,6 @@
 <mat-form-field>
-  <input matInput (keyup)="applyFilter($event)" placeholder="Type search string" #input>
+  <input matInput (keyup)="applyFilter($event)" class = "filterField" #input>
+  <mat-label class="whiteTextFilter">Type to search...</mat-label>
 </mat-form-field>
 
 <div class="mat-elevation-z8">
@@ -51,7 +52,7 @@
     
     <ng-container matColumnDef="expandedDetail"  >
       <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplayWithExpand.length+1">
-        <div class="example-element-detail" *ngIf="['CR','DR'].includes(element['typeTransaction'])"
+        <div class="element-detail" *ngIf="['CR','DR'].includes(element['typeTransaction'])"
           [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'"
           style=" width: 100%;">
           <mat-expansion-panel class="complex-search-entries"
@@ -73,7 +74,6 @@
               Full amount has been allocated. Edit existing entries or delete them 
             </h2>
           </mat-expansion-panel>
-
           <mat-expansion-panel class="complex-search-entries" 
             (opened)="panelEntryListOpenState = true"
             (closed)="panelEntryListOpenState = false" >
@@ -97,12 +97,11 @@
     </ng-container>
     <tr mat-header-row *matHeaderRowDef="columnsToDisplayWithExpand"></tr>
     <tr mat-row *matRowDef="let element; columns: columnsToDisplayWithExpand;"
-      class="example-element-row"
-      [class.example-expanded-row]="expandedElement === element"
+      [class.expanded-row]="expandedElement === element"
       (click)="expandedElement === element ?  null : openEntry(element);
       (expandedElement = expandedElement === element ? null : element)">
     </tr>
-    <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"    ></tr>
+    <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row"    ></tr>
   </table>
   <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" [pageSize]="20" aria-label="Select page of users"></mat-paginator>
 </div>

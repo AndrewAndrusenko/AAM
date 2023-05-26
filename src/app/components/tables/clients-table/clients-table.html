@@ -24,9 +24,9 @@
           mat-cell *matCellDef="let element">
           <span [ngSwitch]="true==true">
             <p *ngSwitchCase="['clientname'].includes(column)">
-              <button mat-stroked-button style="width: 90; font-size: 18px; margin-top: 2%;"  matTooltip="Client details"
+              <button mat-stroked-button style="width: 90; font-size: 18px; margin-top: 5%;"  matTooltip="Client details"
               [style.background-color] =  "investmentNodeColor"
-              (click)="openAddFileDialog(disabledControlElements? 'View': 'Edit')">
+              (click)="openAddFileDialog(disabledControlElements? 'View': 'Edit', element)">
                 {{element[column] }}
               </button> 
             </p>
@@ -67,7 +67,7 @@
           <div class="tree-menu-context" cdkMenu >
           <ng-container *ngIf="disabledControlElements">
             <button 
-              (click)="openAddFileDialog('View')"
+              (click)="openAddFileDialog('View',element)"
               class="tree-menu-item" cdkMenuItem >
               <mat-icon class="menu-icon" matPrefix>pageview</mat-icon>      
               View Client
@@ -76,25 +76,25 @@
           <ng-container *ngIf="!disabledControlElements">
 
             <button 
-              (click)="openAddFileDialog('Create')"
+              (click)="openAddFileDialog('Create', null)"
               class="tree-menu-item" cdkMenuItem >
               <mat-icon class="menu-icon" matPrefix>account_box</mat-icon>      
               Open Client
             </button>
             <button 
-              (click)="openAddFileDialog('Create_Example')"
+              (click)="openAddFileDialog('Create_Example', element)"
               class="tree-menu-item" cdkMenuItem >
               <mat-icon class="menu-icon" matPrefix>account_box</mat-icon>      
               New Client (on sample)
             </button>
             <button 
-              (click)="openAddFileDialog('Edit')"
+              (click)="openAddFileDialog('Edit', element)"
               class="tree-menu-item" cdkMenuItem>
               <mat-icon class="menu-icon" matPrefix>edit</mat-icon>      
               Edit Client
             </button>
             <button 
-              (click)="openAddFileDialog('Delete')"
+              (click)="openAddFileDialog('Delete', element)"
               class="tree-menu-item" cdkMenuItem>
               <mat-icon class="menu-icon" matPrefix>delete</mat-icon> 
               Delete Client

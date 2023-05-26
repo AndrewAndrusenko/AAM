@@ -101,6 +101,7 @@ appServer.post ('/logout/', function (req, res){
 
 
 appServer.get ('/auth/userRoles/', auth_module.getUserRoles)
+appServer.get ('/auth/loginsArray/', auth_module.getLoginsArray)
 
 appServer.get ('/accessRestriction/', auth_module.getAccessRestriction)
 

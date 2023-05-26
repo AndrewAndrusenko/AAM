@@ -35,37 +35,31 @@ export class AppInvestmentDataServiceService {
     const params = {'secid': secid}
     return this.http.get <InstrumentData[]> ('/api/AAM/InstrumentData/',{ params: params } )
   }
-
   getClientData (client: number, clientname: string, action: string) : Observable <ClientData[]>  {
     const params = {'client': client, 'clientname' :clientname, 'action':action }
     return this.http.get <ClientData[]> ('/api/AAM/ClientData/', { params: params } )
   }
-
-  updateClient (data:any) { 
-    return this.http.post ('/api/AAM/ClientDataEdit/',{'data': data}).toPromise()
+  updateClient (data:any) :Observable<ClientData[]>  { 
+    return this.http.post <ClientData[]> ('/api/AAM/ClientDataEdit/',{'data': data})
   }
-  deleteClient (id:string) {
-    return this.http.post ('/api/AAM/ClientDataDelete/',{'idclient': id}).toPromise()
+  deleteClient (id:string): Observable<ClientData[]> {
+    return this.http.post <ClientData[]> ('/api/AAM/ClientDataDelete/',{'idclient': id})
   }
-  createClient (data:any) { 
-    return this.http.post ('/api/AAM/ClientDataCreate/',{'data': data}).toPromise()
+  createClient (data:any): Observable<ClientData[]>  { 
+    return this.http.post <ClientData[]> ('/api/AAM/ClientDataCreate/',{'data': data})
   }
-
-
   sendReloadStrategyStructure ( id:number) { 
     this.subjectReloadStrategyStructure.next(id);
   }
   getReloadStrategyStructure(): Observable<any> { 
     return this.subjectReloadStrategyStructure.asObservable(); 
   }
-
   sendReloadStrategyList ( id:any) { 
     this.subjectName.next(id);
   }
   getReloadStrategyList(): Observable<any> {
     return this.subjectName.asObservable(); 
   }
-
   getGlobalStategiesList (id:number, Name:string, action:string) : Observable <StrategiesGlobalData[]>  {
     const params = {'id': id, 'Name' :Name, 'action':action }
     return this.http.get <StrategiesGlobalData[]> ('/api/AAM/GetStrategiesList/',{ params: params } )

@@ -81,7 +81,6 @@ u
   ) 
   return PromQty;
 }
- 
 async function FAmmGetTreeData(request,response) {
   Paramlist = request.query.paramList
   Paramlist.splice (Paramlist.indexOf('Favorites'),1)
@@ -94,9 +93,7 @@ async function FAmmGetTreeData(request,response) {
     return response.status(200).json(value)
   })
 }
-
 async function fGetportfolioTable (request,response) {
-  console.log('request.query fGetportfolioTable',request.query);
   const clientDataFields = ", dclients.clientname, dclients.isclientproffesional , dclients.address, dclients.contact_person, dclients.email, dclients.phone" ;
   const query = { text: "SELECT "+
     " dportfolios.idportfolio, dportfolios.idclient , dportfolios.idstategy, " + 
@@ -117,7 +114,7 @@ async function fGetportfolioTable (request,response) {
       query.text += ' WHERE (public.dstrategiesglobal.id= $1);'
       query.values = [request.query.strategyId]
     break;
-    case 'Get_Portfolios_By_idPortfolio':
+    case 'Get_Portfolio_By_idPortfolio':
       query.text += ' WHERE (public.dportfolios.idportfolio= $1);'
       query.values = [request.query.idportfolio]
     break;
@@ -129,13 +126,9 @@ async function fGetportfolioTable (request,response) {
       query.text += ';'
     break;
   }
-  pool.query (query, (err, res) => {if (err) {console.log (err.stack)} else {
-    console.log('res',res.rows);
-    return response.status(200).json((res.rows))}
-  })
+  sql = pgp.as.format(query.text,query.values)
+  queryExecute (sql, response);
 }
-
-
 async function fPutNewFavorite (request, response) {
     paramArr = [request.body.nodename, request.body.nodeparent, request.body.userId, request.body.idelement]
     const query = {
@@ -143,21 +136,18 @@ async function fPutNewFavorite (request, response) {
       values: paramArr,
       rowMode: 'array'
     }
-    pool.query (query, (err, res) => {
-      if (err) {console.log (err.stack)} else {return response.status(200).json(res.rows[0])}
-    })
+    sql = pgp.as.format(query.text,query.values)
+    queryExecute (sql, response);
 }
 async function fRemoveFavorite (request, response) {
     paramArr = [request.body.nodename, request.body.userId, request.body.idelement]
     const query = {
       text: "DELETE FROM public.dtree_menu_favorites where (nodename = $1 and userid= $2 and idelement= $3) RETURNING *",
       values: paramArr,
-      rowMode: 'array'
     }
-    pool.query (query, (err, res) => {if (err) {console.log (err.stack)} else {return response.status(200).json(res.rows[0])}
-    })
+    sql = pgp.as.format(query.text,query.values)
+    queryExecute (sql, response);
 }
-
 async function fGetClientData(request,response) {
   const query = {text: ' SELECT * FROM public.dclients'}
   switch (request.query.action) {
@@ -173,11 +163,9 @@ async function fGetClientData(request,response) {
       query.text += ';'
     break;
   }
-  
   sql = pgp.as.format(query.text,query.values)
   queryExecute (sql, response);
 }
-
 async function fEditClientData (request, response) {
   paramArr = request.body.data
   const query = {
@@ -190,19 +178,12 @@ async function fEditClientData (request, response) {
    'email=${email}, '+
    'phone=${phone}, '+
    'code=${code} '+
-	 'WHERE idclient=${idclient};',
+	 'WHERE idclient=${idclient} RETURNING *;',
     values: paramArr
   }
   sql = pgp.as.format(query.text,query.values)
-  pool.query (sql,  (err, res) => {if (err) {
-    console.log (err.stack.split("\n", 1).join(""))
-    err.detail = err.stack
-    return response.send(err)
-  } else {
-    return response.status(200).json(res.rowCount)}
-  })  
+  queryExecute (sql, response);
 }
-
 async function fCreateClientData (request, response) {
   paramArr = request.body.data
   const query = {
@@ -210,30 +191,16 @@ async function fCreateClientData (request, response) {
         '(clientname, idcountrydomicile, isclientproffesional, address, contact_person, email, phone, code)' +
         ' VALUES (' + 
         '${clientname}, ${idcountrydomicile}, ${isclientproffesional}, ${address}, ${contact_person}, ' +
-        '${email}, ${phone}, ${code} );',
+        '${email}, ${phone}, ${code} ) RETURNING *;',
     values: paramArr
   }
   sql = pgp.as.format(query.text,query.values)
-  console.log('sql', sql);
-  pool.query (sql,  (err, res) => {if (err) {
-    console.log (err.stack.split("\n", 1).join(""))
-    err.detail = err.stack
-
-    return response.send(err)
-  } else {
-    return response.status(200).json(res.rowCount)}
-  })  
+  queryExecute (sql, response);
 }
-
 async function fClientDataDelete (request, response) {
-  const query = {text: 'DELETE FROM public.dclients WHERE idclient=${idclient};', values:  request.body}
+  const query = {text: 'DELETE FROM public.dclients WHERE idclient=${idclient} RETURNING *;', values:  request.body}
   sql = pgp.as.format(query.text,query.values)
-  pool.query (sql,  (err, res) => {if (err) {
-    console.log ('err',err.stack)
-    return response.send(err)
-  } else {
-    return response.status(200).json(res.rowCount)}
-  })  
+  queryExecute (sql, response); 
 }
 
 module.exports = {

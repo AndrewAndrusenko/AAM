@@ -1,15 +1,14 @@
 import {AfterViewInit, Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
-import { lastValueFrom, Subscription } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
-import {TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { bcParametersSchemeAccTrans, bcTransactionType_Ext, SWIFTStatement950model } from 'src/app/models/intefaces';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
 import { AppAccEntryModifyFormComponent } from '../../forms/acc-entry-form/acc-entry-form';
 import { HandlingTableSelectionService } from 'src/app/services/handling-table-selection.service';
 import { SelectionModel } from '@angular/cdk/collections';
+import { AuthService } from 'src/app/services/auth.service';
 @Component({
   selector: 'app-table-swift-950-items-process',
   templateUrl: './swift-950-table.html',
@@ -23,6 +22,8 @@ import { SelectionModel } from '@angular/cdk/collections';
   ],
 })
 export class AppTableSWIFT950ItemsComponent  implements  AfterViewInit {
+  accessState: string = 'none';
+  disabledControlElements: boolean = false;
   bcEntryParameters = <bcParametersSchemeAccTrans> {}
   TransactionTypes: bcTransactionType_Ext[] = [];
   columnsToDisplay = ['select','id', 'amountTransaction',  'typeTransaction', 'valueDate', 'comment', 'refTransaction', 'entriesAmount' ];
@@ -44,20 +45,21 @@ export class AppTableSWIFT950ItemsComponent  implements  AfterViewInit {
 
   constructor ( 
     private AccountingDataService:AppAccountingService, 
-    private TreeMenuSevice:TreeMenuSevice, 
     private SelectionService:HandlingTableSelectionService,
+    private AuthServiceS:AuthService,  
+
   ) {
-    this.AccountingDataService.getReloadEntryList().subscribe (entryData =>{
-      this.reloadSwiftItemsTable()})
+    this.AccountingDataService.getReloadEntryList().subscribe (entryData => this.reloadSwiftItemsTable())
   }
-  async ngAfterViewInit() {
+  ngAfterViewInit() {
     this.columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
-    let userData = JSON.parse(localStorage.getItem('userInfo'))
-    await lastValueFrom (this.TreeMenuSevice.getaccessRestriction (userData.user.accessrole, 'accessToClientData'))
-    .then (accessRestrictionData => this.reloadSwiftItemsTable())
+    this.accessToClientData = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToClientData')[0].elementvalue;
+    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToSWIFTData')[0].elementvalue;
+    this.disabledControlElements = this.accessState === 'full'? false : true;
+    this.reloadSwiftItemsTable()
   }
   reloadSwiftItemsTable () {
-    this.AccountingDataService.GetMT950Transactions (null,this.parentMsgRow.id,null,null,'GetMT950Transactions').subscribe (MT950Transactions  => {
+    this.accessState ==='none'? null : this.AccountingDataService.GetMT950Transactions (null,this.parentMsgRow.id,null,null,'GetMT950Transactions').subscribe (MT950Transactions  => {
       this.dataSource  = new MatTableDataSource(MT950Transactions);
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
@@ -71,12 +73,9 @@ export class AppTableSWIFT950ItemsComponent  implements  AfterViewInit {
       this.AccountingDataService.sendEntryDraft(EmptyEntry);
     } else {
       let accountNo = row.comment.split('/')[3];
-      await lastValueFrom (this.AccountingDataService.GetAccountData(0,0,0, accountNo,'GetAccountData'))
-      .then ((accountData) => {
+      this.AccountingDataService.GetAccountData(0,0,0, accountNo,'GetAccountData').subscribe(accountData => {
         this.bcEntryParameters.pAccountId = Number(accountData[0].accountId);
-        // this.bcEntryParameters.dAccountNo = accountData[0].accountNo;
         this.bcEntryParameters.pLedgerNoId = this.parentMsgRow.ledgerNoId;
-        // this.bcEntryParameters.dLedgerNo = this.parentMsgRow.ledgerNo;
         this.bcEntryParameters.pExtTransactionId = row.id;
         this.bcEntryParameters.pAmount = row.amountTransaction;
         this.bcEntryParameters.pDate_T = row.valueDate ;
@@ -86,7 +85,6 @@ export class AppTableSWIFT950ItemsComponent  implements  AfterViewInit {
         this.bcEntryParameters.cxActTypeCode_Ext = row.comment.split('/')[1];
         this.bcEntryParameters.cLedgerType = 'NostroAccount';
         this.AccountingDataService.GetEntryScheme (this.bcEntryParameters).subscribe (entryScheme => {
-          // console.log('Manual 950 sent sendEntryDraft',entryScheme);
         this.AccountingDataService.sendEntryDraft({'entryDraft' : entryScheme, 'formStateisDisabled': false, 'refTransaction': row.refTransaction});
         });
       })

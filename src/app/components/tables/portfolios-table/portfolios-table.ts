@@ -5,7 +5,7 @@ import {MatTableDataSource as MatTableDataSource} from '@angular/material/table'
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {AccountsTableModel } from 'src/app/models/intefaces';
 import {MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import {AppNewAccountComponent } from '../../forms/new-account-form/new-account-form';
+import {AppNewAccountComponent } from '../../forms/portfolio-form/portfolio-form';
 import {AppInvestmentDataServiceService } from 'src/app/services/app-investment-data.service.service';
 import {AuthService } from 'src/app/services/auth.service';
 import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
@@ -39,11 +39,11 @@ export class TablePortfolios {
   dialogRef: MatDialogRef<AppNewAccountComponent>;
   currentAccout:any;
 
-  @Input() clientId : number;
-  @Input() strategyId : number;
-  @Input() actionOnAccountTable : string;
-  @Input() action : string;
-  @Input() row : any;
+  @Input() clientId: number;
+  @Input() strategyId: number;
+  @Input() actionOnAccountTable: string;
+  @Input() action: string;
+  @Input() row: any;
 
   @Output() public modal_principal_parent = new EventEmitter();
 
@@ -69,10 +69,8 @@ export class TablePortfolios {
     })
   }
   ngOnInit(): void {
-    console.log('accessRestrictions',this.AuthServiceS.accessRestrictions);
     this.accessToClientData = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToClientData')[0].elementvalue;
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToPortfolioData')[0].elementvalue;
-    console.log('this.accessState',this.accessToClientData,this.accessState);
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.updatePortfolioData (undefined, this.clientId,this.strategyId,this.actionOnAccountTable,this.accessToClientData);
     if (this.accessState !=='none') this.InvestmentDataService.getReloadPortfoliosData().subscribe((data) => {

@@ -19,7 +19,7 @@ import {ScrollingModule} from '@angular/cdk/scrolling';
 import { DataTablesModule } from "angular-datatables";
 import { MatDialogModule as MatDialogModule} from "@angular/material/dialog";
 import { AppClientFormComponent } from './components/forms/client-form/client-form';
-import { AppNewAccountComponent } from './components/forms/new-account-form/new-account-form';
+import { AppNewAccountComponent } from './components/forms/portfolio-form/portfolio-form';
 import { AppConfimActionComponent } from './components/common-forms/app-confim-action/app-confim-action.component';
 import { AppSnackMsgboxComponent } from './components/common-forms/app-snack-msgbox/app-snack-msgbox.component';
 import { tradesDataTable } from './components/tables/z-ds-trades-table/z-ds-trades-table';

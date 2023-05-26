@@ -8,8 +8,8 @@ import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dia
 import { AuthService } from 'src/app/services/auth.service';
 @Component({
   selector: 'app-app-portfolio',
-  templateUrl: './new-account-form.html',
-  styleUrls: ['./new-account-form.css']
+  templateUrl: './portfolio-form.html',
+  styleUrls: ['./portfolio-form.css']
 })
 export class AppNewAccountComponent {
   accessState: string = 'none';
@@ -31,7 +31,8 @@ export class AppNewAccountComponent {
     private InvestmentDataService : AppInvestmentDataServiceService,   
     private AuthServiceS:AuthService,  
     private dialog: MatDialog, 
-    ) {
+  ) 
+    {
       this.newAccountForm=this.fb.group ({
         idportfolio: {value:'', disabled: true, }, 
         account_type: [{value:'', disabled: false}],
@@ -46,42 +47,38 @@ export class AppNewAccountComponent {
       this.InvestmentDataService.getAccountTypesList (0,'','Get_AccountTypes_List').subscribe (data => {
         this.accountTypes = data;
       })
-      this.AuthServiceS.verifyAccessRestrictions('accessToClientData').subscribe ((accessData) => {
-        this.accessToClientData = accessData.elementvalue;
-        this.AuthServiceS.verifyAccessRestrictions('accessToPortfolioData').subscribe ((accessData) => {
-          this.accessState=accessData.elementvalue;
-          this.disabledControlElements = this.accessState === 'full'? false : true;
-          if (this.accessState !=='none') {
-            this.InvestmentDataService.getPortfoliosData('',this.portfolioCode,0,0,'Get_Accounts_By_idPortfolio', this.accessToClientData).subscribe (data => {
-              this.portfolioData=data[0];
-              this.title = this.action
-              this.action = this.action
-              this.newAccountForm.patchValue(this.portfolioData);
-              switch (this.action) {
-                case 'Open':
-                case 'Create':  
-                this.newAccountForm.reset();
-                this.newAccountForm.controls['idclient'].setValue(this.portfolioData['idclient'])
-                this.newAccountForm.controls['clientname'].setValue(this.portfolioData['clientname'])
-                break;
-                case 'Create_Example':
-                  this.newAccountForm.controls['portfolioname'].setValue(null);
-                  this.title = "Create"
-                  this.action = "Create"
-                break;
-                case 'Delete': 
-                case 'View': 
-                  this.newAccountForm.disable();
-                break;
-               }  
-            })
-          }
+      this.accessToClientData = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToClientData')[0].elementvalue;
+      this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToPortfolioData')[0].elementvalue;
+      this.disabledControlElements = this.accessState === 'full'? false : true;
+      if (this.accessState !=='none') {
+        this.InvestmentDataService.getPortfoliosData('',this.portfolioCode,0,0,'Get_Accounts_By_idPortfolio', this.accessToClientData).subscribe (data => {
+          this.portfolioData=data[0];
+          this.title = this.action
+          this.action = this.action
+          this.newAccountForm.patchValue(this.portfolioData);
+          switch (this.action) {
+            case 'Open':
+            case 'Create':  
+            this.newAccountForm.reset();
+            this.newAccountForm.controls['idclient'].setValue(this.portfolioData['idclient'])
+            this.newAccountForm.controls['clientname'].setValue(this.portfolioData['clientname'])
+            break;
+            case 'Create_Example':
+              this.newAccountForm.controls['portfolioname'].setValue(null);
+              this.title = "Create"
+              this.action = "Create"
+            break;
+            case 'Delete': 
+            case 'View': 
+              this.newAccountForm.disable();
+            break;
+            }  
         })
-      })
+      }
     }
   ngOnChanges(changes: SimpleChanges) {
     if (this.accessState !=='none') {
-      this.InvestmentDataService.getPortfoliosData('',changes['portfolioCode'].currentValue,0,0, 'Get_Accounts_By_idPortfolio', this.accessToClientData).subscribe (portfoliosData => {
+      this.InvestmentDataService.getPortfoliosData('',changes['portfolioCode'].currentValue,0,0, 'Get_Portfolio_By_idPortfolio', this.accessToClientData).subscribe (portfoliosData => {
         this.newAccountForm.patchValue(portfoliosData[0])})
     }
   }

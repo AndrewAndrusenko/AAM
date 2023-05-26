@@ -30,6 +30,7 @@ import { AuthService } from 'src/app/services/auth.service';
 })
 export class AppTableSWIFTsInListsComponent  implements  AfterViewInit, OnInit,OnDestroy {
   accessState: string = 'none';
+  accessToEntriesData: string = 'none';
   disabledControlElements: boolean = false;
   columnsToDisplay = ['select','msgId',  'senderBIC', 'DateMsg', 'typeMsg','accountNo', 'ledgerNo'];
   columnsHeaderToDisplay = ['msgId',  'senderBIC', 'Date', 'Type','Account','ledger'];
@@ -71,6 +72,9 @@ export class AppTableSWIFTsInListsComponent  implements  AfterViewInit, OnInit,O
     private fb : FormBuilder
 
   ) {
+    this.accessToEntriesData = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToEntriesData')[0].elementvalue;
+    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToSWIFTData')[0].elementvalue;
+    this.disabledControlElements = this.accessState === 'full'? false : true;
     this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data=>{
       this.FirstOpenedAccountingDate = data[0].FirstOpenedDate
     })
@@ -90,8 +94,6 @@ export class AppTableSWIFTsInListsComponent  implements  AfterViewInit, OnInit,O
       this.transactionsToProcess[index].status ='Created'
       this.createdLogAutoProcessingALL.push(logCreatedObject);
       this.isProcessingComplete()? this.swiftProcessingFB.enable() : null ;
-      console.log('st',this.transactionsToProcess);
-
     })
     this.swiftProcessingFB = this.fb.group ({
       cDateToProcessSwift:[null, [Validators.required]],
@@ -105,27 +107,21 @@ export class AppTableSWIFTsInListsComponent  implements  AfterViewInit, OnInit,O
   }
   ngOnInit(): void {
     this.swiftProcessingFB.enable()
-    this.AuthServiceS.verifyAccessRestrictions('accessToSWIFTData').subscribe ((accessData) => {
-      console.log('access',accessData);
-      this.accessState=accessData.elementvalue;
-      this.disabledControlElements = this.accessState === 'full'? false : true;
-    })
+  }
+  ngAfterViewInit() {
+    this.updateSwiftsData('GetSWIFTsList');
+    this.cDateToProcessSwift.setValue(new Date(this.FirstOpenedAccountingDate))
+    this.cDateAccounting.setValue(new Date(this.FirstOpenedAccountingDate))
   }
   async updateSwiftsData (action: string) {
     return new Promise<number> (async (resolve,reject) => {
-    this.AuthServiceS.verifyAccessRestrictions('accessToSWIFTData').subscribe ((accessData) => {
-
-    })
-
-
-/*       this.accessToClientData = accessRestrictionData['elementvalue']
-      this.AccountingDataService.GetAccountsListAccounting (null,null,null,null,this.action).subscribe (AccountsList  => {
-        this.dataSource  = new MatTableDataSource(AccountsList);
+      this.accessState === 'none'? null : this.AccountingDataService.GetSWIFTsList (null,null,null,null,action).subscribe (SWIFTsList  => {
+        this.dataSource? this.dataSource.data = null : null;
+        this.dataSource  = new MatTableDataSource(SWIFTsList);
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
-        resolve (AccountsList.length)
-      })
-    }) */
+        resolve(SWIFTsList.length)
+    })
   })
   }
   async ProcessSwiftStatemts (overdraftOverride:boolean) {
@@ -141,16 +137,6 @@ export class AppTableSWIFTsInListsComponent  implements  AfterViewInit, OnInit,O
         }
       });
       swiftTable.selection.clear();
-      
-    })
-  }
-  async ngAfterViewInit() {
-      this.AccountingDataService.GetSWIFTsList (null,null,null,null,'GetSWIFTsList').subscribe (SWIFTsList  => {
-        this.dataSource  = new MatTableDataSource(SWIFTsList);
-        this.dataSource.paginator = this.paginator;
-        this.dataSource.sort = this.sort;
-        this.cDateToProcessSwift.setValue(new Date(this.FirstOpenedAccountingDate))
-        this.cDateAccounting.setValue(new Date(this.FirstOpenedAccountingDate))
     })
   }
   isProcessingComplete():boolean {
@@ -190,15 +176,10 @@ export class AppTableSWIFTsInListsComponent  implements  AfterViewInit, OnInit,O
   checkboxLabel(row?: SWIFTSGlobalListmodel): string {return this.SelectionService.checkboxLabel(this.dataSource, this.selection, row)}
   changeProcesDate (dateToProcess) {
     this.cDateAccounting.setValue(this.cDateToProcessSwift.value>=new Date(this.FirstOpenedAccountingDate)? this.cDateToProcessSwift.value : this.FirstOpenedAccountingDate)
-    this.AccountingDataService.GetSWIFTsList (new Date(dateToProcess).toDateString(),null,null,null,'GetSWIFTsList').subscribe (SWIFTsList  => {
-      this.dataSource  = new MatTableDataSource(SWIFTsList);
-      this.dataSource.paginator = this.paginator;
-      this.dataSource.sort = this.sort;
-    })
+    this.updateSwiftsData('GetSWIFTsList');
   }
   async submitQuery () {
-    this.dataSource.data=null;
-    await this.updateSwiftsData(this.action).then ((rowsCount) => {
+    this.updateSwiftsData('GetSWIFTsList').then (rowsCount => {
       this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (rowsCount,'en-US') + ' rows'},'Loaded ')
     })
   }

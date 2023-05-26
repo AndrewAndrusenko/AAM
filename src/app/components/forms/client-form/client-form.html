@@ -4,7 +4,7 @@
 <div class="client_form">
   <button mat-raised-button color="primary" 
     [disabled]="!(editClienttForm.valid && submitbox.checked)"
-    (click)="updateClientData(action)"
+    (click)="editClienttForm.valid? updateClientData(action) : null"
     style="margin-top: 10px; width: 200px; font-size: 18px;">
     {{title}} Client 
   </button>
@@ -15,7 +15,6 @@
     "
   >Submit Data</mat-checkbox>
 </div>
-
 <form class="submit" [formGroup]="editClienttForm">
   <mat-form-field>
     <input matInput placeholder="id client" formControlName="idclient">

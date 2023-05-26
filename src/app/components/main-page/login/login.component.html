@@ -9,7 +9,7 @@
           <img class="mb-4" src="assets/logo.png" alt="" width="64" height="64" >
         </div>
         <h1 class="h2 mb-3 font-weight-normal" >Please sign in</h1>
-        <mat-form-field appearance="fill">
+        <mat-form-field appearance="fill" >
           <mat-label>Username</mat-label>
           <input  matInput type="text" formControlName="login" >
           <button mat-icon-button matPrefix color="primary" aria-label="Example icon button with a home icon">
@@ -18,21 +18,22 @@
           <button *ngIf="login.value" matSuffix mat-icon-button aria-label="Clear" (click)="login.patchValue(null)">
             <mat-icon>close</mat-icon>
           </button>
-          <mat-error  *ngIf="login.invalid">
-            The field is required.    
+          <mat-error  *ngIf="login?.errors?.['required']">
+            The field is required    
           </mat-error>
         </mat-form-field>
         <mat-form-field appearance="fill">
           <mat-label>Password</mat-label>
-          <button mat-icon-button color="primary" matPrefix (click)="hide = !hide" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide">
+          <button mat-icon-button color="primary" matPrefix (click)="hide = !hide" 
+            [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide">
             <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
           </button>
           <input matInput formControlName="password" [type]="hide ? 'password' : 'text'">
           <button *ngIf="password.value" matSuffix mat-icon-button aria-label="Clear" (click)="password.patchValue(null)">
             <mat-icon>close</mat-icon>
           </button>
-          <mat-error  *ngIf="password.invalid">
-            The field is required.    
+          <mat-error  *ngIf="password?.errors?.['required']">
+            The field is required    
           </mat-error>
         </mat-form-field>
         <button class="submit"
@@ -47,16 +48,19 @@
       <form class="submit" class="AccessForm" [formGroup]="addNewUserForm">
         <img class="mb-4" src="assets/logo.png" alt="" width="64" height="64" >
         <h1 class="h2 mb-3 font-weight-normal" >Please sign up</h1>
-          <mat-form-field appearance="fill"   >
-            <mat-label > <mat-icon >accessibility</mat-icon> Userrole</mat-label>
-            <mat-select formControlName="userrole" >
-              <mat-option *ngFor="let userrole of userroles " [value]="userrole">
-                {{userrole}}
-              </mat-option>
+          <mat-form-field  appearance="fill" style="min-height: 8.2vh;">
+            <button mat-icon-button matPrefix color="primary" >
+              <mat-icon  >accessibility</mat-icon>
+            </button> 
+            <mat-label> Userrole</mat-label>
+            <mat-select formControlName="userroleValue" >
+              <ng-container *ngFor="let userrole of userroles">
+                <mat-option [value]="userrole"> {{userrole}} </mat-option>
+              </ng-container>
             </mat-select>
-            <mat-error  *ngIf="userroleCreate.invalid">
-              The field is required.    
-           </mat-error>
+            <mat-error  *ngIf="userroleCreate?.errors?.['required']">
+              The field is required    
+            </mat-error>
           </mat-form-field>
           <mat-form-field appearance="fill">
             <mat-label>Username</mat-label>
@@ -64,11 +68,17 @@
             <button mat-icon-button matPrefix color="primary" aria-label="Example icon button with a home icon">
               <mat-icon  >perm_identity</mat-icon>
             </button> 
-            <button *ngIf="loginCreate.value" matSuffix mat-icon-button aria-label="Clear" (click)="loginCreate.patchValue(null)">
+            <button *ngIf="loginCreate.value" matSuffix mat-icon-button aria-label="Clear" (click)="loginCreate.setValue(null)">
               <mat-icon>close</mat-icon>
             </button>
-            <mat-error  *ngIf="loginCreate.invalid">
-              The field is required.    
+            <mat-error  *ngIf="loginCreate?.errors?.['loginIsTaken']">
+              Login isn't unique   
+            </mat-error>
+            <mat-error  *ngIf="loginCreate?.errors?.['minlength']">
+              Minimum length is 4 characters  
+            </mat-error>
+            <mat-error  *ngIf="loginCreate?.errors?.['required']">
+              The field is required    
            </mat-error>
           </mat-form-field>
           <mat-form-field appearance="fill">
@@ -80,14 +90,17 @@
           <button *ngIf="passwordCreate.value" matSuffix mat-icon-button aria-label="Clear" (click)="passwordCreate.patchValue(null)">
             <mat-icon>close</mat-icon>
             </button>
-            <mat-error  *ngIf="passwordCreate.invalid">
-              The field is required.    
+            <mat-error  *ngIf="passwordCreate?.errors?.['required']">
+              The field is required   
            </mat-error>
+           <mat-error  *ngIf="passwordCreate?.errors?.['minlength']">
+            Minimum length is 4 characters  
+          </mat-error>
           </mat-form-field>
           <button class="submit"
             mat-flat-button 
             [ngClass]="addNewUserForm.valid? 'activeB' : 'disabledButton'" class="buttons-signin"
-            (click)="addNewUserForm.valid? handleNewUserClick() : null"
+            (click)="addNewUserForm.valid? handleNewUserClick() : showErrors()"
             >Create New User
           </button>
       </form>

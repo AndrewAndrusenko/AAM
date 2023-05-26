@@ -51,9 +51,6 @@ async function fGetStrategiesList (request,response) {
   }
   sql = pgp.as.format(query.text,query.values)
   queryExecute (sql, response);
-/*   pool.query (query, (err, res) => {if (err) {console.log (err.stack)} else {
-    return response.status(200).json((res.rows))}
-  }) */
 }
 async function fGetStrategyStructure (request,response) {
   const query = {text: 'SELECT '+
@@ -65,7 +62,6 @@ async function fGetStrategyStructure (request,response) {
     ' LEFT JOIN public."aMoexInstruments"  ' +
     ' ON public."aMoexInstruments".secid = dstrategies_global_structure.id_strategy_child '+
     ' WHERE id_strategy_parent = $1'}
-    console.log('request.query.id',request.query,request.query.id);
     query.values = [Number(request.query.id)] 
   switch (request.query.action) {
     case 'Check_Name':
@@ -82,10 +78,6 @@ async function fGetStrategyStructure (request,response) {
   }
   sql = pgp.as.format(query.text,query.values)
   queryExecute (sql, response);
-/*   console.log('query', query);
-  pool.query (query, (err, res) => {if (err) {console.log (err.stack)} else {
-    return response.status(200).json((res.rows))}
-  }) */
 }
 async function fEditStrategyData (request, response) {
   paramArr = request.body.data

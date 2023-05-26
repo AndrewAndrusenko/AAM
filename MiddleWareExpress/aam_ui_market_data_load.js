@@ -20,7 +20,7 @@ async function queryExecute (sql, response, responseType) {//General query to po
         err.detail = err.stack
         resolve (response? response.send(err):err)
       } else {
-        // console.log('**********************QTY rows',responseType==='rowCount'? res.rowCount:res.rows.length)
+        console.log('UI MArket Data*********************QTY rows',responseType==='rowCount'? res.rowCount:res.rows.length)
         let result = responseType==='rowCount'? res.rowCount : res.rows;
         resolve (response? response.status(200).json(result):result)
       }

@@ -2,13 +2,13 @@ import {
   AbstractControl,
   AsyncValidatorFn,
   ValidationErrors,
+  ValidatorFn,
 } from '@angular/forms';
 import { firstValueFrom, Observable, of } from 'rxjs';
 import { catchError, first, map, take, tap } from 'rxjs/operators';
 import { AppInvestmentDataServiceService } from './app-investment-data.service.service';
 import { AppAccountingService } from './app-accounting.service';
 import { AppMarketDataService } from './app-market-data.service';
-import { registerUpdateLifecycle } from 'echarts';
 export class customAsyncValidators {
 
   static clientNameCustomAsyncValidator(userService: AppInvestmentDataServiceService, clientId:number): AsyncValidatorFn {

@@ -35,13 +35,20 @@ async function addNewUser (request,response) {
 }
 
 async function getUserRoles (request,response) {
+  console.log('getLoginsArray------------','SELECT roles' );
+  
   pool.query ({text : 'SELECT "roleName" from  public."aAccesRoles"; ',rowMode: "array"}, (err, res) => {
     if (err) {console.log (err.stack)} else {return response.status(200).json(res.rows.flat())}
   })
 }
+async function getLoginsArray (request,response) {
+  console.log('getLoginsArray------------','SELECT ..... dusers' );
 
+  pool.query ({text : 'SELECT "login" from  public."dusers"; ',rowMode: "array"}, (err, res) => {
+    if (err) {console.log (err.stack)} else {return response.status(200).json(res.rows.flat())}
+  })
+}
 async function getAccessRestriction (request,response) {
-  console.log('request.query.elementid',request.query.elementid);
   const query = {
     text: ' SELECT id, accessrole, elementid, tsmodule, htmltemplate, elementtype, elementvalue ' +
     ' FROM public."aAccessConstraints"' + 
@@ -53,8 +60,8 @@ async function getAccessRestriction (request,response) {
     query.values.push(request.query.elementid)
   }
   sql = pgp.as.format(query.text,query.values)
+  console.log('getAccessRestriction------------',sql );
   pool.query ({text:sql,values:""}, (err, res) => {if (err) {console.log (err.stack)} else {
-    console.log('res.rows',res.rows.length);
     return request.query.elementid?  response.status(200).json(res.rows[0]) : response.status(200).json(res.rows)
   }
   })
@@ -64,5 +71,6 @@ module.exports = {
   encryptPsw,
   addNewUser,
   getUserRoles,
+  getLoginsArray,
   getAccessRestriction
 }
