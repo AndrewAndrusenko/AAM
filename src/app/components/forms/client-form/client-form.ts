@@ -7,6 +7,7 @@ import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AppInvestmentDataServiceService } from 'src/app/services/app-investment-data.service.service';
 import { AuthService } from 'src/app/services/auth.service';
+import { ClientData } from 'src/app/models/intefaces';
 @Component({
   selector: 'app-app-client-form',
   templateUrl: './client-form.html',
@@ -61,12 +62,12 @@ export class AppClientFormComponent implements OnInit {
   ngOnChanges(changes: SimpleChanges) {
     this.updataDataSourse(changes['client'].currentValue, null, 'Get_Client_Data');
   }
-  snacksBox(result:any, action?:string){
+  snacksBox(result:ClientData[], action?:string){
     if (result['name']=='error') {
       this.CommonDialogsService.snackResultHandler(result)
     } else {
-      this.CommonDialogsService.snackResultHandler({name:'success', detail: result + 'client'}, action);
-      $('#mytable').DataTable().ajax.reload();
+      this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + 'client'}, action);
+      this.InvestmentDataServiceService.sendReloadClientTable(result)
     }
   }
   updateClientData(action:string){
@@ -74,13 +75,13 @@ export class AppClientFormComponent implements OnInit {
     switch (action) {
       case 'Create_Example':
       case 'Create':
-        this.InvestmentDataServiceService.createClient (this.editClienttForm.value).subscribe (result => this.snacksBox(result.length,'Created') )
+        this.InvestmentDataServiceService.createClient (this.editClienttForm.value).subscribe (result => this.snacksBox(result,'Created') )
         this.editClienttForm.controls['clientname'].markAsDirty;
         this.editClienttForm.controls['idclient'].disable()
       break;
       case 'Edit':
         this.editClienttForm.controls['idclient'].enable()
-        this.InvestmentDataServiceService.updateClient (this.editClienttForm.value).subscribe (result => this.snacksBox(result.length,'Updated'))
+        this.InvestmentDataServiceService.updateClient (this.editClienttForm.value).subscribe (result => this.snacksBox(result,'Updated'))
         this.editClienttForm.controls['idclient'].disable()
       break;
       case 'Delete':
@@ -88,7 +89,7 @@ export class AppClientFormComponent implements OnInit {
           if (isConfirmed.isConfirmed) {
             this.editClienttForm.controls['idclient'].enable()
             this.InvestmentDataServiceService.deleteClient (this.editClienttForm.value['idclient']).subscribe (result =>{
-              this.snacksBox(result.length,'Deleted')
+              this.snacksBox(result,'Deleted')
               this.CommonDialogsService.dialogCloseAll();
             })
             this.editClienttForm.controls['idclient'].disable()

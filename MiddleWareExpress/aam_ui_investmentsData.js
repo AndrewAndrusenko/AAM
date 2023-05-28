@@ -46,7 +46,7 @@ async function fGetStrategiesList (request,response) {
       query.values = ['account_type']
     break;
     default:
-      query.text += ';'
+      query.text += ' ORDER BY s_level_id, sname ;'
     break;
   }
   sql = pgp.as.format(query.text,query.values)

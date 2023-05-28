@@ -11,6 +11,7 @@ import {AuthService } from 'src/app/services/auth.service';
 import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { formatNumber } from '@angular/common';
+import { investmentNodeColor } from 'src/app/models/constants';
 @Component({
   selector: 'app-app-portfolio-tablee',
   templateUrl: './portfolios-table.html',
@@ -46,6 +47,8 @@ export class TablePortfolios {
   @Input() row: any;
 
   @Output() public modal_principal_parent = new EventEmitter();
+  investmentNodeColor=investmentNodeColor
+  expandAllowed: boolean;
 
   constructor(
     private InvestmentDataService:AppInvestmentDataServiceService, 
@@ -94,7 +97,8 @@ export class TablePortfolios {
     this.dialogRef = this.dialog.open(AppNewAccountComponent ,{minHeight:'400px', maxWidth:'1000px' });
     this.dialogRef.componentInstance.action = actionType;
     this.dialogRef.componentInstance.title = actionType;
-    this.dialogRef.componentInstance.portfolioCode = row['idportfolio'];
+    this.dialogRef.componentInstance.portfolioCode = Number(row['idportfolio']);
+    console.log('idportfolio', row, row['idportfolio']);
     // this.dialogRef.componentInstance.accessToClientData = this.accessToClientData;
     switch (actionType) {
       case 'Create':

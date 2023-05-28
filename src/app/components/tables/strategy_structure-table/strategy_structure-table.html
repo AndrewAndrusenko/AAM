@@ -12,7 +12,8 @@
     </mat-panel-description>
     </mat-expansion-panel-header >
 
-    <app-structure-strategy-form
+    <app-structure-strategy-form 
+    [disabledControlElements] ="disabledControlElements"
     [strategyId] = parentStrategyId
     [MP] = ModelPortfolio
     > </app-structure-strategy-form> 

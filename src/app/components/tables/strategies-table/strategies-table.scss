@@ -1,5 +1,5 @@
 .mat-table {
-  background-color:#4f4e4e;
+  background-color:#313131;
   width: 100%;
   font-size: 26px;
 }
@@ -15,7 +15,10 @@ tr.detail-row {
   border-bottom-width: 0;
 }
 .element-detail {
+  border-color: red;
   overflow: hidden;
-  display: flex;
 }
 
+.mat-column-description {
+  color: rgb(85, 167, 238)
+}

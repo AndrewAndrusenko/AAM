@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { AccountsTableModel, accountTypes, ClientData, InstrumentData, StrategiesGlobalData, StrategyStructure } from '../models/intefaces';
+import { cleanData } from 'jquery';
 
 @Injectable({
   providedIn: 'root'
@@ -13,8 +14,10 @@ export class AppInvestmentDataServiceService {
   private subjectName = new Subject<any>(); 
   private subjectReloadStrategyStructure = new Subject<any>(); 
   private subjectReloadPortfoliosData = new Subject<any>(); 
-
+  private subjectReloadClientTable = new Subject<ClientData[]>(); 
+  
   getPortfoliosData (accountType:string, idportfolio: number, clientId: number, strategyId: number, action:string, accessToClientData:string='none'):Observable <AccountsTableModel[]> {
+    console.log('idportfolio',idportfolio);
     const params = {
       accountType: accountType,
       idportfolio: idportfolio,
@@ -38,6 +41,12 @@ export class AppInvestmentDataServiceService {
   getClientData (client: number, clientname: string, action: string) : Observable <ClientData[]>  {
     const params = {'client': client, 'clientname' :clientname, 'action':action }
     return this.http.get <ClientData[]> ('/api/AAM/ClientData/', { params: params } )
+  }
+  sendReloadClientTable ( data:ClientData[]) { 
+    this.subjectReloadClientTable.next(data);
+  }
+  getReloadClientTable(): Observable<ClientData[]> { 
+    return this.subjectReloadClientTable.asObservable(); 
   }
   updateClient (data:any) :Observable<ClientData[]>  { 
     return this.http.post <ClientData[]> ('/api/AAM/ClientDataEdit/',{'data': data})

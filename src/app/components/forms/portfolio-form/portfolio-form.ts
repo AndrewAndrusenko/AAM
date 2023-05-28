@@ -50,32 +50,36 @@ export class AppNewAccountComponent {
       this.accessToClientData = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToClientData')[0].elementvalue;
       this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToPortfolioData')[0].elementvalue;
       this.disabledControlElements = this.accessState === 'full'? false : true;
-      if (this.accessState !=='none') {
-        this.InvestmentDataService.getPortfoliosData('',this.portfolioCode,0,0,'Get_Accounts_By_idPortfolio', this.accessToClientData).subscribe (data => {
-          this.portfolioData=data[0];
-          this.title = this.action
-          this.action = this.action
-          this.newAccountForm.patchValue(this.portfolioData);
-          switch (this.action) {
-            case 'Open':
-            case 'Create':  
-            this.newAccountForm.reset();
-            this.newAccountForm.controls['idclient'].setValue(this.portfolioData['idclient'])
-            this.newAccountForm.controls['clientname'].setValue(this.portfolioData['clientname'])
-            break;
-            case 'Create_Example':
-              this.newAccountForm.controls['portfolioname'].setValue(null);
-              this.title = "Create"
-              this.action = "Create"
-            break;
-            case 'Delete': 
-            case 'View': 
-              this.newAccountForm.disable();
-            break;
-            }  
-        })
-      }
+          }
+  ngAfterViewInit(): void {
+    if (this.accessState !=='none') {
+      console.log('portfolioCode', this.portfolioCode);
+      this.InvestmentDataService.getPortfoliosData('',this.portfolioCode,0,0,'Get_Portfolio_By_idPortfolio', this.accessToClientData).subscribe (data => {
+        this.portfolioData=data[0];
+        this.title = this.action
+        this.action = this.action
+        this.newAccountForm.patchValue(this.portfolioData);
+        switch (this.action) {
+          case 'Open':
+          case 'Create':  
+          this.newAccountForm.reset();
+          this.newAccountForm.controls['idclient'].setValue(this.portfolioData['idclient'])
+          this.newAccountForm.controls['clientname'].setValue(this.portfolioData['clientname'])
+          break;
+          case 'Create_Example':
+            this.newAccountForm.controls['portfolioname'].setValue(null);
+            this.title = "Create"
+            this.action = "Create"
+          break;
+          case 'Delete': 
+          case 'View': 
+            this.newAccountForm.disable();
+          break;
+          }  
+      })
     }
+
+  }
   ngOnChanges(changes: SimpleChanges) {
     if (this.accessState !=='none') {
       this.InvestmentDataService.getPortfoliosData('',changes['portfolioCode'].currentValue,0,0, 'Get_Portfolio_By_idPortfolio', this.accessToClientData).subscribe (portfoliosData => {

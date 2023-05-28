@@ -56,6 +56,7 @@ export class AppClientsTableComponent  {
     this.accessToPortfolioData = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToPortfolioData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.updateClientData(null,null,null);
+    this.InvestmentDataService.getReloadClientTable().subscribe(data => this.updateClientData (null, null, null));
   }
   async updateClientData (client: number, clientname: string, action: string) {
     return new Promise<number> (async (resolve) => {

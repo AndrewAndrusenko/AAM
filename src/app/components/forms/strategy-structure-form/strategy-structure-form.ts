@@ -24,11 +24,12 @@ export class AppStructureStrategyFormComponent implements OnInit {
     id_item: {value:'', disabled: false},
     id_strategy_parent : ''
   })
+  
+  @Input() disabledControlElements: boolean ;
   @Input() action: string;
   @Input() strategyId: string;
   @Input() MP: number;
   dialogRefConfirm: MatDialogRef<AppConfimActionComponent>;
-  isEditForm: boolean = false;
   dialogRef: MatDialogRef<AppInstrumentTableComponent>;
   MPnames: StrategiesGlobalData [] = [];
   @Output() public modal_principal_parent = new EventEmitter();
@@ -44,19 +45,20 @@ export class AppStructureStrategyFormComponent implements OnInit {
     private AtuoCompService:AtuoCompSecidService,
     private CommonDialogsService:HadlingCommonDialogsService,
     private dialog: MatDialog, 
-  ) {}
+  ) {
+  }
   
   ngOnInit(): void {
     this.AtuoCompService.getSecidLists('get_secid_array');
     this.filterednstrumentsLists = this.editStructureStrategyForm.controls['id'].valueChanges.pipe(
       startWith(''),
       map(value => this.AtuoCompService.filter(value || ''))
-    );
-    this.InvestmentDataService.getGlobalStategiesList (0,'','Get_ModelPortfolios_List').subscribe (data => {
-      this.MPnames = data;
-    })
-    switch (this.action) {
-      case 'Create': 
+      );
+      this.InvestmentDataService.getGlobalStategiesList (0,'','Get_ModelPortfolios_List').subscribe (data => {
+        this.MPnames = data;
+      })
+      switch (this.action) {
+        case 'Create': 
       break;
       case 'Create_Example':
       break;
@@ -71,8 +73,8 @@ export class AppStructureStrategyFormComponent implements OnInit {
         this.editStructureStrategyForm.controls['weight_of_child'].disable() 
       break;
       default :
-        this.title = "Create"
-        this.action = "Create"
+      this.title = "Create"
+      this.action = "Create"
       break; 
     }  
     this.editStructureStrategyForm.controls['weight_of_child'].addValidators ( [Validators.required, Validators.pattern('[0-9]*')]);
@@ -80,6 +82,12 @@ export class AppStructureStrategyFormComponent implements OnInit {
       this.editStructureStrategyForm.controls['id'].setAsyncValidators(customAsyncValidators.secidCustomAsyncValidator(this.InvestmentDataService, this.id.value));
       this.editStructureStrategyForm.controls['id'].updateValueAndValidity();
     }
+  }
+  ngAfterViewChecked(): void {
+    //Called after every check of the component's view. Applies to components only.
+    //Add 'implements AfterViewChecked' to the class.
+    this.disabledControlElements? this.editStructureStrategyForm.disable() : null;
+    
   }
   ngOnChanges(changes: SimpleChanges) {
     this.editStructureStrategyForm.controls['id_item'].setValue (changes['strategyId'].currentValue)

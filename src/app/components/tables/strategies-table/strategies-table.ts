@@ -11,6 +11,7 @@ import { HandlingCommonTasksService } from 'src/app/services/handling-common-tas
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { formatNumber } from '@angular/common';
+import { investmentNodeColor } from 'src/app/models/constants';
 @Component({
   selector: 'app-table-strategies',
   templateUrl: './strategies-table.html',
@@ -26,6 +27,9 @@ import { formatNumber } from '@angular/common';
 export class AppTableStrategiesComponentComponent  implements AfterViewInit {
   accessState: string = 'none';
   disabledControlElements: boolean = false;
+  accessToClientData: string = 'none';
+  accessToPortfolioData: string = 'none';
+  
   StrategiesGlobalDataC = (): StrategiesGlobalData => ( {
     id: 0, 
     name : '', 
@@ -36,7 +40,7 @@ export class AppTableStrategiesComponentComponent  implements AfterViewInit {
     'Benchmark Account': '', 
   });
   columnsToDisplay = ['id','name',  'level', 'description', 'Benchmark Account'];
-  columnsHeaderToDisplay = ['ID','Name',  'Level', 'Description', 'Benchmark'];
+  columnsHeaderToDisplay = ['ID','Title',  'Level', 'Description', 'Benchmark'];
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
   dataSource: MatTableDataSource<StrategiesGlobalData>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -46,6 +50,8 @@ export class AppTableStrategiesComponentComponent  implements AfterViewInit {
   StrategyForm: MatDialogRef<AppStrategyFormComponent>;
   action ='';
   currentStrategy: any;
+  investmentNodeColor=investmentNodeColor
+  expandAllowed: any;
 
   constructor(
     private InvestmentDataService:AppInvestmentDataServiceService,
@@ -54,15 +60,11 @@ export class AppTableStrategiesComponentComponent  implements AfterViewInit {
     private HandlingCommonTasksS:HandlingCommonTasksService,
     private CommonDialogsService:HadlingCommonDialogsService,
   ) {
-    this.AuthServiceS.verifyAccessRestrictions('accessToStrategyData').subscribe ((accessData) => {
-      this.accessState=accessData.elementvalue;
-      this.disabledControlElements = this.accessState === 'full'? false : true;
-      if (this.accessState !=='none') {
-        this.InvestmentDataService.getReloadStrategyList().subscribe ( (id) => {
-          this.updateStrategyData(this.action)
-        })
-      }
-    })
+    this.accessToClientData = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToClientData')[0].elementvalue;
+    this.accessToPortfolioData = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToPortfolioData')[0].elementvalue;
+    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToStrategyData')[0].elementvalue;
+    this.disabledControlElements = this.accessState === 'full'? false : true;
+    this.InvestmentDataService.getReloadStrategyList().subscribe (data => this.updateStrategyData(this.action))
   }
   async ngAfterViewInit() {
     this.columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
@@ -83,7 +85,7 @@ export class AppTableStrategiesComponentComponent  implements AfterViewInit {
     this.modal_principal_parent.emit('CLOSE_PARENT_MODAL');
   }
   openStrategyForm (actionType:string, row: StrategiesGlobalData ) {
-    console.log('openStrategyForm',actionType);
+    this.expandAllowed = false;
     this.StrategyForm = this.dialog.open(AppStrategyFormComponent ,{minHeight:'400px', maxWidth:'1000px' });
     this.StrategyForm.componentInstance.action = actionType;
     this.StrategyForm.componentInstance.title = actionType;
@@ -102,21 +104,24 @@ export class AppTableStrategiesComponentComponent  implements AfterViewInit {
   async updateStrategyData (action: string) {
     return new Promise<number> (async (resolve,reject) => {
       this.dataSource? this.dataSource.data=null : null;
-      this.InvestmentDataService.getGlobalStategiesList(0,'0',this.action).subscribe (portfoliosData => {
-        this.dataSource  = new MatTableDataSource(portfoliosData);
+      this.accessState ==='none'? null : 
+      this.InvestmentDataService.getGlobalStategiesList(0,'0',this.action).subscribe (strategyData => {
+        this.dataSource  = new MatTableDataSource(strategyData);
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
-        resolve (portfoliosData.length)
+        resolve (strategyData.length)
       })
     })
   }
   async submitQuery () {
-    this.dataSource? this.dataSource.data = null : null;
     await this.updateStrategyData(this.action).then ((rowsCount) => {
       this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (rowsCount,'en-US') + ' rows'},'Loaded ')
     })
   }
   exportToExcel() {
     this.HandlingCommonTasksS.exportToExcel (this.dataSource.data,"StrategyData")
+  }
+  showPortfolios($event:Event,element:StrategiesGlobalData) {
+    this.expandAllowed? this.expandedElement = this.expandedElement === element ? null : element:this.expandAllowed=true;
   }
 }

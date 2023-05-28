@@ -27,7 +27,21 @@
         <td  
           mat-cell *matCellDef="let element"
           (click)="chooseStrategy(element)"> 
-          {{element[column]}} 
+          <span [ngSwitch]="true==true">
+            <p *ngSwitchCase="['name'].includes(column)">
+              <button mat-stroked-button style="width: 90; font-size: 18px; margin-top:2%;height: 4vh;"  matTooltip="Strategy details"
+              [style.background-color] =  "investmentNodeColor"
+              (click)="openStrategyForm(disabledControlElements? 'View': 'Edit', element)">
+                {{element[column] }}
+              </button> 
+            </p>
+            <p *ngSwitchCase="['level'].includes(column)">
+                 {{element[column]===1? 'Model Portfolio' : 'Strategy' }}
+            </p>
+            <p *ngSwitchDefault>
+              {{element[column]}}
+            </p>
+          </span>
         </td>
       </ng-container>
       <ng-container matColumnDef="expand">
@@ -43,9 +57,10 @@
       <ng-container matColumnDef="expandedDetail" >
         <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplayWithExpand.length">
           <div class="element-detail"
-            [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
-            <app-app-portfolio-tablee style="width: 100%;"
-              [actionOnAccountTable]="'Get_Accounts_By_StrategyId'"
+          [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
+  <h1 style = "color: rgb(85, 167, 238); font-style: italic; margin-top: 1%;"> {{element['name']}}: Portfolios List </h1>
+          <app-app-portfolio-tablee style="width: 100%;"
+              [actionOnAccountTable]="'Get_Portfolios_By_StrategyId'"
               [strategyId]="element['id']"
             ></app-app-portfolio-tablee>
           </div>
@@ -55,7 +70,7 @@
         <tr mat-row [cdkContextMenuTriggerFor]="instrumentcontextmenu"  *matRowDef="let element; columns: columnsToDisplayWithExpand;"
           class="element-row"
           [class.expanded-row]="expandedElement === element"
-          (click)="expandedElement = expandedElement === element ? null : element">
+          (click)="showPortfolios($event,element) ">
           <ng-template  #instrumentcontextmenu>
             <div  class="tree-menu-context" cdkMenu >
               <ng-container *ngIf="disabledControlElements">

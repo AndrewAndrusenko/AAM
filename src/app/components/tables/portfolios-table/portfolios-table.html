@@ -17,12 +17,25 @@
   </button>
   <h2 *ngIf="action=='Select_Benchmark'" style="color: rgb(224, 73, 73);">Use double click to select benchmark Portfolio</h2>
   <div class="mat-elevation-z8">
-    <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class="mat-elevation-z8">
+    <table  mat-table [style.background-color]="strategyId||clientId? '#5e5e5e': '#313131'"
+    [dataSource]="dataSource" multiTemplateDataRows  matSort class="mat-elevation-z8">
       <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i=index">
         <th mat-header-cell *matHeaderCellDef mat-sort-header> {{columnsToHeaderDisplay[i]}}</th>
         <td 
           (click)="chooseAccount(element)"
-          mat-cell *matCellDef="let element"> {{element[column]}} 
+          mat-cell *matCellDef="let element"> 
+          <span [ngSwitch]="true==true">
+            <p *ngSwitchCase="['portfolioname'].includes(column)">
+              <button mat-stroked-button style="font-size: 18px; margin-top: 3%;"  matTooltip="Portfolio details"
+              [style.background-color] =  "investmentNodeColor"
+              (click)="openAccountForm(disabledControlElements? 'View': 'Edit', element)">
+                {{element[column] }}
+              </button> 
+            </p>
+            <p *ngSwitchDefault>
+              {{element[column]}}
+            </p>
+          </span>
         </td>
       </ng-container>
       <ng-container   matColumnDef="expand">
@@ -41,18 +54,16 @@
             <div class="element-description" *ngIf="accessToClientData!=='none'">
               <span class="row_field_name">Client:  </span> {{element.clientname}} 
               <span class="row_field_name">Address: </span>  {{element.address}} 
-              <span class="row_field_name">  Proffesional: </span> {{element.isclientproffesional}}
+              <span class="row_field_name">Proffesional: </span> {{element.isclientproffesional}}
             </div>
           </div>
         </td>
       </ng-container>
-
       <tr mat-header-row *matHeaderRowDef="columnsToDisplayWithExpand"></tr>
       <tr mat-row [cdkContextMenuTriggerFor]="instrumentcontextmenu"  *matRowDef="let element; columns: columnsToDisplayWithExpand;"
         class="element-row"
         [class.expanded-row]="expandedElement === element"
         (click)="expandedElement = expandedElement === element ? null : element">
-        
         <ng-template  #instrumentcontextmenu>
           <div class="tree-menu-context" cdkMenu >
           <ng-container *ngIf="disabledControlElements">
@@ -64,7 +75,6 @@
             </button>
           </ng-container>
           <ng-container *ngIf="!disabledControlElements">
-
             <button 
               (click)="openAccountForm('Create', element)"
               class="tree-menu-item" cdkMenuItem >
@@ -90,10 +100,8 @@
               Delete Portfolio
             </button> 
           </ng-container>
-
           </div>
         </ng-template>
-
       </tr>
       <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row"></tr>
     </table>
