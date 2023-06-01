@@ -63,7 +63,7 @@
       <tr mat-row [cdkContextMenuTriggerFor]="instrumentcontextmenu"  *matRowDef="let element; columns: columnsToDisplayWithExpand;"
         class="element-row"
         [class.expanded-row]="expandedElement === element"
-        (click)="expandedElement = expandedElement === element ? null : element">
+        (click)="showClientData(element)">        
         <ng-template  #instrumentcontextmenu>
           <div class="tree-menu-context" cdkMenu >
           <ng-container *ngIf="disabledControlElements">

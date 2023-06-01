@@ -1,4 +1,4 @@
-<form class="submit" [formGroup]="editStructureStrategyForm" >
+<form class="submit" [formGroup]="editStructureStrategyForm" *ngIf="strategyId" >
   <mat-form-field *ngIf="MP!==1" style="width: 45%;"  enabled  appearance="fill">
     <mat-label>Model Portfolio</mat-label>
     <mat-select   formControlName="id"  > 
@@ -33,7 +33,7 @@
     <mat-icon >input</mat-icon>
   </button>
 
-  <mat-form-field style="width: 20%; font-size: 18px;" >
+  <mat-form-field style="width: 12%; font-size: 18px;" >
     <input matInput placeholder="Weight" formControlName="weight_of_child"
     pattern="[0-9]*" type="number">
     <mat-error  *ngIf="weight_of_child.invalid && weight_of_child.touched">
@@ -44,9 +44,9 @@
     [disabled]="!(editStructureStrategyForm.valid )"
     (click)="updateStrategyStructureData(action)"
     style="margin-top: 1%; margin-right: 1%; width: 25%; font-size: 18px;">
-    {{title}} Item {{disabledControlElements}} {{editStructureStrategyForm.disabled}}
+    {{action}} Item 
   </button>
 </form>
 
 
-<p >To close the window click outside it</p>
+<h2 *ngIf="!strategyId" style="color:rgb(114, 161, 116);">To add new items please save strategy or model portfolio and then reopen it for editing </h2>

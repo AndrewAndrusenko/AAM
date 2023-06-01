@@ -161,10 +161,12 @@
              {{element[column] }}
           </p>
           <p *ngSwitchCase="['secid'].includes(column)">
-            <button mat-stroked-button style="width: 90; font-size: 18px;"  matTooltip="Instrument details"
-            [style.background-color] =  "investmentNodeColor"
-            (click)="openInstrumentModifyForm(disabledControlElements? 'View': 'Edit',element)">
-              {{element[column] }}
+            <button mat-stroked-button style="font-size: 18px; margin-left: 0;"  
+            [matTooltip]="FormMode==='Select'? 'Click to select instrument':'Instrument details'"
+            [style.background-color] = "FormMode==='Select'? '': investmentNodeColor"
+            (click)="FormMode==='Select'? selectInstrument(element) : openInstrumentModifyForm(disabledControlElements? 'View': 'Edit',element)">
+            <mat-icon matPrefix *ngIf="FormMode==='Select'">check</mat-icon>  
+            {{element[column] }}
             </button> 
           </p>
           <p *ngSwitchDefault>
@@ -222,7 +224,9 @@
       </td>
     </ng-container>
     <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
-    <tr mat-row  *matRowDef="let element; columns: columnsToDisplay"></tr>
+    <tr mat-row  *matRowDef="let element; columns: columnsToDisplay"
+      (click)="FormMode==='Select'? selectInstrument(element): null ">
+    </tr>
   </table>
   <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" [pageSize]="20" aria-label="Select page of users"></mat-paginator>
 </div>

@@ -1,16 +1,16 @@
 <mat-toolbar color="primary" style="margin-left: 1%;margin-bottom:10px; border-radius: 8px; width: 95%">
-  {{title}} portfolio ID {{portfolioCode}}
+  {{action}} portfolio ID {{id.value}}
 </mat-toolbar>
 
 <form class="submit" [formGroup]="newAccountForm">
   <div>
     <button mat-flat-button color="primary" type="submit" 
       [disabled]="!(newAccountForm.valid && submitbox.checked)"
-      (click)='updatePortfolioData(action)'
+      (click)='newAccountForm.valid? updatePortfolioData(action) : null'
       style="margin-top: 1px; width: 200px; font-size: 18px; margin-left: 1%;">
-        {{title}} account
+        {{action}} portfolio
     </button>
-    <mat-checkbox color="primary"  #submitbox checked="false"
+    <mat-checkbox color="primary"  #submitbox checked="false" 
     (click)="newAccountForm.markAllAsTouched()"
     >Submit Data</mat-checkbox>
   </div>
@@ -24,25 +24,40 @@
   </mat-form-field>
   <mat-form-field style="width: 20%">
     <input matInput placeholder="PortfolioCode" formControlName="portfolioname" [readonly]="true">
+    <mat-error  *ngIf="portfolioname?.errors?.['required']">
+      Required!   
+    </mat-error>
   </mat-form-field>
   <div *ngIf="accessToClientData!=='none'">
-    <mat-form-field style="width: 15%">
-      <input matInput placeholder="ClientID" formControlName="idclient">
+    <mat-form-field style="width: 20%">
+      <input matInput placeholder="ClientID" formControlName="idclient" [readonly]="true">
+      <mat-error  *ngIf="idclient?.errors?.['required']">
+        Required!    
+      </mat-error>
     </mat-form-field>
     <mat-form-field style="width: 60%">
       <input matInput placeholder="ClientName" formControlName="clientname">
     </mat-form-field>
+    <button mat-flat-button color="accent" 
+    matTooltip="Select Client"
+    (click) = "selectClient()"
+    style=" width: 5%;  line-height: 80% !important; height: 60px !important;">
+    <mat-icon >input</mat-icon>
+  </button>
   </div>
-  <div  (dblclick) = "selectStrategy('Get_Strategies_List')">
-    <mat-form-field style="width: 15%">
-      <input matInput placeholder="StrategyID" formControlName="idstategy">
+  <div  >
+    <mat-form-field style="width: 20%">
+      <input matInput placeholder="StrategyID" formControlName="idstategy" [readonly]="true">
+      <mat-error  *ngIf="idstategy?.errors?.['required']">
+        Required!  
+      </mat-error>
     </mat-form-field>
     <mat-form-field >
-      <input matInput placeholder="StategyCode" formControlName="stategy_name" [readonly]="true">
+      <input matInput placeholder="StategyCode" formControlName="stategy_name">
     </mat-form-field>
     <button mat-flat-button color="accent" 
       matTooltip="Select Stategy"
-      (click) = "selectStrategy('Get_Strategies_List')"
+      (click) = "selectStrategy('Select')"
       style=" width: 5%;  line-height: 80% !important; height: 60px !important;">
       <mat-icon >input</mat-icon>
     </button>

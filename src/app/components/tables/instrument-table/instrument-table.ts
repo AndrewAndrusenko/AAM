@@ -63,10 +63,8 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild('filterALL', { static: false }) filterALL: ElementRef;
   @Output() public modal_principal_parent = new EventEmitter();
-  private subscriptionName: Subscription;
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
   
-  menuColorGl=menuColorGl
   addOnBlur = true;
   panelOpenStateSecond = false;
   instrumentDetailsArr:instrumentDetails[] = [];
@@ -76,7 +74,7 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
   investmentNodeColor = investmentNodeColorChild;
   additionalLightGreen = additionalLightGreen;
   public filterednstrumentsLists : Observable<string[]>;
-  
+  menuColorGl=menuColorGl;
   boardIDs =[]
   searchParametersFG: FormGroup;
   boardsOne = new FormControl('');
@@ -85,6 +83,7 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
 
   defaultFilterPredicate?: (data: any, filter: string) => boolean;
   secidfilter?: (data: any, filter: string) => boolean;
+  selectedRow: Instruments;
   constructor(
     private MarketDataService: AppMarketDataService,
     private TreeMenuSevice:TreeMenuSevice,
@@ -217,6 +216,9 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
   }
   toggleAllSelection() {
    
+  }
+  selectInstrument (element:Instruments) {
+    this.modal_principal_parent.emit(element);
   }
   exportToExcel() {
     this.HandlingCommonTasksS.exportToExcel (this.dataSource.data,"instrumentData")

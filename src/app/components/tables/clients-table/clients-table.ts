@@ -39,10 +39,10 @@ export class AppClientsTableComponent  {
   @ViewChild(MatSort) sort: MatSort;
   dialogRef: MatDialogRef<AppClientFormComponent>;
   dialogAccountRef: MatDialogRef<AppNewAccountComponent>
+  dialogNewAccountRef: MatDialogRef<AppNewAccountComponent, any>;
   @Output() public modal_principal_parent = new EventEmitter();
   action ='';
-  public readOnly: boolean = false;
-  public selectedRow: any;
+  readOnly: boolean = false;
   investmentNodeColor=investmentNodeColor
   constructor(
     private dialog: MatDialog,    
@@ -71,19 +71,24 @@ export class AppClientsTableComponent  {
       } 
     })
   }
-  chooseClient () {
-    let table =  $('#mytable')
-    let data = table.DataTable().row({ selected: true }).data()
-    this.selectedRow = data;
-    this.modal_principal_parent.emit('CLOSE_PARENT_MODAL');
+  chooseClient (element:ClientData) {
+    this.modal_principal_parent.emit(element);
   }
-  openAddFileDialog(actionType, element:ClientData) {
+  openClientModifyForm (actionType, element:ClientData) {
     this.expandAllowed = false;
     this.dialogRef = this.dialog.open(AppClientFormComponent ,{minHeight:'400px', width:'900px' });
     this.dialogRef.componentInstance.client = element.idclient;
     this.dialogRef.componentInstance.action = actionType;
     this.dialogRef.componentInstance.title = ['Create','Create_Example'].includes(actionType)? 'Create New': actionType;
   }
+  openNewPortfolioForm (element:ClientData) {
+    this.expandAllowed = false;
+    this.dialogNewAccountRef = this.dialog.open(AppNewAccountComponent ,{minHeight:'400px', width:'900px' });
+    this.dialogNewAccountRef.componentInstance.newAccountForm.controls['idclient'].patchValue(element.idclient)
+    this.dialogNewAccountRef.componentInstance.newAccountForm.controls['clientname'].patchValue(element.clientname)
+    this.dialogNewAccountRef.componentInstance.action = 'Create';
+  }
+
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();

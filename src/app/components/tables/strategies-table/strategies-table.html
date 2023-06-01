@@ -24,14 +24,13 @@
     <table  #strategyTable mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class="mat-elevation-z8">
       <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay let i=index">
         <th mat-header-cell *matHeaderCellDef mat-sort-header >  {{columnsHeaderToDisplay[i] }}</th>
-        <td  
-          mat-cell *matCellDef="let element"
-          (click)="chooseStrategy(element)"> 
+        <td  mat-cell *matCellDef="let element">
           <span [ngSwitch]="true==true">
             <p *ngSwitchCase="['name'].includes(column)">
-              <button mat-stroked-button style="width: 90; font-size: 18px; margin-top:2%;height: 4vh;"  matTooltip="Strategy details"
-              [style.background-color] =  "investmentNodeColor"
-              (click)="openStrategyForm(disabledControlElements? 'View': 'Edit', element)">
+              <button mat-stroked-button style="width: 90; font-size: 18px; margin-top:2%;height: 4vh;" 
+              [matTooltip]="this.strategyTableInitParams.action==='Select'? 'Click to select strategy':'Strategy details'"
+              [style.background-color] = "this.strategyTableInitParams.action==='Select'? '': investmentNodeColor"
+              (click)="this.strategyTableInitParams.action==='Select'? chooseStrategy(element) : openStrategyForm(disabledControlElements? 'View': 'Edit',element)">
                 {{element[column] }}
               </button> 
             </p>
@@ -58,7 +57,7 @@
         <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplayWithExpand.length">
           <div class="element-detail"
           [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
-  <h1 style = "color: rgb(85, 167, 238); font-style: italic; margin-top: 1%;"> {{element['name']}}: Portfolios List </h1>
+          <h1 style = "color: rgb(85, 167, 238); font-style: italic; margin-top: 1%;"> {{element['name']}}: Portfolios List </h1>
           <app-app-portfolio-tablee style="width: 100%;"
               [actionOnAccountTable]="'Get_Portfolios_By_StrategyId'"
               [strategyId]="element['id']"
@@ -70,7 +69,7 @@
         <tr mat-row [cdkContextMenuTriggerFor]="instrumentcontextmenu"  *matRowDef="let element; columns: columnsToDisplayWithExpand;"
           class="element-row"
           [class.expanded-row]="expandedElement === element"
-          (click)="showPortfolios($event,element) ">
+          (click)="this.strategyTableInitParams.action==='Select'? chooseStrategy(element): showPortfolios($event,element) ">
           <ng-template  #instrumentcontextmenu>
             <div  class="tree-menu-context" cdkMenu >
               <ng-container *ngIf="disabledControlElements">

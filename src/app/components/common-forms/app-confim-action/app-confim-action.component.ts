@@ -9,7 +9,7 @@ import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/m
 export class AppConfimActionComponent {
   constructor(private dialog: MatDialog, public dialogRefConfirm: MatDialogRef<AppConfimActionComponent>) {
   }
-  public actionToConfim : {'action':string ,'isConfirmed': boolean}
+  public actionToConfim : {'action':string ,'isConfirmed': boolean, data?:any}
 
   submitAction (actionToConfim) {
     this.actionToConfim.isConfirmed = true;

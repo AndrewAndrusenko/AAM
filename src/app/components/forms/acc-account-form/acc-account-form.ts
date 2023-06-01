@@ -5,7 +5,7 @@ import { AppConfimActionComponent } from '../../common-forms/app-confim-action/a
 import { AppSnackMsgboxComponent } from '../../common-forms/app-snack-msgbox/app-snack-msgbox.component';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
-import { bcAccountType_Ext, bcEnityType } from 'src/app/models/intefaces';
+import { ClientData, bcAccountType_Ext, bcEnityType } from 'src/app/models/intefaces';
 import { AppClientsTableComponent } from '../../tables/clients-table/clients-table';
 import { TablePortfolios } from '../../tables/portfolios-table/portfolios-table';
 import { Subscription } from 'rxjs';
@@ -123,23 +123,23 @@ export class AppAccAccountModifyFormComponent implements OnInit, AfterViewInit {
     this.dialogChoseAccount.componentInstance.action = "Select";
     this.dialogChoseAccount.componentInstance.readOnly = true;
     this.dialogChoseAccount.componentInstance.clientId = this.clientId.value;
-    this.dialogChoseAccount.componentInstance.actionOnAccountTable = "Get_Accounts_By_CientId";
+    this.dialogChoseAccount.componentInstance.actionOnAccountTable = "Get_Portfolios_By_CientId";
     
     this.dialogChoseAccount.componentInstance.modal_principal_parent.subscribe ((item)=>{
-      this.accountModifyForm.controls['idportfolio'].patchValue(this.dialogChoseAccount.componentInstance.selectedRow['idportfolio'])
-      this.accountModifyForm.controls['d_portfolioCode'].patchValue(this.dialogChoseAccount.componentInstance.selectedRow['portfolioname'])
+      this.accountModifyForm.controls['idportfolio'].patchValue(item['idportfolio'])
+      this.accountModifyForm.controls['d_portfolioCode'].patchValue(item['portfolioname'])
       this.dialogChoseAccount.close(); 
     });
   }
   selectClient () {
-    this.dialogChoseClient = this.dialog.open(AppClientsTableComponent ,{minHeight:'600px', minWidth:'1300px', autoFocus: false, maxHeight: '90vh'});
+    this.dialogChoseClient = this.dialog.open(AppClientsTableComponent ,{minHeight:'600px', minWidth:'90vw', autoFocus: false, maxHeight: '90vh'});
     this.dialogChoseClient.componentInstance.action = "Select";
     this.dialogChoseClient.componentInstance.readOnly = true;
-    this.dialogChoseClient.componentInstance.modal_principal_parent.subscribe ((item)=>{
-      this.accountModifyForm.controls['clientId'].patchValue(this.dialogChoseClient.componentInstance.selectedRow['idclient'])
-      this.accountLedgerModifyForm.controls['clientID'].patchValue(this.dialogChoseClient.componentInstance.selectedRow['idclient'])
-      this.accountModifyForm.controls['d_clientname'].patchValue(this.dialogChoseClient.componentInstance.selectedRow['clientname'])
-      this.accountLedgerModifyForm.controls['d_Client'].patchValue(this.dialogChoseClient.componentInstance.selectedRow['clientname'])
+    this.dialogChoseClient.componentInstance.modal_principal_parent.subscribe ((item:ClientData)=>{
+      this.accountModifyForm.controls['clientId'].patchValue(item.idclient)
+      this.accountLedgerModifyForm.controls['clientID'].patchValue(item.idclient)
+      this.accountModifyForm.controls['d_clientname'].patchValue(item.clientname)
+      this.accountLedgerModifyForm.controls['d_Client'].patchValue(item.clientname)
       this.dialogChoseClient.close(); 
     });
   }

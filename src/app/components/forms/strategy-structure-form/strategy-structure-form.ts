@@ -1,10 +1,10 @@
-import { Component,  EventEmitter,  Input, OnInit, Output, SimpleChanges,  } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup,  ValidationErrors,  Validators } from '@angular/forms';
+import { Component,  EventEmitter,  Input, OnInit, Output, SimpleChanges} from '@angular/core';
+import { FormBuilder, FormControl, Validators } from '@angular/forms';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { AppConfimActionComponent } from '../../common-forms/app-confim-action/app-confim-action.component';
 import { StrategiesGlobalData } from 'src/app/models/intefaces';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
-import { map, Observable, startWith } from 'rxjs';
+import { filter, map, Observable, startWith, switchMap } from 'rxjs';
 import { AtuoCompSecidService } from 'src/app/services/atuo-comp-secid.service';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AppInstrumentTableComponent } from '../../tables/instrument-table/instrument-table';
@@ -26,7 +26,7 @@ export class AppStructureStrategyFormComponent implements OnInit {
   })
   
   @Input() disabledControlElements: boolean ;
-  @Input() action: string;
+  @Input() action: string = 'Create'
   @Input() strategyId: string;
   @Input() MP: number;
   dialogRefConfirm: MatDialogRef<AppConfimActionComponent>;
@@ -35,7 +35,6 @@ export class AppStructureStrategyFormComponent implements OnInit {
   @Output() public modal_principal_parent = new EventEmitter();
 
   public filterednstrumentsLists : Observable<string[]>;
-  public title: string;
   public actionType : string;
   public showStrateryStructure: boolean;
   public data: any;
@@ -47,50 +46,28 @@ export class AppStructureStrategyFormComponent implements OnInit {
     private dialog: MatDialog, 
   ) {
   }
-  
   ngOnInit(): void {
     this.AtuoCompService.getSecidLists('get_secid_array');
     this.filterednstrumentsLists = this.editStructureStrategyForm.controls['id'].valueChanges.pipe(
       startWith(''),
       map(value => this.AtuoCompService.filter(value || ''))
-      );
-      this.InvestmentDataService.getGlobalStategiesList (0,'','Get_ModelPortfolios_List').subscribe (data => {
-        this.MPnames = data;
-      })
-      switch (this.action) {
-        case 'Create': 
-      break;
-      case 'Create_Example':
-      break;
-      case 'Edit':
-        this.title = "Edit"
-        this.action="Edit"
-        this.editStructureStrategyForm.patchValue(this.data);
-      break;   
-      case 'Delete': 
-        this.editStructureStrategyForm.patchValue(this.data);
-        this.editStructureStrategyForm.controls['id'].disable() 
-        this.editStructureStrategyForm.controls['weight_of_child'].disable() 
-      break;
-      default :
-      this.title = "Create"
-      this.action = "Create"
-      break; 
-    }  
+    );
+    this.InvestmentDataService.getGlobalStategiesList (0,'','Get_ModelPortfolios_List').subscribe (data =>this.MPnames = data)
+    this.action !== "Create"? this.editStructureStrategyForm.patchValue(this.data) : null;
+    this.action === "Create_Example"?  this.action = "Create" : null;
     this.editStructureStrategyForm.controls['weight_of_child'].addValidators ( [Validators.required, Validators.pattern('[0-9]*')]);
-    if (this.MP===1) {
-      this.editStructureStrategyForm.controls['id'].setAsyncValidators(customAsyncValidators.secidCustomAsyncValidator(this.InvestmentDataService, this.id.value));
-      this.editStructureStrategyForm.controls['id'].updateValueAndValidity();
-    }
+    this.addValidators();
   }
   ngAfterViewChecked(): void {
-    //Called after every check of the component's view. Applies to components only.
-    //Add 'implements AfterViewChecked' to the class.
     this.disabledControlElements? this.editStructureStrategyForm.disable() : null;
-    
   }
   ngOnChanges(changes: SimpleChanges) {
-    this.editStructureStrategyForm.controls['id_item'].setValue (changes['strategyId'].currentValue)
+    if (Object.hasOwn(changes,'parentStrategyId')) {
+      this.editStructureStrategyForm.controls['id_item'].setValue (changes['strategyId'].currentValue)
+      this.addValidators();
+    }
+  }
+  addValidators () {
     if (this.MP===1) {
       this.editStructureStrategyForm.controls['id'].setAsyncValidators(customAsyncValidators.secidCustomAsyncValidator(this.InvestmentDataService, this.id.value));
       this.editStructureStrategyForm.controls['id'].updateValueAndValidity();
@@ -100,10 +77,11 @@ export class AppStructureStrategyFormComponent implements OnInit {
     }
   }
   snacksBox(result:any, action?:string){
+    ['Edit','Delete'].includes(this.action)? this.modal_principal_parent.emit(result) : null;
     if (result['name']=='error') {
       this.CommonDialogsService.snackResultHandler(result)
     } else {
-      this.CommonDialogsService.snackResultHandler({name:'success', detail: result + 'item'}, action, undefined, false);
+      this.CommonDialogsService.snackResultHandler({name:'success', detail: result + ' item'}, action, undefined, false);
       this.InvestmentDataService.sendReloadStrategyStructure(Number(this.strategyId));
     }
   }
@@ -111,8 +89,8 @@ export class AppStructureStrategyFormComponent implements OnInit {
     switch (action) {
       case 'Create':
         this.editStructureStrategyForm.controls['id_strategy_parent'].setValue(this.strategyId)
-        this.InvestmentDataService.createStrategyStructure (this.editStructureStrategyForm.value).then(result=>{
-          this.snacksBox(result,'Created');
+        this.InvestmentDataService.createStrategyStructure (this.editStructureStrategyForm.value).subscribe(result=>{
+          this.snacksBox(result.length,'Created');
           this.editStructureStrategyForm.controls['id'].setValue(null);
           this.editStructureStrategyForm.controls['weight_of_child'].setValue('');
           this.editStructureStrategyForm.controls['weight_of_child'].markAsPending();
@@ -121,45 +99,26 @@ export class AppStructureStrategyFormComponent implements OnInit {
       break;
       case 'Edit':
         this.editStructureStrategyForm.addControl('id_strategy_parent',new FormControl(this.strategyId, Validators.required))
-        this.InvestmentDataService.updateStrategyStructure (this.editStructureStrategyForm.value).then(result=>{
-          console.log('result',result);
-          this.snacksBox(result,'Updated');
-          this.modal_principal_parent.emit('CLOSE_PARENT_MODAL');
-
-        })
+        this.InvestmentDataService.updateStrategyStructure (this.editStructureStrategyForm.value).subscribe(result=>this.snacksBox(result.length,'Updated'))
       break;
       case 'Delete':
-        this.CommonDialogsService.confirmDialog( this.MP!==1? 'Delete ' + this.sname.value : 'Delete ' + this.id.value).subscribe(isConfirmed => {
-          if (isConfirmed.isConfirmed) {
-            this.InvestmentDataService.deleteStrategyStructure (this.editStructureStrategyForm.value['id_item']).then (result =>{
-              this.snacksBox(result,'Deleted')          
-              this.modal_principal_parent.emit('CLOSE_PARENT_MODAL');
-            })
-          }
-        })
+        this.CommonDialogsService.confirmDialog( this.MP!==1? 'Delete ' + this.sname.value : 'Delete ' + this.id.value).pipe(
+          filter(isConfirmed => isConfirmed.isConfirmed===true),
+          switchMap(confirmed => this.InvestmentDataService.deleteStrategyStructure(this.id_item.value))
+        ).subscribe(result => this.snacksBox(result.length, 'Deleted'))
       break;
     }
   }
-  getFormValidationErrors() {
-    Object.keys(this.editStructureStrategyForm.controls).forEach(key => {
-      const controlErrors: ValidationErrors = this.editStructureStrategyForm.get(key).errors;
-      if (controlErrors != null) {
-        Object.keys(controlErrors).forEach(keyError => {
-         console.log('Key control: ' + key + ', keyError: ' + keyError + ', err value: ', controlErrors[keyError]);
-        });
-      }
-    });
-  }
   selectInstrument () {
-    this.dialogRef = this.dialog.open(AppInstrumentTableComponent ,{minHeight:'400px', minWidth:'900px', autoFocus: false, maxHeight: '90vh'});
+    this.dialogRef = this.dialog.open(AppInstrumentTableComponent ,{minHeight:'400px', minWidth:'90vw', autoFocus: false, maxHeight: '90vh'});
     this.dialogRef.componentInstance.FormMode="Select";
     this.dialogRef.componentInstance.modal_principal_parent.subscribe ((item)=>{
-      // this.editStructureStrategyForm.controls['id'].patchValue(this.dialogRef.componentInstance.currentInstrument['secid'])
+      this.id.patchValue(item.secid)
       this.dialogRef.close(); 
     });
   }
-  
   get  id ()   {return this.editStructureStrategyForm.get('id') } 
+  get  id_item ()   {return this.editStructureStrategyForm.get('id_item') } 
   get  sname ()   {return this.editStructureStrategyForm.get('sname') } 
   get  description ()   {return this.editStructureStrategyForm.get('description') } 
   get  weight_of_child ()   {return this.editStructureStrategyForm.get('weight_of_child') } 

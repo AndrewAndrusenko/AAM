@@ -35,9 +35,7 @@ export class AppTableStrategyComponent   {
   @Input() ModelPortfolio: number;
   @Input() accessState: string = 'none';
   @Input() disabledControlElements: boolean = false;
-
   editStructureStrategyForm: FormGroup;
-
   constructor(
     private InvestmentDataService:AppInvestmentDataServiceService, 
     private dialog: MatDialog, 
@@ -55,12 +53,11 @@ export class AppTableStrategyComponent   {
   }
   ngOnChanges(changes: SimpleChanges) {
     console.log('Structure Changes',changes); 
-    this.updateStrategyStructure(changes['parentStrategyId'].currentValue);
+    Object.hasOwn(changes,'parentStrategyId')? this.updateStrategyStructure(changes['parentStrategyId'].currentValue) : null;
   }
   updateStrategyStructure (id:number) {
     if (this.accessState !== 'none') {
       this.InvestmentDataService.getStrategyStructure (id,'0','0').subscribe (strategyItems => {
-        console.log('ModelPortfolio',this.ModelPortfolio);
         if (this.ModelPortfolio===1) { 
           this.columnsToDisplay = ['id','isin', 'shortname', 'weight_of_child'] 
         } else {
@@ -74,22 +71,12 @@ export class AppTableStrategyComponent   {
     }
   }
   openStrategyStructureForm (actionType:string, row: any ) {
-    this.dialogRef = this.dialog.open(AppStructureStrategyFormComponent ,{minHeight:'150px', minWidth:'800px' });
+    this.dialogRef = this.dialog.open(AppStructureStrategyFormComponent ,{minHeight:'20vh', minWidth:'60vw' });
     this.dialogRef.componentInstance.MP = this.ModelPortfolio;
     this.dialogRef.componentInstance.action = actionType;
-    this.dialogRef.componentInstance.title = actionType;
     this.dialogRef.componentInstance.data = row;
     this.dialogRef.componentInstance.strategyId=this.parentStrategyId;
-
-    switch (actionType) {
-      case 'Create':
-      case 'Create_Example': 
-      this.dialogRef.componentInstance.title = 'Create New';
-      break;
-    }
-    this.dialogRef.componentInstance.modal_principal_parent.subscribe ((item)=>{
-      this.dialogRef.close();
-    })
+    this.dialogRef.componentInstance.modal_principal_parent.subscribe ((item)=>this.dialogRef.close())
 }
   getTotalWeight () {
     return this.dataSource? this.dataSource.data.map(t => t.weight_of_child).reduce((acc, value) => acc + Number(value)/100, 0):0;

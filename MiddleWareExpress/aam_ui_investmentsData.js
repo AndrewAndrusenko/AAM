@@ -88,65 +88,43 @@ async function fEditStrategyData (request, response) {
    's_level_id=${level}, '+
    's_description=${description}, '+
    's_benchmark_account=${s_benchmark_account} ' +
-	 'WHERE id=${id};',
+	 'WHERE id=${id} RETURNING *;',
     values: paramArr
   } 
-
-  sql = pgp.as.format(query.text,query.values)
-  pool.query (sql,  (err, res) => {if (err) {
-    console.log (err.stack.split("\n", 1).join(""))
-    err.detail = err.stack
-
-    return response.send(err)
-  } else {
-    return response.status(200).json(res.rowCount)}
-  })   
-}
-async function fStrategyGlobalDataDelete (request, response) {
-  const query = {text: 'DELETE FROM public.dstrategiesglobal WHERE id=${id};', values: request.body}
   sql = pgp.as.format(query.text,query.values)
   queryExecute (sql, response);
- /*  sql = pgp.as.format(query.text,query.values)
-  pool.query (sql,  (err, res) => {if (err) { return response.send(err)} else { return response.status(200).json(res.rowCount) }
-  })  */
+}
+async function fStrategyGlobalDataDelete (request, response) {
+  const query = {text: 'DELETE FROM public.dstrategiesglobal WHERE id=${id} RETURNING *;', values: request.body}
+  sql = pgp.as.format(query.text,query.values)
+  queryExecute (sql, response);
 }
 async function fStrategyGlobalDataCreate (request, response) {
   paramArr = request.body.data
   const query = {
   text: 'INSERT INTO public.dstrategiesglobal ' +
         '(sname, s_level_id, s_description, s_benchmark_account)' +
-        ' VALUES (${name}, ${level}, ${description}, ${s_benchmark_account}) ;',
+        ' VALUES (${name}, ${level}, ${description}, ${s_benchmark_account}) RETURNING *;',
     values: paramArr
   }
   sql = pgp.as.format(query.text,query.values)
-  pool.query (sql,  (err, res) => {if (err) {
-    console.log (err.stack.split("\n", 1).join(""))
-    err.detail = err.stack
-    return response.send(err)
-  } else {return response.status(200).json(res.rowCount)}
-  })  
+  queryExecute (sql, response);
 }
 async function fStrategyStructureCreate (request, response) {
   paramArr = request.body.data
   const query = {
   text: 'INSERT INTO public.dstrategies_global_structure ' +
         '(id_strategy_parent, id_strategy_child, weight_of_child)' +
-        ' VALUES (${id_strategy_parent}, ${id}, ${weight_of_child}) ;',
+        ' VALUES (${id_strategy_parent}, ${id}, ${weight_of_child}) RETURNING *;',
     values: paramArr
   }
-  sql = pgp.as.format(query.text,query.values)
-  pool.query (sql,  (err, res) => {if (err) {
-    console.log (err.stack.split("\n", 1).join(""))
-    err.detail = err.stack
-    return response.send(err)
-  } else {return response.status(200).json(res.rowCount)}
-  })  
+  sql = pgp.as.format(query.text,query.values);
+  queryExecute (sql,response);
 }
 async function fStrategyStructureDelete (request, response) {
-  const query = {text: 'DELETE FROM public.dstrategies_global_structure WHERE id=${id};', values: request.body}
-  sql = pgp.as.format(query.text,query.values)
-  pool.query (sql,  (err, res) => {if (err) { return response.send(err)} else { return response.status(200).json(res.rowCount) }
-  }) 
+  const query = {text: 'DELETE FROM public.dstrategies_global_structure WHERE id=${id} RETURNING *;', values: request.body}
+  sql = pgp.as.format(query.text,query.values);
+  queryExecute (sql,response);
 }
 async function fStrategyStructureEdit (request, response) {
   paramArr = request.body.data
@@ -156,41 +134,27 @@ async function fStrategyStructureEdit (request, response) {
    'id_strategy_parent=${id_strategy_parent}, ' +
    'id_strategy_child=${id}, '+
    'weight_of_child=${weight_of_child} '+
-	 'WHERE id=${id_item};',
+	 'WHERE id=${id_item} RETURNING *;',
     values: paramArr
   } 
   sql = pgp.as.format(query.text,query.values)
-   pool.query (sql,  (err, res) => {if (err) {
-    console.log (err.stack.split("\n", 1).join(""))
-    err.detail = err.stack
-    return response.send(err)
-  } else {
-    return response.status(200).json(res.rowCount)}
-  })   
+  queryExecute (sql,response);
 }
 async function fAccountCreate (request, response) {
   paramArr = request.body.data
   const query = {
   text: 'INSERT INTO public.dportfolios ' +
         '(idclient, idstategy, portfolioname, portleverage)' +
-        ' VALUES (${idclient}, ${idstategy}, ${portfolioname}, ${portleverage}) ;',
+        ' VALUES (${idclient}, ${idstategy}, ${portfolioname}, ${portleverage}) RETURNING *;',
     values: paramArr
   }
   sql = pgp.as.format(query.text,query.values)
-
-  pool.query (sql,  (err, res) => {if (err) {
-    console.log (err.stack.split("\n", 1).join(""))
-    err.detail = err.stack
-    return response.send(err)
-  } else {
-    return response.status(200).json(res.rowCount)}
-  })  
+  queryExecute (sql,response);
 }
 async function fAccountDelete (request, response) {
-  const query = {text: 'DELETE FROM public.dportfolios WHERE idportfolio=${id};', values: request.body}
+  const query = {text: 'DELETE FROM public.dportfolios WHERE idportfolio=${id} RETURNING *;', values: request.body}
   sql = pgp.as.format(query.text,query.values)
-  pool.query (sql,  (err, res) => {if (err) { return response.send(err)} else { return response.status(200).json(res.rowCount) }
-  }) 
+  queryExecute (sql,response);
 }
 async function fAccountEdit (request, response) {
   paramArr = request.body.data
@@ -201,17 +165,11 @@ async function fAccountEdit (request, response) {
    'idstategy=${idstategy}, '+
    'portfolioname=${portfolioname}, '+
    'portleverage=${portleverage} '+
-	 'WHERE idportfolio=${idportfolio}; ',
+	 'WHERE idportfolio=${idportfolio} RETURNING *; ',
     values: paramArr
   } 
   sql = pgp.as.format(query.text,query.values)
-   pool.query (sql,  (err, res) => {if (err) {
-    console.log (err.stack.split("\n", 1).join(""))
-    err.detail = err.stack
-    return response.send(err)
-  } else {
-    return response.status(200).json(res.rowCount)}
-  })   
+  queryExecute (sql,response);
 }
 
 module.exports = {

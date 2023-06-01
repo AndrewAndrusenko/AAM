@@ -122,8 +122,9 @@ async function fGetportfolioTable (request,response) {
       query.text += ' WHERE (LEFT(public.dportfolios.portfolioname,$2) = $1) '+
                     ' ORDER BY RIGHT(public.dportfolios.portfolioname,$2)::numeric DESC LIMIT 1; '
       query.values = [request.query.accountType, request.query.accountType.length ]
+    break;  
     default:
-      query.text += ';'
+      query.text += ' ORDER BY idportfolio DESC;'
     break;
   }
   sql = pgp.as.format(query.text,query.values)

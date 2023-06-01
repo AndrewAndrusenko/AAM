@@ -1,11 +1,13 @@
 import { Component, Input, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { AccountsTableModel, accountTypes } from 'src/app/models/intefaces';
+import { AccountsTableModel, ClientData, StrategiesGlobalData, accountTypes } from 'src/app/models/intefaces';
 import { AppInvestmentDataServiceService } from 'src/app/services/app-investment-data.service.service';
 import { AppTableStrategiesComponentComponent } from '../../tables/strategies-table/strategies-table';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AuthService } from 'src/app/services/auth.service';
+import { AppClientsTableComponent } from '../../tables/clients-table/clients-table';
+import { filter, switchMap } from 'rxjs';
 @Component({
   selector: 'app-app-portfolio',
   templateUrl: './portfolio-form.html',
@@ -21,9 +23,8 @@ export class AppNewAccountComponent {
   @Input() ClientID: number;
   @Input() action: string;
   dialogTableStrategiesRef: MatDialogRef<AppTableStrategiesComponentComponent>;
-  title: any;
+  dialogClientsTabletRef: MatDialogRef<AppClientsTableComponent>;
   accountTypes: accountTypes [] = [];
-  formDisabledFields = ['idclient', 'idstategy', 'portfolioname','idportfolio']
 
   constructor (
     private fb:FormBuilder, 
@@ -32,100 +33,87 @@ export class AppNewAccountComponent {
     private AuthServiceS:AuthService,  
     private dialog: MatDialog, 
   ) 
-    {
-      this.newAccountForm=this.fb.group ({
-        idportfolio: {value:'', disabled: true, }, 
-        account_type: [{value:'', disabled: false}],
-        idclient: {value: null, disabled: true}, 
-        clientname: {value: null, disabled: true}, 
-        idstategy: {value:'', disabled: true}, 
-        stategy_name: [{value:'', disabled: false}, [Validators.required]],
-        description: {value:'', disabled: true}, 
-        portfolioname:[{value:'', disabled: false}, [Validators.required]],
-        portleverage: [ {value:0, disabled: false}, [Validators.required, Validators.pattern('[0-9]*')]]
-      })
-      this.InvestmentDataService.getAccountTypesList (0,'','Get_AccountTypes_List').subscribe (data => {
-        this.accountTypes = data;
-      })
-      this.accessToClientData = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToClientData')[0].elementvalue;
-      this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToPortfolioData')[0].elementvalue;
-      this.disabledControlElements = this.accessState === 'full'? false : true;
-          }
+  {
+    this.newAccountForm=this.fb.group ({
+      idportfolio: {value:null, disabled: false, }, 
+      account_type: [{value:null, disabled: false}],
+      idclient: [{value:null, disabled: false}, [Validators.required]],
+      idstategy: [{value:null, disabled: false}, [Validators.required]],
+      clientname: {value:null, disabled: true}, 
+      stategy_name: [{value:null, disabled: true}],
+      description: {value:null, disabled: true}, 
+      portfolioname:[{value:null, disabled: false}, [Validators.required]],
+      portleverage: [ {value:0, disabled: false}, [Validators.required, Validators.pattern('[0-9]*')]]
+    })
+    this.InvestmentDataService.getAccountTypesList (0,'','Get_AccountTypes_List').subscribe (data => this.accountTypes = data);
+    this.accessToClientData = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToClientData')[0].elementvalue;
+    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToPortfolioData')[0].elementvalue;
+    this.disabledControlElements = this.accessState === 'full'? false : true;
+  }
   ngAfterViewInit(): void {
-    if (this.accessState !=='none') {
-      console.log('portfolioCode', this.portfolioCode);
+    if (this.accessState !=='none'&&this.action!=='Create') {
       this.InvestmentDataService.getPortfoliosData('',this.portfolioCode,0,0,'Get_Portfolio_By_idPortfolio', this.accessToClientData).subscribe (data => {
         this.portfolioData=data[0];
-        this.title = this.action
-        this.action = this.action
         this.newAccountForm.patchValue(this.portfolioData);
-        switch (this.action) {
-          case 'Open':
-          case 'Create':  
-          this.newAccountForm.reset();
-          this.newAccountForm.controls['idclient'].setValue(this.portfolioData['idclient'])
-          this.newAccountForm.controls['clientname'].setValue(this.portfolioData['clientname'])
-          break;
-          case 'Create_Example':
-            this.newAccountForm.controls['portfolioname'].setValue(null);
-            this.title = "Create"
-            this.action = "Create"
-          break;
-          case 'Delete': 
-          case 'View': 
-            this.newAccountForm.disable();
-          break;
-          }  
+        if (this.action === 'Create_Example') {
+          this.action ='Create';
+          this.newAccountForm.get('portfolioname').setValue(null)
+        }
+        this.action === 'View'? this.newAccountForm.disable() : null;
       })
     }
-
   }
-  ngOnChanges(changes: SimpleChanges) {
+  ngOnChanges (changes: SimpleChanges) {
     if (this.accessState !=='none') {
       this.InvestmentDataService.getPortfoliosData('',changes['portfolioCode'].currentValue,0,0, 'Get_Portfolio_By_idPortfolio', this.accessToClientData).subscribe (portfoliosData => {
         this.newAccountForm.patchValue(portfoliosData[0])})
     }
   }
-  snacksBox(result:any, action?:string) {
+
+  snacksBox (result:any, action?:string) {
     if (result['name']=='error') {
       this.CommonDialogsService.snackResultHandler(result)
     } else {
-      this.CommonDialogsService.snackResultHandler({name:'success', detail: result + 'portfolio'}, action)
+      this.CommonDialogsService.snackResultHandler({name:'success', detail: result + ' portfolio'}, action)
       this.InvestmentDataService.sendReloadPortfoliosData (Number(this.newAccountForm.controls['idportfolio']));
     }
-    this.formDisabledFields.forEach(elem => this.newAccountForm.controls[elem].disable())
   }
-  updatePortfolioData(action:string){
-    this.formDisabledFields.forEach(elem => this.newAccountForm.controls[elem].enable())
+  updatePortfolioData (action:string){
     switch (action) {
       case 'Create':
       case 'Create_Example':
-      case 'Open':
-        this.InvestmentDataService.createAccount (this.newAccountForm.value).then (result => this.snacksBox(result,'Created'))
+          this.InvestmentDataService.createAccount (this.newAccountForm.value).subscribe (result => this.snacksBox(result.length,'Created'))
       break;
       case 'Edit':
-        this.InvestmentDataService.updateAccount (this.newAccountForm.value).then (result => this.snacksBox(result,'Updated'))
+        this.InvestmentDataService.updateAccount (this.newAccountForm.value).subscribe (result => this.snacksBox(result.length,'Updated'))
       break;
       case 'Delete':
-        this.CommonDialogsService.confirmDialog('Delete Portfolio ' + this.newAccountForm.value['portfolioname']).subscribe(isConfirmed => {
-          if (isConfirmed.isConfirmed) {
-            this.InvestmentDataService.deleteAccount (this.newAccountForm.value['idportfolio']).then (result =>{
-              this.snacksBox(result,'Deleted')
-              this.CommonDialogsService.dialogCloseAll();
-            })
-          }
-        })
-    break;
+              this.CommonDialogsService.confirmDialog('Delete Portfolio ' + this.newAccountForm.value['portfolioname']).pipe (
+                filter (isConfirmed => isConfirmed.isConfirmed),
+                switchMap(data => this.InvestmentDataService.deleteAccount (this.newAccountForm.value['idportfolio']))
+              ).subscribe (result =>this.snacksBox(result.length,'Deleted'));
+      break;
     }
   }
   selectStrategy (action:string) {
-    this.dialogTableStrategiesRef = this.dialog.open(AppTableStrategiesComponentComponent ,{minHeight:'400px', minWidth:'900px', autoFocus: false, maxHeight: '90vh'});
-    this.dialogTableStrategiesRef.componentInstance.action = action;
-    this.dialogTableStrategiesRef.componentInstance.modal_principal_parent.subscribe ((item)=>{
-      this.newAccountForm.controls['idstategy'].patchValue(this.dialogTableStrategiesRef.componentInstance.currentStrategy['id'])
-      this.newAccountForm.controls['stategy_name'].patchValue(this.dialogTableStrategiesRef.componentInstance.currentStrategy['name'])
-      this.newAccountForm.controls['description'].patchValue(this.dialogTableStrategiesRef.componentInstance.currentStrategy['description'])
+    this.dialogTableStrategiesRef = this.dialog.open(AppTableStrategiesComponentComponent ,{minHeight:'400px', minWidth:'90vw', autoFocus: false, maxHeight: '90vh'});
+    let filer = {field:'level', value:2}
+    this.dialogTableStrategiesRef.componentInstance.strategyTableInitParams.action = action;
+    this.dialogTableStrategiesRef.componentInstance.strategyTableInitParams.filterData = filer;
+    this.dialogTableStrategiesRef.componentInstance.modal_principal_parent.subscribe ((item:StrategiesGlobalData)=>{
+      this.newAccountForm.controls['idstategy'].patchValue(item.id)
+      this.newAccountForm.controls['stategy_name'].patchValue(item.name)
+      this.newAccountForm.controls['description'].patchValue(item.description)
       this.dialogTableStrategiesRef.close(); 
+    });
+  }
+  selectClient () {
+    this.dialogClientsTabletRef = this.dialog.open(AppClientsTableComponent ,{minHeight:'400px', minWidth:'90vw', autoFocus: false, maxHeight: '90vh'});
+    this.dialogClientsTabletRef.componentInstance.action = 'Select';
+    this.dialogClientsTabletRef.componentInstance.modal_principal_parent.subscribe ((item:ClientData )=>{
+      this.newAccountForm.controls['idclient'].patchValue(item.idclient)
+      this.newAccountForm.controls['clientname'].patchValue(item.clientname)
+      this.dialogClientsTabletRef.close(); 
     });
   }
   calculateAccountCode () {
@@ -140,4 +128,8 @@ export class AppNewAccountComponent {
       this.newAccountForm.controls['portfolioname'].setValue (accountType + newNumberS)
     })
   }
+  get id (){return this.newAccountForm.get('idportfolio')}
+  get portfolioname (){return this.newAccountForm.get('portfolioname')}
+  get idclient (){return this.newAccountForm.get('idclient')}
+  get idstategy (){return this.newAccountForm.get('idstategy')}
 }

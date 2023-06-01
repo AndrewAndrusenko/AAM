@@ -3,7 +3,7 @@ import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
-import { StrategiesGlobalData } from 'src/app/models/intefaces';
+import { StrategiesGlobalData, formInitParams } from 'src/app/models/intefaces';
 import { AppInvestmentDataServiceService } from 'src/app/services/app-investment-data.service.service';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { AppStrategyFormComponent } from '../../forms/strategy-form/strategy-form';
@@ -48,8 +48,11 @@ export class AppTableStrategiesComponentComponent  implements AfterViewInit {
   @Output() modal_principal_parent = new EventEmitter();
   expandedElement: StrategiesGlobalData  | null;
   StrategyForm: MatDialogRef<AppStrategyFormComponent>;
-  action ='';
-  currentStrategy: any;
+  strategyTableInitParams: formInitParams = {
+    action:null,
+    filterData:null,
+    readOnly: null
+  };
   investmentNodeColor=investmentNodeColor
   expandAllowed: any;
 
@@ -64,11 +67,11 @@ export class AppTableStrategiesComponentComponent  implements AfterViewInit {
     this.accessToPortfolioData = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToPortfolioData')[0].elementvalue;
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToStrategyData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
-    this.InvestmentDataService.getReloadStrategyList().subscribe (data => this.updateStrategyData(this.action))
+    this.InvestmentDataService.getReloadStrategyList().subscribe (data => this.updateStrategyData(this.strategyTableInitParams.action))
   }
   async ngAfterViewInit() {
     this.columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
-    this.updateStrategyData(this.action)
+    this.updateStrategyData(this.strategyTableInitParams.action)
   }
   clearFilter (input:HTMLInputElement) {
     input.value=''
@@ -80,33 +83,27 @@ export class AppTableStrategiesComponentComponent  implements AfterViewInit {
     this.dataSource.filter = filterValue.trim().toLowerCase();
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
-  chooseStrategy (element) {
-    this.currentStrategy = element;
-    this.modal_principal_parent.emit('CLOSE_PARENT_MODAL');
+  chooseStrategy (element:StrategiesGlobalData) {
+    this.modal_principal_parent.emit(element);
   }
   openStrategyForm (actionType:string, row: StrategiesGlobalData ) {
     this.expandAllowed = false;
     this.StrategyForm = this.dialog.open(AppStrategyFormComponent ,{minHeight:'400px', maxWidth:'1000px' });
     this.StrategyForm.componentInstance.action = actionType;
-    this.StrategyForm.componentInstance.title = actionType;
-    this.StrategyForm.componentInstance.strategyId = row['id']
-    switch (actionType) {
-      case 'Create':
-      case 'Create_Example': 
-        this.StrategyForm.componentInstance.title = 'Create New';
-      break;
-      case 'View': 
-        this.StrategyForm.componentInstance.editStrategyForm.disable();
-        console.log('disable');
-      break;
-    }
+    actionType !=='Create'? this.StrategyForm.componentInstance.strategyId = row['id'] : null;
   }
-  async updateStrategyData (action: string) {
+  async updateStrategyData (action: string = '') {
+    let field = 'level';
+    let value = 2
     return new Promise<number> (async (resolve,reject) => {
       this.dataSource? this.dataSource.data=null : null;
       this.accessState ==='none'? null : 
-      this.InvestmentDataService.getGlobalStategiesList(0,'0',this.action).subscribe (strategyData => {
+      this.InvestmentDataService.getGlobalStategiesList(0,'0', action).subscribe (strategyData => {
         this.dataSource  = new MatTableDataSource(strategyData);
+        if (this.strategyTableInitParams.filterData) {
+          let filter = this.strategyTableInitParams.filterData
+          this.dataSource.data= this.dataSource.data.filter(el =>  el[filter.field]===filter.value)
+        }
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
         resolve (strategyData.length)
@@ -114,7 +111,7 @@ export class AppTableStrategiesComponentComponent  implements AfterViewInit {
     })
   }
   async submitQuery () {
-    await this.updateStrategyData(this.action).then ((rowsCount) => {
+    await this.updateStrategyData(this.strategyTableInitParams.action).then ((rowsCount) => {
       this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (rowsCount,'en-US') + ' rows'},'Loaded ')
     })
   }

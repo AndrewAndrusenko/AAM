@@ -36,9 +36,7 @@ export class TablePortfolios {
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
   readOnly: boolean = true;
-  selectedRow: any;
   dialogRef: MatDialogRef<AppNewAccountComponent>;
-  currentAccout:any;
 
   @Input() clientId: number;
   @Input() strategyId: number;
@@ -84,9 +82,7 @@ export class TablePortfolios {
     this.updatePortfolioData (undefined, this.clientId,this.strategyId,this.actionOnAccountTable,this.accessToClientData);
   }
   chooseAccount (element) {
-    this.currentAccout = element;
-    this.selectedRow = element;
-    this.modal_principal_parent.emit('CLOSE_PARENT_MODAL');
+    this.modal_principal_parent.emit(element);
   }
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
@@ -94,18 +90,10 @@ export class TablePortfolios {
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
   openAccountForm (actionType:string, row: any ) {
+    this.expandAllowed = false;
     this.dialogRef = this.dialog.open(AppNewAccountComponent ,{minHeight:'400px', maxWidth:'1000px' });
     this.dialogRef.componentInstance.action = actionType;
-    this.dialogRef.componentInstance.title = actionType;
     this.dialogRef.componentInstance.portfolioCode = Number(row['idportfolio']);
-    console.log('idportfolio', row, row['idportfolio']);
-    // this.dialogRef.componentInstance.accessToClientData = this.accessToClientData;
-    switch (actionType) {
-      case 'Create':
-      case 'Create_Example': 
-      this.dialogRef.componentInstance.title = 'Create New';
-      break;
-    }
   }
   async submitQuery () {
     this.dataSource? this.dataSource.data = null : null;
@@ -115,5 +103,8 @@ export class TablePortfolios {
   }
   exportToExcel() {
     this.HandlingCommonTasksS.exportToExcel (this.dataSource.data,"PortfolioData")
+  }
+  showClientData(element:any) {
+    this.expandAllowed? this.expandedElement = this.expandedElement === element ? null : element:this.expandAllowed=true;
   }
 }

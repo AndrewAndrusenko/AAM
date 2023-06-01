@@ -17,6 +17,14 @@ export const portfolioTypes :portfolioType [] = [
   {value: 1, viewValue: 'Model Portfolio'},
   {value: 2, viewValue: 'Strategy (based on MP)'},
 ]
+export interface formInitParams {
+  action:string
+  filterData: {
+    field:string
+    value:any
+  }
+  readOnly: boolean
+}
 export interface AccountsTableModel {
  idportfolio:number;
  idclient:number;

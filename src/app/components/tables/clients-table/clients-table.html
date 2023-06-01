@@ -24,9 +24,10 @@
           mat-cell *matCellDef="let element">
           <span [ngSwitch]="true==true">
             <p *ngSwitchCase="['clientname'].includes(column)">
-              <button mat-stroked-button style="width: 90; font-size: 18px; margin-top: 5%;"  matTooltip="Client details"
-              [style.background-color] =  "investmentNodeColor"
-              (click)="openAddFileDialog(disabledControlElements? 'View': 'Edit', element)">
+              <button mat-stroked-button style="width: 90; font-size: 18px; margin-top: 5%;"  
+              [matTooltip]="action==='Select'? 'Click to select client':'Client details'"
+              [style.background-color] = "action==='Select'? '': investmentNodeColor"
+              (click)="action==='Select'? chooseClient(element) : openClientModifyForm(disabledControlElements? 'View': 'Edit',element)">
                 {{element[column] }}
               </button> 
             </p>
@@ -56,61 +57,53 @@
           </div>
         </td>
       </ng-container>
-
       <tr mat-header-row *matHeaderRowDef="columnsToDisplayWithExpand"></tr>
       <tr mat-row [cdkContextMenuTriggerFor]="instrumentcontextmenu"  *matRowDef="let element; columns: columnsToDisplayWithExpand;"
         class="element-row"
         [class.expanded-row]="expandedElement === element"
-        (click)="showPortfolios($event,element) ">
-        
+        (click)="action==='Select'? chooseClient(element): showPortfolios($event,element) ">
         <ng-template  #instrumentcontextmenu>
           <div class="tree-menu-context" cdkMenu >
-          <ng-container *ngIf="disabledControlElements">
-            <button 
-              (click)="openAddFileDialog('View',element)"
+            <button  *ngIf="disabledControlElements">
+              (click)="openClientModifyForm('View',element)"
               class="tree-menu-item" cdkMenuItem >
               <mat-icon class="menu-icon" matPrefix>pageview</mat-icon>      
               View Client
             </button>
-          </ng-container>
-          <ng-container *ngIf="!disabledControlElements">
-
-            <button 
-              (click)="openAddFileDialog('Create', null)"
-              class="tree-menu-item" cdkMenuItem >
-              <mat-icon class="menu-icon" matPrefix>account_box</mat-icon>      
-              Open Client
-            </button>
-            <button 
-              (click)="openAddFileDialog('Create_Example', element)"
-              class="tree-menu-item" cdkMenuItem >
-              <mat-icon class="menu-icon" matPrefix>account_box</mat-icon>      
-              New Client (on sample)
-            </button>
-            <button 
-              (click)="openAddFileDialog('Edit', element)"
-              class="tree-menu-item" cdkMenuItem>
-              <mat-icon class="menu-icon" matPrefix>edit</mat-icon>      
-              Edit Client
-            </button>
-            <button 
-              (click)="openAddFileDialog('Delete', element)"
-              class="tree-menu-item" cdkMenuItem>
-              <mat-icon class="menu-icon" matPrefix>delete</mat-icon> 
-              Delete Client
-            </button> 
-          </ng-container>
-  <div class="tree-menu-context" cdkMenu *ngIf="readOnly">
-    <button 
-    (click)="chooseClient()"
-     class="tree-menu-item" cdkMenuItem>
-     <mat-icon class="menu-icon" matPrefix>done</mat-icon> 
-     Select Client
-   </button> 
-  </div>
+            <ng-container *ngIf="!disabledControlElements">
+              <button 
+                (click)="openNewPortfolioForm(element)"
+                class="tree-menu-item" cdkMenuItem >
+                <mat-icon class="menu-icon" matPrefix>account_box</mat-icon>      
+                Open Portfolio
+              </button>
+              <button 
+                (click)="openClientModifyForm('Create', null)"
+                class="tree-menu-item" cdkMenuItem >
+                <mat-icon class="menu-icon" matPrefix>sentiment_satisfied_alt</mat-icon>      
+                Open Client
+              </button>
+              <button 
+                (click)="openClientModifyForm('Create_Example', element)"
+                class="tree-menu-item" cdkMenuItem >
+                <mat-icon class="menu-icon" matPrefix>sentiment_satisfied_alt</mat-icon>      
+                New Client (on sample)
+              </button>
+              <button 
+                (click)="openClientModifyForm('Edit', element)"
+                class="tree-menu-item" cdkMenuItem>
+                <mat-icon class="menu-icon" matPrefix>edit</mat-icon>      
+                Edit Client
+              </button>
+              <button 
+                (click)="openClientModifyForm('Delete', element)"
+                class="tree-menu-item" cdkMenuItem>
+                <mat-icon class="menu-icon" matPrefix>delete</mat-icon> 
+                Delete Client
+              </button> 
+            </ng-container>
           </div>
         </ng-template>
-
       </tr>
       <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row"></tr>
     </table>

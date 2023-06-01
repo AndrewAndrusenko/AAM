@@ -17,7 +17,6 @@ export class AppInvestmentDataServiceService {
   private subjectReloadClientTable = new Subject<ClientData[]>(); 
   
   getPortfoliosData (accountType:string, idportfolio: number, clientId: number, strategyId: number, action:string, accessToClientData:string='none'):Observable <AccountsTableModel[]> {
-    console.log('idportfolio',idportfolio);
     const params = {
       accountType: accountType,
       idportfolio: idportfolio,
@@ -87,35 +86,35 @@ export class AppInvestmentDataServiceService {
     return this.http.get <StrategyStructure[]> ('/api/AAM/GetStrategyStructure/', { params: params } )
   }
   
-  createStrategy (data:any) { 
-    return this.http.post ('/api/AAM/StrategyGlobalDataCreate/',{'data': data}).toPromise()
+  createStrategy (data:any):Observable <StrategiesGlobalData[]> { 
+    return this.http.post <StrategiesGlobalData[]> ('/api/AAM/StrategyGlobalDataCreate/',{'data': data})
   }
-  deleteStrategy (id:string) {
-    return this.http.post ('/api/AAM/StrategyGlobalDataDelete/',{'id': id}).toPromise()
+  deleteStrategy (id:string):Observable <StrategiesGlobalData[]> {
+    return this.http.post <StrategiesGlobalData[]> ('/api/AAM/StrategyGlobalDataDelete/',{'id': id})
   }
-  updateStrategy (data:any) { 
-    return this.http.post ('/api/AAM/StrategyDataEdit/',{'data': data}).toPromise()
+  updateStrategy (data:any):Observable <StrategiesGlobalData[]> { 
+    return this.http.post <StrategiesGlobalData[]> ('/api/AAM/StrategyDataEdit/',{'data': data})
   }
 
 
-  createStrategyStructure (data:any) { 
-    return this.http.post ('/api/AAM/StrategyStructureCreate/',{'data': data}).toPromise()
+  createStrategyStructure (data:any):Observable <StrategyStructure[]> { 
+    return this.http.post <StrategyStructure[]> ('/api/AAM/StrategyStructureCreate/',{'data': data})
   } 
-  deleteStrategyStructure (id:string) { 
-    return this.http.post ('/api/AAM/StrategyStructureDelete/',{'id': id}).toPromise()
+  deleteStrategyStructure (id:string):Observable <StrategyStructure[]> { 
+    return this.http.post <StrategyStructure[]> ('/api/AAM/StrategyStructureDelete/',{'id': id})
   } 
-  updateStrategyStructure (data:any) { 
-    return this.http.post ('/api/AAM/StrategyStructureEdit/',{'data': data}).toPromise()
+  updateStrategyStructure (data:any):Observable <StrategyStructure[]> { 
+    return this.http.post <StrategyStructure[]> ('/api/AAM/StrategyStructureEdit/',{'data': data})
   }
   
   createAccount (data:any) { 
-    return this.http.post ('/api/AAM/AccountCreate/',{'data': data}).toPromise()
+    return this.http.post <AccountsTableModel[]> ('/api/AAM/AccountCreate/',{'data': data})
   } 
   deleteAccount (id:string) { 
-    return this.http.post ('/api/AAM/AccountDelete/',{'id': id}).toPromise()
+    return this.http.post <AccountsTableModel[]> ('/api/AAM/AccountDelete/',{'id': id})
   } 
   updateAccount (data:any) { 
-    return this.http.post ('/api/AAM/AccountEdit/',{'data': data}).toPromise()
+    return this.http.post <AccountsTableModel[]> ('/api/AAM/AccountEdit/',{'data': data})
   }
   
 }
