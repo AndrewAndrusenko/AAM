@@ -97,6 +97,7 @@ async function fEditStrategyData (request, response) {
 async function fStrategyGlobalDataDelete (request, response) {
   const query = {text: 'DELETE FROM public.dstrategiesglobal WHERE id=${id} RETURNING *;', values: request.body}
   sql = pgp.as.format(query.text,query.values)
+  console.log('DELETE--------------------------------------------------------------',sql);
   queryExecute (sql, response);
 }
 async function fStrategyGlobalDataCreate (request, response) {
@@ -114,8 +115,8 @@ async function fStrategyStructureCreate (request, response) {
   paramArr = request.body.data
   const query = {
   text: 'INSERT INTO public.dstrategies_global_structure ' +
-        '(id_strategy_parent, id_strategy_child, weight_of_child)' +
-        ' VALUES (${id_strategy_parent}, ${id}, ${weight_of_child}) RETURNING *;',
+        '(id_strategy_parent, id_strategy_child, weight_of_child, id_strategy_child_integer)' +
+        ' VALUES (${id_strategy_parent}, ${id}, ${weight_of_child},${id_strategy_child_integer}) RETURNING *;',
     values: paramArr
   }
   sql = pgp.as.format(query.text,query.values);
@@ -134,6 +135,7 @@ async function fStrategyStructureEdit (request, response) {
    'id_strategy_parent=${id_strategy_parent}, ' +
    'id_strategy_child=${id}, '+
    'weight_of_child=${weight_of_child} '+
+   'id_strategy_child_integer=${id_strategy_child_integer} '+
 	 'WHERE id=${id_item} RETURNING *;',
     values: paramArr
   } 

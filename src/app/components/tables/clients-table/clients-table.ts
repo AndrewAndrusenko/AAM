@@ -74,12 +74,14 @@ export class AppClientsTableComponent  {
   chooseClient (element:ClientData) {
     this.modal_principal_parent.emit(element);
   }
-  openClientModifyForm (actionType, element:ClientData) {
+  openClientModifyForm (actionType: string, element:ClientData) {
+    console.log('actionType',actionType);
     this.expandAllowed = false;
     this.dialogRef = this.dialog.open(AppClientFormComponent ,{minHeight:'400px', width:'900px' });
-    this.dialogRef.componentInstance.client = element.idclient;
+    this.dialogRef.componentInstance.client = element === null? 0 : element.idclient;
     this.dialogRef.componentInstance.action = actionType;
-    this.dialogRef.componentInstance.title = ['Create','Create_Example'].includes(actionType)? 'Create New': actionType;
+
+    // this.dialogRef.componentInstance.action = ['Create','Create_Example'].includes(actionType)? 'Create New': actionType;
   }
   openNewPortfolioForm (element:ClientData) {
     this.expandAllowed = false;

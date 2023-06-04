@@ -22,8 +22,8 @@ export class AppStrategyFormComponent {
   @ViewChild(AppTableStrategyComponent) strategyStructureTable: AppTableStrategyComponent;
   portfolioTypes = portfolioTypes;
   @Input()  strategyId : number;
+  @Input() MP : number; 
   @Input() action: string;
-  disabledFields = ['id','s_benchmark_account'];
   panelOpenState = true;
   editStrategyForm: FormGroup;
   dialogRefConfirm: MatDialogRef<AppConfimActionComponent>;
@@ -39,37 +39,26 @@ export class AppStrategyFormComponent {
     private AuthServiceS:AuthService,  
     private InvestmentDataService:AppInvestmentDataServiceService, 
     private CommonDialogsService:HadlingCommonDialogsService,
-  ) {
+  ) 
+  {
     this.accessToClientData = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToClientData')[0].elementvalue;
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToStrategyData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
-    this.disabledControlElements? this.editStrategyForm.disable() : null;
-    this.getStrategyData (this.strategyId);
     this.editStrategyForm=this.fb.group ({
-      id: {value:'', disabled: true }, 
-      name :[null, { updateOn: 'blur'} ], 
-      level : {value:'', disabled: false}, 
-      description: {value:'', disabled: false}, 
-      s_benchmark_account: {value:'', disabled: true},
+      id: {value:'', disabled: false }, 
+      name :[null, {validators: [Validators.required], updateOn:'blur' } ],
+      level : [null, [Validators.required]], 
+      description: [null, [Validators.required]],
+      s_benchmark_account: [null],
       'Benchmark Account': {value:'', disabled: true},
     })
-   switch (this.action) {
-    case 'Create_Example':
-      this.data['id']='';
-      this.name.markAsTouched();
-      this.action='Create';
-    break;
-    case 'View': 
-      this.editStrategyForm.disable();
-    break;
-   }  
-    this.editStrategyForm.controls['name'].addValidators ( [Validators.required]);
-    this.editStrategyForm.controls['description'].addValidators ( [Validators.required]);
-    this.editStrategyForm.controls['level'].addValidators ( [Validators.required, Validators.pattern('[0-9]*')]);
-    this.editStrategyForm.controls['name'].setAsyncValidators (
-      customAsyncValidators.strategyCodeCustomAsyncValidator(this.InvestmentDataService, this.id.value), 
-    );  
   }
+  ngOnInit(): void {
+    this.editStrategyForm.controls['name'].setAsyncValidators(customAsyncValidators.strategyCodeCustomAsyncValidator(this.InvestmentDataService, ['Create','Create_Example'].includes(this.action)? 0 : this.strategyId)); 
+    this.getStrategyData (this.strategyId);
+    this.action === 'View'||this.disabledControlElements? this.editStrategyForm.disable() : null;
+  }
+
   getStrategyData (strategyId:number) {
     if (this.accessState !=='none') {
       this.InvestmentDataService.getGlobalStategiesList(strategyId, null, 'Get_Strategy_Data').subscribe(data => {
@@ -77,9 +66,9 @@ export class AppStrategyFormComponent {
           this.strategyStructureTable.parentStrategyId = data[0].id;
           this.strategyStructureTable.ModelPortfolio = data[0]['level'];
           this.editStrategyForm.patchValue(data[0])
+          this.action === 'Create_Example'? this.action = 'Create' : null;
         };
         this.showStrateryStructure = true;
-        this.editStrategyForm.controls['name'].setAsyncValidators(customAsyncValidators.strategyCodeCustomAsyncValidator(this.InvestmentDataService, ['Create','Create_Example'].includes(this.action)? 0 : this.id.value)); 
         this.strategyStructureTable.accessState = this.accessState;
         this.strategyStructureTable.disabledControlElements = this.disabledControlElements;
       })
@@ -92,28 +81,25 @@ export class AppStrategyFormComponent {
     if (result['name']=='error') {
       this.CommonDialogsService.snackResultHandler(result)
     } else {
-      this.CommonDialogsService.snackResultHandler({name:'success', detail: result + ' strategy'}, action)
+      this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' strategy'}, action)
       this.InvestmentDataService.sendReloadStrategyList (this.editStrategyForm.controls['id']);
     }
-    Object.keys(this.editStrategyForm.controls).forEach(el => this.disabledFields.includes(el)? this.editStrategyForm.get(el).disable() : null);
     ['Edit','Delete'].includes(this.action)? this.dialog.closeAll() : null;
   }
   updateStrategyData(action:string){
-    Object.keys(this.editStrategyForm.controls).forEach(el => this.disabledFields.includes(el)? this.editStrategyForm.get(el).enable() : null)
     switch (action) {
       case 'Create_Example':
       case 'Create':
-        this.InvestmentDataService.createStrategy(this.editStrategyForm.value).subscribe(result => this.snacksBox(result.length,'Created '))
+        this.InvestmentDataService.createStrategy(this.editStrategyForm.value).subscribe(result => this.snacksBox(result,'Created '))
       break;
       case 'Edit':
-        this.InvestmentDataService.updateStrategy(this.editStrategyForm.value).subscribe(result => this.snacksBox(result.length,'Updated '))
+        this.InvestmentDataService.updateStrategy(this.editStrategyForm.value).subscribe(result => this.snacksBox(result,'Updated '))
       break;
       case 'Delete':
-        this.editStrategyForm.controls['id'].enable()
         this.CommonDialogsService.confirmDialog('Delete strategy ' + this.name.value).pipe(
           filter(isConfirmed => (isConfirmed.isConfirmed)),
           switchMap(data => this.InvestmentDataService.deleteStrategy(this.id.value))
-        ).subscribe (result => this.snacksBox(result.length,'Deleted '))
+        ).subscribe (result => this.snacksBox(result,'Deleted '))
       break;
     }
   }

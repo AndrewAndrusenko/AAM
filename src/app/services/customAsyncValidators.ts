@@ -4,13 +4,12 @@ import {
   ValidationErrors,
   ValidatorFn,
 } from '@angular/forms';
-import { firstValueFrom, Observable, of } from 'rxjs';
-import { catchError, first, map, take, tap } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { catchError, map, take, tap } from 'rxjs/operators';
 import { AppInvestmentDataServiceService } from './app-investment-data.service.service';
 import { AppAccountingService } from './app-accounting.service';
 import { AppMarketDataService } from './app-market-data.service';
 export class customAsyncValidators {
-
   static clientNameCustomAsyncValidator(userService: AppInvestmentDataServiceService, clientId:number): AsyncValidatorFn {
     return (control: AbstractControl): Observable<ValidationErrors> => {
       return userService
@@ -118,39 +117,29 @@ export class customAsyncValidators {
           );
     };
   }  
-  static MD_SecidUniqueAsyncValidator (AppMarketDataService: AppMarketDataService, secid:string): AsyncValidatorFn {
+  static MD_SecidUniqueAsyncValidator (AppMarketDataService: AppMarketDataService, secid:string,  errors?:ValidationErrors): AsyncValidatorFn {
     return (control: AbstractControl): Observable<ValidationErrors> => {
-      if (control.dirty) {
+      if (control.value.toUpperCase() !== secid.toUpperCase() && control.touched) {
         return AppMarketDataService
           .getInstrumentDataGeneral('validateSecidForUnique', control.value.toUpperCase())
           .pipe(
-            map ( secidIsTaken => (control.value.toUpperCase() !== secid.toUpperCase() && secidIsTaken.length ? { secidIsTaken: true } : null)  ),
-            catchError(() => of(null)),
-            take(1)
+            map (secidIsTaken => secidIsTaken.length? {secidIsTaken: true} : null),
+            catchError(() => of(null))
           );
-        } else {
-          return of(null);
-        }
+      } else {return of(errors)}
     };
   }
-  static MD_ISINuniqueAsyncValidator (AppMarketDataService: AppMarketDataService, isin:string): AsyncValidatorFn {
-    return (control: AbstractControl): Observable<ValidationErrors> => {
-      console.log('isin dirty',control.dirty,'touched', control.touched);
-      if (control.dirty) {
+  static MD_ISINuniqueAsyncValidator (AppMarketDataService: AppMarketDataService, isin:string, errors?:ValidationErrors): AsyncValidatorFn {
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      if (control.value.toUpperCase() !== isin.toUpperCase() && control.touched) {
         return AppMarketDataService
           .getInstrumentDataGeneral('validateISINForUnique', control.value.toUpperCase())
           .pipe(
-            map ( isinIsTaken => (control.value.toUpperCase() !== isin.toUpperCase() && isinIsTaken.length ? { isinIsTaken: true } : null)  ),
+            map (isinIsTaken => isinIsTaken.length? {isinIsTaken: true} : null),
             catchError(() => of(null)),
-            take(1)
           );
-        } else {
-          return of(null);
-        }
+      } else {return of(errors)}
     };
   }
 }
-/* function getControlName(c: AbstractControl): string | null {
-  const formGroup = c.parent.controls;
-  return Object.keys(formGroup).find(name => c === formGroup[name]) || null;
-} */
+

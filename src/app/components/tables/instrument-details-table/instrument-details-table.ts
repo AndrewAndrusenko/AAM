@@ -41,11 +41,8 @@ export class AppTableInstrumentDetailsComponent  implements AfterViewInit {
     private indexDBServiceS:indexDBService,
     private dialog: MatDialog,
   ) {
-    this.AuthServiceS.verifyAccessRestrictions('accessToInstrumentData').subscribe ((accessData) => {
-      console.log('access',accessData);
-      this.accessState=accessData.elementvalue;
-      this.disabledControlElements = this.accessState === 'full'? false : true;
-    })
+    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToInstrumentData')[0].elementvalue;
+    this.disabledControlElements = this.accessState === 'full'? false : true;
   }
   async ngAfterViewInit() {
     this.indexDBServiceS.getIndexDBInstrumentStaticTables('getInstrumentDataDetails').then ((data)=>this.updateInstrumentDataTable (data['data']))

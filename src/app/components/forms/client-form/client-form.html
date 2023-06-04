@@ -1,12 +1,12 @@
 <mat-toolbar color="primary" >
-  {{title}} Client
+  {{action}} Client
 </mat-toolbar>
 <div class="client_form">
   <button mat-raised-button color="primary" 
     [disabled]="!(editClienttForm.valid && submitbox.checked)"
     (click)="editClienttForm.valid? updateClientData(action) : null"
     style="margin-top: 10px; width: 200px; font-size: 18px;">
-    {{title}} Client 
+    {{action}} Client 
   </button>
   <mat-checkbox color="primary"  #submitbox checked="false" 
     (click)=" 
@@ -17,17 +17,23 @@
 </div>
 <form class="submit" [formGroup]="editClienttForm">
   <mat-form-field>
-    <input matInput placeholder="id client" formControlName="idclient">
+    <input matInput placeholder="id client" formControlName="idclient" [readonly]="true">
   </mat-form-field>
   <mat-form-field>
     <input matInput placeholder="client name" formControlName="clientname">
-    <mat-error  *ngIf="clientname.invalid">
+    <mat-error  *ngIf="clientname?.errors?.['required']">
+      Required!    
+    </mat-error>
+    <mat-error  *ngIf="clientname?.errors?.['uniqueClientName']">
        Client Name isn't unique. Please choose another one.    
     </mat-error>
   </mat-form-field>
   <mat-form-field>
     <input matInput placeholder="country" formControlName="idcountrydomicile">
-    <mat-error  *ngIf="idcountrydomicile.invalid && idcountrydomicile.touched">
+    <mat-error  *ngIf="idcountrydomicile?.errors?.['required']">
+      Required!    
+    </mat-error>
+    <mat-error  *ngIf="idcountrydomicile?.errors?.['pattern']">
       Only digts are allowed.    
    </mat-error>
   </mat-form-field>
@@ -37,21 +43,33 @@
     >Status  {{ professional.checked? 'Professional':'Non-Professional'}} </mat-slide-toggle>
   <mat-form-field>
     <input matInput placeholder="address" formControlName="address">
+    <mat-error  *ngIf="address?.errors?.['required']">
+      Required!    
+    </mat-error>
   </mat-form-field>
   <mat-form-field>
     <input matInput placeholder="contact person" formControlName="contact_person">
+    <mat-error  *ngIf="contact_person?.errors?.['required']">
+      Required!    
+    </mat-error>
   </mat-form-field>
   <mat-form-field>
     <input matInput placeholder="email" formControlName="email">
-    <mat-error  *ngIf="email.invalid && email.touched">
+    <mat-error  *ngIf="email?.errors?.['required']">
+      Required!    
+    </mat-error>
+    <mat-error  *ngIf="email?.errors?.['email']">
       Email is incorrect. Please check.    
-   </mat-error>
+    </mat-error>
   </mat-form-field>
   <mat-form-field>
     <input matInput placeholder="phone" formControlName="phone">
-    <mat-error  *ngIf="phone.invalid && phone.touched">
+    <mat-error  *ngIf="phone?.errors?.['required']">
+      Required!    
+    </mat-error>
+    <mat-error  *ngIf="phone?.errors?.['pattern']">
       Only digts are allowed.    
-   </mat-error>
+    </mat-error>
   </mat-form-field>
   <p color = 'red' *ngIf="editClienttForm.invalid"> Please check the form. Data is invalid</p>
 </form>

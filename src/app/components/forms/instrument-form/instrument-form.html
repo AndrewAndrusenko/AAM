@@ -1,16 +1,16 @@
 <mat-toolbar color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4">
-  <span>{{title}} Instrument</span>
+  <span>{{action}} Instrument</span>
   <span class="example-spacer"></span>
   <mat-checkbox style= "font-size: 14px; color:rgb(255, 255, 255); padding: 1%;" #submitbox checked="false" 
     (click)=" instrumentModifyForm.markAllAsTouched();
-    instrumentModifyForm.markAllAsTouched();"
+    instrumentModifyForm.updateValueAndValidity();"
     >Submit Data
   </mat-checkbox>
   <button mat-raised-button color="accent" 
     [disabled]="!(instrumentModifyForm.valid && submitbox.checked)"
     (click)="updateInstrumentData(action)"
     style="margin-top: 1px; width: 30%; font-size: 18px; margin-left: 1%;">
-    {{title}} Instrument
+    {{action}} Instrument
   </button>
 
 </mat-toolbar>
@@ -19,13 +19,15 @@
   <h3 style="color:rgb(177, 174, 174)" *ngIf="instrumentModifyForm.valid"> 
     To save data please select 'Submit data' check and then press button {{secid.hasError('secidIsTaken')}}
   </h3>
+<!--   <div >{{secid.errors| json}}</div>
+  <div >{{isin.errors| json}}</div> -->
   <mat-form-field style="width: 10%;" title="SecID">
     <input matInput placeholder="SecID" formControlName="secid">
-    <mat-error  *ngIf="secid.invalid && secid.touched && secid.value==''">
-      The field is required.    
+    <mat-error  *ngIf="secid?.errors?.['required']">
+      Required!    
     </mat-error>
     <mat-error  *ngIf="secid.hasError('secidIsTaken')">
-      SecID must be unique!    
+      Not unique!    
     </mat-error>
   </mat-form-field>
   <mat-form-field  style="width: 26%;" title="Security Group Code">
@@ -66,11 +68,8 @@
   </mat-form-field>
   <mat-form-field style = "width: 15%;" title="ISIN">
     <input matInput placeholder = "ISIN" formControlName="isin">
-    <mat-error  *ngIf="isin.invalid && isin.touched && isin.value==''">
-      The field is required.    
-    </mat-error>
     <mat-error  *ngIf="isin.hasError('isinIsTaken')">
-      ISIN must be unique!    
+      Not unique!    
     </mat-error>
   </mat-form-field>
   <mat-form-field  style="width: 26%;" title="Main Board Code">

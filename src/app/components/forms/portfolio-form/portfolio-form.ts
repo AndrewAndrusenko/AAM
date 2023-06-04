@@ -51,6 +51,7 @@ export class AppNewAccountComponent {
     this.disabledControlElements = this.accessState === 'full'? false : true;
   }
   ngAfterViewInit(): void {
+    this.action === 'View'||this.disabledControlElements? this.newAccountForm.disable() : null;
     if (this.accessState !=='none'&&this.action!=='Create') {
       this.InvestmentDataService.getPortfoliosData('',this.portfolioCode,0,0,'Get_Portfolio_By_idPortfolio', this.accessToClientData).subscribe (data => {
         this.portfolioData=data[0];
@@ -59,7 +60,6 @@ export class AppNewAccountComponent {
           this.action ='Create';
           this.newAccountForm.get('portfolioname').setValue(null)
         }
-        this.action === 'View'? this.newAccountForm.disable() : null;
       })
     }
   }
@@ -88,9 +88,9 @@ export class AppNewAccountComponent {
         this.InvestmentDataService.updateAccount (this.newAccountForm.value).subscribe (result => this.snacksBox(result.length,'Updated'))
       break;
       case 'Delete':
-              this.CommonDialogsService.confirmDialog('Delete Portfolio ' + this.newAccountForm.value['portfolioname']).pipe (
+              this.CommonDialogsService.confirmDialog('Delete Portfolio ' + this.portfolioname.value).pipe (
                 filter (isConfirmed => isConfirmed.isConfirmed),
-                switchMap(data => this.InvestmentDataService.deleteAccount (this.newAccountForm.value['idportfolio']))
+                switchMap(data => this.InvestmentDataService.deleteAccount (this.portfolioname.value))
               ).subscribe (result =>this.snacksBox(result.length,'Deleted'));
       break;
     }

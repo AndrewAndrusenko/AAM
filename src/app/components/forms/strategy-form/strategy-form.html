@@ -28,7 +28,7 @@
     </mat-checkbox>
     <form class="submit" [formGroup]="editStrategyForm">
       <mat-form-field style="width: 10%;">
-        <input [value]="id"  matInput placeholder="id" formControlName="id">
+        <input [value]="id"  matInput placeholder="id" formControlName="id" [readonly]="true">
       </mat-form-field>
       <mat-form-field style="width: 35%; font-size: 16px;" appearance="fill">
         <mat-select  formControlName="level">
@@ -36,21 +36,24 @@
             {{level.viewValue}}
           </mat-option>
         </mat-select>
+        <mat-error  *ngIf="name?.errors?.['required']">
+          Required!    
+        </mat-error>
       </mat-form-field>
       <mat-form-field>
         <input matInput placeholder="Name" formControlName="name">
-        <mat-error  *ngIf="name.invalid && name.value!==''">
-          Strategy Name isn't unique. Please choose another.    
+        <mat-error  *ngIf="name?.errors?.['uniqueStrategyCode']">
+          Strategy Name isn't unique. Please choose another  
         </mat-error>
-        <mat-error  *ngIf="name.invalid && name.touched && name.value==''">
-          The field is required.    
-      </mat-error>
+        <mat-error  *ngIf="name?.errors?.['required']">
+          Required!    
+        </mat-error>
       </mat-form-field>
       <mat-form-field style="width: 20%;" >
-        <input matInput placeholder="BenchmarkAccountId" formControlName="s_benchmark_account">
+        <input matInput placeholder="PortfolioCode" formControlName="s_benchmark_account" [readonly]="true">
       </mat-form-field>
       <mat-form-field>
-        <input matInput placeholder="Benchmark Account" formControlName="Benchmark Account">
+        <input matInput placeholder="Benchmark Portfolio" formControlName="Benchmark Account">
       </mat-form-field>
       <button *ngIf="!disabledControlElements" mat-raised-button color="accent" 
         (click)="selectBenchmarkAccount()"
@@ -59,9 +62,9 @@
       </button>
       <mat-form-field style="width: 95%;">
         <input matInput placeholder="description" formControlName="description">
-        <mat-error  *ngIf="Description.invalid && Description.touched">
-          The field is required.    
-      </mat-error>
+        <mat-error  *ngIf="Description?.errors?.['required']">
+          Required!    
+        </mat-error>
       </mat-form-field>
       <p color = 'red' *ngIf="editStrategyForm.invalid"> Please check the form. Data is invalid</p>
     </form>

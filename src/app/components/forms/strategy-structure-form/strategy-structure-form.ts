@@ -4,7 +4,7 @@ import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/m
 import { AppConfimActionComponent } from '../../common-forms/app-confim-action/app-confim-action.component';
 import { StrategiesGlobalData } from 'src/app/models/intefaces';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
-import { filter, map, Observable, startWith, switchMap } from 'rxjs';
+import { debounce, distinctUntilChanged, filter, map, Observable, startWith, switchMap } from 'rxjs';
 import { AtuoCompSecidService } from 'src/app/services/atuo-comp-secid.service';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AppInstrumentTableComponent } from '../../tables/instrument-table/instrument-table';
@@ -18,11 +18,12 @@ import { AppInvestmentDataServiceService } from 'src/app/services/app-investment
 export class AppStructureStrategyFormComponent implements OnInit {
   public editStructureStrategyForm=this.fb.group ({
     id: [null, {validators: [Validators.required]}],
+    weight_of_child: [null, {validators: [Validators.required, Validators.pattern('[0-9]*')]}],
     sname: [null, { updateOn: 'blur'} ],
     description: {value:'', disabled: true}, 
-    weight_of_child: {value:'', disabled: false},
     id_item: {value:'', disabled: false},
-    id_strategy_parent : ''
+    id_strategy_parent : '',
+    id_strategy_child_integer: [0]
   })
   
   @Input() disabledControlElements: boolean ;
@@ -47,21 +48,22 @@ export class AppStructureStrategyFormComponent implements OnInit {
   ) {
   }
   ngOnInit(): void {
-    this.AtuoCompService.getSecidLists('get_secid_array');
-    this.filterednstrumentsLists = this.editStructureStrategyForm.controls['id'].valueChanges.pipe(
-      startWith(''),
-      map(value => this.AtuoCompService.filter(value || ''))
-    );
-    this.InvestmentDataService.getGlobalStategiesList (0,'','Get_ModelPortfolios_List').subscribe (data =>this.MPnames = data)
     this.action !== "Create"? this.editStructureStrategyForm.patchValue(this.data) : null;
     this.action === "Create_Example"?  this.action = "Create" : null;
-    this.editStructureStrategyForm.controls['weight_of_child'].addValidators ( [Validators.required, Validators.pattern('[0-9]*')]);
-    this.addValidators();
-  }
-  ngAfterViewChecked(): void {
-    this.disabledControlElements? this.editStructureStrategyForm.disable() : null;
   }
   ngOnChanges(changes: SimpleChanges) {
+    console.log('mp change', this.MP);
+    this.MP===1||2? this.addValidators() : null;
+    this.disabledControlElements? this.editStructureStrategyForm.disable() : null;
+    this.MP===2? this.InvestmentDataService.getGlobalStategiesList (0,'','Get_ModelPortfolios_List').subscribe (data =>this.MPnames = data):null;
+    if (this.MP===1) {
+      this.AtuoCompService.getSecidLists('get_secid_array');
+      this.filterednstrumentsLists = this.editStructureStrategyForm.controls['id'].valueChanges.pipe(
+        startWith(''),
+        distinctUntilChanged(),
+        map(value => this.AtuoCompService.filter(value || ''))
+      );
+    };
     if (Object.hasOwn(changes,'parentStrategyId')) {
       this.editStructureStrategyForm.controls['id_item'].setValue (changes['strategyId'].currentValue)
       this.addValidators();
@@ -86,13 +88,15 @@ export class AppStructureStrategyFormComponent implements OnInit {
     }
   }
   updateStrategyStructureData (action:string){
+       this.id_child_integer.patchValue(+(this.id.value||0))
+       console.log('this.editStructureStrategyForm.value',this.editStructureStrategyForm.value);
     switch (action) {
       case 'Create':
         this.editStructureStrategyForm.controls['id_strategy_parent'].setValue(this.strategyId)
         this.InvestmentDataService.createStrategyStructure (this.editStructureStrategyForm.value).subscribe(result=>{
           this.snacksBox(result.length,'Created');
           this.editStructureStrategyForm.controls['id'].setValue(null);
-          this.editStructureStrategyForm.controls['weight_of_child'].setValue('');
+          this.editStructureStrategyForm.controls['weight_of_child'].setValue(null);
           this.editStructureStrategyForm.controls['weight_of_child'].markAsPending();
           this.editStructureStrategyForm.controls['id'].markAsPending();
         })
@@ -118,6 +122,7 @@ export class AppStructureStrategyFormComponent implements OnInit {
     });
   }
   get  id ()   {return this.editStructureStrategyForm.get('id') } 
+  get  id_child_integer ()   {return this.editStructureStrategyForm.get('id_strategy_child_integer') } 
   get  id_item ()   {return this.editStructureStrategyForm.get('id_item') } 
   get  sname ()   {return this.editStructureStrategyForm.get('sname') } 
   get  description ()   {return this.editStructureStrategyForm.get('description') } 

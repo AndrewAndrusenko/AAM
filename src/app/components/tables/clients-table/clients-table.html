@@ -64,7 +64,7 @@
         (click)="action==='Select'? chooseClient(element): showPortfolios($event,element) ">
         <ng-template  #instrumentcontextmenu>
           <div class="tree-menu-context" cdkMenu >
-            <button  *ngIf="disabledControlElements">
+            <button  *ngIf="disabledControlElements"
               (click)="openClientModifyForm('View',element)"
               class="tree-menu-item" cdkMenuItem >
               <mat-icon class="menu-icon" matPrefix>pageview</mat-icon>      
