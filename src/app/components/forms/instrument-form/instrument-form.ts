@@ -17,15 +17,15 @@ import { AuthService } from 'src/app/services/auth.service';
 export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
   accessState: string = 'none';
   disabledControlElements: boolean = false;
-  @Input() action: string = 'View';
   public panelOpenState = true;
   public instrumentModifyForm: FormGroup;
   public instrumentDetailsForm: FormGroup;
+  @Input() action: string = 'View';
   @Input() moexBoards = []
   @Input() secidParam:string;
+  @Output() public modal_principal_parent = new EventEmitter();
   instrumentDetails:instrumentDetails[] = [];
   instrumentCorpActions:instrumentCorpActions[] = [];
-  @Output() public modal_principal_parent = new EventEmitter();
   public title: string;
   public actionType : string;
   public data: any;
@@ -47,37 +47,7 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
     private MarketDataService: AppMarketDataService,
     private indexDBServiceS:indexDBService,
   ) 
-  { 
-    this.AuthServiceS.verifyAccessRestrictions('accessToInstrumentData').subscribe ((accessData) => {
-      this.accessState=accessData.elementvalue;
-      if (this.accessState === 'full')  {
-        this.disabledControlElements = true;
-        this.action='Edit'
-      }
-        this.title = this.action;
-        if (this.secidParam) {
-          this.MarketDataService.getMoexInstruments(undefined,undefined, {secid:[this.secidParam,this.secidParam]}).subscribe (instrumentData => {
-            this.indexDBServiceS.getIndexDBInstrumentStaticTables('getBoardsDataFromInstruments').then ((data)=>this.moexBoards = data['data'])
-            this.instrumentModifyForm.patchValue(instrumentData[0]);
-          }) 
-        };  
-        console.log('constructor', this.action);
-        switch (this.action) {
-          case 'Create': 
-          break;
-          case 'Create_Example':
-            this.instrumentModifyForm.patchValue(this.data);
-            this.title = 'Create';
-            break;
-            default :
-            this.instrumentModifyForm.patchValue(this.data)
-          break;
-        } 
-        if (this.action == 'View') {
-          this.instrumentModifyForm.disable();
-        }
-    })
-    this.formDisabledFields = ['clientId', 'accountId', 'idportfolio']
+  {    
     this.instrumentModifyForm = this.fb.group ({
       id : {value:null, disabled: false},
       secid: [null, { validators:  Validators.required, asyncValidators: null, updateOn: 'blur' }], 
@@ -100,42 +70,41 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
     })
     this.instrumentDetailsForm = this.fb.group ({
       secid: {value:null, disabled: false}, boardid: {value:null, disabled: false}, shortname: {value:null, disabled: false}, lotsize: {value:null, disabled: false}, facevalue: {value:null, disabled: false}, status: {value:null, disabled: false}, boardname: {value:null, disabled: false}, decimals: {value:null, disabled: false}, matdate: {value:null, disabled: false}, secname: {value:null, disabled: false}, couponperiod: {value:null, disabled: false}, issuesize: {value:0, disabled: false}, remarks: {value:null, disabled: false}, marketcode: {value:null, disabled: false}, instrid: {value:null, disabled: false}, sectorid: {value:null, disabled: false}, minstep: {value:null, disabled: false}, faceunit: {value:null, disabled: false}, isin: {value:null, disabled: false}, latname: {value:null, disabled: false}, regnumber: {value:null, disabled: false}, currencyid: {value:null, disabled: false}, sectype: {value:null, disabled: false}, listlevel: {value:null, disabled: false}, issuesizeplaced: {value:null, disabled: false}, couponpercent: {value:null, disabled: false}, lotvalue: {value:null, disabled: false}, nextcoupon: {value:null, disabled: false}, issuevolume:{value:null, disabled: true}
-    })
+    }) 
+    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToInstrumentData')[0].elementvalue;
+    this.disabledControlElements = this.accessState === 'full'? false : true;
     this.indexDBServiceS.getIndexDBInstrumentStaticTables('getMoexSecurityGroups').then ((data)=>this.securityGroups = data['data'])
     this.indexDBServiceS.getIndexDBInstrumentStaticTables('getMoexSecurityTypes').then ((data)=>{
       this.securityTypes = data['data'];
       this.filtersecurityType(this.group.value);
-      if (this.action==='Create_Example') {
-        this.isin.setErrors({isinIsTaken:true})
-        this.secid.setErrors({'secidIsTaken':true})
-      }
     })
   }
   ngAfterContentInit (): void {
-    this.instrumentDetailsForm.patchValue(this.instrumentDetails[0]);
+    this.moexBoards.length? null : this.indexDBServiceS.getIndexDBInstrumentStaticTables('getBoardsDataFromInstruments').then ((data)=>this.moexBoards = data['data']);
+    this.secidParam? this.MarketDataService.getMoexInstruments(undefined,undefined, {secid:[this.secidParam,this.secidParam]}).subscribe (instrumentData => this.instrumentModifyForm.patchValue(instrumentData[0])) : this.instrumentModifyForm.patchValue(this.data);
+    this.action == 'View'|| this.disabledControlElements?  this.instrumentModifyForm.disable() : null;
     this.addAsyncValidators(this.action);
   }
   async addAsyncValidators(action:string) {
     if (['Create','Create_Example'].includes(this.action)) {
-      this.SecidUniqueAsyncValidator = customAsyncValidators.MD_SecidUniqueAsyncValidator (this.MarketDataService, '');
-      this.ISINuniqueAsyncValidator = customAsyncValidators.MD_ISINuniqueAsyncValidator (this.MarketDataService, '');
+      this.isin.setErrors({isinIsTaken:true});
+      this.secid.setErrors({secidIsTaken:true})
+      this.SecidUniqueAsyncValidator = customAsyncValidators.MD_SecidUniqueAsyncValidator (this.MarketDataService, '', this.secid.errors);
+      this.ISINuniqueAsyncValidator = customAsyncValidators.MD_ISINuniqueAsyncValidator (this.MarketDataService, '', this.isin.errors);
     } else {
       this.SecidUniqueAsyncValidator = customAsyncValidators.MD_SecidUniqueAsyncValidator (this.MarketDataService, this.secid.value);
       this.ISINuniqueAsyncValidator = customAsyncValidators.MD_ISINuniqueAsyncValidator (this.MarketDataService, this.isin.value);
     }
-    this.secid.setAsyncValidators([this.SecidUniqueAsyncValidator]);
     this.isin.setAsyncValidators([this.ISINuniqueAsyncValidator]);
-    this.secid.markAsPristine();
-    this.isin.markAsPristine();
-    this.secid.updateValueAndValidity();
-    this.isin.updateValueAndValidity();
+    this.secid.setAsyncValidators([this.SecidUniqueAsyncValidator]);
+    this.action === 'Create_Example'? this.action='Create':null;
   }
   revomeAsyncValidators (action?:string) {
+    console.log('revomeAsyncValidators');
     this.secid.removeAsyncValidators([this.SecidUniqueAsyncValidator]);
     this.isin.removeAsyncValidators([this.ISINuniqueAsyncValidator]); 
   }
   ngOnChanges(changes: SimpleChanges) {
-    console.log('ngOnChanges', true);
     this.revomeAsyncValidators();
     this.MarketDataService.getMoexInstruments(undefined,undefined, {secid:[changes['secidParam'].currentValue,changes['secidParam'].currentValue]}).subscribe (instrumentData => {
       this.instrumentModifyForm.patchValue(instrumentData[0]);
@@ -159,7 +128,7 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
     return result;
   }
   updateInstrumentData(action:string){
-    this.instrumentModifyForm.updateValueAndValidity();
+    // this.instrumentModifyForm.updateValueAndValidity();
     if (this.instrumentModifyForm.invalid) {return}
     switch (action) {
       case 'Create_Example':

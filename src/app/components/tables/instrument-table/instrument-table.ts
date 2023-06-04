@@ -94,10 +94,8 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
     private dialog: MatDialog,
     private fb:FormBuilder, 
   ) {
-    this.AuthServiceS.verifyAccessRestrictions('accessToInstrumentData').subscribe ((accessData) => {
-      this.accessState=accessData.elementvalue;
-      this.disabledControlElements = this.accessState === 'full'? false : true;
-    })
+    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToInstrumentData')[0].elementvalue;
+    this.disabledControlElements = this.accessState === 'full'? false : true;
     this.searchParametersFG = this.fb.group ({
       secidList: null,
       amount:{value:null, disabled:true},
@@ -122,21 +120,18 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
      this.dataSource.paginator = this.paginator;
      this.dataSource.sort = this.sort;
     })
-
   }
   openInstrumentModifyForm (action:string, element:any) {
     this.dialogInstrumentModify = this.dialog.open (AppInvInstrumentModifyFormComponent,{minHeight:'600px', minWidth:'800px', maxWidth:'60vw', autoFocus: false, maxHeight: '90vh'})
     this.dialogInstrumentModify.componentInstance.moexBoards = this.boardIDs;
     this.dialogInstrumentModify.componentInstance.action = action;
-    this.dialogInstrumentModify.componentInstance.data = element;
+    this.dialogInstrumentModify.componentInstance.data = action ==='Create'? null :element;
     this.dialogInstrumentModify.componentInstance.instrumentDetails = this.instrumentDetailsArr.filter(el=> el.secid===element.secid&&element.primary_boardid===el.boardid)
     this.dialogInstrumentModify.componentInstance.instrumentCorpActions = this.instrumentCorpActions.filter(el=> el.isin===element.isin)
-    action=== 'View'? this.dialogInstrumentModify.componentInstance.instrumentModifyForm.disable() : null;
+    // action=== 'View'? this.dialogInstrumentModify.componentInstance.instrumentModifyForm.disable() : null;
   }
   async ngAfterViewInit() {
-    console.log('formMode',this.FormMode);
     if (this.FormMode==='Redis') {
-      console.log('getRedisMoexInstruments');
       this.MarketDataService.getRedisMoexInstruments().subscribe((data)=>this.updateInstrumentDataTable(data))   
     } else {
       this.MarketDataService.getMoexInstruments().subscribe (instrumentData => this.updateInstrumentDataTable(instrumentData))  
