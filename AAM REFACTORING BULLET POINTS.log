@@ -1,0 +1,15 @@
+AAM REFACTORING BULLET POINTS
+1 Multiple subscribes => to RxJS pipes with switch map and so on
+2 Async Validators => Create by Example: set unique errors manually through setError method and avoid any request to the db unless value has 
+  been changed => check dirty and touched status before sending a request. Noted.. when user changes values by selecting whole old value and pasting instead new value, field is still in untouched state...
+3 Access control model => change request to db with retrieving data form app variable containing all restrictions
+  Retrieve static tables from indexDB storage and don't request DB
+4 Check error blocks in template field?.errors?[''requiered]
+
+() Instrument Form - Done 6/6/23 + AsyncValidators
+() Instrument Table - Done 7/6/23 + ToggleAllSelection
+() Market Data Table - Done 7/6/23 + ToggleAllSelection + UI to Material design and Chart for one instrument
+() Portfolio Table - Done 8/6/23
+() Portfolio Form - Done 8/6/23
+() Client Table  - Done 8/6/23
+() Client Form - Done 10/6/23
