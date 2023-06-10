@@ -139,7 +139,6 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
   }
   disableAllexceptOne(index:number) {
     let disableOtherSources = this.marketSources[index].checkedAll||this.marketSources[index].indeterminate? true:false;
-    console.log('disableAllexceptOne',this.marketSources[index].checkedAll,this.marketSources[index].indeterminate,disableOtherSources);
     this.marketSources.forEach((el, i)=>{i===index? null : el.disabled = disableOtherSources})
   }
   showSelectedSources() {
@@ -174,7 +173,6 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
       this.loadedMarketData = data;
       if (!data.length) {
         this.logLoadingData = await functionToLoadData(sourcesData, dateToLoad);
-        console.log('this.loadMarketData.enable()')
         this.loadingDataState = {Message:'Loading is complited.', State:'Success'};
         this.marketSources.forEach(el=>el.checkedAll=false);
       }
@@ -186,10 +184,8 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
           this.CommonDialogsService.confirmDialog('Delete all data for codes: ' + sourceCodesArray).subscribe(isConfirmed=>{
             if (isConfirmed.isConfirmed){
               this.MarketDataService.deleteOldMarketData(sourceCodesArray,dateToLoad).then(async rowsDeleted => {
-                console.log('rowsDeleted',rowsDeleted);
                 this.marketDataDeleted = rowsDeleted;
                 this.logLoadingData = await functionToLoadData(sourcesData, dateToLoad);
-                // this.loadMarketData.enable();
                 this.loadingDataState = {Message:'Have been deleted '+rowsDeleted+' of old data', State : 'Success'}
                 this.marketSources.forEach(el=>el.checkedAll=false)
               })
@@ -253,7 +249,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
   }
   async submitQuery () {
     return new Promise((resolve, reject) => {
-    this.dataSource.data=null;
+      this.dataSource? this.dataSource.data=null : null;
     let searchObj = {};
     let instrumentsList = [];
     (this.instruments.indexOf('ClearAll') !== -1)? this.instruments.splice(this.instruments.indexOf('ClearAll'),1) : null;
@@ -276,9 +272,12 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
     })
   })
   }
-  toggleAllSelection() {
-   
+  toggleAllSelection(elem:string, allSelected: boolean) {
+    allSelected? this.searchParametersFG.get(elem).patchValue(
+      elem==='marketSource'? [...this.marketSources.map(item => item.segments.map(el => el.sourceCode)),0].flat() : [...this.boardIDs.map(item => item.boardid
+    ), 0]) : this.searchParametersFG.get(elem).patchValue([]);
   }
+   
   exportToExcel() {
    const fileName = "marketData.xlsx";
    let data = this.dataSource.data.map( (row,ind) =>({

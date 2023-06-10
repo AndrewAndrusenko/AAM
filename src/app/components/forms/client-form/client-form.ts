@@ -47,21 +47,20 @@ export class AppClientFormComponent implements OnInit {
       phone: [null, [Validators.required, Validators.pattern('[0-9]*') ]],
       code : [null, []]
     });
-
    }
   ngAfterViewInit(): void {
   this.updataDataSourse(this.client, null, 'Get_Client_Data');
   this.disabledControlElements? this.editClienttForm.disable() : null;
   }
-  updataDataSourse (clientId:number, clientname:string, action:string) {
-    this.accessState==='none'? null : this.InvestmentDataServiceService.getClientData(clientId, clientname, action).subscribe(data => {
-      this.editClienttForm.patchValue(data[0])
-      if (this.action === 'Create_Example') {
-        clientId = 0;
-        this.action ='Create';
-      }
-      this.editClienttForm.controls['clientname'].setAsyncValidators(customAsyncValidators.clientNameCustomAsyncValidator(this.InvestmentDataServiceService, clientId))
-      this.editClienttForm.controls['clientname'].updateValueAndValidity();
+  updataDataSourse (clientId:number, clientname:string, actionSQL:string) {
+    this.accessState==='none'? null : this.InvestmentDataServiceService.getClientData(clientId, clientname, actionSQL).subscribe(data => {
+      this.editClienttForm.patchValue(data[0]);
+      this.action === 'Create_Example'? this.clientname.setErrors({uniqueClientName:true}) : null;
+      this.clientname.setAsyncValidators(customAsyncValidators.clientNameCustomAsyncValidator(this.InvestmentDataServiceService, 
+      ['Create','Create_Example'].includes(this.action)? 0 : clientId, 
+      this.clientname.value,
+      this.action==='Create_Example'? this.clientname.errors : null));
+      this.clientname.updateValueAndValidity();
     })
   }
   ngOnChanges(changes: SimpleChanges) {
@@ -72,7 +71,7 @@ export class AppClientFormComponent implements OnInit {
       this.CommonDialogsService.snackResultHandler(result)
     } else {
       this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' client'}, action);
-      this.InvestmentDataServiceService.sendReloadClientTable(result)
+      this.InvestmentDataServiceService.sendReloadClientTable(result);
     }
   }
   updateClientData(action:string){
@@ -89,7 +88,6 @@ export class AppClientFormComponent implements OnInit {
           filter(isConfirmed => isConfirmed.isConfirmed),
           switchMap(data => this.InvestmentDataServiceService.deleteClient (this.clientId.value))
         ).subscribe (result => this.snacksBox(result,'Deleted'))
-      // this.CommonDialogsService.dialogCloseAll();
       break;
     }
   }

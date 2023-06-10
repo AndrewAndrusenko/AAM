@@ -12,15 +12,12 @@
     style="margin-top: 1px; width: 30%; font-size: 18px; margin-left: 1%;">
     {{action}} Instrument
   </button>
-
 </mat-toolbar>
 
 <form class="submit" [formGroup]="instrumentModifyForm">
   <h3 style="color:rgb(177, 174, 174)" *ngIf="instrumentModifyForm.valid"> 
     To save data please select 'Submit data' check and then press button {{secid.hasError('secidIsTaken')}}
   </h3>
-<!--   <div >{{secid.errors| json}}</div>
-  <div >{{isin.errors| json}}</div> -->
   <mat-form-field style="width: 10%;" title="SecID">
     <input matInput placeholder="SecID" formControlName="secid">
     <mat-error  *ngIf="secid?.errors?.['required']">
@@ -40,8 +37,8 @@
       </mat-option>
       </ng-container>
     </mat-select>
-    <mat-error  *ngIf="security_group_name.invalid && security_group_name.touched && security_group_name.value==''">
-      The field is required.    
+    <mat-error  *ngIf="group?.errors?.['required']">
+      Required!   
     </mat-error>
   </mat-form-field>
   <mat-form-field  style="width: 24%;" title="Security Type Code">
@@ -53,17 +50,14 @@
       </mat-option>
       </ng-container>
     </mat-select>
-    <mat-error  *ngIf="security_type_name.invalid && security_type_name.touched && security_type_name.value==''">
-      The field is required.    
+    <mat-error  *ngIf="type?.errors?.['required']">
+      Required!   
     </mat-error>
   </mat-form-field>
   <mat-form-field style = "width: 29%;" title="Short Name">
     <input matInput placeholder = "Shortname" formControlName="shortname">
-    <mat-error  *ngIf="shortname.invalid && shortname.touched && shortname.value !== '' ">
-      Only dights   
-    </mat-error>
-    <mat-error  *ngIf="shortname.invalid  && shortname.value == ''">
-      Required!    
+    <mat-error  *ngIf="shortname?.errors?.['required']">
+      Required!   
     </mat-error>
   </mat-form-field>
   <mat-form-field style = "width: 15%;" title="ISIN">
@@ -81,9 +75,6 @@
       </mat-option>
       </ng-container>
     </mat-select>
-    <mat-error  *ngIf="security_group_name.invalid && security_group_name.touched && security_group_name.value==''">
-      The field is required.    
-    </mat-error>
   </mat-form-field>
   <mat-form-field  style="width: 26%;" title="Market Price Board">
     <mat-label>Market Price Board</mat-label>
@@ -94,17 +85,11 @@
       </mat-option>
       </ng-container>
     </mat-select>
-    <mat-error  *ngIf="security_group_name.invalid && security_group_name.touched && security_group_name.value==''">
-      The field is required.    
-    </mat-error>
   </mat-form-field>
   <mat-form-field style="width: 35%;" title="Instrument Name">
     <input matInput placeholder="Instrument Name" formControlName="name" >   
-    <mat-error  *ngIf="name.invalid && name.value!==''">
-      Incorrect client number. Use search loop.    
-    </mat-error>
-    <mat-error  *ngIf="name.invalid && name.touched && name.value==''">
-      The field is required.    
+    <mat-error  *ngIf="name?.errors?.['required']">
+      Required!   
     </mat-error>
   </mat-form-field>
   <mat-form-field style="width: 15%;" title="INN">
@@ -137,8 +122,8 @@
     </div>
 </mat-expansion-panel>
 <mat-expansion-panel class="headers-align" title="instrumenCorpActionsTable"
-(opened)="panelOpenStateSecond = true"
-(closed)="panelOpenStateSecond = false" >
+  (opened)="panelOpenStateSecond = true"
+  (closed)="panelOpenStateSecond = false" >
 <mat-expansion-panel-header >
   <mat-panel-title>
     Corporate Actions

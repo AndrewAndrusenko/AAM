@@ -24,16 +24,17 @@
       Settings
     </button>
     <button mat-menu-item
-    (click)="localStorageclear()">
-    Local Storage Clear
+    (click)="indexdbDeleteAllCache()">
+    IndexedDB Clear
   </button>
-    <button mat-menu-item>User profile</button>
-    <button mat-menu-item
-      (click)="LogOut()">
-      Sign out
-    </button>
-  
-  </mat-menu>
+  <button mat-menu-item>User profile</button>
+  <button mat-menu-item
+  (click)="LogOut()">
+  Sign out
+</button>
+
+</mat-menu>
+<button mat-flat-button mat-button color ="accent" style="color: black;"  (click)="indexdbDeleteAllCache()" >Clear cache</button>
 
 <button mat-flat-button
   class="menuright"

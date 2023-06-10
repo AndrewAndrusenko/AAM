@@ -18,6 +18,8 @@ import { formatNumber } from '@angular/common';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import { AuthService } from 'src/app/services/auth.service';
+import { MatOption } from '@angular/material/core';
+import { MatSelect } from '@angular/material/select';
 @Component({
   selector: 'app-app-instrument-table',
   
@@ -62,6 +64,7 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild('filterALL', { static: false }) filterALL: ElementRef;
+
   @Output() public modal_principal_parent = new EventEmitter();
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
   
@@ -128,33 +131,25 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
     this.dialogInstrumentModify.componentInstance.data = action ==='Create'? null :element;
     this.dialogInstrumentModify.componentInstance.instrumentDetails = this.instrumentDetailsArr.filter(el=> el.secid===element.secid&&element.primary_boardid===el.boardid)
     this.dialogInstrumentModify.componentInstance.instrumentCorpActions = this.instrumentCorpActions.filter(el=> el.isin===element.isin)
-    // action=== 'View'? this.dialogInstrumentModify.componentInstance.instrumentModifyForm.disable() : null;
   }
   async ngAfterViewInit() {
     if (this.FormMode==='Redis') {
-      this.MarketDataService.getRedisMoexInstruments().subscribe((data)=>this.updateInstrumentDataTable(data))   
+      this.MarketDataService.getRedisMoexInstruments().subscribe(data => this.updateInstrumentDataTable(data))   
     } else {
       this.MarketDataService.getMoexInstruments().subscribe (instrumentData => this.updateInstrumentDataTable(instrumentData))  
     }
-    this.indexDBServiceS.getIndexDBInstrumentStaticTables('getInstrumentDataDetails').then ((data)=>this.instrumentDetailsArr = data['data']);
-    // this.indexDBServiceS.getIndexDBInstrumentStaticTables('getInstrumentDataCorpActions').then ((data)=>this.instrumentCorpActions = data['data']); -- corporate actions data will be cached by CoprActionTable
-
+    this.indexDBServiceS.getIndexDBInstrumentStaticTables('getInstrumentDataDetails').then(data =>this.instrumentDetailsArr = data['data']);
   }
   handleNewFavoriteClick(elem:Instruments){
-    console.log('elem',elem);
-    let userData = JSON.parse(localStorage.getItem('userInfo'))
-    this.TreeMenuSevice.addItemToFavorites (elem.secid , 'Instruments', userData.user.id, elem.id.toString())
-    .then((response) => { console.log('Added to Favorites')})
+    let userData = JSON.parse(localStorage.getItem('userInfo'));
+    this.TreeMenuSevice.addItemToFavorites (elem.secid , 'Instruments', userData.user.id, elem.id.toString());
   }
   updateInstrumentDataTable (instrumentData:Instruments[]) {
     this.dataSource  = new MatTableDataSource(instrumentData);
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
     this.defaultFilterPredicate = this.dataSource.filterPredicate;
-    
-    this.dataSource.filterPredicate = function(data, filter: string): boolean {
-      return data.secid.toLowerCase().includes(filter) 
-    };
+    this.dataSource.filterPredicate = function(data, filter: string): boolean {return data.secid.toLowerCase().includes(filter)};
     this.secidfilter = this.dataSource.filterPredicate;
   }
   applyFilter(event: any, col?:string) {
@@ -172,15 +167,12 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
   }
   remove(account: string): void {
     const index = this.instruments.indexOf(account);
-   (index >= 0)? this.instruments.splice(index, 1) : null
+    (index >= 0)? this.instruments.splice(index, 1) : null;
   }
-  clearAll(event) {
-    console.log('event', event.target.textContent);
-    event.target.textContent.trim() === 'ClearAll cancel'? this.instruments = ['ClearAll']: null;
-  }
+  clearAll(event) {event.target.textContent.trim() === 'ClearAll cancel'? this.instruments = ['ClearAll']: null}
   addChips (el: any, column: string) {(['accountNo'].includes(column))? this.instruments.push(el):null;}
   updateFilter (el: any) {
-    this.filterALL.nativeElement.value = el
+    this.filterALL.nativeElement.value = el;
     this.dataSource.filter = el.trim();
     (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
   }
@@ -191,36 +183,33 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
   }
   async submitQuery () {
     return new Promise((resolve, reject) => {
-    this.dataSource.data = null;
-    let searchObj = {};
-    let instrumentsList = [];
-    (this.instruments.indexOf('ClearAll') !== -1)? this.instruments.splice(this.instruments.indexOf('ClearAll'),1) : null;
-    (this.instruments.length===1)? instrumentsList = [...this.instruments,...this.instruments]: instrumentsList = this.instruments;
-    (this.instruments.length)? Object.assign (searchObj , {'secid': instrumentsList}): null;
-    ( this.marketSource.value != null&&this.marketSource.value.length !=0)? Object.assign (searchObj , {'sourcecode': this.marketSource.value}): null;
-    ( this.boards.value != null&&this.boards.value.length !=0)? Object.assign (searchObj , {'boardid': this.boards.value}): null;
-    this.MarketDataService.getMoexInstruments(undefined,this.FormMode==='ChartMode'? 'secid ASC':undefined,searchObj).subscribe (instrmenttData  => {
-      this.dataSource  = new MatTableDataSource(instrmenttData);
-      this.dataSource.paginator = this.paginator;
-      this.dataSource.sort = this.sort;
-      this.instruments.unshift('ClearAll')
-      this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (instrmenttData.length,'en-US') + ' rows'}, 'Loaded ');
-      resolve(instrmenttData) 
-    })
-  })
+      this.dataSource.data? this.dataSource.data = null : null;
+      let searchObj = {};
+      let instrumentsList = [];
+      this.instruments.indexOf('ClearAll') !== -1? this.instruments.splice(this.instruments.indexOf('ClearAll'),1) : null;
+      this.instruments.length===1? instrumentsList = [...this.instruments,...this.instruments]: instrumentsList = this.instruments;
+      this.instruments.length? Object.assign (searchObj , {'secid': instrumentsList}): null;
+      this.marketSource.value != null&&this.marketSource.value.length !=0? Object.assign (searchObj , {'sourcecode': this.marketSource.value}): null;
+      this.boards.value != null&&this.boards.value.length !=0? Object.assign (searchObj , {'boardid': this.boards.value}): null;
+      this.MarketDataService.getMoexInstruments(undefined,this.FormMode==='ChartMode'? 'secid ASC':undefined,searchObj).subscribe(data => {
+        this.dataSource  = new MatTableDataSource(data);
+        this.dataSource.paginator = this.paginator;
+        this.dataSource.sort = this.sort;
+        this.instruments.unshift('ClearAll')
+        this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ');
+        resolve(data) 
+      });
+    });
   }
-  toggleAllSelection() {
+  toggleAllSelection(elem:string, allSelected: boolean) {
+    allSelected? this.searchParametersFG.get(elem).patchValue(
+      elem==='marketSource'? [...this.marketSources.map(item => item.segments.map(el => el.sourceCode)),0].flat() : [...this.boardIDs.map(item => item.boardid
+    ), 0]) : this.searchParametersFG.get(elem).patchValue([]);
+  }
    
-  }
-  selectInstrument (element:Instruments) {
-    this.modal_principal_parent.emit(element);
-  }
-  exportToExcel() {
-    this.HandlingCommonTasksS.exportToExcel (this.dataSource.data,"instrumentData")
-  }
+  selectInstrument (element:Instruments) {this.modal_principal_parent.emit(element)}
+  exportToExcel() {this.HandlingCommonTasksS.exportToExcel (this.dataSource.data,"instrumentData")  }
   get  marketSource () {return this.searchParametersFG.get('marketSource') } 
   get  boards () {return this.searchParametersFG.get('boards') } 
   get  secidList () {return this.searchParametersFG.get('secidList') } 
-  
-  
 }

@@ -10,14 +10,16 @@ import { AppInvestmentDataServiceService } from './app-investment-data.service.s
 import { AppAccountingService } from './app-accounting.service';
 import { AppMarketDataService } from './app-market-data.service';
 export class customAsyncValidators {
-  static clientNameCustomAsyncValidator(userService: AppInvestmentDataServiceService, clientId:number): AsyncValidatorFn {
+  static clientNameCustomAsyncValidator(userService: AppInvestmentDataServiceService, clientId: number, client:string, errors?:ValidationErrors): AsyncValidatorFn {
     return (control: AbstractControl): Observable<ValidationErrors> => {
-      return userService
+      if (control.value.toUpperCase() !== client.toUpperCase() && control.touched||control.dirty) {
+        return userService
         .getClientData(clientId, control.value, 'Check_clientname')
         .pipe(
-          map ( isTaken => ( control.touched && control.value !== clientId && isTaken.length ? { uniqueClientName: true } : null)  ),
+          map (isTaken => (isTaken.length ? { uniqueClientName: true } : null)  ),
           catchError(() => of(null))
         );
+      } else {return of(errors)}
     };
   }
   static secidCustomAsyncValidator (userService: AppInvestmentDataServiceService, secid:string): AsyncValidatorFn {
@@ -119,7 +121,7 @@ export class customAsyncValidators {
   }  
   static MD_SecidUniqueAsyncValidator (AppMarketDataService: AppMarketDataService, secid:string,  errors?:ValidationErrors): AsyncValidatorFn {
     return (control: AbstractControl): Observable<ValidationErrors> => {
-      if (control.value.toUpperCase() !== secid.toUpperCase() && control.touched) {
+      if (control.value.toUpperCase() !== secid.toUpperCase() && control.touched||control.dirty) {
         return AppMarketDataService
           .getInstrumentDataGeneral('validateSecidForUnique', control.value.toUpperCase())
           .pipe(
@@ -131,7 +133,7 @@ export class customAsyncValidators {
   }
   static MD_ISINuniqueAsyncValidator (AppMarketDataService: AppMarketDataService, isin:string, errors?:ValidationErrors): AsyncValidatorFn {
     return (control: AbstractControl): Observable<ValidationErrors | null> => {
-      if (control.value.toUpperCase() !== isin.toUpperCase() && control.touched) {
+      if (control.value.toUpperCase() !== isin.toUpperCase() && (control.touched||control.dirty)) {
         return AppMarketDataService
           .getInstrumentDataGeneral('validateISINForUnique', control.value.toUpperCase())
           .pipe(

@@ -75,13 +75,10 @@ export class AppClientsTableComponent  {
     this.modal_principal_parent.emit(element);
   }
   openClientModifyForm (actionType: string, element:ClientData) {
-    console.log('actionType',actionType);
     this.expandAllowed = false;
     this.dialogRef = this.dialog.open(AppClientFormComponent ,{minHeight:'400px', width:'900px' });
     this.dialogRef.componentInstance.client = element === null? 0 : element.idclient;
     this.dialogRef.componentInstance.action = actionType;
-
-    // this.dialogRef.componentInstance.action = ['Create','Create_Example'].includes(actionType)? 'Create New': actionType;
   }
   openNewPortfolioForm (element:ClientData) {
     this.expandAllowed = false;
@@ -97,9 +94,7 @@ export class AppClientsTableComponent  {
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
   submitQuery () {
-    this.updateClientData (null,null,null).then ((rowsCount) => {
-      this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (rowsCount,'en-US') + ' rows'},'Loaded ')
-    }) 
+    this.updateClientData (null,null,null).then (rowsCount => this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (rowsCount,'en-US') + ' rows'},'Loaded ')); 
   }
   exportToExcel() {
     this.HandlingCommonTasksS.exportToExcel (this.dataSource.data,"ClientData")

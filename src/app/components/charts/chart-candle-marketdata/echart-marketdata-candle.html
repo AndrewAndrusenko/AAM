@@ -1,9 +1,11 @@
 <nav class="navbar navbar-expand-sm navbar-dark bg-primary"  style="align-items: center;">
-  <div style="margin-left: 1%" >
-    <select class="form-control" name="" (change)="onChangeCountry($event.target)">
-      <option *ngFor="let c of secIds" [value]="c">{{c}}</option>
-    </select>
-  </div>
+  <mat-form-field 
+  style="color: black;; margin-left: 1%;font-size: large; background-color: rgb(46, 93, 147); text-align: center; width: 12%; border-radius: 12px;"  >
+    <mat-label style="color: black;">Select SecID..</mat-label>
+    <mat-select >
+      <mat-option *ngFor="let secId of secIds" (click)="onChangeCountry(secId)"  [value]="secId">{{secId}}</mat-option>
+    </mat-select>
+  </mat-form-field>
   <a class=" navbar-brand mx-auto" style="align-items: center;">Market Data</a>
 </nav>
 

@@ -1,12 +1,12 @@
 <mat-toolbar color="primary" >
-  {{action}} Client
+  {{action==='Create_Example'? 'Create' : action}} Client
 </mat-toolbar>
 <div class="client_form">
   <button mat-raised-button color="primary" 
     [disabled]="!(editClienttForm.valid && submitbox.checked)"
     (click)="editClienttForm.valid? updateClientData(action) : null"
     style="margin-top: 10px; width: 200px; font-size: 18px;">
-    {{action}} Client 
+    {{action==='Create_Example'? 'Create' : action}} Client 
   </button>
   <mat-checkbox color="primary"  #submitbox checked="false" 
     (click)=" 
@@ -25,7 +25,7 @@
       Required!    
     </mat-error>
     <mat-error  *ngIf="clientname?.errors?.['uniqueClientName']">
-       Client Name isn't unique. Please choose another one.    
+       Not unique. Please choose another one.    
     </mat-error>
   </mat-form-field>
   <mat-form-field>

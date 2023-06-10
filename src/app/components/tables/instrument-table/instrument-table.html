@@ -72,25 +72,12 @@
           ClearAll
         </button>
       </span>
-      <mat-form-field  style="width: 25%;">
-        <mat-label>MarketDataSource</mat-label>
-        <mat-select  #marketSource formControlName="marketSource"  multiple> 
-          <mat-option #allSelected [value]="0"
-            (click)="toggleAllSelection()" >
-            ALL - {{this.allSelected.selected? 'Clear' :'Select' }} All 
-          </mat-option>
-          <mat-optgroup *ngFor="let marketSource of marketSources" [label]="marketSource.sourceName">
-          <mat-option *ngFor="let segment of marketSource.segments" [value]="segment.sourceCode">
-              {{segment.description}}
-          </mat-option>
-        </mat-optgroup>
-        </mat-select>
-      </mat-form-field>
+
       <mat-form-field  style="width: 25%;">
         <mat-label>BoardID</mat-label>
         <mat-select  #BoardID formControlName="boards"  multiple> 
           <mat-option #allSelected [value]="0"
-            (click)="toggleAllSelection()" >
+            (click)="toggleAllSelection('boards', allSelected.selected)" >
             ALL - {{this.allSelected.selected? 'Clear' :'Select' }} All 
           </mat-option>
           <mat-option *ngFor="let board of boardIDs" [value]="board.boardid.toString()">

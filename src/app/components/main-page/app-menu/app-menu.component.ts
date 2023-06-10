@@ -2,6 +2,7 @@ import { Component, Input } from '@angular/core';
 import { menuColorGl } from 'src/app/models/constants';
 import { AppMenuServiceService } from 'src/app/services/app-menu-service.service';
 import { AuthService } from 'src/app/services/auth.service';
+import { indexDBService } from 'src/app/services/indexDB.service';
 
 @Component({
   selector: 'app-app-menu',
@@ -13,7 +14,10 @@ export class AppMenuComponent {
 fullscreen : boolean = false;
 public menuColor = menuColorGl
 constructor(
-  private authService : AuthService, private appMenuService : AppMenuServiceService) { }
+  private authService : AuthService, 
+  private appMenuService : AppMenuServiceService,
+  private indexDBServiceS:indexDBService,
+  ) { }
 
   public getLogin = () => {
     let userData = JSON.parse(localStorage.getItem ('userInfo'));
@@ -33,9 +37,7 @@ constructor(
     this.appMenuService.sendToggleTree(this.treeOpened)
   }
   showChart () {}
-  localStorageclear (){
-    let userData = localStorage.getItem ('userInfo');
-    localStorage.clear();
-    localStorage.setItem('userInfo',userData)
+  indexdbDeleteAllCache (){
+    this.indexDBServiceS.indexdbDeleteAllCache('AAMCache')
   }
 }

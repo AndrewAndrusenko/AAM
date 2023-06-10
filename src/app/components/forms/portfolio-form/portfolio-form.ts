@@ -65,11 +65,9 @@ export class AppNewAccountComponent {
   }
   ngOnChanges (changes: SimpleChanges) {
     if (this.accessState !=='none') {
-      this.InvestmentDataService.getPortfoliosData('',changes['portfolioCode'].currentValue,0,0, 'Get_Portfolio_By_idPortfolio', this.accessToClientData).subscribe (portfoliosData => {
-        this.newAccountForm.patchValue(portfoliosData[0])})
+      this.InvestmentDataService.getPortfoliosData('',changes['portfolioCode'].currentValue,0,0, 'Get_Portfolio_By_idPortfolio', this.accessToClientData).subscribe (portfoliosData => this.newAccountForm.patchValue(portfoliosData[0]))
     }
   }
-
   snacksBox (result:any, action?:string) {
     if (result['name']=='error') {
       this.CommonDialogsService.snackResultHandler(result)
@@ -88,10 +86,10 @@ export class AppNewAccountComponent {
         this.InvestmentDataService.updateAccount (this.newAccountForm.value).subscribe (result => this.snacksBox(result.length,'Updated'))
       break;
       case 'Delete':
-              this.CommonDialogsService.confirmDialog('Delete Portfolio ' + this.portfolioname.value).pipe (
-                filter (isConfirmed => isConfirmed.isConfirmed),
-                switchMap(data => this.InvestmentDataService.deleteAccount (this.portfolioname.value))
-              ).subscribe (result =>this.snacksBox(result.length,'Deleted'));
+        this.CommonDialogsService.confirmDialog('Delete Portfolio ' + this.portfolioname.value).pipe (
+          filter (isConfirmed => isConfirmed.isConfirmed),
+          switchMap(data => this.InvestmentDataService.deleteAccount (this.portfolioname.value))
+        ).subscribe (result =>this.snacksBox(result.length,'Deleted'));
       break;
     }
   }
@@ -119,7 +117,7 @@ export class AppNewAccountComponent {
   calculateAccountCode () {
     let newNumberS : string;
     let accountType = this.newAccountForm.controls['account_type'].value
-    this.InvestmentDataService.getPortfoliosData (accountType, 0,0,0, 'calculateAccountCode',this.accessToClientData).subscribe( (dataA) => {
+    this.InvestmentDataService.getPortfoliosData (accountType, 0,0,0, 'calculateAccountCode',this.accessToClientData).subscribe(dataA => {
       if (dataA.length === 0) {newNumberS = "001"} else {
         let data = dataA[0]
         let newNumber = Number (data['portfolioname'].substr(accountType.length)) + 1

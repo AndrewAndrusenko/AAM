@@ -32,9 +32,7 @@ export class NgEchartMarketDataCandleComponent  {
 
     })
   }
-  onChangeCountry(target:any) {
-    console.log('event',target.value);
-    let secid= target.value;
+  onChangeCountry(secid:string) {
     this.seriesCandle=[]
     this.setOptions(secid);
     console.log('mdata',this.marketData.length);

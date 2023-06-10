@@ -153,7 +153,7 @@ async function fGetClientData(request,response) {
   const query = {text: ' SELECT * FROM public.dclients'}
   switch (request.query.action) {
     case 'Check_clientname':
-      query.text += ' WHERE ((clientname) = $1) AND ((idclient) != $2);'
+      query.text += ' WHERE UPPER(clientname) = UPPER($1) AND idclient != $2;'
       query.values = [request.query.clientname, request.query.client]
     break;
     case 'Get_Client_Data':

@@ -8,6 +8,7 @@ import { AppMarketDataService } from 'src/app/services/app-market-data.service';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
 import { indexDBService } from 'src/app/services/indexDB.service';
 import { AuthService } from 'src/app/services/auth.service';
+import { filter, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-inv-instrument-modify-form',
@@ -54,17 +55,17 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
       security_type_title:  {value:null, disabled: false},
       security_group_name:  {value:null, disabled: false}, 
       security_type_name:  {value:null, disabled: false}, 
-      shortname:  {value:null, disabled: false}, 
-      primary_boardid:  {value:null, disabled: false}, 
+      shortname:  [null, { validators:  Validators.required, updateOn: 'blur' }], 
+      primary_boardid:  {value:null, disabled: false},
       board_title:  {value:null, disabled: false}, 
       title:  {value:null, disabled: false},
       category:  {value:null, disabled: false}, 
-      name:  {value:null, disabled: false}, 
+      name:   [null, { validators:  Validators.required, updateOn: 'blur' }], 
       isin: ['', {  asyncValidators: null, updateOn: 'blur' }], 
       emitent_title:  {value:null, disabled: false}, 
       emitent_inn:  {value:null, disabled: false}, 
-      type:  {value:null, disabled: false}, 
-      group:  {value:null, disabled: false}, 
+      type:  [null, { validators:  Validators.required, updateOn: 'blur' }],
+      group:  [null, { validators:  Validators.required, updateOn: 'blur' }], 
       marketprice_boardid:  {value:null, disabled: false},
       group_title:  {value:null, disabled: false}
     })
@@ -73,17 +74,19 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
     }) 
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToInstrumentData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
-    this.indexDBServiceS.getIndexDBInstrumentStaticTables('getMoexSecurityGroups').then ((data)=>this.securityGroups = data['data'])
+    this.indexDBServiceS.getIndexDBInstrumentStaticTables('getMoexSecurityGroups').then ((data)=>this.securityGroups = data['data']);
     this.indexDBServiceS.getIndexDBInstrumentStaticTables('getMoexSecurityTypes').then ((data)=>{
       this.securityTypes = data['data'];
       this.filtersecurityType(this.group.value);
-    })
+    });
   }
   ngAfterContentInit (): void {
-    this.moexBoards.length? null : this.indexDBServiceS.getIndexDBInstrumentStaticTables('getBoardsDataFromInstruments').then ((data)=>this.moexBoards = data['data']);
-    this.secidParam? this.MarketDataService.getMoexInstruments(undefined,undefined, {secid:[this.secidParam,this.secidParam]}).subscribe (instrumentData => this.instrumentModifyForm.patchValue(instrumentData[0])) : this.instrumentModifyForm.patchValue(this.data);
+    this.moexBoards.length? null : this.indexDBServiceS.getIndexDBInstrumentStaticTables('getBoardsDataFromInstruments').then (data=>this.moexBoards = data['data']);
+    if (this.data)  {
+      this.instrumentModifyForm.patchValue(this.data);
+      this.addAsyncValidators(this.action); 
+    };
     this.action == 'View'|| this.disabledControlElements?  this.instrumentModifyForm.disable() : null;
-    this.addAsyncValidators(this.action);
   }
   async addAsyncValidators(action:string) {
     if (['Create','Create_Example'].includes(this.action)) {
@@ -119,7 +122,10 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
     if (result['name']=='error') {
       this.CommonDialogsService.snackResultHandler(result)
     } else {
-      this.CommonDialogsService.snackResultHandler({name:'success', detail: result + ' instrument'}, action)
+      this.CommonDialogsService.dialogCloseAll();
+      this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' instrument'}, action)
+      this.MarketDataService.sendInstrumentDataToUpdateTableSource(result,'Deleted')
+      this.MarketDataService.sendInstrumentDataToUpdateTableSource(this.addJoinedFieldsToResult(result), action)
     }
   }
   addJoinedFieldsToResult (result:Instruments[]):Instruments[] {
@@ -133,32 +139,21 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
     switch (action) {
       case 'Create_Example':
       case 'Create':
-        this.MarketDataService.createInstrument(this.instrumentModifyForm.value).subscribe(result => {
-          this.MarketDataService.sendInstrumentDataToUpdateTableSource(this.addJoinedFieldsToResult(result),'Created')
-          this.snacksBox(result.length,'Created');
-        })
+        this.MarketDataService.createInstrument(this.instrumentModifyForm.value).subscribe(result =>this.snacksBox(result,'Created'))
       break;
       case 'Edit':
-        this.MarketDataService.updateInstrument (this.instrumentModifyForm.value).subscribe(result => {
-          this.MarketDataService.sendInstrumentDataToUpdateTableSource(this.addJoinedFieldsToResult(result),'Updated')
-          this.snacksBox(result.length,'Updated')
-        })
+        this.MarketDataService.updateInstrument (this.instrumentModifyForm.value).subscribe(result => this.snacksBox(result,'Updated'))
       break;
       case 'Delete':
-        this.CommonDialogsService.confirmDialog('Delete Instrument ' + this.secid.value).subscribe(isConfirmed => {
-          if (isConfirmed.isConfirmed) {
-            this.instrumentModifyForm.controls['id'].enable()
-            this.MarketDataService.deleteInstrument (this.instrumentModifyForm.value['id']).subscribe (result =>{
-              this.MarketDataService.sendInstrumentDataToUpdateTableSource(result,'Deleted')
-              this.snacksBox(result.length,'Deleted')
-              this.CommonDialogsService.dialogCloseAll();
-            })
-          }
-        })
+        this.CommonDialogsService.confirmDialog('Delete Instrument ' + this.secid.value).pipe(
+          filter (isConfirmed => isConfirmed.isConfirmed),
+          switchMap(data => this.MarketDataService.deleteInstrument (this.id.value))
+        ).subscribe (result =>this.snacksBox(result,'Deleted'));
       break;
     }
   }
   get  secid() {return this.instrumentModifyForm.get('secid')}​
+  get  id() {return this.instrumentModifyForm.get('id')}​
   get  security_type_title() {return this.instrumentModifyForm.get('security_type_title')}​
   get  shortname ()   {return this.instrumentModifyForm.get('shortname') } 
   get  isin ()   {return this.instrumentModifyForm.get('isin') } 
@@ -168,6 +163,7 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
   get  emitent_inn ()   {return this.instrumentModifyForm.get('emitent_inn') }
   get  security_group_name ()   {return this.instrumentModifyForm.get('security_group_name') }
   get  security_type_name ()   {return this.instrumentModifyForm.get('security_type_name') }
+  get  type ()   {return this.instrumentModifyForm.get('type') }
   get  group ()   {return this.instrumentModifyForm.get('group') }
   
   get  issuesize ()   {return this.instrumentDetailsForm.get('issuesize') } 

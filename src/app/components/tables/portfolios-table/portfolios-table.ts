@@ -37,30 +37,27 @@ export class TablePortfolios {
   @ViewChild(MatSort) sort: MatSort;
   readOnly: boolean = true;
   dialogRef: MatDialogRef<AppNewAccountComponent>;
-
   @Input() clientId: number;
   @Input() strategyId: number;
   @Input() actionOnAccountTable: string;
   @Input() action: string;
   @Input() row: any;
-
   @Output() public modal_principal_parent = new EventEmitter();
   investmentNodeColor=investmentNodeColor
   expandAllowed: boolean;
-
   constructor(
     private InvestmentDataService:AppInvestmentDataServiceService, 
     private dialog: MatDialog,
     private AuthServiceS:AuthService,  
     private CommonDialogsService:HadlingCommonDialogsService,
-    private HandlingCommonTasksS:HandlingCommonTasksService,
+    private HandlingCommonTasksS:HandlingCommonTasksService
   ) 
   { }
   async updatePortfolioData (portfolioid: number, clientid:number, strategyid:number, action: string, accessToClientData:string ) {
-    return new Promise<number> (async (resolve,reject) => {
+    return new Promise<number> (async (resolve) => {
       if (this.accessState !=='none') {
         this.dataSource? this.dataSource.data=null : null;
-        this.InvestmentDataService.getPortfoliosData('', portfolioid,clientid,strategyid,action,accessToClientData).subscribe (portfoliosData => {
+        this.InvestmentDataService.getPortfoliosData('', portfolioid,clientid,strategyid,action,accessToClientData).subscribe (portfoliosData=>{
           this.dataSource  = new MatTableDataSource(portfoliosData);
           this.dataSource.paginator = this.paginator;
           this.dataSource.sort = this.sort;
@@ -74,9 +71,7 @@ export class TablePortfolios {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToPortfolioData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.updatePortfolioData (undefined, this.clientId,this.strategyId,this.actionOnAccountTable,this.accessToClientData);
-    if (this.accessState !=='none') this.InvestmentDataService.getReloadPortfoliosData().subscribe((data) => {
-      this.updatePortfolioData (undefined, this.clientId,this.strategyId,this.actionOnAccountTable,this.accessToClientData);
-    })
+    if (this.accessState !=='none') this.InvestmentDataService.getReloadPortfoliosData().subscribe(data => this.updatePortfolioData (undefined, this.clientId,this.strategyId,this.actionOnAccountTable,this.accessToClientData));
   }
   ngOnChanges(changes: SimpleChanges) {
     this.updatePortfolioData (undefined, this.clientId,this.strategyId,this.actionOnAccountTable,this.accessToClientData);
@@ -97,9 +92,7 @@ export class TablePortfolios {
   }
   async submitQuery () {
     this.dataSource? this.dataSource.data = null : null;
-    await  this.updatePortfolioData (undefined,this.clientId,this.strategyId,this.actionOnAccountTable,this.accessToClientData).then ((rowsCount) => {
-      this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (rowsCount,'en-US') + ' rows'},'Loaded ')
-    })
+    this.updatePortfolioData (undefined,this.clientId,this.strategyId,this.actionOnAccountTable,this.accessToClientData).then (rowsCount => this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (rowsCount,'en-US') + ' rows'},'Loaded '));
   }
   exportToExcel() {
     this.HandlingCommonTasksS.exportToExcel (this.dataSource.data,"PortfolioData")
