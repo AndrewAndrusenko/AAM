@@ -54,11 +54,10 @@ export class AppStrategyFormComponent {
     })
   }
   ngOnInit(): void {
-    this.editStrategyForm.controls['name'].setAsyncValidators(customAsyncValidators.strategyCodeCustomAsyncValidator(this.InvestmentDataService, ['Create','Create_Example'].includes(this.action)? 0 : this.strategyId)); 
+
     this.getStrategyData (this.strategyId);
     this.action === 'View'||this.disabledControlElements? this.editStrategyForm.disable() : null;
   }
-
   getStrategyData (strategyId:number) {
     if (this.accessState !=='none') {
       this.InvestmentDataService.getGlobalStategiesList(strategyId, null, 'Get_Strategy_Data').subscribe(data => {
@@ -66,11 +65,15 @@ export class AppStrategyFormComponent {
           this.strategyStructureTable.parentStrategyId = data[0].id;
           this.strategyStructureTable.ModelPortfolio = data[0]['level'];
           this.editStrategyForm.patchValue(data[0])
-          this.action === 'Create_Example'? this.action = 'Create' : null;
+          this.action === 'Create_Example'? this.name.setErrors({uniqueStrategyCode:true}) : null;
+
         };
+        this.editStrategyForm.controls['name'].setAsyncValidators(customAsyncValidators.strategyCodeCustomAsyncValidator(this.InvestmentDataService, ['Create','Create_Example'].includes(this.action)? 0 : this.strategyId, this.name.value,
+        this.action === 'Create_Example'? this.name.errors : null)); 
         this.showStrateryStructure = true;
         this.strategyStructureTable.accessState = this.accessState;
         this.strategyStructureTable.disabledControlElements = this.disabledControlElements;
+        this.name.updateValueAndValidity();
       })
     }
   }

@@ -5,6 +5,7 @@ AAM REFACTORING BULLET POINTS
 3 Access control model => change request to db with retrieving data form app variable containing all restrictions
   Retrieve static tables from indexDB storage and don't request DB
 4 Check error blocks in template field?.errors?[''requiered]
+5 Unsubscibe via onDestroy pattern and takeUntil.. (Not relised yet)
 
 () Instrument Form - Done 6/6/23 + AsyncValidators
 () Instrument Table - Done 7/6/23 + ToggleAllSelection
@@ -13,3 +14,7 @@ AAM REFACTORING BULLET POINTS
 () Portfolio Form - Done 8/6/23
 () Client Table  - Done 8/6/23
 () Client Form - Done 10/6/23
+() Strategy Table - Done 10/6/23
+() Strategy Form - Done 10/6/23
+() Market Data & Chart - Done earlier 
+() Corp Actions and Details inst - NOT DONE!

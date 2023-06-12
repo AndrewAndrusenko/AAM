@@ -26,7 +26,7 @@ async function fGetStrategiesList (request,response) {
   switch (request.query.action) {
     case 'Check_Name':
       request.query.id = (request.query.id == '') ? 0 : request.query.id 
-      query.text += ' WHERE ((sname) = $1) AND ((id) != $2);'
+      query.text += ' WHERE UPPER(sname) = UPPER($1) AND id != $2;'
       query.values = [request.query.Name, request.query.id]
     break;
     case 'Get_Strategy_Data':

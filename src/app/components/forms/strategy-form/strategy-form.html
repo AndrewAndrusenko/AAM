@@ -1,6 +1,6 @@
 <ng-container *ngIf="accessState!=='none'">
   <mat-toolbar style="margin-left: 1%;" color="primary" >
-    {{action}} {{Level.value===2? 'Strategy':'Model Portfolio'}}  <span style="color: whitesmoke;"> {{':  '+ Description.value}}</span>
+  {{action==='Create_Example'? 'Create' : action}} {{Level.value===2? ' Strategy':'Model Portfolio'}}  <span style="color: whitesmoke;"> {{':  '+ Description.value}}</span>
   </mat-toolbar>
   <mat-expansion-panel style="margin-left: 1%; margin-right: -1%; " 
     [expanded]="true"
@@ -18,7 +18,7 @@
       [disabled]="!(editStrategyForm.valid && submitbox.checked)"
       (click)="updateStrategyData(action)"
       style="margin-top: 1px; width: 200px; font-size: 18px; margin-left: 1%;">
-      {{action}} Strategy
+      {{action==='Create_Example'? 'Create' : action}} Strategy
     </button>
     <mat-checkbox color="primary"  #submitbox checked="false" 
       (click)=" 
@@ -43,7 +43,7 @@
       <mat-form-field>
         <input matInput placeholder="Name" formControlName="name">
         <mat-error  *ngIf="name?.errors?.['uniqueStrategyCode']">
-          Strategy Name isn't unique. Please choose another  
+          Not unique. Please choose another  
         </mat-error>
         <mat-error  *ngIf="name?.errors?.['required']">
           Required!    

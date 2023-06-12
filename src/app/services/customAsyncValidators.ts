@@ -33,14 +33,17 @@ export class customAsyncValidators {
         );
     };
   }
-  static strategyCodeCustomAsyncValidator (userService: AppInvestmentDataServiceService, Id:number): AsyncValidatorFn {
+  static strategyCodeCustomAsyncValidator (userService: AppInvestmentDataServiceService, Id:number, name: string, errors?:ValidationErrors): AsyncValidatorFn {
     return (control: AbstractControl): Observable<ValidationErrors> => {
-      return userService
-        .getGlobalStategiesList (Id, control.value, 'Check_Name')
-        .pipe(
-          map ( isTaken => ( control.touched && control.value !== Id && isTaken.length ? { uniqueStrategyCode: true } : null)  ),
-          catchError(() => of(null))
-        );
+      if (control.value.toUpperCase() !== name.toUpperCase() && control.touched||control.dirty) {
+        return userService
+          .getGlobalStategiesList (Id, control.value, 'Check_Name')
+          .pipe(
+            map ( isTaken => ( control.touched && control.value !== Id && isTaken.length ? { uniqueStrategyCode: true } : null)  ),
+            catchError(() => of(null))
+          )
+      } else {return of(errors)}
+
     };
   }
   static AccountingAccountNoCustomAsyncValidator (AccountingDataService: AppAccountingService, AccountNo:string): AsyncValidatorFn {

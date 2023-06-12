@@ -102,7 +102,7 @@ export class AppTableStrategiesComponentComponent  implements AfterViewInit {
         this.dataSource  = new MatTableDataSource(strategyData);
         if (this.strategyTableInitParams.filterData) {
           let filter = this.strategyTableInitParams.filterData
-          this.dataSource.data= this.dataSource.data.filter(el =>  el[filter.field]===filter.value)
+          this.dataSource.data= this.dataSource.data.filter(el => el[filter.field]===filter.value)
         }
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
