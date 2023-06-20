@@ -4,7 +4,7 @@ import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { instrumentCorpActions } from 'src/app/models/intefaces';
+import { Instruments, instrumentCorpActions } from 'src/app/models/intefaces';
 import { FormGroup} from '@angular/forms';
 import { AppMarketDataService } from 'src/app/services/app-market-data.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
@@ -12,6 +12,7 @@ import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dia
 import { formatNumber } from '@angular/common';
 import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import { AuthService } from 'src/app/services/auth.service';
+import { AppInstrumentCorpActionFormComponent } from '../../forms/instrument-corp-action-form/instrument-corp-action-form';
 @Component({
   selector: 'app-table-inst-corp-actions',
   templateUrl: './instrument-corp-actions-table.html',
@@ -39,8 +40,8 @@ export class AppTableCorporateActionsComponent  implements AfterViewInit {
   instruments: string[] = ['ClearAll'];
   searchParametersFG: FormGroup;
   @Input () coprData:instrumentCorpActions[] = [];
-  @Input () isin:string;
-
+  @Input () instrument:any;
+  refCorpActionForm : MatDialogRef<AppInstrumentCorpActionFormComponent>
   constructor(
     private MarketDataService: AppMarketDataService,
     private AuthServiceS:AuthService,  
@@ -54,22 +55,30 @@ export class AppTableCorporateActionsComponent  implements AfterViewInit {
   }
   async ngAfterViewInit() {
     this.indexDBServiceS.getIndexDBInstrumentStaticTables('getInstrumentDataCorpActions').then((data)=>{
-      this.updateInstrumentDataTable(data['data']);
+      this.updateCAdataTable(data['data']);
     });
+    console.log('instru',this.instrument);
   }
   ngOnChanges(changes: SimpleChanges) {
-    this.dataSource? this.applyFilter(undefined, this.isin) : null;
+    console.log('instruCh',this.instrument,this.instrument.secid);
+
+    this.dataSource? this.applyFilter(undefined, this.instrument.secid) : null;
   }
-  openCorpActionForm (action:string, elem:instrumentCorpActions) {
-    /*    this.dialogInstrumentModify = this.dialog.open (AppInvInstrumentModifyFormComponent,{minHeight:'600px', minWidth:'1300px', autoFocus: false, maxHeight: '90vh'})
-    this.dialogInstrumentModify.componentInstance.action = action; */
-    // this.dialogInstrumentModify.componentInstance.data = element;
+  openCorpActionForm (action:string, element:instrumentCorpActions) {    
+    this.refCorpActionForm = this.dialog.open (AppInstrumentCorpActionFormComponent,{minHeight:'30vh', width:'70vw', autoFocus: false, maxHeight: '90vh'})
+    this.refCorpActionForm.componentInstance.action = action; 
+    this.refCorpActionForm.componentInstance.data = element;
+    this.refCorpActionForm.componentInstance.instrument = this.instrument;
+    this.refCorpActionForm.componentInstance.modal_principal_parent.subscribe(success => {
+      success? this.refCorpActionForm.close():null;
+      this.indexDBServiceS.reloadIndexDBStaticTable('getInstrumentDataDetails').then(data => this.updateCAdataTable(data['data']))
+    })
   }
-  updateInstrumentDataTable (corpActionData:instrumentCorpActions[]) {
+  updateCAdataTable (corpActionData:instrumentCorpActions[]) {
     this.dataSource  = new MatTableDataSource(corpActionData);
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
-    this.isin? this.applyFilter(undefined,this.isin) : null;
+    this.instrument? this.applyFilter(undefined,this.instrument.secid) : null;
   }
   applyFilter(event?: any, manualValue?:string) {
     const filterValue =  manualValue || (event.target as HTMLInputElement).value;
@@ -84,7 +93,7 @@ export class AppTableCorporateActionsComponent  implements AfterViewInit {
   submitQuery () {
     this.dataSource.data=null;
     this.MarketDataService.getInstrumentDataCorpActions().subscribe(corpActionData => {
-      this.updateInstrumentDataTable(corpActionData);
+      this.updateCAdataTable(corpActionData);
       this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (corpActionData.length,'en-US') + ' rows'}, 'Loaded ');
     })
   }

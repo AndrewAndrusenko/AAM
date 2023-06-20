@@ -13,6 +13,7 @@ pg.types.setTypeParser(1114, function(stringValue) {
 });
 async function queryExecute (sql, response, responseType) {//General query to postgres execution via pool
   return new Promise ((resolve) => {
+    console.log('sql',sql);
     pool.query (sql,  (err, res) => {
       console.log('sql',sql);
       if (err) {
@@ -229,7 +230,7 @@ function fGetMoexInstruments(request,response) { //Get general instruments list
         query.text = 
         "SELECT mmoexsecurities.id, secid, security_type_title, stock_type, security_type_name, shortname, "+ 
         " primary_boardid, board_title, mmoexboardgroups.title,mmoexboardgroups.category, mmoexsecurities.name, "+
-        " COALESCE(mmoexsecurities.isin,'') as isin, emitent_title, emitent_inn, type, \"group\", marketprice_boardid, mmoexsecuritygroups.title as group_title, security_group_name, 0 as action "+
+        " COALESCE(mmoexsecurities.isin,'') as isin, emitent_title, emitent_inn, type, \"group\", marketprice_boardid, mmoexsecuritygroups.title as group_title, security_group_name, 0 as action, faceunit, facevalue, maturitydate, regnumeric "+
         "FROM public.mmoexsecurities " +
         "LEFT JOIN mmoexsecuritytypes ON mmoexsecurities.type=mmoexsecuritytypes.security_type_name "+
         "LEFT JOIN mmoexsecuritygroups ON mmoexsecuritygroups.name=mmoexsecuritytypes.security_group_name "+
@@ -245,13 +246,13 @@ function fGetMoexInstruments(request,response) { //Get general instruments list
   })
 }
 async function fgetInstrumentDetails (request,response) {
-  let sql = "SELECT secid, boardid, shortname, lotsize, facevalue, status, boardname, decimals, matdate::timestamp without time zone, secname, couponperiod, issuesize, remarks, marketcode, instrid, sectorid, minstep, faceunit, isin, latname, regnumber, currencyid, sectype, listlevel, issuesizeplaced, couponpercent, lotvalue, nextcoupon, issuesize*facevalue as issuevolume "+ 
+  let sql = "SELECT secid, boardid, shortname, lotsize, facevalue, status, boardname, decimals, matdate::timestamp without time zone, secname, couponperiod, issuesize, remarks, marketcode, instrid, sectorid, minstep, faceunit, isin, latname, regnumber, currencyid, sectype, listlevel, issuesizeplaced, couponpercent, lotvalue, nextcoupon, issuesize*facevalue as issuevolume, id "+ 
   'FROM public.mmoexinstrumentdetails '
   sql += request.query.secid? "WHERE secid ='"   +request.query.secid +"';": ";" 
   queryExecute (sql, response);
 }
 async function fgetInstrumentDataCorpActions (request,response) {
-  let sql = "SELECT id, isin, issuevolume, secname, notinal, notinalcurrency, unredemeedvalue, couponrate, couponamount, actiontype, couponamountrur, to_date(date,'DD.MM.YYYY')::timestamp without time zone as date, 0 as action FROM public.mmoexbondscorpactions ";
+  let sql = "SELECT id, secid, isin, issuevolume, secname, notinal, notinalcurrency, unredemeedvalue, couponrate, couponamount, actiontype::int2, couponamountrur, to_date(date,'DD.MM.YYYY')::timestamp without time zone as date, 0 as action FROM public.mmoexcorpactions ";
   sql += request.query.isin? "WHERE isin ='"   + request.query.isin +"' ": "";
   sql += " ORDER BY to_date(date,'DD.MM.YYYY')::timestamp without time zone; "
   queryExecute (sql, response);
@@ -266,6 +267,11 @@ async function fgetInstrumentDataGeneral(request,response) {
     break;
     case 'getMoexSecurityTypes':
       query.text = "SELECT id, security_type_name, security_type_title,security_group_name FROM public.mmoexsecuritytypes; " 
+    break;
+    case 'getCorpActionTypes':
+      query.text = "SELECT  dccorporateactionstypes.id, mmoexsecuritygroups.name as sectypename, dccorporateactionstypes.name, sectype, ismandatory, ratetype, fixedrate "+
+      "FROM public.dccorporateactionstypes " +
+      "LEFT JOIN mmoexsecuritygroups ON dccorporateactionstypes.sectype=mmoexsecuritygroups.id;"
     break;
     case 'getMoexSecurityGroups':
       query.text = "SELECT name, title  FROM public.mmoexsecuritygroups;"
@@ -284,8 +290,8 @@ async function fgetInstrumentDataGeneral(request,response) {
 async function fInstrumentCreate (request, response) {
   const query = {
   text: 'INSERT INTO public.mmoexsecurities ' +
-        '(secid, shortname, name, isin,  emitent_title, emitent_inn, type, "group", primary_boardid, marketprice_boardid)' +
-        ' VALUES (UPPER(${secid}),${shortname},${name},UPPER(${isin}),${emitent_title},${emitent_inn},${type},${group},${primary_boardid},${marketprice_boardid}) RETURNING *;',
+        '(secid, name, isin,  emitent_title, emitent_inn, type, "group", primary_boardid, marketprice_boardid, regnumeric, maturitydate, facevalue, faceunit)' +
+        ' VALUES (UPPER(${secid}),${name},UPPER(${isin}),${emitent_title},${emitent_inn},${type},${group},${primary_boardid},${marketprice_boardid},${regnumeric},${maturitydate},${facevalue},${faceunit} ) RETURNING *;',
   }
   sql = pgp.as.format(query.text,request.body.data)
   queryExecute (sql, response);
@@ -301,28 +307,38 @@ async function fInstrumentEdit (request, response) {
     'SET  ' +
     'secid=UPPER(${secid}), '+
     'name=${name}, '+
-    'shortname=${shortname}, '+
     'emitent_title=${emitent_title}, '+
     'isin=UPPER(${isin}), '+
     'emitent_inn=${emitent_inn}, '+
     'type=${type}, '+
     '"group"=${group}, '+
     'primary_boardid=${primary_boardid}, '+
-    'marketprice_boardid=${marketprice_boardid} '+
+    'marketprice_boardid=${marketprice_boardid}, '+
+    'faceunit=${faceunit}, '+
+    'facevalue=${facevalue}, '+
+    'maturitydate=${maturitydate}, '+
+    'regnumeric=${regnumeric} '+
     'WHERE id=${id} RETURNING *;',
   } 
   sql = pgp.as.format(query.text,request.body.data)
   queryExecute (sql, response);
 }
 async function fUpdateInstrumentDetails (request, response) {
-  let fields = 'secid, boardid, shortname, lotsize, facevalue, status, boardname, decimals, matdate, secname, couponperiod, issuesize, remarks, marketcode, instrid, sectorid, minstep, faceunit, isin, latname, regnumber, currencyid, sectype, listlevel, issuesizeplaced, couponpercent, lotvalue, nextcoupon'
-  console.log('fields.split()',fields.split(','));
+  let fields = 'status,  boardid, boardname,  listlevel,  issuesize,  currencyid,  lotsize,  minstep,  decimals, marketcode,   secid'
   let values = fields.split(',').map(el=>'${'+el+'}')
   let updatePairs = fields.split(',').map(el=> el+'=${'+el+'}')
-  const query = {text:'INSERT INTO public.mmoexinstrumentdetails ('+ fields +') VALUES ('+ values + ') ON CONFLICT (secid) DO UPDATE SET  ' + updatePairs + ' WHERE secid=${secid} RETURNING *;',
-  } 
-  console.log('query.text', query.text);
-  sql = pgp.as.format(query.text,request.body.data)
+  switch (request.body.action) {
+    case 'Create':
+      sqlText = 'INSERT INTO public.mmoexinstrumentdetails ('+ fields +') VALUES ('+ values + ') RETURNING *;'
+    break;
+    case 'Edit':
+      sqlText = 'UPDATE public.mmoexinstrumentdetails SET  ' + updatePairs + ' WHERE id=${id} RETURNING *;'
+      break;
+    case 'Delete':
+      sqlText = 'DELETE FROM public.mmoexinstrumentdetails WHERE id=${id} RETURNING *;'
+    break;
+  }
+  sql = pgp.as.format(sqlText,request.body.data)
   queryExecute (sql, response);
 }
 

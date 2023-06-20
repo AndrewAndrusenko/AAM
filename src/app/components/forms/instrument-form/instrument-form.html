@@ -18,7 +18,7 @@
   <h3 style="color:rgb(177, 174, 174)" *ngIf="instrumentModifyForm.valid"> 
     To save data please select 'Submit data' check and then press button {{secid.hasError('secidIsTaken')}}
   </h3>
-  <mat-form-field style="width: 10%;" title="SecID">
+  <mat-form-field style="width: 14%;" title="SecID">
     <input matInput placeholder="SecID" formControlName="secid">
     <mat-error  *ngIf="secid?.errors?.['required']">
       Required!    
@@ -41,7 +41,7 @@
       Required!   
     </mat-error>
   </mat-form-field>
-  <mat-form-field  style="width: 24%;" title="Security Type Code">
+  <mat-form-field  style="width: 28%;" title="Security Type Code">
     <mat-label>Security Type Code</mat-label>
     <mat-select  #securityType formControlName="type"  > 
       <ng-container *ngFor="let securityType of securityTypesFiltered">
@@ -54,17 +54,14 @@
       Required!   
     </mat-error>
   </mat-form-field>
-  <mat-form-field style = "width: 29%;" title="Short Name">
-    <input matInput placeholder = "Shortname" formControlName="shortname">
-    <mat-error  *ngIf="shortname?.errors?.['required']">
-      Required!   
-    </mat-error>
-  </mat-form-field>
   <mat-form-field style = "width: 15%;" title="ISIN">
     <input matInput placeholder = "ISIN" formControlName="isin">
     <mat-error  *ngIf="isin.hasError('isinIsTaken')">
       Not unique!    
     </mat-error>
+  </mat-form-field>
+  <mat-form-field style="width: 12%;" title="regnumeric">
+    <input matInput placeholder="Reg numeric" formControlName="regnumeric" >   
   </mat-form-field>
   <mat-form-field  style="width: 26%;" title="Main Board Code">
     <mat-label>Main Board Code</mat-label>
@@ -98,6 +95,27 @@
   <mat-form-field style="width: 35%;" title="Emitent Title" >
     <input matInput placeholder="Emitent Title" formControlName="emitent_title" >
   </mat-form-field>
+  <mat-form-field class="example-full-width" style="width: 14%;" >
+    <input matInput [matDatepicker]="picker" placeholder="Maturity date"  formControlName="maturitydate" >
+    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-datepicker #picker></mat-datepicker>
+    <mat-error  *ngIf="name?.errors?.['required']">
+      Required!   
+    </mat-error>
+  </mat-form-field>
+  <mat-form-field style="width: 14%;" title="faceunit">
+    <input matInput placeholder="Notinal currency" formControlName="faceunit" >   
+    <mat-error  *ngIf="name?.errors?.['required']">
+      Required!   
+    </mat-error>
+  </mat-form-field>
+  <mat-form-field style="width: 12%;" title="facevalue">
+    <input matInput placeholder="Notinal value" formControlName="facevalue" >   
+    <mat-error  *ngIf="name?.errors?.['required']">
+      Required!   
+    </mat-error>
+  </mat-form-field>
+
   <br>
   <br>
   <h3 style="color:rgb(252, 113, 113)" *ngIf="instrumentModifyForm.invalid"> Please check the form. Data is invalid</h3>
@@ -136,7 +154,7 @@
 <div style="width: 100%;">
 <app-table-inst-corp-actions 
   [coprData]="instrumentCorpActions"  
-  [isin]="isin.value"> 
+  [instrument]="{secid:secid.value, group:group.value, type:type.value}"> 
 </app-table-inst-corp-actions>
 </div>
 </mat-expansion-panel>

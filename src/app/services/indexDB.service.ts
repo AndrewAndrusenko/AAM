@@ -41,6 +41,9 @@ export class indexDBService {
         case 'getMoexSecurityTypes':
           this.MarketDataService.getInstrumentDataGeneral('getMoexSecurityTypes').subscribe(data=>resolve(data))
         break;
+        case 'getCorpActionTypes':
+          this.MarketDataService.getInstrumentDataGeneral('getCorpActionTypes').subscribe(data=>resolve(data))
+        break;
       }
     })
   }
@@ -60,18 +63,27 @@ export class indexDBService {
   }
   async getIndexDBInstrumentStaticTables (key:string) {
     return new Promise ((resolve) => {
-    this.dbService.getByIndex('AAMCache','code',key).subscribe(async data=>{
-      if (data) {
-        console.log('for ',key,' is found ', data['data'].length, data, ' rows ');
-        resolve(data)
-      } else {
-        data = await this.fetchDataFromDb(key).then((data)=>{
-          this.indexidCacheData(key,data);
-          resolve({code:key,'data':data})
-        })
-      }  
+      this.dbService.getByIndex('AAMCache','code',key).subscribe(async data=>{
+        if (data) {
+          console.log('for ',key,' is found ', data['data'].length, data, ' rows ');
+          resolve(data)
+        } else {
+          data = await this.fetchDataFromDb(key).then((data)=>{
+            this.indexidCacheData(key,data);
+            resolve({code:key,'data':data})
+          })
+        }  
+      })
     })
-  })
-}
+  }
+  async reloadIndexDBStaticTable(key:string) {
+    return new Promise (resolve => {
+      this.dbService.deleteByKey('AAMCache',key).subscribe(res => console.log('deleted data for key:', key));
+      this.fetchDataFromDb(key).then (data => {
+        this.indexidCacheData(key,data);
+        resolve({code:key,'data':data})
+      });
+    });
+  }
 }
 

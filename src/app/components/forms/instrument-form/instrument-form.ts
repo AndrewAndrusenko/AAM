@@ -55,7 +55,6 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
       security_type_title:  {value:null, disabled: false},
       security_group_name:  {value:null, disabled: false}, 
       security_type_name:  {value:null, disabled: false}, 
-      shortname:  [null, { validators:  Validators.required, updateOn: 'blur' }], 
       primary_boardid:  {value:null, disabled: false},
       board_title:  {value:null, disabled: false}, 
       title:  {value:null, disabled: false},
@@ -67,7 +66,11 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
       type:  [null, { validators:  Validators.required, updateOn: 'blur' }],
       group:  [null, { validators:  Validators.required, updateOn: 'blur' }], 
       marketprice_boardid:  {value:null, disabled: false},
-      group_title:  {value:null, disabled: false}
+      group_title:  {value:null, disabled: false},
+      faceunit:  {value:null, disabled: false},
+      facevalue:  {value:null, disabled: false},
+      maturitydate:  {value:null, disabled: false},
+      regnumeric:  {value:null, disabled: false},
     })
     this.instrumentDetailsForm = this.fb.group ({
       secid: {value:null, disabled: false}, boardid: {value:null, disabled: false}, shortname: {value:null, disabled: false}, lotsize: {value:null, disabled: false}, facevalue: {value:null, disabled: false}, status: {value:null, disabled: false}, boardname: {value:null, disabled: false}, decimals: {value:null, disabled: false}, matdate: {value:null, disabled: false}, secname: {value:null, disabled: false}, couponperiod: {value:null, disabled: false}, issuesize: {value:0, disabled: false}, remarks: {value:null, disabled: false}, marketcode: {value:null, disabled: false}, instrid: {value:null, disabled: false}, sectorid: {value:null, disabled: false}, minstep: {value:null, disabled: false}, faceunit: {value:null, disabled: false}, isin: {value:null, disabled: false}, latname: {value:null, disabled: false}, regnumber: {value:null, disabled: false}, currencyid: {value:null, disabled: false}, sectype: {value:null, disabled: false}, listlevel: {value:null, disabled: false}, issuesizeplaced: {value:null, disabled: false}, couponpercent: {value:null, disabled: false}, lotvalue: {value:null, disabled: false}, nextcoupon: {value:null, disabled: false}, issuevolume:{value:null, disabled: true}
@@ -134,7 +137,6 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
     return result;
   }
   updateInstrumentData(action:string){
-    // this.instrumentModifyForm.updateValueAndValidity();
     if (this.instrumentModifyForm.invalid) {return}
     switch (action) {
       case 'Create_Example':
@@ -165,10 +167,12 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
   get  security_type_name ()   {return this.instrumentModifyForm.get('security_type_name') }
   get  type ()   {return this.instrumentModifyForm.get('type') }
   get  group ()   {return this.instrumentModifyForm.get('group') }
-  
-  get  issuesize ()   {return this.instrumentDetailsForm.get('issuesize') } 
-  get  facevalue ()   {return this.instrumentDetailsForm.get('facevalue') } 
+  get  faceunit ()   {return this.instrumentModifyForm.get('faceunit') }
+  get  facevalue ()   {return this.instrumentModifyForm.get('facevalue') }
+  get  maturitydate ()   {return this.instrumentModifyForm.get('maturitydate') }
+  get  regnumeric ()   {return this.instrumentModifyForm.get('regnumeric') }
+  /* get  issuesize ()   {return this.instrumentDetailsForm.get('issuesize') } 
   get  lotsize ()   {return this.instrumentDetailsForm.get('lotsize') } 
   get  issuevolume ()   {return this.instrumentDetailsForm.get('issuevolume') } 
-  
+   */
 }

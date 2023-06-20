@@ -339,12 +339,18 @@ export interface Instruments  {
   marketprice_boardid: string,
   group_title: string,
   security_group_name: string,
-  action: string
+  action: string,
+  faceunit: string, 
+  facevalue: number, 
+  maturitydate: Date, 
+  regnumeric: string 
 }
 export interface instrumentDetails {
-  secid: string, boardid: string, shortname: string, lotsize: number, facevalue: number, status: string, boardname: string, decimals: number, matdate: Date, secname: string, couponperiod: string, issuesize: number, remarks: string, marketcode: string, instrid: string, sectorid: string, minstep: number, faceunit: number, isin: string, latname: string, regnumber: string, currencyid: string, sectype: string, listlevel: number, issuesizeplaced: number, couponpercent: string, lotvalue: number, nextcoupon: string, issuevolume:number
+  secid: string, boardid: string, shortname: string, lotsize: number, facevalue: number, status: string, boardname: string, decimals: number, matdate: Date, secname: string, couponperiod: string, issuesize: number, remarks: string, marketcode: string, instrid: string, sectorid: string, minstep: number, faceunit: number, isin: string, latname: string, regnumber: string, currencyid: string, sectype: string, listlevel: number, issuesizeplaced: number, couponpercent: string, lotvalue: number, nextcoupon: string, issuevolume:number,id: number
 }
 export interface instrumentCorpActions {
   id: number, isin: string, issuevolume: number, secname: string, notinal: number, notinalcurrency: string, unredemeedvalue: number, couponrate: number, couponamount: number, actiontype: string, couponamountrur: number, date: Date, action: string
-
+}
+export interface caTypes {
+  sectypename: string, id: number, name: string, sectype: number, ismandatory: boolean, ratetype: string, fixedrate: boolean
 }

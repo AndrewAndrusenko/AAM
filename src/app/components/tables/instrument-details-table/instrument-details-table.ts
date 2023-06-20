@@ -33,11 +33,9 @@ export class AppTableInstrumentDetailsComponent  implements AfterViewInit {
   @Output() public modal_principal_parent = new EventEmitter();
   @Input () instrumentDetails:instrumentDetails[] = [];
   @Input () secid:string;
-  panelOpenStateSecond = false;
   dialogInstrumentDetails: MatDialogRef<AppInvInstrumentDetailsFormComponent>;
   constructor(
     private AuthServiceS:AuthService,  
-    private MarketDataService: AppMarketDataService,
     private indexDBServiceS:indexDBService,
     private dialog: MatDialog,
   ) {
@@ -47,9 +45,7 @@ export class AppTableInstrumentDetailsComponent  implements AfterViewInit {
   async ngAfterViewInit() {
     this.indexDBServiceS.getIndexDBInstrumentStaticTables('getInstrumentDataDetails').then ((data)=>this.updateInstrumentDataTable (data['data']))
   }
-  ngOnChanges(changes: SimpleChanges) {
-    this.dataSource? this.applyFilter(undefined, this.secid) : null;
-  }
+  ngOnChanges(changes: SimpleChanges) {this.dataSource? this.applyFilter(undefined, this.secid) : null}
   applyFilter(event?: any, manualValue?:string) {
     const filterValue =  manualValue || (event.target as HTMLInputElement).value;
     this.dataSource? this.dataSource.filter = filterValue.trim().toLowerCase():null
@@ -59,6 +55,11 @@ export class AppTableInstrumentDetailsComponent  implements AfterViewInit {
     this.dialogInstrumentDetails = this.dialog.open (AppInvInstrumentDetailsFormComponent,{minHeight:'30vh', minWidth:'1300px', autoFocus: false, maxHeight: '90vh'})
     this.dialogInstrumentDetails.componentInstance.action = action; 
     this.dialogInstrumentDetails.componentInstance.data = element;
+    this.dialogInstrumentDetails.componentInstance.secidParam = this.secid;
+    this.dialogInstrumentDetails.componentInstance.modal_principal_parent.subscribe(success => {
+      success? this.dialogInstrumentDetails.close():null;
+      this.indexDBServiceS.reloadIndexDBStaticTable('getInstrumentDataDetails').then(data => this.updateInstrumentDataTable(data['data']))
+    })
   }
   updateInstrumentDataTable (corpActionData:instrumentDetails[]) {
     this.dataSource  = new MatTableDataSource(corpActionData);

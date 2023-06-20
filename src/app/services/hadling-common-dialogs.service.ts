@@ -14,9 +14,7 @@ export class HadlingCommonDialogsService {
     private snack:MatSnackBar,
     private dialog: MatDialog, 
   ) {}
-  dialogCloseAll () {
-    this.dialog.closeAll()
-  }
+  dialogCloseAll () {this.dialog.closeAll()}
   confirmDialog (actionToConfim:string):Observable<any> {
     this.dialogRefConfirm = this.dialog.open(AppConfimActionComponent, {panelClass: 'custom-modalbox',} );
     this.dialogRefConfirm.componentInstance.actionToConfim = {'action':actionToConfim ,'isConfirmed': false}

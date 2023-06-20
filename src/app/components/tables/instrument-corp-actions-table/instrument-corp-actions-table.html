@@ -22,11 +22,16 @@
   Reload 
   <mat-icon matSuffix >refresh</mat-icon>
 </button>
-
+<button color = "accent" mat-raised-button 
+  style=" margin-left:1%; font-size: 18px;"
+  (click)="openCorpActionForm('Create',null)">
+  Create item 
+  <mat-icon matSuffix >add_circle</mat-icon>
+</button>
 <div class="mat-elevation-z8">
   <table  #strategyTable mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class="mat-elevation-z8">
     <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i=index">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>  {{columnsHeaderToDisplay[i]  | titlecase}}</th>
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> {{columnsHeaderToDisplay[i]  | titlecase}} </th>
       <td mat-cell *matCellDef="let element" [cdkContextMenuTriggerFor]="instrumentcontextmenu"> 
         <span [ngSwitch]="true==true">
           <p *ngSwitchCase="['date'].includes(column)">

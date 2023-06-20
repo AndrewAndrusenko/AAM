@@ -14,6 +14,7 @@ export class AppMarketDataService {
   private subjectCharMarketData = new Subject<marketData[]> ()
   private subjectCorpData = new Subject<instrumentCorpActions[]> ()
   private subjectInstrument = new Subject<InstrumentDataSet> ()
+  private subjectInstrumentDetails = new Subject<instrumentDetails[]> ()
   private httpOptions = {
     headers: new HttpHeaders({}),
     responseType: 'text'
@@ -176,22 +177,22 @@ export class AppMarketDataService {
     isin?  Object.assign(params,{isin:isin}): null;
     return this.http.get <instrumentCorpActions[]> ('/api/AAM/MD/getInstrumentDataCorpActions/',{params:params})
   }
-  sendReloadMarketData ( dataSet:marketData[]) { //the component that wants to update something, calls this fn
-    this.subjectMarketData.next(dataSet); //next() will feed the value in Subject
+  sendReloadMarketData ( dataSet:marketData[]) {
+    this.subjectMarketData.next(dataSet); 
   }
-  getReloadMarketData(): Observable<marketData[]> { //the receiver component calls this function 
+  getReloadMarketData(): Observable<marketData[]> { 
     return this.subjectMarketData.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
   }
-  sendMarketDataForChart ( dataSet:marketData[]) { //the component that wants to update something, calls this fn
-    this.subjectCharMarketData.next(dataSet); //next() will feed the value in Subject
+  sendMarketDataForChart ( dataSet:marketData[]) {
+    this.subjectCharMarketData.next(dataSet); 
   }
-  getMarketDataForChart(): Observable<marketData[]> { //the receiver component calls this function 
+  getMarketDataForChart(): Observable<marketData[]> { 
     return this.subjectCharMarketData.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
   }
-  sendCorpActionData ( dataSet:instrumentCorpActions[]) { //the component that wants to update something, calls this fn
-    this.subjectCorpData.next(dataSet); //next() will feed the value in Subject
+  sendCorpActionData ( dataSet:instrumentCorpActions[]) {
+    this.subjectCorpData.next(dataSet); 
   }
-  getCorpActionData(): Observable<instrumentCorpActions[]> { //the receiver component calls this function 
+  getCorpActionData(): Observable<instrumentCorpActions[]> { 
     return this.subjectCorpData.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
   }
   createInstrument (data:any): Observable<Instruments[]>  { 
@@ -203,18 +204,21 @@ export class AppMarketDataService {
   updateInstrument (data:any):  Observable<Instruments[]>  { 
     return this.http.post <Instruments[]> ('/api/AAM/MD/InstrumentEdit/',{'data': data})
   }
-  sendInstrumentDataToUpdateTableSource ( data:Instruments[], action: string) { //the component that wants to update something, calls this fn
+  sendInstrumentDataToUpdateTableSource ( data:Instruments[], action: string) {
     let dataSet = {
       data: data,
       action:action
     }
-    this.subjectInstrument.next(dataSet); //next() will feed the value in Subject
+    this.subjectInstrument.next(dataSet); 
   }
-  getInstrumentDataToUpdateTableSource(): Observable<InstrumentDataSet> { //the receiver component calls this function 
+  getInstrumentDataToUpdateTableSource(): Observable<InstrumentDataSet> { 
     return this.subjectInstrument.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
   }
   updateInstrumentDetails (data:any, action:string):  Observable<instrumentDetails[]>  { 
     return this.http.post <instrumentDetails[]> ('/api/AAM/MD/UpdateInstrumentDetails/',{data:data, action:action})
+  }
+  sendReloadInstrumentDetails ( dataSet:instrumentDetails[]) {
+    this.subjectInstrumentDetails.next(dataSet); 
   }
 }
 
