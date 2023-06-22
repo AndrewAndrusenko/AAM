@@ -25,8 +25,8 @@ import { AuthService } from 'src/app/services/auth.service';
 export class AppTableInstrumentDetailsComponent  implements AfterViewInit {
   accessState: string = 'none';
   disabledControlElements: boolean = false;
-  columnsToDisplay = ['status','boardid', 'boardname', 'listlevel','issuesize','facevalue','matdate','regnumber', 'currencyid', 'lotsize', 'minstep', 'action' ];
-  columnsHeaderToDisplay = ['status','board', 'board name', 'list','issue','facevalue','maturity','regnumber', 'cur', 'lot', 'step', 'action' ];
+  columnsToDisplay = ['status','boardid', 'boardname', 'listlevel','issuesize', 'lotsize', 'minstep', 'action' ];
+  columnsHeaderToDisplay = ['status','board', 'board name', 'list','issue', 'lot', 'step', 'action' ];
   dataSource: MatTableDataSource<instrumentDetails>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;

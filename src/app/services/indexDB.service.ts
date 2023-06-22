@@ -44,6 +44,10 @@ export class indexDBService {
         case 'getCorpActionTypes':
           this.MarketDataService.getInstrumentDataGeneral('getCorpActionTypes').subscribe(data=>resolve(data))
         break;
+        case 'getCurrencyCodes':
+          this.MarketDataService.getInstrumentDataGeneral('getCurrencyCodes').subscribe(data=>resolve(data))
+        break;
+        
       }
     })
   }

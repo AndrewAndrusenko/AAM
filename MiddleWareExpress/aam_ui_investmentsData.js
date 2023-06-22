@@ -134,7 +134,7 @@ async function fStrategyStructureEdit (request, response) {
 	'SET  ' +
    'id_strategy_parent=${id_strategy_parent}, ' +
    'id_strategy_child=${id}, '+
-   'weight_of_child=${weight_of_child} '+
+   'weight_of_child=${weight_of_child}, '+
    'id_strategy_child_integer=${id_strategy_child_integer} '+
 	 'WHERE id=${id_item} RETURNING *;',
     values: paramArr

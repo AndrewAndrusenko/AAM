@@ -28,17 +28,6 @@
   <mat-form-field style="width: 5%;" title="decimals">
     <input matInput placeholder="Decimals" formControlName="decimals" >
   </mat-form-field>
-  <mat-form-field class="example-full-width" style="width: 10%;" >
-    <input matInput [matDatepicker]="picker" placeholder="Maturity date"  formControlName="matdate" >
-    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-    <mat-datepicker #picker></mat-datepicker>
-  </mat-form-field>
-  <mat-form-field style="width: 10%;" title="regnumber">
-    <input matInput placeholder="Regnumber" formControlName="regnumber" >
-  </mat-form-field>
-  <mat-form-field style="width: 5%;" title="currencyid">
-    <input matInput placeholder="Currency" formControlName="currencyid" >
-  </mat-form-field>
   <mat-form-field style="width: 15%;" title="issuevolume"  >
     <input matInput placeholder="Issue Volume" formControlName="issuevolume" [disabled]="true" [value]="issuesize.value*facevalue.value | number" >
     <mat-hint class="number-format">{{issuesize.value*facevalue.value | number}}</mat-hint>
@@ -46,10 +35,6 @@
   <mat-form-field style="width: 10%;" title="issuesize">
     <input matInput placeholder="Issue Size" formControlName="issuesize" >
     <mat-hint class="number-format">{{issuesize.value | number}}</mat-hint>
-  </mat-form-field>
-  <mat-form-field style="width: 10%;" title="facevalue">
-    <input matInput placeholder="Face Value" formControlName="facevalue" >
-    <mat-hint class="number-format">{{facevalue.value | number}}</mat-hint>
   </mat-form-field>
   <mat-form-field style="width: 10%;" title="marketcode">
     <input matInput placeholder="MarketCode" formControlName="marketcode" >

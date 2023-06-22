@@ -4,8 +4,8 @@ import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/m
 import { AppConfimActionComponent } from '../../common-forms/app-confim-action/app-confim-action.component';
 import { StrategiesGlobalData } from 'src/app/models/intefaces';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
-import { debounce, distinctUntilChanged, filter, map, Observable, startWith, switchMap } from 'rxjs';
-import { AtuoCompSecidService } from 'src/app/services/atuo-comp-secid.service';
+import { distinctUntilChanged, filter, map, Observable, startWith, switchMap } from 'rxjs';
+import { AtuoCompleteService } from 'src/app/services/atuo-complete-service';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AppInstrumentTableComponent } from '../../tables/instrument-table/instrument-table';
 import { AppInvestmentDataServiceService } from 'src/app/services/app-investment-data.service.service';
@@ -34,7 +34,6 @@ export class AppStructureStrategyFormComponent implements OnInit {
   dialogRef: MatDialogRef<AppInstrumentTableComponent>;
   MPnames: StrategiesGlobalData [] = [];
   @Output() public modal_principal_parent = new EventEmitter();
-
   public filterednstrumentsLists : Observable<string[]>;
   public actionType : string;
   public showStrateryStructure: boolean;
@@ -42,14 +41,14 @@ export class AppStructureStrategyFormComponent implements OnInit {
   constructor (
     private fb:FormBuilder, 
     private InvestmentDataService: AppInvestmentDataServiceService,
-    private AtuoCompService:AtuoCompSecidService,
+    private AtuoCompService:AtuoCompleteService,
     private CommonDialogsService:HadlingCommonDialogsService,
     private dialog: MatDialog, 
-  ) {
-  }
-  ngOnInit(): void {
-    this.action !== "Create"? this.editStructureStrategyForm.patchValue(this.data) : null;
-    this.action === "Create_Example"?  this.action = "Create" : null;
+    ) {
+    }
+    ngOnInit(): void {
+      this.action !== "Create"? this.editStructureStrategyForm.patchValue(this.data) : null;
+      this.action === "Create_Example"?  this.action = "Create" : null;
   }
   ngOnChanges(changes: SimpleChanges) {
     console.log('mp change', this.MP);
@@ -61,7 +60,7 @@ export class AppStructureStrategyFormComponent implements OnInit {
       this.filterednstrumentsLists = this.editStructureStrategyForm.controls['id'].valueChanges.pipe(
         startWith(''),
         distinctUntilChanged(),
-        map(value => this.AtuoCompService.filter(value || ''))
+        map(value => this.AtuoCompService.filterList(value || '','secid'))
       );
     };
     if (Object.hasOwn(changes,'parentStrategyId')) {
@@ -83,7 +82,7 @@ export class AppStructureStrategyFormComponent implements OnInit {
     if (result['name']=='error') {
       this.CommonDialogsService.snackResultHandler(result)
     } else {
-      this.CommonDialogsService.snackResultHandler({name:'success', detail: result + ' item'}, action, undefined, false);
+      this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' item'}, action, undefined, false);
       this.InvestmentDataService.sendReloadStrategyStructure(Number(this.strategyId));
     }
   }
@@ -94,7 +93,7 @@ export class AppStructureStrategyFormComponent implements OnInit {
       case 'Create':
         this.editStructureStrategyForm.controls['id_strategy_parent'].setValue(this.strategyId)
         this.InvestmentDataService.createStrategyStructure (this.editStructureStrategyForm.value).subscribe(result=>{
-          this.snacksBox(result.length,'Created');
+          this.snacksBox(result,'Created');
           this.editStructureStrategyForm.controls['id'].setValue(null);
           this.editStructureStrategyForm.controls['weight_of_child'].setValue(null);
           this.editStructureStrategyForm.controls['weight_of_child'].markAsPending();
@@ -103,13 +102,13 @@ export class AppStructureStrategyFormComponent implements OnInit {
       break;
       case 'Edit':
         this.editStructureStrategyForm.addControl('id_strategy_parent',new FormControl(this.strategyId, Validators.required))
-        this.InvestmentDataService.updateStrategyStructure (this.editStructureStrategyForm.value).subscribe(result=>this.snacksBox(result.length,'Updated'))
+        this.InvestmentDataService.updateStrategyStructure (this.editStructureStrategyForm.value).subscribe(result=>this.snacksBox(result,'Updated'))
       break;
       case 'Delete':
         this.CommonDialogsService.confirmDialog( this.MP!==1? 'Delete ' + this.sname.value : 'Delete ' + this.id.value).pipe(
           filter(isConfirmed => isConfirmed.isConfirmed===true),
           switchMap(confirmed => this.InvestmentDataService.deleteStrategyStructure(this.id_item.value))
-        ).subscribe(result => this.snacksBox(result.length, 'Deleted'))
+        ).subscribe(result => this.snacksBox(result, 'Deleted'))
       break;
     }
   }

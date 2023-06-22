@@ -276,6 +276,9 @@ async function fgetInstrumentDataGeneral(request,response) {
     case 'getMoexSecurityGroups':
       query.text = "SELECT name, title  FROM public.mmoexsecuritygroups;"
     break;
+    case 'getCurrencyCodes':
+      query.text = 'SELECT  ARRAY_AGG ("CurrencyCodeNum"&&"-"&&"CurrencyCode"&&"-"&&"CurrencyName") as currency FROM public."dCurrencies";'
+    break;
     case 'validateSecidForUnique':
       query.text = "SELECT secid  FROM public.mmoexsecurities where UPPER(secid)=${fieldtoCheck};"
     break;
@@ -324,7 +327,7 @@ async function fInstrumentEdit (request, response) {
   queryExecute (sql, response);
 }
 async function fUpdateInstrumentDetails (request, response) {
-  let fields = 'status,  boardid, boardname,  listlevel,  issuesize,  currencyid,  lotsize,  minstep,  decimals, marketcode,   secid'
+  let fields = 'status,  boardid, boardname,  listlevel,  issuesize,   lotsize,  minstep,  decimals, marketcode,   secid'
   let values = fields.split(',').map(el=>'${'+el+'}')
   let updatePairs = fields.split(',').map(el=> el+'=${'+el+'}')
   switch (request.body.action) {

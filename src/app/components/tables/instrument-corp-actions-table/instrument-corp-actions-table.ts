@@ -57,12 +57,10 @@ export class AppTableCorporateActionsComponent  implements AfterViewInit {
     this.indexDBServiceS.getIndexDBInstrumentStaticTables('getInstrumentDataCorpActions').then((data)=>{
       this.updateCAdataTable(data['data']);
     });
-    console.log('instru',this.instrument);
   }
   ngOnChanges(changes: SimpleChanges) {
-    console.log('instruCh',this.instrument,this.instrument.secid);
-
-    this.dataSource? this.applyFilter(undefined, this.instrument.secid) : null;
+    console.log('changes',changes['instrument'].currentValue.secid);
+    this.dataSource&&changes['instrument'].currentValue.secid? this.applyFilter(undefined, this.instrument.secid) : null;
   }
   openCorpActionForm (action:string, element:instrumentCorpActions) {    
     this.refCorpActionForm = this.dialog.open (AppInstrumentCorpActionFormComponent,{minHeight:'30vh', width:'70vw', autoFocus: false, maxHeight: '90vh'})
@@ -78,9 +76,10 @@ export class AppTableCorporateActionsComponent  implements AfterViewInit {
     this.dataSource  = new MatTableDataSource(corpActionData);
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
-    this.instrument? this.applyFilter(undefined,this.instrument.secid) : null;
+    this.instrument?.secid? this.applyFilter(undefined,this.instrument.secid) : null;
   }
   applyFilter(event?: any, manualValue?:string) {
+    console.log('manual',manualValue);
     const filterValue =  manualValue || (event.target as HTMLInputElement).value;
     this.dataSource? this.dataSource.filter = filterValue.trim().toLowerCase():null
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}

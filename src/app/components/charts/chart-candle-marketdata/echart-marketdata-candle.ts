@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { marketData } from 'src/app/models/intefaces';
 import { AppMarketDataService } from 'src/app/services/app-market-data.service';
-import { AtuoCompSecidService } from 'src/app/services/atuo-comp-secid.service';
+import { AtuoCompleteService } from 'src/app/services/atuo-complete-service';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 @Component({
   selector: 'app-echart-marketdata-candle',
@@ -18,7 +18,7 @@ export class NgEchartMarketDataCandleComponent  {
 
   constructor(
     private MarketDataService: AppMarketDataService,
-    private AtuoCompService:AtuoCompSecidService,
+    private AtuoCompService:AtuoCompleteService,
     private CommonDialogsService:HadlingCommonDialogsService,
 
     ) {

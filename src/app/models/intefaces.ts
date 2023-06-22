@@ -1,5 +1,22 @@
 import { DBConfig } from "ngx-indexed-db";
-
+interface errorsDescription {
+  constraintCode: string,
+  errorText: string
+}
+export const dbErrorsMap: errorsDescription[] = [
+  { 
+    constraintCode: 'cUniqueParentStrategyChildStrategy', 
+    errorText: 'Attempt to duplicate an instrument in the model portfolio or duplicate a model portfolio in the strategy. cUniqueParentStrategyChildStrategy blocked data modifying'
+  },
+  {
+    constraintCode:'cFK_dStategiesStructure_ChildID',
+    errorText: 'Attempt to delete a model portfolio which has strategies linked to it. cFK_dStategiesStructure_ChildID blocked transaction ' 
+  },
+  {
+    constraintCode: 'cForeignKeyStrategyPortfolios',
+    errorText:'Attempt to delete a strategy which has portfolios linked to it. cForeignKeyStrategyPortfolios blocked transaction'
+  }
+]
 export const indexDbConfigAAM: DBConfig  = {
   name: 'AAMdb',
   version: 1,

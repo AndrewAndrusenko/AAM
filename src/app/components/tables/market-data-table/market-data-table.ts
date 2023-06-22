@@ -14,7 +14,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatCalendarCellClassFunction } from '@angular/material/datepicker';
 import { AppMarketDataService } from 'src/app/services/app-market-data.service';
 import * as moment from 'moment';
-import { AtuoCompSecidService } from 'src/app/services/atuo-comp-secid.service';
+import { AtuoCompleteService } from 'src/app/services/atuo-complete-service';
 import { formatNumber, registerLocaleData } from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
@@ -90,7 +90,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
     private AccountingDataService:AppAccountingService, 
     private MarketDataService: AppMarketDataService,
     private AuthServiceS:AuthService,  
-    private AtuoCompService:AtuoCompSecidService,
+    private AtuoCompService:AtuoCompleteService,
     private HandlingCommonTasksS:HandlingCommonTasksService,
     private CommonDialogsService:HadlingCommonDialogsService,
     private fb:FormBuilder, 
@@ -119,7 +119,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
     this.AtuoCompService.getSecidLists('get_secid_array');
     this.filterednstrumentsLists = this.searchParametersFG.controls['secidList'].valueChanges.pipe(
       startWith(''),
-      map(value => this.AtuoCompService.filter(value || ''))
+      map(value => this.AtuoCompService.filterList(value || '','secid'))
     );
   }
   formatDate (dateToFormat:any):string {

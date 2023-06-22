@@ -30,7 +30,8 @@
   <mat-form-field  style="width: 26%;" title="Security Group Code">
     <mat-label>Main Type Code</mat-label>
     <mat-select  #securityGroup formControlName="group" 
-    (selectionChange)="filtersecurityType($event.value)" > 
+    (selectionChange)="this.type.patchValue(null);
+                      filtersecurityType($event.value)" > 
       <ng-container *ngFor="let securityGroup of securityGroups">
       <mat-option  [value]="securityGroup.name">
           {{securityGroup.name }} - {{securityGroup.title}}
@@ -99,19 +100,22 @@
     <input matInput [matDatepicker]="picker" placeholder="Maturity date"  formControlName="maturitydate" >
     <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
     <mat-datepicker #picker></mat-datepicker>
-    <mat-error  *ngIf="name?.errors?.['required']">
+    <mat-error  *ngIf="maturitydate?.errors?.['required']">
       Required!   
     </mat-error>
   </mat-form-field>
   <mat-form-field style="width: 14%;" title="faceunit">
     <input matInput placeholder="Notinal currency" formControlName="faceunit" >   
-    <mat-error  *ngIf="name?.errors?.['required']">
+    <mat-error  *ngIf="faceunit?.errors?.['required']">
       Required!   
     </mat-error>
   </mat-form-field>
   <mat-form-field style="width: 12%;" title="facevalue">
     <input matInput placeholder="Notinal value" formControlName="facevalue" >   
-    <mat-error  *ngIf="name?.errors?.['required']">
+    <mat-error  *ngIf="facevalue?.errors?.['pattern']">
+      Only numbers!   
+    </mat-error>
+    <mat-error  *ngIf="facevalue?.errors?.['required']">
       Required!   
     </mat-error>
   </mat-form-field>
@@ -120,25 +124,6 @@
   <br>
   <h3 style="color:rgb(252, 113, 113)" *ngIf="instrumentModifyForm.invalid"> Please check the form. Data is invalid</h3>
 </form>
-<mat-expansion-panel class="headers-align" title="instrumentDetailsTable"
-  (opened)="panelOpenStateFirst = true"
-  (closed)="panelOpenStateFirst = false" >
-  <mat-expansion-panel-header style="margin-bottom: 1%;">
-    <mat-panel-title title="Details">
-      Details
-    </mat-panel-title>
-    <mat-panel-description >
-      Tap to {{panelOpenStateFirst? 'hide': 'open'}} additional parameters
-      <mat-icon color = 'accent'>list</mat-icon>
-    </mat-panel-description>
-  </mat-expansion-panel-header >
-  <div style="width: 100%;">
-    <app-table-instrument-details 
-      [instrumentDetails]="instrumentDetails"  
-      [secid]="secid.value"> 
-    </app-table-instrument-details>
-    </div>
-</mat-expansion-panel>
 <mat-expansion-panel class="headers-align" title="instrumenCorpActionsTable"
   (opened)="panelOpenStateSecond = true"
   (closed)="panelOpenStateSecond = false" >
@@ -157,4 +142,24 @@
   [instrument]="{secid:secid.value, group:group.value, type:type.value}"> 
 </app-table-inst-corp-actions>
 </div>
+</mat-expansion-panel>
+<br>
+<mat-expansion-panel class="headers-align" title="instrumentDetailsTable"
+  (opened)="panelOpenStateFirst = true"
+  (closed)="panelOpenStateFirst = false" >
+  <mat-expansion-panel-header style="margin-bottom: 1%;">
+    <mat-panel-title title="Details">
+      Details
+    </mat-panel-title>
+    <mat-panel-description >
+      Tap to {{panelOpenStateFirst? 'hide': 'open'}} additional parameters
+      <mat-icon color = 'accent'>list</mat-icon>
+    </mat-panel-description>
+  </mat-expansion-panel-header >
+  <div style="width: 100%;">
+    <app-table-instrument-details 
+      [instrumentDetails]="instrumentDetails"  
+      [secid]="secid.value"> 
+    </app-table-instrument-details>
+    </div>
 </mat-expansion-panel>

@@ -3,6 +3,7 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarVerticalPosition } from '@angular/material/snack-bar';
 import { AppConfimActionComponent } from '../components/common-forms/app-confim-action/app-confim-action.component';
 import { Observable } from 'rxjs/internal/Observable';
+import { dbErrorsMap } from '../models/intefaces';
 
 @Injectable({
   providedIn: 'root'
@@ -10,6 +11,7 @@ import { Observable } from 'rxjs/internal/Observable';
 export class HadlingCommonDialogsService {
   dialogRefConfirm: MatDialogRef<AppConfimActionComponent>;
   verticalPosition: MatSnackBarVerticalPosition = 'bottom';
+  dbErrorsMap = dbErrorsMap;
   constructor(
     private snack:MatSnackBar,
     private dialog: MatDialog, 
@@ -23,6 +25,7 @@ export class HadlingCommonDialogsService {
   snackResultHandler (result :any, action?: string, postion:any = 'top', closeAll:boolean=true, duration:number=3000) {
     this.verticalPosition=postion;
     if (result['name']=='error') { 
+      this.dbErrorsMap.forEach (el => result['detail'].includes(el.constraintCode)? result['detail'] = el.errorText : null);
       this.snack.open('Error: ' + result['detail'].split("\n", 1).join(""),'OK',{
         panelClass: ['snackbar-error'],
         verticalPosition: this.verticalPosition
