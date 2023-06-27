@@ -55,12 +55,11 @@ async function fGetStrategiesList (request,response) {
 async function fGetStrategyStructure (request,response) {
   const query = {text: 'SELECT '+
     ' id_strategy_parent, id_strategy_child as id, dstrategiesglobal.sname, dstrategiesglobal.s_description as description,  ' +
-    ' public."aMoexInstruments".isin, public."aMoexInstruments".shortname, '+ 
+    ' mmoexsecurities.isin, mmoexsecurities.name, '+ 
     ' weight_of_child, dstrategies_global_structure.id as id_item ' + 
     ' FROM public.dstrategies_global_structure LEFT JOIN	dstrategiesglobal ' +
     ' ON dstrategiesglobal.id::text = dstrategies_global_structure.id_strategy_child	' +
-    ' LEFT JOIN public."aMoexInstruments"  ' +
-    ' ON public."aMoexInstruments".secid = dstrategies_global_structure.id_strategy_child '+
+    ' LEFT JOIN mmoexsecurities ON mmoexsecurities.secid = dstrategies_global_structure.id_strategy_child '+
     ' WHERE id_strategy_parent = $1'}
     query.values = [Number(request.query.id)] 
   switch (request.query.action) {

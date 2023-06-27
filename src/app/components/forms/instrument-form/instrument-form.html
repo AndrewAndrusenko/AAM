@@ -96,30 +96,40 @@
   <mat-form-field style="width: 35%;" title="Emitent Title" >
     <input matInput placeholder="Emitent Title" formControlName="emitent_title" >
   </mat-form-field>
-  <mat-form-field class="example-full-width" style="width: 14%;" >
-    <input matInput [matDatepicker]="picker" placeholder="Maturity date"  formControlName="maturitydate" >
+  <mat-form-field style="width: 14%;" >
+    <input matInput [matDatepicker]="picker" [placeholder]="placeholders.get('maturitydate')" formControlName="maturitydate" >
     <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
     <mat-datepicker #picker></mat-datepicker>
     <mat-error  *ngIf="maturitydate?.errors?.['required']">
       Required!   
     </mat-error>
   </mat-form-field>
-  <mat-form-field style="width: 14%;" title="faceunit">
-    <input matInput placeholder="Notinal currency" formControlName="faceunit" >   
+  <mat-form-field style="width: 20%;" title="faceunit">
+    <input matInput [placeholder]="placeholders.get('faceunit')" formControlName="faceunit" [matAutocomplete]="auto">
+    <mat-autocomplete #auto="matAutocomplete">
+      <mat-option *ngFor="let currency of filteredCurrenciesList | async" [value]="currency['CurrencyCodeNum']">
+        {{currency['CurrencyCodeNum']}} -  {{currency['CurrencyCode']}} -  {{currency['CurrencyName']}} 
+      </mat-option>
+    </mat-autocomplete>   
     <mat-error  *ngIf="faceunit?.errors?.['required']">
       Required!   
     </mat-error>
+    <mat-error  *ngIf="faceunit?.errors?.['currencyCode']">
+      Inccorect Code!   
+    </mat-error>
   </mat-form-field>
-  <mat-form-field style="width: 12%;" title="facevalue">
-    <input matInput placeholder="Notinal value" formControlName="facevalue" >   
+  <mat-form-field style="width: 14%;" title="facevalue">
+    <input matInput [placeholder]="placeholders.get('facevalue')" formControlName="facevalue" >   
     <mat-error  *ngIf="facevalue?.errors?.['pattern']">
-      Only numbers!   
+      Only numbers (0.00)   
     </mat-error>
     <mat-error  *ngIf="facevalue?.errors?.['required']">
       Required!   
     </mat-error>
+    <mat-hint *ngIf="facevalue.valid">
+      {{facevalue.value | number}}
+    </mat-hint>
   </mat-form-field>
-
   <br>
   <br>
   <h3 style="color:rgb(252, 113, 113)" *ngIf="instrumentModifyForm.invalid"> Please check the form. Data is invalid</h3>

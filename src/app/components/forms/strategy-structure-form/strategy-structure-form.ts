@@ -51,31 +51,18 @@ export class AppStructureStrategyFormComponent implements OnInit {
       this.action === "Create_Example"?  this.action = "Create" : null;
   }
   ngOnChanges(changes: SimpleChanges) {
-    console.log('mp change', this.MP);
-    this.MP===1||2? this.addValidators() : null;
     this.disabledControlElements? this.editStructureStrategyForm.disable() : null;
     this.MP===2? this.InvestmentDataService.getGlobalStategiesList (0,'','Get_ModelPortfolios_List').subscribe (data =>this.MPnames = data):null;
     if (this.MP===1) {
       this.AtuoCompService.getSecidLists('get_secid_array');
-      this.filterednstrumentsLists = this.editStructureStrategyForm.controls['id'].valueChanges.pipe(
+      this.filterednstrumentsLists = this.id.valueChanges.pipe(
         startWith(''),
         distinctUntilChanged(),
         map(value => this.AtuoCompService.filterList(value || '','secid'))
       );
+      this.filterednstrumentsLists.subscribe(data => this.id.setErrors(data.filter(el => el===this.id.value).length? null: {noSecid:true}));
     };
-    if (Object.hasOwn(changes,'parentStrategyId')) {
-      this.editStructureStrategyForm.controls['id_item'].setValue (changes['strategyId'].currentValue)
-      this.addValidators();
-    }
-  }
-  addValidators () {
-    if (this.MP===1) {
-      this.editStructureStrategyForm.controls['id'].setAsyncValidators(customAsyncValidators.secidCustomAsyncValidator(this.InvestmentDataService, this.id.value));
-      this.editStructureStrategyForm.controls['id'].updateValueAndValidity();
-    } else {
-      this.editStructureStrategyForm.controls['id'].clearAsyncValidators();
-      this.editStructureStrategyForm.controls['id'].updateValueAndValidity();
-    }
+    Object.hasOwn(changes,'parentStrategyId')? this.id_item.setValue(changes['strategyId'].currentValue): null;
   }
   snacksBox(result:any, action?:string){
     ['Edit','Delete'].includes(this.action)? this.modal_principal_parent.emit(result) : null;

@@ -21,8 +21,8 @@ import { FormBuilder, FormGroup } from '@angular/forms';
   ],
 })
 export class AppTableStrategyComponent   {
-  columnsToDisplay = ['id','sname', 'description', 'weight_of_child'];
-  columnsHToDisplay = ['id','sname', 'description', 'weight'];
+  columnsToDisplay = [];
+  columnsHToDisplay = [];
   panelOpenState = false;
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
   dataSource: MatTableDataSource<StrategyStructure>;
@@ -59,8 +59,10 @@ export class AppTableStrategyComponent   {
     if (this.accessState !== 'none') {
       this.InvestmentDataService.getStrategyStructure (id,'0','0').subscribe (strategyItems => {
         if (this.ModelPortfolio===1) { 
-          this.columnsToDisplay = ['id','isin', 'shortname', 'weight_of_child'] 
+          this.columnsHToDisplay = ['id','isin', 'name', 'weight'] ;
+          this.columnsToDisplay = ['id','isin', 'name', 'weight_of_child'] ;
         } else {
+          this.columnsHToDisplay = ['id','name', 'description', 'weight'];
           this.columnsToDisplay = ['id','sname', 'description', 'weight_of_child'];
         }
         this.columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];

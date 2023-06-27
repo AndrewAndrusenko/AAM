@@ -15,7 +15,21 @@ export const dbErrorsMap: errorsDescription[] = [
   {
     constraintCode: 'cForeignKeyStrategyPortfolios',
     errorText:'Attempt to delete a strategy which has portfolios linked to it. cForeignKeyStrategyPortfolios blocked transaction'
-  }
+  },
+  {
+    constraintCode: 'bAccountTransaction',
+    errorText:'Attempt to delete an account which has entries linked to it. Operation has been blocked'
+  },
+  {
+    constraintCode: 'cForeignKeyInstrumentInModelPortfolio',
+    errorText:'Attempt to delete an instrument included in the model portfolio. cForeignKeyInstrumentInModelPortfolio blocked transaction'
+  },
+  {
+    constraintCode: 'cForeignClientKey',
+    errorText:'Attempt to delete a client with opened portfolios. cForeignClientKey blocked transaction'
+  },
+  
+  
 ]
 export const indexDbConfigAAM: DBConfig  = {
   name: 'AAMdb',
@@ -366,7 +380,7 @@ export interface instrumentDetails {
   secid: string, boardid: string, shortname: string, lotsize: number, facevalue: number, status: string, boardname: string, decimals: number, matdate: Date, secname: string, couponperiod: string, issuesize: number, remarks: string, marketcode: string, instrid: string, sectorid: string, minstep: number, faceunit: number, isin: string, latname: string, regnumber: string, currencyid: string, sectype: string, listlevel: number, issuesizeplaced: number, couponpercent: string, lotvalue: number, nextcoupon: string, issuevolume:number,id: number
 }
 export interface instrumentCorpActions {
-  id: number, isin: string, issuevolume: number, secname: string, notinal: number, notinalcurrency: string, unredemeedvalue: number, couponrate: number, couponamount: number, actiontype: string, couponamountrur: number, date: Date, action: string
+  id: number, isin: string, issuevolume: number, secname: string, notinal: number, notinalcurrency: string, unredemeedvalue: number, couponrate: number, couponamount: number, actiontype: string, couponamountrur: number, date: Date, action: string, actiontypename: string
 }
 export interface caTypes {
   sectypename: string, id: number, name: string, sectype: number, ismandatory: boolean, ratetype: string, fixedrate: boolean

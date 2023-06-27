@@ -22,7 +22,7 @@ export class AtuoCompleteService {
     const filterValue = value.toLowerCase();
     switch (type) {
       case 'secid': return this.fullInstrumentsLists.filter(option => option.toLowerCase().includes(filterValue));
-      case 'currency': return this.fullCurrenciesList.filter(option => option.toLowerCase().includes(filterValue));
+      case 'currency': return this.fullCurrenciesList.filter(option => option['CurrencyCodeNum'].toLowerCase().includes(filterValue));
       default: return [];
     }
   }
@@ -35,8 +35,7 @@ export class AtuoCompleteService {
   }
   getCurrencyList () {
     this.indexDBServiceS.getIndexDBInstrumentStaticTables('getCurrencyCodes').then(data=> {
-      console.log('currency', data);
-      this.fullCurrenciesList = data[0]['currency']
+      this.fullCurrenciesList = data['data']
       this.sendCurrencyList(this.fullCurrenciesList);
    })
   }

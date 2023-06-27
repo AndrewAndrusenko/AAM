@@ -66,7 +66,7 @@ export class AppAccEntryModifyFormComponent implements OnInit,  OnDestroy {
       t_ledgerNoId: {value:null, disabled: false}, 
       t_extTransactionId : {value:null, disabled: false}, 
       t_dataTime: [null, [Validators.required]],  
-      t_amountTransaction: [0, [Validators.required, Validators.pattern('[0-9.,]*') ]   ], 
+      t_amountTransaction: [0, [Validators.required, Validators.pattern('[0-9]*([0-9.]{0,3})?$') ]   ], 
       t_XactTypeCode: {value:null, disabled: false},  
       t_XactTypeCode_Ext: [null, [Validators.required]], 
       d_Debit : {value:null, disabled: false},  

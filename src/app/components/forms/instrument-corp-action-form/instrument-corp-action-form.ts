@@ -1,10 +1,11 @@
 import { Component,  EventEmitter,  Input, Output, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { caTypes, instrumentDetails } from 'src/app/models/intefaces';
-import { Subscription, filter, switchMap } from 'rxjs';
+import { Observable, Subscription, distinctUntilChanged, filter, map, startWith, switchMap } from 'rxjs';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AppMarketDataService } from 'src/app/services/app-market-data.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
+import { AtuoCompleteService } from 'src/app/services/atuo-complete-service';
 
 @Component({
   selector: 'instrument-corp-action-form',
@@ -22,31 +23,66 @@ export class AppInstrumentCorpActionFormComponent {
   @Input() data: any;
   private subscriptionName: Subscription
   caTypes: caTypes[];
+  filteredCurrenciesList: Observable<string[]>;
+  templateStructureAT = {
+   1 : {
+    placeholders: {couponamount:'Coupon Amount',couponrate: "Coupon Rate" },
+    requiredFileds: ['couponrate']
+   },
+   2 : {
+    placeholders: {couponamount:'Coupon Amount',couponrate: "Coupon Rate" },
+    requiredFileds: ['couponrate']
+  },
+  3 : {
+    placeholders: {couponamount:'Amortization Amount',couponrate: "Amortization Rate" },
+    requiredFileds: ['couponrate']
+   },
+   4 : {
+    placeholders: {couponamount:'Coupon Amount',couponrate: "Coupon Rate" },
+    requiredFileds: []
+   },
+   5 : {
+    placeholders: {couponamount:'Dividend Amount' },
+    requiredFileds: []
+   },
+   6 : {
+    placeholders: {couponamount:'Offerta Amount',couponrate: "Offerta Rate" },
+    requiredFileds: []
+   },
+   7 : {
+    placeholders: {couponamount:'Offerta Amount',couponrate: "Offerta Rate" },
+    requiredFileds: []
+   },
+  } 
   constructor (
     private fb:FormBuilder, 
     private CommonDialogsService:HadlingCommonDialogsService,
     private MarketDataService: AppMarketDataService,
     private indexDBServiceS: indexDBService,
+    private AtuoCompService:AtuoCompleteService,
   ) 
   {   
+    this.AtuoCompService.getCurrencyList();
     this.CorpActionsForm = this.fb.group ({
       id: {value:null, disabled: false}, 
       secid: [null, { validators:  Validators.required, updateOn: 'blur' }], 
-      issuevolume: {value:null, disabled: false}, 
-      secname: {value:null, disabled: false}, 
-      notinal: {value:null, disabled: false}, 
-      notinalcurrency: {value:null, disabled: false}, 
-      unredemeedvalue: {value:null, disabled: false}, 
+      currency: [null, { validators:  Validators.required, updateOn: 'blur' }], 
+      unredemeedvalue: [null, { validators:  [Validators.pattern('[0-9]*([0-9.]{0,3})?$')], updateOn: 'blur' }], 
       couponrate: {value:null, disabled: false}, 
-      couponamount: {value:null, disabled: false}, 
-      actiontype: [null, { validators:  Validators.required, updateOn: 'blur' }], 
+      couponamount: [null, { validators:  [Validators.required,Validators.pattern('[0-9]*([0-9.]{0,3})?$')], updateOn: 'blur' }], 
+      actiontype: [1, { validators:  Validators.required, updateOn: 'blur' }], 
       couponamountrur: {value:null, disabled: false}, 
       date: [null, { validators:  Validators.required, updateOn: 'blur' }], 
       action: {value:null, disabled: false}
-      // boardid:  [null, { validators:  Validators.required, updateOn: 'blur' }], 
-         })
+    })
   }
   ngAfterContentInit(): void {
+    this.filteredCurrenciesList = this.currency.valueChanges.pipe (
+      startWith (''),
+      distinctUntilChanged(),
+      map(value => this.AtuoCompService.filterList(value || '','currency'))
+    )
+    this.filteredCurrenciesList.subscribe(data => this.currency.setErrors(data.length? null: {currencyCode:true}))
     this.title = this.action;
     switch (this.action) {
       case 'Create': 
@@ -61,8 +97,19 @@ export class AppInstrumentCorpActionFormComponent {
       break; 
     } 
     this.indexDBServiceS.getIndexDBInstrumentStaticTables('getCorpActionTypes').then(data => {
-      console.log('data',data['data']);
       this.caTypes=data['data'].filter(el=>el.sectypename===this.instrument.group)})
+  }
+  modifyTemplate (actionType:number) {
+    switch (actionType) {
+      case 1:
+      case 2:
+      case 3:
+        
+        break;
+    
+      default:
+        break;
+    }
   }
   ngOnChanges(changes: SimpleChanges) {
     this.MarketDataService.getMoexInstruments(undefined,undefined, {secid:[changes['isinParam'].currentValue,changes['isinParam'].currentValue]}).subscribe (instrumentData => {
@@ -104,7 +151,7 @@ export class AppInstrumentCorpActionFormComponent {
   }
   get  actiontype() {return this.CorpActionsForm.get('actiontype')}
   get  id() {return this.CorpActionsForm.get('id')}
-  get  notinalcurrency () {return this.CorpActionsForm.get('notinalcurrency') } 
+  get   currency () {return this.CorpActionsForm.get('currency') } 
   get  unredemeedvalue () {return this.CorpActionsForm.get('unredemeedvalue') } 
   get  couponrate () {return this.CorpActionsForm.get('couponrate') } 
   get  couponamount () {return this.CorpActionsForm.get('couponamount') } 

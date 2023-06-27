@@ -8,7 +8,7 @@ import { AppMarketDataService } from 'src/app/services/app-market-data.service';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
 import { indexDBService } from 'src/app/services/indexDB.service';
 import { AuthService } from 'src/app/services/auth.service';
-import { filter, switchMap } from 'rxjs';
+import { Observable, distinctUntilChanged, filter, map, observable, startWith, switchMap } from 'rxjs';
 import { AtuoCompleteService } from 'src/app/services/atuo-complete-service';
 
 @Component({
@@ -41,7 +41,18 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
   securityGroups: any;
   SecidUniqueAsyncValidator :AsyncValidatorFn;
   ISINuniqueAsyncValidator :AsyncValidatorFn;
-
+  placeholders = new Map();
+  bondsPlaceholders = [
+    ['maturitydate','Maturity date'],
+    ['faceunit','Notinal currency'],
+    ['facevalue','Notinal value'],
+  ]
+  futuresPlaceholders = [
+    ['maturitydate','Experation date'],
+    ['faceunit','Contract currency'],
+    ['facevalue','Contract value'],
+  ]
+  filteredCurrenciesList: Observable<string[]>;
   constructor (
     private fb:FormBuilder, 
     private AuthServiceS:AuthService,  
@@ -51,6 +62,7 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
     private AtuoCompService:AtuoCompleteService,
   ) 
   {    
+    this.changePlaceholders('stock_bonds');
     this.instrumentModifyForm = this.fb.group ({
       id : {value:null, disabled: false},
       secid: [null, { validators:  Validators.required, asyncValidators: null, updateOn: 'blur' }], 
@@ -70,7 +82,7 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
       marketprice_boardid:  {value:null, disabled: false},
       group_title:  {value:null, disabled: false},
       faceunit:  {value:null, disabled: false},
-      facevalue:  [null,{validators: Validators.pattern("^[0-9]*$"),updateOn: 'blur'}],
+      facevalue:  [null,{validators: Validators.pattern('[0-9]*([0-9.]{0,3})?$'),updateOn: 'blur'}],
       maturitydate:  {value:null, disabled: false},
       regnumeric:  {value:null, disabled: false},
     })
@@ -84,6 +96,12 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
     });
   }
   ngAfterContentInit (): void {
+    this.filteredCurrenciesList = this.faceunit.valueChanges.pipe (
+      startWith (''),
+      distinctUntilChanged(),
+      map(value => this.AtuoCompService.filterList(value || '','currency'))
+    )
+    this.filteredCurrenciesList.subscribe(data => this.faceunit.setErrors(data.length? null: {currencyCode:true}))
     this.moexBoards.length? null : this.indexDBServiceS.getIndexDBInstrumentStaticTables('getBoardsDataFromInstruments').then (data=>this.moexBoards = data['data']);
     if (this.data)  {
       this.instrumentModifyForm.patchValue(this.data);
@@ -106,7 +124,6 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
     this.action === 'Create_Example'? this.action='Create':null;
   }
   revomeAsyncValidators (action?:string) {
-    console.log('revomeAsyncValidators');
     this.secid.removeAsyncValidators([this.SecidUniqueAsyncValidator]);
     this.isin.removeAsyncValidators([this.ISINuniqueAsyncValidator]); 
   }
@@ -116,6 +133,9 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
       case 'stock_bonds':
       case 'stock_eurobond':
       case 'stock_deposit':
+      case 'futures_options':
+      case 'currency_futures':
+      case 'futures_forts':
         fields.forEach(key => this.instrumentModifyForm.get(key).addValidators(Validators.required));
       break;
       default:
@@ -124,7 +144,25 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
     }
     fields.forEach(key => this.instrumentModifyForm.get(key).updateValueAndValidity());
   }
+  changePlaceholders(secType:string) {
+    switch (secType) {
+      case 'stock_bonds':
+      case 'stock_eurobond':
+      case 'stock_deposit':
+        this.bondsPlaceholders.forEach(el => this.placeholders.set(el[0],el[1]))
+      break;
+      case 'futures_options':
+      case 'currency_futures':
+      case 'futures_forts':
+        this.futuresPlaceholders.forEach(el => this.placeholders.set(el[0],el[1]))
+      break;
+      default:
+        // fields.forEach(key => this.instrumentModifyForm.get(key).removeValidators(Validators.required));
+      break;
+    }
+  }
   ngOnChanges(changes: SimpleChanges) {
+
     this.revomeAsyncValidators();
     this.MarketDataService.getMoexInstruments(undefined,undefined, {secid:[changes['secidParam'].currentValue,changes['secidParam'].currentValue]}).subscribe (instrumentData => {
       this.instrumentModifyForm.patchValue(instrumentData[0]);
@@ -133,6 +171,7 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
     });  
   }
   filtersecurityType (filter:string) {
+    this.changePlaceholders(filter);
     this.addBasicValidators(filter);
     this.securityTypes? this.securityTypesFiltered = this.securityTypes.filter (elem => elem.security_group_name===filter) : null;
   }

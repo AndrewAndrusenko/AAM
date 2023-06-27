@@ -43,7 +43,7 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
   columnsToDisplay = [ 
     'secid', 
     'security_type_title',
-    'shortname', 
+    'name', 
     'isin', 
     'primary_boardid', 
     'board_title', 

@@ -252,7 +252,8 @@ async function fgetInstrumentDetails (request,response) {
   queryExecute (sql, response);
 }
 async function fgetInstrumentDataCorpActions (request,response) {
-  let sql = "SELECT id, secid, isin, issuevolume, secname, notinal, notinalcurrency, unredemeedvalue, couponrate, couponamount, actiontype::int2, couponamountrur, to_date(date,'DD.MM.YYYY')::timestamp without time zone as date, 0 as action FROM public.mmoexcorpactions ";
+  let sql = "SELECT mmoexcorpactions.id, secid, currency, unredemeedvalue, couponrate, couponamount, actiontype::int2, couponamountrur, to_date(date,'DD.MM.YYYY')::timestamp without time zone as date, 0 as action, dccorporateactionstypes.name as actiontypename FROM public.mmoexcorpactions " +
+  " LEFT JOIN dccorporateactionstypes on dccorporateactionstypes.id = mmoexcorpactions.actiontype ";
   sql += request.query.isin? "WHERE isin ='"   + request.query.isin +"' ": "";
   sql += " ORDER BY to_date(date,'DD.MM.YYYY')::timestamp without time zone; "
   queryExecute (sql, response);
@@ -277,7 +278,7 @@ async function fgetInstrumentDataGeneral(request,response) {
       query.text = "SELECT name, title  FROM public.mmoexsecuritygroups;"
     break;
     case 'getCurrencyCodes':
-      query.text = 'SELECT  ARRAY_AGG ("CurrencyCodeNum"&&"-"&&"CurrencyCode"&&"-"&&"CurrencyName") as currency FROM public."dCurrencies";'
+      query.text = 'SELECT  "CurrencyCodeNum","CurrencyCode","CurrencyName" FROM public."dCurrencies";'
     break;
     case 'validateSecidForUnique':
       query.text = "SELECT secid  FROM public.mmoexsecurities where UPPER(secid)=${fieldtoCheck};"

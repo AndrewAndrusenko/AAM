@@ -6,6 +6,7 @@ AAM REFACTORING BULLET POINTS
   Retrieve static tables from indexDB storage and don't request DB
 4 Check error blocks in template field?.errors?[''requiered]
 5 Unsubscibe via onDestroy pattern and takeUntil.. (Not relised yet)
+6 Add DB errors description when constraints are violated
 
 () Instrument Form - Done 6/6/23 + AsyncValidators
 () Instrument Table - Done 7/6/23 + ToggleAllSelection

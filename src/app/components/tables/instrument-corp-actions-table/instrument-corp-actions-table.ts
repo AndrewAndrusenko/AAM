@@ -29,8 +29,8 @@ import { AppInstrumentCorpActionFormComponent } from '../../forms/instrument-cor
 export class AppTableCorporateActionsComponent  implements AfterViewInit {
   accessState: string = 'none';
   disabledControlElements: boolean = false;
-  columnsToDisplay = ['date', 'isin','actiontype','unredemeedvalue','couponrate','couponamount', 'notinal', 'notinalcurrency', 'issuevolume', 'action'];
-  columnsHeaderToDisplay = ['date','ISIN','type','unredemeed','rate','coupon', 'notinal', 'currency', 'issue','action' ];
+  columnsToDisplay = ['date', 'actiontype','actiontypename', 'unredemeedvalue','couponrate','couponamount', 'currency', 'action'];
+  columnsHeaderToDisplay = ['date','Code', 'Action Title','unredemeed','rate','Amount', 'currency', 'issue','action' ];
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
   dataSource: MatTableDataSource<instrumentCorpActions>;
   @ViewChild(MatPaginator) paginator: MatPaginator;

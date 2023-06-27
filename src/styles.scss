@@ -104,3 +104,10 @@
 .snackbar-error, .mat-simple-snack-bar-content {
   font-size: 20px !important;
 }
+.mat-error {
+  color: rgb(158, 0, 0);
+  transform: (1.1);
+  height: 110%;
+  font-size: 16px;
+  font-style: italic;
+}
