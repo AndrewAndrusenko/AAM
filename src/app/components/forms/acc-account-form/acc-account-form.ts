@@ -6,7 +6,7 @@ import { AppSnackMsgboxComponent } from '../../common-forms/app-snack-msgbox/app
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
 import { ClientData, bcAccountType_Ext, bcEnityType } from 'src/app/models/intefaces';
-import { AppClientsTableComponent } from '../../tables/clients-table/clients-table';
+import { AppClientsTableComponent } from '../../tables/clients-table.component/clients-table.component';
 import { TablePortfolios } from '../../tables/portfolios-table/portfolios-table';
 import { Subscription } from 'rxjs';
 import { MatTabGroup as MatTabGroup } from '@angular/material/tabs';

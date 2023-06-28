@@ -6,7 +6,7 @@ import { AppSnackMsgboxComponent } from '../../common-forms/app-snack-msgbox/app
 import { bcTransactionType_Ext } from 'src/app/models/intefaces';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
-import { AppInstrumentTableComponent } from '../../tables/instrument-table/instrument-table';
+import { AppInstrumentTableComponent } from '../../tables/instrument-table.component/instrument-table.component';
 
 @Component({
   selector: 'app-MT950ItemsParser-form',

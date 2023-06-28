@@ -9,7 +9,7 @@ import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
 import { indexDBService } from 'src/app/services/indexDB.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { Observable, distinctUntilChanged, filter, map, observable, startWith, switchMap } from 'rxjs';
-import { AtuoCompleteService } from 'src/app/services/atuo-complete-service';
+import { AtuoCompleteService } from 'src/app/services/auto-complete-service';
 
 @Component({
   selector: 'app-inv-instrument-modify-form',
@@ -96,12 +96,12 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
     });
   }
   ngAfterContentInit (): void {
+    this.faceunit.setValidators(this.AtuoCompService.currencyValirator())
     this.filteredCurrenciesList = this.faceunit.valueChanges.pipe (
       startWith (''),
       distinctUntilChanged(),
       map(value => this.AtuoCompService.filterList(value || '','currency'))
     )
-    this.filteredCurrenciesList.subscribe(data => this.faceunit.setErrors(data.length? null: {currencyCode:true}))
     this.moexBoards.length? null : this.indexDBServiceS.getIndexDBInstrumentStaticTables('getBoardsDataFromInstruments').then (data=>this.moexBoards = data['data']);
     if (this.data)  {
       this.instrumentModifyForm.patchValue(this.data);

@@ -57,7 +57,7 @@
       </mat-hint>
     </mat-form-field>
 
-  <mat-form-field style="width: 12%;" title="currency">
+  <mat-form-field style="width: 18%;" title="Type to find(any filed). Click to select">
     <input matInput placeholder="Currency" formControlName="currency" [matAutocomplete]="auto" >
     <mat-autocomplete #auto="matAutocomplete">
       <mat-option *ngFor="let currency of filteredCurrenciesList | async" [value]="currency['CurrencyCodeNum']">
@@ -68,7 +68,7 @@
       Required!   
     </mat-error>
     <mat-error  *ngIf="currency?.errors?.['currencyCode']">
-      Inccorect Code!   
+      Inccorect Code! Only numbers   
     </mat-error>
   </mat-form-field>
   <div>

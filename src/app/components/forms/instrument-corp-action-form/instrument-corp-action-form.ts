@@ -5,7 +5,7 @@ import { Observable, Subscription, distinctUntilChanged, filter, map, startWith,
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AppMarketDataService } from 'src/app/services/app-market-data.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
-import { AtuoCompleteService } from 'src/app/services/atuo-complete-service';
+import { AtuoCompleteService } from 'src/app/services/auto-complete-service';
 
 @Component({
   selector: 'instrument-corp-action-form',
@@ -63,10 +63,11 @@ export class AppInstrumentCorpActionFormComponent {
   ) 
   {   
     this.AtuoCompService.getCurrencyList();
+
     this.CorpActionsForm = this.fb.group ({
       id: {value:null, disabled: false}, 
       secid: [null, { validators:  Validators.required, updateOn: 'blur' }], 
-      currency: [null, { validators:  Validators.required, updateOn: 'blur' }], 
+      currency: [null, { validators:  [Validators.required]}], 
       unredemeedvalue: [null, { validators:  [Validators.pattern('[0-9]*([0-9.]{0,3})?$')], updateOn: 'blur' }], 
       couponrate: {value:null, disabled: false}, 
       couponamount: [null, { validators:  [Validators.required,Validators.pattern('[0-9]*([0-9.]{0,3})?$')], updateOn: 'blur' }], 
@@ -77,12 +78,12 @@ export class AppInstrumentCorpActionFormComponent {
     })
   }
   ngAfterContentInit(): void {
+    this.currency.setValidators(this.AtuoCompService.currencyValirator())
     this.filteredCurrenciesList = this.currency.valueChanges.pipe (
       startWith (''),
       distinctUntilChanged(),
       map(value => this.AtuoCompService.filterList(value || '','currency'))
     )
-    this.filteredCurrenciesList.subscribe(data => this.currency.setErrors(data.length? null: {currencyCode:true}))
     this.title = this.action;
     switch (this.action) {
       case 'Create': 

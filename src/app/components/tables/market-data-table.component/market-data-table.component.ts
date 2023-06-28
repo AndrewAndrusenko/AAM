@@ -14,7 +14,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatCalendarCellClassFunction } from '@angular/material/datepicker';
 import { AppMarketDataService } from 'src/app/services/app-market-data.service';
 import * as moment from 'moment';
-import { AtuoCompleteService } from 'src/app/services/atuo-complete-service';
+import { AtuoCompleteService } from 'src/app/services/auto-complete-service';
 import { formatNumber, registerLocaleData } from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
@@ -26,8 +26,8 @@ registerLocaleData(localeFr, 'fr');
 export class extends  */
 @Component({
   selector: 'app-table-market-data',
-  templateUrl: './market-data-table.html',
-  styleUrls: ['./market-data-table.scss'],
+  templateUrl: './market-data-table.component.html',
+  styleUrls: ['./market-data-table.component.scss'],
   encapsulation: ViewEncapsulation.None,
   animations: [
     trigger('detailExpand', [
@@ -90,7 +90,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
     private AccountingDataService:AppAccountingService, 
     private MarketDataService: AppMarketDataService,
     private AuthServiceS:AuthService,  
-    private AtuoCompService:AtuoCompleteService,
+    private AutoCompService:AtuoCompleteService,
     private HandlingCommonTasksS:HandlingCommonTasksService,
     private CommonDialogsService:HadlingCommonDialogsService,
     private fb:FormBuilder, 
@@ -116,10 +116,11 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
       sourceCode: [[],Validators.required],
       overwritingCurrentData : [false]
     });
-    this.AtuoCompService.getSecidLists('get_secid_array');
-    this.filterednstrumentsLists = this.searchParametersFG.controls['secidList'].valueChanges.pipe(
+    this.AutoCompService.getSecidLists();
+    this.secidList.setValidators(this.AutoCompService.secidValirator())
+    this.filterednstrumentsLists = this.secidList.valueChanges.pipe(
       startWith(''),
-      map(value => this.AtuoCompService.filterList(value || '','secid'))
+      map(value => this.AutoCompService.filterList(value || '','secid'))
     );
   }
   formatDate (dateToFormat:any):string {

@@ -5,9 +5,9 @@ import { AppConfimActionComponent } from '../../common-forms/app-confim-action/a
 import { StrategiesGlobalData } from 'src/app/models/intefaces';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
 import { distinctUntilChanged, filter, map, Observable, startWith, switchMap } from 'rxjs';
-import { AtuoCompleteService } from 'src/app/services/atuo-complete-service';
+import { AtuoCompleteService } from 'src/app/services/auto-complete-service';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
-import { AppInstrumentTableComponent } from '../../tables/instrument-table/instrument-table';
+import { AppInstrumentTableComponent } from '../../tables/instrument-table.component/instrument-table.component';
 import { AppInvestmentDataServiceService } from 'src/app/services/app-investment-data.service.service';
 
 @Component({
@@ -18,7 +18,7 @@ import { AppInvestmentDataServiceService } from 'src/app/services/app-investment
 export class AppStructureStrategyFormComponent implements OnInit {
   public editStructureStrategyForm=this.fb.group ({
     id: [null, {validators: [Validators.required]}],
-    weight_of_child: [null, {validators: [Validators.required, Validators.pattern('[0-9]*')]}],
+    weight_of_child: [null, {validators: [Validators.required,Validators.pattern('[0-9]*([0-9.]{0,6})?$')], updateOn: 'blur'} ],
     sname: [null, { updateOn: 'blur'} ],
     description: {value:'', disabled: true}, 
     id_item: {value:'', disabled: false},
@@ -54,13 +54,13 @@ export class AppStructureStrategyFormComponent implements OnInit {
     this.disabledControlElements? this.editStructureStrategyForm.disable() : null;
     this.MP===2? this.InvestmentDataService.getGlobalStategiesList (0,'','Get_ModelPortfolios_List').subscribe (data =>this.MPnames = data):null;
     if (this.MP===1) {
-      this.AtuoCompService.getSecidLists('get_secid_array');
+      this.AtuoCompService.getSecidLists();
+      this.id.setValidators(this.AtuoCompService.secidValirator())
       this.filterednstrumentsLists = this.id.valueChanges.pipe(
         startWith(''),
         distinctUntilChanged(),
         map(value => this.AtuoCompService.filterList(value || '','secid'))
       );
-      this.filterednstrumentsLists.subscribe(data => this.id.setErrors(data.filter(el => el===this.id.value).length? null: {noSecid:true}));
     };
     Object.hasOwn(changes,'parentStrategyId')? this.id_item.setValue(changes['strategyId'].currentValue): null;
   }

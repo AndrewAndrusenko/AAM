@@ -24,8 +24,8 @@ import { MatSelect } from '@angular/material/select';
   selector: 'app-app-instrument-table',
   
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './instrument-table.html',
-  styleUrls: ['./instrument-table.scss'],
+  templateUrl: './instrument-table.component.html',
+  styleUrls: ['./instrument-table.component.scss'],
   encapsulation: ViewEncapsulation.None,
   animations: [
     trigger('detailExpand', [

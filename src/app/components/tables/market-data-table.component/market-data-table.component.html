@@ -204,8 +204,8 @@
           matTooltip="Type account number or paste accounts list separated by comma and press enter" >
         </mat-chip-list>
         <mat-autocomplete #auto="matAutocomplete" (optionSelected)='changedValueofChip($event.option.value)'>
-          <mat-option *ngFor="let secid of filterednstrumentsLists | async" [value]="secid">
-            {{secid}}
+          <mat-option *ngFor="let secid of filterednstrumentsLists | async" [value]="secid[0]">
+            {{secid[0]}} - {{secid[1]}}
           </mat-option>
         </mat-autocomplete>
       </mat-form-field>

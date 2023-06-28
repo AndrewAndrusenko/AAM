@@ -6,7 +6,7 @@ import { AppInvestmentDataServiceService } from 'src/app/services/app-investment
 import { AppTableStrategiesComponentComponent } from '../../tables/strategies-table/strategies-table';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AuthService } from 'src/app/services/auth.service';
-import { AppClientsTableComponent } from '../../tables/clients-table/clients-table';
+import { AppClientsTableComponent } from '../../tables/clients-table.component/clients-table.component';
 import { filter, switchMap } from 'rxjs';
 @Component({
   selector: 'app-app-portfolio',

@@ -11,8 +11,8 @@ import { COMMA, ENTER} from '@angular/cdk/keycodes';
 import { MatChipInputEvent} from '@angular/material/chips';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatOption } from '@angular/material/core';
-import { AppTableAccAccountsComponent } from '../acc-accounts-table/acc-accounts-table';
-import { AppTableAccEntriesComponent } from '../acc-entries-table/acc-entries-table';
+import { AppTableAccAccountsComponent } from '../acc-accounts-table.component/acc-accounts-table.component';
+import { AppTableAccEntriesComponent } from '../acc-entries-table.component/acc-entries-table.component';
 import { AppAccAccountModifyFormComponent } from '../../forms/acc-account-form/acc-account-form';
 import { MatCalendarCellClassFunction } from '@angular/material/datepicker';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
@@ -26,8 +26,8 @@ export interface Fruit {
 }
 @Component({
   selector: 'app-table-balance-sheet',
-  templateUrl: './acc-balance-sheet-table.html',
-  styleUrls: ['./acc-balance-sheet-table.scss'],
+  templateUrl: './acc-balance-sheet-table.component.html',
+  styleUrls: ['./acc-balance-sheet-table.component.scss'],
   encapsulation: ViewEncapsulation.None,
   animations: [
     trigger('detailExpand', [

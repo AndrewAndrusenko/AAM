@@ -174,13 +174,17 @@
               <mat-icon class="menu-icon" matPrefix>favorite</mat-icon> 
               Favorites
             </button> 
-            <ng-container *ngIf="!disabledControlElements" title="Edit block">
+            <ng-container *ngIf="disabledControlElements">
               <button 
                 (click)="openInstrumentModifyForm('View', element)"
                 class="tree-menu-item" cdkMenuItem>
                 <mat-icon class="menu-icon" matPrefix>pageview</mat-icon> 
                 View Instrument
               </button> 
+            </ng-container>
+            
+            <ng-container *ngIf="!disabledControlElements" title="Edit block">
+
               <button 
                 class="tree-menu-item" cdkMenuItem 
                 (click)="openInstrumentModifyForm('Create', element)">

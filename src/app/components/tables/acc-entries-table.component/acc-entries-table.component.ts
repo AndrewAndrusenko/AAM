@@ -12,7 +12,7 @@ import { AppAccEntryModifyFormComponent } from '../../forms/acc-entry-form/acc-e
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { AppTableAccAccountsComponent } from '../acc-accounts-table/acc-accounts-table';
+import { AppTableAccAccountsComponent } from '../acc-accounts-table.component/acc-accounts-table.component';
 import { MatOption } from '@angular/material/core';
 import { menuColorGl } from 'src/app/models/constants';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
@@ -22,8 +22,8 @@ import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
   selector: 'app-table-acc-entries',
-  templateUrl: './acc-entries-table.html',
-  styleUrls: ['./acc-entries-table.scss'],
+  templateUrl: './acc-entries-table.component.html',
+  styleUrls: ['./acc-entries-table.component.scss'],
   animations: [
     trigger('detailExpand', [
       state('collapsed', style({height: '0px', minHeight: '0'})),

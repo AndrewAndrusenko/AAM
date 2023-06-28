@@ -221,10 +221,11 @@ function fGetMoexInstruments(request,response) { //Get general instruments list
     switch (request.query.Action) {
       case 'checkLoadedMarketData':
       break;
-      case 'get_secid_array' :
-        query.text = "SELECT ARRAY_AGG(secid) FROM public.mmoexsecurities " +
+      case 'getInstrumentAutoCompleteList' :
+        query.text = "SELECT secid, name FROM public.mmoexsecurities " +
         "LEFT JOIN mmoexsecuritytypes ON mmoexsecurities.type=mmoexsecuritytypes.security_type_name " +
         "WHERE mmoexsecuritytypes.trade_engine_name !='futures'"
+        query.rowMode= 'array';
       break;
       default :  
         query.text = 
@@ -241,8 +242,8 @@ function fGetMoexInstruments(request,response) { //Get general instruments list
       break;
     }
     console.log('fGetMoexInstruments');
-    sql = pgp.as.format(query.text,request.query);
-    resolve (queryExecute (sql, response))
+    query.text = pgp.as.format(query.text,request.query);
+    resolve (queryExecute (query, response))
   })
 }
 async function fgetInstrumentDetails (request,response) {

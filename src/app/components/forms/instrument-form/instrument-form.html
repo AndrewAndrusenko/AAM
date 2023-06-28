@@ -104,7 +104,7 @@
       Required!   
     </mat-error>
   </mat-form-field>
-  <mat-form-field style="width: 20%;" title="faceunit">
+  <mat-form-field style="width: 20%;" title="Type to find(any filed). Click to select">
     <input matInput [placeholder]="placeholders.get('faceunit')" formControlName="faceunit" [matAutocomplete]="auto">
     <mat-autocomplete #auto="matAutocomplete">
       <mat-option *ngFor="let currency of filteredCurrenciesList | async" [value]="currency['CurrencyCodeNum']">
@@ -115,7 +115,7 @@
       Required!   
     </mat-error>
     <mat-error  *ngIf="faceunit?.errors?.['currencyCode']">
-      Inccorect Code!   
+      Inccorect Code! Only numbers  
     </mat-error>
   </mat-form-field>
   <mat-form-field style="width: 14%;" title="facevalue">

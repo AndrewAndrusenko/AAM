@@ -15,8 +15,8 @@ import { animate, state, style, transition, trigger } from '@angular/animations'
 import { investmentNodeColor } from 'src/app/models/constants';
 @Component({
   selector: 'app-app-clients-table',
-  templateUrl: './clients-table.html',
-  styleUrls: ['./clients-table.css'],
+  templateUrl: './clients-table.component.html',
+  styleUrls: ['./clients-table.component.css'],
   animations: [
     trigger('detailExpand', [
       state('collapsed', style({height: '0px', minHeight: '0'})),

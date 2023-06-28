@@ -22,7 +22,7 @@
   Reload 
   <mat-icon matSuffix >refresh</mat-icon>
 </button>
-<button color = "accent" mat-raised-button 
+<button color = "accent" mat-raised-button [disabled]="disabledControlElements||!instrument?.secid"
   style=" margin-left:1%; font-size: 18px;"
   (click)="openCorpActionForm('Create',null)">
   Create item 

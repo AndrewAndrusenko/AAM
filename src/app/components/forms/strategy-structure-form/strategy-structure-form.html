@@ -13,7 +13,7 @@
     Inccorect SecID!   
    </mat-error>
   </mat-form-field>
-  <mat-form-field  *ngIf="MP===1"  style="width: 25%; height: 5%; font-size: 18px;" appearance="fill">
+  <mat-form-field  *ngIf="MP===1"  style="width: 35%; height: 5%; font-size: 18px;" appearance="fill">
     <mat-label>SecID</mat-label>
     <input type="text"
            placeholder="Choose SecID"
@@ -22,8 +22,8 @@
            formControlName="id" 
            [matAutocomplete]="auto">
     <mat-autocomplete #auto="matAutocomplete">
-      <mat-option *ngFor="let secid of filterednstrumentsLists | async" [value]="secid">
-        {{secid}}
+      <mat-option *ngFor="let secid of filterednstrumentsLists | async" [value]="secid[0]">
+        {{secid[0]}} - {{secid[1]}}
       </mat-option>
     </mat-autocomplete>
     <mat-error  *ngIf="id?.errors?.['required']">
@@ -42,12 +42,14 @@
     <mat-icon >input</mat-icon>
   </button>
 
-  <mat-form-field style="width: 14%; font-size: 18px;" >
-    <input matInput placeholder="Weight" formControlName="weight_of_child"
-    pattern="[0-9]*" type="number">
-    <mat-error  *ngIf="weight_of_child.invalid && weight_of_child.touched">
+  <mat-form-field style="width: 18%; font-size: 18px;" >
+    <input matInput placeholder="Weight" formControlName="weight_of_child">
+    <mat-error  *ngIf="weight_of_child?.errors?.['required']">
       Required!   
    </mat-error>
+   <mat-error  *ngIf="weight_of_child?.errors?.['pattern']">
+    Only numbers (0.00)   
+  </mat-error>
   </mat-form-field>
   <button  mat-flat-button color="accent" 
     [disabled]="!(editStructureStrategyForm.valid )"

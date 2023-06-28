@@ -11,8 +11,8 @@ import { indexDBService } from 'src/app/services/indexDB.service';
 import { AuthService } from 'src/app/services/auth.service';
 @Component({
   selector: 'app-table-instrument-details',
-  templateUrl: './instrument-details-table.html',
-  styleUrls: ['./instrument-details-table.scss'],
+  templateUrl: './instrument-details-table.component.html',
+  styleUrls: ['./instrument-details-table.component.scss'],
   encapsulation: ViewEncapsulation.None,
   animations: [
     trigger('detailExpand', [

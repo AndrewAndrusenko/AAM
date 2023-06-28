@@ -47,6 +47,9 @@ export class indexDBService {
         case 'getCurrencyCodes':
           this.MarketDataService.getInstrumentDataGeneral('getCurrencyCodes').subscribe(data=>resolve(data))
         break;
+        case 'getInstrumentAutoCompleteList':
+          this.MarketDataService.getMoexInstruments(undefined,undefined,{Action:'getInstrumentAutoCompleteList'}).subscribe(data=>resolve(data))
+        break;
         
       }
     })
