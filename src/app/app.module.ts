@@ -162,7 +162,8 @@ const appInitializerFn = (accessRestirictions:AuthService) => {
         AccTransactionsTabComponent,
         PortfoliosTabComponent,  
         ClientsTabComponent,
-        AppInstrumentCorpActionFormComponent
+        AppInstrumentCorpActionFormComponent,
+        AccSWIFTTabComponent
      ],
     bootstrap: [AppComponent],
     providers: [ 
@@ -190,4 +191,5 @@ import { PortfoliosTabComponent } from './components/main-page/tabs/portfolios-t
 import { ClientsTabComponent } from './components/main-page/tabs/clients-tab/clients-tab';
 import { AuthService } from './services/auth.service';
 import { AppInstrumentCorpActionFormComponent } from './components/forms/instrument-corp-action-form/instrument-corp-action-form';
+import { AccSWIFTTabComponent } from './components/main-page/tabs/SWIFT-tab.component/SWIFT-tab.component';
 

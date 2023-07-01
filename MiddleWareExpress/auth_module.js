@@ -7,7 +7,6 @@ const pool = new Pool(config.dbConfig);
 var pgp = require('pg-promise')({
   capSQL: true // to capitalize all generated SQL
 });
-
 async function encryptPsw (accessRole, login , password, response) {
   var hashedPassword;
   bcrypt.genSalt(10, (err,Salt) => {
@@ -29,21 +28,15 @@ async function encryptPsw (accessRole, login , password, response) {
     })
   })
 }
-
 async function addNewUser (request,response) {
   encryptPsw (request.body.accessrole, request.body.username, request.body.password,response)
 }
-
 async function getUserRoles (request,response) {
-  console.log('getLoginsArray------------','SELECT roles' );
-  
   pool.query ({text : 'SELECT "roleName" from  public."aAccesRoles"; ',rowMode: "array"}, (err, res) => {
     if (err) {console.log (err.stack)} else {return response.status(200).json(res.rows.flat())}
   })
 }
 async function getLoginsArray (request,response) {
-  console.log('getLoginsArray------------','SELECT ..... dusers' );
-
   pool.query ({text : 'SELECT "login" from  public."dusers"; ',rowMode: "array"}, (err, res) => {
     if (err) {console.log (err.stack)} else {return response.status(200).json(res.rows.flat())}
   })
@@ -66,7 +59,6 @@ async function getAccessRestriction (request,response) {
   }
   })
 }
-
 module.exports = {
   encryptPsw,
   addNewUser,

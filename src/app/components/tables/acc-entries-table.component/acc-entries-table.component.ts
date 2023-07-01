@@ -111,7 +111,7 @@ export class AppTableAccEntriesComponent implements OnInit {
     this.AccountingDataService.GetTransactionType_Ext('',0,'','','bcTransactionType_Ext').subscribe (
       data => this.TransactionTypes = data)
     this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate)
-    this.AccountingDataService.getReloadEntryList().subscribe(data => this.submitQuery())
+    this.AccountingDataService.getReloadEntryList().subscribe(data => this.submitQuery(false))
   }
   ngOnInit(): void {
     switch (this.action) {
@@ -142,7 +142,7 @@ export class AppTableAccEntriesComponent implements OnInit {
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
   openEntryModifyForm (actionType:string, row: any ) {
-    this.dialogRef = this.dialog.open(AppAccEntryModifyFormComponent ,{minHeight:'400px', maxWidth:'1000px' });
+    this.dialogRef = this.dialog.open(AppAccEntryModifyFormComponent ,{minHeight:'400px', maxWidth:'1000px',data:{data:row} });
     this.dialogRef.componentInstance.action = actionType;
     this.dialogRef.componentInstance.title = ['Create','CreateLL','Create_Example'].includes(actionType)? actionType: 'Create New';
     this.dialogRef.componentInstance.data =  row;

@@ -214,7 +214,7 @@ function fGetMoexInstruments(request,response) { //Get general instruments list
     let conditionsMOEXiss =' WHERE'
     Object.entries(conditions).forEach(([key,value]) => {
       if  (request.query.hasOwnProperty(key)) {
-        query.values.push(request.query[key]);
+        // query.values.push(request.query[key]);
         conditionsMOEXiss +=conditions[key][1] + ' AND ';
       }
     });
@@ -229,7 +229,7 @@ function fGetMoexInstruments(request,response) { //Get general instruments list
       break;
       default :  
         query.text = 
-        "SELECT mmoexsecurities.id, secid, security_type_title, stock_type, security_type_name, shortname, "+ 
+        "SELECT  mmoexsecuritygroups.id as groupid, mmoexsecurities.id, secid, security_type_title, stock_type, security_type_name, shortname, "+ 
         " primary_boardid, board_title, mmoexboardgroups.title,mmoexboardgroups.category, mmoexsecurities.name, "+
         " COALESCE(mmoexsecurities.isin,'') as isin, emitent_title, emitent_inn, type, \"group\", marketprice_boardid, mmoexsecuritygroups.title as group_title, security_group_name, 0 as action, faceunit, facevalue, maturitydate, regnumeric "+
         "FROM public.mmoexsecurities " +
@@ -253,10 +253,10 @@ async function fgetInstrumentDetails (request,response) {
   queryExecute (sql, response);
 }
 async function fgetInstrumentDataCorpActions (request,response) {
-  let sql = "SELECT mmoexcorpactions.id, secid, currency, unredemeedvalue, couponrate, couponamount, actiontype::int2, couponamountrur, to_date(date,'DD.MM.YYYY')::timestamp without time zone as date, 0 as action, dccorporateactionstypes.name as actiontypename FROM public.mmoexcorpactions " +
+  let sql = "SELECT mmoexcorpactions.id, secid, currency, unredemeedvalue, couponrate, couponamount, actiontype::int2, couponamountrur, date::timestamp without time zone as date, 0 as action, dccorporateactionstypes.name as actiontypename FROM public.mmoexcorpactions " +
   " LEFT JOIN dccorporateactionstypes on dccorporateactionstypes.id = mmoexcorpactions.actiontype ";
   sql += request.query.isin? "WHERE isin ='"   + request.query.isin +"' ": "";
-  sql += " ORDER BY to_date(date,'DD.MM.YYYY')::timestamp without time zone; "
+  sql += " ORDER BY date; "
   queryExecute (sql, response);
 }
 async function fgetInstrumentDataGeneral(request,response) { 
@@ -271,9 +271,8 @@ async function fgetInstrumentDataGeneral(request,response) {
       query.text = "SELECT id, security_type_name, security_type_title,security_group_name FROM public.mmoexsecuritytypes; " 
     break;
     case 'getCorpActionTypes':
-      query.text = "SELECT  dccorporateactionstypes.id, mmoexsecuritygroups.name as sectypename, dccorporateactionstypes.name, sectype, ismandatory, ratetype, fixedrate "+
-      "FROM public.dccorporateactionstypes " +
-      "LEFT JOIN mmoexsecuritygroups ON dccorporateactionstypes.sectype=mmoexsecuritygroups.id;"
+      query.text = "SELECT  dccorporateactionstypes.id, dccorporateactionstypes.name, sectype, ismandatory, ratetype, fixedrate "+
+      "FROM public.dccorporateactionstypes;"
     break;
     case 'getMoexSecurityGroups':
       query.text = "SELECT name, title  FROM public.mmoexsecuritygroups;"
@@ -346,6 +345,24 @@ async function fUpdateInstrumentDetails (request, response) {
   sql = pgp.as.format(sqlText,request.body.data)
   queryExecute (sql, response);
 }
+async function fUpdateInstrumentDataCorpActions (request, response) {
+  let fields = ' secid, currency,  unredemeedvalue,  couponrate,   couponamount,  actiontype,  date, couponamountrur'
+  let values = fields.split(',').map(el=>'${'+el+'}')
+  let updatePairs = fields.split(',').map(el=> el+'=${'+el+'}')
+  switch (request.body.action) {
+    case 'Create':
+      sqlText = 'INSERT INTO public.mmoexcorpactions ('+ fields +') VALUES ('+ values + ') RETURNING *;'
+    break;
+    case 'Edit':
+      sqlText = 'UPDATE public.mmoexcorpactions SET  ' + updatePairs + ' WHERE id=${id} RETURNING *;'
+      break;
+    case 'Delete':
+      sqlText = 'DELETE FROM public.mmoexcorpactions WHERE id=${id} RETURNING *;'
+    break;
+  }
+  sql = pgp.as.format(sqlText,request.body.data)
+  queryExecute (sql, response);
+}
 
 module.exports = {
   finsertMarketData,
@@ -361,7 +378,8 @@ module.exports = {
   fInstrumentCreate,
   fInstrumentEdit,
   fInstrumentDelete,
-  fUpdateInstrumentDetails
+  fUpdateInstrumentDetails,
+  fUpdateInstrumentDataCorpActions
 }
 
 

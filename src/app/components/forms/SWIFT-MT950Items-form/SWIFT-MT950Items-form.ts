@@ -57,7 +57,7 @@ export class AppMT950ItemParsing  {
   SubmitEntryAccounntingInsertRow () {
     this.ledgerNo.disable();
     this.accountNo.disable();
-    this.AccountingDataService.CreateEntryAccountingInsertRow(this.swift950Entry.value).then (result => this.snacksBox(result,'Created'))
+    this.AccountingDataService.CreateEntryAccountingInsertRow(this.swift950Entry.value).subscribe (result => this.snacksBox(result,'Created'))
     this.swift950Entry.disable();
   }
 

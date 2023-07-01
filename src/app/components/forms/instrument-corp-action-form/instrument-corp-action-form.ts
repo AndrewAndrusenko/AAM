@@ -63,7 +63,6 @@ export class AppInstrumentCorpActionFormComponent {
   ) 
   {   
     this.AtuoCompService.getCurrencyList();
-
     this.CorpActionsForm = this.fb.group ({
       id: {value:null, disabled: false}, 
       secid: [null, { validators:  Validators.required, updateOn: 'blur' }], 
@@ -97,36 +96,14 @@ export class AppInstrumentCorpActionFormComponent {
         this.CorpActionsForm.patchValue(this.data);
       break; 
     } 
-    this.indexDBServiceS.getIndexDBInstrumentStaticTables('getCorpActionTypes').then(data => {
-      this.caTypes=data['data'].filter(el=>el.sectypename===this.instrument.group)})
-  }
-  modifyTemplate (actionType:number) {
-    switch (actionType) {
-      case 1:
-      case 2:
-      case 3:
-        
-        break;
-    
-      default:
-        break;
-    }
-  }
-  ngOnChanges(changes: SimpleChanges) {
-    this.MarketDataService.getMoexInstruments(undefined,undefined, {secid:[changes['isinParam'].currentValue,changes['isinParam'].currentValue]}).subscribe (instrumentData => {
-      this.CorpActionsForm.patchValue(instrumentData[0]);
-      this.MarketDataService.getInstrumentDataCorpActions(instrumentData[0].isin).subscribe(instrumentCorpActions => {
-        this.MarketDataService.sendCorpActionData(instrumentCorpActions)
-      })
-    });  
-    this.MarketDataService.getInstrumentDataDetails(changes['isinParam'].currentValue).subscribe(instrumentDetails => this.CorpActionsForm.patchValue(instrumentDetails[0]));
+    this.indexDBServiceS.getIndexDBInstrumentStaticTables('getCorpActionTypes').then(data =>this.caTypes=data['data'].filter(el=>el.sectype.includes(Number(this.instrument.groupid))))
   }
   snacksBox(result:any, action?:string){
     if (result['name']=='error') {
       this.CommonDialogsService.snackResultHandler(result)
     } else {
       this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' instrument details'}, action,undefined,false)
-      this.MarketDataService.sendReloadInstrumentDetails(result)
+      this.MarketDataService.sendReloadDataCorpActions(result)
       this.modal_principal_parent.emit(true)
     }
   }
@@ -137,15 +114,15 @@ export class AppInstrumentCorpActionFormComponent {
     switch (action) {
       case 'Create_Example':
       case 'Create':
-        this.MarketDataService.updateInstrumentDetails(this.CorpActionsForm.value,'Create').subscribe(result => this.snacksBox(result))
+        this.MarketDataService.updateInstrumentDataCorpActions(this.CorpActionsForm.value,'Create').subscribe(result => this.snacksBox(result))
       break;
       case 'Edit':
-        this.MarketDataService.updateInstrumentDetails (this.CorpActionsForm.value,'Edit').subscribe(result => this.snacksBox(result))
+        this.MarketDataService.updateInstrumentDataCorpActions (this.CorpActionsForm.value,'Edit').subscribe(result => this.snacksBox(result))
       break;
       case 'Delete':
         this.CommonDialogsService.confirmDialog('Delete Action: '+ this.actiontype.value + ' for '+ this.secid.value).pipe(
           filter (isConfirmed => (isConfirmed.isConfirmed)),
-          switchMap(data => this.MarketDataService.updateInstrumentDetails(this.CorpActionsForm.value,'Delete'))
+          switchMap(data => this.MarketDataService.updateInstrumentDataCorpActions(this.CorpActionsForm.value,'Delete'))
         ).subscribe(result => this.snacksBox(result,'Deleted'))
       break;
     }

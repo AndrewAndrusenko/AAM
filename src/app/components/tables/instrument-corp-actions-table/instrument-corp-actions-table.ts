@@ -4,7 +4,7 @@ import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { Instruments, instrumentCorpActions } from 'src/app/models/intefaces';
+import { instrumentCorpActions } from 'src/app/models/intefaces';
 import { FormGroup} from '@angular/forms';
 import { AppMarketDataService } from 'src/app/services/app-market-data.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
@@ -54,12 +54,10 @@ export class AppTableCorporateActionsComponent  implements AfterViewInit {
     this.disabledControlElements = this.accessState === 'full'? false : true;
   }
   async ngAfterViewInit() {
-    this.indexDBServiceS.getIndexDBInstrumentStaticTables('getInstrumentDataCorpActions').then((data)=>{
-      this.updateCAdataTable(data['data']);
-    });
+    this.indexDBServiceS.getIndexDBInstrumentStaticTables('getInstrumentDataCorpActions').then((data)=> this.updateCAdataTable(data['data']));
+    // this.MarketDataService.get
   }
   ngOnChanges(changes: SimpleChanges) {
-    console.log('changes',changes['instrument'].currentValue.secid);
     this.dataSource&&changes['instrument'].currentValue.secid? this.applyFilter(undefined, this.instrument.secid) : null;
   }
   openCorpActionForm (action:string, element:instrumentCorpActions) {    
@@ -69,7 +67,7 @@ export class AppTableCorporateActionsComponent  implements AfterViewInit {
     this.refCorpActionForm.componentInstance.instrument = this.instrument;
     this.refCorpActionForm.componentInstance.modal_principal_parent.subscribe(success => {
       success? this.refCorpActionForm.close():null;
-      this.indexDBServiceS.reloadIndexDBStaticTable('getInstrumentDataDetails').then(data => this.updateCAdataTable(data['data']))
+      this.indexDBServiceS.reloadIndexDBStaticTable('getInstrumentDataCorpActions').then(data => this.updateCAdataTable(data['data']))
     })
   }
   updateCAdataTable (corpActionData:instrumentCorpActions[]) {

@@ -18,11 +18,15 @@ export const dbErrorsMap: errorsDescription[] = [
   },
   {
     constraintCode: 'bAccountTransaction',
-    errorText:'Attempt to delete an account which has entries linked to it. Operation has been blocked'
+    errorText:'Attempt to delete an account which has entries linked to it. bAccountTransaction blocked transaction'
   },
   {
     constraintCode: 'cForeignKeyInstrumentInModelPortfolio',
     errorText:'Attempt to delete an instrument included in the model portfolio. cForeignKeyInstrumentInModelPortfolio blocked transaction'
+  },
+  {
+    constraintCode: 'cForeignClientKey',
+    errorText:'Attempt to delete a client with opened portfolios. cForeignClientKey blocked transaction'
   },
   {
     constraintCode: 'cForeignClientKey',
@@ -352,6 +356,7 @@ export interface InstrumentsMapCodes {
 }
 export interface Instruments  {
   id :number,
+  groupid: number,
   secid: string, 
   security_type_title: string,
   stock_type: number, 
@@ -383,5 +388,5 @@ export interface instrumentCorpActions {
   id: number, isin: string, issuevolume: number, secname: string, notinal: number, notinalcurrency: string, unredemeedvalue: number, couponrate: number, couponamount: number, actiontype: string, couponamountrur: number, date: Date, action: string, actiontypename: string
 }
 export interface caTypes {
-  sectypename: string, id: number, name: string, sectype: number, ismandatory: boolean, ratetype: string, fixedrate: boolean
+  id: number, name: string, sectype: number[], ismandatory: boolean, ratetype: string, fixedrate: boolean
 }

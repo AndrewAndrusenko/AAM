@@ -69,6 +69,13 @@
         <th mat-header-cell *matHeaderCellDef mat-sort-header>  {{columnsHeaderToDisplay[i]  | titlecase}}</th>
         <td  mat-cell *matCellDef="let element"> 
           <span [ngSwitch]="column">
+            <p *ngSwitchCase="'accountNo'">
+              <button mat-stroked-button style="font-size: 18px; margin-top: 3%;"  matTooltip="Portfolio details"
+              [style.background-color] =  "investmentNodeColor"
+              (click)="openAccountModifyForm(disabledControlElements? 'View': 'Edit', element)">
+                {{element[column]}}
+              </button> 
+            </p>
             <p *ngSwitchCase="'d_APTypeCodeAccount'">
               {{element[column]==1?  'Active' : 'Passive'}}
             </p>
@@ -79,12 +86,12 @@
                 (click)="openAccountModifyForm('View', element)">
                 <mat-icon >pageview</mat-icon>
               </button>
-              <ng-container *ngIf="!disabledControlElements">
-                <button  *ngIf="!readOnly" matTooltip="Edit Account"  color="accent" mat-icon-button
+              <ng-container *ngIf="!disabledControlElements&&!readOnly">
+                <button   matTooltip="Edit Account"  color="accent" mat-icon-button
                   (click)="openAccountModifyForm('Edit', element)">
                   <mat-icon >edit</mat-icon>
                 </button>
-                <button *ngIf="!readOnly" matTooltip="Delete Account" mat-icon-button style="margin-left: 5%;" color="accent" 
+                <button  matTooltip="Delete Account" mat-icon-button style="margin-left: 5%;" color="accent" 
                   (click)="openAccountModifyForm('Delete', element)">
                   <mat-icon >delete</mat-icon>
                 </button>
@@ -104,7 +111,7 @@
             <div class="tree-menu-context"  *ngIf="!readOnly&&!disabledControlElements" cdkMenu >
               <button 
                 class="tree-menu-item" cdkMenuItem 
-                (click)="openAccountModifyForm('Create', element)">
+                (click)="openAccountModifyForm('Create', null)">
                 <mat-icon class="menu-icon" matPrefix>add_circle</mat-icon>      
                 New Account
               </button>

@@ -11,6 +11,8 @@ import { HandlingCommonTasksService } from 'src/app/services/handling-common-tas
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { formatNumber } from '@angular/common';
 import { AuthService } from 'src/app/services/auth.service';
+import { investmentNodeColor } from 'src/app/models/constants';
+
 @Component({
   selector: 'app-table-acc-ledger-accounts',
   templateUrl: './acc-accounts-ledger-table.component.html',
@@ -26,26 +28,8 @@ import { AuthService } from 'src/app/services/auth.service';
 export class AppTableAccLedgerAccountsComponent {
   accessState: string = 'none';
   disabledControlElements: boolean = false;
-  columnsToDisplay = [
-    'ledgerNo',  
-    'd_APTypeCodeAccount', 
-    'name',
-    'd_Client',
-    'externalAccountNo',
-    'd_Account_Type',
-    'ledgerNoTrade',  
-    'action'
-  ]
-  columnsHeaderToDisplay = [
-    'No',
-    'Balance',
-    'Details', 
-    'Client',  
-    'external No', 
-    'Type', 
-    'Trade', 
-    'Action'
-  ];
+  columnsToDisplay = ['ledgerNo','d_APTypeCodeAccount', 'name','d_Client', 'externalAccountNo','d_Account_Type','ledgerNoTrade', 'action']
+  columnsHeaderToDisplay = ['No','Balance','Details','Client', 'external No','Type','Trade','Action'];
   dataSource: MatTableDataSource<bLedgerAccounts>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
@@ -56,6 +40,7 @@ export class AppTableAccLedgerAccountsComponent {
   public readOnly: boolean = false; 
   action ='GetLedgerAccountsDataWholeList';
   dialogRef: MatDialogRef<AppAccAccountModifyFormComponent>;
+  investmentNodeColor = investmentNodeColor
   constructor(    
     private AccountingDataService:AppAccountingService, 
     private CommonDialogsService:HadlingCommonDialogsService,
@@ -63,17 +48,17 @@ export class AppTableAccLedgerAccountsComponent {
     private dialog: MatDialog ,
     private HandlingCommonTasksS:HandlingCommonTasksService 
   ) {
-    this.AuthServiceS.verifyAccessRestrictions('accessToBalanceData').subscribe ((accessData) => {
-      this.accessState=accessData.elementvalue;
-      this.disabledControlElements = this.accessState === 'full'? false : true;
-      if (this.accessState !=='none') {
-        this.AccountingDataService.getReloadAccontList().subscribe ( (id) => this.updateAccountsData(this.action));
-        this.updateAccountsData(this.action);
-      }
-    })
+    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToBalanceData')[0].elementvalue;
+    this.disabledControlElements = this.accessState === 'full'? false : true; 
+    this.accessState !=='none'? this.AccountingDataService.getReloadLedgerAccontList().subscribe (id => this.updateAccountsData(this.action)):null;
+  }
+  ngOnInit(): void {
+    this.updateAccountsData(this.action)
   }
   async updateAccountsData (action: string) {
-    return new Promise<number> (async (resolve,reject) => {
+    console.log('Reload Ledger');
+    
+    return new Promise<number> (async (resolve) => {
       this.dataSource? this.dataSource.data=null : null;
       this.AccountingDataService.GetLedgerAccountsListAccounting (null,null,null,null,this.action).subscribe (AccountsList  => {
         this.dataSource  = new MatTableDataSource(AccountsList);
@@ -85,9 +70,7 @@ export class AppTableAccLedgerAccountsComponent {
   }
   async submitQuery () {
     this.dataSource.data = null;
-    await this.updateAccountsData(this.action).then ((rowsCount) => {
-      this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (rowsCount,'en-US') + ' rows'}, ' Loaded')
-    })
+    await this.updateAccountsData(this.action).then (rowsCount =>this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (rowsCount,'en-US') + ' rows'}, ' Loaded'))
   }
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
@@ -104,21 +87,10 @@ export class AppTableAccLedgerAccountsComponent {
     this.modal_principal_parent.emit('CLOSE_PARENT_MODAL');
   }
   openAccountModifyForm (actionType:string, row: any ) {
-    console.log('row', row);
     this.dialogRef = this.dialog.open(AppAccAccountModifyFormComponent ,{minHeight:'400px', maxWidth:'1000px' });
     this.dialogRef.componentInstance.action = actionType;
-    this.dialogRef.componentInstance.title = actionType;
     this.dialogRef.componentInstance.data = row;
     this.dialogRef.componentInstance.aType = 1;
-    switch (actionType) {
-      case 'Create':
-      case 'Create_Example': 
-        this.dialogRef.componentInstance.title = 'Create New';
-      break;
-      case 'View': 
-        this.dialogRef.componentInstance.accountModifyForm.disable();
-      break;
-    }
   }
   exportToExcel ()  {
     this.HandlingCommonTasksS.exportToExcel (this.dataSource.data,"accountLedgerData")

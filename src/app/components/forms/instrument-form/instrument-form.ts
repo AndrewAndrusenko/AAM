@@ -65,6 +65,7 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
     this.changePlaceholders('stock_bonds');
     this.instrumentModifyForm = this.fb.group ({
       id : {value:null, disabled: false},
+      groupid : {value:null, disabled: false},
       secid: [null, { validators:  Validators.required, asyncValidators: null, updateOn: 'blur' }], 
       security_type_title:  {value:null, disabled: false},
       security_group_name:  {value:null, disabled: false}, 
@@ -225,4 +226,5 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
   get  facevalue ()   {return this.instrumentModifyForm.get('facevalue') }
   get  maturitydate ()   {return this.instrumentModifyForm.get('maturitydate') }
   get  regnumeric ()   {return this.instrumentModifyForm.get('regnumeric') }
+  get  groupid ()   {return this.instrumentModifyForm.get('groupid') }
 }

@@ -7,250 +7,237 @@
     >Submit Data
   </mat-checkbox>
   <button *ngIf="aType!==1"mat-raised-button color="accent" 
-    [disabled]="!(accountModifyForm.valid && submitbox.checked)"
+    [disabled]="!(accountModifyForm.valid && submitbox.checked)||action==='View'"
     (click)="updateAccountData(action)"
     style="margin-top: 1px; width: 30%; font-size: 18px; margin-left: 1%;">
-    {{title}} Account
+    {{action}} Account
   </button>
   <button *ngIf="aType==1" mat-raised-button color="accent" 
-    [disabled]="!(accountLedgerModifyForm.valid && submitbox.checked)"
+    [disabled]="!(accountLedgerModifyForm.valid && submitbox.checked)||action==='View'"
     (click)="updateLedgerAccountData(action)"
     style="margin-top: 1px; width: 30%; font-size: 18px; margin-left: 1%;">
-    {{title}} Ledger Account
+    {{action}} Ledger Account
   </button>
 </mat-toolbar>
 
 
-<mat-tab-group mat-stretch-tabs [selectedIndex]="aType*1">
+<mat-tab-group mat-stretch-tabs [selectedIndex]="aType*1" >
   <mat-tab  label="Clients">
-  <form class="submit" [formGroup]="accountModifyForm">
-  <h3 style="color:rgb(177, 174, 174)" *ngIf="accountModifyForm.valid"> 
-    To save data please select 'Submit data' check and then press button 
-  </h3>
-  <p>
-    <mat-form-field style="width: 6%;">
-      <input matInput placeholder="ID" formControlName="accountId">
-    </mat-form-field>
-    <mat-form-field style="width: 35%;">
-      <input matInput placeholder="Account Number" formControlName="accountNo">
-      <mat-error  *ngIf="accountNo.invalid && accountNo.value !== '' ">
-        Account number ins't unique      
-      </mat-error>
-      <mat-error  *ngIf="accountNo.invalid  && accountNo.value == '' "> 
-        The field is required.    
-      </mat-error>
-    </mat-form-field>
+    <form class="submit" [formGroup]="accountModifyForm" >
+      <fieldset [disabled]="action==='View'? true: false">
+      <h3 style="color:rgb(177, 174, 174)" *ngIf="accountModifyForm.valid"> 
+        To save data please select 'Submit data' check and then press button 
+      </h3>
+      <p>
+        <mat-form-field style="width: 6%;">
+          <input matInput placeholder="ID" formControlName="accountId" [readonly]="true">
+        </mat-form-field>
+        <mat-form-field style="width: 35%;">
+          <input matInput placeholder="Account Number" formControlName="accountNo">
+          <mat-error  *ngIf="accountNo.invalid && accountNo.value !== '' ">
+            Account number ins't unique      
+          </mat-error>
+          <mat-error  *ngIf="accountNo.invalid  && accountNo.value == '' "> 
+            The field is required.    
+          </mat-error>
+        </mat-form-field>
 
-    
-    <mat-form-field style = "width: 15%;">
-      <input matInput placeholder = "Currency" formControlName="currencyCode">
-      <mat-error  *ngIf="currencyCode.invalid && currencyCode.touched && currencyCode.value !== '' ">
-        Only dights   
-      </mat-error>
-      <mat-error  *ngIf="currencyCode.invalid  && currencyCode.value == ''">
-        Required!    
-      </mat-error>
-    </mat-form-field>
+        
+        <mat-form-field style = "width: 15%;">
+          <input matInput placeholder = "Currency" formControlName="currencyCode">
+          <mat-error  *ngIf="currencyCode.invalid && currencyCode.touched && currencyCode.value !== '' ">
+            Only dights   
+          </mat-error>
+          <mat-error  *ngIf="currencyCode.invalid  && currencyCode.value == ''">
+            Required!    
+          </mat-error>
+        </mat-form-field>
 
-    <mat-form-field  style="width: 27%;">
-      <mat-label>Type Code</mat-label>
-      <mat-select   formControlName="accountTypeExt" > 
-        <ng-container *ngFor="let AccountType of AccountTypes">
-        <mat-option  [value]="AccountType.accountType_Ext">
-            {{AccountType.actCodeShort}} - {{AccountType.description}}
-        </mat-option>
-        </ng-container>
-      </mat-select>
-      <mat-error  *ngIf="accountTypeExt.invalid  && accountTypeExt.value==null">
-        Required!    
-      </mat-error>
-    </mat-form-field>
-  </p>
-  <p> 
-    <mat-form-field style="width: 15%;" >
-      <input matInput placeholder="ClientID" formControlName="clientId">
-      <button mat-icon-button matSuffix
-      (click)="selectClient()">
-      <mat-icon class = "icon_search">search</mat-icon></button>
-    </mat-form-field>
-
-    <mat-form-field style="width: 35%;" >
-      <input matInput placeholder="Client" formControlName="d_clientname" >   
-      <mat-error  *ngIf="d_clientname.invalid && d_clientname.value!==''">
-        Incorrect client number. Use search loop.    
-      </mat-error>
-      <mat-error  *ngIf="d_clientname.invalid && d_clientname.touched && d_clientname.value==''">
-        The field is required.    
-      </mat-error>
-    </mat-form-field>
-
-    <mat-form-field  style="width: 27%;">
-      <mat-label>Type Code</mat-label>
-      <mat-select   formControlName="entityTypeCode" > 
-        <ng-container *ngFor="let EnityType of EnityTypes">
-        <mat-option  [value]="EnityType.entityType">
-            {{EnityType.entityTypeCode}} - {{EnityType.name}}
-        </mat-option>
-        </ng-container>
-      </mat-select>
-      <mat-error  *ngIf="entityTypeCode.invalid  && entityTypeCode.value==null">
-        Required!    
-      </mat-error>
-    </mat-form-field>
-  </p>
-  <p>
-    <mat-form-field style="width: 15%;" >
-      <input matInput placeholder="Portfolio" formControlName="idportfolio" >
-      <button mat-icon-button matSuffix
-      (click)="  selectPortfolio ()">
-      <mat-icon class = "icon_search">search</mat-icon></button>
-
-    </mat-form-field>
-
-    <mat-form-field style="width: 20%;">
-      <input matInput placeholder="Portfolio Code" formControlName="d_portfolioCode" >   
-            <mat-error  *ngIf="d_clientname.invalid && d_clientname.value!==''">
-        Incorrect portfolio number. Use search loop.    
-      </mat-error>
-      <mat-error  *ngIf="d_clientname.invalid && d_clientname.touched && d_clientname.value==''">
-        The field is required.    
-      </mat-error>
-    </mat-form-field>
-  </p>
-    <mat-form-field style="width: 95%;">
-      <input matInput placeholder="Information" formControlName="Information">
-    </mat-form-field>
-    <h3 style="color:rgb(252, 113, 113)" *ngIf="accountModifyForm.invalid"> Please check the form. Data is invalid</h3>
-  </form>
-</mat-tab>  
-
-<mat-tab   label="Ledger"> 
-  <form class="submit" [formGroup]="accountLedgerModifyForm">
-    <h3 style="color:rgb(177, 174, 174)" *ngIf="accountLedgerModifyForm.valid"> 
-      To save data please select 'Submit data' check and then press button 
-    </h3>
-    <p>
-      <mat-form-field style="width: 6%;">
-        <input matInput placeholder="ID" formControlName="ledgerNoId">
-      </mat-form-field>
-
-      <mat-form-field style="width: 35%;">
-        <input matInput placeholder="Account Number" formControlName="ledgerNo">
-        <mat-error  *ngIf="ledgerNo.invalid && ledgerNo.value !== '' ">
-          Account number ins't unique      
-        </mat-error>
-        <mat-error  *ngIf="ledgerNo.invalid  && ledgerNo.value == '' "> 
-          The field is required.    
-      </mat-error>
-      </mat-form-field>
-
-      <mat-form-field style = "width: 13%;">
-        <input matInput placeholder = "Currency" formControlName="currecyCode">
-        <mat-error  *ngIf="currecyCodeLedger.invalid && currecyCodeLedger.touched && currecyCodeLedger.value !== '' ">
-          Only dights   
-        </mat-error>
-        <mat-error  *ngIf="currecyCodeLedger.invalid  && currecyCodeLedger.value == ''">
-          Required!    
-      </mat-error>
-      </mat-form-field>
-
-      <mat-form-field  style="width: 33%;">
-        <mat-label>Type Code</mat-label>
-        <mat-select   formControlName="accountTypeID" 
-        (selectionChange) ="changeAccountType()"> 
-          <ng-container *ngFor="let AccountType of AccountTypes">
-          <mat-option  [value]="AccountType.accountType_Ext">
-            {{AccountType.actCodeShort}} - {{AccountType.description}}
-          </mat-option>
-          </ng-container>
-        </mat-select>
-        <mat-error  *ngIf="accountTypeExt.invalid  && accountTypeExt.value==null">
-          Required!    
-        </mat-error>
-      </mat-form-field>
-    </p>
-    <p> 
-      <mat-form-field style="width: 15%;" >
-        <input matInput placeholder="ClientID" formControlName="clientID">
-        <button mat-icon-button matSuffix
+        <mat-form-field  style="width: 27%;">
+          <mat-label>Type Code</mat-label>
+          <mat-select   formControlName="accountTypeExt" > 
+            <ng-container *ngFor="let AccountType of AccountTypes">
+            <mat-option  [value]="AccountType.accountType_Ext">
+                {{AccountType.actCodeShort}} - {{AccountType.description}}
+            </mat-option>
+            </ng-container>
+          </mat-select>
+          <mat-error  *ngIf="accountTypeExt.invalid  && accountTypeExt.value==null">
+            Required!    
+          </mat-error>
+        </mat-form-field>
+      </p>
+      <p> 
+        <mat-form-field style="width: 15%;" >
+          <input matInput placeholder="ClientID" formControlName="clientId">
+          <button mat-icon-button matSuffix
           (click)="selectClient()">
-          <mat-icon  class = "icon_search">search</mat-icon>
-        </button>
-        <mat-error  *ngIf="clientIDledger.invalid  && clientIDledger.value==null">
-          Required!    
-        </mat-error>
+          <mat-icon class = "icon_search">search</mat-icon></button>
+        </mat-form-field>
 
+        <mat-form-field style="width: 35%;" >
+          <input matInput placeholder="Client" formControlName="d_clientname" >   
+          <mat-error  *ngIf="d_clientname.invalid && d_clientname.value!==''">
+            Incorrect client number. Use search loop.    
+          </mat-error>
+          <mat-error  *ngIf="d_clientname.invalid && d_clientname.touched && d_clientname.value==''">
+            The field is required.    
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field  style="width: 27%;">
+          <mat-label>Type Code</mat-label>
+          <mat-select   formControlName="entityTypeCode" > 
+            <ng-container *ngFor="let EnityType of EnityTypes">
+            <mat-option  [value]="EnityType.entityType">
+                {{EnityType.entityTypeCode}} - {{EnityType.name}}
+            </mat-option>
+            </ng-container>
+          </mat-select>
+          <mat-error  *ngIf="entityTypeCode.invalid  && entityTypeCode.value==null">
+            Required!    
+          </mat-error>
+        </mat-form-field>
+      </p>
+      <p>
+        <mat-form-field style="width: 15%;" >
+          <input matInput placeholder="Portfolio" formControlName="idportfolio" >
+          <button mat-icon-button matSuffix
+          (click)="  selectPortfolio ()">
+          <mat-icon class = "icon_search">search</mat-icon></button>
+
+        </mat-form-field>
+
+        <mat-form-field style="width: 20%;">
+          <input matInput placeholder="Portfolio Code" formControlName="d_portfolioCode" >   
+                <mat-error  *ngIf="d_clientname.invalid && d_clientname.value!==''">
+            Incorrect portfolio number. Use search loop.    
+          </mat-error>
+          <mat-error  *ngIf="d_clientname.invalid && d_clientname.touched && d_clientname.value==''">
+            The field is required.    
+          </mat-error>
+        </mat-form-field>
+      </p>
+      <mat-form-field style="width: 95%;">
+        <input matInput placeholder="Information" formControlName="Information">
       </mat-form-field>
+      <h3 style="color:rgb(252, 113, 113)" *ngIf="accountModifyForm.invalid"> Please check the form. Data is invalid</h3>
+    </fieldset>
+    </form>
+  </mat-tab>  
 
-      <mat-form-field style="width: 35%;" >
-        <input matInput placeholder="Client" formControlName="d_Client" >   
+  <mat-tab   label="Ledger"> 
+    <form class="submit" [formGroup]="accountLedgerModifyForm">
+      <fieldset [disabled]="action==='View'? true: false">
+      <h3 style="color:rgb(177, 174, 174)" *ngIf="accountLedgerModifyForm.valid"> 
+        To save data please select 'Submit data' check and then press button 
+      </h3>
+      <p>
+        <mat-form-field style="width: 6%;">
+          <input matInput placeholder="ID" formControlName="ledgerNoId">
+        </mat-form-field>
+        <mat-form-field style="width: 35%;">
+          <input matInput placeholder="Account Number" formControlName="ledgerNo">
+          <mat-error  *ngIf="ledgerNo.invalid && ledgerNo.value !== '' ">
+            Account number ins't unique      
+          </mat-error>
+          <mat-error  *ngIf="ledgerNo.invalid  && ledgerNo.value == '' "> 
+            The field is required.    
+        </mat-error>
+        </mat-form-field>
+        <mat-form-field style = "width: 13%;">
+          <input matInput placeholder = "Currency" formControlName="currecyCode">
+          <mat-error  *ngIf="currecyCodeLedger.invalid && currecyCodeLedger.touched && currecyCodeLedger.value !== '' ">
+            Only dights   
+          </mat-error>
+          <mat-error  *ngIf="currecyCodeLedger.invalid  && currecyCodeLedger.value == ''">
+            Required!    
+        </mat-error>
+        </mat-form-field>
+        <mat-form-field  style="width: 33%;">
+          <mat-label>Type Code</mat-label>
+          <mat-select   formControlName="accountTypeID" 
+          (selectionChange) ="changeAccountType()"> 
+            <ng-container *ngFor="let AccountType of AccountTypes">
+            <mat-option  [value]="AccountType.accountType_Ext">
+              {{AccountType.actCodeShort}} - {{AccountType.description}}
+            </mat-option>
+            </ng-container>
+          </mat-select>
+          <mat-error  *ngIf="accountTypeExt.invalid  && accountTypeExt.value==null">
+            Required!    
+          </mat-error>
+        </mat-form-field>
+      </p>
+      <p> 
+        <mat-form-field style="width: 15%;" >
+          <input matInput placeholder="ClientID" formControlName="clientID">
+          <button mat-icon-button matSuffix
+            (click)="selectClient()">
+            <mat-icon  class = "icon_search">search</mat-icon>
+          </button>
+          <mat-error  *ngIf="clientIDledger.invalid  && clientIDledger.value==null">
+            Required!    
+          </mat-error>
+        </mat-form-field>
+        <mat-form-field style="width: 35%;" >
+          <input matInput placeholder="Client" formControlName="d_Client" >   
+          <mat-error  *ngIf="d_clientname.invalid && d_clientname.value!==''">
+            Incorrect client number. Use search loop.    
+          </mat-error>
+          <mat-error  *ngIf="d_clientname.invalid && d_clientname.touched && d_clientname.value==''">
+            The field is required.    
+          </mat-error>
+        </mat-form-field>
+        <mat-form-field  style="width: 27%;">
+          <mat-label>Type Code</mat-label>
+          <mat-select   formControlName="entityTypeCode" > 
+            <ng-container *ngFor="let EnityType of EnityTypes">
+            <mat-option  [value]="EnityType.entityType">
+              {{EnityType.entityTypeCode}} - {{EnityType.name}}
+            </mat-option>
+            </ng-container>
+          </mat-select>
+          <mat-error  *ngIf="entityTypeCode.invalid  && entityTypeCode.value==null">
+            Required!    
+        </mat-error>
+        </mat-form-field>
+        <mat-form-field style="width: 20%;">
+          <input matInput placeholder="APType" formControlName="d_APType">   
+        </mat-form-field>
+      </p>
+      <mat-form-field style="width: 20%;">
+        <input matInput placeholder="NoTrade" formControlName="ledgerNoTrade" >   
         <mat-error  *ngIf="d_clientname.invalid && d_clientname.value!==''">
-          Incorrect client number. Use search loop.    
+          Incorrect portfolio number. Use search loop.    
         </mat-error>
         <mat-error  *ngIf="d_clientname.invalid && d_clientname.touched && d_clientname.value==''">
           The field is required.    
         </mat-error>
       </mat-form-field>
-
-      <mat-form-field  style="width: 27%;">
-        <mat-label>Type Code</mat-label>
-        <mat-select   formControlName="entityTypeCode" > 
-          <ng-container *ngFor="let EnityType of EnityTypes">
-          <mat-option  [value]="EnityType.entityType">
-            {{EnityType.entityTypeCode}} - {{EnityType.name}}
-          </mat-option>
-          </ng-container>
-        </mat-select>
-        <mat-error  *ngIf="entityTypeCode.invalid  && entityTypeCode.value==null">
-          Required!    
-      </mat-error>
-      </mat-form-field>
-
       <mat-form-field style="width: 20%;">
-        <input matInput placeholder="APType" formControlName="d_APType" 
-        >   
+        <input matInput placeholder="NoCptyCode" formControlName="ledgerNoCptyCode" >   
+        <mat-error  *ngIf="d_clientname.invalid && d_clientname.value!==''">
+          Incorrect portfolio number. Use search loop.    
+        </mat-error>
+        <mat-error  *ngIf="d_clientname.invalid && d_clientname.touched && d_clientname.value==''">
+          The field is required.    
+        </mat-error>
       </mat-form-field>
-    </p>
-  
-
-    <mat-form-field style="width: 20%;">
-      <input matInput placeholder="NoTrade" formControlName="ledgerNoTrade" >   
-      <mat-error  *ngIf="d_clientname.invalid && d_clientname.value!==''">
-        Incorrect portfolio number. Use search loop.    
-      </mat-error>
-      <mat-error  *ngIf="d_clientname.invalid && d_clientname.touched && d_clientname.value==''">
-        The field is required.    
-      </mat-error>
-    </mat-form-field>
-    
-    <mat-form-field style="width: 20%;">
-      <input matInput placeholder="NoCptyCode" formControlName="ledgerNoCptyCode" >   
-      <mat-error  *ngIf="d_clientname.invalid && d_clientname.value!==''">
-        Incorrect portfolio number. Use search loop.    
-      </mat-error>
-      <mat-error  *ngIf="d_clientname.invalid && d_clientname.touched && d_clientname.value==''">
-        The field is required.    
-      </mat-error>
-    </mat-form-field>
-
-    <mat-form-field style="width: 35%;">
-      <input matInput placeholder="External Number" formControlName="externalAccountNo">
-      <mat-error  *ngIf="accountNo.invalid && accountNo.value! == '' ">
-        Account number ins't unique      
-      </mat-error>
-      <mat-error  *ngIf="accountNo.invalid  && accountNo.value == '' "> 
-        The field is required.    
-      </mat-error>
-    </mat-form-field>
-
-    <mat-form-field style="width: 95%;">
-      <input matInput placeholder="Information" formControlName="name">
-    </mat-form-field>
-    <h3 style="color:rgb(252, 113, 113)" *ngIf="accountLedgerModifyForm.invalid"> Please check the form. Data is invalid</h3>
-   </form>
-   
-
-</mat-tab>
-
+      <mat-form-field style="width: 35%;">
+        <input matInput placeholder="External Number" formControlName="externalAccountNo">
+        <mat-error  *ngIf="accountNo.invalid && accountNo.value! == '' ">
+          Account number ins't unique      
+        </mat-error>
+        <mat-error  *ngIf="accountNo.invalid  && accountNo.value == '' "> 
+          The field is required.    
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field style="width: 95%;">
+        <input matInput placeholder="Information" formControlName="name">
+      </mat-form-field>
+      <h3 style="color:rgb(252, 113, 113)" *ngIf="accountLedgerModifyForm.invalid"> Please check the form. Data is invalid</h3>
+      </fieldset>
+    </form>
+  </mat-tab>
 </mat-tab-group>
-      <!-- accountId: {value:null, disabled: false}, -->

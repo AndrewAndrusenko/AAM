@@ -14,6 +14,7 @@ import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dia
 import { formatNumber } from '@angular/common';
 import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import { AuthService } from 'src/app/services/auth.service';
+import { investmentNodeColor } from 'src/app/models/constants';
 
 @Component({
   selector: 'app-table-acc-accounts',
@@ -30,63 +31,39 @@ import { AuthService } from 'src/app/services/auth.service';
 export class AppTableAccAccountsComponent  implements OnInit {
   accessState: string = 'none';
   disabledControlElements: boolean = false;
-  columnsToDisplay = [
-    'select',
-    'accountNo',  
-    'd_APTypeCodeAccount',
-    'd_Account_Type',  
-    'Information',  
-    'd_clientname',
-    'd_portfolioCode',
-    'd_entitytypedescription', 
-    'action'
-  ]
-  columnsHeaderToDisplay = [
-    'No',
-    'Balance',
-    'Type',
-    'Details', 
-    'Client',  
-    'Portfolio', 
-    'Entity', 
-    'Action'
-  ];
+  columnsToDisplay = ['select','accountNo','d_APTypeCodeAccount','d_Account_Type','Information','d_clientname','d_portfolioCode', 'd_entitytypedescription', 'action']
+  columnsHeaderToDisplay = ['No','Balance','Type','Details','Client','Portfolio','Entity','Action' ];
   dataSource: MatTableDataSource<bAccounts>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
   @Output() public modal_principal_parent = new EventEmitter();
   public readOnly: boolean = false; 
   public multiSelect: boolean = false; 
-  
   public selectedRow: bAccounts  | null;
   expandedElement: bAccounts  | null;
   accessToClientData: string = 'true';
   action ='GetAccountDataWholeList';
   dialogRef: MatDialogRef<AppAccAccountModifyFormComponent>;
- 
   selection = new SelectionModel<bAccounts>(true, []);
   accounts: string[] = [];
   addOnBlur = true;
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
+  investmentNodeColor=investmentNodeColor;
   constructor(
     private AccountingDataService:AppAccountingService, 
     private CommonDialogsService:HadlingCommonDialogsService,
     private AuthServiceS:AuthService,  
     private dialog: MatDialog ,
     private HandlingCommonTasksS:HandlingCommonTasksService
-  ) {    
-    this.AuthServiceS.verifyAccessRestrictions('accessToBalanceData').subscribe ((accessData) => {
-      this.accessState=accessData.elementvalue;
-      this.disabledControlElements = this.accessState === 'full'? false : true;
-      if (this.accessState !=='none') {
-        this.AccountingDataService.getReloadAccontList().subscribe ( (id) => {
-          this.updateAccountsData(this.action)
-        })
-      }
-    })
+  ) {   
+    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToBalanceData')[0].elementvalue;
+    this.disabledControlElements = this.accessState === 'full'? false : true; 
+    this.accessState !=='none'? this.AccountingDataService.getReloadAccontList().subscribe (id => this.updateAccountsData(this.action)):null;
   }
   async updateAccountsData (action: string) {
-    return new Promise<number> (async (resolve,reject) => {
+    console.log('Reload Account');
+
+    return new Promise<number> (async (resolve) => {
       this.dataSource? this.dataSource.data=null : null;
       this.AccountingDataService.GetAccountsListAccounting (null,null,null,null,this.action).subscribe (AccountsList  => {
         this.dataSource  = new MatTableDataSource(AccountsList);
@@ -101,9 +78,7 @@ export class AppTableAccAccountsComponent  implements OnInit {
   }
   async submitQuery () {
     this.dataSource.data=null;
-    await this.updateAccountsData(this.action).then ((rowsCount) => {
-      this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (rowsCount,'en-US') + ' rows'},'Loaded ')
-    })
+    await this.updateAccountsData(this.action).then (rowsCount => this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (rowsCount,'en-US') + ' rows'},'Loaded '))
   }
   exportToExcel () {
     this.HandlingCommonTasksS.exportToExcel (this.dataSource.data,"accountData")
@@ -128,18 +103,7 @@ export class AppTableAccAccountsComponent  implements OnInit {
   openAccountModifyForm (actionType:string, row: any ) {
     this.dialogRef = this.dialog.open(AppAccAccountModifyFormComponent ,{minHeight:'400px', maxWidth:'1000px' });
     this.dialogRef.componentInstance.action = actionType;
-    this.dialogRef.componentInstance.title = actionType;
     this.dialogRef.componentInstance.data = row;
-    switch (actionType) {
-      case 'Create':
-      case 'Create_Example': 
-        this.dialogRef.componentInstance.title = 'Create New';
-      break;
-      break;
-      case 'View':
-        this.dialogRef.componentInstance.accountModifyForm.disable()
-      break;
-    }
   }
   isAllSelected() {
     if (!this.dataSource) return false
@@ -148,17 +112,10 @@ export class AppTableAccAccountsComponent  implements OnInit {
     return numSelected === numRows;
   }
   toggleAllRows() {
-    if (this.isAllSelected()) {
-      this.selection.clear();
-      return;
-    }
-    this.selection.select(...this.dataSource.data);
+    this.isAllSelected()? this.selection.clear(): this.selection.select(...this.dataSource.data);
   }
   checkboxLabel(row?: bAccounts): string {
-    if (!row) {
-      return `${this.isAllSelected() ? 'deselect' : 'select'} all`;
-    }
-    return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${ 1}`;
+    return !row? `${this.isAllSelected() ? 'deselect' : 'select'} all`: `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${ 1}`;
   }
   add(event: MatChipInputEvent): void {
     const value = (event.value || '').trim();
@@ -171,6 +128,5 @@ export class AppTableAccAccountsComponent  implements OnInit {
   }
   addChips (selection:SelectionModel<bAccounts>) { 
     this.accounts = selection.selected.map((accountRow) => {return accountRow['accountNo']}) 
-    console.log('acc', this.accounts);
   }
 }

@@ -1,11 +1,65 @@
+const  db_common_api = require ('./db_common_api')
 const config = require ('./db_config');
 const Pool = require('pg').Pool;
 const pool = new Pool(config.dbConfig);
 var pgp = require ('pg-promise')({capSQL:true});
 const pg = require('pg');
 pg.types.setTypeParser(1114, function(stringValue) {
-  return stringValue;  //1114 for time without timezone type
+  return stringValue;  
 });
+async function fUpdateAccountAccounting (request, response) {
+  let fields =  ['accountNo','accountTypeExt','Information','clientId','currencyCode','entityTypeCode','idportfolio']
+  db_common_api.fUpdateTableDB ('bAccounts',fields,'accountId',request, response)
+}
+async function fUpdateLedgerAccountAccounting (request, response) {
+  let fields =  ['accountTypeID', 'name', 'clientID', 'entityTypeCode', 'ledgerNo', 'currecyCode', 'ledgerNoCptyCode', 'ledgerNoTrade', 'externalAccountNo']
+  db_common_api.fUpdateTableDB ('bLedger',fields,'ledgerNoId',request, response)
+}
+async function fUpdateLLEntryAccounting (request, response) {
+  let fields =  ['ledgerID_Debit', 'dateTime',  'XactTypeCode_Ext', 'ledgerID',  'amount', 'entryDetails', 'extTransactionId']
+  db_common_api.fUpdateTableDB ('bLedgerTransactions',fields,'id',request, response)
+}
+async function fUpdateEntryAccountAccounting (request, response) {
+  let fields =  ['ledgerNoId', 'dataTime', 'XactTypeCode', 'XactTypeCode_Ext', 'accountId',  'amountTransaction', 'entryDetails', 'extTransactionId']
+  db_common_api.fUpdateTableDB ('bAccountTransaction',fields,'id',request, response)
+}
+/* async function fcreateEntryAccounting (request, response) {
+  paramArr = request.body.data
+  const query = {
+  text: 'INSERT INTO public."bAccountTransaction" ' +
+  ' () ' +
+  ' VALUES '+
+  '(${t_ledgerNoId}, ${t_dataTime}, ${t_XactTypeCode}, ${t_XactTypeCode_Ext}, ${t_accountId}, ${t_amountTransaction}, ${t_entryDetails},  ${t_extTransactionId});',
+    values: paramArr
+  }
+  sql = pgp.as.format(query.text,query.values)
+  pool.query (sql,  (err, res) => {if (err) {
+    console.log (err.stack.split("\n", 1).join(""))
+    err.detail = err.stack
+    return response.send(err)
+  } else {
+    return response.status(200).json(res.rowCount)}
+  })  
+} */
+/* 
+async function fcreateLLEntryAccounting (request, response) {
+  paramArr = request.body.data
+  const query = {
+  text: 'INSERT INTO public."bLedgerTransactions" ' +
+  ' () ' +
+  ' VALUES '+
+  '(${t_ledgerNoId}, ${t_dataTime}::date,  ${t_XactTypeCode_Ext}, ${t_accountId}, ${t_amountTransaction}, ${t_entryDetails},  ${t_extTransactionId});',
+    values: paramArr
+  } 
+  sql = pgp.as.format(query.text,query.values)
+  pool.query (sql,  (err, res) => {if (err) {
+    console.log (err.stack.split("\n", 1).join(""))
+    err.detail = err.stack
+    return response.send(err)
+  } else {
+    return response.status(200).json(res.rowCount)}
+  })  
+} */
 async function fGetAccountingData (request,response) {
   let conditions = {}
   const query = {text: '', values:[]}
@@ -49,7 +103,6 @@ async function fGetAccountingData (request,response) {
         'FROM public."bLedger" '+
         'LEFT JOIN "dclients" ON "bLedger"."clientID" = "dclients".idclient ' +
         'WHERE ("ledgerNo"= ${accountNo}) ; '
-
     break;
     case 'GetLedgerAccountsDataWholeList' :
       query.text ='SELECT '+
@@ -84,8 +137,6 @@ async function fGetAccountingData (request,response) {
           1: ' ("extTransactionId" = ${extTransactionId:raw})',
           2: ' ("extTransactionId" = ${extTransactionId:raw}) '
         },
-        
-
       }
       let conditionsAccountLedger =' WHERE'
       let conditionsLedgerToLedger =' WHERE'
@@ -96,7 +147,6 @@ async function fGetAccountingData (request,response) {
         conditionsLedgerToLedger +=conditions[key][2] + ' AND ';
         }
       });
-
       query.text ='SELECT \'AL\' AS "d_transactionType","bAccountTransaction".id AS "t_id", "entryDetails" AS "t_entryDetails", ' + 
       '"bAccountTransaction"."ledgerNoId" AS "t_ledgerNoId", "bAccountTransaction"."accountId" AS "t_accountId", ' +
       '"dataTime"::timestamp without time zone AS "t_dataTime", "extTransactionId" AS "t_extTransactionId", "amountTransaction" AS "t_amountTransaction", '+
@@ -133,8 +183,6 @@ async function fGetAccountingData (request,response) {
       query.text += conditionsLedgerToLedger.slice(0,-5);
       query.text +='ORDER BY "t_dataTime" DESC; '
     break;
-    case 'GetBalanceSheet':
-    break;
     case 'GetbLastClosedAccountingDate':
       query.text ='SELECT "FirstOpenedDate"::date, "LastClosedDate"::date FROM "bLastClosedAccountingDate";'
     break;
@@ -151,7 +199,6 @@ async function fGetAccountingData (request,response) {
     case 'GetDeepBalanceCheck':
       query.text ='SELECT * FROM public.f_s_balancesheet_deep_check(${dateBalanceToCheck},${firstDayOfCalculation});'
     break;
-    
     case 'GetALLAccountsDataWholeList' :
       query.text ='SELECT '+
       '"accountNo", "accountTypeExt", "Information", "clientId", "currencyCode","bAccounts"."entityTypeCode", "accountId", '+
@@ -209,8 +256,6 @@ async function fGetAccountingData (request,response) {
         conditionsLedgerProject +=conditions[key][3] + ' AND ';
         }
       });
-
-
       query.text ='SELECT '+
       ' "accountNo", "accountId", "accountType", "datePreviousBalance" ,"dateBalance"::timestamp without time zone , "openingBalance", '+
       ' "totalDebit", "totalCredit", "OutGoingBalance", "checkClosing", "xacttypecode" ' +
@@ -229,7 +274,6 @@ async function fGetAccountingData (request,response) {
       ' FROM f_bcurrent_ledger_turnovers_balances_notclosed(${lastClosedDate}) '; 
       query.text += conditionsLedgerProject.slice(0,-5) ;
       query.text += ' ORDER BY "dateBalance"::timestamp without time zone DESC;';
-
     break;
   }
   sql = pgp.as.format(query.text,request.query);
@@ -281,7 +325,6 @@ async function fGetMT950Transactions (request,response) {
   })
 }
 async function GetEntryScheme (request, response) {
-
   const query = {
     text:'SELECT '+
     '"ledgerNoId" , "dataTime", "XactTypeCode", ' +
@@ -291,7 +334,6 @@ async function GetEntryScheme (request, response) {
     'WHERE '+
     '("cxActTypeCode_Ext" = ${cxActTypeCode_Ext} AND "cxActTypeCode" = ${cxActTypeCode} AND "cLedgerType" = ${cLedgerType});'
   }
-
   sql = pgp.as.format(query.text,request.query)
   pool.query (sql,  (err, res) => {if (err) {
     console.log (err.stack.split("\n", 1).join(""))
@@ -300,7 +342,6 @@ async function GetEntryScheme (request, response) {
   } else {
     if (res.rows.length !== 0) {
       entryDraftData = JSON.parse (pgp.as.format (JSON.stringify(res.rows[0]), request.query))
-
       sql = 'SELECT ' + 
       '"bLedger"."ledgerNo", "bAccounts"."accountNo", "bcTransactionType_Ext"."xActTypeCode_Ext", "bcTransactionType_DE"."name", '+ 'json_populate_recordset.* ' +
       'FROM json_populate_recordset(null::public."bAccountTransaction",\'[' + [JSON.stringify(entryDraftData)] +']\') ' +
@@ -314,7 +355,6 @@ async function GetEntryScheme (request, response) {
         return response.send(err)
       } else {
         return response.status(200).json((res.rows[0]))
-
       }})
     }
   }
@@ -337,132 +377,10 @@ async function fCreateEntryAccountingInsertRow (request, response) {
       return response.status(200).json(res.rowCount)}
     })  
 }
-async function fcreateAccountAccounting (request, response) {
-  paramArr = request.body.data
-  const query = {
-  text: 'INSERT INTO public."bAccounts" ' +
-        ' ("accountNo", "accountTypeExt", "Information", "clientId", "currencyCode", "entityTypeCode", "idportfolio") ' +
-        ' VALUES '+
-        '(${accountNo}, ${accountTypeExt}, ${Information}, ${clientId}, ${currencyCode}, ${entityTypeCode}, ${idportfolio});',
-    values: paramArr
-  }
-  sql = pgp.as.format(query.text,query.values)
-  pool.query (sql,  (err, res) => {if (err) {
-    console.log (err.stack.split("\n", 1).join(""))
-    err.detail = err.stack
-    return response.send(err)
-  } else {
-    return response.status(200).json(res.rowCount)}
-  })  
-}
-async function fdeleteAccountAccounting (request, response) {
-  const query = {text: 'DELETE FROM public."bAccounts" WHERE "accountId"=${id};', values: request.body}
-  sql = pgp.as.format(query.text,query.values)
-  
-  pool.query (sql,  (err, res) => {if (err) { return response.send(err)} else { return response.status(200).json(res.rowCount) }
-  }) 
-}
-async function fupdateAccountAccounting (request, response) {
-  paramArr = request.body.data
-  const query = {
-  text: 'UPDATE public."bAccounts" ' +
-	'SET  ' +
-   '"accountNo"=${accountNo}, ' +
-   '"accountTypeExt"=${accountTypeExt}, '+
-   '"Information"=${Information}, '+
-   '"clientId"=${clientId}, '+
-   '"currencyCode"=${currencyCode}, '+
-   '"entityTypeCode"=${entityTypeCode}, '+
-   '"idportfolio"=${idportfolio} '+
-	 'WHERE "accountId"=${accountId};',
-    values: paramArr
-  } 
-  sql = pgp.as.format(query.text,query.values)
-   pool.query (sql,  (err, res) => {if (err) {
-    err.detail = err.stack
-    return response.send(err)
-  } else {
-    return response.status(200).json(res.rowCount)}
-  })   
-}
 
-async function fcreateLedgerAccountAccounting (request, response) {
-  paramArr = request.body.data
-  console.log('param',paramArr);
-  const query = {
-  text: 'INSERT INTO public."bLedger" ' +
-  ' ("accountTypeID", "name", "clientID", "entityTypeCode", "ledgerNo", "currecyCode", "ledgerNoCptyCode", "ledgerNoTrade", "externalAccountNo") ' +
-  ' VALUES '+
-  '(${accountTypeID}, ${name}, ${clientID}, ${entityTypeCode}, ${ledgerNo}, ${currecyCode}, ${ledgerNoCptyCode}, ${ledgerNoTrade}, ${externalAccountNo});',
-    values: paramArr
-  }
-	
-  sql = pgp.as.format(query.text,query.values)
-  pool.query (sql,  (err, res) => {if (err) {
-    console.log (err.stack.split("\n", 1).join(""))
-    err.detail = err.stack
-    return response.send(err)
-  } else {
-    return response.status(200).json(res.rowCount)}
-  })  
-}
-async function fdeleteLedgerAccountAccounting (request, response) {
-  const query = {text: 'DELETE FROM public."bLedger" WHERE "ledgerNoId"=${id};', values: request.body}
-  sql = pgp.as.format(query.text,query.values)
-  
-  pool.query (sql,  (err, res) => {if (err) { return response.send(err)} else { return response.status(200).json(res.rowCount) }
-  }) 
-}
-async function fupdateLedgerAccountAccounting (request, response) {
-  paramArr = request.body.data
-  const query = {
-  text: 'UPDATE public."bLedger" ' +
-	'SET  ' +
-   '"accountTypeID"=${accountTypeID}, ' +
-   '"name"=${name}, '+
-   '"clientID"=${clientID}, '+
-   '"entityTypeCode"=${entityTypeCode}, '+
-   '"ledgerNo"=${ledgerNo}, '+
-   '"currecyCode"=${currecyCode}, '+
-   '"ledgerNoCptyCode"=${ledgerNoCptyCode}, '+
-   '"ledgerNoTrade"=${ledgerNoTrade}, '+
-   '"externalAccountNo"=${externalAccountNo} '+
-	 'WHERE "ledgerNoId"=${ledgerNoId};',
-    values: paramArr
-  } 
-
-  sql = pgp.as.format(query.text,query.values)
-   pool.query (sql,  (err, res) => {if (err) {
-    console.log (err.stack.split("\n", 1).join(""))
-    err.detail = err.stack
-    return response.send(err)
-  } else {
-    return response.status(200).json(res.rowCount)}
-  })   
-}
-
-async function fcreateEntryAccounting (request, response) {
-  paramArr = request.body.data
-  const query = {
-  text: 'INSERT INTO public."bAccountTransaction" ' +
-  ' ("ledgerNoId", "dataTime", "XactTypeCode", "XactTypeCode_Ext", "accountId",  "amountTransaction", "entryDetails", "extTransactionId") ' +
-  ' VALUES '+
-  '(${t_ledgerNoId}, ${t_dataTime}, ${t_XactTypeCode}, ${t_XactTypeCode_Ext}, ${t_accountId}, ${t_amountTransaction}, ${t_entryDetails},  ${t_extTransactionId});',
-    values: paramArr
-  }
-  sql = pgp.as.format(query.text,query.values)
-  pool.query (sql,  (err, res) => {if (err) {
-    console.log (err.stack.split("\n", 1).join(""))
-    err.detail = err.stack
-    return response.send(err)
-  } else {
-    return response.status(200).json(res.rowCount)}
-  })  
-}
-async function fdeleteEntryrAccountAccounting (request, response) {
+/* async function fdeleteEntryrAccountAccounting (request, response) {
   const query = {text: 'DELETE FROM public."bAccountTransaction" WHERE "id"=${id};', values: request.body}
   sql = pgp.as.format(query.text,query.values)
-  
   pool.query (sql,  (err, res) => {if (err) { return response.send(err)} else { return response.status(200).json(res.rowCount) }
   }) 
 }
@@ -491,26 +409,8 @@ async function fupdateEntryAccountAccounting (request, response) {
     return response.status(200).json(res.rowCount)}
   })   
 }
-
-async function fcreateLLEntryAccounting (request, response) {
-  paramArr = request.body.data
-  const query = {
-  text: 'INSERT INTO public."bLedgerTransactions" ' +
-  ' ("ledgerID_Debit", "dateTime",  "XactTypeCode_Ext", "ledgerID",  "amount", "entryDetails", "extTransactionId") ' +
-  ' VALUES '+
-  '(${t_ledgerNoId}, ${t_dataTime}::date,  ${t_XactTypeCode_Ext}, ${t_accountId}, ${t_amountTransaction}, ${t_entryDetails},  ${t_extTransactionId});',
-    values: paramArr
-  } 
-  sql = pgp.as.format(query.text,query.values)
-  pool.query (sql,  (err, res) => {if (err) {
-    console.log (err.stack.split("\n", 1).join(""))
-    err.detail = err.stack
-    return response.send(err)
-  } else {
-    return response.status(200).json(res.rowCount)}
-  })  
-}
-async function fdeleteLLEntryrAccountAccounting (request, response) {
+ */
+/* async function fdeleteLLEntryrAccountAccounting (request, response) {
   const query = {text: 'DELETE FROM public."bLedgerTransactions" WHERE "id"=${id};', values: request.body}
   sql = pgp.as.format(query.text,query.values)
   console.log('sql', sql);
@@ -534,7 +434,6 @@ async function fupdateLLEntryAccountAccounting (request, response) {
 	 'WHERE id = ${t_id};',
     values: paramArr
   } 
-
   sql = pgp.as.format(query.text,query.values)
    pool.query (sql,  (err, res) => {if (err) {
     console.log (err.stack.split("\n", 1).join(""))
@@ -543,7 +442,7 @@ async function fupdateLLEntryAccountAccounting (request, response) {
   } else {
     return response.status(200).json(res.rowCount)}
   })   
-}
+} */
 async function faccountingOverdraftAccountCheck (request, response) {
   paramArr = request.query
   console.log('param', paramArr);
@@ -560,11 +459,9 @@ async function faccountingOverdraftAccountCheck (request, response) {
     err.detail = err.stack
     return response.send(err)
   } else {
-    // console.log('validator', res.rows[0]);
     return response.status(200).json(res.rows)}
   })   
 }
-
 async function faccountingOverdraftLedgerAccountCheck (request, response) {
   paramArr = request.query
   console.log('param', paramArr);
@@ -586,7 +483,6 @@ async function faccountingOverdraftLedgerAccountCheck (request, response) {
     return response.status(200).json(res.rows)}
   })   
 }
-
 async function faccountingBalanceCloseInsert (request, response) {
   paramArr = request.body.data
   const query = {
@@ -618,33 +514,20 @@ async function faccountingBalanceDayOpen (request, response) {
     return response.send(err)
   } else {
     return response.status(200).json(res[0].rowCount + res[1].rowCount)}
-  })   
+  })  
+   
 }
 module.exports = {
   fGetMT950Transactions,
   fGetAccountingData,
   GetEntryScheme,
   fCreateEntryAccountingInsertRow,
-  
-  fupdateAccountAccounting,
-  fdeleteAccountAccounting,
-  fcreateAccountAccounting,
-  
-  fupdateLedgerAccountAccounting,
-  fdeleteLedgerAccountAccounting,
-  fcreateLedgerAccountAccounting,
-  
-  fcreateLLEntryAccounting,
-  fdeleteLLEntryrAccountAccounting,
-  fupdateLLEntryAccountAccounting,
-  
-  fcreateEntryAccounting,
-  fdeleteEntryrAccountAccounting,
-  fupdateEntryAccountAccounting,
-
+  fUpdateAccountAccounting,
+  fUpdateLedgerAccountAccounting,
+  fUpdateLLEntryAccounting,
+  fUpdateEntryAccountAccounting,
   faccountingOverdraftAccountCheck,
   faccountingOverdraftLedgerAccountCheck,
-
   faccountingBalanceCloseInsert,
   faccountingBalanceDayOpen
 }

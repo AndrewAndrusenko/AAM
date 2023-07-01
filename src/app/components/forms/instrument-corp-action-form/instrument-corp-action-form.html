@@ -8,8 +8,7 @@
   </h3>
   <mat-form-field  style="width: 26%;" title="Action Type">
     <mat-label>Action Type</mat-label>
-    <mat-select  #actionT formControlName="actiontype" 
-    (selectionChange)="modifyTemplate(actiontype.value)" > 
+    <mat-select  #actionT formControlName="actiontype"  > 
       <ng-container *ngFor="let caType of caTypes">
       <mat-option  [value]="caType.id">
           {{caType.name }} - {{caType.ratetype}}

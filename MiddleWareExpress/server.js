@@ -148,22 +148,12 @@ appServer.get('/DEA/GetEntryScheme/',jsPassport.authenticate('session') , uiAmmA
 appServer.post('/DEA/fCreateEntryAccountingInsertRow/',jsPassport.authenticate('session') , uiAmmAccountingModule.fCreateEntryAccountingInsertRow)
 
 /*----------------------AccountsUI---------------------------------------------------------*/
-appServer.post('/DEA/updateAccountAccounting/',jsPassport.authenticate('session') , uiAmmAccountingModule.fupdateAccountAccounting)
-appServer.post('/DEA/deleteAccountAccounting/',jsPassport.authenticate('session') , uiAmmAccountingModule.fdeleteAccountAccounting)
-appServer.post('/DEA/createAccountAccounting/',jsPassport.authenticate('session') , uiAmmAccountingModule.fcreateAccountAccounting)
+appServer.post('/DEA/updateAccountAccounting/',jsPassport.authenticate('session') , uiAmmAccountingModule.fUpdateAccountAccounting)
 /*----------------------LedgerAccountsUI----------------------------------------------------*/
-appServer.post('/DEA/updateLedgerAccountAccounting/',jsPassport.authenticate('session') , uiAmmAccountingModule.fupdateLedgerAccountAccounting)
-appServer.post('/DEA/deleteLedgerAccountAccounting/',jsPassport.authenticate('session') , uiAmmAccountingModule.fdeleteLedgerAccountAccounting)
-appServer.post('/DEA/createLedgerAccountAccounting/',jsPassport.authenticate('session') , uiAmmAccountingModule.fcreateLedgerAccountAccounting)
+appServer.post('/DEA/updateLedgerAccountAccounting/',jsPassport.authenticate('session') , uiAmmAccountingModule.fUpdateLedgerAccountAccounting)
 /*----------------------EntryUI----------------------------------------------------*/
-appServer.post('/DEA/updateEntryAccountAccounting/',jsPassport.authenticate('session') , uiAmmAccountingModule.fupdateEntryAccountAccounting)
-appServer.post('/DEA/deleteEntryrAccountAccounting/',jsPassport.authenticate('session') , uiAmmAccountingModule.fdeleteEntryrAccountAccounting)
-appServer.post('/DEA/createEntryAccounting/',jsPassport.authenticate('session') , uiAmmAccountingModule.fcreateEntryAccounting)
-
-appServer.post('/DEA/updateLLEntryAccountAccounting/',jsPassport.authenticate('session') , uiAmmAccountingModule.fupdateLLEntryAccountAccounting)
-appServer.post('/DEA/deleteLLEntryrAccountAccounting/',jsPassport.authenticate('session') , uiAmmAccountingModule.fdeleteLLEntryrAccountAccounting)
-appServer.post('/DEA/createLLEntryAccounting/',jsPassport.authenticate('session') , uiAmmAccountingModule.fcreateLLEntryAccounting)
-
+appServer.post('/DEA/updateEntryAccountAccounting/',jsPassport.authenticate('session') , uiAmmAccountingModule.fUpdateEntryAccountAccounting)
+appServer.post('/DEA/updateLLEntryAccountAccounting/',jsPassport.authenticate('session') , uiAmmAccountingModule.fUpdateLLEntryAccounting)
 /*----------------------OverdraftValidators----------------------------------------------------*/
 appServer.get('/DEA/accountingOverdraftAccountCheck/',jsPassport.authenticate('session') , uiAmmAccountingModule.faccountingOverdraftAccountCheck)
 appServer.get('/DEA/accountingOverdraftLedgerAccountCheck/',jsPassport.authenticate('session') , uiAmmAccountingModule.faccountingOverdraftLedgerAccountCheck)
@@ -191,6 +181,7 @@ appServer.post('/AAM/MD/InstrumentDelete/',jsPassport.authenticate('session') , 
 appServer.post('/AAM/MD/InstrumentEdit/',jsPassport.authenticate('session') , uiAmmMarketData.fInstrumentEdit)
 
 appServer.post('/AAM/MD/UpdateInstrumentDetails/',jsPassport.authenticate('session') , uiAmmMarketData.fUpdateInstrumentDetails)
+appServer.post('/AAM/MD/UpdateInstrumentDataCorpActions/',jsPassport.authenticate('session') , uiAmmMarketData.fUpdateInstrumentDataCorpActions)
 
 RedisService.TestRedis();
 RedisService.redisSetInstrumentList();

@@ -1,6 +1,7 @@
 import {
   AbstractControl,
   AsyncValidatorFn,
+  FormGroup,
   ValidationErrors,
   ValidatorFn,
 } from '@angular/forms';
@@ -93,9 +94,11 @@ export class customAsyncValidators {
     };
   }
   static AccountingOverdraftAccountAsyncValidator (
-    AccountingDataService: AppAccountingService, AccountId:AbstractControl, transactionAmount: AbstractControl, transactionDate:AbstractControl, xactTypeCode:AbstractControl, d_closingBalance: AbstractControl, id: AbstractControl, FirstOpenedAccountingDate : Date  
+    AccountingDataService: AppAccountingService, AccountId:AbstractControl, transactionAmount: AbstractControl, transactionDate:AbstractControl, xactTypeCode:AbstractControl, d_closingBalance: AbstractControl, id: AbstractControl, FirstOpenedAccountingDate : Date, FG1:FormGroup  
     ): AsyncValidatorFn {
     return (control: AbstractControl): Observable<ValidationErrors> => {
+      if (FG1.status!=='VALID') {  
+        console.log('Overdraft Account SAsyncValidator', FG1.status,FG1.dirty,FG1.pristine)
       return AccountingDataService
         .getExpectedBalanceOverdraftCheck (AccountId.value,transactionAmount.getRawValue(), new Date (transactionDate.value).toDateString(),xactTypeCode.value, id.value, new Date (FirstOpenedAccountingDate).toDateString(),'AccountingOverdraftAccountCheck')
         .pipe(
@@ -103,24 +106,28 @@ export class customAsyncValidators {
           map ( expectedBalance => (expectedBalance[0].closingBalance < 0 ? { overdraft: true } : null)  ),
           catchError(() => of(null)),
           take(1)
+         );
+    } else {return of(null)}
 
-          );
     };
   }
   static AccountingOverdraftLedgerAccountAsyncValidator (
-    AccountingDataService: AppAccountingService, AccountId:AbstractControl, transactionAmount: AbstractControl, transactionDate:AbstractControl, xactTypeCode:number, d_closingLedgerBalance: AbstractControl, id: AbstractControl, FirstOpenedAccountingDate : Date 
+    AccountingDataService: AppAccountingService, AccountId:AbstractControl, transactionAmount: AbstractControl, transactionDate:AbstractControl, xactTypeCode:number, d_closingLedgerBalance: AbstractControl, id: AbstractControl, FirstOpenedAccountingDate : Date, FG:FormGroup 
     ): AsyncValidatorFn {
-    return (control: AbstractControl): Observable<ValidationErrors> => {
-     return AccountingDataService
+      return (control: AbstractControl): Observable<ValidationErrors> => {
+      if (FG.status!=='VALID') {  
+      console.log('Overdraft Ledger AsyncValidator', FG.status,FG.dirty,FG.pristine)
+      //  console.log('AccountingOverdraftLedgerAccountAsyncValidator', arguments.callee)
+        return AccountingDataService
         .getExpectedBalanceLedgerOverdraftCheck (AccountId.value,transactionAmount.getRawValue(), new Date (transactionDate.value).toDateString(), xactTypeCode, id.value, new Date (FirstOpenedAccountingDate).toDateString(), 'AccountingOverdraftAccountCheck')
         .pipe(
-          // tap (expectedBalance => console.log('ad', getControlName(AccountId)) ),
           tap (expectedBalance => d_closingLedgerBalance.setValue (expectedBalance[0].closingBalance ) ),
           map ( expectedBalance => (expectedBalance[0].closingBalance < 0 ? { overdraft: true } : null)  ),
           catchError(() => of(null)),
           take(1)
-          );
-    };
+         );
+    } else {return of(null)}
+  }
   }  
   static MD_SecidUniqueAsyncValidator (AppMarketDataService: AppMarketDataService, secid:string,  errors?:ValidationErrors): AsyncValidatorFn {
     return (control: AbstractControl): Observable<ValidationErrors> => {

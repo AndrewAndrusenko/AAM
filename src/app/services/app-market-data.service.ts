@@ -15,6 +15,7 @@ export class AppMarketDataService {
   private subjectCorpData = new Subject<instrumentCorpActions[]> ()
   private subjectInstrument = new Subject<InstrumentDataSet> ()
   private subjectInstrumentDetails = new Subject<instrumentDetails[]> ()
+  private subjectCorpActions = new Subject<instrumentCorpActions[]> ()
   private httpOptions = {
     headers: new HttpHeaders({}),
     responseType: 'text'
@@ -212,13 +213,19 @@ export class AppMarketDataService {
     this.subjectInstrument.next(dataSet); 
   }
   getInstrumentDataToUpdateTableSource(): Observable<InstrumentDataSet> { 
-    return this.subjectInstrument.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
+    return this.subjectInstrument.asObservable(); 
   }
   updateInstrumentDetails (data:any, action:string):  Observable<instrumentDetails[]>  { 
     return this.http.post <instrumentDetails[]> ('/api/AAM/MD/UpdateInstrumentDetails/',{data:data, action:action})
   }
+  updateInstrumentDataCorpActions (data:any, action:string):  Observable<instrumentDetails[]>  { 
+    return this.http.post <instrumentDetails[]> ('/api/AAM/MD/UpdateInstrumentDataCorpActions/',{data:data, action:action})
+  }
   sendReloadInstrumentDetails ( dataSet:instrumentDetails[]) {
     this.subjectInstrumentDetails.next(dataSet); 
+  }
+  sendReloadDataCorpActions ( dataSet:instrumentCorpActions[]) {
+    this.subjectCorpActions.next(dataSet); 
   }
 }
 

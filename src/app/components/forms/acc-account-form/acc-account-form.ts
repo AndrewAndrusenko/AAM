@@ -8,7 +8,7 @@ import { AppAccountingService } from 'src/app/services/app-accounting.service';
 import { ClientData, bcAccountType_Ext, bcEnityType } from 'src/app/models/intefaces';
 import { AppClientsTableComponent } from '../../tables/clients-table.component/clients-table.component';
 import { TablePortfolios } from '../../tables/portfolios-table/portfolios-table';
-import { Subscription } from 'rxjs';
+import { Subscription, filter, switchMap } from 'rxjs';
 import { MatTabGroup as MatTabGroup } from '@angular/material/tabs';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 
@@ -17,7 +17,7 @@ import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dia
   templateUrl: './acc-account-form.html',
   styleUrls: ['./acc-account-form.scss'],
 })
-export class AppAccAccountModifyFormComponent implements OnInit, AfterViewInit {
+export class AppAccAccountModifyFormComponent implements OnInit {
 
   public panelOpenState = true;
   public accountModifyForm: FormGroup;
@@ -46,11 +46,8 @@ export class AppAccAccountModifyFormComponent implements OnInit, AfterViewInit {
     private AccountingDataService:AppAccountingService, 
     private CommonDialogsService:HadlingCommonDialogsService,
   ) 
-  { 
-     this.AccountingDataService.GetEntityTypeList('',0,'','','bcEnityType').subscribe (
-    data => this.EnityTypes=data)
-    this.AccountingDataService.GetAccountTypeList('',0,'','','bcAccountType_Ext').subscribe (
-      data => this.AccountTypes=data)
+  { this.AccountingDataService.GetEntityTypeList('',0,'','','bcEnityType').subscribe (data => this.EnityTypes=data)
+    this.AccountingDataService.GetAccountTypeList('',0,'','','bcAccountType_Ext').subscribe (data => this.AccountTypes=data)
     this.formDisabledFields = ['clientId', 'accountId', 'idportfolio']
     this.formLedgerDisabledFields = ['ledgerNoId', 'clientID']
     this.accountModifyForm = this.fb.group ({
@@ -60,7 +57,7 @@ export class AppAccAccountModifyFormComponent implements OnInit, AfterViewInit {
       clientId: {value:null, disabled: true},  
       currencyCode: [null, [Validators.required, Validators.pattern('[0-9]*') ]],  
       entityTypeCode: [null, [Validators.required]], 
-      accountId: {value:null, disabled: true},
+      accountId: {value:null, disabled: false},
       idportfolio: {value:null, disabled: true},
       d_clientname: {value:null, disabled: true}, 
       d_portfolioCode: {value:null, disabled: true}
@@ -70,7 +67,7 @@ export class AppAccAccountModifyFormComponent implements OnInit, AfterViewInit {
       ledgerNo: [null, {validators: [Validators.required], updateOn:'blur' } ],
       name: [null, [Validators.required]], 
       accountTypeID: [null, [Validators.required]],  
-      accountId: {value:null, disabled: true},
+      accountId: {value:null, disabled: false},
       currecyCode: [null, [Validators.required, Validators.pattern('[0-9]*') ]],
       externalAccountNo: {value:null, disabled: false}, 
       clientID: [{value:null, disabled: true}, [Validators.required]],   
@@ -84,31 +81,20 @@ export class AppAccAccountModifyFormComponent implements OnInit, AfterViewInit {
     })
   }
   ngOnInit(): void {
-    this.title = this.action;
-    switch (this.action) {
-      case 'Create': 
-      break;
-      case 'Create_Example':
-        this.data['accountId'] = null;
-        (this.aType == 1)? this.accountLedgerModifyForm.patchValue(this.data): this.accountModifyForm.patchValue(this.data)
-        this.title = 'Create';
-      break;
-      default :
-      console.log('this.data)',this.data);
-      (this.aType == 1)? this.accountLedgerModifyForm.patchValue(this.data): this.accountModifyForm.patchValue(this.data)
-      break;
-    } 
-    if (this.action == 'View') {
-      this.accountModifyForm.disable();
-      this.accountLedgerModifyForm.disable();
-    }
+    (this.aType == 1)? this.accountLedgerModifyForm.patchValue(this.data): this.accountModifyForm.patchValue(this.data)
   }
-  ngAfterViewInit(): void {
+  ngAfterContentInit(): void {
     let accType = this.d_APTypeCodeAccount.value == 1 ? 'Active' : 'Passive'
     this.accountLedgerModifyForm.controls['d_APType'].patchValue(accType)
-
-    let accountNoToCheck = (this.action !== 'Create_Example') ? this.accountNo.value : null
-    let accountNoToCheckLedger = (this.action !== 'Create_Example') ? this.ledgerNo.value : null
+    let accountNoToCheck =   this.accountNo.value;
+    let accountNoToCheckLedger = this.ledgerNo.value;
+    if (this.action === 'Create_Example') {
+      accountNoToCheck =   null;
+      accountNoToCheckLedger = null;
+      this.action='Create'
+      this.accountNo.setErrors({accountIsTaken:true})
+      this.ledgerNo.setErrors({accountIsTaken:true})
+    } 
     this.accountNo.setAsyncValidators (
       customAsyncValidators.AccountingUniqueAccountNoAsyncValidator(this.AccountingDataService, accountNoToCheck) 
     )
@@ -152,55 +138,43 @@ export class AppAccAccountModifyFormComponent implements OnInit, AfterViewInit {
     if (result['name']=='error') {
       this.CommonDialogsService.snackResultHandler(result)
     } else {
-      this.CommonDialogsService.snackResultHandler({name:'success', detail: result + 'account'}, action)
-      this.AccountingDataService.sendReloadAccontList (this.accountModifyForm.controls['accountId']);
+      this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' account'}, action);
+      this.aType == 1? this.AccountingDataService.sendReloadLedgerAccontList (this.ledgerNoId.value): this.AccountingDataService.sendReloadAccontList (this.accountId.value);
     }
-    this.formDisabledFields.forEach(elem => this.accountModifyForm.controls[elem].disable())
+    // this.formDisabledFields.forEach(elem => this.accountModifyForm.controls[elem].disable())
   }
   updateAccountData(action:string){
     this.formDisabledFields.forEach(elem => this.accountModifyForm.controls[elem].enable())
     switch (action) {
-      case 'Create_Example':
       case 'Create':
-        this.AccountingDataService.createAccountAccounting(this.accountModifyForm.value).then(result => this.snacksBox(result,'Created'))
+        this.AccountingDataService.updateAccountAccounting(this.accountModifyForm.value,'Create').subscribe(result => this.snacksBox(result,'Created'))
       break;
       case 'Edit':
-        this.AccountingDataService.updateAccountAccounting (this.accountModifyForm.value).then(result => this.snacksBox(result,'Updated'))
+        this.AccountingDataService.updateAccountAccounting (this.accountModifyForm.value,'Edit').subscribe(result => this.snacksBox(result,'Updated'))
       break;
       case 'Delete':
-        this.CommonDialogsService.confirmDialog('Delete Account ' + this.accountNo.value).subscribe(isConfirmed => {
-          if (isConfirmed.isConfirmed) {
-            this.accountModifyForm.controls['accountId'].enable()
-            this.AccountingDataService.deleteAccountAccounting (this.accountModifyForm.value['accountId']).then (result =>{
-              this.snacksBox(result,'Deleted')
-              this.CommonDialogsService.dialogCloseAll();
-            })
-          }
-        })
+        this.CommonDialogsService.confirmDialog('Delete Account ' + this.accountNo.value).pipe(
+          filter (isConfirmed => isConfirmed),
+          switchMap(isConfirmed => this.AccountingDataService.updateAccountAccounting(this.accountModifyForm.value,'Delete'))
+        ).subscribe(result => this.snacksBox(result,'Deleted'))
       break;
     }
   }
   updateLedgerAccountData (action:string){
-    console.log('action',action);
     this.formLedgerDisabledFields.forEach(elem => this.accountLedgerModifyForm.controls[elem].enable())
     switch (action) {
       case 'Create_Example':
       case 'Create':
-        this.AccountingDataService.createLedgerAccountAccounting(this.accountLedgerModifyForm.value).then(result => this.snacksBox(result,'Created'))
+        this.AccountingDataService.updateLedgerAccountAccounting(this.accountLedgerModifyForm.value,'Create').subscribe(result => this.snacksBox(result,'Created'))
       break;
       case 'Edit':
-        this.AccountingDataService.updateLedgerAccountAccounting (this.accountLedgerModifyForm.value).then(result => this.snacksBox(result,'Updated'))
+        this.AccountingDataService.updateLedgerAccountAccounting (this.accountLedgerModifyForm.value,'Edit').subscribe(result => this.snacksBox(result,'Updated'))
       break;
       case 'Delete':
-        this.CommonDialogsService.confirmDialog('Delete Account ' + this.ledgerNo.value).subscribe(isConfirmed=>{
-          if (isConfirmed.isConfirmed) {
-            this.ledgerNoId.enable()
-            this.AccountingDataService.deleteLedgerAccountAccounting (this.ledgerNoId.value).then (result =>{
-              this.snacksBox(result,'Deleted')
-              this.CommonDialogsService.dialogCloseAll();
-            })
-          }
-        })
+        this.CommonDialogsService.confirmDialog('Delete Account ' + this.ledgerNo.value).pipe(
+          filter (isConfirmed => isConfirmed),
+          switchMap(isConfirmed => this.AccountingDataService.updateLedgerAccountAccounting(this.accountLedgerModifyForm.value,'Delete'))
+        ).subscribe(result => this.snacksBox(result,'Deleted'))
       break;
     }
   }

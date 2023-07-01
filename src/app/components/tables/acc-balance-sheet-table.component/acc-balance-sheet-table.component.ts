@@ -21,9 +21,6 @@ import { formatNumber } from '@angular/common';
 import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import { AuthService } from 'src/app/services/auth.service';
 
-export interface Fruit {
-  name: string;
-}
 @Component({
   selector: 'app-table-balance-sheet',
   templateUrl: './acc-balance-sheet-table.component.html',
@@ -314,7 +311,7 @@ export class AppTableBalanceSheetComponent   {
     })
   } 
   executeClosingBalance () {
-    this.AccountingDataService.accountingBalanceCloseInsert ({'closingDate' : new Date(this.firstClosingDate).toDateString()}).then ((result) => this.updateResultHandler(result,'Balance was closed for '+ new Date(this.firstClosingDate).toDateString()+ '. Created'))
+    this.AccountingDataService.accountingBalanceCloseInsert ({'closingDate' : new Date(this.firstClosingDate).toDateString()}).subscribe ((result) => this.updateResultHandler(result,'Balance was closed for '+ new Date(this.firstClosingDate).toDateString()+ '. Created'))
   }
   async checkBalance (dateBalance: string) {
     this.totalPassive = 0;
@@ -338,7 +335,7 @@ export class AppTableBalanceSheetComponent   {
   openBalance (date:string) {
     this.CommonDialogsService.confirmDialog('Open date: ' + date ).subscribe(action => {
       if (action.isConfirmed===true) {
-        this.AccountingDataService.accountingBalanceDayOpen({'dateToOpen' : new Date(date).toDateString()}).then ((result) => 
+        this.AccountingDataService.accountingBalanceDayOpen({'dateToOpen' : new Date(date).toDateString()}).subscribe ((result) => 
         this.updateResultHandler(result, 'Operational day ' + new Date(date).toDateString()+ ' has been opened'))
       }
     })
