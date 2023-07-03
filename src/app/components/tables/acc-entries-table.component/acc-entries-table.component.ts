@@ -14,7 +14,7 @@ import {MatChipInputEvent} from '@angular/material/chips';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { AppTableAccAccountsComponent } from '../acc-accounts-table.component/acc-accounts-table.component';
 import { MatOption } from '@angular/material/core';
-import { menuColorGl } from 'src/app/models/constants';
+import { investmentNodeColor, menuColorGl } from 'src/app/models/constants';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { formatNumber } from '@angular/common';
 import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
@@ -35,27 +35,8 @@ import { AuthService } from 'src/app/services/auth.service';
 export class AppTableAccEntriesComponent implements OnInit {
   accessState: string = 'none';
   disabledControlElements: boolean = false;
-  columnsToDisplay = [
-    'd_Debit',
-    'd_Credit',
-    't_dataTime', 
-    'd_xActTypeCodeExtName', 
-    't_XactTypeCode',  
-    't_amountTransaction', 
-    'd_entryDetails', 
-    't_extTransactionId'
-  ]
-  columnsHeaderToDisplay = [
-    'debit',
-    'credit',
-    'dataTime', 
-    'Code', 
-    'Ledger',  
-    'amount', 
-    'Details', 
-    'ExtId',
-    'Action'
-  ];
+  columnsToDisplay = ['t_id','d_Debit','d_Credit','t_dataTime','d_xActTypeCodeExtName','t_XactTypeCode','t_amountTransaction','d_entryDetails', 't_extTransactionId']
+  columnsHeaderToDisplay = ['ID','Debit','Credit','Date', 'Code', 'Ledger',  'Amount', 'Details', 'ExtID', 'Action'];
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
   dataSource: MatTableDataSource<bAccountsEntriesList>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -87,6 +68,8 @@ export class AppTableAccEntriesComponent implements OnInit {
   TransactionTypes: bcTransactionType_Ext[] = [];
   filterEntryTypes:string[] = ['ClearAll'];
   paramRowData : any = null;
+  investmentNodeColor=investmentNodeColor;
+
   constructor(
     private AccountingDataService:AppAccountingService, 
     private CommonDialogsService:HadlingCommonDialogsService,
@@ -133,9 +116,7 @@ export class AppTableAccEntriesComponent implements OnInit {
       })
     break;
     }
-    
   }
-
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
@@ -241,6 +222,4 @@ export class AppTableAccEntriesComponent implements OnInit {
   get  dateRangeEnd() {return this.searchParametersFG.get('dateRangeEnd') } 
   get  entryTypes () {return this.searchParametersFG.get('entryType') } 
   get  ExtId () {return this.searchParametersFG.get('ExtID') } 
-  
- 
 }

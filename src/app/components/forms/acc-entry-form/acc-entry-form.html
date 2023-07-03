@@ -30,8 +30,7 @@
   <mat-form-field style="width: 20%; ">
     <input matInput placeholder="Amount" formControlName="t_amountTransaction" [value]="amountTransaction.value"
     (blur)="amountFormat();
-            showAValidator();
-            updateExpectedBalance();">
+            showAValidator();">
     <mat-error  *ngIf="amountTransaction?.errors?.['required']">
       The field is required.    
     </mat-error>
@@ -41,8 +40,7 @@
   </mat-form-field>
   <mat-form-field  style="width: 17%;" >
     <input matInput [min]="FirstOpenedAccountingDate" [matDatepicker]="picker" placeholder="Choose a date"  formControlName="t_dataTime" 
-    (dateChange)="showAValidator();
-                  updateExpectedBalance();" >
+    (dateChange)="showAValidator();">
     <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
     <mat-datepicker #picker></mat-datepicker>
   </mat-form-field>
@@ -51,8 +49,7 @@
     aria-label="Font Style" matTooltip="Choose Ledger Side"
     (click)="xActTypeCode_Ext.patchValue(''); 
              xActTypeCode_Ext.markAsTouched();
-             showAValidator();
-             updateExpectedBalance();">
+             showAValidator();">
     <mat-button-toggle 
       [disabled]="d_transactionType.value=='LL'" style="width: 50%;font-size: 18px;" [value]="1">
       Debit 
@@ -67,6 +64,7 @@
       <mat-slide-toggle #overdraft 
         style="font-size:85%; letter-spacing: .05rem;"
         [checked]="!ledgerNo.hasAsyncValidator(validatorLedgerAccountOverdraft)"
+        [style.color]="overdraft.checked ? 'rgb(43, 43, 245)' : 'brown'"
         (toggleChange)="toggleOverdraftValidator(overdraft,'d_ledgerNo')"
         >Overdraft {{overdraft.checked? 'allowed!':'forbidden'}}
       </mat-slide-toggle>
@@ -89,13 +87,11 @@
         The field is required.    
       </mat-error>
     </mat-form-field>
-    <!-- [style.color]="overdraft.checked ? 'rgb(43, 43, 245)' : 'brown'" -->
-    
-    <!-- [style.color]="overdraft.checked ? 'rgb(43, 43, 245)' : 'brown'"
-  -->   <mat-form-field *ngSwitchCase="1"style="width: 35%;">
+    <mat-form-field *ngSwitchCase="1"style="width: 35%;">
       <mat-slide-toggle #overdraft 
         style="font-size:85%; letter-spacing: .05rem;"
         [checked]="!accountNo.hasAsyncValidator(validatorAccountOverdraft)"
+        [style.color]="overdraft.checked ? 'rgb(43, 43, 245)' : 'brown'"
         (toggleChange)="toggleOverdraftValidator(overdraft,'d_accountNo')"
         >Overdraft {{overdraft.checked? 'allowed!':'forbidden'}}
       </mat-slide-toggle>
@@ -119,12 +115,11 @@
         Expceted balance {{d_closingBalance.value | currency}}
       </mat-hint>
     </mat-form-field>
-    
-    <!-- [style.color]="overdraft.checked ? 'rgb(43, 43, 245)' : 'brown'" -->
     <mat-form-field *ngSwitchCase="2" style="width: 35%;">
       <mat-slide-toggle #overdraft 
         style="font-size:85%; letter-spacing: .05rem;"
         [checked]="!accountNo.hasAsyncValidator(validatorAccountOverdraft)"
+        [style.color]="overdraft.checked ? 'rgb(43, 43, 245)' : 'brown'"
         (toggleChange)="toggleOverdraftValidator( overdraft,'d_accountNo' )"
         >Overdraft {{overdraft.checked? 'allowed!':'forbidden'}}
       </mat-slide-toggle>
@@ -149,7 +144,6 @@
         Expceted balance {{d_closingBalance.value | currency}}
       </mat-hint>
     </mat-form-field>
-    
     <mat-form-field *ngSwitchCase="2"style="width: 35%;">
       <mat-slide-toggle #overdraft 
         style="font-size:85%; letter-spacing: .05rem;"
@@ -179,7 +173,6 @@
         The field is required.    
       </mat-error>
     </mat-form-field>
-    
     <mat-form-field *ngSwitchCase="0" style="width: 35%;">
       <mat-slide-toggle #overdraft 
         style="font-size:85%; letter-spacing: .05rem;"
@@ -209,8 +202,6 @@
         The field is required.    
       </mat-error>
     </mat-form-field>
-
-
     <mat-form-field *ngSwitchCase="0"style="width: 35%;">
       <mat-slide-toggle #overdraft 
         style="font-size:85%; letter-spacing: .05rem;"
@@ -239,12 +230,6 @@
         Expceted balance {{d_closingBalance.value | currency}}
       </mat-hint>
     </mat-form-field>
-    <mat-form-field *ngSwitchCase="0"style="width: 5%;">
-      <input matInput placeholder="L_id" formControlName="t_ledgerNoId">
-    </mat-form-field> 
-    <mat-form-field *ngSwitchCase="0"style="width: 5%;">
-      <input matInput placeholder="A_id" formControlName="t_accountId">
-    </mat-form-field> 
     <mat-error 
       class ="mat-form-field" 
       style="background-color: rgb(155, 154, 154); width: 50%;" 
@@ -258,15 +243,11 @@
       Incorrect client account number. Use search loop
     </mat-error>
   </span>
-
   <mat-form-field style="width: 95%;">
     <input matInput placeholder="entryDetails" formControlName="t_entryDetails">
   </mat-form-field>
   <h3 *ngIf="action!='View'"
     [style.color]="entryModifyForm.invalid ? 'rgb(252, 113, 113)' : null">
     {{entryModifyForm.invalid? 'Please check the form. Data is invalid' : 'Data is valid. Please select "Submit data"'}}
-
   </h3>
-
 </form>
-<!-- </mat-expansion-panel> -->

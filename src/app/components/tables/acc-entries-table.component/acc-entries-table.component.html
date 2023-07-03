@@ -122,16 +122,21 @@
           <p style="color: rgb(198, 255, 215);" *ngSwitchCase="'t_dataTime'">
             {{columnsHeaderToDisplay[i]  | titlecase}} 
           </p>
-<!--           <p style="width: 100%"  *ngSwitchCase="'d_entryDetails'">
-            {{columnsHeaderToDisplay[i]  | titlecase}} 
-          </p> -->
+          
         <p *ngSwitchDefault>
-          {{columnsHeaderToDisplay[i]  | titlecase}} 
+          {{columnsHeaderToDisplay[i] }} 
         </p>
       </span>
       </th>
       <td  mat-cell *matCellDef="let element" [cdkContextMenuTriggerFor]="instrumentcontextmenu" > 
         <span [ngSwitch]="column">
+          <p *ngSwitchCase="'t_id'">
+            <button mat-stroked-button style="font-size: 18px; margin-top: 3%; min-width: 70%;"  matTooltip="Entry details"
+            [style.background-color] =  "investmentNodeColor"
+            (click)="openEntryModifyForm(disabledControlElements? 'View': 'Edit', element)">
+              {{element[column]}}
+            </button> 
+          </p>
           <p  *ngSwitchCase="'t_dataTime'">
             {{element[column] | date}} 
           </p>
