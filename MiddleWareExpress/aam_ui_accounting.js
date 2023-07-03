@@ -17,6 +17,7 @@ async function fUpdateLedgerAccountAccounting (request, response) {
 }
 async function fUpdateLLEntryAccounting (request, response) {
   let fields =  ['ledgerID_Debit', 'dateTime',  'XactTypeCode_Ext', 'ledgerID',  'amount', 'entryDetails', 'extTransactionId']
+  
   db_common_api.fUpdateTableDB ('bLedgerTransactions',fields,'id',request, response)
 }
 async function fUpdateEntryAccountAccounting (request, response) {
