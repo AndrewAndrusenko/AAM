@@ -17,50 +17,12 @@ async function fUpdateLedgerAccountAccounting (request, response) {
 }
 async function fUpdateLLEntryAccounting (request, response) {
   let fields =  ['ledgerID_Debit', 'dateTime',  'XactTypeCode_Ext', 'ledgerID',  'amount', 'entryDetails', 'extTransactionId']
-  
   db_common_api.fUpdateTableDB ('bLedgerTransactions',fields,'id',request, response)
 }
 async function fUpdateEntryAccountAccounting (request, response) {
   let fields =  ['ledgerNoId', 'dataTime', 'XactTypeCode', 'XactTypeCode_Ext', 'accountId',  'amountTransaction', 'entryDetails', 'extTransactionId']
   db_common_api.fUpdateTableDB ('bAccountTransaction',fields,'id',request, response)
 }
-/* async function fcreateEntryAccounting (request, response) {
-  paramArr = request.body.data
-  const query = {
-  text: 'INSERT INTO public."bAccountTransaction" ' +
-  ' () ' +
-  ' VALUES '+
-  '(${t_ledgerNoId}, ${t_dataTime}, ${t_XactTypeCode}, ${t_XactTypeCode_Ext}, ${t_accountId}, ${t_amountTransaction}, ${t_entryDetails},  ${t_extTransactionId});',
-    values: paramArr
-  }
-  sql = pgp.as.format(query.text,query.values)
-  pool.query (sql,  (err, res) => {if (err) {
-    console.log (err.stack.split("\n", 1).join(""))
-    err.detail = err.stack
-    return response.send(err)
-  } else {
-    return response.status(200).json(res.rowCount)}
-  })  
-} */
-/* 
-async function fcreateLLEntryAccounting (request, response) {
-  paramArr = request.body.data
-  const query = {
-  text: 'INSERT INTO public."bLedgerTransactions" ' +
-  ' () ' +
-  ' VALUES '+
-  '(${t_ledgerNoId}, ${t_dataTime}::date,  ${t_XactTypeCode_Ext}, ${t_accountId}, ${t_amountTransaction}, ${t_entryDetails},  ${t_extTransactionId});',
-    values: paramArr
-  } 
-  sql = pgp.as.format(query.text,query.values)
-  pool.query (sql,  (err, res) => {if (err) {
-    console.log (err.stack.split("\n", 1).join(""))
-    err.detail = err.stack
-    return response.send(err)
-  } else {
-    return response.status(200).json(res.rowCount)}
-  })  
-} */
 async function fGetAccountingData (request,response) {
   let conditions = {}
   const query = {text: '', values:[]}
@@ -362,161 +324,39 @@ async function GetEntryScheme (request, response) {
   })
 }
 async function fCreateEntryAccountingInsertRow (request, response) {
-    data = request.body.data
-    fields = Object.keys(data).map(filed => `"${filed}"`).join()
-    const query = {
-    text: 'INSERT INTO public."bAccountTransaction" ' +
-          '(' +  fields + ')' +
-          ' VALUES (' + Object.values (data).map(value => `'${value}'`).join() + ');',
-    }
-    // sql = pgp.as.format(query.text,query.values)
-    pool.query (query.text,  (err, res) => {if (err) {
-      console.log (err.stack.split("\n", 1).join(""))
-      err.detail = err.stack
-      return response.send(err)
-    } else {
-      return response.status(200).json(res.rowCount)}
-    })  
+    fields = Object.keys(request.body.data).map(filed => `"${filed}"`).join()
+    let sqlText = 'INSERT INTO public."bAccountTransaction" '+'('+fields+')'+' VALUES ('+Object.values(request.body.data).map(value =>`'${value}'`).join() + ');';
+    db_common_api.queryExecute(sqlText,response)
 }
-
-/* async function fdeleteEntryrAccountAccounting (request, response) {
-  const query = {text: 'DELETE FROM public."bAccountTransaction" WHERE "id"=${id};', values: request.body}
-  sql = pgp.as.format(query.text,query.values)
-  pool.query (sql,  (err, res) => {if (err) { return response.send(err)} else { return response.status(200).json(res.rowCount) }
-  }) 
-}
-async function fupdateEntryAccountAccounting (request, response) {
-  paramArr = request.body.data
-  const query = {
-  text: 'UPDATE public."bAccountTransaction" ' +
-	'SET  ' +
-   '"ledgerNoId"=${t_ledgerNoId}, ' +
-   '"dataTime"=${t_dataTime}::date, '+
-   '"XactTypeCode_Ext"=${t_XactTypeCode_Ext}, '+
-   '"XactTypeCode"=${t_XactTypeCode}, '+
-   '"accountId"=${t_accountId}, '+
-   '"amountTransaction"=${t_amountTransaction}, '+
-   '"entryDetails"=${t_entryDetails}, '+
-   '"extTransactionId"=${t_extTransactionId} '+
-	 'WHERE id = ${t_id};',
-    values: paramArr
-  } 
-  sql = pgp.as.format(query.text,query.values)
-   pool.query (sql,  (err, res) => {if (err) {
-    console.log (err.stack.split("\n", 1).join(""))
-    err.detail = err.stack
-    return response.send(err)
-  } else {
-    return response.status(200).json(res.rowCount)}
-  })   
-}
- */
-/* async function fdeleteLLEntryrAccountAccounting (request, response) {
-  const query = {text: 'DELETE FROM public."bLedgerTransactions" WHERE "id"=${id};', values: request.body}
-  sql = pgp.as.format(query.text,query.values)
-  console.log('sql', sql);
-  
-  pool.query (sql,  (err, res) => {if (err) { return response.send(err)} else { return response.status(200).json(res.rowCount) }
-  }) 
-}
-async function fupdateLLEntryAccountAccounting (request, response) {
-  paramArr = request.body.data
-  console.log('param', paramArr, paramArr.t_dataTime.value);
-  const query = {
-  text: 'UPDATE public."bLedgerTransactions" ' +
-	'SET  ' +
-   '"ledgerID_Debit"=${t_ledgerNoId}, ' +
-   '"dateTime"=${t_dataTime}::date, '+
-   '"XactTypeCode_Ext"=${t_XactTypeCode_Ext}, '+
-   '"ledgerID"=${t_accountId}, '+
-   '"amount"=${t_amountTransaction}, '+
-   '"entryDetails"=${t_entryDetails}, '+
-   '"extTransactionId"=${t_extTransactionId} '+
-	 'WHERE id = ${t_id};',
-    values: paramArr
-  } 
-  sql = pgp.as.format(query.text,query.values)
-   pool.query (sql,  (err, res) => {if (err) {
-    console.log (err.stack.split("\n", 1).join(""))
-    err.detail = err.stack
-    return response.send(err)
-  } else {
-    return response.status(200).json(res.rowCount)}
-  })   
-} */
 async function faccountingOverdraftAccountCheck (request, response) {
-  paramArr = request.query
-  console.log('param', paramArr);
   const query = {
     text: 'SELECT "accountId", "openingBalance", CAST ("closingBalance" AS NUMERIC) AS "closingBalance", "closingBalance" AS "EndBalance"'+
     'FROM f_checkoverdraftbyaccountandbydate'+
     '(${transactionDate}, ${accountId}, ${xactTypeCode}, ${transactionAmount}, ${id}, ${FirstOpenedAccountingDate}) ', 
-    values: paramArr
+    values: request.query
   } 
-  sql = pgp.as.format(query.text,query.values)
-  console.log('sql', sql);
-   pool.query (sql,  (err, res) => {if (err) {
-    console.log (err.stack.split("\n", 1).join(""))
-    err.detail = err.stack
-    return response.send(err)
-  } else {
-    return response.status(200).json(res.rows)}
-  })   
+  sql = pgp.as.format(query.text,query.values);
+  db_common_api.queryExecute(sql,response)
 }
 async function faccountingOverdraftLedgerAccountCheck (request, response) {
-  paramArr = request.query
-  console.log('param', paramArr);
   const query = {
-    text: 'SELECT * , '+
-    'CAST(("openingBalance" +	"accountTransaction" + "CrSignAmount" + "DbSignAmount" + "signedTransactionAmount") AS numeric) as "closingBalance" '+
-    'FROM f_CheckOverdraftByLedgerAndByDate'+
+    text: 'SELECT *, CAST(("openingBalance" +	"accountTransaction" + "CrSignAmount" + "DbSignAmount" + "signedTransactionAmount") AS numeric) as "closingBalance" FROM f_CheckOverdraftByLedgerAndByDate'+
     '(${transactionDate}, ${accountId}, ${xactTypeCode}, ${transactionAmount}, ${id}, ${FirstOpenedAccountingDate} )', 
-    values: paramArr
+    values: request.query
   } 
-  sql = pgp.as.format(query.text,query.values)
-  console.log('tLedge', sql);
-   pool.query (sql,  (err, res) => {if (err) {
-    console.log (err.stack.split("\n", 1).join(""))
-    err.detail = err.stack
-    return response.send(err)
-  } else {
-    // console.log('validator', res.rows[0]);
-    return response.status(200).json(res.rows)}
-  })   
+  sql = pgp.as.format(query.text,query.values);
+  db_common_api.queryExecute(sql,response)
 }
 async function faccountingBalanceCloseInsert (request, response) {
-  paramArr = request.body.data
-  const query = {
-  text: 'SELECT public.f_b_close_balance_for_date(${closingDate})',
-  values: paramArr
-  } 
-
-  sql = pgp.as.format(query.text,query.values)
-   pool.query (sql,  (err, res) => {if (err) {
-    console.log (err.stack.split("\n", 1).join(""))
-    err.detail = err.stack
-    return response.send(err)
-  } else {
-    return response.status(200).json(res.rowCount)}
-  })   
+  sqlText = 'SELECT public.f_b_close_balance_for_date(${closingDate})';
+  sql = pgp.as.format(sqlText,request.body.data)
+  db_common_api.queryExecute(sql,response)
 }
 async function faccountingBalanceDayOpen (request, response) {
-  paramArr = request.body.data
-  const query = {
-  text: 
-  'DELETE FROM public."bAccountStatement" WHERE "dateAcc"::date = ${dateToOpen} RETURNING *; ' +
-  'DELETE FROM public."bLedgerStatement" WHERE "dateAcc"::date = ${dateToOpen} RETURNING *;'
-  } 
-  sql = pgp.as.format(query.text,paramArr)
-
-   pool.query (sql,  (err, res) => {if (err) {
-    console.log (err.stack.split("\n", 1).join(""))
-    err.detail = err.stack
-    return response.send(err)
-  } else {
-    return response.status(200).json(res[0].rowCount + res[1].rowCount)}
-  })  
-   
+  sqlText = 'DELETE FROM public."bAccountStatement" WHERE "dateAcc"::date = ${dateToOpen} RETURNING *; ' +
+            'DELETE FROM public."bLedgerStatement" WHERE "dateAcc"::date = ${dateToOpen} RETURNING *;'
+  sql = pgp.as.format(sqlText,request.body.data);
+  db_common_api.queryExecute(sql,response);
 }
 module.exports = {
   fGetMT950Transactions,

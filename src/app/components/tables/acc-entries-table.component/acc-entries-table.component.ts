@@ -125,7 +125,7 @@ export class AppTableAccEntriesComponent implements OnInit {
   openEntryModifyForm (actionType:string, row: any ) {
     this.dialogRef = this.dialog.open(AppAccEntryModifyFormComponent ,{minHeight:'400px', maxWidth:'1000px',data:{data:row} });
     this.dialogRef.componentInstance.action = actionType;
-    this.dialogRef.componentInstance.title = ['Create','CreateLL','Create_Example'].includes(actionType)? actionType: 'Create New';
+    // this.dialogRef.componentInstance.title = ['Create','CreateLL','Create_Example'].includes(actionType)? actionType: 'Create New';
     this.dialogRef.componentInstance.data =  row;
     this.dialogRef.componentInstance.FirstOpenedAccountingDate = this.FirstOpenedAccountingDate;
     switch (actionType) {
@@ -134,7 +134,6 @@ export class AppTableAccEntriesComponent implements OnInit {
       break;
       case 'CreateLL':
         this.dialogRef.componentInstance.action = 'Create';
-        this.dialogRef.componentInstance.title = 'Create';
         this.dialogRef.componentInstance.data = {t_XactTypeCode:0, d_transactionType:'LL'} 
       break;
       case 'View':

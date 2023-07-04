@@ -1,12 +1,12 @@
 <mat-toolbar style="margin-left: 1%;" color="primary" >
-  {{title}} Entry: {{d_transactionType.value=='LL'? ' Ledger - Ledger':' Account - Ledger'}} ID: {{id.value}} {{d_transactionType.value}}
+  {{action}} Entry: {{d_transactionType.value=='LL'? ' Ledger - Ledger':' Account - Ledger'}} ID: {{id.value}} {{d_transactionType.value}}
 </mat-toolbar>
 <button mat-raised-button color="accent" 
   [disabled]="!(entryModifyForm.valid && submitbox.checked)"
   (click)="showAValidator();
            updateEntryData(action)"
   style="margin-top: 1px; width: 200px; font-size: 18px; margin-left: 1%;">
-  {{title}} Entry 
+  {{action}} Entry 
 </button>
 <mat-checkbox color="primary"  #submitbox checked="false" style = "margin-left: 5%;"
   (click)="showAValidator();
@@ -23,8 +23,8 @@
       </mat-option>
       </ng-container>
     </mat-select>
-    <mat-error  *ngIf="xActTypeCode_Ext.invalid && xActTypeCode_Ext.touched && xActTypeCode_Ext.value==''">
-      The field is required.    
+    <mat-error *ngIf="xActTypeCode_Ext.errors?.['required']">
+      Required!
     </mat-error>
   </mat-form-field>
   <mat-form-field style="width: 20%; ">
@@ -43,6 +43,9 @@
     (dateChange)="showAValidator();">
     <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
     <mat-datepicker #picker></mat-datepicker>
+    <mat-error *ngIf="ledgerNo.errors?.['required']">
+      Required!
+    </mat-error>
   </mat-form-field>
   <mat-button-toggle-group [disabled]="d_transactionType.value=='LL'"
     style=" width: 26%;font-size: 18px;" formControlName="t_XactTypeCode" 
@@ -60,7 +63,7 @@
     </mat-button-toggle>
   </mat-button-toggle-group>
   <span [ngSwitch]="xActTypeCode.value">
-    <mat-form-field *ngSwitchCase="1" style="width: 35%;">
+    <mat-form-field *ngSwitchCase="1" style="width: 35%;" [appearance]="!ledgerNo.value? 'fill' : null">
       <mat-slide-toggle #overdraft 
         style="font-size:85%; letter-spacing: .05rem;"
         [checked]="!ledgerNo.hasAsyncValidator(validatorLedgerAccountOverdraft)"
@@ -83,11 +86,11 @@
         *ngIf="!ledgerNo.hasError('overdraft')">
         Expceted balance {{d_closingLedgerBalance.value | currency}}
       </mat-hint>
-      <mat-error  *ngIf="ledgerNo.invalid && ledgerNo.touched && ledgerNo.value==''">
-        The field is required.    
+      <mat-error *ngIf="ledgerNo.errors?.['required']">
+        Required!
       </mat-error>
     </mat-form-field>
-    <mat-form-field *ngSwitchCase="1"style="width: 35%;">
+    <mat-form-field *ngSwitchCase="1"style="width: 35%;"  [appearance]="!accountNo.value? 'fill' : null">
       <mat-slide-toggle #overdraft 
         style="font-size:85%; letter-spacing: .05rem;"
         [checked]="!accountNo.hasAsyncValidator(validatorAccountOverdraft)"
@@ -99,8 +102,8 @@
       <button mat-icon-button matSuffix (click)="selectAccount()">
         <mat-icon *ngIf="action!=='View'" class = "icon_search">search</mat-icon>
       </button>
-      <mat-error  *ngIf="accountNo.invalid && accountNo.touched && accountNo.value==''">
-        The field is required.    
+      <mat-error *ngIf="accountNo.errors?.['required']">
+        Required!
       </mat-error>
       <mat-error *ngIf="accountNo.hasError('overdraft')">
         Overdraft!! {{d_closingBalance.value| currency }}
@@ -115,7 +118,7 @@
         Expceted balance {{d_closingBalance.value | currency}}
       </mat-hint>
     </mat-form-field>
-    <mat-form-field *ngSwitchCase="2" style="width: 35%;">
+    <mat-form-field *ngSwitchCase="2" style="width: 35%;" [appearance]="!accountNo.value? 'fill' : null">
       <mat-slide-toggle #overdraft 
         style="font-size:85%; letter-spacing: .05rem;"
         [checked]="!accountNo.hasAsyncValidator(validatorAccountOverdraft)"
@@ -128,8 +131,8 @@
         (click)="selectAccount()">
         <mat-icon *ngIf="action!=='View'" class = "icon_search">search</mat-icon>
       </button>
-      <mat-error  *ngIf="accountNo.invalid && accountNo.touched && accountNo.value==''">
-        The field is required.    
+      <mat-error *ngIf="accountNo.errors?.['required']">
+        Required!
       </mat-error>
       <mat-error *ngIf="accountNo.hasError('overdraft')">
         Overdraft!! {{d_closingBalance.value | currency}}
@@ -139,12 +142,11 @@
       </mat-error>
       <mat-hint 
         class="mat-error" 
-        [style.color]="(d_closingBalance.value<0) ? 'brown' : 'white'"
-        >
+        [style.color]="(d_closingBalance.value<0) ? 'brown' : 'white'">
         Expceted balance {{d_closingBalance.value | currency}}
       </mat-hint>
     </mat-form-field>
-    <mat-form-field *ngSwitchCase="2"style="width: 35%;">
+    <mat-form-field *ngSwitchCase="2"style="width: 35%;" [appearance]="!ledgerNo.value? 'fill' : null">
       <mat-slide-toggle #overdraft 
         style="font-size:85%; letter-spacing: .05rem;"
         [checked]="!ledgerNo.hasAsyncValidator(validatorLedgerAccountOverdraft)"
@@ -169,11 +171,11 @@
         *ngIf="!ledgerNo.hasError('overdraft')">
         Expceted balance {{d_closingLedgerBalance.value | currency}}
       </mat-hint>
-      <mat-error  *ngIf="ledgerNo.invalid && ledgerNo.touched && ledgerNo.value==''">
-        The field is required.    
+      <mat-error *ngIf="ledgerNo.errors?.['required']">
+        Required!
       </mat-error>
     </mat-form-field>
-    <mat-form-field *ngSwitchCase="0" style="width: 35%;">
+    <mat-form-field *ngSwitchCase="0" style="width: 35%;" [appearance]="!ledgerNo.value? 'fill' : null">
       <mat-slide-toggle #overdraft 
         style="font-size:85%; letter-spacing: .05rem;"
         [checked]="!ledgerNo.hasAsyncValidator(validatorLedgerAccountOverdraft)"
@@ -198,11 +200,11 @@
         *ngIf="!ledgerNo.hasError('overdraft')">
         Expceted balance {{d_closingLedgerBalance.value | currency}}
       </mat-hint>
-      <mat-error  *ngIf="ledgerNo.invalid && ledgerNo.touched && ledgerNo.value==''">
-        The field is required.    
+      <mat-error *ngIf="ledgerNo.errors?.['required']">
+        Required!
       </mat-error>
     </mat-form-field>
-    <mat-form-field *ngSwitchCase="0"style="width: 35%;">
+    <mat-form-field *ngSwitchCase="0"style="width: 35%;" [appearance]="!accountNo.value? 'fill' : null">
       <mat-slide-toggle #overdraft 
         style="font-size:85%; letter-spacing: .05rem;"
         [checked]="!accountNo.hasAsyncValidator(validatorLedgerLL2Overdraft)"
@@ -215,8 +217,8 @@
         (click)="selectLedger('account')">
         <mat-icon *ngIf="action!=='View'" class = "icon_search">search</mat-icon>
       </button>
-      <mat-error  *ngIf="accountNo.invalid && accountNo.touched && accountNo.value==''">
-        The field is required.    
+      <mat-error *ngIf="accountNo.errors?.['required']">
+        Required!
       </mat-error>
       <mat-error *ngIf="accountNo.hasError('overdraft')">
         Overdraft!! {{d_closingBalance.value | currency}}
@@ -244,7 +246,10 @@
     </mat-error>
   </span>
   <mat-form-field style="width: 95%;">
-    <input matInput placeholder="entryDetails" formControlName="t_entryDetails">
+    <input matInput placeholder="Entry Details" formControlName="t_entryDetails">
+    <mat-error *ngIf="entryDetails.errors?.['required']">
+      Required!
+    </mat-error>
   </mat-form-field>
   <h3 *ngIf="action!='View'"
     [style.color]="entryModifyForm.invalid ? 'rgb(252, 113, 113)' : null">
