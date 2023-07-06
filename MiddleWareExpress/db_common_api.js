@@ -13,9 +13,13 @@ async function queryExecute (sql, response, responseType) {
         err.detail = err.stack
         resolve (response? response.send(err):err)
       } else {
-        console.log('db_common_api ------------------- QTY rows',responseType==='rowCount'? res.rowCount:res.rows.length)
-        let result = responseType === 'rowCount'? res.rowCount : res.rows;
+        let rows = [];
+        res.length? res.map(el => rows.push(...el.rows) ): rows = res.rows;
+        result = responseType === 'rowCount'? rowsCount : rows;
+        console.log('db_common_api ------------------- QTY rows', rows.length)
         resolve (response? response.status(200).json(result):result)
+        // let rowsCount = res.length? res.reduce((acc,el) => acc+el.rowCount,0) : res.rowCount;
+        // console.log('db_common_api ------------------- QTY rows', rows)
       }
     })
   })

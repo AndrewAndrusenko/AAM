@@ -53,12 +53,11 @@
         (dateChange)="changeProcesDate($event.value)"
         matInput style="font-size: 18px;"  [matDatepicker]="dateToProcessSwift"  placeholder="Date to process">
         <mat-datepicker-toggle matSuffix [for]="dateToProcessSwift"></mat-datepicker-toggle>
-        <mat-datepicker  #dateToProcessSwift></mat-datepicker>
+        <mat-datepicker [dateClass]="dateClass" #dateToProcessSwift></mat-datepicker>
         <mat-error  *ngIf="cDateToProcessSwift.invalid &&  cDateToProcessSwift.value==null">
           The field is required or incorrect format.    
         </mat-error>
       </mat-form-field>
-
       <mat-form-field style=" margin-left: 2%; width: 12%; font-size: 18px; margin-bottom: 1%;" >
         <input #dateForAccounting 
         formControlName="cDateAccounting"

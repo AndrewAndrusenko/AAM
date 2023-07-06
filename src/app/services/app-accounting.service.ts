@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, ReplaySubject, Subject} from 'rxjs';
+import { Observable, ReplaySubject, Subject, observable} from 'rxjs';
 import { bAccounts, bAccountsEntriesList, bBalanceData, bBalanceFullData, bcAccountType_Ext, bcEnityType, bcTransactionType_Ext, bLedger, bLedgerAccounts, bLedgerBalanceData, SWIFTSGlobalListmodel, SWIFTStatement950model } from '../models/intefaces';
 
 @Injectable({
@@ -10,6 +10,7 @@ export class AppAccountingService {
   constructor(private http:HttpClient) { }
   private subjectReloadAccontList = new Subject<any>();
   private subjectReloadLedgerAccontList = new Subject<any>();
+  private subjectReloadBalanceSheet = new Subject<any>();
   private subjectFormState = new Subject<any>();
   private subjectEntryDraft = new Subject<any>();
   private subjectLoadedMT950Transactions = new Subject<any>();
@@ -42,7 +43,7 @@ export class AppAccountingService {
     let argumentsNames = ['dateMessage', 'id', 'MTType', 'Sender', 'Action']
     for (let index = 0; index < arguments.length; index++) {
       argName = argumentsNames[index];
-      arguments[index]===null? null: params[argName]= arguments[index]; 
+      arguments[index]==null? null: params[argName]= arguments[index]; 
     }
     return this.http.get <SWIFTSGlobalListmodel []>('/api/DEA/fGetMT950Transactions/', { params: params })
   }
@@ -88,6 +89,7 @@ export class AppAccountingService {
       })
       newEntryDraft['d_transactionType'] = 'AL';
       data.entryDraft = newEntryDraft; 
+      this.subjectEntryDraft.forEach(el=>console.log('subjectEntryDraft next'))
       this.subjectEntryDraft.next(data)
     })
   }
@@ -170,7 +172,6 @@ export class AppAccountingService {
       'FirstOpenedAccountingDate': FirstOpenedAccountingDate, 
       'Action': Action
     }
-    // console.log("getExpectedBalanceLedgerOverdraftCheck caller is " ,arguments);
     return this.http.get <bLedgerBalanceData []>('/api/DEA/accountingOverdraftLedgerAccountCheck/', { params: params })
   }
   /*----------------------Balance Sheets----------------------------------------------------*/
@@ -179,8 +180,11 @@ export class AppAccountingService {
     (searchParameters !== null) ?  params = {...params,...searchParameters}: null
     return this.http.get <bBalanceFullData []>('/api/DEA/fGetAccountingData/', { params: params })
   }
-  accountingBalanceCloseInsert (data:any) {return this.http.post ('/api/DEA/accountingBalanceCloseInsert/',{'data': data})}
-  accountingBalanceDayOpen (data:any) {return this.http.post ('/api/DEA/accountingBalanceDayOpen/',{'data': data})}
+  sendReloadBalanceSheet ( id:any) {this.subjectReloadBalanceSheet.next(id)}
+  getReloadBalanceSheet(): Observable<any> {return this.subjectReloadBalanceSheet.asObservable()}
+
+  accountingBalanceCloseInsert (data:any) {return this.http.post <any[]> ('/api/DEA/accountingBalanceCloseInsert/',{'data': data})}
+  accountingBalanceDayOpen (data:any) {return this.http.post <any[]> ('/api/DEA/accountingBalanceDayOpen/',{'data': data})}
   GetDeepBalanceCheck (dateBalanceToCheck:string, firstDayOfCalculation: string, Action: string):Observable <bBalanceFullData[]> {
     let params = {'dateBalanceToCheck': dateBalanceToCheck,'firstDayOfCalculation':firstDayOfCalculation, 'Action': Action};
     return this.http.get <bBalanceFullData []>('/api/DEA/fGetAccountingData/', { params: params })

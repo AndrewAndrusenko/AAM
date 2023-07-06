@@ -25,7 +25,7 @@ async function fUpdateEntryAccountAccounting (request, response) {
 }
 async function fGetAccountingData (request,response) {
   let conditions = {}
-  const query = {text: '', values:[]}
+  const query = {text: ''}
   switch (request.query.Action) {
     case 'bcTransactionType_Ext':
       query.text = 'SELECT id, TRIM("xActTypeCode_Ext") as "xActTypeCode_Ext", description, code2 FROM public."bcTransactionType_Ext" ORDER BY "xActTypeCode_Ext"; '
@@ -105,7 +105,7 @@ async function fGetAccountingData (request,response) {
       let conditionsLedgerToLedger =' WHERE'
       Object.entries(conditions).forEach(([key,value]) => {
       if  (request.query.hasOwnProperty(key)) {
-        query.values.push(request.query[key]);
+        // query.values.push(request.query[key]);
         conditionsAccountLedger +=conditions[key][1] + ' AND ';
         conditionsLedgerToLedger +=conditions[key][2] + ' AND ';
         }
@@ -150,8 +150,7 @@ async function fGetAccountingData (request,response) {
       query.text ='SELECT "FirstOpenedDate"::date, "LastClosedDate"::date FROM "bLastClosedAccountingDate";'
     break;
     case 'GetbbalacedDateWithEntries':
-      query.text ='SELECT "dateAcc"::date FROM "vbBalancedDatesWithEntries" ORDER BY "dateAcc" DESC;'
-      query.rowMode = "array" ;
+      query.text ='SELECT ARRAY_AGG("dateAcc"::date) as datesarray FROM "vbBalancedDatesWithEntries";'
     break;
     case 'GetbAccountingDateToClose':
       query.text ='SELECT "accountingDateToClose" FROM "bAccountingDateToClose";'
@@ -213,7 +212,7 @@ async function fGetAccountingData (request,response) {
       let conditionsLedgerProject =' WHERE'
       Object.entries(conditions).forEach(([key,value]) => {
       if  (request.query.hasOwnProperty(key)) {
-        query.values.push(request.query[key]);
+        // query.values.push(request.query[key]);
         conditionsBalance +=conditions[key][1] + ' AND ';
         conditionsAccountProject +=conditions[key][2] + ' AND ';
         conditionsLedgerProject +=conditions[key][3] + ' AND ';
@@ -239,21 +238,13 @@ async function fGetAccountingData (request,response) {
       query.text += ' ORDER BY "dateBalance"::timestamp without time zone DESC;';
     break;
   }
-  sql = pgp.as.format(query.text,request.query);
-  query.values = null
-   query.text = sql;
-   pool.query (query,  (err, res) => 
-   {if (err) {
-    console.log (err.stack.split("\n", 1).join(""))
-    err.detail = err.stack
-    return response.send(err)
-    } else {
-      return response.status(200).json(res.rows)
-    }
-  }) 
+  console.log('queryExecute');
+  query.text = pgp.as.format(query.text,request.query);
+  console.log('queryExecute1');
+  db_common_api.queryExecute(query.text,response);
 }
 async function fGetMT950Transactions (request,response) {
-  const query = {text: ''}
+  let sqlText;
   switch (request.query.Action) {
     case 'GetSWIFTsList':
       conditions = {
@@ -261,31 +252,29 @@ async function fGetMT950Transactions (request,response) {
           1: ' ("bSWIFTGlobalMsg"."DateMsg"::timestamp without time zone = ${dateMessage}) ',
         }
       }
+      console.log('request.query',request.query);
       let bSWIFTGlobalMsg =' WHERE'
-      Object.entries(conditions).forEach(([key,value]) => {
-      if  (request.query.hasOwnProperty(key)) {
-        bSWIFTGlobalMsg +=conditions[key][1] + ' AND ';
-        }
-      });
-      query.text = 'SELECT ' + 
+      Object.entries(conditions).forEach(([key]) => request.query.hasOwnProperty(key)? bSWIFTGlobalMsg +=conditions[key][1]+' AND ': null);
+      sqlText = 'SELECT ' + 
       ' id, "msgId", "senderBIC", "DateMsg"::timestamp without time zone, "typeMsg", "accountNo", '+
       '"bLedger"."ledgerNo", "ledgerNoId"'+ 
       ' FROM public."bSWIFTGlobalMsg" ' +
       ' LEFT JOIN public."bLedger" ON "bSWIFTGlobalMsg"."accountNo" = "bLedger"."externalAccountNo" ';
-      query.text += bSWIFTGlobalMsg.slice(0,-5) + ' ORDER BY id; '
+      sqlText += bSWIFTGlobalMsg.slice(0,-5) + ' ORDER BY id; '
     break;
     case 'GetMT950Transactions':
-      query.text ='SELECT '+
+      sqlText ='SELECT '+
         'id, "msgId", "amountTransaction", "typeTransaction", "valueDate"::timestamp without time zone, comment, "entryAllocatedId", "refTransaction", "entriesAllocated"."entriesAmount" '+
         'FROM public."bSWIFTStatement" ' +
         'LEFT JOIN "entriesAllocated" ON "bSWIFTStatement".id = "entriesAllocated"."extTransactionId" '+
         'WHERE ("msgId"= ${id}) ORDER BY "msgId", id; '
     break;
+    case 'DatesWithSWIFT':
+      sqlText ='SELECT ARRAY_AGG( DISTINCT "DateMsg"::date) as datesarray FROM public."bSWIFTGlobalMsg";';
+    break;
   }
-  sql = pgp.as.format(query.text,request.query);
-  pool.query (sql, (err, res) => {if (err) {console.log (err.stack)} else {
-    return response.status(200).json((res.rows))}
-  })
+  sql = pgp.as.format(sqlText,request.query);
+  db_common_api.queryExecute(sql,response);
 }
 async function GetEntryScheme (request, response) {
   const query = {
@@ -299,28 +288,22 @@ async function GetEntryScheme (request, response) {
   }
   sql = pgp.as.format(query.text,request.query)
   pool.query (sql,  (err, res) => {if (err) {
-    console.log (err.stack.split("\n", 1).join(""))
-    err.detail = err.stack
-    return response.send(err)
-  } else {
-    if (res.rows.length !== 0) {
-      entryDraftData = JSON.parse (pgp.as.format (JSON.stringify(res.rows[0]), request.query))
-      sql = 'SELECT ' + 
-      '"bLedger"."ledgerNo", "bAccounts"."accountNo", "bcTransactionType_Ext"."xActTypeCode_Ext", "bcTransactionType_DE"."name", '+ 'json_populate_recordset.* ' +
-      'FROM json_populate_recordset(null::public."bAccountTransaction",\'[' + [JSON.stringify(entryDraftData)] +']\') ' +
-      'LEFT JOIN "bcTransactionType_Ext" ON "bcTransactionType_Ext".id = json_populate_recordset."XactTypeCode_Ext" ' +
-      'LEFT JOIN "bcTransactionType_DE" ON "bcTransactionType_DE"."xActTypeCode" = json_populate_recordset."XactTypeCode" ' +
-      'LEFT JOIN "bLedger" ON "bLedger"."ledgerNoId" = json_populate_recordset."ledgerNoId"	' +
-      'LEFT JOIN "bAccounts" ON "bAccounts"."accountId" = json_populate_recordset."accountId";	' 	
-      pool.query (sql,  (err, res) => {if (err) {
-        console.log (err.stack.split("\n", 1).join(""))
-        err.detail = err.stack
-        return response.send(err)
-      } else {
-        return response.status(200).json((res.rows[0]))
-      }})
+      console.log (err.stack.split("\n", 1).join(""))
+      err.detail = err.stack
+      return response.send(err)
+    } else {
+      if (res.rows.length !== 0) {
+        entryDraftData = JSON.parse (pgp.as.format (JSON.stringify(res.rows[0]), request.query));
+        sql = 'SELECT ' + 
+        '"bLedger"."ledgerNo", "bAccounts"."accountNo", "bcTransactionType_Ext"."xActTypeCode_Ext", "bcTransactionType_DE"."name", '+ 'json_populate_recordset.* ' +
+        'FROM json_populate_recordset(null::public."bAccountTransaction",\'[' + [JSON.stringify(entryDraftData)] +']\') ' +
+        'LEFT JOIN "bcTransactionType_Ext" ON "bcTransactionType_Ext".id = json_populate_recordset."XactTypeCode_Ext" ' +
+        'LEFT JOIN "bcTransactionType_DE" ON "bcTransactionType_DE"."xActTypeCode" = json_populate_recordset."XactTypeCode" ' +
+        'LEFT JOIN "bLedger" ON "bLedger"."ledgerNoId" = json_populate_recordset."ledgerNoId"	' +
+        'LEFT JOIN "bAccounts" ON "bAccounts"."accountId" = json_populate_recordset."accountId";'; 	
+        db_common_api.queryExecute(sql,response);
+      }
     }
-  }
   })
 }
 async function fCreateEntryAccountingInsertRow (request, response) {
@@ -329,22 +312,16 @@ async function fCreateEntryAccountingInsertRow (request, response) {
     db_common_api.queryExecute(sqlText,response)
 }
 async function faccountingOverdraftAccountCheck (request, response) {
-  const query = {
-    text: 'SELECT "accountId", "openingBalance", CAST ("closingBalance" AS NUMERIC) AS "closingBalance", "closingBalance" AS "EndBalance"'+
-    'FROM f_checkoverdraftbyaccountandbydate'+
-    '(${transactionDate}, ${accountId}, ${xactTypeCode}, ${transactionAmount}, ${id}, ${FirstOpenedAccountingDate}) ', 
-    values: request.query
-  } 
-  sql = pgp.as.format(query.text,query.values);
+  let sqlText = 'SELECT "accountId", "openingBalance", CAST ("closingBalance" AS NUMERIC) AS "closingBalance", "closingBalance" AS "EndBalance"'+
+  'FROM f_checkoverdraftbyaccountandbydate'+
+  '(${transactionDate}, ${accountId}, ${xactTypeCode}, ${transactionAmount}, ${id}, ${FirstOpenedAccountingDate}) ;';
+  sql = pgp.as.format(sqlText,request.query);
   db_common_api.queryExecute(sql,response)
 }
 async function faccountingOverdraftLedgerAccountCheck (request, response) {
-  const query = {
-    text: 'SELECT *, CAST(("openingBalance" +	"accountTransaction" + "CrSignAmount" + "DbSignAmount" + "signedTransactionAmount") AS numeric) as "closingBalance" FROM f_CheckOverdraftByLedgerAndByDate'+
-    '(${transactionDate}, ${accountId}, ${xactTypeCode}, ${transactionAmount}, ${id}, ${FirstOpenedAccountingDate} )', 
-    values: request.query
-  } 
-  sql = pgp.as.format(query.text,query.values);
+  let sqlText =  'SELECT *, CAST(("openingBalance" +	"accountTransaction" + "CrSignAmount" + "DbSignAmount" + "signedTransactionAmount") AS numeric) as "closingBalance" FROM f_CheckOverdraftByLedgerAndByDate'+
+  '(${transactionDate}, ${accountId}, ${xactTypeCode}, ${transactionAmount}, ${id}, ${FirstOpenedAccountingDate} );';
+  sql = pgp.as.format(sqlText,request.query);
   db_common_api.queryExecute(sql,response)
 }
 async function faccountingBalanceCloseInsert (request, response) {

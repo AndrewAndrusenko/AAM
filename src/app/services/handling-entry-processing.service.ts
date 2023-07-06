@@ -36,7 +36,7 @@ export class HandlingEntryProcessingService {
           bcEntryParameters.cxActTypeCode_Ext = row.comment.split('/')[1];
           bcEntryParameters.cLedgerType = 'NostroAccount';
           this.AccountingDataService.GetEntryScheme (bcEntryParameters).subscribe (entryScheme => {
-            this.AccountingDataService.sendEntryDraft({'entryDraft' : entryScheme, 'formStateisDisabled': false, 'refTransaction': row.refTransaction, 'autoProcessing':autoProcessing, 'overRideOverdraft' :overRideOverdraft});
+            this.AccountingDataService.sendEntryDraft({'entryDraft' : entryScheme[0], 'formStateisDisabled': false, 'refTransaction': row.refTransaction, 'autoProcessing':autoProcessing, 'overRideOverdraft' :overRideOverdraft});
           });
         } else {
           this.snack.open('Error: Account No: ' +accountNo +' has not been found for ref:'+row.refTransaction,'OK',{panelClass: ['snackbar-error']}); 

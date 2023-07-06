@@ -48,6 +48,8 @@ export class AppAccEntryModifyFormComponent implements OnInit {
   autoProcessingState : boolean = false
   pendingStatusAP: boolean = false
   validatorCorrectLedgerLLAccountNo: AsyncValidatorFn;
+  sbSTPCreateEntry$: Subscription;
+
   constructor (
     private fb:FormBuilder, 
     private AccountingDataService:AppAccountingService, 
@@ -78,6 +80,10 @@ export class AppAccEntryModifyFormComponent implements OnInit {
       d_closingLedgerBalance: {value:null, disabled: false} 
     })
   }
+  ngOnDestroy(): void {
+   this.sbSTPCreateEntry$.unsubscribe();
+    
+  }
   ngOnInit(): void {
     if (this.FirstOpenedAccountingDate !=null) {
       this.entryModifyForm.patchValue(this.data);
@@ -95,7 +101,7 @@ export class AppAccEntryModifyFormComponent implements OnInit {
       ).subscribe(() => this.ledgerNo.updateValueAndValidity());
       this.entryModifyForm.markAllAsTouched();
     }
-    this.AccountingDataService.getEntryDraft().subscribe ( entryData => {
+    this.sbSTPCreateEntry$ = this.AccountingDataService.getEntryDraft().subscribe ( entryData => {
       if (entryData.refTransaction === this.Ref ) {
         if (entryData.autoProcessing === true) {
           this.autoProcessingState = true;

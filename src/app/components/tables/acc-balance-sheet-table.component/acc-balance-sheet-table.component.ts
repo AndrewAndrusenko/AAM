@@ -20,7 +20,6 @@ import { menuColorGl } from 'src/app/models/constants';
 import { formatNumber } from '@angular/common';
 import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import { AuthService } from 'src/app/services/auth.service';
-
 @Component({
   selector: 'app-table-balance-sheet',
   templateUrl: './acc-balance-sheet-table.component.html',
@@ -37,30 +36,8 @@ import { AuthService } from 'src/app/services/auth.service';
 export class AppTableBalanceSheetComponent   {
   accessState: string = 'none';
   disabledControlElements: boolean = false;
-  columnsToDisplay = [
-    'accountNo' , 
-    'accountType' , 
-    'datePreviousBalance' , 
-    'dateBalance' , 
-    'openingBalance' ,
-    'totalDebit' ,  
-    'totalCredit' , 
-    'OutGoingBalance' , 
-    'checkClosing',
-    "xacttypecode"
-  ]
-  columnsHeaderToDisplay = [
-    'No' , 
-    'Type' , 
-    'Previous Balance' , 
-    'Balance' , 
-    'Opening Balance' , 
-    'total Debit' ,  
-    'total Credit' ,  
-    'Closing Balance' , 
-    'check Closing',
-     "AP"
-  ];
+  columnsToDisplay = ['accountNo','accountType','datePreviousBalance','dateBalance','openingBalance','totalDebit','totalCredit','OutGoingBalance','checkClosing',"xacttypecode"]
+  columnsHeaderToDisplay = ['No','Type','Previous Balance','Balance', 'Opening Balance','total Debit','total Credit','Closing Balance',    'check Closing',"AP"];
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
   dataSource: MatTableDataSource<bBalanceFullData>;
   obj: MatTableDataSource<bBalanceFullData>;
@@ -131,14 +108,11 @@ export class AppTableBalanceSheetComponent   {
         this.dataSource.sort = this.sort;
       })
     })
-    this.AccountingDataService.GetbbalacedDateWithEntries('GetbbalacedDateWithEntries').subscribe(data => {
-      this.balacedDateWithEntries = data.flat()
-    })
-    this.AccountingDataService.GetbAccountingDateToClose('GetbAccountingDateToClose').subscribe(data => {
-            this.firstClosingDate= new Date(data[0].accountingDateToClose)
-    })
-    this.subscriptionName= this.AccountingDataService.getReloadAccontList().subscribe ( (id) => {
+    this.AccountingDataService.GetbbalacedDateWithEntries('GetbbalacedDateWithEntries').subscribe(data => this.balacedDateWithEntries = data[0]['datesarray']);
+    this.AccountingDataService.GetbAccountingDateToClose('GetbAccountingDateToClose').subscribe(data =>this.firstClosingDate= new Date(data[0].accountingDateToClose));
+    this.subscriptionName= this.AccountingDataService.getReloadBalanceSheet().subscribe ( (id) => {
       this.AccountingDataService.GetALLClosedBalances (null, null, new Date(this.FirstOpenedAccountingDate).toDateString(),null,'GetALLClosedBalances').subscribe (Balances  => {
+        this.dataSource  = null
         this.dataSource  = new MatTableDataSource(Balances);
         let openDates = Balances.map((el) => el.datePreviousBalance==null? el.dateBalance:null)
         this.dataSource.paginator = this.paginator;
@@ -183,7 +157,7 @@ export class AppTableBalanceSheetComponent   {
     this.dataSource.filter = ''
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
   }
-  async submitQuery () {
+  async submitQuery (showSnackMsg:boolean=true) {
     return new Promise((resolve, reject) => {
     this.dataSource.data=null;
     let searchObj = {};
@@ -201,7 +175,7 @@ export class AppTableBalanceSheetComponent   {
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
       this.accounts.unshift('ClearAll')
-      this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (Balances.length,'en-US') + ' rows'}, 'Loaded');
+      showSnackMsg? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (Balances.length,'en-US') + ' rows'}, 'Loaded') : null;
       resolve(Balances) 
     })
   })
@@ -268,10 +242,10 @@ export class AppTableBalanceSheetComponent   {
     }))
     this.HandlingCommonTasksS.exportToExcel (data,"balancesData")
   }
-  async updateResultHandler (result :any, action: string) {
-    this.CommonDialogsService.snackResultHandler(result, action)
+  async updateResultHandler (result :any, action: string, showSnackMsg:boolean=true,duration?:number) {
+    this.CommonDialogsService.snackResultHandler({detail: result.length}, action,undefined,undefined,duration)
     if (result['name']!=='error') {
-      await this.submitQuery();
+      // await this.submitQuery(showSnackMsg);
       this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data=>{
         this.FirstOpenedAccountingDate = data[0].FirstOpenedDate;
         this.LastClosedDate = data[0].LastClosedDate;
@@ -311,7 +285,10 @@ export class AppTableBalanceSheetComponent   {
     })
   } 
   executeClosingBalance () {
-    this.AccountingDataService.accountingBalanceCloseInsert ({'closingDate' : new Date(this.firstClosingDate).toDateString()}).subscribe ((result) => this.updateResultHandler(result,'Balance was closed for '+ new Date(this.firstClosingDate).toDateString()+ '. Created'))
+    this.AccountingDataService.accountingBalanceCloseInsert ({'closingDate' : new Date(this.firstClosingDate).toDateString()}).subscribe ((result) =>{ 
+      this.AccountingDataService.sendReloadBalanceSheet(0);
+      this.updateResultHandler(result,'Balance was closed for '+ new Date(this.firstClosingDate).toDateString()+ '. Created rows',false, 7000)
+    })
   }
   async checkBalance (dateBalance: string) {
     this.totalPassive = 0;
@@ -329,14 +306,16 @@ export class AppTableBalanceSheetComponent   {
      })
   }
   dateClass: MatCalendarCellClassFunction<Date> = (cellDate, view) => {
+    console.log('balacedDateWithEntries', new Date(this.balacedDateWithEntries[1]).toLocaleDateString(),cellDate['_d'].toLocaleDateString());
     const index = this.balacedDateWithEntries.findIndex(x => new Date(x).toLocaleDateString() == cellDate['_d'].toLocaleDateString());
-    return (index > -1)? 'date-orange' : '';
+    return (index > -1)? 'date-highlighted' : '';
   };
   openBalance (date:string) {
     this.CommonDialogsService.confirmDialog('Open date: ' + date ).subscribe(action => {
       if (action.isConfirmed===true) {
-        this.AccountingDataService.accountingBalanceDayOpen({'dateToOpen' : new Date(date).toDateString()}).subscribe ((result) => 
-        this.updateResultHandler(result, 'Operational day ' + new Date(date).toDateString()+ ' has been opened'))
+        this.AccountingDataService.accountingBalanceDayOpen({'dateToOpen' : new Date(date).toDateString()}).subscribe ((result) => {
+        this.AccountingDataService.sendReloadBalanceSheet(0);
+        this.updateResultHandler(result, 'Operational day ' + new Date(date).toDateString()+ ' has been opened. Deleted rows ', false, 7000)})
       }
     })
   }
