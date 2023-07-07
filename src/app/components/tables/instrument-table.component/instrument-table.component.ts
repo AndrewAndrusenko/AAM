@@ -105,7 +105,7 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
       marketSource : {value:null, disabled:false},
       boards : {value:null, disabled:false}
     });
-     this.indexDBServiceS.getIndexDBInstrumentStaticTables('getBoardsDataFromInstruments').then ((data)=>this.boardIDs = data['data'])
+     this.indexDBServiceS.getIndexDBStaticTables('getBoardsDataFromInstruments').then ((data)=>this.boardIDs = data['data'])
      this.MarketDataService.getMarketDataSources().subscribe(marketSourcesData => this.marketSources = marketSourcesData);
      this.MarketDataService.getInstrumentDataToUpdateTableSource().subscribe(data =>{
      let index =  this.dataSource.data.findIndex(elem=>elem.id===data.data[0].id)
@@ -138,7 +138,7 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
     } else {
       this.MarketDataService.getMoexInstruments().subscribe (instrumentData => this.updateInstrumentDataTable(instrumentData))  
     }
-    this.indexDBServiceS.getIndexDBInstrumentStaticTables('getInstrumentDataDetails').then(data =>this.instrumentDetailsArr = data['data']);
+    this.indexDBServiceS.getIndexDBStaticTables('getInstrumentDataDetails').then(data =>this.instrumentDetailsArr = data['data']);
   }
   handleNewFavoriteClick(elem:Instruments){
     let userData = JSON.parse(localStorage.getItem('userInfo'));

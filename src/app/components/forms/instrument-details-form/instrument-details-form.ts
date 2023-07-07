@@ -47,7 +47,7 @@ export class AppInvInstrumentDetailsFormComponent {
       secid: {value:null, disabled: false},
       id: {value:null, disabled: false}
     })
-    this.indexDBServiceS.getIndexDBInstrumentStaticTables('getBoardsDataFromInstruments').then (data=>this.moexBoards=data['data'])
+    this.indexDBServiceS.getIndexDBStaticTables('getBoardsDataFromInstruments').then (data=>this.moexBoards=data['data'])
   }
   ngAfterContentInit(): void {
     this.title = this.action;

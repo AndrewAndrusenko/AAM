@@ -30,13 +30,13 @@ export class AtuoCompleteService {
   }
   getSecidLists () {
     // const params = {Action:Action}
-    this.indexDBServiceS.getIndexDBInstrumentStaticTables('getInstrumentAutoCompleteList').then (data=>{
+    this.indexDBServiceS.getIndexDBStaticTables('getInstrumentAutoCompleteList').then (data=>{
       this.fullInstrumentsLists = data['data']
       this.sendSecIdList(this.fullInstrumentsLists);
    })
   }
   getCurrencyList () {
-    this.indexDBServiceS.getIndexDBInstrumentStaticTables('getCurrencyCodes').then(data=> {
+    this.indexDBServiceS.getIndexDBStaticTables('getCurrencyCodes').then(data=> {
       this.fullCurrenciesList = data['data']
       this.sendCurrencyList(this.fullCurrenciesList);
    })

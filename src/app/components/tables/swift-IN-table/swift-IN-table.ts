@@ -83,9 +83,7 @@ export class AppTableSWIFTsInListsComponent  implements  AfterViewInit, OnInit,O
       this.cDateToProcessSwift.setValue(new Date(this.FirstOpenedAccountingDate))
       this.cDateAccounting.setValue(new Date(this.FirstOpenedAccountingDate))
     })
-    this.AccountingDataService.GetSWIFTsList (null,null,null,null,'DatesWithSWIFT').subscribe(dates=>{
-      console.log('dates',dates);
-      this.dateWithSWIFTs = dates[0]['datesarray']});
+    this.AccountingDataService.GetSWIFTsList (null,null,null,null,'DatesWithSWIFT').subscribe(dates=>this.dateWithSWIFTs = dates[0]['datesarray']);
     this.subscription = this.LogService.getLogObject().subscribe(logObject => {
       logObject.forEach (logObj => {
         let index = this.transactionsToProcess.findIndex(elem => elem.id===logObj.t_extTransactionId)
@@ -198,7 +196,6 @@ export class AppTableSWIFTsInListsComponent  implements  AfterViewInit, OnInit,O
     })
   }
   dateClass: MatCalendarCellClassFunction<Date> = (cellDate, view) => {
-    console.log('dateWithSWIFTs',new Date(this.dateWithSWIFTs[1]).toLocaleDateString(),cellDate['_d'].toLocaleDateString());
     const index = this.dateWithSWIFTs.findIndex(x => new Date(x).toLocaleDateString() == cellDate['_d'].toLocaleDateString());
     return (index > -1)? 'date-highlighted' : '';
   };

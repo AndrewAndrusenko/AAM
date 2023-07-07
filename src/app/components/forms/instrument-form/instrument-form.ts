@@ -90,8 +90,8 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToInstrumentData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.AtuoCompService.getCurrencyList();
-    this.indexDBServiceS.getIndexDBInstrumentStaticTables('getMoexSecurityGroups').then ((data)=>this.securityGroups = data['data']);
-    this.indexDBServiceS.getIndexDBInstrumentStaticTables('getMoexSecurityTypes').then ((data)=>{
+    this.indexDBServiceS.getIndexDBStaticTables('getMoexSecurityGroups').then ((data)=>this.securityGroups = data['data']);
+    this.indexDBServiceS.getIndexDBStaticTables('getMoexSecurityTypes').then ((data)=>{
       this.securityTypes = data['data'];
       this.filtersecurityType(this.group.value);
     });
@@ -103,7 +103,7 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
       distinctUntilChanged(),
       map(value => this.AtuoCompService.filterList(value || '','currency'))
     )
-    this.moexBoards.length? null : this.indexDBServiceS.getIndexDBInstrumentStaticTables('getBoardsDataFromInstruments').then (data=>this.moexBoards = data['data']);
+    this.moexBoards.length? null : this.indexDBServiceS.getIndexDBStaticTables('getBoardsDataFromInstruments').then (data=>this.moexBoards = data['data']);
     if (this.data)  {
       this.instrumentModifyForm.patchValue(this.data);
       this.addAsyncValidators(this.action); 

@@ -16,13 +16,15 @@ export class DashboardComponent implements OnDestroy,OnInit {
   constructor (
     private appMenuService : AppMenuServiceService,
     private indexDBServiceS:indexDBService,
-    private AuthServiceS:AuthService,  
 
     ) {
     this.subscriptionName= this.appMenuService.getToggleTree().subscribe (message => this.opened = message.text );
   }
   async ngOnInit(): Promise<void> {
-    this.indexDBServiceS.indexdbDeleteAllCache('AAMCache')
+    this.indexDBServiceS.indexdbDeleteAllCache('AAMCache').subscribe(data => {
+      console.log('Cache has been cleared', data)
+      this.indexDBServiceS.getIndexDBStaticTables('bcTransactionType_Ext').then ( (data) => console.log('Cache:', data['data'].length,' saved for bcTransactionType_Ext'));
+    })
   }
   ngOnDestroy() { 
     this.subscriptionName.unsubscribe();

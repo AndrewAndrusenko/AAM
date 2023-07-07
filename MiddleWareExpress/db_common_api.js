@@ -4,9 +4,9 @@ const pool = new Pool(config.dbConfig);
 var pgp = require ('pg-promise')({capSQL:true});
 const pg = require('pg');
 
-async function queryExecute (sql, response, responseType) {
+async function queryExecute (sql, response, responseType, sqlID) {
   return new Promise ((resolve) => {
-    console.log('sql',sql);
+    // console.log('sql',sql);
     pool.query (sql,  (err, res) => {
       if (err) {
         console.log (err.stack.split("\n", 1).join(""))
@@ -16,10 +16,8 @@ async function queryExecute (sql, response, responseType) {
         let rows = [];
         res.length? res.map(el => rows.push(...el.rows) ): rows = res.rows;
         result = responseType === 'rowCount'? rowsCount : rows;
-        console.log('db_common_api ------------------- QTY rows', rows.length)
+        console.log('db_common_api; ', sqlID, ';  QTY rows ;', rows.length)
         resolve (response? response.status(200).json(result):result)
-        // let rowsCount = res.length? res.reduce((acc,el) => acc+el.rowCount,0) : res.rowCount;
-        // console.log('db_common_api ------------------- QTY rows', rows)
       }
     })
   })

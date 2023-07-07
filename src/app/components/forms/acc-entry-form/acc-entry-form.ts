@@ -10,6 +10,7 @@ import { COMMA, ENTER} from '@angular/cdk/keycodes';
 import { distinctUntilChanged, filter, Subject, Subscription, tap } from 'rxjs';
 import { LogProcessingService } from 'src/app/services/log-processing.service';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
+import { indexDBService } from 'src/app/services/indexDB.service';
 @Component({
   selector: 'app-acc-entry-modify-form',
   templateUrl: './acc-entry-form.html',
@@ -33,7 +34,7 @@ export class AppAccEntryModifyFormComponent implements OnInit {
   actionType : string;
   data: any;
   selectedValue : string
-  FirstOpenedAccountingDate : Date;
+  @Input() FirstOpenedAccountingDate : Date;
   TransactionTypes: bcTransactionType_Ext[] = [];
   addOnBlur = true;
   asynValidatorsAdded: boolean = false
@@ -56,10 +57,10 @@ export class AppAccEntryModifyFormComponent implements OnInit {
     private LogService:LogProcessingService,
     private CommonDialogsService:HadlingCommonDialogsService,
     private dialog: MatDialog, 
+    private indexDBServiceS:indexDBService,    
   ) 
-  { this.AccountingDataService.GetTransactionType_Ext('',0,'','','bcTransactionType_Ext').subscribe (
-    data => this.TransactionTypes=data)
-    this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate)
+  {
+
     this.entryModifyForm = this.fb.group ({
       d_transactionType: {value:null, disabled: false},
       t_id: {value:0, disabled: false},
@@ -78,27 +79,22 @@ export class AppAccEntryModifyFormComponent implements OnInit {
       d_xActTypeCode_ExtName : {value:null, disabled: false}, 
       d_closingBalance: {value:null, disabled: false}, 
       d_closingLedgerBalance: {value:null, disabled: false} 
-    })
+    })    
   }
   ngOnDestroy(): void {
    this.sbSTPCreateEntry$.unsubscribe();
-    
   }
-  ngOnInit(): void {
-    if (this.FirstOpenedAccountingDate !=null) {
+  ngAfterContentInit(): void {
+    if (this.autoProcessingState!==true)  {   
+      this.indexDBServiceS.getIndexDBStaticTables('bcTransactionType_Ext').then ( data => this.TransactionTypes = data['data']);
       this.entryModifyForm.patchValue(this.data);
       this.dataTime.setValue(new Date(this.data.t_dataTime));
       this.xActTypeCode.value? this.xActTypeCode.setValue(Number(this.data.t_XactTypeCode)) : null;
       this.xActTypeCode_Ext.value? this.xActTypeCode_Ext.setValue(Number(this.data.t_XactTypeCode_Ext)) : null;
       this.AddAsyncValidators(false);
       this.amountFormat();
-      this.accountId.valueChanges.pipe(
-        distinctUntilChanged(),
-      ).subscribe(() => this.accountNo.updateValueAndValidity());
-      this.ledgerId.valueChanges.pipe(
-        tap (data => console.log('START id valueChanges', data)),
-        distinctUntilChanged(),
-      ).subscribe(() => this.ledgerNo.updateValueAndValidity());
+      this.accountId.valueChanges.pipe(distinctUntilChanged()).subscribe(() => this.accountNo.updateValueAndValidity());
+      this.ledgerId.valueChanges.pipe(distinctUntilChanged()).subscribe(() => this.ledgerNo.updateValueAndValidity());
       this.entryModifyForm.markAllAsTouched();
     }
     this.sbSTPCreateEntry$ = this.AccountingDataService.getEntryDraft().subscribe ( entryData => {
@@ -128,6 +124,10 @@ export class AppAccEntryModifyFormComponent implements OnInit {
         this.amountFormat()
       }
     })
+    
+  }
+  ngOnInit(): void {
+    
   }
   async AddAsyncValidators (overdraftOverride:boolean) {
     if (this.FirstOpenedAccountingDate !=null) {

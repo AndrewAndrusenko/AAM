@@ -96,7 +96,7 @@ export class AppInstrumentCorpActionFormComponent {
         this.CorpActionsForm.patchValue(this.data);
       break; 
     } 
-    this.indexDBServiceS.getIndexDBInstrumentStaticTables('getCorpActionTypes').then(data =>this.caTypes=data['data'].filter(el=>el.sectype.includes(Number(this.instrument.groupid))))
+    this.indexDBServiceS.getIndexDBStaticTables('getCorpActionTypes').then(data =>this.caTypes=data['data'].filter(el=>el.sectype.includes(Number(this.instrument.groupid))))
   }
   snacksBox(result:any, action?:string){
     if (result['name']=='error') {

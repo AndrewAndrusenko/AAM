@@ -31,6 +31,8 @@ export class AppTableSWIFT950ItemsComponent  implements  AfterViewInit {
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
   dataSource: MatTableDataSource<SWIFTStatement950model>;
   @Input() parentMsgRow: any;
+  @Input() FirstOpenedAccountingDate: Date;
+
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild(AppAccEntryModifyFormComponent) EntryModifyForm: AppAccEntryModifyFormComponent;

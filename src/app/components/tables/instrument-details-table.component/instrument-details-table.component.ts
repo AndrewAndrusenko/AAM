@@ -43,7 +43,7 @@ export class AppTableInstrumentDetailsComponent  implements AfterViewInit {
     this.disabledControlElements = this.accessState === 'full'? false : true;
   }
   async ngAfterViewInit() {
-    this.indexDBServiceS.getIndexDBInstrumentStaticTables('getInstrumentDataDetails').then ((data)=>this.updateInstrumentDataTable (data['data']))
+    this.indexDBServiceS.getIndexDBStaticTables('getInstrumentDataDetails').then ((data)=>this.updateInstrumentDataTable (data['data']))
   }
   ngOnChanges(changes: SimpleChanges) {this.dataSource? this.applyFilter(undefined, this.secid) : null}
   applyFilter(event?: any, manualValue?:string) {

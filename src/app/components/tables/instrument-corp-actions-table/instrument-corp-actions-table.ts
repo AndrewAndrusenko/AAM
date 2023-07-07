@@ -54,7 +54,7 @@ export class AppTableCorporateActionsComponent  implements AfterViewInit {
     this.disabledControlElements = this.accessState === 'full'? false : true;
   }
   async ngAfterViewInit() {
-    this.indexDBServiceS.getIndexDBInstrumentStaticTables('getInstrumentDataCorpActions').then((data)=> this.updateCAdataTable(data['data']));
+    this.indexDBServiceS.getIndexDBStaticTables('getInstrumentDataCorpActions').then((data)=> this.updateCAdataTable(data['data']));
     // this.MarketDataService.get
   }
   ngOnChanges(changes: SimpleChanges) {

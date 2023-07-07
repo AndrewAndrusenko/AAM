@@ -238,10 +238,8 @@ async function fGetAccountingData (request,response) {
       query.text += ' ORDER BY "dateBalance"::timestamp without time zone DESC;';
     break;
   }
-  console.log('queryExecute');
   query.text = pgp.as.format(query.text,request.query);
-  console.log('queryExecute1');
-  db_common_api.queryExecute(query.text,response);
+  db_common_api.queryExecute(query.text,response,null, request.query.Action);
 }
 async function fGetMT950Transactions (request,response) {
   let sqlText;
@@ -252,7 +250,6 @@ async function fGetMT950Transactions (request,response) {
           1: ' ("bSWIFTGlobalMsg"."DateMsg"::timestamp without time zone = ${dateMessage}) ',
         }
       }
-      console.log('request.query',request.query);
       let bSWIFTGlobalMsg =' WHERE'
       Object.entries(conditions).forEach(([key]) => request.query.hasOwnProperty(key)? bSWIFTGlobalMsg +=conditions[key][1]+' AND ': null);
       sqlText = 'SELECT ' + 
@@ -274,7 +271,7 @@ async function fGetMT950Transactions (request,response) {
     break;
   }
   sql = pgp.as.format(sqlText,request.query);
-  db_common_api.queryExecute(sql,response);
+  db_common_api.queryExecute(sql,response,null,request.query.Action);
 }
 async function GetEntryScheme (request, response) {
   const query = {
@@ -301,7 +298,7 @@ async function GetEntryScheme (request, response) {
         'LEFT JOIN "bcTransactionType_DE" ON "bcTransactionType_DE"."xActTypeCode" = json_populate_recordset."XactTypeCode" ' +
         'LEFT JOIN "bLedger" ON "bLedger"."ledgerNoId" = json_populate_recordset."ledgerNoId"	' +
         'LEFT JOIN "bAccounts" ON "bAccounts"."accountId" = json_populate_recordset."accountId";'; 	
-        db_common_api.queryExecute(sql,response);
+        db_common_api.queryExecute(sql,response,null,'STP_Get Entry Scheme');
       }
     }
   })
@@ -309,31 +306,31 @@ async function GetEntryScheme (request, response) {
 async function fCreateEntryAccountingInsertRow (request, response) {
     fields = Object.keys(request.body.data).map(filed => `"${filed}"`).join()
     let sqlText = 'INSERT INTO public."bAccountTransaction" '+'('+fields+')'+' VALUES ('+Object.values(request.body.data).map(value =>`'${value}'`).join() + ');';
-    db_common_api.queryExecute(sqlText,response)
+    db_common_api.queryExecute(sqlText,response,'STP_f Create Entry Accounting InsertRow')
 }
 async function faccountingOverdraftAccountCheck (request, response) {
   let sqlText = 'SELECT "accountId", "openingBalance", CAST ("closingBalance" AS NUMERIC) AS "closingBalance", "closingBalance" AS "EndBalance"'+
   'FROM f_checkoverdraftbyaccountandbydate'+
   '(${transactionDate}, ${accountId}, ${xactTypeCode}, ${transactionAmount}, ${id}, ${FirstOpenedAccountingDate}) ;';
   sql = pgp.as.format(sqlText,request.query);
-  db_common_api.queryExecute(sql,response)
+  db_common_api.queryExecute(sql,response,null, 'Account Overdraft Check')
 }
 async function faccountingOverdraftLedgerAccountCheck (request, response) {
   let sqlText =  'SELECT *, CAST(("openingBalance" +	"accountTransaction" + "CrSignAmount" + "DbSignAmount" + "signedTransactionAmount") AS numeric) as "closingBalance" FROM f_CheckOverdraftByLedgerAndByDate'+
   '(${transactionDate}, ${accountId}, ${xactTypeCode}, ${transactionAmount}, ${id}, ${FirstOpenedAccountingDate} );';
   sql = pgp.as.format(sqlText,request.query);
-  db_common_api.queryExecute(sql,response)
+  db_common_api.queryExecute(sql,response,null,'Ledger Overdraft Check')
 }
 async function faccountingBalanceCloseInsert (request, response) {
   sqlText = 'SELECT public.f_b_close_balance_for_date(${closingDate})';
   sql = pgp.as.format(sqlText,request.body.data)
-  db_common_api.queryExecute(sql,response)
+  db_common_api.queryExecute(sql,response,null,'Balance Day Close')
 }
 async function faccountingBalanceDayOpen (request, response) {
   sqlText = 'DELETE FROM public."bAccountStatement" WHERE "dateAcc"::date = ${dateToOpen} RETURNING *; ' +
             'DELETE FROM public."bLedgerStatement" WHERE "dateAcc"::date = ${dateToOpen} RETURNING *;'
   sql = pgp.as.format(sqlText,request.body.data);
-  db_common_api.queryExecute(sql,response);
+  db_common_api.queryExecute(sql,response,null,'Balance Day Open');
 }
 module.exports = {
   fGetMT950Transactions,

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { AppMarketDataService } from './app-market-data.service';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
+import { AppAccountingService } from './app-accounting.service';
 interface cacheAAM {
   code:string,
   data:[]
@@ -13,7 +14,8 @@ export class indexDBService {
 
   constructor(
     private MarketDataService: AppMarketDataService,
-    private dbService: NgxIndexedDBService
+    private dbService: NgxIndexedDBService,
+    private AccountingDataService:AppAccountingService, 
   ) { }
   indexDBcacheData (key:string,data:any) {
     // console.log('data',data[0]);
@@ -50,6 +52,10 @@ export class indexDBService {
         case 'getInstrumentAutoCompleteList':
           this.MarketDataService.getMoexInstruments(undefined,undefined,{Action:'getInstrumentAutoCompleteList'}).subscribe(data=>resolve(data))
         break;
+        case 'bcTransactionType_Ext':
+            this.AccountingDataService.GetTransactionType_Ext('',0,'','','bcTransactionType_Ext').subscribe(data=>resolve(data))
+        break;
+        
         
       }
     })
@@ -66,15 +72,17 @@ export class indexDBService {
     });
   }
   indexdbDeleteAllCache (key:string) {
-    this.dbService.clear(key).subscribe(res=>console.log(key,' is cleared? ', res))
+    return this.dbService.clear(key)
   }
-  async getIndexDBInstrumentStaticTables (key:string) {
+  async getIndexDBStaticTables (key:string) {
     return new Promise ((resolve) => {
       this.dbService.getByIndex('AAMCache','code',key).subscribe(async data=>{
         if (data) {
           console.log('for ',key,' is found ', data['data'].length, data, ' rows ');
           resolve(data)
         } else {
+          
+
           data = await this.fetchDataFromDb(key).then((data)=>{
             this.indexidCacheData(key,data);
             resolve({code:key,'data':data})

@@ -19,6 +19,7 @@ import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dia
 import { formatNumber } from '@angular/common';
 import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import { AuthService } from 'src/app/services/auth.service';
+import { indexDBService } from 'src/app/services/indexDB.service';
 
 @Component({
   selector: 'app-table-acc-entries',
@@ -48,8 +49,9 @@ export class AppTableAccEntriesComponent implements OnInit {
   @Input() readOnly: boolean = false; 
   @Input() action :string;
   @Input() externalId: number = null;
+  @Input() FirstOpenedAccountingDate: Date;
   dialogRef: MatDialogRef<AppAccEntryModifyFormComponent>;
-  public FirstOpenedAccountingDate : Date;
+
   menuColorGl=menuColorGl
   filterlFormControl = new FormControl('');
   addOnBlur = true;
@@ -76,7 +78,9 @@ export class AppTableAccEntriesComponent implements OnInit {
     private AuthServiceS:AuthService,  
     private HandlingCommonTasksS:HandlingCommonTasksService,
     private dialog: MatDialog,
-    private fb:FormBuilder 
+    private fb:FormBuilder ,
+    private indexDBServiceS:indexDBService,
+
   ) {
     this.searchParametersFG = this.fb.group ({
       dataRange : this.dataRange,
@@ -85,18 +89,14 @@ export class AppTableAccEntriesComponent implements OnInit {
       entryType : {value:[], disabled:false},
       ExtID:{value:null, disabled:false}
     })
-    this.AuthServiceS.verifyAccessRestrictions('accessToEntriesData').subscribe ((accessData) => {
-      console.log('access',accessData);
-      this.accessState=accessData.elementvalue;
-      this.disabledControlElements = this.accessState === 'full'? false : true;
-    })
+    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToEntriesData')[0].elementvalue;
+    this.disabledControlElements = this.accessState === 'full'? false : true;
     this.columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
-    this.AccountingDataService.GetTransactionType_Ext('',0,'','','bcTransactionType_Ext').subscribe (
-      data => this.TransactionTypes = data)
-    this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate)
+    this.indexDBServiceS.getIndexDBStaticTables('bcTransactionType_Ext').then ( data => this.TransactionTypes = data['data']);
     this.AccountingDataService.getReloadEntryList().subscribe(data => this.submitQuery(false))
   }
   ngOnInit(): void {
+    this.FirstOpenedAccountingDate? null : this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate);
     switch (this.action) {
       case 'ShowEntriesForBalanceSheet':
         this.accounts = [this.paramRowData.accountNo];

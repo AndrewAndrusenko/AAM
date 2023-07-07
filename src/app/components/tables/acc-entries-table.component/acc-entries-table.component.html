@@ -115,7 +115,7 @@
             <p *ngSwitchCase="'t_id'">
               <button mat-stroked-button style="font-size: 18px; margin-top: 3%; min-width: 70%;"  matTooltip="Entry details"
               [style.background-color] =  "investmentNodeColor"
-              (click)="openEntryModifyForm(disabledControlElements? 'View': 'Edit', element)">
+              (click)="openEntryModifyForm(element.t_dataTime<FirstOpenedAccountingDate||disabledControlElements? 'View': 'Edit', element)">
                 {{element[column]}}
               </button> 
             </p>
