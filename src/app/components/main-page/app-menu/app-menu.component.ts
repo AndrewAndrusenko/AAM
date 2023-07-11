@@ -40,4 +40,7 @@ constructor(
   indexdbDeleteAllCache (){
     this.indexDBServiceS.indexdbDeleteAllCache('AAMCache')
   }
+  nodecls (){
+    this.authService.nodeTerminalClear().subscribe(data=>console.log('nodeTerminalClear',data))
+  }
 }

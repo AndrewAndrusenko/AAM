@@ -100,11 +100,11 @@
     <tr mat-header-row *matHeaderRowDef="columnsToDisplayWithExpand"></tr>
     <tr mat-row *matRowDef="let element; columns: columnsToDisplayWithExpand;"
       [class.expanded-row]="expandedElement === element"
-      (click)="expandedElement === element ?  null : openEntry(element);
-      (expandedElement = expandedElement === element ? null : element)">
+      (click)="(expandedElement = expandedElement === element ? null : element)">
     </tr>
     <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row"    ></tr>
   </table>
   <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" [pageSize]="20" aria-label="Select page of users"></mat-paginator>
 </div>
 
+<!-- (click)="expandedElement === element ?  null : openEntry(element); -->

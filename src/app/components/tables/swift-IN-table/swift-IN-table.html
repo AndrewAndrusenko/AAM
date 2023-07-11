@@ -38,8 +38,14 @@
       <button color = "primary" mat-raised-button 
         [disabled]="swiftProcessingFB.invalid||swiftProcessingFB.disabled"
         style=" margin-left:1%;  font-size: 18px;"
-        (click)="ProcessSwiftStatemts(overdraft.checked)">
+        (click)="ProcessSwiftStatemts(overdraft.checked,true)">
         Process all transactions
+      </button>
+      <button color = "warn" mat-raised-button 
+        [disabled]="swiftProcessingFB.invalid||swiftProcessingFB.disabled"
+        style=" margin-left:1%;  font-size: 18px;"
+        (click)="ProcessSwiftStatemts(false,false)">
+        Make drafts (entries)
       </button>
       <button color = "accent" mat-raised-button 
         style=" margin-left:1%; font-size: 18px;"

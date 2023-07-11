@@ -18,7 +18,7 @@
     <mat-label>Type Code</mat-label>
     <mat-select  #t_XactTypeCode_Ext formControlName="t_XactTypeCode_Ext"  > 
       <ng-container *ngFor="let TransactionType of TransactionTypes">
-      <mat-option *ngIf = "TransactionType.code2 == xActTypeCode.value" [value]="TransactionType.id">
+      <mat-option *ngIf = "TransactionType.code2==xActTypeCode.value" [value]="TransactionType.id">
           {{TransactionType.xActTypeCode_Ext |uppercase}} - {{TransactionType.description}}
       </mat-option>
       </ng-container>

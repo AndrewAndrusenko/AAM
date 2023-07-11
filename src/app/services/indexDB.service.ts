@@ -9,9 +9,7 @@ interface cacheAAM {
 @Injectable({
   providedIn: 'root'
 })
-
 export class indexDBService {
-
   constructor(
     private MarketDataService: AppMarketDataService,
     private dbService: NgxIndexedDBService,
@@ -55,8 +53,6 @@ export class indexDBService {
         case 'bcTransactionType_Ext':
             this.AccountingDataService.GetTransactionType_Ext('',0,'','','bcTransactionType_Ext').subscribe(data=>resolve(data))
         break;
-        
-        
       }
     })
   }
@@ -78,11 +74,9 @@ export class indexDBService {
     return new Promise ((resolve) => {
       this.dbService.getByIndex('AAMCache','code',key).subscribe(async data=>{
         if (data) {
-          console.log('for ',key,' is found ', data['data'].length, data, ' rows ');
+          // console.log('for ',key,' is found ', data['data'].length, data, ' rows ');
           resolve(data)
         } else {
-          
-
           data = await this.fetchDataFromDb(key).then((data)=>{
             this.indexidCacheData(key,data);
             resolve({code:key,'data':data})
@@ -101,4 +95,3 @@ export class indexDBService {
     });
   }
 }
-

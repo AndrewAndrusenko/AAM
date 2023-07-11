@@ -160,7 +160,7 @@ export interface bcTransactionType_Ext {
   id: number, 
   xActTypeCode_Ext: string, 
   description: string, 
-  code2: string,
+  code2: number,
 }
 export interface bcEnityType {
   entityType: number, 
@@ -180,7 +180,7 @@ export interface bcParametersSchemeAccTrans {
   pAmount: number,
   pSenderBIC: string,
   pRefTransaction: string,
-  pDate_T: string,
+  pDate_T: Date,
   cxActTypeCode_Ext:number,
   cxActTypeCode: number,
   cLedgerType: string,

@@ -5,6 +5,7 @@ const pool = new Pool(config.dbConfig);
 var pgp = require('pg-promise')({
   capSQL: true // to capitalize all generated SQL
 });
+
 async function queryExecute (sql, response, responseType) {//General query to postgres execution via pool
   return new Promise ((resolve) => {
     pool.query (sql,  (err, res) => {

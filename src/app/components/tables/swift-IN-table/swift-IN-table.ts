@@ -1,7 +1,7 @@
-import {AfterViewInit, Component, EventEmitter, OnDestroy, OnInit, Output, QueryList, ViewChild, ViewChildren} from '@angular/core';
+import { Component, EventEmitter, OnDestroy, OnInit, Output, QueryList, ViewChild, ViewChildren} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
-import {Subscription } from 'rxjs';
+import {Subject, Subscription, takeUntil } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import { bAccountsEntriesList, cFormValidationLog, SWIFTSGlobalListmodel } from 'src/app/models/intefaces';
@@ -29,7 +29,8 @@ import { MatCalendarCellClassFunction } from '@angular/material/datepicker';
     ]),
   ],
 })
-export class AppTableSWIFTsInListsComponent  implements  AfterViewInit, OnInit,OnDestroy {
+export class AppTableSWIFTsInListsComponent  implements OnInit,OnDestroy {
+  private readonly destroy$ = new Subject();
   accessState: string = 'none';
   accessToEntriesData: string = 'none';
   disabledControlElements: boolean = false;
@@ -78,13 +79,17 @@ export class AppTableSWIFTsInListsComponent  implements  AfterViewInit, OnInit,O
     this.accessToEntriesData = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToEntriesData')[0].elementvalue;
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToSWIFTData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
-    this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data=>{
+    this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').pipe(takeUntil(this.destroy$)).subscribe(data=>{
       this.FirstOpenedAccountingDate = data[0].FirstOpenedDate
       this.cDateToProcessSwift.setValue(new Date(this.FirstOpenedAccountingDate))
       this.cDateAccounting.setValue(new Date(this.FirstOpenedAccountingDate))
+      this.cDateToProcessSwift.setValue(new Date('2023-06-21'))
+      this.cDateAccounting.setValue(new Date('2023-06-21'))
+
     })
-    this.AccountingDataService.GetSWIFTsList (null,null,null,null,'DatesWithSWIFT').subscribe(dates=>this.dateWithSWIFTs = dates[0]['datesarray']);
-    this.subscription = this.LogService.getLogObject().subscribe(logObject => {
+    this.AccountingDataService.GetSWIFTsList (null,null,null,null,'DatesWithSWIFT').pipe(takeUntil(this.destroy$)).subscribe(dates=>this.dateWithSWIFTs = dates[0]['datesarray']);
+    this.LogService.getLogObject().pipe(takeUntil(this.destroy$)).subscribe(logObject => {
+      // console.log('getLogObject',logObject);
       logObject.forEach (logObj => {
         let index = this.transactionsToProcess.findIndex(elem => elem.id===logObj.t_extTransactionId)
         this.transactionsToProcess[index].status ='Error';
@@ -92,9 +97,8 @@ export class AppTableSWIFTsInListsComponent  implements  AfterViewInit, OnInit,O
         this.isProcessingComplete()? this.swiftProcessingFB.enable() : null ;
         
       })
-      console.log('st',this.transactionsToProcess);
     })
-    this.subscriptionCreatedLog = this.LogService.geCreatedtLogObject().subscribe(logCreatedObject => {
+    this.LogService.geCreatedtLogObject().pipe(takeUntil(this.destroy$)).subscribe(logCreatedObject => {
       console.log('geCreatedtLogObject',logCreatedObject, this.createdLogAutoProcessingALL);
       let index = this.transactionsToProcess.findIndex(elem => elem.id===logCreatedObject.t_extTransactionId)
       this.transactionsToProcess[index].status ='Created'
@@ -108,21 +112,16 @@ export class AppTableSWIFTsInListsComponent  implements  AfterViewInit, OnInit,O
     } )
   }
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
-    this.subscriptionCreatedLog.unsubscribe();
+    this.destroy$.next(true);
+    this.destroy$.complete();
   }
   ngOnInit(): void {
     this.swiftProcessingFB.enable()
   }
-  ngAfterViewInit() {
-    // this.updateSwiftsData('GetSWIFTsList');
-
-  }
   async updateSwiftsData (action: string, dateMessage?:string) {
     console.log('updateSwiftsData');
     return new Promise<number> (async (resolve,reject) => {
-      this.accessState === 'none'? null : this.AccountingDataService.GetSWIFTsList (dateMessage,null,null,null,action).subscribe (SWIFTsList  => {
-        console.log('GetSWIFTsList sub',SWIFTsList);
+      this.accessState === 'none'? null : this.AccountingDataService.GetSWIFTsList (dateMessage,null,null,null,action).pipe(takeUntil(this.destroy$)).subscribe (SWIFTsList  => {
         this.dataSource? this.dataSource.data = null : null;
         this.dataSource  = new MatTableDataSource(SWIFTsList);
         this.dataSource.paginator = this.paginator;
@@ -131,22 +130,21 @@ export class AppTableSWIFTsInListsComponent  implements  AfterViewInit, OnInit,O
     })
   })
   }
-  async ProcessSwiftStatemts (overdraftOverride:boolean) {
-    this.swiftProcessingFB.disable();
+  async ProcessSwiftStatemts (overdraftOverride:boolean, autoProcessing:boolean) {
+    autoProcessing? this.swiftProcessingFB.disable() : this.toggleAllRows();
     this.errorLogAutoProcessingALL = [];
     this.createdLogAutoProcessingALL = [];
     this.transactionsToProcess = [];
     this.TableSwiftItems.forEach(swiftTable => {
       swiftTable.selection.selected.forEach(element => {
-        console.log('element.typeTransaction)&&(Number(element.entriesAmount', (['CR','DR'].includes(element.typeTransaction)&&(Number(element.entriesAmount)===0)), element.typeTransaction,Number(element.entriesAmount))
         if (['CR','DR'].includes(element.typeTransaction)&&(Number(element.entriesAmount)===0)) {
-         this.EntryProcessingService.openEntry(element, swiftTable.parentMsgRow, true, this.cDateAccounting.value, overdraftOverride);
-         this.transactionsToProcess.push(element) 
+         this.EntryProcessingService.openEntry(element, swiftTable.parentMsgRow, autoProcessing, this.cDateAccounting.value, overdraftOverride);
+         autoProcessing? this.transactionsToProcess.push(element) : null;
         }
       });
       if (!this.transactionsToProcess.length) {
         this.swiftProcessingFB.enable();
-        this.CommonDialogsService.snackResultHandler({name:'error', detail:'All transaction are allocated. No entries have been created'});
+        autoProcessing? this.CommonDialogsService.snackResultHandler({name:'error', detail:'All transaction are allocated. No entries have been created'}) : null;
       }
       swiftTable.selection.clear();
     })

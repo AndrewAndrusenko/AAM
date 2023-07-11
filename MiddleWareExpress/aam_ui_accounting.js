@@ -239,7 +239,7 @@ async function fGetAccountingData (request,response) {
     break;
   }
   query.text = pgp.as.format(query.text,request.query);
-  db_common_api.queryExecute(query.text,response,null, request.query.Action);
+  db_common_api.queryExecute(query.text,response,null, request.query.queryCode === undefined?  request.query.Action : request.query.queryCode );
 }
 async function fGetMT950Transactions (request,response) {
   let sqlText;

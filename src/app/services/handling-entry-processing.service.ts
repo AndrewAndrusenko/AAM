@@ -17,9 +17,11 @@ export class HandlingEntryProcessingService {
     if (Number(row.entriesAmount) > Number(row.amountTransaction) && ['CR','DR'].includes(row.typeTransaction)) {
       let EmptyEntry = {'entryDraft' : {}, 'formStateisDisabled': true, 'overRideOverdraft' :overRideOverdraft}
       this.AccountingDataService.sendEntryDraft(EmptyEntry);
+
     } else {
+      // console.log('draft 1', row.comment);
       let accountNo = row.comment.split('/')[3];
-      await lastValueFrom (this.AccountingDataService.GetAccountData(0,0,0, accountNo,'GetAccountData'))
+      await lastValueFrom (this.AccountingDataService.GetAccountData(0,0,0, accountNo,'GetAccountData','accountData'))
       .then ((accountData) => {
         if (accountData.length) {
           let bcEntryParameters = <bcParametersSchemeAccTrans> {}
@@ -28,7 +30,7 @@ export class HandlingEntryProcessingService {
           bcEntryParameters.pExtTransactionId = row.id;
           bcEntryParameters.pAmount = row.amountTransaction;
           bcEntryParameters.pDate_T = dateToProcess? new Date (dateToProcess).toDateString() : row.valueDate ;
-          console.log('rw',row.valueDate,dateToProcess,  bcEntryParameters.pDate_T);
+          // console.log('rw',row.valueDate,dateToProcess,  bcEntryParameters.pDate_T);
           
           bcEntryParameters.pSenderBIC = parentMsgRow.senderBIC;
           bcEntryParameters.pRef = row.refTransaction;
@@ -36,6 +38,7 @@ export class HandlingEntryProcessingService {
           bcEntryParameters.cxActTypeCode_Ext = row.comment.split('/')[1];
           bcEntryParameters.cLedgerType = 'NostroAccount';
           this.AccountingDataService.GetEntryScheme (bcEntryParameters).subscribe (entryScheme => {
+            // console.log('sendEntryDraft');
             this.AccountingDataService.sendEntryDraft({'entryDraft' : entryScheme[0], 'formStateisDisabled': false, 'refTransaction': row.refTransaction, 'autoProcessing':autoProcessing, 'overRideOverdraft' :overRideOverdraft});
           });
         } else {

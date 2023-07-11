@@ -65,7 +65,7 @@ export class AppTableSWIFT950ItemsComponent  implements  AfterViewInit {
       this.dataSource  = new MatTableDataSource(MT950Transactions);
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
-      console.log('reloadSwiftItemsTable for parent',this.parentMsgRow.id);
+      // console.log('reloadSwiftItemsTable for parent',this.parentMsgRow.id);
       this.AccountingDataService.sendLoadedMT950Transactions(this.parentMsgRow.id)
     })
   }

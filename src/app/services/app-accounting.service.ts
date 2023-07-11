@@ -66,12 +66,12 @@ export class AppAccountingService {
     const params = {'dataRange': dataRange, 'id' :id, 'MTType': MTType,'Sender':Sender, 'Action': Action}
     return this.http.get <bcAccountType_Ext []>('/api/DEA/fGetAccountingData/', { params: params })
   }
-  GetAccountData (currencyCode: number, id: number, clientId:number, accountNo: string, Action: string):Observable <bAccounts[]> {
-    const params = {'currencyCode': currencyCode, 'id' :id, 'clientId': clientId,'accountNo':accountNo, 'Action': Action}
+  GetAccountData (currencyCode: number, id: number, clientId:number, accountNo: string, Action: string,  queryCode?:string):Observable <bAccounts[]> {
+    const params = {'currencyCode': currencyCode, 'id' :id, 'clientId': clientId,'accountNo':accountNo, 'Action': Action, queryCode: queryCode}
     return this.http.get <bAccounts []>('/api/DEA/fGetAccountingData/', { params: params })
   }
-  GetLedgerData (currencyCode: number, id: number, clientId:number, accountNo: string, Action: string):Observable <bLedger[]> {
-    const params = {'currencyCode': currencyCode, 'id' :id, 'clientId': clientId,'accountNo':accountNo, 'Action': Action}
+  GetLedgerData (currencyCode: number, id: number, clientId:number, accountNo: string, Action: string, queryCode?:string ):Observable <bLedger[]> {
+    const params = {'currencyCode': currencyCode, 'id' :id, 'clientId': clientId,'accountNo':accountNo, 'Action': Action, queryCode: queryCode}
     return this.http.get <bLedger []>('/api/DEA/fGetAccountingData/', { params: params })
   }
   /*----------------------Create entry by scheme---------------------------------------------------------*/
@@ -83,13 +83,15 @@ export class AppAccountingService {
       let newEntryDraft = {}
       newEntryDraft['FirstOpenedAccountingDate'] = OpenedDate[0].FirstOpenedDate;
       let entryFormFields = Object.keys (this.AccountsEntriesList)
+      // console.log('data.entryDraft)',data);
       Object.entries(data.entryDraft).forEach ((value,key) => {
         entryFormFields.includes('t_'+ value[0])? newEntryDraft['t_' + value[0]] = value[1]  : null;
         entryFormFields.includes('d_'+ value[0])? newEntryDraft['d_' + value[0]] = value[1] : null;
       })
       newEntryDraft['d_transactionType'] = 'AL';
+      // newEntryDraft['id'] = 0
       data.entryDraft = newEntryDraft; 
-      this.subjectEntryDraft.forEach(el=>console.log('subjectEntryDraft next'))
+      // this.subjectEntryDraft.forEach(el=>console.log('subjectEntryDraft next', data))
       this.subjectEntryDraft.next(data)
     })
   }

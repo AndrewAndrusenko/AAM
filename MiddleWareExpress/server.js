@@ -93,12 +93,22 @@ appServer.post ('/auth/', function (req, res, next) {
   return res.json({message:"Success", username: user});
 })(req, res, next)
 }) 
-
+function NodeCls () {
+  process.stdout.write('\x1b')
+  console.log('AA');
+}
 appServer.post ('/logout/', function (req, res){
  // console.log('req', req.session)
   req.session.destroy();
 });
-
+appServer.get('/nodecls/', function (req, res){
+  process.stdout.write('\x1b')
+  console.log('\x1b')
+  console.log('\x1Bc');
+  console.log('Terminal cleared');
+  
+  res.status(200).json('Terminal cleared')
+ } )
 
 appServer.get ('/auth/userRoles/', auth_module.getUserRoles)
 appServer.get ('/auth/loginsArray/', auth_module.getLoginsArray)
