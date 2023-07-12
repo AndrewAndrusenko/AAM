@@ -1,5 +1,6 @@
 <mat-toolbar style="margin-left: 1%;" color="primary" >
-  {{action}} Entry: {{d_transactionType.value=='LL'? ' Ledger - Ledger':' Account - Ledger'}} ID: {{id.value}} {{d_transactionType.value}}
+  {{action}} | Entry: {{d_transactionType.value=='LL'? ' Ledger - Ledger':' Account - Ledger'}} | ID: {{id.value}} 
+  | Status: {{entryModifyForm.status}}
 </mat-toolbar>
 <button mat-raised-button color="accent" 
   [disabled]="!(entryModifyForm.valid && submitbox.checked)"

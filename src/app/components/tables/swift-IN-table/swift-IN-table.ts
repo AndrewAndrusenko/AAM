@@ -131,7 +131,7 @@ export class AppTableSWIFTsInListsComponent  implements OnInit,OnDestroy {
   })
   }
   async ProcessSwiftStatemts (overdraftOverride:boolean, autoProcessing:boolean) {
-    autoProcessing? this.swiftProcessingFB.disable() : this.toggleAllRows();
+    // autoProcessing? this.swiftProcessingFB.disable() : this.toggleAllRows();
     this.errorLogAutoProcessingALL = [];
     this.createdLogAutoProcessingALL = [];
     this.transactionsToProcess = [];
