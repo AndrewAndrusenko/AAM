@@ -91,14 +91,12 @@ export class AppAccEntryModifyFormComponent {
       this.accountNo.removeAsyncValidators(this.validatorCorrectAccountNo);
       this.entryModifyForm.reset({ onlySelf: false, emitEvent: false} )
       this.pendingStatusAP=false;
-      console.log('form status', this.entryModifyForm.status, this.validationsToSkip);
       this.errorLogAutoProcessing=[];
       this.statusArray=[];
       this.data = entryData.entryDraft
       this.data['t_id'] = 0
       this.action='Create';
-      // this.entryModifyForm.markAsPristine
-      this.formInitialSetup(entryData.overRideOverdraft,'getEntryDraft');
+      this.formInitialSetup(entryData.overRideOverdraft);
       if (entryData.autoProcessing === true) {
         this.autoProcessingState = true;
         this.formStatusChange$=this.entryModifyForm.statusChanges.pipe(distinctUntilChanged(),takeUntil(this.entrySTPdone$)).subscribe(result=>{
@@ -118,7 +116,7 @@ export class AppAccEntryModifyFormComponent {
     }) 
   }
   ngAfterViewInit(): void {
-    this.data? this.formInitialSetup(undefined,'ngAfterViewInit') :null;
+    this.data? this.formInitialSetup() :null;
   }
   ngOnDestroy(): void {
     // this.formStatusChange$.unsubscribe();
@@ -129,17 +127,15 @@ export class AppAccEntryModifyFormComponent {
     this.formStatusChange$.unsubscribe();
     console.log('this.formStatusChange$.closed1?',this.formStatusChange$.closed);
   }
-  formInitialSetup (overdraftOverride:boolean=false,int:string) {
+  formInitialSetup (overdraftOverride:boolean=false) {
     this.entryModifyForm.patchValue(this.data);
     this.xActTypeCode_Ext.setValue(Number(this.data.t_XactTypeCode_Ext))
     this.xActTypeCode.setValue(Number(this.data.t_XactTypeCode))
     this.AddAsyncValidators(overdraftOverride);
     this.amountFormat();
+    this.accountId.valueChanges.pipe(distinctUntilChanged()).subscribe(() => this.showAValidator('accountNo'));
+    this.ledgerId.valueChanges.pipe(distinctUntilChanged()).subscribe(() => this.showAValidator('ledgerNo'));
     this.entryModifyForm.markAllAsTouched();
-    if (int==='getEntryDraft') {
-     /*  this.ledgerNo.updateValueAndValidity();
-      this.accountNo.updateValueAndValidity() */
-    };
   }
   async AddAsyncValidators (overdraftOverride:boolean) {
 
@@ -173,11 +169,7 @@ export class AppAccEntryModifyFormComponent {
       break;
     }
   } 
-  removeFormValidationErrors() {
-    Object.keys(this.entryModifyForm.controls).forEach(key=>this.entryModifyForm.get(key).setErrors(null))
-  }
   getFormValidationErrors(element: string, refTransaction?:string) {
-    // this.errorLogAutoProcessing =[]
     Object.keys(this.entryModifyForm.controls).forEach(key => {
       const controlErrors: ValidationErrors = this.entryModifyForm.get(key).errors;
       if (controlErrors != null) {
@@ -192,15 +184,11 @@ export class AppAccEntryModifyFormComponent {
             errorCode: '_'+refTransaction+key+keyError
           }) : null;
          });
-         if (element!=='full') {
-            // (element == 'd_ledgerNo')?  this.entryModifyForm.get("d_ledgerNo").setErrors(null) : this.entryModifyForm.get("d_accountNo").setErrors(null);
-         } else {
           if (this.errorLogAutoProcessing) {
-            this.LogService.sendLogObject(this.errorLogAutoProcessing)
-            this.completeSTPsubscription ();
-          };
-         }
-      }
+          this.LogService.sendLogObject(this.errorLogAutoProcessing);
+          this.completeSTPsubscription ();
+        };
+        }
     });
   }
   showAValidator (validateScope:string = 'full'){
@@ -215,7 +203,7 @@ export class AppAccEntryModifyFormComponent {
     }
     if (['full','accountNo'].includes(validateScope)) {
       if (this.accountNo.hasAsyncValidator(this.validatorAccountOverdraft) || this.accountNo.hasAsyncValidator (this.validatorLedgerLL2Overdraft)) {
-        this.validationsToSkip.push('AccountingAccountNoAValidator');
+        this.validationsToSkip.push(this.d_transactionType.value === 'AL'? 'AccountingAccountNoAValidator' : 'LedgerAccountNoAValidator');
         this.accountNo.updateValueAndValidity();
       } else {
           this.updateExpectedBalance('accountNo'+ this.d_transactionType.value)
@@ -224,7 +212,6 @@ export class AppAccEntryModifyFormComponent {
   }
   toggleOverdraftValidator ( overdraft :any, element: string) {
     if (overdraft.checked)  { 
-      // this.getFormValidationErrors(element)
       if (element === 'd_ledgerNo') {
         this.ledgerNo.removeAsyncValidators(this.validatorLedgerAccountOverdraft);
         this.ledgerNo.setAsyncValidators ([this.validatorLedgerAccountOverdraft, this.validatorCorrectLedgerAccountNo]);
@@ -237,17 +224,13 @@ export class AppAccEntryModifyFormComponent {
           this.accountNo.setAsyncValidators ([this.validatorLedgerLL2Overdraft, this.validatorCorrectLedgerLLAccountNo]); 
         }
       }
-    }
-    else { 
-      this.getFormValidationErrors(element)
+    } else { 
       if (element === 'd_ledgerNo') {
         this.entryModifyForm.get("d_ledgerNo").setErrors(null) ;
-        this.validationsToSkip.push('LedgerAccountNoAValidator')
         this.ledgerNo.removeAsyncValidators(this.validatorLedgerAccountOverdraft);
         this.ledgerNo.setAsyncValidators ([this.validatorCorrectLedgerAccountNo]);
       } else {
-        this.validationsToSkip.push('AccountingAccountNoAValidator')
-         this.entryModifyForm.get("d_accountNo").setErrors(null);
+        this.entryModifyForm.get("d_accountNo").setErrors(null);
         if (this.d_transactionType.value === 'AL') { // Account - Ledger Transaction
           this.accountNo.removeAsyncValidators(this.validatorAccountOverdraft);
           this.accountNo.setAsyncValidators ([this.validatorCorrectAccountNo]);
