@@ -93,7 +93,9 @@ export class AppTableAccEntriesComponent implements OnInit {
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
     this.indexDBServiceS.getIndexDBStaticTables('bcTransactionType_Ext').then ( data => this.TransactionTypes = data['data']);
-    this.AccountingDataService.getReloadEntryList().subscribe(data => this.submitQuery(false))
+    this.AccountingDataService.getReloadEntryList().subscribe(data => {
+      console.log('TableAccEntries',);
+      this.submitQuery(false)})
   }
   ngOnInit(): void {
     this.FirstOpenedAccountingDate? null : this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate);

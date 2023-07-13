@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, ReplaySubject, Subject, observable} from 'rxjs';
+import { Observable, ReplaySubject, Subject} from 'rxjs';
 import { bAccounts, bAccountsEntriesList, bBalanceData, bBalanceFullData, bcAccountType_Ext, bcEnityType, bcTransactionType_Ext, bLedger, bLedgerAccounts, bLedgerBalanceData, SWIFTSGlobalListmodel, SWIFTStatement950model } from '../models/intefaces';
 
 @Injectable({
@@ -51,8 +51,8 @@ export class AppAccountingService {
    const params = {'dataRange': dataRange, 'id' :id, 'MTType': MTType,'Sender':Sender, 'Action': Action}
     return this.http.get <SWIFTStatement950model []>('/api/DEA/fGetMT950Transactions/', { params: params })
   }
-  sendLoadedMT950Transactions ( id:any) {this.subjectLoadedMT950Transactions.next(id)}
-  getLoadedMT950Transactions(): Observable<any> {return this.subjectLoadedMT950Transactions.asObservable()}
+  sendLoadedMT950Transactions ( swiftIDs:number[]) {this.subjectLoadedMT950Transactions.next(swiftIDs)}
+  getLoadedMT950Transactions(): Observable<number[]> {return this.subjectLoadedMT950Transactions.asObservable()}
 
   GetTransactionType_Ext (dataRange: string, id: number, MTType:string, Sender: string, Action: string):Observable <bcTransactionType_Ext[]> {
     const params = {'dataRange': dataRange, 'id' :id, 'MTType': MTType,'Sender':Sender, 'Action': Action}

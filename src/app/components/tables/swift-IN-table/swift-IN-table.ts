@@ -103,7 +103,10 @@ export class AppTableSWIFTsInListsComponent  implements OnInit,OnDestroy {
       let index = this.transactionsToProcess.findIndex(elem => elem.id===logCreatedObject.t_extTransactionId)
       this.transactionsToProcess[index].status ='Created'
       this.createdLogAutoProcessingALL.push(logCreatedObject);
-      this.isProcessingComplete()? this.swiftProcessingFB.enable() : null ;
+      if (this.isProcessingComplete()) {
+        this.swiftProcessingFB.enable();
+       this.AccountingDataService.sendLoadedMT950Transactions (this.transactionsToProcess.map(el=>el.msgId));        
+      };
     })
     this.swiftProcessingFB = this.fb.group ({
       cDateToProcessSwift :[null, [Validators.required]],
@@ -131,7 +134,7 @@ export class AppTableSWIFTsInListsComponent  implements OnInit,OnDestroy {
   })
   }
   async ProcessSwiftStatemts (overdraftOverride:boolean, autoProcessing:boolean) {
-    // autoProcessing? this.swiftProcessingFB.disable() : this.toggleAllRows();
+    autoProcessing? this.swiftProcessingFB.disable() : this.toggleAllRows();
     this.errorLogAutoProcessingALL = [];
     this.createdLogAutoProcessingALL = [];
     this.transactionsToProcess = [];

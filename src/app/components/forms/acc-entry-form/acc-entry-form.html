@@ -252,6 +252,12 @@
       Required!
     </mat-error>
   </mat-form-field>
+  <mat-form-field style="width: 10%;">
+    <input matInput placeholder="t_accountId" formControlName="t_accountId">
+  </mat-form-field>
+  <mat-form-field style="width: 10%;">
+    <input matInput placeholder="t_ledgerNoId" formControlName="t_ledgerNoId">
+  </mat-form-field>
   <h3 *ngIf="action!='View'"
     [style.color]="entryModifyForm.invalid ? 'rgb(252, 113, 113)' : null">
     {{entryModifyForm.invalid? 'Please check the form. Data is invalid' : 'Data is valid. Please select "Submit data"'}}

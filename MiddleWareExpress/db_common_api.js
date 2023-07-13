@@ -6,7 +6,6 @@ const pg = require('pg');
 
 async function queryExecute (sql, response, responseType, sqlID) {
   return new Promise ((resolve) => {
-    // console.log('sql',sql);
     pool.query (sql,  (err, res) => {
       if (err) {
         console.log (err.stack.split("\n", 1).join(""))
@@ -16,7 +15,8 @@ async function queryExecute (sql, response, responseType, sqlID) {
         let rows = [];
         res.length? res.map(el => rows.push(...el.rows) ): rows = res.rows;
         result = responseType === 'rowCount'? rowsCount : rows;
-        console.log('db_common_api; ', sqlID, ';  QTY rows ;', rows.length)
+        // console.log('sql',sql);
+        console.log('N:',new Date().getSeconds()+10, 'db_api; ', sqlID, ';  QTY rows ;', rows.length)
         resolve (response? response.status(200).json(result):result)
       }
     })
@@ -38,11 +38,8 @@ async function fUpdateTableDB (table, fields,idfieldName, request, response) {
             sqlText = 'DELETE FROM public."'+ table +'" WHERE "'+ idfieldName +'"=${'+ idfieldName +'} RETURNING *;'
             break;
           }
-          console.log(request.body.data);
-          console.log(sqlText);
           sql = pgp.as.format(sqlText,request.body.data);
-          console.log('pgp - sql',sql);
-    resolve(queryExecute (sql, response))
+    resolve(queryExecute (sql, response,undefined,'fUpdateTableDB '+request.body.action+' ',table))
   })
 }
 module.exports = {

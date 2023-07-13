@@ -51,7 +51,7 @@ export class AppTableSWIFT950ItemsComponent  implements  AfterViewInit {
     private AuthServiceS:AuthService,  
 
   ) {
-    this.AccountingDataService.getReloadEntryList().subscribe (entryData => this.reloadSwiftItemsTable())
+    this.AccountingDataService.getLoadedMT950Transactions().subscribe (swiftsIDs => swiftsIDs.includes (this.parentMsgRow.id)? this.reloadSwiftItemsTable() : console.log('swiftsIDs',swiftsIDs,this.parentMsgRow))
   }
   ngAfterViewInit() {
     this.columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
@@ -65,8 +65,8 @@ export class AppTableSWIFT950ItemsComponent  implements  AfterViewInit {
       this.dataSource  = new MatTableDataSource(MT950Transactions);
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
-      // console.log('reloadSwiftItemsTable for parent',this.parentMsgRow.id);
-      this.AccountingDataService.sendLoadedMT950Transactions(this.parentMsgRow.id)
+      console.log('reloadSwiftItemsTable for parent',this.parentMsgRow.id);
+      // this.AccountingDataService.sendLoadedMT950Transactions(this.parentMsgRow.id)
     })
   }
   async openEntry (row) {
@@ -87,7 +87,7 @@ export class AppTableSWIFT950ItemsComponent  implements  AfterViewInit {
         this.bcEntryParameters.cxActTypeCode_Ext = row.comment.split('/')[1];
         this.bcEntryParameters.cLedgerType = 'NostroAccount';
         this.AccountingDataService.GetEntryScheme (this.bcEntryParameters).subscribe (entryScheme => {
-        this.AccountingDataService.sendEntryDraft({'entryDraft' : entryScheme, 'formStateisDisabled': false, 'refTransaction': row.refTransaction});
+          this.AccountingDataService.sendEntryDraft({'entryDraft' : entryScheme, 'formStateisDisabled': false, 'refTransaction': row.refTransaction});
         });
       })
     }
