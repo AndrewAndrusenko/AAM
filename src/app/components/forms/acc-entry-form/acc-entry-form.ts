@@ -135,8 +135,8 @@ export class AppAccEntryModifyFormComponent {
     this.data? this.formInitialSetup() :null;
   }
   ngOnDestroy(): void {
-    // this.accountIDchanges$? this.accountIDchanges$.unsubscribe() :null;
-    // this.ledgerIDchanges$? this.ledgerIDchanges$.unsubscribe() : null;
+    this.accountIDchanges$? this.accountIDchanges$.unsubscribe() :null;
+    this.ledgerIDchanges$? this.ledgerIDchanges$.unsubscribe() : null;
   }
   completeSTPsubscription (){
     this.accountIDchanges$.unsubscribe();
@@ -163,8 +163,6 @@ export class AppAccEntryModifyFormComponent {
     }
   }
   updateExpectedBalance (accountTypeEntryType:string) {
-    console.log('amountTransaction',this.amountTransaction.value, this.amountTransaction.getRawValue());
-    console.log('form', this.entryModifyForm.value);
     switch (accountTypeEntryType) {
       case 'accountNoAL':
         this.AccountingDataService.getExpectedBalanceOverdraftCheck (this.accountId.value,this.amountTransaction.value, new Date (this.dataTime.value).toDateString(),this.xActTypeCode.value, this.id.value, new Date (this.FirstOpenedAccountingDate).toDateString(), 'AccountingOverdraftAccountCheck').subscribe(expectBalanceData => this.d_closingBalance.setValue(expectBalanceData[0].closingBalance))

@@ -122,7 +122,6 @@ export class AppTableSWIFTsInListsComponent  implements OnInit,OnDestroy {
     this.swiftProcessingFB.enable()
   }
   async updateSwiftsData (action: string, dateMessage?:string) {
-    console.log('updateSwiftsData');
     return new Promise<number> (async (resolve,reject) => {
       this.accessState === 'none'? null : this.AccountingDataService.GetSWIFTsList (dateMessage,null,null,null,action).pipe(takeUntil(this.destroy$)).subscribe (SWIFTsList  => {
         this.dataSource? this.dataSource.data = null : null;
@@ -145,12 +144,13 @@ export class AppTableSWIFTsInListsComponent  implements OnInit,OnDestroy {
          autoProcessing? this.transactionsToProcess.push(element) : null;
         }
       });
-      if (!this.transactionsToProcess.length) {
-        this.swiftProcessingFB.enable();
-        autoProcessing? this.CommonDialogsService.snackResultHandler({name:'error', detail:'All transaction are allocated. No entries have been created'}) : null;
-      }
+
       swiftTable.selection.clear();
     })
+    if (!this.transactionsToProcess.length) {
+      this.swiftProcessingFB.enable();
+      autoProcessing? this.CommonDialogsService.snackResultHandler({name:'error', detail:'All transaction are allocated. No entries have been created'}) : null;
+    }
   }
   isProcessingComplete():boolean {
     this.transactionsCreated = this.transactionsToProcess.filter(elem => elem.status ==='Created').length; 

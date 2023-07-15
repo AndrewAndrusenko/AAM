@@ -53,7 +53,7 @@ export class customAsyncValidators {
             tap (accountExist => (controlErrors = control.touched && !accountExist.length ? { accountIsNotExist: true } : null)  ),
             map (accountExist => (control.touched && !accountExist.length ? { accountIsNotExist: true } : null)  ),
             catchError(() => of(controlErrors)),
-            take(1)
+            take(1),
           );
       } else {
         validationsToSkip.splice(validationsToSkip.indexOf('AccountingAccountNoAValidator'),1)
@@ -72,7 +72,7 @@ export class customAsyncValidators {
             tap (accountExist => (controlErrors = control.touched && !accountExist.length ? { accountIsNotExist: true } : null)  ),
             map (accountExist => (control.touched && !accountExist.length ? { accountIsNotExist: true } : null)  ),
             catchError(() => of(controlErrors)),
-            take(1)
+            take(1),
           );
       } else {
         validationsToSkip.splice(validationsToSkip.indexOf('LedgerAccountNoAValidator'),1)
@@ -120,10 +120,10 @@ export class customAsyncValidators {
         return AccountingDataService
         .getExpectedBalanceLedgerOverdraftCheck (AccountId.value,transactionAmount.getRawValue(), new Date (transactionDate.value).toDateString(), typeof(xactTypeCode)==='number'? xactTypeCode: xactTypeCode.value, id.value, new Date (FirstOpenedAccountingDate).toDateString(), 'AccountingOverdraftAccountCheck')
         .pipe(
-          take(1),
           tap (expectedBalance => d_closingBalance.setValue (expectedBalance[0].closingBalance)),
           map (expectedBalance => (expectedBalance[0].closingBalance < 0 ? {overdraft: true} : null)),
           catchError(() => of(null)),
+          take(1),
         );
     }
   }  

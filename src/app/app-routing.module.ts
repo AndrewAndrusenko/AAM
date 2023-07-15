@@ -10,6 +10,7 @@ import { AccTransactionsTabComponent } from './components/main-page/tabs/transac
 import { PortfoliosTabComponent } from './components/main-page/tabs/portfolios-tab/portfolios-tab';
 import { ClientsTabComponent } from './components/main-page/tabs/clients-tab/clients-tab';
 import { AccSWIFTTabComponent } from './components/main-page/tabs/SWIFT-tab.component/SWIFT-tab.component';
+import { AppTableSWIFT950ItemsComponent } from './components/tables/swift-950-table/swift-950-table';
 export const routesTreeMenu =[
   {
     path: "Instruments",
@@ -35,6 +36,11 @@ export const routesTreeMenu =[
     path: "SWIFT",
     data: { reuse: true },
     component: AccSWIFTTabComponent
+  },
+  {
+    path: "SWIFT950",
+    data: { reuse: true },
+    component: AppTableSWIFT950ItemsComponent
   },
   {
     path: "Portfolios",
