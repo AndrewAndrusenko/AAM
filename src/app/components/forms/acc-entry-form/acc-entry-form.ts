@@ -1,5 +1,5 @@
-import { Component,  EventEmitter,  Input } from '@angular/core';
-import { AsyncValidatorFn, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { Component,  EventEmitter,  Input, ViewChild } from '@angular/core';
+import { AsyncValidatorFn, FormBuilder, FormGroup, NgForm, ValidationErrors, Validators } from '@angular/forms';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
@@ -11,25 +11,28 @@ import { distinctUntilChanged, filter, ReplaySubject, Subject, Subscription, tak
 import { LogProcessingService } from 'src/app/services/log-processing.service';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
+import { AppMarketDataService } from 'src/app/services/app-market-data.service';
 @Component({
   selector: 'app-acc-entry-modify-form',
   templateUrl: './acc-entry-form.html',
   styleUrls: ['./acc-entry-form.scss'],
 })
 export class AppAccEntryModifyFormComponent {
+  @ViewChild('formDirective') private formDirective: NgForm;
   isAccountOverdraft = true;
-  entryModifyForm: FormGroup;
+  public entryModifyForm: FormGroup;
   panelOpenState = true;
   @Input() action: string;
   @Input() Ref: string;
   dialogChoseAccount: MatDialogRef<AppTableAccAccountsComponent>;
   dialogChoseLedger: MatDialogRef<AppTableAccLedgerAccountsComponent>;
-  validatorCorrectAccountNo :AsyncValidatorFn
-  validatorCorrectLedgerAccountNo :AsyncValidatorFn
-  validatorCorrectLLLedgerAccountNo :AsyncValidatorFn
-  validatorLedgerAccountOverdraft :AsyncValidatorFn
-  validatorLedgerLL2Overdraft :AsyncValidatorFn
-  validatorAccountOverdraft :AsyncValidatorFn
+  validatorCorrectAccountNo :AsyncValidatorFn;
+  validatorCorrectLedgerAccountNo :AsyncValidatorFn;
+  validatorLedgerAccountOverdraft :AsyncValidatorFn;
+  validatorLedgerLL2Overdraft :AsyncValidatorFn;
+  validatorAccountOverdraft :AsyncValidatorFn;
+  validatorCorrectLedgerLLAccountNo: AsyncValidatorFn;
+  
   validationsToSkip: string[] = [];
   formSubmitSubject$ = new Subject();
   actionType : string;
@@ -49,10 +52,10 @@ export class AppAccEntryModifyFormComponent {
   errorLogAutoProcessing : cFormValidationLog [] = []
   autoProcessingState : boolean = false
   pendingStatusAP: boolean = false
-  validatorCorrectLedgerLLAccountNo: AsyncValidatorFn;
   sbSTPCreateEntry$: Subscription;
   formStatusChange$: Subscription;
-  private  entrySTPdone$ :  ReplaySubject <boolean> = new ReplaySubject(1);
+  private accountIDchanges$ :Subscription; 
+  private ledgerIDchanges$ :Subscription; 
   constructor (
     private fb:FormBuilder, 
     private AccountingDataService:AppAccountingService, 
@@ -83,13 +86,25 @@ export class AppAccEntryModifyFormComponent {
     })    
     this.indexDBServiceS.getIndexDBStaticTables('bcTransactionType_Ext').then (data =>this.TransactionTypes = data['data']);
   }
+  formInitialSetup (overdraftOverride:boolean=false) {
+    this.entryModifyForm.patchValue(this.data);
+    this.xActTypeCode_Ext.setValue(Number(this.data.t_XactTypeCode_Ext))
+    this.xActTypeCode.setValue(Number(this.data.t_XactTypeCode))
+    this.entryModifyForm.markAsPending()
+
+    this.AddAsyncValidators(overdraftOverride);
+    this.amountFormat();
+    this.entryModifyForm.markAllAsTouched();
+    this.accountIDchanges$ = this.accountId.valueChanges.pipe(distinctUntilChanged()).subscribe(() => (this.amountTransaction.value&&this.dataTime.value)? this.showAValidator('accountNo') : null);
+    this.ledgerIDchanges$ = this.ledgerId.valueChanges.pipe(distinctUntilChanged()).subscribe(() => this.amountTransaction.value&&this.dataTime.value? this.showAValidator('ledgerNo'): null)
+  }
   ngOnInit(): void {
     this.AccountingDataService.getEntryDraft().pipe(filter(entryData => entryData.refTransaction === this.Ref)).subscribe (entryData=> {
-      this.ledgerNo.removeAsyncValidators(this.validatorLedgerAccountOverdraft);
-      this.ledgerNo.removeAsyncValidators(this.validatorCorrectLedgerAccountNo);
-      this.accountNo.removeAsyncValidators(this.validatorAccountOverdraft);
-      this.accountNo.removeAsyncValidators(this.validatorCorrectAccountNo);
-      this.entryModifyForm.reset({ onlySelf: false, emitEvent: false} )
+      this.entryModifyForm.markAsPending()
+      if (entryData.overRideOverdraft) {
+        this.ledgerNo.removeAsyncValidators(this.validatorLedgerAccountOverdraft);
+        this.accountNo.removeAsyncValidators(this.validatorAccountOverdraft);
+      }
       this.pendingStatusAP=false;
       this.errorLogAutoProcessing=[];
       this.statusArray=[];
@@ -99,7 +114,7 @@ export class AppAccEntryModifyFormComponent {
       this.formInitialSetup(entryData.overRideOverdraft);
       if (entryData.autoProcessing === true) {
         this.autoProcessingState = true;
-        this.formStatusChange$=this.entryModifyForm.statusChanges.pipe(distinctUntilChanged(),takeUntil(this.entrySTPdone$)).subscribe(result=>{
+        this.formStatusChange$=this.entryModifyForm.statusChanges.pipe().subscribe(result=>{
           console.log('formStatusChange', result );
           if (result==='PENDING') {
             this.pendingStatusAP = true;
@@ -112,6 +127,7 @@ export class AppAccEntryModifyFormComponent {
           result==='INVALID' && this.statusArray.length>0 ? this.getFormValidationErrors('full', this.Ref) : null; 
           this.statusArray.push(result)
         })
+        this.entryModifyForm.markAsPending();
       }
     }) 
   }
@@ -119,28 +135,18 @@ export class AppAccEntryModifyFormComponent {
     this.data? this.formInitialSetup() :null;
   }
   ngOnDestroy(): void {
-    // this.formStatusChange$.unsubscribe();
+    // this.accountIDchanges$? this.accountIDchanges$.unsubscribe() :null;
+    // this.ledgerIDchanges$? this.ledgerIDchanges$.unsubscribe() : null;
   }
   completeSTPsubscription (){
-    this.entrySTPdone$.next(true);
-    this.entrySTPdone$.complete();
+    this.accountIDchanges$.unsubscribe();
+    this.ledgerIDchanges$.unsubscribe();
     this.formStatusChange$.unsubscribe();
     console.log('this.formStatusChange$.closed1?',this.formStatusChange$.closed);
   }
-  formInitialSetup (overdraftOverride:boolean=false) {
-    this.entryModifyForm.patchValue(this.data);
-    this.xActTypeCode_Ext.setValue(Number(this.data.t_XactTypeCode_Ext))
-    this.xActTypeCode.setValue(Number(this.data.t_XactTypeCode))
-    this.AddAsyncValidators(overdraftOverride);
-    this.amountFormat();
-    this.accountId.valueChanges.pipe(distinctUntilChanged()).subscribe(() => this.showAValidator('accountNo'));
-    this.ledgerId.valueChanges.pipe(distinctUntilChanged()).subscribe(() => this.showAValidator('ledgerNo'));
-    this.entryModifyForm.markAllAsTouched();
-  }
   async AddAsyncValidators (overdraftOverride:boolean) {
-
     if (this.FirstOpenedAccountingDate !=null) {
-      this.validatorAccountOverdraft = customAsyncValidators.AccountingOverdraftAccountAsyncValidator (this.AccountingDataService, this.accountId ,this.amountTransaction, this.dataTime, this.xActTypeCode, this.d_closingBalance, this.id, this.FirstOpenedAccountingDate,this.entryModifyForm );
+      this.validatorAccountOverdraft = customAsyncValidators.AccountingOverdraftAccountAsyncValidator (this.AccountingDataService, this.accountId ,this.amountTransaction, this.dataTime, this.xActTypeCode, this.d_closingBalance, this.id, this.FirstOpenedAccountingDate);
       this.validatorLedgerAccountOverdraft = customAsyncValidators.AccountingOverdraftLedgerAccountAsyncValidator (this.AccountingDataService, this.ledgerId ,this.amountTransaction, this.dataTime, this.xActTypeCode.getRawValue() === 0? 1: this.xActTypeCode, this.d_closingLedgerBalance, this.id, this.FirstOpenedAccountingDate,this.entryModifyForm );
       this.validatorLedgerLL2Overdraft = customAsyncValidators.AccountingOverdraftLedgerAccountAsyncValidator (this.AccountingDataService, this.accountId ,this.amountTransaction, this.dataTime,  2 , this.d_closingBalance, this.id, this.FirstOpenedAccountingDate,this.entryModifyForm  );
       this.validatorCorrectAccountNo =  customAsyncValidators.AccountingAccountNoAValidator (this.AccountingDataService, this.accountNo.value, this.accountId, this.validationsToSkip); 
@@ -153,19 +159,21 @@ export class AppAccEntryModifyFormComponent {
         this.accountNo.setAsyncValidators (overdraftOverride?  [this.validatorCorrectLedgerLLAccountNo] : [this.validatorLedgerLL2Overdraft, this.validatorCorrectLedgerLLAccountNo] );
         this.ledgerNo.setAsyncValidators (overdraftOverride? [this.validatorCorrectLedgerAccountNo] : [this.validatorLedgerAccountOverdraft, this.validatorCorrectLedgerAccountNo] );
       }
-      return console.log('asynValidatorsAdded', overdraftOverride, this.accountNo) ;
+      return console.log('asynValidatorsAdded') ;
     }
   }
   updateExpectedBalance (accountTypeEntryType:string) {
+    console.log('amountTransaction',this.amountTransaction.value, this.amountTransaction.getRawValue());
+    console.log('form', this.entryModifyForm.value);
     switch (accountTypeEntryType) {
       case 'accountNoAL':
-        this.AccountingDataService.getExpectedBalanceOverdraftCheck (this.accountId.value,this.amountTransaction.getRawValue(), new Date (this.dataTime.value).toDateString(),this.xActTypeCode.value, this.id.value, new Date (this.FirstOpenedAccountingDate).toDateString(), 'AccountingOverdraftAccountCheck').subscribe(expectBalanceData => this.d_closingBalance.setValue(expectBalanceData[0].closingBalance))
+        this.AccountingDataService.getExpectedBalanceOverdraftCheck (this.accountId.value,this.amountTransaction.value, new Date (this.dataTime.value).toDateString(),this.xActTypeCode.value, this.id.value, new Date (this.FirstOpenedAccountingDate).toDateString(), 'AccountingOverdraftAccountCheck').subscribe(expectBalanceData => this.d_closingBalance.setValue(expectBalanceData[0].closingBalance))
       break;
       case 'accountNoLL':
-        this.AccountingDataService.getExpectedBalanceLedgerOverdraftCheck (this.accountId.value,this.amountTransaction.getRawValue(), new Date (this.dataTime.value).toDateString(), 2 , this.id.value, new Date (this.FirstOpenedAccountingDate).toDateString() ,'AccountingOverdraftAccountCheck').subscribe(expectBalanceData => this.d_closingBalance.setValue(expectBalanceData[0].closingBalance))
+        this.AccountingDataService.getExpectedBalanceLedgerOverdraftCheck (this.accountId.value,this.amountTransaction.value, new Date (this.dataTime.value).toDateString(), 2 , this.id.value, new Date (this.FirstOpenedAccountingDate).toDateString() ,'AccountingOverdraftAccountCheck').subscribe(expectBalanceData => this.d_closingBalance.setValue(expectBalanceData[0].closingBalance))
       break;
       default:
-        this.AccountingDataService.getExpectedBalanceLedgerOverdraftCheck (this.ledgerId.value,this.amountTransaction.getRawValue(), new Date (this.dataTime.value).toDateString(), this.xActTypeCode.getRawValue() === 0? 1: this.xActTypeCode.getRawValue(), this.id.value, new Date (this.FirstOpenedAccountingDate).toDateString() ,'AccountingOverdraftAccountCheck'). subscribe(expectBalanceData => this.d_closingLedgerBalance.setValue(expectBalanceData[0].closingBalance))
+        this.AccountingDataService.getExpectedBalanceLedgerOverdraftCheck (this.ledgerId.value,this.amountTransaction.value, new Date (this.dataTime.value).toDateString(), this.xActTypeCode.getRawValue() === 0? 1: this.xActTypeCode.getRawValue(), this.id.value, new Date (this.FirstOpenedAccountingDate).toDateString() ,'AccountingOverdraftAccountCheck'). subscribe(expectBalanceData => this.d_closingLedgerBalance.setValue(expectBalanceData[0].closingBalance))
       break;
     }
   } 
@@ -198,6 +206,7 @@ export class AppAccEntryModifyFormComponent {
         this.validationsToSkip.push('LedgerAccountNoAValidator');
         this.ledgerNo.updateValueAndValidity();
       } else {
+        console.log(' showAValidator (validateScope:string = ',);
         this.updateExpectedBalance('ledgerNo')
       };
     }
@@ -206,6 +215,7 @@ export class AppAccEntryModifyFormComponent {
         this.validationsToSkip.push(this.d_transactionType.value === 'AL'? 'AccountingAccountNoAValidator' : 'LedgerAccountNoAValidator');
         this.accountNo.updateValueAndValidity();
       } else {
+        console.log(' showAValidator (validateScope:string = ',);
           this.updateExpectedBalance('accountNo'+ this.d_transactionType.value)
       };
     }
@@ -226,11 +236,11 @@ export class AppAccEntryModifyFormComponent {
       }
     } else { 
       if (element === 'd_ledgerNo') {
-        this.entryModifyForm.get("d_ledgerNo").setErrors(null) ;
+        this.ledgerNo.errors['accountIsNotExist']? delete this.ledgerNo.errors['overdraft'] : this.ledgerNo.setErrors(null);
         this.ledgerNo.removeAsyncValidators(this.validatorLedgerAccountOverdraft);
         this.ledgerNo.setAsyncValidators ([this.validatorCorrectLedgerAccountNo]);
       } else {
-        this.entryModifyForm.get("d_accountNo").setErrors(null);
+        this.accountNo.errors['accountIsNotExist']? delete this.accountNo.errors['overdraft'] : this.accountNo.setErrors(null);
         if (this.d_transactionType.value === 'AL') { // Account - Ledger Transaction
           this.accountNo.removeAsyncValidators(this.validatorAccountOverdraft);
           this.accountNo.setAsyncValidators ([this.validatorCorrectAccountNo]);
@@ -280,6 +290,7 @@ export class AppAccEntryModifyFormComponent {
       this.autoProcessingState? this.LogService.sendCreatedLogObject (dataForUpdateLog): null;
       this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' entry'}, action);
       reloadEntryList? this.AccountingDataService.sendReloadEntryList (this.id.value) : null;
+      this.action === 'Create'||'Create_Example'? this.entryModifyForm.reset() : null;
     }
   }
   updateEntryData (action:string,reloadEntryList:boolean=true){

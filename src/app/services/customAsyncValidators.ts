@@ -6,6 +6,7 @@ import { AppAccountingService } from './app-accounting.service';
 import { AppMarketDataService } from './app-market-data.service';
 import { EventEmitter } from '@angular/core';
 export class customAsyncValidators {
+
   static clientNameCustomAsyncValidator(userService: AppInvestmentDataServiceService, clientId: number, client:string, errors?:ValidationErrors): AsyncValidatorFn {
     return (control: AbstractControl): Observable<ValidationErrors> => {
       if (control.value.toUpperCase() !== client.toUpperCase() && control.touched||control.dirty) {
@@ -42,36 +43,40 @@ export class customAsyncValidators {
     };
   }
   static AccountingAccountNoAValidator (AccountingDataService: AppAccountingService, AccountNo:string, accountId:AbstractControl, validationsToSkip: string[]): AsyncValidatorFn {
-    return (control: AbstractControl): Observable<ValidationErrors| null> => {
+    let  controlErrors:ValidationErrors;
+    return (control: AbstractControl): Observable<ValidationErrors> => {
       if (!validationsToSkip.includes('AccountingAccountNoAValidator')) {
         return AccountingDataService
           .GetAccountData (null,null,null, control.value, 'GetAccountData','AccountAccountNo Validator')
           .pipe(
             tap (data => data.length && (data[0].accountId!==accountId.value) ? accountId.setValue (data[0].accountId) : null),
+            tap (accountExist => (controlErrors = control.touched && !accountExist.length ? { accountIsNotExist: true } : null)  ),
             map (accountExist => (control.touched && !accountExist.length ? { accountIsNotExist: true } : null)  ),
-            catchError(() => of(null)),
+            catchError(() => of(controlErrors)),
             take(1)
           );
       } else {
         validationsToSkip.splice(validationsToSkip.indexOf('AccountingAccountNoAValidator'),1)
-        return of(null);
+        return of(controlErrors);
       }
     };
   }
   static LedgerAccountNoAValidator (AccountingDataService: AppAccountingService, AccountNo:string,ledgerId:AbstractControl, validationsToSkip: string[]): AsyncValidatorFn {
+    let  controlErrors:ValidationErrors;
     return (control: AbstractControl): Observable<ValidationErrors| null> => {
       if (!validationsToSkip.includes('LedgerAccountNoAValidator')) {
         return AccountingDataService
           .GetLedgerData (null,null,null, control.value, 'GetLedgerData','LedgerAccountNo Validator')
           .pipe(
             tap (data => data.length && (data[0].ledgerNoId!==ledgerId.value) ? ledgerId.setValue (data[0].ledgerNoId) : null),
+            tap (accountExist => (controlErrors = control.touched && !accountExist.length ? { accountIsNotExist: true } : null)  ),
             map (accountExist => (control.touched && !accountExist.length ? { accountIsNotExist: true } : null)  ),
-            catchError(() => of(null)),
+            catchError(() => of(controlErrors)),
             take(1)
           );
       } else {
         validationsToSkip.splice(validationsToSkip.indexOf('LedgerAccountNoAValidator'),1)
-        return of(null);
+        return of(controlErrors);
       }
     };
   }
@@ -98,17 +103,15 @@ export class customAsyncValidators {
         );
     };
   }
-  static AccountingOverdraftAccountAsyncValidator (
-  AccountingDataService: AppAccountingService, AccountId:AbstractControl, transactionAmount: AbstractControl, transactionDate:AbstractControl, xactTypeCode:AbstractControl, d_closingBalance: AbstractControl, id: AbstractControl, FirstOpenedAccountingDate : Date, FG1:FormGroup  
-  ): AsyncValidatorFn {
-    return (control: AbstractControl): Observable<ValidationErrors| null> => {
+  static AccountingOverdraftAccountAsyncValidator (AccountingDataService: AppAccountingService, AccountId:AbstractControl, transactionAmount: AbstractControl, transactionDate:AbstractControl, xactTypeCode:AbstractControl, d_closingBalance: AbstractControl, id: AbstractControl, FirstOpenedAccountingDate : Date): AsyncValidatorFn {
+    return (control: AbstractControl): Observable<ValidationErrors> => {
         return AccountingDataService
           .getExpectedBalanceOverdraftCheck (AccountId.value,transactionAmount.getRawValue(), new Date (transactionDate.value).toDateString(),xactTypeCode.value, id.value, new Date (FirstOpenedAccountingDate).toDateString(),'AccountingOverdraftAccountCheck')
           .pipe(
-            take(1),
             tap (expectedBalance => d_closingBalance.setValue (expectedBalance[0].closingBalance)),
             map (expectedBalance => (expectedBalance[0].closingBalance < 0 ? {overdraft: true} : null)),
             catchError(() => of(null)),
+            take(1),
           );
     };
   }
@@ -138,6 +141,7 @@ export class customAsyncValidators {
   }
   static MD_ISINuniqueAsyncValidator (AppMarketDataService: AppMarketDataService, isin:string, errors?:ValidationErrors): AsyncValidatorFn {
     return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      console.log('isin errors', errors);
       if (control.value.toUpperCase() !== isin.toUpperCase() && (control.touched||control.dirty)) {
         return AppMarketDataService
           .getInstrumentDataGeneral('validateISINForUnique', control.value.toUpperCase())

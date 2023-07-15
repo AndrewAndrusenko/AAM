@@ -14,7 +14,7 @@
             entryModifyForm.markAllAsTouched();">
   Submit Data {{ (action!='View')? '(change to update overdraft data)' : ''}}
 </mat-checkbox>
-<form class="submit" [formGroup]="entryModifyForm">
+<form class="submit" [formGroup]="entryModifyForm" #formDirective="ngForm" >
   <mat-form-field  style="width: 27%;">
     <mat-label>Type Code</mat-label>
     <mat-select  #t_XactTypeCode_Ext formControlName="t_XactTypeCode_Ext"  > 

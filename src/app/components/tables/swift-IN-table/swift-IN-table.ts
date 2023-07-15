@@ -83,8 +83,8 @@ export class AppTableSWIFTsInListsComponent  implements OnInit,OnDestroy {
       this.FirstOpenedAccountingDate = data[0].FirstOpenedDate
       this.cDateToProcessSwift.setValue(new Date(this.FirstOpenedAccountingDate))
       this.cDateAccounting.setValue(new Date(this.FirstOpenedAccountingDate))
-      this.cDateToProcessSwift.setValue(new Date('2023-06-21'))
-      this.cDateAccounting.setValue(new Date('2023-06-21'))
+      this.cDateToProcessSwift.setValue(new Date('2023-06-25'))
+      this.cDateAccounting.setValue(new Date('2023-06-25'))
 
     })
     this.AccountingDataService.GetSWIFTsList (null,null,null,null,'DatesWithSWIFT').pipe(takeUntil(this.destroy$)).subscribe(dates=>this.dateWithSWIFTs = dates[0]['datesarray']);
@@ -134,7 +134,7 @@ export class AppTableSWIFTsInListsComponent  implements OnInit,OnDestroy {
   })
   }
   async ProcessSwiftStatemts (overdraftOverride:boolean, autoProcessing:boolean) {
-    autoProcessing? this.swiftProcessingFB.disable() : this.toggleAllRows();
+    autoProcessing? this.swiftProcessingFB.disable() : null;
     this.errorLogAutoProcessingALL = [];
     this.createdLogAutoProcessingALL = [];
     this.transactionsToProcess = [];
@@ -192,6 +192,8 @@ export class AppTableSWIFTsInListsComponent  implements OnInit,OnDestroy {
     this.cDateToProcessSwift.valid? this.updateSwiftsData('GetSWIFTsList',formatDate(this.cDateToProcessSwift.value,'yyyy-MM-dd','en')) : null;
   }
   async submitQuery () {
+    this.cDateAccounting.patchValue(null);
+    this.cDateToProcessSwift.patchValue(null);
     this.updateSwiftsData('GetSWIFTsList').then (rowsCount => {
       this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (rowsCount,'en-US') + ' rows'},'Loaded ')
     })
