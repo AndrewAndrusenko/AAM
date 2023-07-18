@@ -93,6 +93,7 @@ export class AppAccountingService {
       data.entryDraft = newEntryDraft; 
       // this.subjectEntryDraft.forEach(el=>console.log('subjectEntryDraft next', data))
       this.subjectEntryDraft.next(data)
+      console.log('subjectEntryDraft currentObservers - ',this.subjectEntryDraft['currentObservers'].length);
     })
   }
   getEntryDraft (): Observable<any> {return this.subjectEntryDraft.asObservable(); }

@@ -9,6 +9,7 @@ import { AppAccEntryModifyFormComponent } from '../../forms/acc-entry-form/acc-e
 import { HandlingTableSelectionService } from 'src/app/services/handling-table-selection.service';
 import { SelectionModel } from '@angular/cdk/collections';
 import { AuthService } from 'src/app/services/auth.service';
+import { MatCheckbox } from '@angular/material/checkbox';
 @Component({
   selector: 'app-table-swift-950-items-process',
   templateUrl: './swift-950-table.html',
@@ -51,7 +52,7 @@ export class AppTableSWIFT950ItemsComponent  implements  AfterViewInit {
     private AuthServiceS:AuthService,  
 
   ) {
-    this.AccountingDataService.getLoadedMT950Transactions().subscribe (swiftsIDs => swiftsIDs.includes (this.parentMsgRow.id)? this.reloadSwiftItemsTable() : console.log('swiftsIDs',swiftsIDs,this.parentMsgRow))
+    this.AccountingDataService.getLoadedMT950Transactions().subscribe (swiftsIDs => swiftsIDs.includes (this.parentMsgRow.id)? this.reloadSwiftItemsTable() : null)
   }
   ngAfterViewInit() {
     this.columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
@@ -62,11 +63,11 @@ export class AppTableSWIFT950ItemsComponent  implements  AfterViewInit {
   }
   reloadSwiftItemsTable () {
     this.accessState ==='none'? null : this.AccountingDataService.GetMT950Transactions (null,this.parentMsgRow.id,null,null,'GetMT950Transactions').subscribe (MT950Transactions  => {
+      this.dataSource? this.dataSource.data = null : null;
       this.dataSource  = new MatTableDataSource(MT950Transactions);
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
       console.log('reloadSwiftItemsTable for parent',this.parentMsgRow.id);
-      // this.AccountingDataService.sendLoadedMT950Transactions(this.parentMsgRow.id)
     })
   }
   async openEntry (row) {
@@ -98,8 +99,8 @@ export class AppTableSWIFT950ItemsComponent  implements  AfterViewInit {
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
   isAllSelected() { return this.SelectionService.isAllSelected(this.dataSource, this.selection)} 
-  toggleAllRows() { 
-    return this.SelectionService.toggleAllRows(this.dataSource, this.selection)} 
+  toggleAllRows(forceSelectAll:boolean=false) { 
+    return this.SelectionService.toggleAllRows(this.dataSource, this.selection,forceSelectAll)} 
   checkboxLabel(row?: SWIFTStatement950model): string {return this.SelectionService.checkboxLabel(this.dataSource, this.selection, row)}
 
 }

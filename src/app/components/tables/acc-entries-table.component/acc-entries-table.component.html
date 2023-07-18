@@ -1,5 +1,5 @@
 <ng-container *ngIf="accessState!=='none'">
-  <span *ngIf="!readOnly"> 
+  <span *ngIf="!UI_min"> 
     <mat-form-field  class = "filterField" >
       <mat-label class="whiteTextFilter">Type to search...</mat-label>
       <input 
@@ -27,7 +27,7 @@
     <p>{{action}}</p>
   </span>
 
-  <mat-expansion-panel *ngIf="!readOnly" class="complex-search-entries" 
+  <mat-expansion-panel *ngIf="!UI_min" class="complex-search-entries" 
     (opened)="panelOpenState = true"
     (closed)="panelOpenState = false" >
     <mat-expansion-panel-header >
@@ -108,7 +108,7 @@
             <p *ngSwitchDefault>
               {{columnsHeaderToDisplay[i] }} 
             </p>
-        </span>
+          </span>
         </th>
         <td  mat-cell *matCellDef="let element" [cdkContextMenuTriggerFor]="instrumentcontextmenu" > 
           <span [ngSwitch]="column">
@@ -133,27 +133,29 @@
             </p>
           </span>
           <ng-template  #instrumentcontextmenu>
-            <div class="tree-menu-context" *ngIf="!readOnly&&!disabledControlElements" cdkMenu >
-              <button 
-                (click)="openEntryModifyForm('Create', element)"
-                class="tree-menu-item" cdkMenuItem >
-                <mat-icon class="menu-icon" matPrefix>add_circle</mat-icon>      
-                New Entry Account-Ledger
-              </button>
-              <button 
-              (click)="openEntryModifyForm('CreateLL', element)"
-              class="tree-menu-item" cdkMenuItem >
-              <mat-icon class="menu-icon" matPrefix>add_circle</mat-icon>      
-              New Entry Ledger-Ledger
-            </button>
-              <button 
-                (click)="openEntryModifyForm('Create_Example', element)"
-                class="tree-menu-item" cdkMenuItem >
-                <mat-icon class="menu-icon" matPrefix>add_circle</mat-icon>      
-                New Entry (on sample)
-              </button>
+            <div class="tree-menu-context" *ngIf="!disabledControlElements" cdkMenu >
+              <ng-container *ngIf="!UI_min">
+                <button 
+                  (click)="openEntryModifyForm('Create', element)"
+                  class="tree-menu-item" cdkMenuItem >
+                  <mat-icon class="menu-icon" matPrefix>add_circle</mat-icon>      
+                  New Entry Account-Ledger
+                </button>
+                <button 
+                  (click)="openEntryModifyForm('CreateLL', element)"
+                  class="tree-menu-item" cdkMenuItem >
+                  <mat-icon class="menu-icon" matPrefix>add_circle</mat-icon>      
+                  New Entry Ledger-Ledger
+                </button>
+                <button 
+                  (click)="openEntryModifyForm('Create_Example', element)"
+                  class="tree-menu-item" cdkMenuItem >
+                  <mat-icon class="menu-icon" matPrefix>add_circle</mat-icon>      
+                  New Entry (on sample)
+                </button>
+              </ng-container>
               <button *ngIf="!(element.t_dataTime<FirstOpenedAccountingDate)"
-              (click)="openEntryModifyForm('Edit', element)"
+                (click)="openEntryModifyForm('Edit', element)"
                 class="tree-menu-item" cdkMenuItem>
                 <mat-icon class="menu-icon" matPrefix>edit</mat-icon>      
                 Edit Entry
@@ -170,18 +172,20 @@
                 <mat-icon class="menu-icon" matPrefix>pageview</mat-icon> 
                 View entry (day is closed)
               </button> 
-              <button 
-                (click)="updateFilter(element[column])"
-                class="tree-menu-item" cdkMenuItem>
-                <mat-icon class="menu-icon" matPrefix>filter_list</mat-icon> 
-                Add to filter
-              </button> 
-              <button 
-                (click)="addChips( element[column], column)"
-                class="tree-menu-item" cdkMenuItem>
-                <mat-icon class="menu-icon" matPrefix>filter_alt</mat-icon> 
-                ComplexFilter
-              </button> 
+              <ng-container *ngIf="!UI_min">
+                <button 
+                  (click)="updateFilter(element[column])"
+                  class="tree-menu-item" cdkMenuItem>
+                  <mat-icon class="menu-icon" matPrefix>filter_list</mat-icon> 
+                  Add to filter
+                </button> 
+                <button 
+                  (click)="addChips( element[column], column)"
+                  class="tree-menu-item" cdkMenuItem>
+                  <mat-icon class="menu-icon" matPrefix>filter_alt</mat-icon> 
+                  ComplexFilter
+                </button> 
+              </ng-container>
             </div>
           </ng-template>   
         </td>

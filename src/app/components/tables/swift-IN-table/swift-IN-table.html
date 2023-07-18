@@ -50,8 +50,8 @@
       <button color = "accent" mat-raised-button 
         style=" margin-left:1%; font-size: 18px;"
         [disabled]="swiftProcessingFB.disabled"
-        (click)="toggleAllRows()">
-        Select All
+        (click)="toggleAllRows((selection.hasValue() && isAllSelected())? false : true  )">
+        {{(selection.hasValue() && isAllSelected())? 'Unselect' : 'Select' }} All
       </button>
       <mat-form-field style=" margin-left: 2%; width: 12%; font-size: 18px;" >
         <input #dateToProcess 
@@ -88,8 +88,8 @@
     <table  #strategyTable mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class="mat-elevation-z8">
       <ng-container   matColumnDef="select">
         <th mat-header-cell *matHeaderCellDef>
-          <mat-checkbox style="  vertical-align: top;"
-          (change)="$event ? toggleAllRows() : null;"
+          <mat-checkbox style="  vertical-align: top;" #toggleAll
+          (change)="$event ? toggleAllRows(toggleAll.checked) : null;"
                         [checked]="(!this.dataSource)? false : selection.hasValue() && isAllSelected()"
                         [indeterminate]="selection.hasValue() && !isAllSelected()"
                         [aria-label]="checkboxLabel()"

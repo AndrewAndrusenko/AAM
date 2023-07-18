@@ -8,14 +8,14 @@ async function queryExecute (sql, response, responseType, sqlID) {
   return new Promise ((resolve) => {
     pool.query (sql,  (err, res) => {
       if (err) {
-        console.log (err.stack.split("\n", 1).join(""))
+        console.log('sql',sql);
+        console.log (sqlID,err.stack.split("\n", 1).join(""))
         err.detail = err.stack
         resolve (response? response.send(err):err)
       } else {
         let rows = [];
         res.length? res.map(el => rows.push(...el.rows) ): rows = res.rows;
         result = responseType === 'rowCount'? rowsCount : rows;
-        // console.log('sql',sql);
         console.log('N:',new Date().getSeconds()+10, 'db_api; ', sqlID, ';  QTY rows ;', rows.length)
         resolve (response? response.status(200).json(result):result)
       }

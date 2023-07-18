@@ -46,7 +46,7 @@ export class AppTableAccEntriesComponent implements OnInit {
   @Output() public modal_principal_parent = new EventEmitter();
   expandedElement: bAccountsEntriesList  | null;
   accessToClientData: string = 'true';
-  @Input() readOnly: boolean = false; 
+  @Input() UI_min: boolean = false; 
   @Input() action :string;
   @Input() externalId: number = null;
   @Input() FirstOpenedAccountingDate: Date;

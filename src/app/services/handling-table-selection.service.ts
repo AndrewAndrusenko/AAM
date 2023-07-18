@@ -17,8 +17,8 @@ export class HandlingTableSelectionService {
   }
 
   /** Selects all rows if they are not all selected; otherwise clear selection. */
-  toggleAllRows(dataSource: MatTableDataSource<any>, selection : SelectionModel<any>) {
-    if (this.isAllSelected(dataSource, selection)) {
+  toggleAllRows(dataSource: MatTableDataSource<any>, selection : SelectionModel<any>, forceSelectAll:boolean=false) {
+    if (this.isAllSelected(dataSource, selection)&&!forceSelectAll) {
       selection.clear();
       return;
     }

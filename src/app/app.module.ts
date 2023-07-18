@@ -31,7 +31,6 @@ import { AppTableStrategyComponent } from './components/tables/strategy_structur
 import { AppStructureStrategyFormComponent } from './components/forms/strategy-structure-form/strategy-structure-form';
 import { AppTableSWIFTsInListsComponent } from './components/tables/swift-IN-table/swift-IN-table';
 import { AppTableSWIFT950ItemsComponent } from './components/tables/swift-950-table/swift-950-table';
-import { AppMT950ItemParsing } from './components/forms/SWIFT-MT950Items-form/SWIFT-MT950Items-form';
 import { AppTableAccEntriesComponent } from './components/tables/acc-entries-table.component/acc-entries-table.component';
 import { AppAccEntryModifyFormComponent } from './components/forms/acc-entry-form/acc-entry-form';
 import { AppTableAccAccountsComponent } from './components/tables/acc-accounts-table.component/acc-accounts-table.component';
@@ -140,7 +139,6 @@ const appInitializerFn = (accessRestirictions:AuthService) => {
         AppStructureStrategyFormComponent,
         AppTableSWIFTsInListsComponent,
         AppTableSWIFT950ItemsComponent,
-        AppMT950ItemParsing,
         AppTableAccEntriesComponent,
         AppAccEntryModifyFormComponent,
         AppTableAccAccountsComponent,

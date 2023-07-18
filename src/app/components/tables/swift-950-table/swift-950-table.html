@@ -69,6 +69,7 @@
             </mat-expansion-panel-header >
             <app-acc-entry-modify-form *ngIf="+element['amountTransaction']>+element['entriesAmount']"
               [Ref]="element['refTransaction']"
+              [swiftID]="parentMsgRow['id']"
               [FirstOpenedAccountingDate]="FirstOpenedAccountingDate">
             </app-acc-entry-modify-form > 
             <h2 *ngIf="+element['amountTransaction']<=+element['entriesAmount']" style="justify-content: center;">
@@ -89,7 +90,7 @@
             </mat-expansion-panel-header >
             <app-table-acc-entries 
               [FirstOpenedAccountingDate] = "FirstOpenedAccountingDate"
-              [readOnly]="true" 
+              [UI_min]="true" 
               [action]="'ViewEntriesByExternalId'" 
               [externalId]="element['id']" >
             </app-table-acc-entries>

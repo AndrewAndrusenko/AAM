@@ -24,6 +24,7 @@ export class AppAccEntryModifyFormComponent {
   panelOpenState = true;
   @Input() action: string;
   @Input() Ref: string;
+  @Input() swiftID: number;
   dialogChoseAccount: MatDialogRef<AppTableAccAccountsComponent>;
   dialogChoseLedger: MatDialogRef<AppTableAccLedgerAccountsComponent>;
   validatorCorrectAccountNo :AsyncValidatorFn;
@@ -53,7 +54,7 @@ export class AppAccEntryModifyFormComponent {
   autoProcessingState : boolean = false
   pendingStatusAP: boolean = false
   sbSTPCreateEntry$: Subscription;
-  formStatusChange$: Subscription;
+  private formStatusChange$: Subscription;
   private accountIDchanges$ :Subscription; 
   private ledgerIDchanges$ :Subscription; 
   constructor (
@@ -86,65 +87,7 @@ export class AppAccEntryModifyFormComponent {
     })    
     this.indexDBServiceS.getIndexDBStaticTables('bcTransactionType_Ext').then (data =>this.TransactionTypes = data['data']);
   }
-  formInitialSetup (overdraftOverride:boolean=false) {
-    this.entryModifyForm.patchValue(this.data);
-    this.xActTypeCode_Ext.setValue(Number(this.data.t_XactTypeCode_Ext))
-    this.xActTypeCode.setValue(Number(this.data.t_XactTypeCode))
-    this.entryModifyForm.markAsPending()
-
-    this.AddAsyncValidators(overdraftOverride);
-    this.amountFormat();
-    this.entryModifyForm.markAllAsTouched();
-    this.accountIDchanges$ = this.accountId.valueChanges.pipe(distinctUntilChanged()).subscribe(() => (this.amountTransaction.value&&this.dataTime.value)? this.showAValidator('accountNo') : null);
-    this.ledgerIDchanges$ = this.ledgerId.valueChanges.pipe(distinctUntilChanged()).subscribe(() => this.amountTransaction.value&&this.dataTime.value? this.showAValidator('ledgerNo'): null)
-  }
-  ngOnInit(): void {
-    this.AccountingDataService.getEntryDraft().pipe(filter(entryData => entryData.refTransaction === this.Ref)).subscribe (entryData=> {
-      this.entryModifyForm.markAsPending()
-      if (entryData.overRideOverdraft) {
-        this.ledgerNo.removeAsyncValidators(this.validatorLedgerAccountOverdraft);
-        this.accountNo.removeAsyncValidators(this.validatorAccountOverdraft);
-      }
-      this.pendingStatusAP=false;
-      this.errorLogAutoProcessing=[];
-      this.statusArray=[];
-      this.data = entryData.entryDraft
-      this.data['t_id'] = 0
-      this.action='Create';
-      this.formInitialSetup(entryData.overRideOverdraft);
-      if (entryData.autoProcessing === true) {
-        this.autoProcessingState = true;
-        this.formStatusChange$=this.entryModifyForm.statusChanges.pipe().subscribe(result=>{
-          console.log('formStatusChange', result );
-          if (result==='PENDING') {
-            this.pendingStatusAP = true;
-            setTimeout (()=> (<EventEmitter<any>> this.entryModifyForm.statusChanges).emit(this.entryModifyForm.status),500)
-          }
-          if (result==='VALID' && this.pendingStatusAP) {
-            this.updateEntryData('Create',false);
-            this.completeSTPsubscription ();
-          }
-          result==='INVALID' && this.statusArray.length>0 ? this.getFormValidationErrors('full', this.Ref) : null; 
-          this.statusArray.push(result)
-        })
-        this.entryModifyForm.markAsPending();
-      }
-    }) 
-  }
-  ngAfterViewInit(): void {
-    this.data? this.formInitialSetup() :null;
-  }
-  ngOnDestroy(): void {
-    this.accountIDchanges$? this.accountIDchanges$.unsubscribe() :null;
-    this.ledgerIDchanges$? this.ledgerIDchanges$.unsubscribe() : null;
-  }
-  completeSTPsubscription (){
-    this.accountIDchanges$.unsubscribe();
-    this.ledgerIDchanges$.unsubscribe();
-    this.formStatusChange$.unsubscribe();
-    console.log('this.formStatusChange$.closed1?',this.formStatusChange$.closed);
-  }
-  async AddAsyncValidators (overdraftOverride:boolean) {
+  async AddAsyncValidators (overdraftOverride:boolean, updateValidators:boolean=false) {
     if (this.FirstOpenedAccountingDate !=null) {
       this.validatorAccountOverdraft = customAsyncValidators.AccountingOverdraftAccountAsyncValidator (this.AccountingDataService, this.accountId ,this.amountTransaction, this.dataTime, this.xActTypeCode, this.d_closingBalance, this.id, this.FirstOpenedAccountingDate);
       this.validatorLedgerAccountOverdraft = customAsyncValidators.AccountingOverdraftLedgerAccountAsyncValidator (this.AccountingDataService, this.ledgerId ,this.amountTransaction, this.dataTime, this.xActTypeCode.getRawValue() === 0? 1: this.xActTypeCode, this.d_closingLedgerBalance, this.id, this.FirstOpenedAccountingDate,this.entryModifyForm );
@@ -159,9 +102,76 @@ export class AppAccEntryModifyFormComponent {
         this.accountNo.setAsyncValidators (overdraftOverride?  [this.validatorCorrectLedgerLLAccountNo] : [this.validatorLedgerLL2Overdraft, this.validatorCorrectLedgerLLAccountNo] );
         this.ledgerNo.setAsyncValidators (overdraftOverride? [this.validatorCorrectLedgerAccountNo] : [this.validatorLedgerAccountOverdraft, this.validatorCorrectLedgerAccountNo] );
       }
+      updateValidators? this.accountNo.updateValueAndValidity() :null;
+      updateValidators? this.ledgerNo.updateValueAndValidity() :null;
       return console.log('asynValidatorsAdded') ;
     }
   }
+  formInitialSetup (overdraftOverride:boolean=false,updateValidators:boolean=false) {
+    this.entryModifyForm.patchValue(this.data);
+    this.xActTypeCode_Ext.setValue(Number(this.data.t_XactTypeCode_Ext))
+    this.xActTypeCode.setValue(Number(this.data.t_XactTypeCode))
+    this.entryModifyForm.markAsPending()
+    this.AddAsyncValidators(overdraftOverride,updateValidators);
+    this.amountFormat();
+    this.entryModifyForm.markAllAsTouched();
+    this.accountIDchanges$ = this.accountId.valueChanges.pipe(distinctUntilChanged()).subscribe(() => (this.amountTransaction.value&&this.dataTime.value)? this.showAValidator('accountNo') : null);
+    this.ledgerIDchanges$ = this.ledgerId.valueChanges.pipe(distinctUntilChanged()).subscribe(() => this.amountTransaction.value&&this.dataTime.value? this.showAValidator('ledgerNo'): null)
+  }
+  clearAsyncValidators (){
+    console.log('clearAsyncValidators',);
+    this.ledgerNo.removeAsyncValidators( [this.validatorLedgerAccountOverdraft, this.validatorCorrectLedgerAccountNo]);
+    this.ledgerNo.updateValueAndValidity()
+    this.accountNo.removeAsyncValidators([this.validatorAccountOverdraft, this.validatorCorrectAccountNo]); 
+    this.accountNo.updateValueAndValidity()
+  }
+  ngOnInit(): void {
+    console.log('ngOnInit', this.Ref);
+    this.sbSTPCreateEntry$ = this.AccountingDataService.getEntryDraft().pipe(filter(entryData => entryData.refTransaction === this.Ref)).subscribe (entryData=> {
+      this.pendingStatusAP=false;
+      this.errorLogAutoProcessing=[];
+      this.statusArray=[];
+      this.action='Create';
+      this.accountIDchanges$? this.accountIDchanges$.unsubscribe() :null;
+      this.ledgerIDchanges$? this.ledgerIDchanges$.unsubscribe() : null;
+      this.clearAsyncValidators()
+      let updateValidators = this.data? true : false;
+      this.entryModifyForm.reset();
+      this.entryModifyForm.markAsPending()
+      this.data = entryData.entryDraft
+      this.data['t_id'] = 0
+      this.formInitialSetup(entryData.overRideOverdraft, updateValidators);
+      if (entryData.autoProcessing === true) {
+        this.autoProcessingState = true;
+        this.formStatusChange$=this.entryModifyForm.statusChanges.pipe(distinctUntilChanged()).subscribe(result=>{
+          console.log('formStatusChange',result);
+          if (result==='PENDING') {
+            this.pendingStatusAP = true;
+            setTimeout (()=> (<EventEmitter<any>> this.entryModifyForm.statusChanges).emit(this.entryModifyForm.status),500)
+          }
+          result==='VALID' && this.pendingStatusAP?  this.updateEntryData('Create',false) : null;   
+          result==='INVALID' && this.statusArray.length>0 ? this.getFormValidationErrors('full', this.Ref) : null; 
+          this.statusArray.push(result)
+        })
+      }
+    }) 
+  }
+  ngAfterViewInit(): void {
+    this.data? this.formInitialSetup() :null;
+  }
+  ngOnDestroy(): void {
+    console.log('ngOnDestroy',this.Ref);
+    this.accountIDchanges$? this.accountIDchanges$.unsubscribe() :null;
+    this.ledgerIDchanges$? this.ledgerIDchanges$.unsubscribe() : null;
+    this.formStatusChange$? this.formStatusChange$.unsubscribe() : null;
+    this.sbSTPCreateEntry$? this.sbSTPCreateEntry$.unsubscribe() : null;
+  }
+  subscriptionsStatus (){
+    console.log('ref ',this.Ref,'sbSTPCreateEntry',this.sbSTPCreateEntry$?  this.sbSTPCreateEntry$.closed : this.sbSTPCreateEntry$)
+    console.log('ref ',this.Ref,'formStatusChange',this.formStatusChange$?  this.formStatusChange$.closed : this.formStatusChange$)
+    console.log('ref ',this.Ref,'accountIDchanges',this.accountIDchanges$?  this.accountIDchanges$.closed : this.accountIDchanges$)
+  }
+
   updateExpectedBalance (accountTypeEntryType:string) {
     switch (accountTypeEntryType) {
       case 'accountNoAL':
@@ -190,21 +200,20 @@ export class AppAccEntryModifyFormComponent {
             errorCode: '_'+refTransaction+key+keyError
           }) : null;
          });
-          if (this.errorLogAutoProcessing) {
+        if (this.errorLogAutoProcessing) {
+          this.autoProcessingState = false;
+          this.formStatusChange$.unsubscribe()
           this.LogService.sendLogObject(this.errorLogAutoProcessing);
-          this.completeSTPsubscription ();
         };
         }
     });
   }
   showAValidator (validateScope:string = 'full'){
-    this.entryModifyForm.markAsPending()
     if (['full','ledgerNo'].includes(validateScope)) {
       if (this.ledgerNo.hasAsyncValidator(this.validatorLedgerAccountOverdraft)) {
         this.validationsToSkip.push('LedgerAccountNoAValidator');
         this.ledgerNo.updateValueAndValidity();
       } else {
-        console.log(' showAValidator (validateScope:string = ',);
         this.updateExpectedBalance('ledgerNo')
       };
     }
@@ -213,8 +222,7 @@ export class AppAccEntryModifyFormComponent {
         this.validationsToSkip.push(this.d_transactionType.value === 'AL'? 'AccountingAccountNoAValidator' : 'LedgerAccountNoAValidator');
         this.accountNo.updateValueAndValidity();
       } else {
-        console.log(' showAValidator (validateScope:string = ',);
-          this.updateExpectedBalance('accountNo'+ this.d_transactionType.value)
+        this.updateExpectedBalance('accountNo'+ this.d_transactionType.value)
       };
     }
   }
@@ -287,8 +295,7 @@ export class AppAccEntryModifyFormComponent {
     } else {
       this.autoProcessingState? this.LogService.sendCreatedLogObject (dataForUpdateLog): null;
       this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' entry'}, action);
-      reloadEntryList? this.AccountingDataService.sendReloadEntryList (this.id.value) : null;
-      this.action === 'Create'||'Create_Example'? this.entryModifyForm.reset() : null;
+      !this.autoProcessingState&&this.swiftID?this.AccountingDataService.sendLoadedMT950Transactions ([this.swiftID]) : null;        
     }
   }
   updateEntryData (action:string,reloadEntryList:boolean=true){

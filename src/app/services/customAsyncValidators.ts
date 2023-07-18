@@ -122,7 +122,7 @@ export class customAsyncValidators {
         .pipe(
           tap (expectedBalance => d_closingBalance.setValue (expectedBalance[0].closingBalance)),
           map (expectedBalance => (expectedBalance[0].closingBalance < 0 ? {overdraft: true} : null)),
-          catchError(() => of(null)),
+          catchError(() => of( {overdraft: true})),
           take(1),
         );
     }

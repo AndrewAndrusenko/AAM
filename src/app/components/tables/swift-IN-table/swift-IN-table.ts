@@ -17,6 +17,7 @@ import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dia
 import { formatDate, formatNumber } from '@angular/common';
 import { AuthService } from 'src/app/services/auth.service';
 import { MatCalendarCellClassFunction } from '@angular/material/datepicker';
+import { MatCheckbox } from '@angular/material/checkbox';
 @Component({
   selector: 'app-table-swift-IN-list',
   templateUrl: './swift-IN-table.html',
@@ -34,8 +35,8 @@ export class AppTableSWIFTsInListsComponent  implements OnInit,OnDestroy {
   accessState: string = 'none';
   accessToEntriesData: string = 'none';
   disabledControlElements: boolean = false;
-  columnsToDisplay = ['select','msgId',  'senderBIC', 'DateMsg', 'typeMsg','accountNo', 'ledgerNo'];
-  columnsHeaderToDisplay = ['msgId',  'senderBIC', 'Date', 'Type','Account','ledger'];
+  columnsToDisplay = ['select','id','msgId',  'senderBIC', 'DateMsg', 'typeMsg','accountNo', 'ledgerNo'];
+  columnsHeaderToDisplay = ['id','msgId',  'senderBIC', 'Date', 'Type','Account','ledger'];
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
   dataSource: MatTableDataSource<SWIFTSGlobalListmodel>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -55,15 +56,16 @@ export class AppTableSWIFTsInListsComponent  implements OnInit,OnDestroy {
   FirstOpenedAccountingDate: Date;
 
   selection = new SelectionModel<SWIFTSGlobalListmodel>(true, []);
-  public multiSelect: boolean = true; 
+  multiSelect: boolean = true; 
   overRideOverdraft: boolean = false;
-  subscription: Subscription;
-  subscriptionCreatedLog: Subscription;
   errorLogAutoProcessingALL :cFormValidationLog[] = []
   createdLogAutoProcessingALL: bAccountsEntriesList []=[]
   transactionsToProcess = []
   swiftProcessingFB: FormGroup
   dateWithSWIFTs : Date[]
+
+  errorLog$ : Subscription;
+  createdLog$ : Subscription;
 
   constructor (
     private AccountingDataService:AppAccountingService, 
@@ -83,31 +85,13 @@ export class AppTableSWIFTsInListsComponent  implements OnInit,OnDestroy {
       this.FirstOpenedAccountingDate = data[0].FirstOpenedDate
       this.cDateToProcessSwift.setValue(new Date(this.FirstOpenedAccountingDate))
       this.cDateAccounting.setValue(new Date(this.FirstOpenedAccountingDate))
-      this.cDateToProcessSwift.setValue(new Date('2023-06-25'))
-      this.cDateAccounting.setValue(new Date('2023-06-25'))
+      this.cDateToProcessSwift.setValue(new Date('2023-06-29'))
+      this.cDateAccounting.setValue(new Date('2023-06-29'))
 
     })
     this.AccountingDataService.GetSWIFTsList (null,null,null,null,'DatesWithSWIFT').pipe(takeUntil(this.destroy$)).subscribe(dates=>this.dateWithSWIFTs = dates[0]['datesarray']);
-    this.LogService.getLogObject().pipe(takeUntil(this.destroy$)).subscribe(logObject => {
-      // console.log('getLogObject',logObject);
-      logObject.forEach (logObj => {
-        let index = this.transactionsToProcess.findIndex(elem => elem.id===logObj.t_extTransactionId)
-        this.transactionsToProcess[index].status ='Error';
-        this.errorLogAutoProcessingALL.filter((fullLog) => fullLog.errorCode === logObj.errorCode).length === 0? this.errorLogAutoProcessingALL.push (logObj):null; 
-        this.isProcessingComplete()? this.swiftProcessingFB.enable() : null ;
-        
-      })
-    })
-    this.LogService.geCreatedtLogObject().pipe(takeUntil(this.destroy$)).subscribe(logCreatedObject => {
-      console.log('geCreatedtLogObject',logCreatedObject, this.createdLogAutoProcessingALL);
-      let index = this.transactionsToProcess.findIndex(elem => elem.id===logCreatedObject.t_extTransactionId)
-      this.transactionsToProcess[index].status ='Created'
-      this.createdLogAutoProcessingALL.push(logCreatedObject);
-      if (this.isProcessingComplete()) {
-        this.swiftProcessingFB.enable();
-       this.AccountingDataService.sendLoadedMT950Transactions (this.transactionsToProcess.map(el=>el.msgId));        
-      };
-    })
+
+
     this.swiftProcessingFB = this.fb.group ({
       cDateToProcessSwift :[null, [Validators.required]],
       cDateAccounting : [null, [Validators.required]],
@@ -115,8 +99,7 @@ export class AppTableSWIFTsInListsComponent  implements OnInit,OnDestroy {
     } )
   }
   ngOnDestroy(): void {
-    this.destroy$.next(true);
-    this.destroy$.complete();
+    this.closeLogSubscriptions();
   }
   ngOnInit(): void {
     this.swiftProcessingFB.enable()
@@ -124,6 +107,7 @@ export class AppTableSWIFTsInListsComponent  implements OnInit,OnDestroy {
   async updateSwiftsData (action: string, dateMessage?:string) {
     return new Promise<number> (async (resolve,reject) => {
       this.accessState === 'none'? null : this.AccountingDataService.GetSWIFTsList (dateMessage,null,null,null,action).pipe(takeUntil(this.destroy$)).subscribe (SWIFTsList  => {
+        console.log('GetSWIFTsList',SWIFTsList);
         this.dataSource? this.dataSource.data = null : null;
         this.dataSource  = new MatTableDataSource(SWIFTsList);
         this.dataSource.paginator = this.paginator;
@@ -132,11 +116,38 @@ export class AppTableSWIFTsInListsComponent  implements OnInit,OnDestroy {
     })
   })
   }
+  clearLogs () {
+    this.errorLogAutoProcessingALL = []
+    this.createdLogAutoProcessingALL =[]
+    this.transactionsToProcess = []
+  }
+  closeLogSubscriptions () {
+    this.errorLog$.unsubscribe();
+    this.createdLog$.unsubscribe();
+  }
+  openLogSubscritions () {
+   this.errorLog$ = this.LogService.getLogObject().pipe().subscribe(logObject => {
+      logObject.forEach (logObj => {
+        let index = this.transactionsToProcess.findIndex(elem => elem.id===logObj.t_extTransactionId)
+        console.log('logObject',logObject);
+        console.log('this.transactionsToProcess',this.transactionsToProcess);
+        this.transactionsToProcess[index].status ='Error';
+        this.errorLogAutoProcessingALL.filter((fullLog) => fullLog.errorCode === logObj.errorCode).length === 0? this.errorLogAutoProcessingALL.push (logObj):null; 
+        this.isProcessingComplete();
+      })
+    })
+    this.createdLog$ = this.LogService.geCreatedtLogObject().pipe().subscribe(logCreatedObject => {
+      console.log('geCreatedtLogObject',logCreatedObject, this.createdLogAutoProcessingALL);
+      let index = this.transactionsToProcess.findIndex(elem => elem.id===logCreatedObject.t_extTransactionId)
+      this.transactionsToProcess[index].status ='Created'
+      this.createdLogAutoProcessingALL.push(logCreatedObject);
+      this.isProcessingComplete();
+    })
+  }
   async ProcessSwiftStatemts (overdraftOverride:boolean, autoProcessing:boolean) {
     autoProcessing? this.swiftProcessingFB.disable() : null;
-    this.errorLogAutoProcessingALL = [];
-    this.createdLogAutoProcessingALL = [];
-    this.transactionsToProcess = [];
+    this.clearLogs();
+    this.openLogSubscritions()
     this.TableSwiftItems.forEach(swiftTable => {
       swiftTable.selection.selected.forEach(element => {
         if (['CR','DR'].includes(element.typeTransaction)&&(Number(element.entriesAmount)===0)) {
@@ -156,6 +167,12 @@ export class AppTableSWIFTsInListsComponent  implements OnInit,OnDestroy {
     this.transactionsCreated = this.transactionsToProcess.filter(elem => elem.status ==='Created').length; 
     this.transactionsWithErrors = this.transactionsToProcess.filter(elem => elem.status ==='Error').length;
     console.log(this.transactionsToProcess.length , this.transactionsWithErrors, this.transactionsCreated)
+    if (this.transactionsToProcess.length  === (this.transactionsWithErrors + this.transactionsCreated)) {
+      this.swiftProcessingFB.enable();
+      console.log('getLogObject sendLoadedMT950Transactions',);
+      this.AccountingDataService.sendLoadedMT950Transactions (this.transactionsToProcess.filter(elem => elem.status ==='Created').map(el=>el.msgId));     
+      this.closeLogSubscriptions();   
+    };
     return this.transactionsToProcess.length  === (this.transactionsWithErrors + this.transactionsCreated)
   }
   applyFilter(event: Event) {
@@ -182,14 +199,17 @@ export class AppTableSWIFTsInListsComponent  implements OnInit,OnDestroy {
     return TableSwiftItem.length? TableSwiftItem[0].selection.hasValue() : false
   }
   isAllSelected() { return this.SelectionService.isAllSelected(this.dataSource, this.selection)} 
-  toggleAllRows() {
-    this.TableSwiftItems.forEach(tableSwift => {tableSwift.toggleAllRows()})
+  toggleAllRows(selectAll:boolean) {
+    this.TableSwiftItems.forEach(tableSwift => {tableSwift.toggleAllRows(selectAll? true : false)})
     return this.SelectionService.toggleAllRows(this.dataSource, this.selection)
   } 
   checkboxLabel(row?: SWIFTSGlobalListmodel): string {return this.SelectionService.checkboxLabel(this.dataSource, this.selection, row)}
   changeProcesDate (dateToProcess) {
     this.cDateAccounting.setValue(this.cDateToProcessSwift.value>=new Date(this.FirstOpenedAccountingDate)? this.cDateToProcessSwift.value : this.FirstOpenedAccountingDate)
-    this.cDateToProcessSwift.valid? this.updateSwiftsData('GetSWIFTsList',formatDate(this.cDateToProcessSwift.value,'yyyy-MM-dd','en')) : null;
+    if (this.cDateToProcessSwift.valid) {
+      this.updateSwiftsData('GetSWIFTsList',formatDate(this.cDateToProcessSwift.value,'yyyy-MM-dd','en'));
+      this.clearLogs ();
+    }
   }
   async submitQuery () {
     this.cDateAccounting.patchValue(null);
