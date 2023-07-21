@@ -112,7 +112,6 @@ export class AppAccEntryModifyFormComponent {
     this.entryModifyForm.patchValue(this.data);
     this.xActTypeCode_Ext.setValue(Number(this.data.t_XactTypeCode_Ext))
     this.xActTypeCode.setValue(Number(this.data.t_XactTypeCode))
-    // this.entryModifyForm.markAsPending()
     this.AddAsyncValidators(overdraftOverride,updateValidators);
     this.amountFormat();
     this.entryModifyForm.markAllAsTouched();
@@ -120,7 +119,6 @@ export class AppAccEntryModifyFormComponent {
     this.ledgerIDchanges$ = this.ledgerId.valueChanges.pipe(distinctUntilChanged()).subscribe(() => this.amountTransaction.value&&this.dataTime.value? this.showAValidator('ledgerNo'): null)
   }
   clearAsyncValidators (){
-    console.log('clearAsyncValidators',);
     this.ledgerNo.removeAsyncValidators( [this.validatorLedgerAccountOverdraft, this.validatorCorrectLedgerAccountNo]);
     this.ledgerNo.updateValueAndValidity()
     this.accountNo.removeAsyncValidators([this.validatorAccountOverdraft, this.validatorCorrectAccountNo]); 
@@ -299,8 +297,8 @@ export class AppAccEntryModifyFormComponent {
       this.autoProcessingState? this.LogService.sendCreatedLogObject (dataForUpdateLog): null;
       this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' entry'}, action);
       console.log(' !this.autoProcessingState&&this.swiftID?', this.autoProcessingState,this.swiftID)   
-      reloadEntryList&&!this.swiftID? this.AccountingDataService.sendReloadEntryList (this.id.value) : null;     
-      !this.autoProcessingState&&this.swiftID? this.AccountingDataService.sendLoadedMT950Transactions ([this.swiftID]) : null;        
+      reloadEntryList&&!this.swiftID? this.AccountingDataService.sendReloadEntryList (undefined) : null;     
+      !this.autoProcessingState&&this.swiftID? this.AccountingDataService.sendReloadEntryList (this.t_extTransactionId.value) : null;        
     }
   }
   updateEntryData (action:string, reloadEntryList:boolean=true){

@@ -83,17 +83,13 @@ export class AppAccountingService {
       let newEntryDraft = {}
       newEntryDraft['FirstOpenedAccountingDate'] = OpenedDate[0].FirstOpenedDate;
       let entryFormFields = Object.keys (this.AccountsEntriesList)
-      // console.log('data.entryDraft)',data);
       Object.entries(data.entryDraft).forEach ((value,key) => {
         entryFormFields.includes('t_'+ value[0])? newEntryDraft['t_' + value[0]] = value[1]  : null;
         entryFormFields.includes('d_'+ value[0])? newEntryDraft['d_' + value[0]] = value[1] : null;
       })
       newEntryDraft['d_transactionType'] = 'AL';
-      // newEntryDraft['id'] = 0
       data.entryDraft = newEntryDraft; 
-      // this.subjectEntryDraft.forEach(el=>console.log('subjectEntryDraft next', data))
       this.subjectEntryDraft.next(data)
-      console.log('subjectEntryDraft currentObservers - ',this.subjectEntryDraft['currentObservers'].length);
     })
   }
   getEntryDraft (): Observable<any> {return this.subjectEntryDraft.asObservable(); }

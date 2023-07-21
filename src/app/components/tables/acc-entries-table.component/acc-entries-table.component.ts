@@ -1,7 +1,7 @@
 import {Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
-import {lastValueFrom } from 'rxjs';
+import {filter, lastValueFrom } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {TreeMenuSevice } from 'src/app/services/tree-menu.service';
@@ -43,7 +43,9 @@ export class AppTableAccEntriesComponent implements OnInit {
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild('filter',{static:false}) filter: ElementRef;
+ 
   @Output() public modal_principal_parent = new EventEmitter();
+  @Output() newAllocatedSum = new EventEmitter<{swift_item_id:number,allocated_sum:number}>();
   expandedElement: bAccountsEntriesList  | null;
   accessToClientData: string = 'true';
   @Input() UI_min: boolean = false; 
@@ -51,6 +53,7 @@ export class AppTableAccEntriesComponent implements OnInit {
   @Input() externalId: number = null;
   @Input() FirstOpenedAccountingDate: Date;
   @Input() swiftID: number;
+  @Input() swiftItemID: number;
 
   dialogRef: MatDialogRef<AppAccEntryModifyFormComponent>;
 
@@ -95,9 +98,11 @@ export class AppTableAccEntriesComponent implements OnInit {
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
     this.indexDBServiceS.getIndexDBStaticTables('bcTransactionType_Ext').then ( data => this.TransactionTypes = data['data']);
-    this.AccountingDataService.getReloadEntryList().subscribe(data => {
-      console.log('TableAccEntries',);
-      this.submitQuery(false)})
+    this.AccountingDataService.getReloadEntryList().pipe(
+      filter(id=> id==undefined||(id===this.externalId))
+    ).subscribe(id =>{
+      this.submitQuery(false,id? true:false)
+    })
   }
   ngOnInit(): void {
     this.FirstOpenedAccountingDate? null : this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate);
@@ -170,7 +175,7 @@ export class AppTableAccEntriesComponent implements OnInit {
     this.dataSource.filter = '';
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
   }
-  submitQuery (notification:boolean=true) {
+  submitQuery (notification:boolean=true, sendNewAllocatedSum:boolean=false) {
     this.dataSource? this.dataSource.data = null: null;
     let searchObj = {};
     let accountsList = [];
@@ -189,6 +194,8 @@ export class AppTableAccEntriesComponent implements OnInit {
       this.dataSource.sort = this.sort;
       this.accounts.unshift('ClearAll')
       notification? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (EntriesList.length,'en-US') + ' rows'},'Loaded '):null;
+      console.log('externalId&&sendNewAllocatedSum',this.externalId,sendNewAllocatedSum);
+      this.externalId&&sendNewAllocatedSum? this.newAllocatedSum.emit({swift_item_id:this.externalId, allocated_sum: this.dataSource.data.reduce((acc,value)=>acc+value.t_amountTransaction,0)}) : null;
     })
   }
   selectAccounts (typeAccount: string) {

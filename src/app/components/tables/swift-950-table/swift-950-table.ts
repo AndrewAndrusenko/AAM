@@ -23,6 +23,8 @@ import { MatCheckbox } from '@angular/material/checkbox';
   ],
 })
 export class AppTableSWIFT950ItemsComponent  implements  AfterViewInit {
+
+
   accessState: string = 'none';
   disabledControlElements: boolean = false;
   bcEntryParameters = <bcParametersSchemeAccTrans> {}
@@ -102,5 +104,8 @@ export class AppTableSWIFT950ItemsComponent  implements  AfterViewInit {
   toggleAllRows(forceSelectAll:boolean=false) { 
     return this.SelectionService.toggleAllRows(this.dataSource, this.selection,forceSelectAll)} 
   checkboxLabel(row?: SWIFTStatement950model): string {return this.SelectionService.checkboxLabel(this.dataSource, this.selection, row)}
-
+  changeAllocatedSum(data: { swift_item_id: number; allocated_sum: number; }) {
+    console.log('changeAllocatedSum', data);
+    this.dataSource.data.filter(el => el.id === data.swift_item_id)[0].entriesAmount=Number(data.allocated_sum)
+  }
 }

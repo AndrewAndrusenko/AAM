@@ -89,6 +89,7 @@
               </mat-panel-description>
             </mat-expansion-panel-header >
             <app-table-acc-entries 
+              (newAllocatedSum)="changeAllocatedSum($event)"
               [FirstOpenedAccountingDate] = "FirstOpenedAccountingDate"
               [UI_min]="true" 
               [swiftID]="parentMsgRow['id']"
