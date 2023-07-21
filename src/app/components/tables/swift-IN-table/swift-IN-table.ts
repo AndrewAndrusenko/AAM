@@ -107,7 +107,6 @@ export class AppTableSWIFTsInListsComponent  implements OnInit,OnDestroy {
   async updateSwiftsData (action: string, dateMessage?:string) {
     return new Promise<number> (async (resolve,reject) => {
       this.accessState === 'none'? null : this.AccountingDataService.GetSWIFTsList (dateMessage,null,null,null,action).pipe(takeUntil(this.destroy$)).subscribe (SWIFTsList  => {
-        console.log('GetSWIFTsList',SWIFTsList);
         this.dataSource? this.dataSource.data = null : null;
         this.dataSource  = new MatTableDataSource(SWIFTsList);
         this.dataSource.paginator = this.paginator;
@@ -125,19 +124,28 @@ export class AppTableSWIFTsInListsComponent  implements OnInit,OnDestroy {
     this.errorLog$.unsubscribe();
     this.createdLog$.unsubscribe();
   }
+  logData(batch:number) {
+    console.log('Batch start ', batch);
+    console.log('errorLog closed : '+ this.errorLog$.closed);
+    console.log('createdLog closed : '+ this.createdLog$.closed);
+    this.transactionsToProcess.forEach(el=>console.log('TC: ' + el['refTransaction']+' Status: '+el['status']))
+    console.log('ErrorLog datat',JSON.stringify(this.errorLogAutoProcessingALL));
+    console.log('Batch end ', batch);
+  }
   openLogSubscritions () {
+   this.errorLog$ = null;
+   this.createdLog$ = null;
    this.errorLog$ = this.LogService.getLogObject().pipe().subscribe(logObject => {
+      console.log('get Error Log',);
       logObject.forEach (logObj => {
         let index = this.transactionsToProcess.findIndex(elem => elem.id===logObj.t_extTransactionId)
-        console.log('logObject',logObject);
-        console.log('this.transactionsToProcess',this.transactionsToProcess);
         this.transactionsToProcess[index].status ='Error';
         this.errorLogAutoProcessingALL.filter((fullLog) => fullLog.errorCode === logObj.errorCode).length === 0? this.errorLogAutoProcessingALL.push (logObj):null; 
         this.isProcessingComplete();
       })
     })
     this.createdLog$ = this.LogService.geCreatedtLogObject().pipe().subscribe(logCreatedObject => {
-      console.log('geCreatedtLogObject',logCreatedObject, this.createdLogAutoProcessingALL);
+      console.log('get Createdt Log');
       let index = this.transactionsToProcess.findIndex(elem => elem.id===logCreatedObject.t_extTransactionId)
       this.transactionsToProcess[index].status ='Created'
       this.createdLogAutoProcessingALL.push(logCreatedObject);
@@ -151,11 +159,12 @@ export class AppTableSWIFTsInListsComponent  implements OnInit,OnDestroy {
     this.TableSwiftItems.forEach(swiftTable => {
       swiftTable.selection.selected.forEach(element => {
         if (['CR','DR'].includes(element.typeTransaction)&&(Number(element.entriesAmount)===0)) {
-         this.EntryProcessingService.openEntry(element, swiftTable.parentMsgRow, autoProcessing, this.cDateAccounting.value, overdraftOverride);
-         autoProcessing? this.transactionsToProcess.push(element) : null;
+          element['status'] = undefined;
+          this.EntryProcessingService.openEntry(element, swiftTable.parentMsgRow, autoProcessing, this.cDateAccounting.value, overdraftOverride);
+          autoProcessing? this.transactionsToProcess.push(element) : null;
         }
       });
-
+      
       swiftTable.selection.clear();
     })
     if (!this.transactionsToProcess.length) {
@@ -166,10 +175,10 @@ export class AppTableSWIFTsInListsComponent  implements OnInit,OnDestroy {
   isProcessingComplete():boolean {
     this.transactionsCreated = this.transactionsToProcess.filter(elem => elem.status ==='Created').length; 
     this.transactionsWithErrors = this.transactionsToProcess.filter(elem => elem.status ==='Error').length;
-    console.log(this.transactionsToProcess.length , this.transactionsWithErrors, this.transactionsCreated)
+    console.log('Trans: ', this.transactionsToProcess.length ,'Err: ', this.transactionsWithErrors,'Cre: ', this.transactionsCreated)
     if (this.transactionsToProcess.length  === (this.transactionsWithErrors + this.transactionsCreated)) {
       this.swiftProcessingFB.enable();
-      console.log('getLogObject sendLoadedMT950Transactions',);
+      console.log('isProcessingComplete True sendLoadedMT950Transactions');
       this.AccountingDataService.sendLoadedMT950Transactions (this.transactionsToProcess.filter(elem => elem.status ==='Created').map(el=>el.msgId));     
       this.closeLogSubscriptions();   
     };

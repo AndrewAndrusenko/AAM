@@ -7,11 +7,10 @@ import { bcTransactionType_Ext, cFormValidationLog } from 'src/app/models/intefa
 import { AppTableAccLedgerAccountsComponent } from '../../tables/acc-accounts-ledger-table.component/acc-accounts-ledger-table.component';
 import { AppTableAccAccountsComponent } from '../../tables/acc-accounts-table.component/acc-accounts-table.component';
 import { COMMA, ENTER} from '@angular/cdk/keycodes';
-import { distinctUntilChanged, filter, ReplaySubject, Subject, Subscription, take, takeUntil, tap } from 'rxjs';
+import { distinctUntilChanged, filter, Subject, Subscription } from 'rxjs';
 import { LogProcessingService } from 'src/app/services/log-processing.service';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
-import { AppMarketDataService } from 'src/app/services/app-market-data.service';
 @Component({
   selector: 'app-acc-entry-modify-form',
   templateUrl: './acc-entry-form.html',
@@ -57,6 +56,8 @@ export class AppAccEntryModifyFormComponent {
   private formStatusChange$: Subscription;
   private accountIDchanges$ :Subscription; 
   private ledgerIDchanges$ :Subscription; 
+  private expectedBalance$: Subscription;
+  setupDone: boolean = false;
   constructor (
     private fb:FormBuilder, 
     private AccountingDataService:AppAccountingService, 
@@ -103,15 +104,15 @@ export class AppAccEntryModifyFormComponent {
         this.ledgerNo.setAsyncValidators (overdraftOverride? [this.validatorCorrectLedgerAccountNo] : [this.validatorLedgerAccountOverdraft, this.validatorCorrectLedgerAccountNo] );
       }
       updateValidators? this.accountNo.updateValueAndValidity() :null;
-      updateValidators? this.ledgerNo.updateValueAndValidity() :null;
-      return console.log('asynValidatorsAdded') ;
+      updateValidators? this.ledgerNo.updateValueAndValidity() :null; 
+      return console.log('AsyncValidators have been assigned') ;
     }
   }
   formInitialSetup (overdraftOverride:boolean=false,updateValidators:boolean=false) {
     this.entryModifyForm.patchValue(this.data);
     this.xActTypeCode_Ext.setValue(Number(this.data.t_XactTypeCode_Ext))
     this.xActTypeCode.setValue(Number(this.data.t_XactTypeCode))
-    this.entryModifyForm.markAsPending()
+    // this.entryModifyForm.markAsPending()
     this.AddAsyncValidators(overdraftOverride,updateValidators);
     this.amountFormat();
     this.entryModifyForm.markAllAsTouched();
@@ -126,8 +127,9 @@ export class AppAccEntryModifyFormComponent {
     this.accountNo.updateValueAndValidity()
   }
   ngOnInit(): void {
-    console.log('ngOnInit', this.Ref);
+    this.Ref? console.log('ngOnInit',this.Ref): null;
     this.sbSTPCreateEntry$ = this.AccountingDataService.getEntryDraft().pipe(filter(entryData => entryData.refTransaction === this.Ref)).subscribe (entryData=> {
+      this.setupDone=true
       this.pendingStatusAP=false;
       this.errorLogAutoProcessing=[];
       this.statusArray=[];
@@ -140,38 +142,39 @@ export class AppAccEntryModifyFormComponent {
       this.entryModifyForm.markAsPending()
       this.data = entryData.entryDraft
       this.data['t_id'] = 0
-      this.formInitialSetup(entryData.overRideOverdraft, updateValidators);
       if (entryData.autoProcessing === true) {
         this.autoProcessingState = true;
         this.formStatusChange$=this.entryModifyForm.statusChanges.pipe(distinctUntilChanged()).subscribe(result=>{
-          console.log('formStatusChange',result);
+          console.log(this.Ref,' formStatusChange',result,this.accountNo.status,this.ledgerNo.status);
           if (result==='PENDING') {
             this.pendingStatusAP = true;
             setTimeout (()=> (<EventEmitter<any>> this.entryModifyForm.statusChanges).emit(this.entryModifyForm.status),500)
           }
-          result==='VALID' && this.pendingStatusAP?  this.updateEntryData('Create',false) : null;   
+          result==='VALID' && this.pendingStatusAP?  this.updateEntryData('Create', false) : null;   
           result==='INVALID' && this.statusArray.length>0 ? this.getFormValidationErrors('full', this.Ref) : null; 
           this.statusArray.push(result)
         })
-      }
+      };
+      this.formInitialSetup(entryData.overRideOverdraft, updateValidators);
+
     }) 
   }
   ngAfterViewInit(): void {
     this.data? this.formInitialSetup() :null;
-  }
-  ngOnDestroy(): void {
-    console.log('ngOnDestroy',this.Ref);
-    this.accountIDchanges$? this.accountIDchanges$.unsubscribe() :null;
-    this.ledgerIDchanges$? this.ledgerIDchanges$.unsubscribe() : null;
-    this.formStatusChange$? this.formStatusChange$.unsubscribe() : null;
-    this.sbSTPCreateEntry$? this.sbSTPCreateEntry$.unsubscribe() : null;
   }
   subscriptionsStatus (){
     console.log('ref ',this.Ref,'sbSTPCreateEntry',this.sbSTPCreateEntry$?  this.sbSTPCreateEntry$.closed : this.sbSTPCreateEntry$)
     console.log('ref ',this.Ref,'formStatusChange',this.formStatusChange$?  this.formStatusChange$.closed : this.formStatusChange$)
     console.log('ref ',this.Ref,'accountIDchanges',this.accountIDchanges$?  this.accountIDchanges$.closed : this.accountIDchanges$)
   }
-
+  ngOnDestroy(): void {
+    this.Ref? console.log('ngOnDestroy',this.Ref): null;
+    this.accountIDchanges$? this.accountIDchanges$.unsubscribe() :null;
+    this.ledgerIDchanges$? this.ledgerIDchanges$.unsubscribe() : null;
+    this.formStatusChange$? this.formStatusChange$.unsubscribe() : null;
+    this.sbSTPCreateEntry$? this.sbSTPCreateEntry$.unsubscribe() : null;
+    this.expectedBalance$? this.expectedBalance$.unsubscribe() : null;
+  }
   updateExpectedBalance (accountTypeEntryType:string) {
     switch (accountTypeEntryType) {
       case 'accountNoAL':
@@ -295,10 +298,12 @@ export class AppAccEntryModifyFormComponent {
     } else {
       this.autoProcessingState? this.LogService.sendCreatedLogObject (dataForUpdateLog): null;
       this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' entry'}, action);
-      !this.autoProcessingState&&this.swiftID?this.AccountingDataService.sendLoadedMT950Transactions ([this.swiftID]) : null;        
+      console.log(' !this.autoProcessingState&&this.swiftID?', this.autoProcessingState,this.swiftID)   
+      reloadEntryList&&!this.swiftID? this.AccountingDataService.sendReloadEntryList (this.id.value) : null;     
+      !this.autoProcessingState&&this.swiftID? this.AccountingDataService.sendLoadedMT950Transactions ([this.swiftID]) : null;        
     }
   }
-  updateEntryData (action:string,reloadEntryList:boolean=true){
+  updateEntryData (action:string, reloadEntryList:boolean=true){
     let newDate = new Date(this.dataTime.value)
     let dataForUpdate = {}
     let renameFieldsForLL = [['ledgerNoId','ledgerID_Debit'],['dataTime','dateTime'],['accountId','ledgerID'],['amountTransaction','amount']];

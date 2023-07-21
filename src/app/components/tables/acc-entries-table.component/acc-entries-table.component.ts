@@ -50,6 +50,8 @@ export class AppTableAccEntriesComponent implements OnInit {
   @Input() action :string;
   @Input() externalId: number = null;
   @Input() FirstOpenedAccountingDate: Date;
+  @Input() swiftID: number;
+
   dialogRef: MatDialogRef<AppAccEntryModifyFormComponent>;
 
   menuColorGl=menuColorGl
@@ -127,6 +129,7 @@ export class AppTableAccEntriesComponent implements OnInit {
   openEntryModifyForm (actionType:string, row: any ) {
     this.dialogRef = this.dialog.open(AppAccEntryModifyFormComponent ,{minHeight:'400px', maxWidth:'1000px',data:{data:row} });
     this.dialogRef.componentInstance.action = actionType;
+    this.dialogRef.componentInstance.swiftID=this.swiftID;
     // this.dialogRef.componentInstance.title = ['Create','CreateLL','Create_Example'].includes(actionType)? actionType: 'Create New';
     this.dialogRef.componentInstance.data =  row;
     this.dialogRef.componentInstance.FirstOpenedAccountingDate = this.FirstOpenedAccountingDate;

@@ -49,6 +49,8 @@ export class customAsyncValidators {
         return AccountingDataService
           .GetAccountData (null,null,null, control.value, 'GetAccountData','AccountAccountNo Validator')
           .pipe(
+            tap(()=>control.markAsPending()),
+            tap(() => console.log('Account NoAValidator Arrived',)),
             tap (data => data.length && (data[0].accountId!==accountId.value) ? accountId.setValue (data[0].accountId) : null),
             tap (accountExist => (controlErrors = control.touched && !accountExist.length ? { accountIsNotExist: true } : null)  ),
             map (accountExist => (control.touched && !accountExist.length ? { accountIsNotExist: true } : null)  ),
@@ -68,6 +70,8 @@ export class customAsyncValidators {
         return AccountingDataService
           .GetLedgerData (null,null,null, control.value, 'GetLedgerData','LedgerAccountNo Validator')
           .pipe(
+            tap(()=>control.markAsPending()),
+            tap(() => console.log('Ledger NoAValidator Arrived',)),
             tap (data => data.length && (data[0].ledgerNoId!==ledgerId.value) ? ledgerId.setValue (data[0].ledgerNoId) : null),
             tap (accountExist => (controlErrors = control.touched && !accountExist.length ? { accountIsNotExist: true } : null)  ),
             map (accountExist => (control.touched && !accountExist.length ? { accountIsNotExist: true } : null)  ),
@@ -108,6 +112,7 @@ export class customAsyncValidators {
         return AccountingDataService
           .getExpectedBalanceOverdraftCheck (AccountId.value,transactionAmount.getRawValue(), new Date (transactionDate.value).toDateString(),xactTypeCode.value, id.value, new Date (FirstOpenedAccountingDate).toDateString(),'AccountingOverdraftAccountCheck')
           .pipe(
+            tap(data =>console.log('Acc Overdraft data arrived', data)),
             tap (expectedBalance => d_closingBalance.setValue (expectedBalance[0].closingBalance)),
             map (expectedBalance => (expectedBalance[0].closingBalance < 0 ? {overdraft: true} : null)),
             catchError(() => of(null)),

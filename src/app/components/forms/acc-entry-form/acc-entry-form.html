@@ -1,6 +1,7 @@
 <mat-toolbar style="margin-left: 1%;" color="primary" >
-  {{action}} | Entry: {{d_transactionType.value=='LL'? ' Ledger - Ledger':' Account - Ledger'}} | ID: {{id.value}} 
-  | Status: {{entryModifyForm.status}} LedgerNo Status {{ledgerNo.status}}
+  {{action}} | Entry: {{setupDone&&d_transactionType.value=='LL'? ' Ledger - Ledger':' Account - Ledger'}}
+  | ID: {{setupDone? id.value:''}} 
+  | Status: {{ entryModifyForm.status }}
 </mat-toolbar>
 <button mat-raised-button color="accent" 
   [disabled]="!(entryModifyForm.valid && submitbox.checked)"
@@ -24,18 +25,18 @@
       </mat-option>
       </ng-container>
     </mat-select>
-    <mat-error *ngIf="xActTypeCode_Ext.errors?.['required']">
+    <mat-error *ngIf="setupDone&&xActTypeCode_Ext.errors?.['required']">
       Required!
     </mat-error>
   </mat-form-field>
   <mat-form-field style="width: 20%; ">
-    <input matInput placeholder="Amount" formControlName="t_amountTransaction" [value]="amountTransaction.value"
+    <input matInput placeholder="Amount" formControlName="t_amountTransaction" [value]="setupDone? amountTransaction.value : null"
     (blur)="amountFormat();
             showAValidator();">
-    <mat-error  *ngIf="amountTransaction?.errors?.['required']">
+    <mat-error  *ngIf="setupDone&&amountTransaction?.errors?.['required']">
       The field is required.    
     </mat-error>
-    <mat-error  *ngIf="amountTransaction?.errors?.['pattern']">
+    <mat-error  *ngIf="setupDone&&amountTransaction?.errors?.['pattern']">
       Only dights!    
     </mat-error>
   </mat-form-field>
@@ -44,11 +45,11 @@
     (dateChange)="showAValidator();">
     <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
     <mat-datepicker #picker></mat-datepicker>
-    <mat-error *ngIf="ledgerNo.errors?.['required']">
+    <mat-error *ngIf="setupDone&&ledgerNo?.errors?.['required']">
       Required!
     </mat-error>
   </mat-form-field>
-  <mat-button-toggle-group [disabled]="d_transactionType.value=='LL'"
+  <mat-button-toggle-group 
     style=" width: 26%;font-size: 18px;" formControlName="t_XactTypeCode" 
     aria-label="Font Style" matTooltip="Choose Ledger Side"
     (click)="xActTypeCode_Ext.patchValue(''); 
@@ -68,7 +69,7 @@
       <mat-slide-toggle #overdraft 
         style="font-size:85%; letter-spacing: .05rem;"
         [checked]="!ledgerNo.hasAsyncValidator(validatorLedgerAccountOverdraft)"
-        [style.color]="overdraft.checked ? 'rgb(43, 43, 245)' : 'brown'"
+        [style.color]="ledgerNo.hasAsyncValidator(validatorLedgerAccountOverdraft)? 'rgb(43, 43, 245)' : 'brown'"
         (toggleChange)="toggleOverdraftValidator(overdraft,'d_ledgerNo')"
         >Overdraft {{overdraft.checked? 'allowed!':'forbidden'}}
       </mat-slide-toggle>
@@ -95,7 +96,7 @@
       <mat-slide-toggle #overdraft 
         style="font-size:85%; letter-spacing: .05rem;"
         [checked]="!accountNo.hasAsyncValidator(validatorAccountOverdraft)"
-        [style.color]="overdraft.checked ? 'rgb(43, 43, 245)' : 'brown'"
+        [style.color]="accountNo.hasAsyncValidator(validatorAccountOverdraft) ? 'rgb(43, 43, 245)' : 'brown'"
         (toggleChange)="toggleOverdraftValidator(overdraft,'d_accountNo')"
         >Overdraft {{overdraft.checked? 'allowed!':'forbidden'}}
       </mat-slide-toggle>
@@ -123,7 +124,7 @@
       <mat-slide-toggle #overdraft 
         style="font-size:85%; letter-spacing: .05rem;"
         [checked]="!accountNo.hasAsyncValidator(validatorAccountOverdraft)"
-        [style.color]="overdraft.checked ? 'rgb(43, 43, 245)' : 'brown'"
+        [style.color]="accountNo.hasAsyncValidator(validatorAccountOverdraft) ? 'rgb(43, 43, 245)' : 'brown'"
         (toggleChange)="toggleOverdraftValidator( overdraft,'d_accountNo' )"
         >Overdraft {{overdraft.checked? 'allowed!':'forbidden'}}
       </mat-slide-toggle>
@@ -151,7 +152,7 @@
       <mat-slide-toggle #overdraft 
         style="font-size:85%; letter-spacing: .05rem;"
         [checked]="!ledgerNo.hasAsyncValidator(validatorLedgerAccountOverdraft)"
-        [style.color]="overdraft.checked ? 'rgb(43, 43, 245)' : 'brown'"
+        [style.color]="ledgerNo.hasAsyncValidator(validatorAccountOverdraft)? 'rgb(43, 43, 245)' : 'brown'"
         (toggleChange)="toggleOverdraftValidator(overdraft,'d_ledgerNo')"
         >Overdraft {{overdraft.checked? 'allowed!':'forbidden'}}
       </mat-slide-toggle>
@@ -248,18 +249,18 @@
   </span>
   <mat-form-field style="width: 95%;">
     <input matInput placeholder="Entry Details" formControlName="t_entryDetails">
-    <mat-error *ngIf="entryDetails.errors?.['required']">
+    <mat-error *ngIf="setupDone&&entryDetails?.errors?.['required']">
       Required!
     </mat-error>
   </mat-form-field>
-  <mat-form-field style="width: 10%;">
+<!--   <mat-form-field style="width: 10%;">
     <input matInput placeholder="t_accountId" formControlName="t_accountId">
   </mat-form-field>
   <mat-form-field style="width: 10%;">
     <input matInput placeholder="t_ledgerNoId" formControlName="t_ledgerNoId">
-  </mat-form-field>
+  </mat-form-field> -->
   <h3 *ngIf="action!='View'"
-    [style.color]="entryModifyForm.invalid ? 'rgb(252, 113, 113)' : null">
-    {{entryModifyForm.invalid? 'Please check the form. Data is invalid' : 'Data is valid. Please select "Submit data"'}}
+    [style.color]="setupDone&&entryModifyForm.invalid ? 'rgb(252, 113, 113)' : null">
+    {{setupDone&&entryModifyForm.invalid? 'Please check the form. Data is invalid' : 'Data is valid. Please select "Submit data"'}}
   </h3>
 </form>

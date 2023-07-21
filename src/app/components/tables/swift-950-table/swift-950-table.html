@@ -91,6 +91,7 @@
             <app-table-acc-entries 
               [FirstOpenedAccountingDate] = "FirstOpenedAccountingDate"
               [UI_min]="true" 
+              [swiftID]="parentMsgRow['id']"
               [action]="'ViewEntriesByExternalId'" 
               [externalId]="element['id']" >
             </app-table-acc-entries>
