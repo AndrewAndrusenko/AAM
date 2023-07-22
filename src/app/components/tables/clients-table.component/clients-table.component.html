@@ -50,10 +50,10 @@
         <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplayWithExpand.length" >
           <div class="element-detail" *ngIf="accessToPortfolioData!=='none'" 
             [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
-              <app-app-portfolio-tablee style="width: 100%" class="myclass" 
+              <app-portfolio-tablee style="width: 100%" class="myclass" 
                 [clientId]="element['idclient']" 
                 [actionOnAccountTable]="'Get_Portfolios_By_CientId'">
-              </app-app-portfolio-tablee >
+              </app-portfolio-tablee >
           </div>
         </td>
       </ng-container>

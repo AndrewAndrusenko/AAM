@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
-import { AccountsTableModel, accountTypes, ClientData, InstrumentData, StrategiesGlobalData, StrategyStructure } from '../models/intefaces';
+import { AccountsTableModel, accountTypes, ClientData, InstrumentData, StrategiesGlobalData, StrategyStructure } from '../models/intefaces.model';
 import { cleanData } from 'jquery';
 
 @Injectable({

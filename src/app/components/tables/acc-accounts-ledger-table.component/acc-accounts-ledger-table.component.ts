@@ -4,14 +4,14 @@ import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { bLedgerAccounts } from 'src/app/models/intefaces';
+import { bLedgerAccounts } from 'src/app/models/intefaces.model';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
-import { AppAccAccountModifyFormComponent } from '../../forms/acc-account-form/acc-account-form';
+import { AppAccAccountModifyFormComponent } from '../../forms/acc-account-form.component/acc-account-form.component';
 import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { formatNumber } from '@angular/common';
 import { AuthService } from 'src/app/services/auth.service';
-import { investmentNodeColor } from 'src/app/models/constants';
+import { investmentNodeColor } from 'src/app/models/constants.model';
 
 @Component({
   selector: 'app-table-acc-ledger-accounts',

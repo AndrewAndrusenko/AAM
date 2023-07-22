@@ -1,9 +1,9 @@
 import { Component, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef} from '@angular/material/dialog';
-import { AppClientFormComponent } from '../../forms/client-form/client-form';
-import { AppNewAccountComponent } from '../../forms/portfolio-form/portfolio-form';
+import { AppClientFormComponent } from '../../forms/client-form.component/client-form.component';
+import { AppNewAccountComponent } from '../../forms/portfolio-form.component/portfolio-form.component';
 import { MatTableDataSource } from '@angular/material/table';
-import { ClientData } from 'src/app/models/intefaces';
+import { ClientData } from 'src/app/models/intefaces.model';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { AppInvestmentDataServiceService } from 'src/app/services/app-investment-data.service.service';
@@ -12,7 +12,7 @@ import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dia
 import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import { formatNumber } from '@angular/common';
 import { animate, state, style, transition, trigger } from '@angular/animations';
-import { investmentNodeColor } from 'src/app/models/constants';
+import { investmentNodeColor } from 'src/app/models/constants.model';
 @Component({
   selector: 'app-app-clients-table',
   templateUrl: './clients-table.component.html',

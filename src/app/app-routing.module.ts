@@ -1,8 +1,8 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AuthGuardService } from './services/auth-guard.service';
-import { LoginComponent } from './components/main-page/login/login.component';
-import { DashboardComponent } from './components/main-page/root-page/root-page';
+import { LoginComponent } from './components/main-page/login.component/login.component';
+import { DashboardComponent } from './components/main-page/root-page.component/root-page.component';
 import { InstrumentTabComponent } from './components/main-page/tabs/instrument-tab/instrument-tab.component';
 import { StrategiesTabComponent } from './components/main-page/tabs/strateries-tab/strateries-tab';
 import { AccAccountsTabComponent } from './components/main-page/tabs/accounting-tab/acc-accounts-tab';
@@ -10,7 +10,7 @@ import { AccTransactionsTabComponent } from './components/main-page/tabs/transac
 import { PortfoliosTabComponent } from './components/main-page/tabs/portfolios-tab/portfolios-tab';
 import { ClientsTabComponent } from './components/main-page/tabs/clients-tab/clients-tab';
 import { AccSWIFTTabComponent } from './components/main-page/tabs/SWIFT-tab.component/SWIFT-tab.component';
-import { AppTableSWIFT950ItemsComponent } from './components/tables/swift-950-table/swift-950-table';
+import { AppTableSWIFT950ItemsComponent } from './components/tables/swift-950-table.component/swift-items-table.component';
 export const routesTreeMenu =[
   {
     path: "Instruments",

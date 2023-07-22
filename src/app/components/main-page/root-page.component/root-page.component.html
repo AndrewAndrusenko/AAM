@@ -1,0 +1,19 @@
+<app-app-menu style="width: 100vw;"
+  [treeOpened] = "opened">
+</app-app-menu>
+
+<mat-drawer-container class="example-container" >
+  <mat-drawer #sidenav class="example-sidenav" mode="side" [(opened)]="opened">
+    <app-tree-menu></app-tree-menu>
+  </mat-drawer>
+  <div class="example-sidenav-content">
+    <button 
+      style="height: 100%; background-color: rgb(108, 107, 107); width: 20px; border-radius: 5px; border-color:rgb(67, 79, 79);" (click)="sidenav.toggle()"> 
+      <mat-icon style="margin-left: -8px; color: white;">chevron_right</mat-icon>
+    </button>
+    <app-app-tabs 
+    style="width: 80vw;"
+    ></app-app-tabs>
+  </div>
+</mat-drawer-container>
+

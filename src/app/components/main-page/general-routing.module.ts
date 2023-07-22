@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { DashboardComponent } from './root-page/root-page';
+import { DashboardComponent } from './root-page.component/root-page.component';
 
 const routes: Routes = [
   { path: '', component: DashboardComponent, data: { reuse: true }}

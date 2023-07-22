@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, tap } from 'rxjs';
-import { accessRestriction } from '../models/intefaces';
+import { accessRestriction } from '../models/intefaces.model';
 interface userRoles {
   value: string;
 }

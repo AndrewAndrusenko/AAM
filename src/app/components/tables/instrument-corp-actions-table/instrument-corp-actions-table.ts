@@ -4,7 +4,7 @@ import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { instrumentCorpActions } from 'src/app/models/intefaces';
+import { instrumentCorpActions } from 'src/app/models/intefaces.model';
 import { FormGroup} from '@angular/forms';
 import { AppMarketDataService } from 'src/app/services/app-market-data.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
@@ -12,7 +12,7 @@ import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dia
 import { formatNumber } from '@angular/common';
 import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import { AuthService } from 'src/app/services/auth.service';
-import { AppInstrumentCorpActionFormComponent } from '../../forms/instrument-corp-action-form/instrument-corp-action-form';
+import { AppInstrumentCorpActionFormComponent } from '../../forms/instrument-corp-action-form.component/instrument-corp-action-form.component';
 @Component({
   selector: 'app-table-inst-corp-actions',
   templateUrl: './instrument-corp-actions-table.html',

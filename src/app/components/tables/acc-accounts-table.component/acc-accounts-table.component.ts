@@ -4,9 +4,9 @@ import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { bAccounts } from 'src/app/models/intefaces';
+import { bAccounts } from 'src/app/models/intefaces.model';
 import { AppAccountingService } from 'src/app/services/app-accounting.service';
-import { AppAccAccountModifyFormComponent } from '../../forms/acc-account-form/acc-account-form';
+import { AppAccAccountModifyFormComponent } from '../../forms/acc-account-form.component/acc-account-form.component';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatChipInputEvent } from '@angular/material/chips';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
@@ -14,7 +14,7 @@ import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dia
 import { formatNumber } from '@angular/common';
 import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import { AuthService } from 'src/app/services/auth.service';
-import { investmentNodeColor } from 'src/app/models/constants';
+import { investmentNodeColor } from 'src/app/models/constants.model';
 
 @Component({
   selector: 'app-table-acc-accounts',
