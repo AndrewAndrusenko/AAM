@@ -5,7 +5,7 @@ import {MatTableDataSource as MatTableDataSource} from '@angular/material/table'
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { bLedgerAccounts } from 'src/app/models/intefaces.model';
-import { AppAccountingService } from 'src/app/services/app-accounting.service';
+import { AppAccountingService } from 'src/app/services/accounting.service';
 import { AppAccAccountModifyFormComponent } from '../../forms/acc-account-form.component/acc-account-form.component';
 import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';

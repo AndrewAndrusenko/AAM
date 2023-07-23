@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { caTypes, instrumentDetails } from 'src/app/models/intefaces.model';
 import { Observable, Subscription, distinctUntilChanged, filter, map, startWith, switchMap } from 'rxjs';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
-import { AppMarketDataService } from 'src/app/services/app-market-data.service';
+import { AppMarketDataService } from 'src/app/services/market-data.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 

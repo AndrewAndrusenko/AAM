@@ -4,7 +4,7 @@ import { instrumentDetails } from 'src/app/models/intefaces.model';
 import { Subscription, filter, switchMap } from 'rxjs';
 import { MatTabGroup as MatTabGroup } from '@angular/material/tabs';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
-import { AppMarketDataService } from 'src/app/services/app-market-data.service';
+import { AppMarketDataService } from 'src/app/services/market-data.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
 
 @Component({

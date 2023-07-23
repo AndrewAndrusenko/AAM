@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { AppMenuServiceService } from 'src/app/services/app-menu-service.service';
+import { AppMenuServiceService } from 'src/app/services/menu-service.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
 @Component({

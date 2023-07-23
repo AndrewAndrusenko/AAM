@@ -2,7 +2,7 @@ import { Component,  EventEmitter,  Input, ViewChild } from '@angular/core';
 import { AsyncValidatorFn, FormBuilder, FormGroup, NgForm, ValidationErrors, Validators } from '@angular/forms';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators.service';
-import { AppAccountingService } from 'src/app/services/app-accounting.service';
+import { AppAccountingService } from 'src/app/services/accounting.service';
 import { bcTransactionType_Ext, cFormValidationLog } from 'src/app/models/intefaces.model';
 import { AppTableAccLedgerAccountsComponent } from '../../tables/acc-accounts-ledger-table.component/acc-accounts-ledger-table.component';
 import { AppTableAccAccountsComponent } from '../../tables/acc-accounts-table.component/acc-accounts-table.component';
@@ -17,34 +17,25 @@ import { indexDBService } from 'src/app/services/indexDB.service';
   styleUrls: ['./acc-entry-form.component.scss'],
 })
 export class AppAccEntryModifyFormComponent {
-  @ViewChild('formDirective') private formDirective: NgForm;
-  isAccountOverdraft = true;
-  public entryModifyForm: FormGroup;
+  TransactionTypes: bcTransactionType_Ext[] = [];
   panelOpenState = true;
+  actionType : string;
+  data: any;
+  entryModifyForm: FormGroup;
+  dialogChoseAccount: MatDialogRef<AppTableAccAccountsComponent>;
+  dialogChoseLedger: MatDialogRef<AppTableAccLedgerAccountsComponent>;
   @Input() action: string;
   @Input() Ref: string;
   @Input() swiftID: number;
-  dialogChoseAccount: MatDialogRef<AppTableAccAccountsComponent>;
-  dialogChoseLedger: MatDialogRef<AppTableAccLedgerAccountsComponent>;
+  @Input() FirstOpenedAccountingDate : Date;
   validatorCorrectAccountNo :AsyncValidatorFn;
   validatorCorrectLedgerAccountNo :AsyncValidatorFn;
   validatorLedgerAccountOverdraft :AsyncValidatorFn;
   validatorLedgerLL2Overdraft :AsyncValidatorFn;
   validatorAccountOverdraft :AsyncValidatorFn;
   validatorCorrectLedgerLLAccountNo: AsyncValidatorFn;
-  
   validationsToSkip: string[] = [];
-  formSubmitSubject$ = new Subject();
-  actionType : string;
-  data: any;
-  selectedValue : string
-  @Input() FirstOpenedAccountingDate : Date;
-  TransactionTypes: bcTransactionType_Ext[] = [];
-  addOnBlur = true;
-  asynValidatorsAdded: boolean = false
-  showDraft: boolean = false;
-  statusArray: string[] =[]
-  readonly separatorKeysCodes = [ENTER, COMMA] as const;
+  
   validatorsLogDescription = {
     'd_accountNo':'Account Number',
     'd_ledgerNo':'Ledger Number'
@@ -52,12 +43,15 @@ export class AppAccEntryModifyFormComponent {
   errorLogAutoProcessing : cFormValidationLog [] = []
   autoProcessingState : boolean = false
   pendingStatusAP: boolean = false
-  sbSTPCreateEntry$: Subscription;
+  statusArray: string[] =[]
+  
+  private sbSTPCreateEntry$: Subscription;
   private formStatusChange$: Subscription;
   private accountIDchanges$ :Subscription; 
   private ledgerIDchanges$ :Subscription; 
   private expectedBalance$: Subscription;
   setupDone: boolean = false;
+  readonly separatorKeysCodes = [ENTER, COMMA] as const;
   constructor (
     private fb:FormBuilder, 
     private AccountingDataService:AppAccountingService, 
@@ -127,30 +121,29 @@ export class AppAccEntryModifyFormComponent {
   ngOnInit(): void {
     this.Ref? console.log('ngOnInit',this.Ref): null;
     this.sbSTPCreateEntry$ = this.AccountingDataService.getEntryDraft().pipe(filter(entryData => entryData.refTransaction === this.Ref)).subscribe (entryData=> {
-      this.setupDone=true
+      this.setupDone=true;
       this.pendingStatusAP=false;
       this.errorLogAutoProcessing=[];
       this.statusArray=[];
       this.action='Create';
       this.accountIDchanges$? this.accountIDchanges$.unsubscribe() :null;
       this.ledgerIDchanges$? this.ledgerIDchanges$.unsubscribe() : null;
-      this.clearAsyncValidators()
+      this.clearAsyncValidators();
       let updateValidators = this.data? true : false;
       this.entryModifyForm.reset();
-      this.entryModifyForm.markAsPending()
-      this.data = entryData.entryDraft
-      this.data['t_id'] = 0
+      this.entryModifyForm.markAsPending();
+      this.data = entryData.entryDraft;
+      this.data['t_id'] = 0;
       if (entryData.autoProcessing === true) {
         this.autoProcessingState = true;
         this.formStatusChange$=this.entryModifyForm.statusChanges.pipe(distinctUntilChanged()).subscribe(result=>{
-          console.log(this.Ref,' formStatusChange',result,this.accountNo.status,this.ledgerNo.status);
           if (result==='PENDING') {
             this.pendingStatusAP = true;
-            setTimeout (()=> (<EventEmitter<any>> this.entryModifyForm.statusChanges).emit(this.entryModifyForm.status),500)
+            setTimeout (()=> (<EventEmitter<any>> this.entryModifyForm.statusChanges).emit(this.entryModifyForm.status),500);
           }
           result==='VALID' && this.pendingStatusAP?  this.updateEntryData('Create', false) : null;   
           result==='INVALID' && this.statusArray.length>0 ? this.getFormValidationErrors('full', this.Ref) : null; 
-          this.statusArray.push(result)
+          this.statusArray.push(result);
         })
       };
       this.formInitialSetup(entryData.overRideOverdraft, updateValidators);
@@ -159,11 +152,6 @@ export class AppAccEntryModifyFormComponent {
   }
   ngAfterViewInit(): void {
     this.data? this.formInitialSetup() :null;
-  }
-  subscriptionsStatus (){
-    console.log('ref ',this.Ref,'sbSTPCreateEntry',this.sbSTPCreateEntry$?  this.sbSTPCreateEntry$.closed : this.sbSTPCreateEntry$)
-    console.log('ref ',this.Ref,'formStatusChange',this.formStatusChange$?  this.formStatusChange$.closed : this.formStatusChange$)
-    console.log('ref ',this.Ref,'accountIDchanges',this.accountIDchanges$?  this.accountIDchanges$.closed : this.accountIDchanges$)
   }
   ngOnDestroy(): void {
     this.Ref? console.log('ngOnDestroy',this.Ref): null;
@@ -176,13 +164,13 @@ export class AppAccEntryModifyFormComponent {
   updateExpectedBalance (accountTypeEntryType:string) {
     switch (accountTypeEntryType) {
       case 'accountNoAL':
-        this.AccountingDataService.getExpectedBalanceOverdraftCheck (this.accountId.value,this.amountTransaction.value, new Date (this.dataTime.value).toDateString(),this.xActTypeCode.value, this.id.value, new Date (this.FirstOpenedAccountingDate).toDateString(), 'AccountingOverdraftAccountCheck').subscribe(expectBalanceData => this.d_closingBalance.setValue(expectBalanceData[0].closingBalance))
+        this.AccountingDataService.getExpectedBalanceOverdraftCheck (this.accountId.value,this.amountTransaction.value, new Date (this.dataTime.value).toDateString(),this.xActTypeCode.value, this.id.value, new Date (this.FirstOpenedAccountingDate).toDateString(), 'AccountingOverdraftAccountCheck').subscribe(expectBalanceData => this.d_closingBalance.setValue(expectBalanceData[0].closingBalance));
       break;
       case 'accountNoLL':
-        this.AccountingDataService.getExpectedBalanceLedgerOverdraftCheck (this.accountId.value,this.amountTransaction.value, new Date (this.dataTime.value).toDateString(), 2 , this.id.value, new Date (this.FirstOpenedAccountingDate).toDateString() ,'AccountingOverdraftAccountCheck').subscribe(expectBalanceData => this.d_closingBalance.setValue(expectBalanceData[0].closingBalance))
+        this.AccountingDataService.getExpectedBalanceLedgerOverdraftCheck (this.accountId.value,this.amountTransaction.value, new Date (this.dataTime.value).toDateString(), 2 , this.id.value, new Date (this.FirstOpenedAccountingDate).toDateString() ,'AccountingOverdraftAccountCheck').subscribe(expectBalanceData => this.d_closingBalance.setValue(expectBalanceData[0].closingBalance));
       break;
       default:
-        this.AccountingDataService.getExpectedBalanceLedgerOverdraftCheck (this.ledgerId.value,this.amountTransaction.value, new Date (this.dataTime.value).toDateString(), this.xActTypeCode.getRawValue() === 0? 1: this.xActTypeCode.getRawValue(), this.id.value, new Date (this.FirstOpenedAccountingDate).toDateString() ,'AccountingOverdraftAccountCheck'). subscribe(expectBalanceData => this.d_closingLedgerBalance.setValue(expectBalanceData[0].closingBalance))
+        this.AccountingDataService.getExpectedBalanceLedgerOverdraftCheck (this.ledgerId.value,this.amountTransaction.value, new Date (this.dataTime.value).toDateString(), this.xActTypeCode.getRawValue() === 0? 1: this.xActTypeCode.getRawValue(), this.id.value, new Date (this.FirstOpenedAccountingDate).toDateString() ,'AccountingOverdraftAccountCheck'). subscribe(expectBalanceData => this.d_closingLedgerBalance.setValue(expectBalanceData[0].closingBalance));
       break;
     }
   } 
@@ -200,13 +188,13 @@ export class AppAccEntryModifyFormComponent {
             kKeyError: keyError,
             errorCode: '_'+refTransaction+key+keyError
           }) : null;
-         });
+        });
         if (this.errorLogAutoProcessing) {
           this.autoProcessingState = false;
-          this.formStatusChange$.unsubscribe()
+          this.formStatusChange$.unsubscribe();
           this.LogService.sendLogObject(this.errorLogAutoProcessing);
         };
-        }
+      }
     });
   }
   showAValidator (validateScope:string = 'full'){
@@ -263,8 +251,8 @@ export class AppAccEntryModifyFormComponent {
     this.dialogChoseAccount = this.dialog.open(AppTableAccAccountsComponent ,{minHeight:'600px', minWidth:'1600px', autoFocus: false, maxHeight: '90vh'});
     this.dialogChoseAccount.componentInstance.readOnly = true;
     this.dialogChoseAccount.componentInstance.modal_principal_parent.subscribe ((item)=>{
-      this.accountId.patchValue(this.dialogChoseAccount.componentInstance.selectedRow['accountId'])
-      this.accountNo.patchValue(this.dialogChoseAccount.componentInstance.selectedRow['accountNo'])
+      this.accountId.patchValue(this.dialogChoseAccount.componentInstance.selectedRow['accountId']);
+      this.accountNo.patchValue(this.dialogChoseAccount.componentInstance.selectedRow['accountNo']);
       this.dialogChoseAccount.close(); 
     });
   }
@@ -273,13 +261,13 @@ export class AppAccEntryModifyFormComponent {
     this.dialogChoseLedger.componentInstance.readOnly = true;
     this.dialogChoseLedger.componentInstance.modal_principal_parent.subscribe (item =>{
       if (type === 'ledger')  {
-        this.ledgerId.patchValue(this.dialogChoseLedger.componentInstance.selectedRow['ledgerNoId'])
-        this.ledgerNo.patchValue(this.dialogChoseLedger.componentInstance.selectedRow['ledgerNo'])
-        this.dialogChoseLedger.close()
+        this.ledgerId.patchValue(this.dialogChoseLedger.componentInstance.selectedRow['ledgerNoId']);
+        this.ledgerNo.patchValue(this.dialogChoseLedger.componentInstance.selectedRow['ledgerNo']);
+        this.dialogChoseLedger.close();
       } else {
-        this.accountId.patchValue(this.dialogChoseLedger.componentInstance.selectedRow['ledgerNoId'])
-        this.accountNo.patchValue(this.dialogChoseLedger.componentInstance.selectedRow['ledgerNo'])
-        this.dialogChoseLedger.close()
+        this.accountId.patchValue(this.dialogChoseLedger.componentInstance.selectedRow['ledgerNoId']);
+        this.accountNo.patchValue(this.dialogChoseLedger.componentInstance.selectedRow['ledgerNo']);
+        this.dialogChoseLedger.close();
       }
     });
   }
@@ -296,16 +284,15 @@ export class AppAccEntryModifyFormComponent {
     } else {
       this.autoProcessingState? this.LogService.sendCreatedLogObject (dataForUpdateLog): null;
       this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' entry'}, action);
-      console.log(' !this.autoProcessingState&&this.swiftID?', this.autoProcessingState,this.swiftID)   
       reloadEntryList&&!this.swiftID? this.AccountingDataService.sendReloadEntryList (undefined) : null;     
       !this.autoProcessingState&&this.swiftID? this.AccountingDataService.sendReloadEntryList (this.t_extTransactionId.value) : null;        
     }
   }
   updateEntryData (action:string, reloadEntryList:boolean=true){
-    let newDate = new Date(this.dataTime.value)
-    let dataForUpdate = {}
+    let newDate = new Date(this.dataTime.value);
+    let dataForUpdate = {};
     let renameFieldsForLL = [['ledgerNoId','ledgerID_Debit'],['dataTime','dateTime'],['accountId','ledgerID'],['amountTransaction','amount']];
-    Object.entries(this.entryModifyForm.value).forEach(([key, value])=>Object.assign(dataForUpdate,{[key.substring(2)]: value}))
+    Object.entries(this.entryModifyForm.value).forEach(([key, value])=>Object.assign(dataForUpdate,{[key.substring(2)]: value}));
     dataForUpdate['dataTime'] = newDate.toLocaleDateString();
     dataForUpdate['amountTransaction'] = parseFloat(this.amountTransaction.value.replace(/,/g, ''));
     this.d_transactionType.value ==='LL'? renameFieldsForLL.forEach(pair => Object.assign(dataForUpdate,{[pair[1]]: dataForUpdate[pair[0]]})) : null;

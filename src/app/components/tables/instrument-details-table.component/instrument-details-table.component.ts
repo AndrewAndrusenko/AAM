@@ -5,7 +5,7 @@ import {MatTableDataSource as MatTableDataSource} from '@angular/material/table'
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { instrumentDetails } from 'src/app/models/intefaces.model';
-import { AppMarketDataService } from 'src/app/services/app-market-data.service';
+import { AppMarketDataService } from 'src/app/services/market-data.service';
 import { AppInvInstrumentDetailsFormComponent } from '../../forms/instrument-details-form.component/instrument-details-form.component';
 import { indexDBService } from 'src/app/services/indexDB.service';
 import { AuthService } from 'src/app/services/auth.service';

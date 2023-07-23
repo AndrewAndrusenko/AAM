@@ -9,6 +9,7 @@ const uiAmmModule = require ('./aam_ui_module');
 const uiAmmInvestmentsModule = require ('./aam_ui_investmentsData')
 const uiAmmAccountingModule = require ('./aam_ui_accounting')
 const uiAmmMarketData = require ('./aam_ui_market_data_load')
+const uiAmmTradeData = require ('./aam_ui_trades')
 const RedisService = require ('./redis')
 const auth_module = require('./auth_module');
 const bcrypt = require('bcryptjs');
@@ -192,6 +193,8 @@ appServer.post('/AAM/MD/InstrumentEdit/',jsPassport.authenticate('session') , ui
 
 appServer.post('/AAM/MD/UpdateInstrumentDetails/',jsPassport.authenticate('session') , uiAmmMarketData.fUpdateInstrumentDetails)
 appServer.post('/AAM/MD/UpdateInstrumentDataCorpActions/',jsPassport.authenticate('session') , uiAmmMarketData.fUpdateInstrumentDataCorpActions)
+/*----------------------TradeData----------------------------------------------------*/
+appServer.get('/AAM/MD/getTradeData/',jsPassport.authenticate('session') , uiAmmTradeData.fGetTradesData)
 
 RedisService.TestRedis();
 RedisService.redisSetInstrumentList();

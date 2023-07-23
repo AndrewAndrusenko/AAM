@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { marketData } from 'src/app/models/intefaces.model';
-import { AppMarketDataService } from 'src/app/services/app-market-data.service';
+import { AppMarketDataService } from 'src/app/services/market-data.service';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 @Component({

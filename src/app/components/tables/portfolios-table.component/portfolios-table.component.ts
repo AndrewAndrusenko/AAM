@@ -6,7 +6,7 @@ import {animate, state, style, transition, trigger} from '@angular/animations';
 import {AccountsTableModel } from 'src/app/models/intefaces.model';
 import {MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import {AppNewAccountComponent } from '../../forms/portfolio-form.component/portfolio-form.component';
-import {AppInvestmentDataServiceService } from 'src/app/services/app-investment-data.service.service';
+import {AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
 import {AuthService } from 'src/app/services/auth.service';
 import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';

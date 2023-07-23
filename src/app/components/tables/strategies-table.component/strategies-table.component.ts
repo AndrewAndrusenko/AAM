@@ -4,7 +4,7 @@ import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import { StrategiesGlobalData, formInitParams } from 'src/app/models/intefaces.model';
-import { AppInvestmentDataServiceService } from 'src/app/services/app-investment-data.service.service';
+import { AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { AppStrategyFormComponent } from '../../forms/strategy-form.component/strategy-form.component';
 import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';

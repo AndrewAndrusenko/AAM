@@ -5,25 +5,24 @@ import {Observable, Subscription } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { Instruments, instrumentCorpActions, instrumentDetails, marketDataSources } from 'src/app/models/intefaces.model';
+import { Instruments, instrumentCorpActions, instrumentDetails, marketDataSources, trades } from 'src/app/models/intefaces.model';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { AppMarketDataService } from 'src/app/services/market-data.service';
 import { menuColorGl, investmentNodeColorChild, additionalLightGreen } from 'src/app/models/constants.model';
-import { AppInvInstrumentModifyFormComponent } from '../../forms/instrument-form.component/instrument-form.component';
-import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
 import { formatNumber } from '@angular/common';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import { AuthService } from 'src/app/services/auth.service';
+import { AppTradeService } from 'src/app/services/trades-service.service';
+import { AppTradeModifyFormComponent } from '../../forms/trade-form.component/trade-form.component';
 @Component({
-  selector: 'app-app-instrument-table',
+  selector: 'app-trade-table',
   
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './instrument-table.component.html',
-  styleUrls: ['./instrument-table.component.scss'],
+  templateUrl: './trade-table.component.html',
+  styleUrls: ['./trade-table.component.scss'],
   encapsulation: ViewEncapsulation.None,
   animations: [
     trigger('detailExpand', [
@@ -33,32 +32,18 @@ import { AuthService } from 'src/app/services/auth.service';
     ]),
   ],
 })
-export class AppInstrumentTableComponent  implements AfterViewInit {
+export class AppTradeTableComponent  implements AfterViewInit {
   accessState: string = 'none';
   disabledControlElements: boolean = false;
   @Input() FormMode:string
   marketSources:marketDataSources[] =  [];
   columnsToDisplay = [ 
-    'secid', 
-    'security_type_title',
-    'name', 
-    'isin', 
-    'primary_boardid', 
-    'board_title', 
-    'emitent_inn', 
-    'action'
+ 'idtrade','tdate','trtype','tidinstrument','price','id_price_currency','qty','cpty','vdate','id_settlement_currency','tidorder','allocatedqty','action'
   ];
   columnsHeaderToDisplay = [ 
-    'SECID', 
-    'Security_Type',
-    'Short Name', 
-    'ISIN', 
-    'Board', 
-    'Board Title', 
-    'Issuer INN', 
-    'Action'
+    'ID','Date','Type','SecID','Price','Currency','Quantity','CParty','ValueDate','Settlement','Order','Allocated','Action'
   ];
-  dataSource: MatTableDataSource<Instruments>;
+  dataSource: MatTableDataSource<trades>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild('filterALL', { static: false }) filterALL: ElementRef;
@@ -68,34 +53,27 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
   
   ;
   panelOpenStateSecond = false;
-  instrumentDetailsArr:instrumentDetails[] = [];
-  instrumentCorpActions:instrumentCorpActions[] = [];
   accessToClientData: string = 'true';
   instruments: string[] = ['ClearAll'];
   investmentNodeColor = investmentNodeColorChild;
   additionalLightGreen = additionalLightGreen;
   public filterednstrumentsLists : Observable<string[]>;
   menuColorGl=menuColorGl;
-  boardIDs =[]
   searchParametersFG: FormGroup;
-  boardsOne = new FormControl('');
 
-  dialogInstrumentModify: MatDialogRef<AppInvInstrumentModifyFormComponent>;
+  dialogTradeModify: MatDialogRef<AppTradeModifyFormComponent>;
 
   defaultFilterPredicate?: (data: any, filter: string) => boolean;
   secidfilter?: (data: any, filter: string) => boolean;
-  selectedRow: Instruments;
   constructor(
-    private MarketDataService: AppMarketDataService,
-    private TreeMenuSevice:TreeMenuSevice,
+    private TradeService: AppTradeService,
     private AuthServiceS:AuthService,  
-    private indexDBServiceS:indexDBService,
     private HandlingCommonTasksS:HandlingCommonTasksService,
     private CommonDialogsService:HadlingCommonDialogsService,
     private dialog: MatDialog,
     private fb:FormBuilder, 
   ) {
-    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToInstrumentData')[0].elementvalue;
+    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.searchParametersFG = this.fb.group ({
       secidList: null,
@@ -103,10 +81,9 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
       marketSource : {value:null, disabled:false},
       boards : {value:null, disabled:false}
     });
-     this.indexDBServiceS.getIndexDBStaticTables('getBoardsDataFromInstruments').then ((data)=>this.boardIDs = data['data'])
-     this.MarketDataService.getMarketDataSources().subscribe(marketSourcesData => this.marketSources = marketSourcesData);
-     this.MarketDataService.getInstrumentDataToUpdateTableSource().subscribe(data =>{
-     let index =  this.dataSource.data.findIndex(elem=>elem.id===data.data[0].id)
+   
+     this.TradeService.getTradeDataToUpdateTableSource().subscribe(data =>{
+     let index =  this.dataSource.data.findIndex(elem=>elem.idtrade===data.data[0].idtrade)
       switch (data.action) {
         case 'Deleted':
           this.dataSource.data.splice(index,1)
@@ -122,32 +99,21 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
      this.dataSource.sort = this.sort;
     })
   }
-  openInstrumentModifyForm (action:string, element:any) {
-    this.dialogInstrumentModify = this.dialog.open (AppInvInstrumentModifyFormComponent,{minHeight:'600px', minWidth:'800px', maxWidth:'60vw', autoFocus: false, maxHeight: '90vh'})
-    this.dialogInstrumentModify.componentInstance.moexBoards = this.boardIDs;
-    this.dialogInstrumentModify.componentInstance.action = action;
-    this.dialogInstrumentModify.componentInstance.data = action ==='Create'? null :element;
-    this.dialogInstrumentModify.componentInstance.instrumentDetails = this.instrumentDetailsArr.filter(el=> el.secid===element.secid&&element.primary_boardid===el.boardid)
-    this.dialogInstrumentModify.componentInstance.instrumentCorpActions = this.instrumentCorpActions.filter(el=> el.isin===element.isin)
+  openTradeModifyForm (action:string, element:any) {
+    this.dialogTradeModify = this.dialog.open (AppTradeModifyFormComponent,{minHeight:'600px', minWidth:'800px', maxWidth:'60vw', autoFocus: false, maxHeight: '90vh'})
+    this.dialogTradeModify.componentInstance.action = action;
+    this.dialogTradeModify.componentInstance.data = action ==='Create'? null :element;
   }
   async ngAfterViewInit() {
-    if (this.FormMode==='Redis') {
-      this.MarketDataService.getRedisMoexInstruments().subscribe(data => this.updateInstrumentDataTable(data))   
-    } else {
-      this.MarketDataService.getMoexInstruments().subscribe (instrumentData => this.updateInstrumentDataTable(instrumentData))  
-    }
-    this.indexDBServiceS.getIndexDBStaticTables('getInstrumentDataDetails').then(data =>this.instrumentDetailsArr = data['data']);
+    this.TradeService.getTradeInformation().subscribe (tradesData => this.updateTradesDataTable(tradesData))  
+
   }
-  handleNewFavoriteClick(elem:Instruments){
-    let userData = JSON.parse(localStorage.getItem('userInfo'));
-    this.TreeMenuSevice.addItemToFavorites (elem.secid , 'Instruments', userData.user.id, elem.id.toString());
-  }
-  updateInstrumentDataTable (instrumentData:Instruments[]) {
-    this.dataSource  = new MatTableDataSource(instrumentData);
+  updateTradesDataTable (tradesData:trades[]) {
+    this.dataSource  = new MatTableDataSource(tradesData);
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
     this.defaultFilterPredicate = this.dataSource.filterPredicate;
-    this.dataSource.filterPredicate = function(data, filter: string): boolean {return data.secid.toLowerCase().includes(filter)};
+    this.dataSource.filterPredicate = function(data, filter: string): boolean {return data.tidinstrument.toLowerCase().includes(filter)};
     this.secidfilter = this.dataSource.filterPredicate;
   }
   applyFilter(event: any, col?:string) {
@@ -187,9 +153,9 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
       this.instruments.indexOf('ClearAll') !== -1? this.instruments.splice(this.instruments.indexOf('ClearAll'),1) : null;
       this.instruments.length===1? instrumentsList = [...this.instruments,...this.instruments]: instrumentsList = this.instruments;
       this.instruments.length? Object.assign (searchObj , {'secid': instrumentsList}): null;
-      this.marketSource.value != null&&this.marketSource.value.length !=0? Object.assign (searchObj , {'sourcecode': this.marketSource.value}): null;
-      this.boards.value != null&&this.boards.value.length !=0? Object.assign (searchObj , {'boardid': this.boards.value}): null;
-      this.MarketDataService.getMoexInstruments(undefined,this.FormMode==='ChartMode'? 'secid ASC':undefined,searchObj).subscribe(data => {
+      /* this.marketSource.value != null&&this.marketSource.value.length !=0? Object.assign (searchObj , {'sourcecode': this.marketSource.value}): null;
+      this.boards.value != null&&this.boards.value.length !=0? Object.assign (searchObj , {'boardid': this.boards.value}): null; */
+      this.TradeService.getTradeInformation().subscribe(data => {
         this.dataSource  = new MatTableDataSource(data);
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
@@ -200,13 +166,13 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
     });
   }
   toggleAllSelection(elem:string, allSelected: boolean) {
-    allSelected? this.searchParametersFG.get(elem).patchValue(
+/*     allSelected? this.searchParametersFG.get(elem).patchValue(
       elem==='marketSource'? [...this.marketSources.map(item => item.segments.map(el => el.sourceCode)),0].flat() : [...this.boardIDs.map(item => item.boardid
-    ), 0]) : this.searchParametersFG.get(elem).patchValue([]);
+    ), 0]) : this.searchParametersFG.get(elem).patchValue([]); */
   }
    
   selectInstrument (element:Instruments) {this.modal_principal_parent.emit(element)}
-  exportToExcel() {this.HandlingCommonTasksS.exportToExcel (this.dataSource.data,"instrumentData")  }
+  exportToExcel() {this.HandlingCommonTasksS.exportToExcel (this.dataSource.data,"tradesData")  }
   get  marketSource () {return this.searchParametersFG.get('marketSource') } 
   get  boards () {return this.searchParametersFG.get('boards') } 
   get  secidList () {return this.searchParametersFG.get('secidList') } 

@@ -64,6 +64,8 @@ import { NgEchartMarketDataCandleComponent } from './components/charts/chart-can
 import { AppInstrumentTableComponent } from './components/tables/instrument-table.component/instrument-table.component';
 import { AppInvInstrumentModifyFormComponent } from './components/forms/instrument-form.component/instrument-form.component';
 import { AppTableCorporateActionsComponent } from './components/tables/instrument-corp-actions-table/instrument-corp-actions-table';
+import { AppTradeTableComponent } from './components/tables/trade-table.component/trade-table.component';
+import { AppTradeModifyFormComponent } from './components/forms/trade-form.component/trade-form.component';
 import { AppTableInstrumentDetailsComponent } from './components/tables/instrument-details-table.component/instrument-details-table.component';
 import { AppInvInstrumentDetailsFormComponent } from './components/forms/instrument-details-form.component/instrument-details-form.component';
 import { TablePortfolios } from './components/tables/portfolios-table.component/portfolios-table.component';
@@ -158,7 +160,9 @@ const appInitializerFn = (accessRestirictions:AuthService) => {
         PortfoliosTabComponent,  
         ClientsTabComponent,
         AppInstrumentCorpActionFormComponent,
-        AccSWIFTTabComponent
+        AccSWIFTTabComponent,
+        AppTradeTableComponent,
+        AppTradeModifyFormComponent
      ],
     bootstrap: [AppComponent],
     providers: [ 

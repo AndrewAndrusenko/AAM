@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { AppMarketDataService } from './app-market-data.service';
+import { AppMarketDataService } from './market-data.service';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
-import { AppAccountingService } from './app-accounting.service';
+import { AppAccountingService } from './accounting.service';
 import { catchError, of } from 'rxjs';
 interface cacheAAM {
   code:string,

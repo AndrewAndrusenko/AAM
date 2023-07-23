@@ -11,6 +11,7 @@ import { PortfoliosTabComponent } from './components/main-page/tabs/portfolios-t
 import { ClientsTabComponent } from './components/main-page/tabs/clients-tab/clients-tab';
 import { AccSWIFTTabComponent } from './components/main-page/tabs/SWIFT-tab.component/SWIFT-tab.component';
 import { AppTableSWIFT950ItemsComponent } from './components/tables/swift-950-table.component/swift-items-table.component';
+import { AppTradeTableComponent } from './components/tables/trade-table.component/trade-table.component';
 export const routesTreeMenu =[
   {
     path: "Instruments",
@@ -52,6 +53,12 @@ export const routesTreeMenu =[
     data: { reuse: true },
     component: ClientsTabComponent
   },
+  {
+    path: "Trades & Orders",
+    data: { reuse: true },
+    component: AppTradeTableComponent
+  },
+  
 ]
 export const routes: Routes = [
  { path: 'login', component: LoginComponent },

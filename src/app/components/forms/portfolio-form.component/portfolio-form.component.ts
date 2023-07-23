@@ -2,7 +2,7 @@ import { Component, Input, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { AccountsTableModel, ClientData, StrategiesGlobalData, accountTypes } from 'src/app/models/intefaces.model';
-import { AppInvestmentDataServiceService } from 'src/app/services/app-investment-data.service.service';
+import { AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
 import { AppTableStrategiesComponentComponent } from '../../tables/strategies-table.component/strategies-table.component';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AuthService } from 'src/app/services/auth.service';

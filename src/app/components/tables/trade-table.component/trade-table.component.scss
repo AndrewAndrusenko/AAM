@@ -1,0 +1,46 @@
+.mat-select-panel {
+  max-height: 80vh !important;
+}
+.headers-align  .mat-expansion-panel-header {
+  background-color: #504f4f;
+}
+.headers-align .mat-expansion-panel-header-description {
+  justify-content: space-between;
+  align-items: center;
+  font-size: 20px;
+}
+.headers-align .mat-expansion-panel-header-title {
+  justify-content: space-between;
+  align-items: center;
+  color: rgb(210, 205, 205);
+  font-size: 20px;
+}
+.mat-header-cell {
+  font-size: 20px;
+  background-color:#393737;
+}
+.mat-table {
+  background-color:#313131;
+  width: 100%;
+  font-size: 26px;
+}
+tr.detail-row {
+  height: 0;
+}
+.element-row td {
+  border-bottom-width: 0;
+}
+.element-detail {
+  border-color: red;
+  overflow: hidden;
+}
+
+.mat-column-tidinstrument {
+  color: rgb(85, 167, 238)
+}
+.mat-column-cpty {
+  color:rgb(53, 168, 110)
+}
+.mat-column-tdate {
+  color:rgb(53, 168, 110)
+}

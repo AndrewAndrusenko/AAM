@@ -5,7 +5,7 @@ import {MatTableDataSource as MatTableDataSource} from '@angular/material/table'
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { bAccounts } from 'src/app/models/intefaces.model';
-import { AppAccountingService } from 'src/app/services/app-accounting.service';
+import { AppAccountingService } from 'src/app/services/accounting.service';
 import { AppAccAccountModifyFormComponent } from '../../forms/acc-account-form.component/acc-account-form.component';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatChipInputEvent } from '@angular/material/chips';
@@ -46,7 +46,7 @@ export class AppTableAccAccountsComponent  implements OnInit {
   dialogRef: MatDialogRef<AppAccAccountModifyFormComponent>;
   selection = new SelectionModel<bAccounts>(true, []);
   accounts: string[] = [];
-  addOnBlur = true;
+  ;
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
   investmentNodeColor=investmentNodeColor;
   constructor(

@@ -22,7 +22,7 @@
   </button>
   <mat-expansion-panel  class="complex-search-entries" [disabled]="disabledControlElements"
     (opened)="panelOpenState = true; 
-    changeProcesDate(dateToProcess.value)"
+    changeProcesDate()"
     (closed)="panelOpenState = false" >
     <mat-expansion-panel-header >
       <mat-panel-title>
@@ -56,7 +56,7 @@
       <mat-form-field style=" margin-left: 2%; width: 12%; font-size: 18px;" >
         <input #dateToProcess 
         formControlName="cDateToProcessSwift"
-        (dateChange)="changeProcesDate($event.value)"
+        (dateChange)="changeProcesDate()"
         matInput style="font-size: 18px;"  [matDatepicker]="dateToProcessSwift"  placeholder="Date to process">
         <mat-datepicker-toggle matSuffix [for]="dateToProcessSwift"></mat-datepicker-toggle>
         <mat-datepicker [dateClass]="dateClass" #dateToProcessSwift></mat-datepicker>

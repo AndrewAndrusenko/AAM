@@ -6,7 +6,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { ClientData } from 'src/app/models/intefaces.model';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
-import { AppInvestmentDataServiceService } from 'src/app/services/app-investment-data.service.service';
+import { AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';

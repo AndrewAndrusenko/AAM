@@ -31,7 +31,7 @@
       <input style = "width: 20%;" placeholder="Add account"
       [matChipInputFor]="chipList"
       [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-      [matChipInputAddOnBlur]="addOnBlur"
+      [matChipInputAddOnBlur]="true"
       (matChipInputTokenEnd)="add($event)"
       matTooltip="Type account number and press enter">
     </mat-chip-list>

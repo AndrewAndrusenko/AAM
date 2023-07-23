@@ -8,7 +8,7 @@ import { distinctUntilChanged, filter, map, Observable, startWith, switchMap } f
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AppInstrumentTableComponent } from '../../tables/instrument-table.component/instrument-table.component';
-import { AppInvestmentDataServiceService } from 'src/app/services/app-investment-data.service.service';
+import { AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
 
 @Component({
   selector: 'app-structure-strategy-form',

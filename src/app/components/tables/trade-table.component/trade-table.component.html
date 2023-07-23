@@ -10,7 +10,7 @@
       <mat-icon>close</mat-icon>
     </button>
   </mat-form-field>
-  <mat-form-field  style="width: 20%;" class = "filterField" title="filter by BoardID">
+<!--   <mat-form-field  style="width: 20%;" class = "filterField" title="filter by BoardID">
     <mat-label class="whiteTextFilter">BoardID</mat-label>
     <mat-select  #BoardID  [formControl]="boardsOne" > 
       <mat-option 
@@ -20,7 +20,7 @@
           {{board.boardid}} - {{board.board_title}}
       </mat-option>
     </mat-select>
-  </mat-form-field>
+  </mat-form-field> -->
   <mat-form-field class = "filterField"  style="font-size: 22px;" title="All columns">
     <mat-label class="whiteTextFilter">Search (all columns)...</mat-label>
     <input 
@@ -73,7 +73,7 @@
         </button>
       </span>
 
-      <mat-form-field  style="width: 25%;">
+<!--       <mat-form-field  style="width: 25%;">
         <mat-label>BoardID</mat-label>
         <mat-select  #BoardID formControlName="boards"  multiple> 
           <mat-option #allSelected [value]="0"
@@ -84,7 +84,7 @@
             {{board.boardid}} - {{board.board_title}}
           </mat-option>
         </mat-select>
-      </mat-form-field>
+      </mat-form-field> -->
       <mat-form-field class="example-chip-list" appearance="fill" style="width: 40%; ">
         <mat-chip-list #chipList aria-label="Fruit selection"  >
           <mat-chip *ngFor="let account of instruments" 
@@ -124,21 +124,21 @@
         <span [ngSwitch]="true==true">
           <p  *ngSwitchCase="['action'].includes(column) " >
             <button  *ngIf="disabledControlElements" mat-icon-button color="accent"
-              matTooltip="View Instrument"
-              (click)="openInstrumentModifyForm('View', element)">
+              matTooltip="View Trade"
+              (click)="openTradeModifyForm('View', element)">
               <mat-icon >pageview</mat-icon>
             </button>
             <ng-container  *ngIf="!disabledControlElements">
               <button mat-icon-button color="accent"
-                matTooltip="Edit Instrument"
-                (click)="openInstrumentModifyForm('Edit',element)">
+                matTooltip="Edit Trade"
+                (click)="openTradeModifyForm('Edit',element)">
                 <mat-icon >edit</mat-icon>
               </button>
               <button 
                 mat-icon-button 
                 color="accent" 
-                matTooltip="Delete Instrument"
-                (click)="openInstrumentModifyForm('Delete',element)">
+                matTooltip="Delete Trade"
+                (click)="openTradeModifyForm('Delete',element)">
                 <mat-icon >delete</mat-icon>
               </button>
             </ng-container>
@@ -147,12 +147,15 @@
           [style.color]="additionalLightGreen">
              {{element[column] }}
           </p>
-          <p *ngSwitchCase="['secid'].includes(column)">
-            <button mat-stroked-button style="font-size: 18px; margin-left: 0;"  
-            [matTooltip]="FormMode==='Select'? 'Click to select instrument':'Instrument details'"
-            [style.background-color] = "FormMode==='Select'? '': investmentNodeColor"
-            (click)="FormMode==='Select'? selectInstrument(element) : openInstrumentModifyForm(disabledControlElements? 'View': 'Edit',element)">
-            <mat-icon matPrefix *ngIf="FormMode==='Select'">check</mat-icon>  
+
+          <p *ngSwitchCase="['tdate','vdate'].includes(column)">
+            {{element[column] | date}} 
+          </p>
+          <p *ngSwitchCase="['idtrade'].includes(column)">
+            <button mat-stroked-button style="font-size: 18px; margin-left: 0; width: 57%;margin-top: 8%;"  
+            [matTooltip]="'Trade details'"
+            [style.background-color] = "investmentNodeColor"
+            (click)="openTradeModifyForm(disabledControlElements? 'View': 'Edit',element)">
             {{element[column] }}
             </button> 
           </p>
@@ -168,18 +171,12 @@
               <mat-icon class="menu-icon" matPrefix>filter_list</mat-icon> 
               Add to filter
             </button> 
-            <button 
-              (click)="handleNewFavoriteClick(element)"
-              class="tree-menu-item" cdkMenuItem>
-              <mat-icon class="menu-icon" matPrefix>favorite</mat-icon> 
-              Favorites
-            </button> 
             <ng-container *ngIf="disabledControlElements">
               <button 
-                (click)="openInstrumentModifyForm('View', element)"
+                (click)="openTradeModifyForm('View', element)"
                 class="tree-menu-item" cdkMenuItem>
                 <mat-icon class="menu-icon" matPrefix>pageview</mat-icon> 
-                View Instrument
+                View Trade
               </button> 
             </ng-container>
             
@@ -187,27 +184,27 @@
 
               <button 
                 class="tree-menu-item" cdkMenuItem 
-                (click)="openInstrumentModifyForm('Create', element)">
+                (click)="openTradeModifyForm('Create', element)">
                 <mat-icon class="menu-icon" matPrefix>add_circle</mat-icon>      
-                New Instrument
+                New Trade
               </button>
               <button 
                 class="tree-menu-item" cdkMenuItem 
-                (click)="openInstrumentModifyForm('Create_Example', element)">
+                (click)="openTradeModifyForm('Create_Example', element)">
                 <mat-icon class="menu-icon" matPrefix>add_circle</mat-icon>      
-                New Instrument (on sample)
+                New Trade (on sample)
               </button>
               <button 
                 class="tree-menu-item" cdkMenuItem
-                (click)="openInstrumentModifyForm('Edit', element)">
+                (click)="openTradeModifyForm('Edit', element)">
                 <mat-icon class="menu-icon" matPrefix>edit</mat-icon>      
-                Edit Instrument
+                Edit Trade
               </button>
               <button 
                 class="tree-menu-item" cdkMenuItem
-                (click)="openInstrumentModifyForm('Delete', element)">
+                (click)="openTradeModifyForm('Delete', element)">
                 <mat-icon class="menu-icon" matPrefix>delete</mat-icon> 
-                Delete Instrument
+                Delete Trade
               </button> 
             </ng-container>
           </div>

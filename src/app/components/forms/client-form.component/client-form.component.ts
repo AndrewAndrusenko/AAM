@@ -5,7 +5,7 @@ import { AppConfimActionComponent } from '../../common-forms/app-confim-action/a
 import { AppSnackMsgboxComponent } from '../../common-forms/app-snack-msgbox/app-snack-msgbox.component';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators.service';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
-import { AppInvestmentDataServiceService } from 'src/app/services/app-investment-data.service.service';
+import { AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { ClientData } from 'src/app/models/intefaces.model';
 import { filter, switchMap } from 'rxjs';

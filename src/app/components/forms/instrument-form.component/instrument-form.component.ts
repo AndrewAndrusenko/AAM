@@ -4,7 +4,7 @@ import { Instruments, instrumentCorpActions, instrumentDetails } from 'src/app/m
 import { MatTabGroup as MatTabGroup } from '@angular/material/tabs';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { menuColorGl } from 'src/app/models/constants.model';
-import { AppMarketDataService } from 'src/app/services/app-market-data.service';
+import { AppMarketDataService } from 'src/app/services/market-data.service';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
 import { AuthService } from 'src/app/services/auth.service';

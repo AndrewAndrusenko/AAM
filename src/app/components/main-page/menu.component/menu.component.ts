@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { menuColorGl } from 'src/app/models/constants.model';
-import { AppMenuServiceService } from 'src/app/services/app-menu-service.service';
+import { AppMenuServiceService } from 'src/app/services/menu-service.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
 

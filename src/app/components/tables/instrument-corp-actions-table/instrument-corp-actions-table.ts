@@ -6,7 +6,7 @@ import {animate, state, style, transition, trigger} from '@angular/animations';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { instrumentCorpActions } from 'src/app/models/intefaces.model';
 import { FormGroup} from '@angular/forms';
-import { AppMarketDataService } from 'src/app/services/app-market-data.service';
+import { AppMarketDataService } from 'src/app/services/market-data.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { formatNumber } from '@angular/common';

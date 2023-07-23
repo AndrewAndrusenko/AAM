@@ -6,7 +6,7 @@ import {MatTableDataSource as MatTableDataSource} from '@angular/material/table'
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { bAccountsEntriesList, bcTransactionType_Ext } from 'src/app/models/intefaces.model';
-import { AppAccountingService } from 'src/app/services/app-accounting.service';
+import { AppAccountingService } from 'src/app/services/accounting.service';
 import { AppAccEntryModifyFormComponent } from '../../forms/acc-entry-form.component/acc-entry-form.component';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
@@ -55,7 +55,7 @@ export class AppTableAccEntriesComponent implements OnInit {
   dialogRef: MatDialogRef<AppAccEntryModifyFormComponent>;
   menuColorGl=menuColorGl
   filterlFormControl = new FormControl('');
-  addOnBlur = true;
+  ;
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
   dataRange = new FormGroup ({
     dateRangeStart: new FormControl<Date | null>(null),

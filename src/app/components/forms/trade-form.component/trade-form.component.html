@@ -1,0 +1,213 @@
+<mat-toolbar color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4">
+  <span>{{action}} Instrument | ID {{idtrade.value}}</span>
+  <span class="example-spacer"></span>
+
+</mat-toolbar>
+
+<form class="submit" [formGroup]="tradeModifyForm">
+  <mat-checkbox style= "font-size: 14px; color:rgb(255, 255, 255); padding: 2%;" #submitbox checked="false" 
+  (click)=" tradeModifyForm.markAllAsTouched();
+  tradeModifyForm.updateValueAndValidity();"
+  >Submit Data
+</mat-checkbox>
+<button mat-raised-button color="accent" 
+  [disabled]="!(tradeModifyForm.valid && submitbox.checked)"
+  (click)="updateInstrumentData(action)"
+  style="margin-top: 1px; width: 50%; font-size: 18px; margin-left: 1%;">
+  {{action}} Trade
+</button>
+  <h3 style="color:rgb(177, 174, 174)" *ngIf="tradeModifyForm.valid"> 
+    To save data please select 'Submit data' check and then press button 
+  </h3>
+  <p>
+  <mat-form-field style="width: 12%;" title="trtype">
+  <input matInput placeholder="Type" formControlName="trtype" >   
+</mat-form-field>
+  <mat-form-field style="width: 17%;" >
+    <input matInput [matDatepicker]="picker" [placeholder]="'Trade Date'" formControlName="tdate" >
+    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-datepicker #picker></mat-datepicker>
+    <mat-error  *ngIf="tdate?.errors?.['required']">
+      Required!   
+    </mat-error>
+  </mat-form-field>
+  <mat-form-field style="width: 17%;" >
+    <input matInput [matDatepicker]="picker" [placeholder]="'Value Date'" formControlName="vdate" >
+    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-datepicker #picker></mat-datepicker>
+    <mat-error  *ngIf="vdate?.errors?.['required']">
+      Required!   
+    </mat-error>
+  </mat-form-field>
+  <mat-form-field style="width: 19%;" title="id_broker" >
+    <input matInput placeholder="Broker" formControlName="id_broker"  >
+  </mat-form-field>
+</p>
+<p>
+  <mat-form-field style="width: 14%;" title="SecID">
+    <input matInput placeholder="SecID" formControlName="tidinstrument">
+    <mat-error  *ngIf="tidinstrument?.errors?.['required']">
+      Required!    
+    </mat-error>
+    <mat-error  *ngIf="tidinstrument.hasError('secidIsTaken')">
+      Not unique!    
+    </mat-error>
+  </mat-form-field>
+  
+  <mat-form-field style="width: 40%;" >
+    <input matInput placeholder="Instrument" formControlName="secid_name" >
+  </mat-form-field>
+  <mat-form-field style="width: 18%;" >
+    <input matInput placeholder="Sec Type" formControlName="secid_type" >
+  </mat-form-field>
+</p>
+<p>
+  <mat-form-field style="width: 15%;" title="price">
+    <input matInput placeholder="price" formControlName="price" >
+  </mat-form-field>
+
+  <mat-form-field style="width: 25%;" title="Quantity" >
+    <input matInput placeholder="Quantity" formControlName="qty"  >
+    <mat-hint>
+      {{qty.value | number}}
+    </mat-hint>
+  </mat-form-field>
+
+  <mat-form-field style="width: 17%;" title="Type to find(any filed). Click to select">
+    <input matInput [placeholder]="'Currency'" formControlName="id_price_currency" [matAutocomplete]="auto">
+    <mat-autocomplete #auto="matAutocomplete">
+      <mat-option *ngFor="let currency of filteredCurrenciesList | async" [value]="currency['CurrencyCodeNum']">
+        {{currency['CurrencyCodeNum']}} -  {{currency['CurrencyCode']}} -  {{currency['CurrencyName']}} 
+      </mat-option>
+    </mat-autocomplete>   
+    <mat-error  *ngIf="id_price_currency?.errors?.['required']">
+      Required!   
+    </mat-error>
+    <mat-error  *ngIf="id_price_currency?.errors?.['currencyCode']">
+      Inccorect Code! Only numbers  
+    </mat-error>
+  </mat-form-field>
+  <mat-form-field style="width: 20%;" title="accured_interest" >
+    <input matInput placeholder="Accured Interest" formControlName="accured_interest"  >
+    <mat-hint>
+      {{accured_interest.value | number}}
+    </mat-hint>
+  </mat-form-field>
+</p>
+<p>
+  <mat-form-field style="width: 20%;"  >
+    <input matInput placeholder="CounterParty" formControlName="cpty"  >
+  </mat-form-field>
+  <mat-form-field style="width: 50%;"  >
+    <input matInput placeholder="CounterParty Name" formControlName="cpty_name"  >
+  </mat-form-field>
+</p>
+<mat-form-field style="width: 90%;"  >
+  <input matInput placeholder="Details" formControlName="details"  >
+</mat-form-field>
+
+  <br>
+  <br>
+  <h3 style="color:rgb(252, 113, 113)" *ngIf="tradeModifyForm.invalid"> Please check the form. Data is invalid</h3>
+</form>
+<mat-expansion-panel class="headers-align" title="instrumenCorpActionsTable"
+  (opened)="panelOpenStateSecond = true"
+  (closed)="panelOpenStateSecond = false" >
+<mat-expansion-panel-header >
+  <mat-panel-title>
+    Details
+  </mat-panel-title>
+  <mat-panel-description>
+    Tap to {{panelOpenStateSecond? 'hide': 'open'}} additional details
+    <mat-icon color = 'accent'>event</mat-icon>
+  </mat-panel-description>
+</mat-expansion-panel-header >
+<div style="width: 100%;">
+  <mat-form-field style="width: 17%;" >
+    <input matInput placeholder="Price Type" formControlName="price_type" >
+  </mat-form-field>
+  <mat-form-field style="width: 20%;" >
+    <input matInput placeholder="Settlement Currency" formControlName="id_settlement_currency" >
+  </mat-form-field>
+  <mat-form-field style="width: 25%;" >
+    <input matInput placeholder="Buyer SSI" formControlName="id_buyer_instructions" >
+  </mat-form-field>
+  <mat-form-field style="width: 25%;" >
+    <input matInput placeholder="Seller SSI" formControlName="id_seller_instructions" >
+  </mat-form-field>
+
+</div>
+</mat-expansion-panel>
+<br>
+<mat-expansion-panel class="headers-align" title="instrumentDetailsTable"
+  (opened)="panelOpenStateFirst = true"
+  (closed)="panelOpenStateFirst = false" >
+  <mat-expansion-panel-header style="margin-bottom: 1%;">
+    <mat-panel-title title="Details">
+      Fees
+    </mat-panel-title>
+    <mat-panel-description >
+      Tap to {{panelOpenStateFirst? 'hide': 'open'}} fees
+      <mat-icon color = 'accent'>list</mat-icon>
+    </mat-panel-description>
+  </mat-expansion-panel-header >
+  <div style="width: 100%;">
+    <mat-form-field style="width: 20%;" >
+      <input matInput placeholder="Fee Trade " formControlName="f1ee_trade" >
+    </mat-form-field>
+    <mat-form-field style="width: 20%;" >
+      <input matInput placeholder="Fee Settlement " formControlName="fee_settlement" >
+    </mat-form-field>
+    <mat-form-field style="width: 20%;" >
+      <input matInput placeholder="Fee Exchange " formControlName="fee_exchange" >
+    </mat-form-field>
+    </div>
+</mat-expansion-panel>
+<!--   <mat-form-field  style="width: 26%;" title="Security Group Code">
+    <mat-label>Main Type Code</mat-label>
+    <mat-select  #securityGroup formControlName="group" 
+    (selectionChange)="this.type.patchValue(null);
+                      filtersecurityType($event.value)" > 
+      <ng-container *ngFor="let securityGroup of securityGroups">
+      <mat-option  [value]="securityGroup.name">
+          {{securityGroup.name }} - {{securityGroup.title}}
+      </mat-option>
+      </ng-container>
+    </mat-select>
+    <mat-error  *ngIf="group?.errors?.['required']">
+      Required!   
+    </mat-error>
+  </mat-form-field> -->
+<!--   <mat-form-field  style="width: 28%;" title="Security Type Code">
+    <mat-label>Security Type Code</mat-label>
+    <mat-select  #securityType formControlName="type"  > 
+      <ng-container *ngFor="let securityType of securityTypesFiltered">
+      <mat-option  [value]="securityType.security_type_name">
+          {{securityType.security_type_name }} - {{securityType.security_type_title}}
+      </mat-option>
+      </ng-container>
+    </mat-select>
+    <mat-error  *ngIf="type?.errors?.['required']">
+      Required!   
+    </mat-error>
+  </mat-form-field> -->
+<!--   <mat-form-field  style="width: 26%;" title="Main Board Code">
+   <mat-label>Main Board Code</mat-label>
+    <mat-select  #mainBoard formControlName="primary_boardid"  > 
+      <ng-container *ngFor="let moexBoard of moexBoards">
+      <mat-option  [value]="moexBoard.boardid">
+          {{moexBoard.boardid }} - {{moexBoard.board_title}}
+      </mat-option>
+      </ng-container>
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field  style="width: 26%;" title="Market Price Board">
+    <mat-label>Market Price Board</mat-label>
+    <mat-select  #mainBoard formControlName="marketprice_boardid"  > 
+      <ng-container *ngFor="let moexBoard of moexBoards">
+      <mat-option  [value]="moexBoard.boardid">
+          {{moexBoard.boardid }} - {{moexBoard.board_title}}
+      </mat-option>
+      </ng-container>
+    </mat-select>
+  </mat-form-field> -->

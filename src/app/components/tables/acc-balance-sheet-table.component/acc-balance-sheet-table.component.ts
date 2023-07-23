@@ -6,7 +6,7 @@ import { MatTableDataSource as MatTableDataSource} from '@angular/material/table
 import { animate, state, style, transition, trigger} from '@angular/animations';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { bAccountsEntriesList, bBalanceFullData, bcTransactionType_Ext } from 'src/app/models/intefaces.model';
-import { AppAccountingService } from 'src/app/services/app-accounting.service';
+import { AppAccountingService } from 'src/app/services/accounting.service';
 import { COMMA, ENTER} from '@angular/cdk/keycodes';
 import { MatChipInputEvent} from '@angular/material/chips';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
@@ -52,7 +52,7 @@ export class AppTableBalanceSheetComponent   {
   @ViewChild('allSelected') private allSelected: MatOption;
 
   public readOnly: boolean = false; 
-  addOnBlur = true;
+  ;
   panelOpenStateFirst = false;
   panelOpenStateSecond = false;
   

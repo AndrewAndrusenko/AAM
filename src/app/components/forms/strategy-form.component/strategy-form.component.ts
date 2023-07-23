@@ -2,7 +2,7 @@ import { Component,  Input, SimpleChanges, ViewChild,  } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { AppConfimActionComponent } from '../../common-forms/app-confim-action/app-confim-action.component';
-import { AppInvestmentDataServiceService } from 'src/app/services/app-investment-data.service.service';
+import { AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
 import { TablePortfolios } from '../../tables/portfolios-table.component/portfolios-table.component';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators.service';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';

@@ -5,14 +5,14 @@ import {map, Observable, startWith } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import { marketData, marketDataSources, marketSourceSegements } from 'src/app/models/intefaces.model';
-import { AppAccountingService } from 'src/app/services/app-accounting.service';
+import { AppAccountingService } from 'src/app/services/accounting.service';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatOption } from '@angular/material/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatCalendarCellClassFunction } from '@angular/material/datepicker';
-import { AppMarketDataService } from 'src/app/services/app-market-data.service';
+import { AppMarketDataService } from 'src/app/services/market-data.service';
 import * as moment from 'moment';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import { formatNumber, registerLocaleData } from '@angular/common';
@@ -58,7 +58,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
   @ViewChild('allSelected') private allSelected: MatOption;
   menuColorGl=menuColorGl
   public readOnly: boolean = false; 
-  addOnBlur = true;
+  ;
   panelOpenStateFirst = false;
   panelOpenStateSecond = true;
   
