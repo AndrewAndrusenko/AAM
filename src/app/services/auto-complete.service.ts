@@ -47,9 +47,11 @@ export class AtuoCompleteService {
       return (this.fullInstrumentsLists.filter(el=>el[0]===control.value).length? null:{noSecid:true})
     }
   }
-  counterPartyalirator ():ValidatorFn {
+  counterPartyalirator (sec_name:AbstractControl):ValidatorFn {
     return (control:AbstractControl): ValidationErrors => {
-      return (this.fullCounterPatiesList.filter(el=>el['idclient']===control.value).length? null:{noCounterParty:true})
+      let cpty= this.fullCounterPatiesList.filter(el=>Number(el['idclient'])==Number(control.value))
+      sec_name.patchValue(cpty.length? cpty[0]['clientname'] : 'Not found!');
+      return (cpty.length? null:{noCounterParty:true})
     }
   }
   sendSecIdList (dataSet:string[]) { 

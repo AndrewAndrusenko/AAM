@@ -3,12 +3,11 @@
   <span class="example-spacer"></span>
 </mat-toolbar>
 <!-- <pre style="font-size: 16px;">{{id_price_currency?.errors | json}}</pre> -->
-<pre style="font-size: 16px;">{{cpty_name?.errors | json}}</pre>
-<form class="submit" [formGroup]="tradeModifyForm">
+<form class="submit" [formGroup]="tradeModifyForm" style="background-color: rgb(40, 39, 39);">
   <button mat-raised-button color="accent" 
     [disabled]="!(tradeModifyForm.valid && submitbox.checked)"
     (click)="updateInstrumentData(action)"
-    style="margin-top: 1px; width: 35%; font-size: 18px; margin-left: 1%;">
+    style="margin-top: 1%; width: 35%; font-size: 18px; margin-left: 1%;">
     {{action}} Trade
   </button> 
   <br>
@@ -23,8 +22,7 @@
   <p>
     <mat-form-field  style="width: 12%;" title="Security Group Code">
       <mat-label>Type</mat-label>
-      <mat-select  #securityGroup formControlName="trtype" 
-      (selectionChange)="filtersecurityType($event.value)" > 
+      <mat-select  #securityGroup formControlName="trtype"> 
         <mat-option  [value]="'BUY'"> BUY</mat-option>
         <mat-option  [value]="'SELL'"> SELL</mat-option>
       </mat-select>
@@ -56,7 +54,7 @@
     <mat-form-field style="width: 27%;" title="Type to find(any filed). Click to select">
       <input matInput [placeholder]="'SecID'" formControlName="tidinstrument" [matAutocomplete]="autoSecID"  >
       <mat-autocomplete #autoSecID="matAutocomplete" 
-        (optionSelected)="secidChange($event.option.viewValue)">
+        (optionSelected)="secid_name.patchValue($event.option.viewValue.split(' - ')[1]+' ('+$event.option.viewValue.split(' - ')[2]+')')">
         <mat-option #selectedsecid *ngFor="let instrument of filterednstrumentsLists | async" [value]="instrument[0]" >
           {{instrument[0]}} - {{instrument[1]}} - {{instrument[2]}}
         </mat-option>
@@ -68,11 +66,14 @@
         Inccorect Code! 
       </mat-error>
     </mat-form-field>
+    <button mat-flat-button color="accent" 
+    matTooltip="Select Instrument"
+    (click) = "selectSecID()"
+    style=" width: 5%;  line-height: 80% !important; height: 60px !important;">
+    <mat-icon >input</mat-icon>
+  </button>
     <mat-form-field style="width: 45%;" >
       <input matInput placeholder="Instrument" formControlName="secid_name" [readonly]="true" >
-    </mat-form-field>
-    <mat-form-field style="width: 23%;" >
-      <input matInput placeholder="Sec Type" formControlName="secid_type" [readonly]="true">
     </mat-form-field>
   </p>
   <p>
@@ -127,27 +128,23 @@
       <mat-error  *ngIf="id_cpty?.errors?.['required']">
         Required!    
       </mat-error>
+      <mat-error  *ngIf="id_cpty?.errors?.['noCounterParty']">
+        Inccorect Code! 
+      </mat-error>
     </mat-form-field>
     <button mat-flat-button color="accent" 
-    matTooltip="Select Client"
-    (click) = "selectClient()"
-    style=" width: 5%;  line-height: 80% !important; height: 60px !important;">
-    <mat-icon >input</mat-icon>
-  </button>
-
+      matTooltip="Select Client"
+      (click) = "selectClient()"
+      style=" width: 5%;  line-height: 80% !important; height: 60px !important;">
+      <mat-icon >input</mat-icon>
+    </button>
     <mat-form-field style="width: 50%;" title="Type to find(any filed). Click to select">
       <input matInput [placeholder]="'CounterParty'" formControlName="cpty_name" [matAutocomplete]="autoCpty">
-      <mat-autocomplete #autoCpty="matAutocomplete">
+      <mat-autocomplete #autoCpty="matAutocomplete" (optionSelected)="id_cpty.patchValue($event.option.viewValue.split('-')[1])">
         <mat-option *ngFor="let cpty of filteredCounterPartiesList | async" [value]="cpty['clientname']">
           {{cpty['clientname']}} -  {{cpty['idclient']}} -  {{cpty['code']}} 
         </mat-option>
       </mat-autocomplete>   
-      <mat-error  *ngIf="cpty_name?.errors?.['required']">
-        Required!    
-      </mat-error>
-      <mat-error  *ngIf="cpty_name?.errors?.['noCounterParty']">
-        Inccorect Code! 
-      </mat-error>
     </mat-form-field>
   </p>
   <mat-form-field style="width: 90%;"  >
@@ -172,8 +169,7 @@
       <mat-form-field style="width: 17%;" >
         <input matInput placeholder="Price Type" formControlName="price_type" >
         <mat-label>Type</mat-label>
-          <mat-select  #securityGroup formControlName="price_type" 
-          (selectionChange)="filtersecurityType($event.value)" > 
+          <mat-select  #securityGroup formControlName="price_type"  > 
             <mat-option  [value]="1">1 - Absolute</mat-option>
             <mat-option  [value]="2">2 - Percent</mat-option>
           </mat-select>

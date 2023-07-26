@@ -8,8 +8,9 @@
 --blue: #00b; // or any global you wish to share with components 
 --faovritesNodeColor: rgb(53, 153, 168);
 --faovritesDarkNodeColor: rgb(34, 104, 114);
---formFieldLightGray: rgb(139, 139, 139);
+--formFieldLightGray: rgb(57, 56, 56);
 }
+
 
 .whiteTextFilter {
   color: white;
@@ -77,7 +78,7 @@
   font-size:x-large !important;
  }
  .mat-form-field-label {
-  color:rgb(15, 15, 15) !important;
+  color:rgb(59, 112, 121) !important;
 /*   transform: 1.2 !important;
   font-size:x-large !important; */
  }

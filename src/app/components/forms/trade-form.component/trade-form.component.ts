@@ -1,18 +1,15 @@
-import { AfterContentInit, Component,  EventEmitter,  Input, Output, SimpleChanges, ViewChild} from '@angular/core';
-import { AsyncValidatorFn, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Instruments, instrumentCorpActions, instrumentDetails, trades } from 'src/app/models/intefaces.model';
-import { MatTabGroup as MatTabGroup } from '@angular/material/tabs';
+import { AfterContentInit, Component,  EventEmitter,  Input, Output} from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ClientData, Instruments, instrumentCorpActions, instrumentDetails, trades } from 'src/app/models/intefaces.model';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { menuColorGl } from 'src/app/models/constants.model';
-import { AppMarketDataService } from 'src/app/services/market-data.service';
-import { customAsyncValidators } from 'src/app/services/customAsyncValidators.service';
-import { indexDBService } from 'src/app/services/indexDB.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { Observable, distinctUntilChanged, filter, map, observable, startWith, switchMap } from 'rxjs';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import { AppTradeService } from 'src/app/services/trades-service.service';
-import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
-
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { AppClientsTableComponent } from '../../tables/clients-table.component/clients-table.component';
+import { AppInstrumentTableComponent } from '../../tables/instrument-table.component/instrument-table.component';
 @Component({
   selector: 'app-trade-modify-form',
   templateUrl: './trade-form.component.html',
@@ -21,52 +18,35 @@ import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 export class AppTradeModifyFormComponent implements AfterContentInit  {
   accessState: string = 'none';
   disabledControlElements: boolean = false;
-  public panelOpenState = true;
   public tradeModifyForm: FormGroup;
-  // // public instrumentDetailsForm: FormGroup;
   @Input() action: string = 'View';
-  @Input() secidParam:string;
   @Output() public modal_principal_parent = new EventEmitter();
   public title: string;
   public actionType : string;
   public data: any;
-  @ViewChild(MatTabGroup) tabGroup: MatTabGroup;
   panelOpenStateFirst = false;
   panelOpenStateSecond = false;
   menuColorGl=menuColorGl
-  SecidUniqueAsyncValidator :AsyncValidatorFn;
-  ISINuniqueAsyncValidator :AsyncValidatorFn;
-  placeholders = new Map();
-  bondsPlaceholders = [
-    ['maturitydate','Maturity date'],
-    ['faceunit','Notinal currency'],
-    ['facevalue','Notinal value'],
-  ]
-  futuresPlaceholders = [
-    ['maturitydate','Experation date'],
-    ['faceunit','Contract currency'],
-    ['facevalue','Contract value'],
-  ]
   filteredCurrenciesList: Observable<string[]>;
   filterednstrumentsLists : Observable<string[]>;
   filteredCounterPartiesList : Observable<string[]>;
-
+  dialogClientsTabletRef: MatDialogRef<AppClientsTableComponent>;
+  dialogInstrumentTabletRef: MatDialogRef<AppInstrumentTableComponent>;
   constructor (
     private fb:FormBuilder, 
     private AuthServiceS:AuthService,  
     private CommonDialogsService:HadlingCommonDialogsService,
     private TradeService: AppTradeService,
-    private indexDBServiceS:indexDBService,
     private AutoCompService:AtuoCompleteService,
+    private dialog: MatDialog, 
   ) 
   {    
-    this.changePlaceholders('stock_bonds');
     this.tradeModifyForm = this.fb.group ({
       idtrade:{value:null, disabled: false},
       trtype:[null, { validators:  Validators.required, updateOn: 'blur' }], action:{value:null, disabled: false},
       tdate:[new Date(), { validators:  Validators.required, updateOn: 'blur' }],
-      tidinstrument:[new Date(), { validators:  Validators.required }],
-      vdate:[null, { validators:  Validators.required, updateOn: 'blur' }],tidorder:{value:null, disabled: false},allocatedqty:{value:null, disabled: false},idportfolio:{value:null, disabled: false},
+      vdate:[new Date(), { validators:  Validators.required, updateOn: 'blur' }],
+      tidinstrument:[null, { validators:  Validators.required }],
       qty:[null, { validators:  [Validators.required,Validators.pattern('[0-9]*([0-9.]{0,8})?$')], updateOn: 'blur' }], 
       price:[null, { validators: [ Validators.required, Validators.pattern('[0-9]*([0-9.]{0,8})?$')], updateOn: 'blur' }],
       price_type:[1, { validators:  Validators.required, updateOn: 'blur' }],
@@ -77,7 +57,8 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
       id_cpty:[null, { validators:  Validators.required, updateOn: 'blur' }],
       id_price_currency:['810', { validators:  Validators.required}],
       id_settlement_currency:['810', { validators:  Validators.required}],
-      id_buyer_instructions:{value:null, disabled: false},id_seller_instructions:{value:null, disabled: false},id_broker:{value:null, disabled: false}, details:{value:null, disabled: false},cpty_name:{value:null, disabled: false},security_group_name :{value:null, disabled: false}, secid_type:{value:null, disabled: false},  secid_name:{value:null, disabled: false}
+      tidorder:{value:null, disabled: false},allocatedqty:{value:null, disabled: false},idportfolio:{value:null, disabled: false},
+      id_buyer_instructions:{value:null, disabled: false},id_seller_instructions:{value:null, disabled: false},id_broker:{value:null, disabled: false}, details:{value:null, disabled: false},cpty_name:{value:null, disabled: false},security_group_name :{value:null, disabled: false},   secid_name:{value:null, disabled: false}
     })
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
@@ -88,7 +69,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
       this.id_settlement_currency.updateValueAndValidity();
     });
     this.AutoCompService.getSecidLists().then (()=>this.tidinstrument.setValidators(this.AutoCompService.secidValirator()) );
-    this.AutoCompService.getCounterpartyLists().then (()=>this.id_cpty.setValidators(this.AutoCompService.counterPartyalirator()));
+    this.AutoCompService.getCounterpartyLists().then (()=>this.id_cpty.setValidators(this.AutoCompService.counterPartyalirator(this.cpty_name)));
   }
   ngAfterContentInit (): void {
     this.filterednstrumentsLists = this.tidinstrument.valueChanges.pipe(
@@ -107,66 +88,25 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
       map(value => this.AutoCompService.filterList(value || '','cpty'))
     );
       this.tradeModifyForm.patchValue(this.data);
-      this.addAsyncValidators(this.action); 
       this.action == 'View'|| this.disabledControlElements?  this.tradeModifyForm.disable() : null;
   }
-  selectClient (){}
-  async addAsyncValidators(action:string) {
-   /*  if (['Create','Create_Example'].includes(this.action)) {
-      this.isin.setErrors({isinIsTaken:true});
-      this.tidinstrument.setErrors({secidIsTaken:true})
-      this.SecidUniqueAsyncValidator = customAsyncValidators.MD_SecidUniqueAsyncValidator (this.MarketDataService, '', this.tidinstrument.errors);
-      this.ISINuniqueAsyncValidator = customAsyncValidators.MD_ISINuniqueAsyncValidator (this.MarketDataService, '', this.isin.errors);
-    } else {
-      this.SecidUniqueAsyncValidator = customAsyncValidators.MD_SecidUniqueAsyncValidator (this.MarketDataService, this.tidinstrument.value);
-      this.ISINuniqueAsyncValidator = customAsyncValidators.MD_ISINuniqueAsyncValidator (this.MarketDataService, this.isin.value);
-    }
-    this.isin.setAsyncValidators([this.ISINuniqueAsyncValidator]);
-    this.tidinstrument.setAsyncValidators([this.SecidUniqueAsyncValidator]);
-    this.action === 'Create_Example'? this.action='Create':null; */
+  selectClient (){
+    this.dialogClientsTabletRef = this.dialog.open(AppClientsTableComponent ,{minHeight:'400px', minWidth:'90vw', autoFocus: false, maxHeight: '90vh'});
+    this.dialogClientsTabletRef.componentInstance.action = 'Select';
+    this.dialogClientsTabletRef.componentInstance.modal_principal_parent.subscribe ((item:ClientData )=>{
+      this.id_cpty.patchValue(item.idclient)
+      this.cpty_name.patchValue(item.clientname)
+      this.dialogClientsTabletRef.close(); 
+    });
   }
-  revomeAsyncValidators (action?:string) {
-    this.tidinstrument.removeAsyncValidators([this.SecidUniqueAsyncValidator]);
-    this.id_price_currency.removeAsyncValidators([this.ISINuniqueAsyncValidator]); 
-  }
-  addBasicValidators(secType:string) {
-    let fields = ['maturitydate','faceunit','facevalue'];
-    switch (secType) {
-      case 'stock_bonds':
-      case 'stock_eurobond':
-      case 'stock_deposit':
-      case 'futures_options':
-      case 'currency_futures':
-      case 'futures_forts':
-        fields.forEach(key => this.tradeModifyForm.get(key).addValidators(Validators.required));
-      break;
-      default:
-        fields.forEach(key => this.tradeModifyForm.get(key).removeValidators(Validators.required));
-      break;
-    }
-    fields.forEach(key => this.tradeModifyForm.get(key).updateValueAndValidity());
-  }
-  changePlaceholders(secType:string) {
-    switch (secType) {
-      case 'stock_bonds':
-      case 'stock_eurobond':
-      case 'stock_deposit':
-        this.bondsPlaceholders.forEach(el => this.placeholders.set(el[0],el[1]))
-      break;
-      case 'futures_options':
-      case 'currency_futures':
-      case 'futures_forts':
-        this.futuresPlaceholders.forEach(el => this.placeholders.set(el[0],el[1]))
-      break;
-      default:
-        // fields.forEach(key => this.tradeModifyForm.get(key).removeValidators(Validators.required));
-      break;
-    }
-  }
-  filtersecurityType (filter:string) {
-/*     this.changePlaceholders(filter);
-    this.addBasicValidators(filter);
-    this.securityTypes? this.securityTypesFiltered = this.securityTypes.filter (elem => elem.security_group_name===filter) : null; */
+  selectSecID (){
+    this.dialogInstrumentTabletRef = this.dialog.open(AppInstrumentTableComponent ,{minHeight:'400px', minWidth:'90vw', autoFocus: false, maxHeight: '90vh'});
+    this.dialogInstrumentTabletRef.componentInstance.FormMode = 'Select';
+    this.dialogInstrumentTabletRef.componentInstance.modal_principal_parent.subscribe ((item:Instruments )=>{
+      this.tidinstrument.patchValue(item.secid)
+      this.secid_name.patchValue(item.name+' ('+item.security_group_name+')')
+      this.dialogInstrumentTabletRef.close(); 
+    });
   }
   snacksBox(result:any, action?:string){
     if (result['name']=='error') {
@@ -199,10 +139,6 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
         ).subscribe (result =>this.snacksBox(result,'Deleted'));
       break;
     }
-  }
-  secidChange(val:string) {
-        this.secid_name.patchValue(val.split(' - ')[1]);
-        this.secid_type.patchValue(val.split(' - ')[2]);
   }
   get  idtrade() {return this.tradeModifyForm.get('idtrade')}​
   get  trtype() {return this.tradeModifyForm.get('trtype')}​
