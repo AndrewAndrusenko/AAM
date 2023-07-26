@@ -3,6 +3,7 @@ import { AppMarketDataService } from './market-data.service';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { AppAccountingService } from './accounting.service';
 import { catchError, of } from 'rxjs';
+import { AppInvestmentDataServiceService } from './investment-data.service.service';
 interface cacheAAM {
   code:string,
   data:[]
@@ -15,6 +16,7 @@ export class indexDBService {
     private MarketDataService: AppMarketDataService,
     private dbService: NgxIndexedDBService,
     private AccountingDataService:AppAccountingService, 
+    private InvestmentDataService : AppInvestmentDataServiceService,   
   ) { }
   indexDBcacheData (key:string,data:any) {
     // console.log('data',data[0]);
@@ -54,6 +56,9 @@ export class indexDBService {
         case 'bcTransactionType_Ext':
             this.AccountingDataService.GetTransactionType_Ext('',0,'','','bcTransactionType_Ext').subscribe(data=>resolve(data))
         break;
+        case 'getCounterPartyList':
+          this.InvestmentDataService.getClientData(undefined,undefined,'getCounterPartyList').subscribe(data => resolve(data))
+        break
       }
     })
   }

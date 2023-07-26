@@ -161,6 +161,8 @@ async function fGetClientData(request,response) {
       query.text += ' WHERE (idclient= $1);'
       query.values = [request.query.client]
     break;
+    case 'getCounterPartyList':
+      query.text = 'SELECT idclient, clientname, code 	FROM public.dclients;'
     default:
       query.text += ';'
     break;

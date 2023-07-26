@@ -36,12 +36,8 @@ export class AppTradeTableComponent  implements AfterViewInit {
   accessState: string = 'none';
   disabledControlElements: boolean = false;
   @Input() FormMode:string
-  marketSources:marketDataSources[] =  [];
-  columnsToDisplay = [ 
- 'idtrade','tdate','trtype','tidinstrument','price','id_price_currency','qty','cpty','vdate','id_settlement_currency','tidorder','allocatedqty','action'
-  ];
-  columnsHeaderToDisplay = [ 
-    'ID','Date','Type','SecID','Price','Currency','Quantity','CParty','ValueDate','Settlement','Order','Allocated','Action'
+  columnsToDisplay = ['idtrade','tdate','trtype','tidinstrument','price','id_price_currency','qty','cpty','vdate','id_settlement_currency','tidorder','allocatedqty','action'];
+  columnsHeaderToDisplay = ['ID','Date','Type','SecID','Price','Currency','Quantity','CParty','ValueDate','Settlement','Order','Allocated','Action'
   ];
   dataSource: MatTableDataSource<trades>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -50,14 +46,12 @@ export class AppTradeTableComponent  implements AfterViewInit {
 
   @Output() public modal_principal_parent = new EventEmitter();
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
-  
-  ;
   panelOpenStateSecond = false;
   accessToClientData: string = 'true';
   instruments: string[] = ['ClearAll'];
   investmentNodeColor = investmentNodeColorChild;
   additionalLightGreen = additionalLightGreen;
-  public filterednstrumentsLists : Observable<string[]>;
+  filterednstrumentsLists : Observable<string[]>;
   menuColorGl=menuColorGl;
   searchParametersFG: FormGroup;
 
@@ -100,7 +94,7 @@ export class AppTradeTableComponent  implements AfterViewInit {
     })
   }
   openTradeModifyForm (action:string, element:any) {
-    this.dialogTradeModify = this.dialog.open (AppTradeModifyFormComponent,{minHeight:'600px', minWidth:'800px', maxWidth:'60vw', autoFocus: false, maxHeight: '90vh'})
+    this.dialogTradeModify = this.dialog.open (AppTradeModifyFormComponent,{minHeight:'600px', minWidth:'40vw', autoFocus: false, maxHeight: '90vh'})
     this.dialogTradeModify.componentInstance.action = action;
     this.dialogTradeModify.componentInstance.data = action ==='Create'? null :element;
   }

@@ -11,6 +11,7 @@ import { AuthService } from 'src/app/services/auth.service';
 import { Observable, distinctUntilChanged, filter, map, observable, startWith, switchMap } from 'rxjs';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import { AppTradeService } from 'src/app/services/trades-service.service';
+import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 
 @Component({
   selector: 'app-trade-modify-form',
@@ -47,57 +48,69 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     ['facevalue','Contract value'],
   ]
   filteredCurrenciesList: Observable<string[]>;
+  filterednstrumentsLists : Observable<string[]>;
+  filteredCounterPartiesList : Observable<string[]>;
+
   constructor (
     private fb:FormBuilder, 
     private AuthServiceS:AuthService,  
     private CommonDialogsService:HadlingCommonDialogsService,
     private TradeService: AppTradeService,
     private indexDBServiceS:indexDBService,
-    private AtuoCompService:AtuoCompleteService,
+    private AutoCompService:AtuoCompleteService,
   ) 
   {    
     this.changePlaceholders('stock_bonds');
     this.tradeModifyForm = this.fb.group ({
-      idtrade:{value:null, disabled: false},qty:{value:null, disabled: false},price:{value:null, disabled: false},accured_interest:{value:null, disabled: false},f1ee_trade:{value:null, disabled: false},fee_settlement:{value:null, disabled: false},fee_exchange:{value:null, disabled: false},tdate:{value:null, disabled: false},vdate:{value:null, disabled: false},tidorder:{value:null, disabled: false},allocatedqty:{value:null, disabled: false},idportfolio:{value:null, disabled: false},id_price_currency:{value:null, disabled: false},id_settlement_currency:{value:null, disabled: false},id_buyer_instructions:{value:null, disabled: false},id_seller_instructions:{value:null, disabled: false},cpty:{value:null, disabled: false},tidinstrument:{value:null, disabled: false},id_broker:{value:null, disabled: false},trtype:{value:null, disabled: false}, action:{value:null, disabled: false},price_type:{value:null, disabled: false}
-
-/*       id : {value:null, disabled: false},
-      groupid : {value:null, disabled: false},
-      tidinstrument: [null, { validators:  Validators.required, asyncValidators: null, updateOn: 'blur' }], 
-      security_type_title:  {value:null, disabled: false},
-      security_group_name:  {value:null, disabled: false}, 
-      security_type_name:  {value:null, disabled: false}, 
-      primary_boardid:  {value:null, disabled: false},
-      board_title:  {value:null, disabled: false}, 
-      title:  {value:null, disabled: false},
-      category:  {value:null, disabled: false}, 
-      name:   [null, { validators:  Validators.required, updateOn: 'blur' }], 
-      isin: ['', {  asyncValidators: null, updateOn: 'blur' }], 
-      emitent_title:  {value:null, disabled: false}, 
-      emitent_inn:  {value:null, disabled: false}, 
-      type:  [null, { validators:  Validators.required, updateOn: 'blur' }],
-      group:  [null, { validators:  Validators.required, updateOn: 'blur' }], 
-      marketprice_boardid:  {value:null, disabled: false},
-      group_title:  {value:null, disabled: false},
-      faceunit:  {value:null, disabled: false},
-      facevalue:  [null,{validators: Validators.pattern('[0-9]*([0-9.]{0,3})?$'),updateOn: 'blur'}],
-      maturitydate:  {value:null, disabled: false},
-      regnumeric:  {value:null, disabled: false}, */
+      idtrade:{value:null, disabled: false},
+      trtype:[null, { validators:  Validators.required, updateOn: 'blur' }], action:{value:null, disabled: false},
+      tdate:[new Date(), { validators:  Validators.required, updateOn: 'blur' }],
+      tidinstrument:[new Date(), { validators:  Validators.required }],
+      vdate:[null, { validators:  Validators.required, updateOn: 'blur' }],tidorder:{value:null, disabled: false},allocatedqty:{value:null, disabled: false},idportfolio:{value:null, disabled: false},
+      qty:[null, { validators:  [Validators.required,Validators.pattern('[0-9]*([0-9.]{0,8})?$')], updateOn: 'blur' }], 
+      price:[null, { validators: [ Validators.required, Validators.pattern('[0-9]*([0-9.]{0,8})?$')], updateOn: 'blur' }],
+      price_type:[1, { validators:  Validators.required, updateOn: 'blur' }],
+      accured_interest:[null, { validators: Validators.pattern('[0-9]*([0-9.]{0,2})?$'), updateOn: 'blur' }],
+      f1ee_trade:[null, { validators: Validators.pattern('[0-9]*([0-9.]{0,2})?$'), updateOn: 'blur' }],
+      fee_settlement:[null, { validators: Validators.pattern('[0-9]*([0-9.]{0,2})?$'), updateOn: 'blur' }],
+      fee_exchange:[null, { validators: Validators.pattern('[0-9]*([0-9.]{0,2})?$'), updateOn: 'blur' }],
+      id_cpty:[null, { validators:  Validators.required, updateOn: 'blur' }],
+      id_price_currency:['810', { validators:  Validators.required}],
+      id_settlement_currency:['810', { validators:  Validators.required}],
+      id_buyer_instructions:{value:null, disabled: false},id_seller_instructions:{value:null, disabled: false},id_broker:{value:null, disabled: false}, details:{value:null, disabled: false},cpty_name:{value:null, disabled: false},security_group_name :{value:null, disabled: false}, secid_type:{value:null, disabled: false},  secid_name:{value:null, disabled: false}
     })
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
-    this.AtuoCompService.getCurrencyList();
+    this.AutoCompService.getCurrencyList().then(()=>{
+      this.id_price_currency.setValidators(this.AutoCompService.currencyValirator());
+      this.id_price_currency.updateValueAndValidity();
+      this.id_settlement_currency.setValidators(this.AutoCompService.currencyValirator());
+      this.id_settlement_currency.updateValueAndValidity();
+    });
+    this.AutoCompService.getSecidLists().then (()=>this.tidinstrument.setValidators(this.AutoCompService.secidValirator()) );
+    this.AutoCompService.getCounterpartyLists().then (()=>this.id_cpty.setValidators(this.AutoCompService.counterPartyalirator()));
   }
   ngAfterContentInit (): void {
-    this.id_price_currency.setValidators(this.AtuoCompService.currencyValirator())
+    this.filterednstrumentsLists = this.tidinstrument.valueChanges.pipe(
+      startWith(''),
+      distinctUntilChanged(),
+      map(value => this.AutoCompService.filterList(value || '','secid'))
+    );
     this.filteredCurrenciesList = this.id_price_currency.valueChanges.pipe (
       startWith (''),
       distinctUntilChanged(),
-      map(value => this.AtuoCompService.filterList(value || '','currency'))
-    )
+      map(value => this.AutoCompService.filterList(value || '','currency'))
+    );
+    this.filteredCounterPartiesList = this.cpty_name.valueChanges.pipe (
+      startWith (''),
+      distinctUntilChanged(),
+      map(value => this.AutoCompService.filterList(value || '','cpty'))
+    );
       this.tradeModifyForm.patchValue(this.data);
       this.addAsyncValidators(this.action); 
-    this.action == 'View'|| this.disabledControlElements?  this.tradeModifyForm.disable() : null;
+      this.action == 'View'|| this.disabledControlElements?  this.tradeModifyForm.disable() : null;
   }
+  selectClient (){}
   async addAsyncValidators(action:string) {
    /*  if (['Create','Create_Example'].includes(this.action)) {
       this.isin.setErrors({isinIsTaken:true});
@@ -187,6 +200,10 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
       break;
     }
   }
+  secidChange(val:string) {
+        this.secid_name.patchValue(val.split(' - ')[1]);
+        this.secid_type.patchValue(val.split(' - ')[2]);
+  }
   get  idtrade() {return this.tradeModifyForm.get('idtrade')}​
   get  trtype() {return this.tradeModifyForm.get('trtype')}​
   get  qty() {return this.tradeModifyForm.get('qty')}​
@@ -202,8 +219,11 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
   get  id_settlement_currency ()   {return this.tradeModifyForm.get('id_settlement_currency') }
   get  id_buyer_instructions ()   {return this.tradeModifyForm.get('id_buyer_instructions') }
   get  id_seller_instructions ()   {return this.tradeModifyForm.get('id_seller_instructions') }
-  get  cpty ()   {return this.tradeModifyForm.get('cpty') }
+  get  id_cpty ()   {return this.tradeModifyForm.get('id_cpty') }
   get  tidinstrument ()   {return this.tradeModifyForm.get('tidinstrument') }
   get  id_broker ()   {return this.tradeModifyForm.get('id_broker') }
   get  price_type ()   {return this.tradeModifyForm.get('price_type') }
+  get  secid_name ()   {return this.tradeModifyForm.get('secid_name') }
+  get  secid_type ()   {return this.tradeModifyForm.get('secid_type') }
+  get  cpty_name ()   {return this.tradeModifyForm.get('cpty_name') }
 }
