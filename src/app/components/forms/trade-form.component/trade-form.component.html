@@ -42,19 +42,23 @@
       <input matInput [matDatepicker]="valuedate" [placeholder]="'Value Date'" formControlName="vdate" >
       <mat-datepicker-toggle matSuffix [for]="valuedate"></mat-datepicker-toggle>
       <mat-datepicker #valuedate></mat-datepicker>
-      <mat-error  *ngIf="vdate?.errors?.['required']">
+      <mat-error *ngIf="vdate?.errors?.['required']">
         Required!   
       </mat-error>
     </mat-form-field>
-    <mat-form-field style="width: 25%;" title="id_broker" >
-      <input matInput placeholder="Broker" formControlName="id_broker"  >
-    </mat-form-field>
+    <mat-label  
+      style="width: 40%; color: rgb(20, 173, 122);" class="mat-form-field">
+      Trade Amount:  {{trade_amount.value | currency :this.code_price_currency.value+' '}} <br>
+      <span style="color: rgb(126, 105, 243);">
+        Accured Interest :  {{accured_interest.value | currency :this.code_price_currency.value+' '}} 
+      </span>
+    </mat-label>
   </p>
   <p>
     <mat-form-field style="width: 27%;" title="Type to find(any filed). Click to select">
       <input matInput [placeholder]="'SecID'" formControlName="tidinstrument" [matAutocomplete]="autoSecID"  >
       <mat-autocomplete #autoSecID="matAutocomplete" 
-        (optionSelected)="secid_name.patchValue($event.option.viewValue.split(' - ')[1]+' ('+$event.option.viewValue.split(' - ')[2]+')')">
+        (optionSelected)="secidChange($event.option.viewValue) ">
         <mat-option #selectedsecid *ngFor="let instrument of filterednstrumentsLists | async" [value]="instrument[0]" >
           {{instrument[0]}} - {{instrument[1]}} - {{instrument[2]}}
         </mat-option>
@@ -77,7 +81,7 @@
     </mat-form-field>
   </p>
   <p>
-    <mat-form-field style="width: 15%;" title="price">
+    <mat-form-field style="width: 13%;" title="price" >
       <input matInput placeholder="Price" formControlName="price" >
       <mat-error  *ngIf="price?.errors?.['required']">
         Required!    
@@ -85,8 +89,11 @@
       <mat-error  *ngIf="price?.errors?.['pattern']">
         Required!    
       </mat-error>
+      <mat-hint>
+        {{price_type.value==2?'percent':'absolute'}}
+      </mat-hint>
     </mat-form-field>
-    <mat-form-field style="width: 25%;" title="Quantity" >
+    <mat-form-field style="width: 20%;" title="Quantity" >
       <input matInput placeholder="Quantity" formControlName="qty"  >
       <mat-error  *ngIf="qty?.errors?.['required']">
         Required!    
@@ -98,9 +105,10 @@
         {{qty?.errors?.['pattern']? 'Format 0,00' :qty.value | number}}
       </mat-hint>
     </mat-form-field>
-    <mat-form-field style="width: 21%;" title="Type to find(any filed). Click to select">
+    <mat-form-field style="width: 17%;" title="Type to find(any filed). Click to select">
       <input matInput [placeholder]="'Currency'" formControlName="id_price_currency" [matAutocomplete]="auto">
-      <mat-autocomplete #auto="matAutocomplete">
+      <mat-autocomplete #auto="matAutocomplete" 
+        (optionSelected)="this.code_price_currency.patchValue($event.option.viewValue.split('-')[1])">
         <mat-option *ngFor="let currency of filteredCurrenciesList | async" [value]="currency['CurrencyCodeNum']">
           {{currency['CurrencyCodeNum']}} -  {{currency['CurrencyCode']}} -  {{currency['CurrencyName']}} 
         </mat-option>
@@ -112,16 +120,10 @@
         Inccorect Code! 
       </mat-error>
     </mat-form-field>
-    <mat-form-field style="width: 20%;" title="accured_interest" >
-      <input matInput placeholder="Accured Interest" formControlName="accured_interest"  >
-      <mat-error  *ngIf="accured_interest?.errors?.['pattern']">
-        Only numbers!    
-      </mat-error>
-      <mat-hint>
-        {{accured_interest?.errors?.['pattern']? 'Format 0,00' :accured_interest.value | number}}
-      </mat-hint>
-    </mat-form-field>
-  </p>
+   <!--  <mat-label  
+    style="width: 25%; color: rgb(20, 173, 122);" class="mat-form-field">
+  </mat-label>
+ -->  </p>
   <p>
     <mat-form-field style="width: 20%;"  >
       <input matInput placeholder="ID_Cpty" formControlName="id_cpty"  >
@@ -167,11 +169,10 @@
     </mat-expansion-panel-header >
     <div style="width: 100%;">
       <mat-form-field style="width: 17%;" >
-        <input matInput placeholder="Price Type" formControlName="price_type" >
         <mat-label>Type</mat-label>
-          <mat-select  #securityGroup formControlName="price_type"  > 
-            <mat-option  [value]="1">1 - Absolute</mat-option>
-            <mat-option  [value]="2">2 - Percent</mat-option>
+          <mat-select  placeholder="Price Type" formControlName="price_type"  > 
+            <mat-option  [value]="'1'">1 - Absolute</mat-option>
+            <mat-option  [value]="'2'">2 - Percent</mat-option>
           </mat-select>
           <mat-error  *ngIf="price_type?.errors?.['required']">
             Required!   
@@ -185,6 +186,9 @@
       </mat-form-field>
       <mat-form-field style="width: 25%;" >
         <input matInput placeholder="Seller SSI" formControlName="id_seller_instructions" >
+      </mat-form-field>
+      <mat-form-field style="width: 25%;" title="id_broker" >
+        <input matInput placeholder="Broker" formControlName="id_broker"  >
       </mat-form-field>
     </div>
   </mat-expansion-panel>

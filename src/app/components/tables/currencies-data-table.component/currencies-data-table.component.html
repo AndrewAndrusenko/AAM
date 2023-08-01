@@ -20,25 +20,24 @@
     <mat-icon matSuffix >save_alt</mat-icon>
   </button>
   <button color = "accent" mat-raised-button 
-  style=" margin-left:1%; font-size: 18px;"
-  (click)="submitQuery()">
-  Reload 
-  <mat-icon matSuffix >refresh</mat-icon>
-</button>
+    style=" margin-left:1%; font-size: 18px;"
+    (click)="submitQuery()">
+    Reload 
+    <mat-icon matSuffix >refresh</mat-icon>
+  </button>
 </span>
-<mat-expansion-panel *ngIf="FormMode==='QuotesMode'&&!disabledControlElements" title="MarketDataUploadingPanel"
+<mat-expansion-panel *ngIf="FormMode==='QuotesMode'&&!disabledControlElements" 
   class="first-expansion" 
   (opened)="panelOpenStateFirst = true"
   (closed)="panelOpenStateFirst = false" 
   style="width: 100%;">
   <mat-expansion-panel-header >
     <mat-panel-title>
-      Market Data Update
+      Currencies Data Update
     </mat-panel-title>
     <mat-panel-description>
       Tap to {{panelOpenStateFirst? 'hide': 'open'}} control elements
-      <mat-icon 
-      style = "color : rgb(44, 43, 43);"
+      <mat-icon  style = "color : rgb(44, 43, 43);"
       >cloud_download</mat-icon>
     </mat-panel-description>
   </mat-expansion-panel-header >
@@ -48,9 +47,9 @@
       style=" margin-left:1%; font-size: 18px; margin-right: 2%;"
       [disabled]="loadMarketData.disabled || loadMarketData.invalid"
       (click)="getMarketData()">
-      Get matket data 
+      Get currencies rates data 
     </button>
-    <mat-form-field style="margin-right: 2%; width: 12%;  color: rgb(44, 43, 43);" title="dateForLoadingPrices">
+    <mat-form-field style="margin-right: 2%; width: 12%;  color: rgb(44, 43, 43);" title="Date to upload">
       <input matInput formControlName = "dateForLoadingPrices" [matDatepicker]="dateForMarketData" placeholder="Date to upload">
       <mat-datepicker-toggle matSuffix [for]="dateForMarketData"></mat-datepicker-toggle>
       <mat-datepicker  #dateForMarketData></mat-datepicker>
@@ -58,7 +57,7 @@
     <mat-slide-toggle #deleteOldMarketData formControlName="overwritingCurrentData"
       style="font-size:100%; letter-spacing: .05rem; margin-left: 2%;"
       [style.color]="deleteOldMarketData.checked ? 'red':'rgb(44, 43, 43)' "
-      >Replace current market data <br>{{deleteOldMarketData.checked? 'allowed!':'forbidden'}}
+      >Replace current rates data <br>{{deleteOldMarketData.checked? 'allowed!':'forbidden'}}
     </mat-slide-toggle>
     <div *ngIf="loadingDataState.State==='Success'||loadingDataState.State==='terminated'" title="loadingDataState">
       <h2 style="text-align: center;" [style.color]="loadingDataState.State=='terminated'? 'red':'rgb(44, 43, 43)'">
@@ -67,7 +66,7 @@
       <pre  style="font-size: 18px;">{{loadedMarketData | json}}</pre>
     </div>
     <span style="display: flex; " title="marketSource-section">
-      <section class="marketSource-section" style="color: rgb(44, 43, 43);"
+      <section class="marketSource-section" style="color: rgb(44, 43, 43);" title="Select sources to upload"
         *ngFor="let marketSource of marketSources;let i=index" >
         <span class="example-list-section" >
           <mat-checkbox  class="marketSource-margin"
@@ -92,15 +91,10 @@
           </ul>
         </span> 
       </section>
-      <button color = "primary" mat-raised-button [disabled]="true" title="getMoexSecurities"
-        style=" margin-left:1%; height: 5%; align-items:flex-end; font-size: 14px; margin-right: 2%;"
-        (click)="getMoexSecurities()">
-        Get moex securities list 
-      </button>
     </span>
   </form>
   <mat-progress-bar *ngIf="loadMarketData.disabled" color="primary" mode="query"></mat-progress-bar>
-  <mat-expansion-panel *ngIf="logLoadingData.length" class="complex-search-entries" title="logLoadingData"
+  <mat-expansion-panel *ngIf="logLoadingData.length" class="complex-search-entries" 
     (opened)="statusLogPanelOpenState = true"
     (closed)="statusLogPanelOpenState = false" >
     <mat-expansion-panel-header >
@@ -116,12 +110,11 @@
   </mat-expansion-panel>
 </mat-expansion-panel>
 
-<mat-expansion-panel class="headers-align" title="ComplexSearchPanel"
-  [expanded]="1"
+<mat-expansion-panel class="headers-align" 
   (opened)="panelOpenStateSecond = true"
   (closed)="panelOpenStateSecond = false" >
   <mat-expansion-panel-header >
-    <mat-panel-title>
+    <mat-panel-title >
       Complex search
     </mat-panel-title>
     <mat-panel-description>
@@ -140,11 +133,11 @@
         <button color = "accent" mat-raised-button 
           style="margin:1%; font-size: 18px;"
           (click)="searchParametersFG.reset();
-           instruments=['ClearAll']">
+           pairs=['ClearAll']">
           ClearAll
         </button>
       </span>
-      <mat-form-field appearance="fill">
+      <mat-form-field appearance="fill" title="Date range filter">
         <mat-label>Enter a date range</mat-label>
         <mat-date-range-input [formGroup]="dataRange" [rangePicker]="picker" >
           <input matStartDate  placeholder="Start date" formControlName="dateRangeStart">
@@ -170,24 +163,12 @@
         </mat-optgroup>
         </mat-select>
       </mat-form-field>
-      <mat-form-field  style="width: 25%;">
-        <mat-label>BoardID</mat-label>
-        <mat-select  #BoardID formControlName="boards"  multiple> 
-          <mat-option #allSelected [value]="0"
-          (click)="toggleAllSelection('boards', allSelected.selected)" >
-            ALL - {{this.allSelected.selected? 'Clear' :'Select' }} All 
-          </mat-option>
-          <mat-option *ngFor="let board of boardIDs" [value]="board.boardid.toString()">
-            {{board.boardid}} - {{board.board_title}}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
       <mat-form-field class="example-chip-list" appearance="fill" style="width: 40%; ">
         <mat-chip-list #chipList  >
-          <mat-chip *ngFor="let account of instruments" 
-          (removed)="remove(account)"
+          <mat-chip *ngFor="let pair of pairs" 
+          (removed)="remove(pair)"
           (click)=" clearAll($event);">
-            {{account}}
+            {{pair}}
             <button matChipRemove>
               <mat-icon>cancel</mat-icon>
             </button>
@@ -195,17 +176,17 @@
           <input #iputForChip
           [matAutocomplete]="auto"
           matInput
-          placeholder="Add secid or secid,secid1,secid2.."
+          placeholder="Add pair or pair,pair1,pair2.."
           formControlName="secidList"
           [matChipInputFor]="chipList"
           [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
           [matChipInputAddOnBlur]="true"
           (matChipInputTokenEnd)="add($event)"
-          matTooltip="Type account number or paste accounts list separated by comma and press enter" >
+          matTooltip="Type currency pair or paste pairs list separated by comma and press enter" >
         </mat-chip-list>
         <mat-autocomplete #auto="matAutocomplete" (optionSelected)='changedValueofChip($event.option.value)'>
-          <mat-option *ngFor="let secid of filterednstrumentsLists | async" [value]="secid[0]">
-            {{secid[0]}} - {{secid[1]}}
+          <mat-option *ngFor="let pair of filteredPairsLists | async" [value]="pair['pair']">
+            {{pair['pair']}} 
           </mat-option>
         </mat-autocomplete>
       </mat-form-field>
@@ -216,25 +197,14 @@
 <div class="mat-elevation-z8">
   <table  #strategyTable mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class="mat-elevation-z8">
     <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i=index">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>  {{columnsHeaderToDisplay[i]  | titlecase}}</th>
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>  {{columnsHeaderToDisplay[i]}}</th>
       <td 
-        [ngStyle]="{'color': element['currency'] == 'RUB' ? 'rgb(198, 255, 215)' : 'white'}"
-        [ngStyle]="{'color': element['percentprice'] ? 'black' : (element['currency'] == 'RUB' ? 'rgb(198, 255, 215)' : 'white')}"
         mat-cell 
         *matCellDef="let element" [cdkContextMenuTriggerFor]="instrumentcontextmenu"  > 
         <span [ngSwitch]="true==true" title ="TableColumnFormatting">
-          <p *ngSwitchCase="['tradedate'].includes(column)">
-              {{ element[column] | date }}
+          <p *ngSwitchCase="['rate_date'].includes(column)">
+            {{ element[column] | date }}
           </p>          
-          <p *ngSwitchCase="['open', 'low', 'high', 'marketprice2','close','admittedquote'].includes(column)">
-            {{!element['percentprice']? (element[column] | currency:element['currency']:element['spsymbol']:'1.2-2':'fr'):(element[column] |  currency:element['currency']:'%':'1.2-2':'fr')}}
-          </p>
-          <p *ngSwitchCase="['value'].includes(column)">
-            {{(element[column] | currency:element['currency']:element['spsymbol']:'1.2-2':'fr')}}
-          </p>
-          <p *ngSwitchCase="['volume'].includes(column)">
-            {{element[column] | number:'1.0-0'}}
-          </p>
           <p *ngSwitchDefault>
             {{element[column]}}
           </p>
@@ -242,9 +212,7 @@
         <ng-template  #instrumentcontextmenu title="TableContextMenu">
           <div class="tree-menu-context" *ngIf="!readOnly" cdkMenu >
             <button 
-              (click)="
-                updateFilter($event, element[column],column);
-                "
+              (click)="updateFilter($event, element[column],column)"
               class="tree-menu-item" cdkMenuItem>
               <mat-icon class="menu-icon" matPrefix>filter_list</mat-icon> 
               Add to filter

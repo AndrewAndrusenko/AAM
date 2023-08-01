@@ -5,10 +5,16 @@
 
 :root 
 {
---blue: #00b; // or any global you wish to share with components 
 --faovritesNodeColor: rgb(53, 153, 168);
 --faovritesDarkNodeColor: rgb(34, 104, 114);
 --formFieldLightGray: rgb(57, 56, 56);
+--investmentNodeColor : crimson;
+--investmentNodeColorChild: rgb(184, 28, 59);
+--faovritesNodeColor: rgb(53, 153, 168);
+--faovritesNodeColorChild: rgb(53, 153, 168);
+--additionalLightGreen: rgb(53, 168, 110);
+--additionalLightBlue: rgb(85, 167, 238);
+--additionalLightRed: rgb(252, 66, 81);
 }
 
 

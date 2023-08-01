@@ -391,5 +391,14 @@ export interface caTypes {
   id: number, name: string, sectype: number[], ismandatory: boolean, ratetype: string, fixedrate: boolean
 }
 export interface trades {
-  idtrade:number,qty:number,price:number,accured_interest:number,f1ee_trade:number,fee_settlement:number,fee_exchange:number,tdate:Date,vdate:Date,tidorder:number,allocatedqty:number,idportfolio:number,id_price_currency:number,id_settlement_currency:number,id_buyer_instructions:number,id_seller_instructions:number,id_cpty:string,tidinstrument:string,id_broker:string,trtype:string, action:number,price_type:number,details:string,cpty_name:string , security_group_name :string, secid_type:string,  secid_name:string
+  idtrade:number,qty:number,price:number,accured_interest:number,f1ee_trade:number,fee_settlement:number,fee_exchange:number,tdate:Date,vdate:Date,tidorder:number,allocatedqty:number,idportfolio:number,id_price_currency:number,id_settlement_currency:number,id_buyer_instructions:number,id_seller_instructions:number,id_cpty:string,tidinstrument:string,id_broker:string,trtype:string, action:number,price_type:number,details:string,cpty_name:string , security_group_name :string, secid_type:string,  secid_name:string, trade_amount:number,faceunit:number,facevalue:number
+}
+export interface couponPeriodInfo {
+  couponrate:number,actiontype:number,currency:number, coupon_date:Date
+}
+export interface currencyRate {
+  rate_date:Date, baseCode:number, quoteCode:number, rate:number
+}
+export interface currencyRateList extends currencyRate {
+  id:number, base_iso:string, quote_iso :string , rate_type:number, nominal:number, pair:string,sourcecode:string
 }

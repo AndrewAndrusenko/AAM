@@ -3,14 +3,13 @@ import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {Observable, Subscription } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
-import {animate, state, style, transition, trigger} from '@angular/animations';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { Instruments, instrumentCorpActions, instrumentDetails, marketDataSources } from 'src/app/models/intefaces.model';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { AppMarketDataService } from 'src/app/services/market-data.service';
-import { menuColorGl, investmentNodeColorChild, additionalLightGreen } from 'src/app/models/constants.model';
+import { investmentNodeColorChild, additionalLightGreen } from 'src/app/models/constants.model';
 import { AppInvInstrumentModifyFormComponent } from '../../forms/instrument-form.component/instrument-form.component';
 import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
@@ -24,14 +23,6 @@ import { AuthService } from 'src/app/services/auth.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './instrument-table.component.html',
   styleUrls: ['./instrument-table.component.scss'],
-  encapsulation: ViewEncapsulation.None,
-  animations: [
-    trigger('detailExpand', [
-      state('collapsed', style({height: '0px', minHeight: '0'})),
-      state('expanded', style({height: '*'})),
-      transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
-    ]),
-  ],
 })
 export class AppInstrumentTableComponent  implements AfterViewInit {
   accessState: string = 'none';
@@ -53,8 +44,8 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
     'Security_Type',
     'Short Name', 
     'ISIN', 
-    'Board', 
     'Board Title', 
+    'Board', 
     'Issuer INN', 
     'Action'
   ];
@@ -75,7 +66,6 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
   investmentNodeColor = investmentNodeColorChild;
   additionalLightGreen = additionalLightGreen;
   public filterednstrumentsLists : Observable<string[]>;
-  menuColorGl=menuColorGl;
   boardIDs =[]
   searchParametersFG: FormGroup;
   boardsOne = new FormControl('');
@@ -104,17 +94,22 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
       boards : {value:null, disabled:false}
     });
      this.indexDBServiceS.getIndexDBStaticTables('getBoardsDataFromInstruments').then ((data)=>this.boardIDs = data['data'])
-     this.MarketDataService.getMarketDataSources().subscribe(marketSourcesData => this.marketSources = marketSourcesData);
+     this.MarketDataService.getMarketDataSources('stock').subscribe(marketSourcesData => this.marketSources = marketSourcesData);
      this.MarketDataService.getInstrumentDataToUpdateTableSource().subscribe(data =>{
+      console.log('getInstrumentDataToUpdateTableSource',data);
      let index =  this.dataSource.data.findIndex(elem=>elem.id===data.data[0].id)
       switch (data.action) {
         case 'Deleted':
           this.dataSource.data.splice(index,1)
+          console.log('Deleted');
         break;
         case 'Created':
           this.dataSource.data.unshift(data.data[0])
+          console.log('Created');
         break;
         case 'Updated':
+          console.log('Updated',index,data.data[0].id);
+          
           this.dataSource.data[index] = {...data.data[0]}
         break;
       }

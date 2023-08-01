@@ -164,7 +164,7 @@ export class AppTradeTableComponent  implements AfterViewInit {
       elem==='marketSource'? [...this.marketSources.map(item => item.segments.map(el => el.sourceCode)),0].flat() : [...this.boardIDs.map(item => item.boardid
     ), 0]) : this.searchParametersFG.get(elem).patchValue([]); */
   }
-   
+
   selectInstrument (element:Instruments) {this.modal_principal_parent.emit(element)}
   exportToExcel() {this.HandlingCommonTasksS.exportToExcel (this.dataSource.data,"tradesData")  }
   get  marketSource () {return this.searchParametersFG.get('marketSource') } 

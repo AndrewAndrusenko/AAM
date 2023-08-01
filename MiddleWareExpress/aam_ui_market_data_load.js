@@ -1,21 +1,17 @@
 const { async } = require('rxjs');
+const db_common_api = require('./db_common_api');
 const https = require('https');
 const config = require ('./db_config');
 const Pool = require('pg').Pool;
 const pool = new Pool(config.dbConfig);
 var pgp = require ('pg-promise')({capSQL:true});
 const pg = require('pg');
-const { query } = require('express');
-const { log } = require('console');
-const { resolve } = require('path');
 pg.types.setTypeParser(1114, function(stringValue) {
   return stringValue;  //1114 for time without timezone type
 });
 async function queryExecute (sql, response, responseType) {//General query to postgres execution via pool
   return new Promise ((resolve) => {
-    console.log('sql',sql);
     pool.query (sql,  (err, res) => {
-      console.log('sql',sql);
       if (err) {
         console.log (err.stack.split("\n", 1).join(""))
         err.detail = err.stack
@@ -149,22 +145,21 @@ async function fgetMarketData (request,response){//Get market data such as marke
     break;
   }
   sql = pgp.as.format(query.text,request.query);
-  queryExecute (sql, response);
+  db_common_api.queryExecute(sql,response,undefined,'fgetMarketData')
 }
 async function fgetMarketDataSources (request,response) {//Get market sources. Needs to be moved to General data function
-   sql =  'SELECT  "sourceName", false AS "checkedAll", false AS indeterminate, false as disabled, json_agg("icMarketDataSources".*) AS "segments" '+
+  sql =  'SELECT  "sourceName", false AS "checkedAll", false AS indeterminate, false as disabled, json_agg("icMarketDataSources".*) AS "segments" '+
   'FROM "icMarketDataSourcesGlobal" '+
   'LEFT JOIN "icMarketDataSources" ON "icMarketDataSources"."sourceGlobal" = "icMarketDataSourcesGlobal"."sourceCode" '+
-  'GROUP BY "sourceName" ';
-   queryExecute (sql, response);
+  'WHERE "icMarketDataSources".type=${sourceType} GROUP BY "sourceName" ';
+  sql = pgp.as.format(sql,request.query);
+  db_common_api.queryExecute(sql,response,undefined,'fgetMarketDataSources')
 }
 async function fgetInstrumentsCodes (request,response) {//Get additional instruments codes, for example to import quotes from global market data source
   let fields = request.query.resasarray? 'json_agg(code) as code' :' secid, code, isin, mapcode'	
   sql =  'SELECT ' + fields + '	FROM public."aInstrumentsCodes" WHERE mapcode=${mapcode};';
   sql = pgp.as.format(sql,request.query);
-   queryExecute (sql, response);
-  // console.log('-------------------------',data);
-  // return response.status(200).send(data);
+  db_common_api.queryExecute(sql,response,undefined,'fgetInstrumentsCodes')
 }
 async function fgetMoexIssSecuritiesList (start) {//Get instrument dictionary from moex iss
   let url='https://iss.moex.com/iss/securities.json?iss.json=extended&limit=100&lang=en&iss.meta=off&is_trading=true&start='+start.toString()
@@ -250,14 +245,16 @@ async function fgetInstrumentDetails (request,response) {
   let sql = "SELECT secid, boardid, shortname, lotsize, facevalue, status, boardname, decimals, matdate::timestamp without time zone, secname, couponperiod, issuesize, remarks, marketcode, instrid, sectorid, minstep, faceunit, isin, latname, regnumber, currencyid, sectype, listlevel, issuesizeplaced, couponpercent, lotvalue, nextcoupon, issuesize*facevalue as issuevolume, id "+ 
   'FROM public.mmoexinstrumentdetails '
   sql += request.query.secid? "WHERE secid ='"   +request.query.secid +"';": ";" 
-  queryExecute (sql, response);
+  db_common_api.queryExecute(sql,response,undefined,'fgetInstrumentDetails');
+
 }
 async function fgetInstrumentDataCorpActions (request,response) {
   let sql = "SELECT mmoexcorpactions.id, secid, currency, unredemeedvalue, couponrate, couponamount, actiontype::int2, couponamountrur, date::timestamp without time zone as date, 0 as action, dccorporateactionstypes.name as actiontypename FROM public.mmoexcorpactions " +
   " LEFT JOIN dccorporateactionstypes on dccorporateactionstypes.id = mmoexcorpactions.actiontype ";
   sql += request.query.isin? "WHERE isin ='"   + request.query.isin +"' ": "";
   sql += " ORDER BY date; "
-  queryExecute (sql, response);
+  db_common_api.queryExecute(sql,response,undefined,'fgetInstrumentDataCorpActions');
+
 }
 async function fgetInstrumentDataGeneral(request,response) { 
   const query = {text: '', values:[]}
@@ -268,7 +265,7 @@ async function fgetInstrumentDataGeneral(request,response) {
       "ORDER BY row_num asc;"
     break;
     case 'getMoexSecurityTypes':
-      query.text = "SELECT id, security_type_name, security_type_title,security_group_name FROM public.mmoexsecuritytypes; " 
+      query.text = "SELECT id, security_type_name, security_type_title,security_group_name,price_type FROM public.mmoexsecuritytypes; " 
     break;
     case 'getCorpActionTypes':
       query.text = "SELECT  dccorporateactionstypes.id, dccorporateactionstypes.name, sectype, ismandatory, ratetype, fixedrate "+
@@ -277,9 +274,7 @@ async function fgetInstrumentDataGeneral(request,response) {
     case 'getMoexSecurityGroups':
       query.text = "SELECT name, title  FROM public.mmoexsecuritygroups;"
     break;
-    case 'getCurrencyCodes':
-      query.text = 'SELECT  "CurrencyCodeNum","CurrencyCode","CurrencyName" FROM public."dCurrencies";'
-    break;
+
     case 'validateSecidForUnique':
       query.text = "SELECT secid  FROM public.mmoexsecurities where UPPER(secid)=${fieldtoCheck};"
     break;
@@ -289,7 +284,7 @@ async function fgetInstrumentDataGeneral(request,response) {
 
   }
   sql = pgp.as.format(query.text,request.query);
-  queryExecute (sql, response);
+  db_common_api.queryExecute(sql,response,undefined,'fgetInstrumentDataGeneral=>'+request.query.dataType);
 }
 async function fInstrumentCreate (request, response) {
   const query = {
@@ -298,12 +293,12 @@ async function fInstrumentCreate (request, response) {
         ' VALUES (UPPER(${secid}),${name},UPPER(${isin}),${emitent_title},${emitent_inn},${type},${group},${primary_boardid},${marketprice_boardid},${regnumeric},${maturitydate},${facevalue},${faceunit} ) RETURNING *;',
   }
   sql = pgp.as.format(query.text,request.body.data)
-  queryExecute (sql, response);
+  db_common_api.queryExecute(sql,response,undefined,'fInstrumentCreate');
 }
 async function fInstrumentDelete (request, response) {
   const query = {text: 'DELETE FROM public.mmoexsecurities WHERE id=${id} RETURNING *;', values: request.body}
   sql = pgp.as.format(query.text,query.values)
-  queryExecute (sql, response);
+  db_common_api.queryExecute(sql,response,undefined,'fInstrumentDelete');
 }
 async function fInstrumentEdit (request, response) {
   const query = {
@@ -324,8 +319,8 @@ async function fInstrumentEdit (request, response) {
     'regnumeric=${regnumeric} '+
     'WHERE id=${id} RETURNING *;',
   } 
-  sql = pgp.as.format(query.text,request.body.data)
-  queryExecute (sql, response);
+  sql = pgp.as.format(query.text,request.body.data);
+  db_common_api.queryExecute(sql,response,undefined,'fInstrumentEdit');
 }
 async function fUpdateInstrumentDetails (request, response) {
   let fields = 'status,  boardid, boardname,  listlevel,  issuesize,   lotsize,  minstep,  decimals, marketcode,   secid'

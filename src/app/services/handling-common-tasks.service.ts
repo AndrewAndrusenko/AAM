@@ -1,3 +1,4 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import * as XLSX from 'xlsx'
 
@@ -14,4 +15,5 @@ export class HandlingCommonTasksService {
     XLSX.utils.book_append_sheet(wb, ws, name);
     XLSX.writeFile(wb, fileName);
   }
+
 }

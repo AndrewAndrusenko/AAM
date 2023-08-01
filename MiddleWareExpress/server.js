@@ -10,6 +10,7 @@ const uiAmmInvestmentsModule = require ('./aam_ui_investmentsData')
 const uiAmmAccountingModule = require ('./aam_ui_accounting')
 const uiAmmMarketData = require ('./aam_ui_market_data_load')
 const uiAmmTradeData = require ('./aam_ui_trades')
+const uiAmmCurrencyData = require ('./aam_currenciesData')
 const RedisService = require ('./redis')
 const auth_module = require('./auth_module');
 const bcrypt = require('bcryptjs');
@@ -195,6 +196,11 @@ appServer.post('/AAM/MD/UpdateInstrumentDetails/',jsPassport.authenticate('sessi
 appServer.post('/AAM/MD/UpdateInstrumentDataCorpActions/',jsPassport.authenticate('session') , uiAmmMarketData.fUpdateInstrumentDataCorpActions)
 /*----------------------TradeData----------------------------------------------------*/
 appServer.get('/AAM/MD/getTradeData/',jsPassport.authenticate('session') , uiAmmTradeData.fGetTradesData)
+appServer.get('/AAM/MD/getcouponPeriodInfo/',jsPassport.authenticate('session') , uiAmmTradeData.GetAccuredInterest)
+
+/*----------------------CurrencyData----------------------------------------------------*/
+appServer.get('/AAM/getCurrencyData/',jsPassport.authenticate('session') , uiAmmCurrencyData.getCurrencyData)
+appServer.get('/AAM/getCbrRateDaily/',jsPassport.authenticate('session') , uiAmmCurrencyData.getCbrRateDaily)
 
 RedisService.TestRedis();
 RedisService.redisSetInstrumentList();

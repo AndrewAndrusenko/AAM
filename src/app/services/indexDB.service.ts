@@ -4,6 +4,7 @@ import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { AppAccountingService } from './accounting.service';
 import { catchError, of } from 'rxjs';
 import { AppInvestmentDataServiceService } from './investment-data.service.service';
+import { CurrenciesDataService } from './currencies-data.service';
 interface cacheAAM {
   code:string,
   data:[]
@@ -17,6 +18,7 @@ export class indexDBService {
     private dbService: NgxIndexedDBService,
     private AccountingDataService:AppAccountingService, 
     private InvestmentDataService : AppInvestmentDataServiceService,   
+    private CurrenciesDataSrv: CurrenciesDataService,
   ) { }
   indexDBcacheData (key:string,data:any) {
     // console.log('data',data[0]);
@@ -48,7 +50,10 @@ export class indexDBService {
           this.MarketDataService.getInstrumentDataGeneral('getCorpActionTypes').subscribe(data=>resolve(data))
         break;
         case 'getCurrencyCodes':
-          this.MarketDataService.getInstrumentDataGeneral('getCurrencyCodes').subscribe(data=>resolve(data))
+          this.CurrenciesDataSrv.getCurrencyCodes().subscribe(data=>resolve(data))
+        break;
+        case 'getCurrencyPairsList':
+          this.CurrenciesDataSrv.getCurrencyPairsList().subscribe(data=>resolve(data))
         break;
         case 'getInstrumentAutoCompleteList':
           this.MarketDataService.getMoexInstruments(undefined,undefined,{Action:'getInstrumentAutoCompleteList'}).subscribe(data=>resolve(data))
@@ -57,6 +62,9 @@ export class indexDBService {
             this.AccountingDataService.GetTransactionType_Ext('',0,'','','bcTransactionType_Ext').subscribe(data=>resolve(data))
         break;
         case 'getCounterPartyList':
+          this.InvestmentDataService.getClientData(undefined,undefined,'getCounterPartyList').subscribe(data => resolve(data))
+        break
+        case 'getCurrencyPairsList':
           this.InvestmentDataService.getClientData(undefined,undefined,'getCounterPartyList').subscribe(data => resolve(data))
         break
       }

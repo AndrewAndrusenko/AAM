@@ -1,16 +1,15 @@
-import {Component, EventEmitter, Output, ViewChild, Input, AfterViewInit} from '@angular/core';
+import { Component, EventEmitter, Output, ViewChild, Input, AfterViewInit} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {map, Observable, startWith } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
-import { marketData, marketDataSources, marketSourceSegements } from 'src/app/models/intefaces.model';
+import { currencyRateList,  marketDataSources, marketSourceSegements } from 'src/app/models/intefaces.model';
 import { AppAccountingService } from 'src/app/services/accounting.service';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatOption } from '@angular/material/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { AppMarketDataService } from 'src/app/services/market-data.service';
 import * as moment from 'moment';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import { formatNumber, registerLocaleData } from '@angular/common';
@@ -18,15 +17,15 @@ import localeFr from '@angular/common/locales/fr';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import { AuthService } from 'src/app/services/auth.service';
+import { CurrenciesDataService } from 'src/app/services/currencies-data.service';
+import { AppMarketDataService } from 'src/app/services/market-data.service';
 registerLocaleData(localeFr, 'fr');
-/* 
-export class extends  */
 @Component({
-  selector: 'app-table-market-data',
-  templateUrl: './market-data-table.component.html',
-  styleUrls: ['./market-data-table.component.scss'],
+  selector: 'app-table-currencies-data',
+  templateUrl: './currencies-data-table.component.html',
+  styleUrls: ['./currencies-data-table.component.scss'],
 })
-export class AppTableMarketDataComponent  implements AfterViewInit {
+export class AppTableCurrenciesDataComponent  implements AfterViewInit {
   accessState: string = 'none';
   disabledControlElements: boolean = false;
   @Input() FormMode:string = 'Full'
@@ -34,9 +33,9 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
   marketSources:marketDataSources[] =  [];
   loadedMarketData: any []= []; 
   marketDataToLoad: any;
-  columnsToDisplay = ['globalsource','sourcecode','boardid','tradedate','secid', 'open', 'low', 'high', 'close','value','volume','marketprice2',  'admittedquote', 'numtrades' ];
-  columnsHeaderToDisplay = ['Source','code','boardid','tradedate','secid', 'open', 'low', 'high', 'close', 'value','volume','market P2', 'admitted P', 'Qty Tr' ];
-  dataSource: MatTableDataSource<marketData>;
+  columnsToDisplay=['id','pair', 'base_code','base_iso','quote_code','quote_iso','rate','rate_date','rate_type','nominal','sourcecode'];
+  columnsHeaderToDisplay=['ID','Pair','Base1','Base2','Quote1','Quote2','Rate','Date','RateType','Ratio','Source'];
+  dataSource: MatTableDataSource<currencyRateList>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
   @Output() public modal_principal_parent = new EventEmitter();
@@ -45,16 +44,14 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
   
   @ViewChild('allSelected') private allSelected: MatOption;
-  readOnly: boolean = false; 
+  public readOnly: boolean = false; 
   panelOpenStateFirst = false;
   panelOpenStateSecond = true;
-  instruments: string[] = ['ClearAll'];
-  psearchParameters: any;
-  
-  filterednstrumentsLists : Observable<string[]>;
+  action ='';
+  pairs: string[] = ['ClearAll'];
+  filteredPairsLists : Observable<string[]>;
   
   dateOfOperaationsStart  = new Date ('2023-02-18')
-  balacedDateWithEntries : Date[]
   FirstOpenedAccountingDate : Date;
   filterDateFormated : string;
   boardIDs = []
@@ -72,6 +69,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
   }
   constructor(
     private AccountingDataService:AppAccountingService, 
+    private CurrenciesDataSrv: CurrenciesDataService,
     private MarketDataService: AppMarketDataService,
     private AuthServiceS:AuthService,  
     private AutoCompService:AtuoCompleteService,
@@ -82,8 +80,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
   ) {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToInstrumentData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
-    this.MarketDataService.getInstrumentDataGeneral('getBoardsDataFromInstruments').subscribe(boardsData => this.boardIDs=boardsData)
-    this.MarketDataService.getMarketDataSources('stock').subscribe(marketSourcesData => this.marketSources = marketSourcesData);
+    this.MarketDataService.getMarketDataSources('currency').subscribe(marketSourcesData => this.marketSources = marketSourcesData);
     this.loadingDataState = {Message:'',State: 'None'};
     this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data=>{
       this.FirstOpenedAccountingDate = data[0].FirstOpenedDate;
@@ -100,11 +97,11 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
       sourceCode: [[],Validators.required],
       overwritingCurrentData : [false]
     });
-    this.AutoCompService.getSecidLists();
+    this.AutoCompService.getCurrencyPairsList();
     this.secidList.setValidators(this.AutoCompService.secidValirator())
-    this.filterednstrumentsLists = this.secidList.valueChanges.pipe(
+    this.filteredPairsLists = this.secidList.valueChanges.pipe(
       startWith(''),
-      map(value => this.AutoCompService.filterList(value || '','secid'))
+      map(value => this.AutoCompService.filterList(value || '','currencyPairs'))
     );
   }
   formatDate (dateToFormat:any):string {
@@ -138,7 +135,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
     this.showSelectedSources();
   }
   async getMarketData(){
-    let functionToLoadData:any;
+/*     let functionToLoadData:any;
     let dateToLoad = this.formatDate(this.dateForLoadingPrices.value)
     this.loadingDataState = {Message : 'Loading', State: 'Pending'}
     this.loadedMarketData=null;
@@ -181,22 +178,20 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
           })
         }
       }
-    })
+    }) */
   }
   async ngAfterViewInit() {
     const number = 123456.789;
-    if (this.FormMode==='QuotesMode') {
-      // this.MarketDataService.getMarketData().subscribe (marketData => this.updateMarketDataTable(marketData)) 
-    } 
-    this.MarketDataService.getReloadMarketData().subscribe(marketData => {
-      this.updateMarketDataTable(marketData);
+      this.CurrenciesDataSrv.getCurrencyRatesList().subscribe (currencyData => this.updateCurrencyDataTable(currencyData)) 
+      this.CurrenciesDataSrv.getReloadCurrencyRatesList().subscribe(currencyData => {
+      // this.updateCurrencyDataTable(currencyData);
       this.loadingDataState = {State:'Success', Message:'Loading is complited'};
       this.loadMarketData.enable();
     });
     this.dateForLoadingPrices.setValue(moment(this.FirstOpenedAccountingDate))
   }
-  updateMarketDataTable (marketData:marketData[]) {
-    this.dataSource  = new MatTableDataSource(marketData);
+  updateCurrencyDataTable (currencyData:currencyRateList[]) {
+    this.dataSource  = new MatTableDataSource(currencyData);
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
   }
@@ -205,22 +200,22 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
     this.dataSource.filter = filterValue.trim().toLowerCase();
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
-  changedValueofChip (value:string) {this.instruments[this.instruments.length-1] = value}
+  changedValueofChip (value:string) {this.pairs[this.pairs.length-1] = value}
   add(event: MatChipInputEvent): void {
     const value = (event.value || '').trim();
     const valueArray = event.value.split(',');
-    (value)? this.instruments = [...this.instruments,...valueArray] : null;
+    (value)? this.pairs = [...this.pairs,...valueArray] : null;
     event.chipInput!.clear();
   }
   remove(account: string): void {
-    const index = this.instruments.indexOf(account);
-   (index >= 0)? this.instruments.splice(index, 1) : null
+    const index = this.pairs.indexOf(account);
+   (index >= 0)? this.pairs.splice(index, 1) : null
   }
   clearAll(event) {
     console.log('event', event.target.textContent);
-    event.target.textContent.trim() === 'ClearAll cancel'? this.instruments = ['ClearAll']: null;
+    event.target.textContent.trim() === 'ClearAll cancel'? this.pairs = ['ClearAll']: null;
   }
-  addChips (el: any, column: string) {(['accountNo'].includes(column))? this.instruments.push(el):null;}
+  addChips (el: any, column: string) {(['accountNo'].includes(column))? this.pairs.push(el):null;}
   updateFilter (event:Event, el: any, column: string) {
     this.filterlFormControl.patchValue(el);
     (column=='dateBalance')? this.filterDateFormated = new Date(el).toLocaleDateString() :null
@@ -236,22 +231,20 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
     return new Promise((resolve, reject) => {
       this.dataSource? this.dataSource.data=null : null;
     let searchObj = {};
-    let instrumentsList = [];
-    (this.instruments.indexOf('ClearAll') !== -1)? this.instruments.splice(this.instruments.indexOf('ClearAll'),1) : null;
-    (this.instruments.length===1)? instrumentsList = [...this.instruments,...this.instruments]: instrumentsList = this.instruments;
-    (this.instruments.length)? Object.assign (searchObj , {'secid': instrumentsList}): null;
+    let pairsList = [];
+    (this.pairs.indexOf('ClearAll') !== -1)? this.pairs.splice(this.pairs.indexOf('ClearAll'),1) : null;
+    (this.pairs.length===1)? pairsList = [...this.pairs,...this.pairs]: pairsList = this.pairs;
+    (this.pairs.length)? Object.assign (searchObj , {'pairs': pairsList}): null;
     (this.gRange.get('dateRangeStart').value)===null? null : Object.assign (searchObj , {
       'dateRangeStart':new Date (this.gRange.get('dateRangeStart').value).toDateString()});
     (this.gRange.get('dateRangeEnd').value)===null? null : Object.assign (searchObj , {
       'dateRangeEnd': new Date (this.gRange.get('dateRangeEnd').value).toDateString()});
     ( this.marketSource.value != null&&this.marketSource.value.length !=0)? Object.assign (searchObj , {'sourcecode': this.marketSource.value}): null;
-    ( this.boards.value != null&&this.boards.value.length !=0)? Object.assign (searchObj , {'boardid': this.boards.value}): null;
-    this.MarketDataService.getMarketData(undefined,this.FormMode==='ChartMode'? 'tradedate ASC':undefined,searchObj).subscribe (marketData  => {
+    this.CurrenciesDataSrv.getCurrencyRatesList(searchObj).subscribe (marketData  => {
       this.dataSource  = new MatTableDataSource(marketData);
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
-      this.instruments.unshift('ClearAll')
-      this.FormMode==='ChartMode'? this.MarketDataService.sendMarketDataForChart(marketData) : null;
+      this.pairs.unshift('ClearAll')
       this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (marketData.length,'en-US') + ' rows'},'Loaded ');
       resolve(marketData) 
     })
@@ -265,7 +258,8 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
    
   exportToExcel() {
    const fileName = "marketData.xlsx";
-   let data = this.dataSource.data.map( (row,ind) =>({
+   let data = this.dataSource.data
+/*    .map( (row,ind) =>({
     globalsource: row.globalsource,
     sourcecode: row. sourcecode,
     boardid: row. boardid, 
@@ -287,12 +281,9 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
     waval: Number(row.waval), 
     tradingsession: row. tradingsession,
     tradedate: new Date(row.tradedate)
-  }))
-  this.HandlingCommonTasksS.exportToExcel (data,"marketData")
+  })) */
+  this.HandlingCommonTasksS.exportToExcel (data,"currencyData")
  }
-  getMoexSecurities (){
-    this.MarketDataService.getMoexInstrumentsList().subscribe(data=>console.log('inserted - ',data))
-  }
   get  gRange () {return this.searchParametersFG.get('dataRange') } 
   get  dateRangeStart() {return this.searchParametersFG.get('dateRangeStart') } 
   get  dateRangeEnd() {return this.searchParametersFG.get('dateRangeEnd') } 

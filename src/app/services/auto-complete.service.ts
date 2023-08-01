@@ -10,6 +10,7 @@ export class AtuoCompleteService {
   fullInstrumentsLists :string [] =[];
   fullCurrenciesList :string [] =[];
   fullCounterPatiesList :string [] =[];
+  fullCurrencyPairsList :string [] =[];
   private subjectSecIDList = new Subject<string[]> ()
   constructor(
     private indexDBServiceS:indexDBService,
@@ -21,6 +22,7 @@ export class AtuoCompleteService {
       case 'secid': return this.fullInstrumentsLists.filter(option => option.toString().toLowerCase().includes(filterValue));
       case 'currency': return this.fullCurrenciesList.filter(option => JSON.stringify(Object.values(option)).toLowerCase().includes(filterValue));
       case 'cpty': return this.fullCounterPatiesList.filter(option => JSON.stringify(Object.values(option)).toLowerCase().includes(filterValue));
+      case 'currencyPairs': return this.fullCurrencyPairsList.filter(option => JSON.stringify(Object.values(option)).toLowerCase().includes(filterValue));
       default: return [];
     }
   }
@@ -36,11 +38,16 @@ export class AtuoCompleteService {
   getCurrencyList () {
    return this.indexDBServiceS.getIndexDBStaticTables('getCurrencyCodes').then(data=> this.fullCurrenciesList = data['data'])
   }
+  getCurrencyPairsList () {
+   return this.indexDBServiceS.getIndexDBStaticTables('getCurrencyPairsList').then(data=> this.fullCurrencyPairsList = data['data'])
+  }
   currencyValirator ():ValidatorFn {
     return (control:AbstractControl): ValidationErrors => {
-      console.log('curr',control.value,this.fullCurrenciesList);
       return (this.fullCurrenciesList.filter(el=>el['CurrencyCodeNum']===control.value).length? null:{currencyCode:true})
     }
+  }
+  getCurrecyCode (codeNum:string):string {
+    return this.fullCurrenciesList.filter(el=>el['CurrencyCodeNum']===codeNum)[0]['CurrencyCode']
   }
   secidValirator ():ValidatorFn {
     return (control:AbstractControl): ValidationErrors => {

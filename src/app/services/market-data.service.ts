@@ -143,8 +143,9 @@ export class AppMarketDataService {
     (sorting !== null) ?  Object.assign(params,{'sorting':sorting}): null;
     return this.http.get <marketData[]> ('/api/AAM/MD/getMarketData/', { params: params } )
   }
-  getMarketDataSources ():Observable<marketDataSources[]> {
-    return this.http.get <marketDataSources[]> ('/api/AAM/MD/getMarketDataSources/')
+  getMarketDataSources (sourceType:string):Observable<marketDataSources[]> {
+    let params = {sourceType:sourceType};
+    return this.http.get <marketDataSources[]> ('/api/AAM/MD/getMarketDataSources/', { params: params })
   }
   getMoexInstrumentsList ():Observable<any[]> {
     return this.http.get <any[]> ('/api/AAM/MD/getMoexInstrumentsList/')

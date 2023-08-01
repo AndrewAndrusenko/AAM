@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
-import { trades } from '../models/intefaces.model';
+import { couponPeriodInfo, trades } from '../models/intefaces.model';
 interface TradesDataSet {
   data:trades[],
   action:string
@@ -27,5 +27,9 @@ export class AppTradeService {
   }
   getTradeInformation():Observable<trades[]> {
     return this.http.get <trades[]> ('api/AAM/MD/getTradeData/')
+  }
+  getcouponPeriodInfo(vdate:string,tidinstrument:string):Observable<couponPeriodInfo[]> {
+    const params = {'vdate':vdate,'tidinstrument':tidinstrument };
+    return this.http.get <couponPeriodInfo[]> ('api/AAM/MD/getcouponPeriodInfo/', {params:params})
   }
 }

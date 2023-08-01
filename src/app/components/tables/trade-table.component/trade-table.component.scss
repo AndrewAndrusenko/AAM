@@ -36,11 +36,14 @@ tr.detail-row {
 }
 
 .mat-column-tidinstrument {
-  color: rgb(85, 167, 238)
+  color: var(--additionalLightBlue)
 }
 .mat-column-cpty {
-  color:rgb(53, 168, 110)
+  color: var(--additionalLightBlue)
 }
 .mat-column-tdate {
-  color:rgb(53, 168, 110)
+  color:var(--additionalLightGreen)
+}
+.mat-column-vdate {
+  color:var(--additionalLightGreen)
 }

@@ -162,7 +162,8 @@ const appInitializerFn = (accessRestirictions:AuthService) => {
         AppInstrumentCorpActionFormComponent,
         AccSWIFTTabComponent,
         AppTradeTableComponent,
-        AppTradeModifyFormComponent
+        AppTradeModifyFormComponent,
+        AppTableCurrenciesDataComponent
      ],
     bootstrap: [AppComponent],
     providers: [ 
@@ -190,3 +191,4 @@ import { ClientsTabComponent } from './components/main-page/tabs/clients-tab/cli
 import { AuthService } from './services/auth.service';
 import { AppInstrumentCorpActionFormComponent } from './components/forms/instrument-corp-action-form.component/instrument-corp-action-form.component';
 import { AccSWIFTTabComponent } from './components/main-page/tabs/SWIFT-tab.component/SWIFT-tab.component';
+import { AppTableCurrenciesDataComponent } from './components/tables/currencies-data-table.component/currencies-data-table.component';

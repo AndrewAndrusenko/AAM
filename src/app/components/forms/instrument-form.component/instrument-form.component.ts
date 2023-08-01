@@ -182,7 +182,6 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
     } else {
       this.CommonDialogsService.dialogCloseAll();
       this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' instrument'}, action)
-      this.MarketDataService.sendInstrumentDataToUpdateTableSource(result,'Deleted')
       this.MarketDataService.sendInstrumentDataToUpdateTableSource(this.addJoinedFieldsToResult(result), action)
     }
   }
