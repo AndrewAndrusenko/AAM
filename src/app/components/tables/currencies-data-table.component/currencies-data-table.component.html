@@ -41,12 +41,12 @@
       >cloud_download</mat-icon>
     </mat-panel-description>
   </mat-expansion-panel-header >
-  <h2 style=" color: rgb(44, 43, 43); text-align: center;" *ngIf="loadingDataState.State==='Pending'">Loading market data...</h2>
+  <h2 style=" color: rgb(44, 43, 43); text-align: center;" *ngIf="loadingDataState.state==='Pending'">Loading market data...</h2>
   <form class="submit"   [formGroup]="loadMarketData" style="font-size: 18px;   margin-top: 0.5%;">
     <button color = "primary" mat-raised-button title="getMarketData"
       style=" margin-left:1%; font-size: 18px; margin-right: 2%;"
       [disabled]="loadMarketData.disabled || loadMarketData.invalid"
-      (click)="getMarketData()">
+      (click)="getRatestData()">
       Get currencies rates data 
     </button>
     <mat-form-field style="margin-right: 2%; width: 12%;  color: rgb(44, 43, 43);" title="Date to upload">
@@ -56,14 +56,15 @@
     </mat-form-field> 
     <mat-slide-toggle #deleteOldMarketData formControlName="overwritingCurrentData"
       style="font-size:100%; letter-spacing: .05rem; margin-left: 2%;"
-      [style.color]="deleteOldMarketData.checked ? 'red':'rgb(44, 43, 43)' "
+      [style.color]="deleteOldMarketData.checked ? 'brown':'rgb(44, 43, 43)' "
       >Replace current rates data <br>{{deleteOldMarketData.checked? 'allowed!':'forbidden'}}
     </mat-slide-toggle>
-    <div *ngIf="loadingDataState.State==='Success'||loadingDataState.State==='terminated'" title="loadingDataState">
-      <h2 style="text-align: center;" [style.color]="loadingDataState.State=='terminated'? 'red':'rgb(44, 43, 43)'">
-        {{loadingDataState.Message}}
+    <div *ngIf="loadingDataState.state==='Success'||loadingDataState.state==='terminated'" title="loadingDataState">
+      <h2 style="text-align: center;" [style.color]="loadingDataState.state=='terminated'? 'brown':'rgb(44, 43, 43)'">
+        {{loadingDataState.message}} <br>
+        <span *ngIf="loadingDataState.loadedCount" [style.color]="'blue'">Uploaded {{loadingDataState.loadedCount}} rows</span><br>
+        <span *ngIf="loadingDataState.deletedCount" [style.color]="'brown'">Deleted {{loadingDataState.deletedCount}} rows</span> 
       </h2>
-      <pre  style="font-size: 18px;">{{loadedMarketData | json}}</pre>
     </div>
     <span style="display: flex; " title="marketSource-section">
       <section class="marketSource-section" style="color: rgb(44, 43, 43);" title="Select sources to upload"
@@ -94,22 +95,7 @@
     </span>
   </form>
   <mat-progress-bar *ngIf="loadMarketData.disabled" color="primary" mode="query"></mat-progress-bar>
-  <mat-expansion-panel *ngIf="logLoadingData.length" class="complex-search-entries" 
-    (opened)="statusLogPanelOpenState = true"
-    (closed)="statusLogPanelOpenState = false" >
-    <mat-expansion-panel-header >
-      <mat-panel-title>
-        Status Job Log
-      </mat-panel-title>
-      <mat-panel-description style="color: rgb(198, 255, 215);">
-        Total: Created  Tap to {{statusLogPanelOpenState? 'hide': 'show'}} details
-        <mat-icon color = 'accent'>done</mat-icon>
-      </mat-panel-description>
-    </mat-expansion-panel-header >
-    <pre style="font-size: 18px;">{{logLoadingData | json}}</pre>
-  </mat-expansion-panel>
 </mat-expansion-panel>
-
 <mat-expansion-panel class="headers-align" 
   (opened)="panelOpenStateSecond = true"
   (closed)="panelOpenStateSecond = false" >
