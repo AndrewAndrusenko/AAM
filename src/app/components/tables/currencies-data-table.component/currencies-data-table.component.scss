@@ -47,6 +47,19 @@ ul {
 .mat-column-rate {
   color: var(--additionalLightBlue);
 }
-
+.headers-align  .mat-expansion-panel-header {
+  background-color: #504f4f;
+}
+.headers-align .mat-expansion-panel-header-description {
+  justify-content: space-between;
+  align-items: center;
+  font-size: 20px;
+}
+.headers-align .mat-expansion-panel-header-title {
+  justify-content: space-between;
+  align-items: center;
+  color: rgb(210, 205, 205);
+  font-size: 20px;
+}
 
 

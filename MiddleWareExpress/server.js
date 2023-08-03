@@ -201,6 +201,7 @@ appServer.get('/AAM/MD/getcouponPeriodInfo/',jsPassport.authenticate('session') 
 /*----------------------CurrencyData----------------------------------------------------*/
 appServer.get('/AAM/getCurrencyData/',jsPassport.authenticate('session') , uiAmmCurrencyData.getCurrencyData)
 appServer.get('/AAM/getCbrRateDaily/',jsPassport.authenticate('session') , uiAmmCurrencyData.getCbrRateDaily)
+appServer.post('/AAM/modifyRatesData/',jsPassport.authenticate('session') , uiAmmCurrencyData.modifyRatesData)
 
 RedisService.TestRedis();
 RedisService.redisSetInstrumentList();

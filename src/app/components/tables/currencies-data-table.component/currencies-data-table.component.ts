@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Output, ViewChild, Input, AfterViewInit} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
-import {map, Observable, startWith } from 'rxjs';
+import {map, Observable, startWith, switchMap, tap } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import { currencyRateList,  marketDataSources, marketSourceSegements } from 'src/app/models/intefaces.model';
 import { AppAccountingService } from 'src/app/services/accounting.service';
@@ -39,7 +39,6 @@ export class AppTableCurrenciesDataComponent  implements AfterViewInit {
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
   @Output() public modal_principal_parent = new EventEmitter();
-  logLoadingData=[];
   statusLogPanelOpenState:boolean=false;
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
   
@@ -64,8 +63,10 @@ export class AppTableCurrenciesDataComponent  implements AfterViewInit {
   });
   marketDataDeleted: Object;
   loadingDataState: {
-    Message: string,
-    State:string 
+    message: string,
+    state:string, 
+    deletedCount:number,
+    loadedCount:number
   }
   constructor(
     private AccountingDataService:AppAccountingService, 
@@ -81,7 +82,8 @@ export class AppTableCurrenciesDataComponent  implements AfterViewInit {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToInstrumentData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.MarketDataService.getMarketDataSources('currency').subscribe(marketSourcesData => this.marketSources = marketSourcesData);
-    this.loadingDataState = {Message:'',State: 'None'};
+    this.loadingDataState={message:'',state:'',deletedCount:0,loadedCount:0}
+    this.loadingDataState.state = 'None';
     this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data=>{
       this.FirstOpenedAccountingDate = data[0].FirstOpenedDate;
     });
@@ -134,61 +136,68 @@ export class AppTableCurrenciesDataComponent  implements AfterViewInit {
     this.disableAllexceptOne(index);
     this.showSelectedSources();
   }
-  async getMarketData(){
-/*     let functionToLoadData:any;
+  completeLoading (currencyData:currencyRateList[]){
+    this.updateCurrencyDataTable(currencyData);
+    this.loadingDataState.state = 'Success';
+    this.loadingDataState.message = 'Loading is complited';
+    this.loadingDataState.loadedCount = currencyData.length;
+    this.loadMarketData.enable();
+    this.marketSources.forEach(el=>{
+      el.checkedAll=false;
+      el.segments.forEach(el=>el.checked=false)
+    });
+  }
+  async getRatestData(){
+    let functionToLoadData:any;
     let dateToLoad = this.formatDate(this.dateForLoadingPrices.value)
-    this.loadingDataState = {Message : 'Loading', State: 'Pending'}
+    this.loadingDataState.message = 'Loading';
+    this.loadingDataState.state = 'Pending';
     this.loadedMarketData=null;
     let sourcesData: marketSourceSegements[] = this.sourceCode.value
     this.loadMarketData.disable();
     let sourceCodesArray:string[] = sourcesData.map(el=>{return el.sourceCode})
     console.log('sb',sourcesData[0].sourceGlobal);
     switch (sourcesData[0].sourceGlobal) {
-      case 'marketstack.com':
-        functionToLoadData = this.MarketDataService.loadMarketDataMarketStack.bind(this.MarketDataService)
-      break;
-      case 'iss.moex.com':
-        functionToLoadData = this.MarketDataService.loadMarketDataMOEXiss.bind(this.MarketDataService)
+      case 'cbr.ru':
+        functionToLoadData = this.CurrenciesDataSrv.getCbrRateDaily.bind(this.CurrenciesDataSrv)
       break;
     }
-    this.MarketDataService.checkLoadedMarketData (sourceCodesArray,dateToLoad).subscribe(async data=>{
+    await functionToLoadData(sourcesData, dateToLoad,'getRatesDate').pipe(
+      tap(data=> console.log('date to check ',data)),
+      switchMap (ratesDate=>this.CurrenciesDataSrv.checkLoadedRatesData (sourceCodesArray,ratesDate['dateToCheck'].toString()))
+    ).subscribe(async data=>{
       this.loadedMarketData = data;
       if (!data.length) {
-        this.logLoadingData = await functionToLoadData(sourcesData, dateToLoad);
-        this.loadingDataState = {Message:'Loading is complited.', State:'Success'};
-        this.marketSources.forEach(el=>el.checkedAll=false);
+       await functionToLoadData(sourcesData, dateToLoad,undefined).subscribe(currencyData => this.completeLoading(currencyData))
       }
       else {
         if (!this.overwritingCurrentData.value) { 
           this.loadMarketData.enable();
-          this.loadingDataState = {Message:'Loading terminated. Data have been already loaded!', State : 'terminated'}
+          this.loadingDataState = {message:'Loading terminated. Data have been already loaded!', state : 'terminated',deletedCount:0,loadedCount:0}
         } else {
           this.CommonDialogsService.confirmDialog('Delete all data for codes: ' + sourceCodesArray).subscribe(isConfirmed=>{
             if (isConfirmed.isConfirmed){
-              this.MarketDataService.deleteOldMarketData(sourceCodesArray,dateToLoad).then(async rowsDeleted => {
+              this.CurrenciesDataSrv.deleteOldRateData(sourceCodesArray,dateToLoad).subscribe(async rowsDeleted => {
                 this.marketDataDeleted = rowsDeleted;
-                this.logLoadingData = await functionToLoadData(sourcesData, dateToLoad);
-                this.loadingDataState = {Message:'Have been deleted '+rowsDeleted+' of old data', State : 'Success'}
+                this.loadingDataState.deletedCount = rowsDeleted.length;
+                await functionToLoadData(sourcesData, dateToLoad,undefined).subscribe(currencyData => this.completeLoading(currencyData))
                 this.marketSources.forEach(el=>el.checkedAll=false)
               })
             } else {
               this.loadMarketData.enable()
-              this.loadingDataState = {Message: 'Loading has been canceled.', State: 'terminated'}
+              this.loadingDataState.message= 'Loading has been canceled.';
+              this.loadingDataState.state= 'terminated';
             }
           })
         }
       }
-    }) */
+    }) 
   }
   async ngAfterViewInit() {
     const number = 123456.789;
-      this.CurrenciesDataSrv.getCurrencyRatesList().subscribe (currencyData => this.updateCurrencyDataTable(currencyData)) 
-      this.CurrenciesDataSrv.getReloadCurrencyRatesList().subscribe(currencyData => {
-      // this.updateCurrencyDataTable(currencyData);
-      this.loadingDataState = {State:'Success', Message:'Loading is complited'};
-      this.loadMarketData.enable();
-    });
-    this.dateForLoadingPrices.setValue(moment(this.FirstOpenedAccountingDate))
+    this.CurrenciesDataSrv.getCurrencyRatesList().subscribe (currencyData => this.updateCurrencyDataTable(currencyData)) 
+    // this.dateForLoadingPrices.setValue(moment(this.FirstOpenedAccountingDate))
+    this.dateForLoadingPrices.setValue(moment(new Date('2023/07/26')))
   }
   updateCurrencyDataTable (currencyData:currencyRateList[]) {
     this.dataSource  = new MatTableDataSource(currencyData);

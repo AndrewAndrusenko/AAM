@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { currencyRate, currencyRateList } from '../models/intefaces.model';
+import { currencyRate, currencyRateList, marketSourceSegements } from '../models/intefaces.model';
 import { Observable, Subject } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
@@ -9,7 +9,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 export class CurrenciesDataService {
   constructor(private http : HttpClient) { }
   header = new HttpHeaders();
-  currencyRatesList$ = new Subject();
+  // currencyRatesList$ = new Subject<currencyRateList[]>();
   convertAmount (amount:string,base:string, quote:string, date: string) {
     this.getCurrencyRate(base,quote,date).subscribe(data => console.log('rate',data))
    }
@@ -31,13 +31,23 @@ export class CurrenciesDataService {
     (searchParameters !== null) ?  params = {...params,...searchParameters}: null;
      return this.http.get <currencyRateList[]> ('api/AAM/getCurrencyData/',{params:params})
    }
-   sendReloadCurrencyRatesList () {
-    this.currencyRatesList$.next(true);
+/*    sendReloadCurrencyRatesList (dataSet:currencyRateList[]) {
+    this.currencyRatesList$.next(dataSet);
    }
-   getReloadCurrencyRatesList () {
+   getReloadCurrencyRatesList():Observable<currencyRateList[]> {
     return this.currencyRatesList$.asObservable();
+   } */
+   checkLoadedRatesData (sourceCodesArray:string[], date:string):Observable<any>{
+    let params = {dataType:'checkLoadedRatesData',date:date, sourcecode:sourceCodesArray};
+    return this.http.get <any[]> ('api/AAM/getCurrencyData/',{params:params})
    }
-   getCbrRateDaily(date:string) {
-    this.http.get ('api/AAM/getCbrRateDaily/').subscribe()
+   deleteOldRateData (sourceCodesArray:string[], date:string):Observable<any>{
+    let params = {dataType:'deleteOldRateData',date:date, sourcecode:sourceCodesArray};
+    return this.http.post <any[]> ('api/AAM/modifyRatesData/',{params:params})
+   }
+   
+   getCbrRateDaily(sourceCodes:marketSourceSegements[],date:string, dataType:string):Observable<any> {
+    let params = {date:date,dataType:dataType};
+    return this.http.get <any[]> ('api/AAM/getCbrRateDaily/',{params:params});
    }
 }

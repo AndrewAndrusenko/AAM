@@ -28,6 +28,12 @@ async function getCurrencyData (request,response) {
     }
   });
   switch (request.query.dataType) {
+    case 'checkLoadedRatesData':
+      console.log('check',request.query.date);
+      sql = 'SELECT rate FROM public.dcurrencies_rates '+
+      ' WHERE rate_date::timestamp without time zone = ${date} and sourcecode=ANY(array[${sourcecode}]) LIMIT 1 ;'
+    break;
+    case 'getPairsList':
     case 'getCurrencyCodes':
       sql = 'SELECT  "CurrencyCodeNum","CurrencyCode","CurrencyName" FROM public."dCurrencies";'
     break;
@@ -46,26 +52,57 @@ async function getCurrencyData (request,response) {
       sql +=conditionsCurrency.slice(0,-5) + 'ORDER BY id DESC;'
     break;
   }
-  console.log('conditionsCurrency',sql);
   sql = pgp.as.format(sql,request.query);
   console.log('sql',sql);
   db_common_api.queryExecute(sql,response,undefined,request.query.dataType);
 }
-async function getCbrRateDaily (start) {
-  let url='https://www.cbr.ru/scripts/XML_daily.asp?date_req=26/07/2023'
-  console.log('url',url,start);
-  return new Promise ((resolve) => {
-    https.get(url, (resp) => {
-      let data = '';
-      resp.on('data', (chunk) => {data += chunk});
-      resp.on('end', () => {
-        console.log('data xml', data);
-      })
-    })
-  })
+async function modifyRatesData (request,response) {
+  let sql='';
+  console.log('modifyRatesData',request.body);
+  switch (request.body.params.dataType) {
+    case 'deleteOldRateData':
+      sql = 'DELETE FROM public.dcurrencies_rates '+
+      'WHERE rate_date::timestamp without time zone = ${date} and sourcecode=ANY(array[${sourcecode}]) RETURNING * ;'
+    break;
+  }
+  sql = pgp.as.format(sql,request.body.params);
+  console.log('sql',sql);
+  db_common_api.queryExecute(sql,response,undefined,request.body.params.dataType);
 }
 
+async function getCbrRateDaily (request,response) {
+  console.log('request.query',request.query);
+  let dateToLoad=request.query.date.split('-')
+  dateToLoad = dateToLoad[2] +'/'+dateToLoad[1]+'/'+dateToLoad[0]
+  console.log('dateToLoad',dateToLoad);
+  let url='https://www.cbr.ru/scripts/XML_daily.asp?date_req='+dateToLoad
+    https.get(url, (resp) => {
+      let data = '';
+      resp.on('error', (e) => console.log('err'));
+      resp.on('data', (chunk) => data += chunk);
+      resp.on('end', () =>  {
+        let ind=data.indexOf("Date=")
+        let dateToCheck =data.substring(ind+6,ind+16).split('.')
+        dateToCheck = dateToCheck[2]+'/'+dateToCheck[1]+'/'+dateToCheck[0]
+        console.log('date',data.substring(ind+6,ind+16))
+        if (request.query.dataType='getRatesDate') {
+          return response.status(200).send({dateToCheck:dateToCheck})
+        } 
+        response.type('application/xml')
+        sql = "INSERT INTO dcurrencies_rates (quote_code,rate_type,sourcecode,rate,base_code,nominal,rate_date) "+
+        "with xmlCBR(x) as (values ('"+ data +"'::xml)) "+
+        "SELECT  810 as quote_code, 1 as rate_type,'CurCBR',  "+
+        "CAST(replace(CAST (unnest (xpath('//ValCurs/Valute/Value/text()', x)) as text),',','.') as numeric) AS rate, "+
+        "CAST(CAST ( unnest (xpath('//ValCurs/Valute/NumCode/text()', x)) as text)as numeric) AS base_code , "+
+        "CAST(CAST( unnest (xpath('//ValCurs/Valute/Nominal/text()', x))as text) as numeric) AS nominal ,  "+
+        "TO_DATE(CAST ((xpath('//ValCurs/@Date', x))[1] as text),'DD.MM.YYYY') AS rate_date  "+
+        "from xmlCBR RETURNING *;"
+        db_common_api.queryExecute(sql,response,undefined,'insertCbrRateFromXML');
+      })
+    })
+}
 module.exports = {
   getCurrencyData,
-  getCbrRateDaily
+  getCbrRateDaily,
+  modifyRatesData
 }
