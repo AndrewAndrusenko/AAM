@@ -31,12 +31,6 @@ export class CurrenciesDataService {
     (searchParameters !== null) ?  params = {...params,...searchParameters}: null;
      return this.http.get <currencyRateList[]> ('api/AAM/getCurrencyData/',{params:params})
    }
-/*    sendReloadCurrencyRatesList (dataSet:currencyRateList[]) {
-    this.currencyRatesList$.next(dataSet);
-   }
-   getReloadCurrencyRatesList():Observable<currencyRateList[]> {
-    return this.currencyRatesList$.asObservable();
-   } */
    checkLoadedRatesData (sourceCodesArray:string[], date:string):Observable<any>{
     let params = {dataType:'checkLoadedRatesData',date:date, sourcecode:sourceCodesArray};
     return this.http.get <any[]> ('api/AAM/getCurrencyData/',{params:params})

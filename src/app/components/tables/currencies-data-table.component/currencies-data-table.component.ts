@@ -31,8 +31,6 @@ export class AppTableCurrenciesDataComponent  implements AfterViewInit {
   @Input() FormMode:string = 'Full'
   loadMarketData: FormGroup;
   marketSources:marketDataSources[] =  [];
-  loadedMarketData: any []= []; 
-  marketDataToLoad: any;
   columnsToDisplay=['id','pair', 'base_code','base_iso','quote_code','quote_iso','rate','rate_date','rate_type','nominal','sourcecode'];
   columnsHeaderToDisplay=['ID','Pair','Base1','Base2','Quote1','Quote2','Rate','Date','RateType','Ratio','Source'];
   dataSource: MatTableDataSource<currencyRateList>;
@@ -82,8 +80,7 @@ export class AppTableCurrenciesDataComponent  implements AfterViewInit {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToInstrumentData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.MarketDataService.getMarketDataSources('currency').subscribe(marketSourcesData => this.marketSources = marketSourcesData);
-    this.loadingDataState={message:'',state:'',deletedCount:0,loadedCount:0}
-    this.loadingDataState.state = 'None';
+    this.loadingDataState={message:'',state:'None',deletedCount:0,loadedCount:0}
     this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data=>{
       this.FirstOpenedAccountingDate = data[0].FirstOpenedDate;
     });
@@ -146,17 +143,15 @@ export class AppTableCurrenciesDataComponent  implements AfterViewInit {
       el.checkedAll=false;
       el.segments.forEach(el=>el.checked=false)
     });
+    this.overwritingCurrentData.patchValue(false)
   }
   async getRatestData(){
     let functionToLoadData:any;
     let dateToLoad = this.formatDate(this.dateForLoadingPrices.value)
-    this.loadingDataState.message = 'Loading';
-    this.loadingDataState.state = 'Pending';
-    this.loadedMarketData=null;
+    this.loadingDataState={message:'Loading',state:'Pending',deletedCount:0,loadedCount:0}
     let sourcesData: marketSourceSegements[] = this.sourceCode.value
     this.loadMarketData.disable();
     let sourceCodesArray:string[] = sourcesData.map(el=>{return el.sourceCode})
-    console.log('sb',sourcesData[0].sourceGlobal);
     switch (sourcesData[0].sourceGlobal) {
       case 'cbr.ru':
         functionToLoadData = this.CurrenciesDataSrv.getCbrRateDaily.bind(this.CurrenciesDataSrv)
@@ -166,7 +161,6 @@ export class AppTableCurrenciesDataComponent  implements AfterViewInit {
       tap(data=> console.log('date to check ',data)),
       switchMap (ratesDate=>this.CurrenciesDataSrv.checkLoadedRatesData (sourceCodesArray,ratesDate['dateToCheck'].toString()))
     ).subscribe(async data=>{
-      this.loadedMarketData = data;
       if (!data.length) {
        await functionToLoadData(sourcesData, dateToLoad,undefined).subscribe(currencyData => this.completeLoading(currencyData))
       }
@@ -175,7 +169,7 @@ export class AppTableCurrenciesDataComponent  implements AfterViewInit {
           this.loadMarketData.enable();
           this.loadingDataState = {message:'Loading terminated. Data have been already loaded!', state : 'terminated',deletedCount:0,loadedCount:0}
         } else {
-          this.CommonDialogsService.confirmDialog('Delete all data for codes: ' + sourceCodesArray).subscribe(isConfirmed=>{
+          this.CommonDialogsService.confirmDialog('Delete all rates for the date '+ dateToLoad+ ' and codes ' + sourceCodesArray).subscribe(isConfirmed=>{
             if (isConfirmed.isConfirmed){
               this.CurrenciesDataSrv.deleteOldRateData(sourceCodesArray,dateToLoad).subscribe(async rowsDeleted => {
                 this.marketDataDeleted = rowsDeleted;
@@ -196,8 +190,8 @@ export class AppTableCurrenciesDataComponent  implements AfterViewInit {
   async ngAfterViewInit() {
     const number = 123456.789;
     this.CurrenciesDataSrv.getCurrencyRatesList().subscribe (currencyData => this.updateCurrencyDataTable(currencyData)) 
-    // this.dateForLoadingPrices.setValue(moment(this.FirstOpenedAccountingDate))
-    this.dateForLoadingPrices.setValue(moment(new Date('2023/07/26')))
+    this.dateForLoadingPrices.setValue(moment(this.FirstOpenedAccountingDate))
+    // this.dateForLoadingPrices.setValue(moment(new Date('2023/07/26')))
   }
   updateCurrencyDataTable (currencyData:currencyRateList[]) {
     this.dataSource  = new MatTableDataSource(currencyData);
@@ -260,9 +254,7 @@ export class AppTableCurrenciesDataComponent  implements AfterViewInit {
   })
   }
   toggleAllSelection(elem:string, allSelected: boolean) {
-    allSelected? this.searchParametersFG.get(elem).patchValue(
-      elem==='marketSource'? [...this.marketSources.map(item => item.segments.map(el => el.sourceCode)),0].flat() : [...this.boardIDs.map(item => item.boardid
-    ), 0]) : this.searchParametersFG.get(elem).patchValue([]);
+    allSelected? this.searchParametersFG.get(elem).patchValue([...this.marketSources.map(item => item.segments.map(el => el.sourceCode)),0].flat()) : this.searchParametersFG.get(elem).patchValue([]);
   }
    
   exportToExcel() {

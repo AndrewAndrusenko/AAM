@@ -27,7 +27,7 @@
   </button>
 </span>
 <mat-expansion-panel *ngIf="FormMode==='QuotesMode'&&!disabledControlElements" 
-  class="first-expansion" 
+class="headers-align" 
   (opened)="panelOpenStateFirst = true"
   (closed)="panelOpenStateFirst = false" 
   style="width: 100%;">
@@ -41,35 +41,13 @@
       >cloud_download</mat-icon>
     </mat-panel-description>
   </mat-expansion-panel-header >
-  <h2 style=" color: rgb(44, 43, 43); text-align: center;" *ngIf="loadingDataState.state==='Pending'">Loading market data...</h2>
+  <h2 style="  text-align: center;" class="textDim" *ngIf="loadingDataState.state==='Pending'">Loading market data...</h2>
   <form class="submit"   [formGroup]="loadMarketData" style="font-size: 18px;   margin-top: 0.5%;">
-    <button color = "primary" mat-raised-button title="getMarketData"
-      style=" margin-left:1%; font-size: 18px; margin-right: 2%;"
-      [disabled]="loadMarketData.disabled || loadMarketData.invalid"
-      (click)="getRatestData()">
-      Get currencies rates data 
-    </button>
-    <mat-form-field style="margin-right: 2%; width: 12%;  color: rgb(44, 43, 43);" title="Date to upload">
-      <input matInput formControlName = "dateForLoadingPrices" [matDatepicker]="dateForMarketData" placeholder="Date to upload">
-      <mat-datepicker-toggle matSuffix [for]="dateForMarketData"></mat-datepicker-toggle>
-      <mat-datepicker  #dateForMarketData></mat-datepicker>
-    </mat-form-field> 
-    <mat-slide-toggle #deleteOldMarketData formControlName="overwritingCurrentData"
-      style="font-size:100%; letter-spacing: .05rem; margin-left: 2%;"
-      [style.color]="deleteOldMarketData.checked ? 'brown':'rgb(44, 43, 43)' "
-      >Replace current rates data <br>{{deleteOldMarketData.checked? 'allowed!':'forbidden'}}
-    </mat-slide-toggle>
-    <div *ngIf="loadingDataState.state==='Success'||loadingDataState.state==='terminated'" title="loadingDataState">
-      <h2 style="text-align: center;" [style.color]="loadingDataState.state=='terminated'? 'brown':'rgb(44, 43, 43)'">
-        {{loadingDataState.message}} <br>
-        <span *ngIf="loadingDataState.loadedCount" [style.color]="'blue'">Uploaded {{loadingDataState.loadedCount}} rows</span><br>
-        <span *ngIf="loadingDataState.deletedCount" [style.color]="'brown'">Deleted {{loadingDataState.deletedCount}} rows</span> 
-      </h2>
-    </div>
-    <span style="display: flex; " title="marketSource-section">
-      <section class="marketSource-section" style="color: rgb(44, 43, 43);" title="Select sources to upload"
+    <mat-label class="marketSource-margin" [style.color]="'var(--faovritesNodeColor)'">Select sources to upload</mat-label> <br>
+    <span style="display: flex;   align-items:flex-start;  margin-right: 1%;margin-top: 0.2%;">
+      <span style="display:grid;  margin-top: 1%;"
         *ngFor="let marketSource of marketSources;let i=index" >
-        <span class="example-list-section" >
+        <span class="example-list-section" style="margin-left: 3%;" >
           <mat-checkbox  class="marketSource-margin"
           [indeterminate]="marketSource.indeterminate"
           (change)="marketSource.checkedAll=!marketSource.checkedAll;
@@ -91,8 +69,34 @@
             </li>
           </ul>
         </span> 
-      </section>
-    </span>
+      </span>
+
+    <mat-form-field style="margin-left:1%;margin-right: 2%; width: 12%;;"class="textDim" title="Date to upload">
+      <input matInput formControlName = "dateForLoadingPrices" [matDatepicker]="dateForMarketData" placeholder="Date to upload">
+      <mat-datepicker-toggle matSuffix [for]="dateForMarketData"></mat-datepicker-toggle>
+      <mat-datepicker  #dateForMarketData></mat-datepicker>
+    </mat-form-field> 
+
+    <button color = "primary" mat-raised-button title="getMarketData"
+    style=" margin-left:1%; font-size: 18px; margin-right: 1%; margin-top: 1%; padding: 1%;"
+    [disabled]="loadMarketData.disabled || loadMarketData.invalid"
+    (click)="getRatestData()">
+    Get currencies rates data 
+  </button>
+  <mat-slide-toggle #deleteOldMarketData formControlName="overwritingCurrentData"
+  style="font-size:80%; letter-spacing: .05rem; margin-left: 2%; margin-top: 2%;"
+  [class]="deleteOldMarketData.checked ? 'textForbidden':'textDim' "
+  >Replace current rates data <br>{{deleteOldMarketData.checked? 'allowed!':'forbidden'}}
+</mat-slide-toggle>
+  </span>
+
+    <div *ngIf="loadingDataState.state==='Success'||loadingDataState.state==='terminated'" title="loadingDataState">
+      <h2 style="text-align: center;" [style.color]="loadingDataState.state=='terminated'? 'crimson':' rgb(168, 162, 162)'">
+        {{loadingDataState.message}} <br>
+        <span *ngIf="loadingDataState.loadedCount" [style.color]="'blue'">Uploaded {{loadingDataState.loadedCount}} rows</span><br>
+        <span *ngIf="loadingDataState.deletedCount" [style.color]="'brown'">Deleted {{loadingDataState.deletedCount}} rows</span> 
+      </h2>
+    </div>
   </form>
   <mat-progress-bar *ngIf="loadMarketData.disabled" color="primary" mode="query"></mat-progress-bar>
 </mat-expansion-panel>
@@ -110,7 +114,7 @@
   </mat-expansion-panel-header >
   <form class="submit" [formGroup]="searchParametersFG"  style="font-size: 18px; ">
     <span style="display: flex;  justify-content: space-between;   align-items:flex-start;  margin-right: 1%;margin-top: 0.2%;">
-      <span style="display:grid; width: 15%;">
+      <span style="display:grid; width: 15%; margin-top: 1%;">
         <button color = "primary"  class= "button-color" mat-raised-button 
           style="margin:1%; font-size: 18px;"
           (click)="submitQuery()">
@@ -124,7 +128,7 @@
         </button>
       </span>
       <mat-form-field appearance="fill" title="Date range filter">
-        <mat-label>Enter a date range</mat-label>
+        <!-- <mat-label>Enter a date range</mat-label> -->
         <mat-date-range-input [formGroup]="dataRange" [rangePicker]="picker" >
           <input matStartDate  placeholder="Start date" formControlName="dateRangeStart">
           <input matEndDate  placeholder="End date" formControlName="dateRangeEnd">
@@ -137,14 +141,14 @@
       </mat-form-field>
       <mat-form-field  style="width: 25%;">
         <mat-label>MarketDataSource</mat-label>
-        <mat-select  #marketSource formControlName="marketSource"  multiple> 
+        <mat-select  #marketSource formControlName="marketSource" multiple> 
           <mat-option #allSelected [value]="0"
           (click)="toggleAllSelection('marketSource', allSelected.selected)" >
             ALL - {{this.allSelected.selected? 'Clear' :'Select' }} All 
           </mat-option>
           <mat-optgroup *ngFor="let marketSource of marketSources" [label]="marketSource.sourceName">
           <mat-option *ngFor="let segment of marketSource.segments" [value]="segment.sourceCode">
-              {{segment.description}}
+            {{segment.description}}
           </mat-option>
         </mat-optgroup>
         </mat-select>

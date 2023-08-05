@@ -85,7 +85,8 @@ async function getCbrRateDaily (request,response) {
         let dateToCheck =data.substring(ind+6,ind+16).split('.')
         dateToCheck = dateToCheck[2]+'/'+dateToCheck[1]+'/'+dateToCheck[0]
         console.log('date',data.substring(ind+6,ind+16))
-        if (request.query.dataType='getRatesDate') {
+        if (request.query.dataType==='getRatesDate') {
+          console.log('getRatesDate',);
           return response.status(200).send({dateToCheck:dateToCheck})
         } 
         response.type('application/xml')
@@ -97,6 +98,7 @@ async function getCbrRateDaily (request,response) {
         "CAST(CAST( unnest (xpath('//ValCurs/Valute/Nominal/text()', x))as text) as numeric) AS nominal ,  "+
         "TO_DATE(CAST ((xpath('//ValCurs/@Date', x))[1] as text),'DD.MM.YYYY') AS rate_date  "+
         "from xmlCBR RETURNING *;"
+        console.log('sql',sql);
         db_common_api.queryExecute(sql,response,undefined,'insertCbrRateFromXML');
       })
     })

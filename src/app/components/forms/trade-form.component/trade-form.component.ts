@@ -63,7 +63,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
       id_price_currency:['810', { validators:  Validators.required}],
       id_settlement_currency:['810', { validators:  Validators.required}],
       tidorder:{value:null, disabled: false},allocatedqty:{value:null, disabled: false},idportfolio:{value:null, disabled: false},
-      id_buyer_instructions:{value:null, disabled: false},id_seller_instructions:{value:null, disabled: false},id_broker:{value:null, disabled: false}, details:{value:null, disabled: false},cpty_name:{value:null, disabled: false},security_group_name :{value:null, disabled: false},   secid_name:{value:null, disabled: false}, trade_amount:[null], facevalue:[null],faceunit:[null], code_price_currency:[null], code_settlement_currency:[null]
+      id_buyer_instructions:{value:null, disabled: false},id_seller_instructions:{value:null, disabled: false},id_broker:{value:null, disabled: false}, details:{value:null, disabled: false},cpty_name:{value:null, disabled: false},security_group_name :{value:null, disabled: false},   secid_name:{value:null, disabled: false}, trade_amount:[null], facevalue:[null],faceunit:[null], code_price_currency:[null], code_settlement_currency:[null],settlement_amount:[null],settlement_rate:[null] 
     })
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
@@ -80,7 +80,6 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     this.AutoCompService.getCounterpartyLists().then (()=>this.id_cpty.setValidators(this.AutoCompService.counterPartyalirator(this.cpty_name)));
   }
   ngAfterContentInit (): void {
-    // this.CurrenciesDataSvc.getCbrRateDaily('');
     this.filterednstrumentsLists = this.tidinstrument.valueChanges.pipe(
       startWith(''),
       distinctUntilChanged(),
@@ -99,6 +98,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
       this.price.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>this.tradeAmountCalculation());
       this.qty.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>this.tradeAmountCalculation());
       this.tradeModifyForm.patchValue(this.data);
+      this.price_type.value==2? this.id_price_currency.patchValue(this.faceunit.value): null;
       this.action == 'View'|| this.disabledControlElements?  this.tradeModifyForm.disable() : null;
       this.CurrenciesDataSvc.convertAmount('111','978','810','2023-05-16')
   }
@@ -119,6 +119,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
       this.secid_name.patchValue(item.name+' ('+item.security_type_name+')')
       this.price_type.patchValue(this.securityTypes.filter(el=>el['security_type_name']===item.security_type_name)[0]['price_type'])
       this.facevalue.patchValue(item.facevalue)
+      this.faceunit.patchValue(item.faceunit)
       this.tradeAmountCalculation();
       this.dialogInstrumentTabletRef.close(); 
     });
@@ -199,7 +200,9 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
   get cpty_name() {return this.tradeModifyForm.get('cpty_name')}
   get trade_amount() {return this.tradeModifyForm.get('trade_amount')}
   get facevalue() {return this.tradeModifyForm.get('facevalue')}
+  get faceunit() {return this.tradeModifyForm.get('faceunit')}
   get details() {return this.tradeModifyForm.get('details')}
   get code_price_currency() {return this.tradeModifyForm.get('code_price_currency')}
   get code_settlement_currency() {return this.tradeModifyForm.get('code_settlement_currency')}
+  get settlement_amount() {return this.tradeModifyForm.get('settlement_amount')}
 }
