@@ -43,11 +43,12 @@ export class AtuoCompleteService {
   }
   currencyValirator ():ValidatorFn {
     return (control:AbstractControl): ValidationErrors => {
-      return (this.fullCurrenciesList.filter(el=>el['CurrencyCodeNum']===control.value).length? null:{currencyCode:true})
+      return (this.fullCurrenciesList.filter(el=>el['CurrencyCodeNum']===control.value).length||!control.value? null:{currencyCode:true})
     }
   }
-  getCurrecyCode (codeNum:string):string {
-    return this.fullCurrenciesList.filter(el=>el['CurrencyCodeNum']===codeNum)[0]['CurrencyCode']
+  getCurrecyData (codeNum:string):string {
+    console.log('codeNum',codeNum);
+    return this.fullCurrenciesList.filter(el=>el['CurrencyCodeNum']===codeNum)[0]
   }
   secidValirator ():ValidatorFn {
     return (control:AbstractControl): ValidationErrors => {

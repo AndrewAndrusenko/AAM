@@ -1,7 +1,9 @@
 <mat-toolbar color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4">
-  <span>{{action}} Instrument | ID {{idtrade.value}} | FV {{faceunit.value}} {{price_type.value}}</span>
+  <span>{{action}} Instrument | ID {{idtrade.value}} 
+    </span>
   <span class="example-spacer"></span>
 </mat-toolbar>
+<!-- <pre>{{tradeModifyForm.errors|json}}</pre> -->
 <!-- <pre style="font-size: 16px;">{{id_price_currency?.errors | json}}</pre> -->
 <form class="submit" [formGroup]="tradeModifyForm" style="background-color: rgb(40, 39, 39);">
   <button mat-raised-button color="accent" 
@@ -11,9 +13,10 @@
     {{action}} Trade
   </button> 
   <br>
-  <mat-checkbox style= "font-size: 14px; color:rgb(255, 255, 255); padding: 2%;" #submitbox checked="false" 
+  <mat-checkbox style= "font-size: 14px; color:rgb(255, 255, 255); margin-top: 0.5%;" #submitbox checked="false" 
     (click)=" tradeModifyForm.markAllAsTouched();
-              tradeModifyForm.updateValueAndValidity();">
+              tradeModifyForm.updateValueAndValidity();
+              showErrors()">
     Submit Data
   </mat-checkbox>
   <h3 style="color:rgb(177, 174, 174)" *ngIf="tradeModifyForm.valid"> 
@@ -39,6 +42,9 @@
       <mat-error  *ngIf="tdate?.errors?.['required']">
         Required!   
       </mat-error>
+      <mat-hint *ngIf="tdate.valid">
+        {{tdate.value|date}}
+      </mat-hint>
     </mat-form-field>
     <mat-form-field style="width: 20%;" >
       <input matInput [matDatepicker]="valuedate" [placeholder]="'Value Date'" formControlName="vdate" >
@@ -47,6 +53,9 @@
       <mat-error *ngIf="vdate?.errors?.['required']">
         Required!   
       </mat-error>
+      <mat-hint *ngIf="vdate.valid">
+        {{vdate.value|date}}
+      </mat-hint>
     </mat-form-field>
       <span style="display:grid;  margin-top: 2%; font-size:18px ; margin-bottom: -5%;">
       <span style="color: rgb(20, 173, 122)">
@@ -55,11 +64,11 @@
      <br> <span style="color: rgb(126, 105, 243);margin-top: 2%;">
         Accured Interest :  {{accured_interest.value | currency :this.code_price_currency.value+' '}} 
       </span>
-      <br><span style="margin-top: 2%;" *ngIf="id_settlement_currency.value !== id_price_currency.value">
-        Settlement Amount :  {{ trade_amount.value/100 | currency :this.code_settlement_currency.value+' '}} 
+      <br><span style="margin-top: 2%;" *ngIf="Number(settlement_amount.value)">
+        Settlement Amount :  {{ settlement_amount.value | currency :this.code_settlement_currency.value+' '}} 
       </span>
-      <span *ngIf="id_settlement_currency.value === id_price_currency.value">
-        Settlement Amount :  {{ trade_amount.value | currency :this.code_price_currency.value+' '}} 
+      <span  style="margin-top: 2%; color: brown;"  *ngIf="!Number(settlement_amount.value)">
+        Settlement Amount :  {{ settlement_amount.value }} 
       </span>
     </span>
     </span>
@@ -68,9 +77,9 @@
     <mat-form-field style="width: 27%;" title="Type to find(any filed). Click to select">
       <input matInput [placeholder]="'SecID'" formControlName="tidinstrument" [matAutocomplete]="autoSecID"  >
       <mat-autocomplete #autoSecID="matAutocomplete" 
-        (optionSelected)="secidChange($event.option.viewValue) ">
+        (optionSelected)="secidAutocolmplete($event.option.viewValue) ">
         <mat-option #selectedsecid *ngFor="let instrument of filterednstrumentsLists | async" [value]="instrument[0]" >
-          {{instrument[0]}} - {{instrument[1]}} - {{instrument[2]}}
+          {{instrument[0]}} - {{instrument[1]}} - {{instrument[2]}} - {{instrument[3]}} - {{instrument[4]}}
         </mat-option>
       </mat-autocomplete>   
       <mat-error  *ngIf="tidinstrument?.errors?.['required']">
@@ -121,7 +130,8 @@
       formControlName="id_price_currency" 
       [matAutocomplete]="auto" [readonly]="price_type.value=='2'? true:false">
       <mat-autocomplete #auto="matAutocomplete" 
-        (optionSelected)="this.code_price_currency.patchValue($event.option.viewValue.split('-')[1])">
+        (optionSelected)="code_price_currency.patchValue($event.option.viewValue.split('-')[1]);
+                          price_currency_name.patchValue($event.option.viewValue.split('-')[2]);">
         <mat-option *ngFor="let currency of filteredCurrenciesList | async" [value]="currency['CurrencyCodeNum']">
           {{currency['CurrencyCodeNum']}} -  {{currency['CurrencyCode']}} -  {{currency['CurrencyName']}} 
         </mat-option>
@@ -132,11 +142,14 @@
       <mat-error  *ngIf="id_price_currency?.errors?.['currencyCode']">
         Inccorect Code! 
       </mat-error>
+      <mat-hint *ngIf="id_price_currency.valid&&id_price_currency.value">
+        {{code_price_currency.value}} - {{price_currency_name.value}}
+      </mat-hint>
     </mat-form-field>
-   <!--  <mat-label  
-    style="width: 25%; color: rgb(20, 173, 122);" class="mat-form-field">
-  </mat-label>
- -->  </p>
+    <mat-form-field *ngIf="price_type.value==2">
+      <input matInput placeholder="Face Value" [value]="facevalue.value  | currency:faceunit_name.value+' '" [readonly]="true">
+    </mat-form-field>
+   </p>
   <p>
     <mat-form-field style="width: 20%;"  >
       <input matInput placeholder="ID_Cpty" formControlName="id_cpty"  >
@@ -191,11 +204,32 @@
             Required!   
           </mat-error>
       </mat-form-field>
-      <mat-form-field style="width: 20%;" >
-        <input matInput placeholder="Settlement Currency" formControlName="id_settlement_currency" >
+      <mat-form-field style="width: 20%;" title="Type to find(any filed). Click to select" >
+        <input matInput [placeholder]="'Settlement Currency'" 
+        formControlName="id_settlement_currency" 
+        [matAutocomplete]="autoSet" >
+        <mat-autocomplete #autoSet="matAutocomplete" 
+          (optionSelected)="code_settlement_currency.patchValue($event.option.viewValue.split('-')[1]);
+                            settlement_currency_name.patchValue($event.option.viewValue.split('-')[2])">
+          <mat-option *ngFor="let currency of filteredSetCurrenciesList | async" [value]="currency['CurrencyCodeNum']">
+            {{currency['CurrencyCodeNum']}} -  {{currency['CurrencyCode']}} -  {{currency['CurrencyName']}} 
+          </mat-option>
+        </mat-autocomplete>   
+        <mat-error  *ngIf="id_settlement_currency?.errors?.['currencyCode']">
+          Inccorect Code! 
+        </mat-error>
+        <mat-hint *ngIf="id_settlement_currency.valid&&id_settlement_currency.value">
+          {{code_settlement_currency.value}} - {{settlement_currency_name.value}}
+        </mat-hint>
       </mat-form-field>
       <mat-form-field style="width: 20%;" >
         <input matInput placeholder="Settlement Rate" formControlName="settlement_rate" >
+        <mat-error *ngIf="settlement_rate?.errors?.['required']">
+          Required!   
+        </mat-error>
+        <mat-error  *ngIf="settlement_rate?.errors?.['pattern']">
+          Only numbers! 0.00   
+        </mat-error>
       </mat-form-field>
       <mat-form-field style="width: 25%;" >
         <input matInput placeholder="Buyer SSI" formControlName="id_buyer_instructions" >

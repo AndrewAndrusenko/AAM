@@ -217,7 +217,7 @@ function fGetMoexInstruments(request,response) { //Get general instruments list
       case 'checkLoadedMarketData':
       break;
       case 'getInstrumentAutoCompleteList' :
-        query.text = "SELECT secid, name, security_type_name FROM public.mmoexsecurities " +
+        query.text = "SELECT secid, name, security_type_name,faceunit,facevalue FROM public.mmoexsecurities " +
         "LEFT JOIN mmoexsecuritytypes ON mmoexsecurities.type=mmoexsecuritytypes.security_type_name " +
         "WHERE mmoexsecuritytypes.trade_engine_name !='futures'"
         query.rowMode= 'array';
