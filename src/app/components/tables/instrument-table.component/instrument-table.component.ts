@@ -17,6 +17,7 @@ import { formatNumber } from '@angular/common';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import { AuthService } from 'src/app/services/auth.service';
+import { InstrumentDataService } from 'src/app/services/instrument-data.service';
 @Component({
   selector: 'app-app-instrument-table',
   
@@ -81,6 +82,7 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
     private AuthServiceS:AuthService,  
     private indexDBServiceS:indexDBService,
     private HandlingCommonTasksS:HandlingCommonTasksService,
+    private InstrumentDataS:InstrumentDataService,
     private CommonDialogsService:HadlingCommonDialogsService,
     private dialog: MatDialog,
     private fb:FormBuilder, 
@@ -95,7 +97,7 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
     });
      this.indexDBServiceS.getIndexDBStaticTables('getBoardsDataFromInstruments').then ((data)=>this.boardIDs = data['data'])
      this.MarketDataService.getMarketDataSources('stock').subscribe(marketSourcesData => this.marketSources = marketSourcesData);
-     this.MarketDataService.getInstrumentDataToUpdateTableSource().subscribe(data =>{
+     this.InstrumentDataS.getInstrumentDataToUpdateTableSource().subscribe(data =>{
       console.log('getInstrumentDataToUpdateTableSource',data);
      let index =  this.dataSource.data.findIndex(elem=>elem.id===data.data[0].id)
       switch (data.action) {
@@ -127,9 +129,9 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
   }
   async ngAfterViewInit() {
     if (this.FormMode==='Redis') {
-      this.MarketDataService.getRedisMoexInstruments().subscribe(data => this.updateInstrumentDataTable(data))   
+      this.InstrumentDataS.getRedisMoexInstruments().subscribe(data => this.updateInstrumentDataTable(data))   
     } else {
-      this.MarketDataService.getMoexInstruments().subscribe (instrumentData => this.updateInstrumentDataTable(instrumentData))  
+      this.InstrumentDataS.getMoexInstruments().subscribe (instrumentData => this.updateInstrumentDataTable(instrumentData))  
     }
     this.indexDBServiceS.getIndexDBStaticTables('getInstrumentDataDetails').then(data =>this.instrumentDetailsArr = data['data']);
   }
@@ -184,7 +186,7 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
       this.instruments.length? Object.assign (searchObj , {'secid': instrumentsList}): null;
       this.marketSource.value != null&&this.marketSource.value.length !=0? Object.assign (searchObj , {'sourcecode': this.marketSource.value}): null;
       this.boards.value != null&&this.boards.value.length !=0? Object.assign (searchObj , {'boardid': this.boards.value}): null;
-      this.MarketDataService.getMoexInstruments(undefined,this.FormMode==='ChartMode'? 'secid ASC':undefined,searchObj).subscribe(data => {
+      this.InstrumentDataS.getMoexInstruments(undefined,this.FormMode==='ChartMode'? 'secid ASC':undefined,searchObj).subscribe(data => {
         this.dataSource  = new MatTableDataSource(data);
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;

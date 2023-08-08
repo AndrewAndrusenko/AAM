@@ -1,6 +1,6 @@
 import { AfterContentInit, Component,  EventEmitter,  Input, Output} from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ClientData, Instruments, instrumentCorpActions, instrumentDetails, trades } from 'src/app/models/intefaces.model';
+import { ClientData, Instruments, trades } from 'src/app/models/intefaces.model';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { menuColorGl } from 'src/app/models/constants.model';
 import { AuthService } from 'src/app/services/auth.service';
@@ -11,7 +11,7 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { AppClientsTableComponent } from '../../tables/clients-table.component/clients-table.component';
 import { AppInstrumentTableComponent } from '../../tables/instrument-table.component/instrument-table.component';
 import { indexDBService } from 'src/app/services/indexDB.service';
-import { CurrenciesDataService } from 'src/app/services/currencies-data.service';
+import { InstrumentDataService } from 'src/app/services/instrument-data.service';
 @Component({
   selector: 'app-trade-modify-form',
   templateUrl: './trade-form.component.html',
@@ -44,7 +44,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     private TradeService: AppTradeService,
     private AutoCompService:AtuoCompleteService,
     private indexDBServiceS:indexDBService,
-    private CurrenciesDataSvc:CurrenciesDataService,
+    private InstrumentDataS:InstrumentDataService,
     private dialog: MatDialog, 
   ) 
   {    
@@ -106,19 +106,26 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
         distinctUntilChanged(),
         map(value => this.AutoCompService.filterList(value || '','cpty'))
       );
-      this.price.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>this.tradeAmountCalculation());
-      this.qty.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>this.tradeAmountCalculation());
-      this.settlement_rate.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>this.tradeAmountCalculation());
-      this.qty.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>this.tradeAmountCalculation());
+      this.price.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>this.fullAmountCalcualtion(false));
+      this.qty.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>this.fullAmountCalcualtion(true));
+      this.settlement_rate.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>this.fullAmountCalcualtion(false));
+      this.vdate.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>this.fullAmountCalcualtion(true));
+      this.id_price_currency.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>this.changeSettlementRate());
       this.id_settlement_currency.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>{
         this.id_settlement_currency.value? this.settlement_rate.setValidators([ Validators.required, Validators.pattern('[0-9]*([0-9.]{0,8})?$')]): this.settlement_rate.removeValidators(Validators.required);
-        this.tradeAmountCalculation();
-        this.settlement_rate.updateValueAndValidity()
+        this.settlement_rate.updateValueAndValidity();
+        this.changeSettlementRate();
       })
       this.tradeModifyForm.patchValue(this.data);
       this.price_type.value==2? this.id_price_currency.patchValue(this.faceunit.value): null;
       this.action == 'View'|| this.disabledControlElements?  this.tradeModifyForm.disable() : null;
-      this.tradeAmountCalculation();
+      this.fullAmountCalcualtion(true);
+  }
+  changeSettlementRate () {
+    if (this.id_price_currency.value === this.id_settlement_currency.value) {
+      this.settlement_rate.patchValue(1)
+      this.settlement_amount.patchValue(this.trade_amount.value)
+    }    
   }
   selectClient (){
     this.dialogClientsTabletRef = this.dialog.open(AppClientsTableComponent ,{minHeight:'400px', minWidth:'90vw', autoFocus: false, maxHeight: '90vh'});
@@ -130,15 +137,16 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     });
   }
   secidChanged (item:any) {
+    console.log('item',item);
     this.tidinstrument.patchValue(item.secid)
     this.secid_name.patchValue(item.name+' ('+item.security_type_name+')')
     this.price_type.patchValue(this.securityTypes.filter(el=>el['security_type_name']===item.security_type_name)[0]['price_type'])
     this.facevalue.patchValue(item.facevalue)
     this.faceunit.patchValue(item.faceunit)
-    this.faceunit_name.patchValue(this.AutoCompService.getCurrecyData(this.faceunit.value)['CurrencyCode'])
-    this.price_type.value==2? this.id_price_currency.patchValue(this.faceunit.value) : null;
+    this.faceunit.value? this.faceunit_name.patchValue(this.AutoCompService.getCurrecyData(this.faceunit.value)['CurrencyCode']):null;
+    this.id_price_currency.patchValue( this.price_type.value==2? this.faceunit.value : null);
     this.checkCurrenciesHints()
-    this.tradeAmountCalculation();
+    this.fullAmountCalcualtion(true);
   }
   secidAutocolmplete (secidDesc:string) {
     let secidArr = secidDesc.split(' - ');
@@ -159,12 +167,16 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     });
   }
   checkCurrenciesHints (){
-    let el_price_currency = this.AutoCompService.getCurrecyData(this.id_price_currency.value)
-    this.code_price_currency.patchValue(el_price_currency['CurrencyCode'])
-    this.price_currency_name.patchValue(el_price_currency['CurrencyName'])
-    let el_settlement_currency = this.AutoCompService.getCurrecyData(this.id_settlement_currency.value)
-    this.code_settlement_currency.patchValue(el_settlement_currency['CurrencyCode'])
-    this.settlement_currency_name.patchValue(el_settlement_currency['CurrencyName'])
+    if (this.id_price_currency.value) {  
+      let el_price_currency = this.AutoCompService.getCurrecyData(this.id_price_currency.value)
+      this.code_price_currency.patchValue(el_price_currency['CurrencyCode'])
+      this.price_currency_name.patchValue(el_price_currency['CurrencyName'])
+    }
+    if (this.id_settlement_currency.value) {
+      let el_settlement_currency = this.AutoCompService.getCurrecyData(this.id_settlement_currency.value)
+      this.code_settlement_currency.patchValue(el_settlement_currency['CurrencyCode'])
+      this.settlement_currency_name.patchValue(el_settlement_currency['CurrencyName'])
+    }
   }
   snacksBox(result:any, action?:string){
     if (result['name']=='error') {
@@ -198,26 +210,29 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
       break;
     }
   }
-
-  tradeAmountCalculation() {
-    if (this.price_type.value==='2') {
-      this.TradeService.getcouponPeriodInfo(this.vdate.value,this.tidinstrument.value).subscribe (coupon => {
-        let cdate = new Date(coupon[0].coupon_date);
-        let valdate = new Date(this.vdate.value);
-        let days = Math.round( Math.ceil(Math.abs((cdate.getTime()-valdate.getTime()))/(1000 * 3600 * 24)));
-        this.id_price_currency.patchValue(coupon[0].currency)
-        this.details.patchValue(JSON.stringify(coupon[0]) +' days:' + days, +'fv'+this.facevalue.value);
-        let accured_interest = (this.facevalue.value*this.qty.value*coupon[0].couponrate/100*days/365).toFixed(2);
-        this.accured_interest.patchValue((this.facevalue.value*this.qty.value*coupon[0].couponrate/100*days/365).toFixed(2));
+  tradeAmountsUpdate() {
+    switch (this.price_type.value) {
+      case '2':
         this.trade_amount.patchValue(Number(this.price.value/100*this.qty.value*this.facevalue.value)+Number(this.accured_interest.value))
-        if (this.id_settlement_currency.value&&this.id_settlement_currency.valid&&Number(this.settlement_rate.value)) {
-          this.settlement_amount.patchValue((Number(this.trade_amount.value)*Number(this.settlement_rate.value)).toFixed(2))
-        } else { 
-          this.settlement_amount.patchValue(!this.id_settlement_currency.value? this.trade_amount.value : 'Error');
-          // this.settlement_amount.patchValue(this.trade_amount.value)
-        }
-      })}
-   this.price_type.value==='1'? this.trade_amount.patchValue(this.price.value*this.qty.value):null;
+      break;
+      case '1':
+        this.trade_amount.patchValue(this.price.value*this.qty.value);
+      break;
+    }
+    if (this.id_settlement_currency.valid&&this.id_settlement_currency.valid&&Number(this.settlement_rate.value)) {
+      this.settlement_amount.patchValue((Number(this.trade_amount.value)*Number(this.settlement_rate.value)).toFixed(2))
+    } else { 
+      this.settlement_amount.patchValue(!this.id_settlement_currency.value? this.trade_amount.value : 'Error');
+    }
+  }
+  fullAmountCalcualtion(accured_interest_update:boolean) {
+    if (this.price_type.value==='2'&&accured_interest_update) {
+      this.InstrumentDataS.getcouponPeriodInfo(this.vdate.value,this.tidinstrument.value,this.facevalue.value,this.qty.value).subscribe (coupon=>{ 
+        this.details.patchValue(coupon.coupon_details);
+        this.accured_interest.patchValue(coupon.accured_interest);
+        this.tradeAmountsUpdate();
+      })
+    } else {this.tradeAmountsUpdate()}
   }
   Number(value) {
     return Number(value)? true:false

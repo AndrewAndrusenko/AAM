@@ -9,10 +9,10 @@ async function fGetTradesData (request,response) {
   db_common_api.queryExecute(sql,response,undefined,'GetTradesData');
 }
 async function GetAccuredInterest (request,response) {
-  console.log('GetAccuredInterest',request.query);
-  let sql = 'SELECT couponrate,actiontype,currency, min(date)::timestamp without time zone as coupon_date FROM public.mmoexcorpactions where secid=${tidinstrument} and date > ${vdate} GROUP BY couponrate,actiontype,currency;'
+  // let sql = 'SELECT couponrate,actiontype,currency, min(date)::timestamp without time zone as coupon_date FROM public.mmoexcorpactions where secid=${tidinstrument} and date > ${vdate} GROUP BY couponrate,actiontype,currency;'
+  let sql = 'SELECT couponrate,actiontype,currency, date  FROM public.mmoexcorpactions where secid=${tidinstrument} AND '+
+          'date <= (select min(date) FROM public.mmoexcorpactions where date > ${vdate} and secid=${tidinstrument}) ORDER BY date desc LIMIT 2'
   sql = pgp.as.format(sql,request.query);
-  console.log('GetAccuredInterest',sql,request.query);
   db_common_api.queryExecute(sql,response,undefined,'GetAccuredInterest');
 }
 module.exports = {

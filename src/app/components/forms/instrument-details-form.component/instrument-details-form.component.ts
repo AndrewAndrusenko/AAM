@@ -2,10 +2,10 @@ import { Component,  EventEmitter,  Input, Output, SimpleChanges, ViewChild,  } 
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { instrumentDetails } from 'src/app/models/intefaces.model';
 import { Subscription, filter, switchMap } from 'rxjs';
-import { MatTabGroup as MatTabGroup } from '@angular/material/tabs';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AppMarketDataService } from 'src/app/services/market-data.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
+import { InstrumentDataService } from 'src/app/services/instrument-data.service';
 
 @Component({
   selector: 'app-instrument-details-form',
@@ -26,6 +26,7 @@ export class AppInvInstrumentDetailsFormComponent {
     private fb:FormBuilder, 
     private CommonDialogsService:HadlingCommonDialogsService,
     private MarketDataService: AppMarketDataService,
+    private InstrumentDataS:InstrumentDataService,
     private indexDBServiceS: indexDBService,
   ) 
   {   
@@ -65,20 +66,20 @@ export class AppInvInstrumentDetailsFormComponent {
     } 
   }
   ngOnChanges(changes: SimpleChanges) {
-    this.MarketDataService.getMoexInstruments(undefined,undefined, {secid:[changes['secidParam'].currentValue,changes['secidParam'].currentValue]}).subscribe (instrumentData => {
+    this.InstrumentDataS.getMoexInstruments(undefined,undefined, {secid:[changes['secidParam'].currentValue,changes['secidParam'].currentValue]}).subscribe (instrumentData => {
       this.instrumentDetailsForm.patchValue(instrumentData[0]);
-      this.MarketDataService.getInstrumentDataCorpActions(instrumentData[0].isin).subscribe(instrumentCorpActions => {
-        this.MarketDataService.sendCorpActionData(instrumentCorpActions)
+      this.InstrumentDataS.getInstrumentDataCorpActions(instrumentData[0].isin).subscribe(instrumentCorpActions => {
+        this.InstrumentDataS.sendCorpActionData(instrumentCorpActions)
       })
     });  
-    this.MarketDataService.getInstrumentDataDetails(changes['secidParam'].currentValue).subscribe(instrumentDetails => this.instrumentDetailsForm.patchValue(instrumentDetails[0]));
+    this.InstrumentDataS.getInstrumentDataDetails(changes['secidParam'].currentValue).subscribe(instrumentDetails => this.instrumentDetailsForm.patchValue(instrumentDetails[0]));
   }
   snacksBox(result:any, action?:string){
     if (result['name']=='error') {
       this.CommonDialogsService.snackResultHandler(result)
     } else {
       this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' instrument details'}, action,undefined,false)
-      this.MarketDataService.sendReloadInstrumentDetails(result)
+      this.InstrumentDataS.sendReloadInstrumentDetails(result)
       this.modal_principal_parent.emit(true)
     }
   }
@@ -88,15 +89,15 @@ export class AppInvInstrumentDetailsFormComponent {
     switch (action) {
       case 'Create_Example':
       case 'Create':
-        this.MarketDataService.updateInstrumentDetails(this.instrumentDetailsForm.value,'Create').subscribe(result => this.snacksBox(result))
+        this.InstrumentDataS.updateInstrumentDetails(this.instrumentDetailsForm.value,'Create').subscribe(result => this.snacksBox(result))
       break;
       case 'Edit':
-        this.MarketDataService.updateInstrumentDetails (this.instrumentDetailsForm.value,'Edit').subscribe(result => this.snacksBox(result))
+        this.InstrumentDataS.updateInstrumentDetails (this.instrumentDetailsForm.value,'Edit').subscribe(result => this.snacksBox(result))
       break;
       case 'Delete':
         this.CommonDialogsService.confirmDialog('Delete Instrument Details ' + this.boardid.value).pipe(
           filter (isConfirmed => (isConfirmed.isConfirmed)),
-          switchMap(data => this.MarketDataService.updateInstrumentDetails(this.instrumentDetailsForm.value,'Delete'))
+          switchMap(data => this.InstrumentDataS.updateInstrumentDetails(this.instrumentDetailsForm.value,'Delete'))
         ).subscribe(result => this.snacksBox(result,'Deleted'))
       break;
     }

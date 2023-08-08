@@ -3,7 +3,7 @@ import { Observable, of } from 'rxjs';
 import { catchError, map, take, tap } from 'rxjs/operators';
 import { AppInvestmentDataServiceService } from './investment-data.service.service';
 import { AppAccountingService } from './accounting.service';
-import { AppMarketDataService } from './market-data.service';
+import { InstrumentDataService } from './instrument-data.service';
 export class customAsyncValidators {
 
   static clientNameCustomAsyncValidator(userService: AppInvestmentDataServiceService, clientId: number, client:string, errors?:ValidationErrors): AsyncValidatorFn {
@@ -128,10 +128,10 @@ export class customAsyncValidators {
         );
     }
   }  
-  static MD_SecidUniqueAsyncValidator (AppMarketDataService: AppMarketDataService, secid:string,  errors?:ValidationErrors): AsyncValidatorFn {
+  static MD_SecidUniqueAsyncValidator (InstrumentDataS: InstrumentDataService, secid:string,  errors?:ValidationErrors): AsyncValidatorFn {
     return (control: AbstractControl): Observable<ValidationErrors> => {
       if (control.value.toUpperCase() !== secid.toUpperCase() && control.touched||control.dirty) {
-        return AppMarketDataService
+        return InstrumentDataS
           .getInstrumentDataGeneral('validateSecidForUnique', control.value.toUpperCase())
           .pipe(
             map (secidIsTaken => secidIsTaken.length? {secidIsTaken: true} : null),
@@ -140,11 +140,11 @@ export class customAsyncValidators {
       } else {return of(errors)}
     };
   }
-  static MD_ISINuniqueAsyncValidator (AppMarketDataService: AppMarketDataService, isin:string, errors?:ValidationErrors): AsyncValidatorFn {
+  static MD_ISINuniqueAsyncValidator (InstrumentDataS: InstrumentDataService, isin:string, errors?:ValidationErrors): AsyncValidatorFn {
     return (control: AbstractControl): Observable<ValidationErrors | null> => {
       console.log('isin errors', errors);
       if (control.value.toUpperCase() !== isin.toUpperCase() && (control.touched||control.dirty)) {
-        return AppMarketDataService
+        return InstrumentDataS
           .getInstrumentDataGeneral('validateISINForUnique', control.value.toUpperCase())
           .pipe(
             map (isinIsTaken => isinIsTaken.length? {isinIsTaken: true} : null),

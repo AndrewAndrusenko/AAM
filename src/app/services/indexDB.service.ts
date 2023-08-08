@@ -5,6 +5,7 @@ import { AppAccountingService } from './accounting.service';
 import { catchError, of } from 'rxjs';
 import { AppInvestmentDataServiceService } from './investment-data.service.service';
 import { CurrenciesDataService } from './currencies-data.service';
+import { InstrumentDataService } from './instrument-data.service';
 interface cacheAAM {
   code:string,
   data:[]
@@ -19,6 +20,7 @@ export class indexDBService {
     private AccountingDataService:AppAccountingService, 
     private InvestmentDataService : AppInvestmentDataServiceService,   
     private CurrenciesDataSrv: CurrenciesDataService,
+    private InstrumentDataS:InstrumentDataService,
   ) { }
   indexDBcacheData (key:string,data:any) {
     // console.log('data',data[0]);
@@ -32,22 +34,22 @@ export class indexDBService {
     return new Promise ((resolve,reject)=> {
       switch (key) {
         case 'getBoardsDataFromInstruments':
-          this.MarketDataService.getInstrumentDataGeneral('getBoardsDataFromInstruments').subscribe(data=>resolve(data))
+          this.InstrumentDataS.getInstrumentDataGeneral('getBoardsDataFromInstruments').subscribe(data=>resolve(data))
         break;
         case 'getInstrumentDataDetails':
-          this.MarketDataService.getInstrumentDataDetails().subscribe(data=>resolve(data))
+          this.InstrumentDataS.getInstrumentDataDetails().subscribe(data=>resolve(data))
         break;
         case 'getInstrumentDataCorpActions':
-          this.MarketDataService.getInstrumentDataCorpActions().subscribe(data=>resolve(data))
+          this.InstrumentDataS.getInstrumentDataCorpActions().subscribe(data=>resolve(data))
         break;
         case 'getMoexSecurityGroups':
-          this.MarketDataService.getInstrumentDataGeneral('getMoexSecurityGroups').subscribe(data=>resolve(data))
+          this.InstrumentDataS.getInstrumentDataGeneral('getMoexSecurityGroups').subscribe(data=>resolve(data))
         break;
         case 'getMoexSecurityTypes':
-          this.MarketDataService.getInstrumentDataGeneral('getMoexSecurityTypes').subscribe(data=>resolve(data))
+          this.InstrumentDataS.getInstrumentDataGeneral('getMoexSecurityTypes').subscribe(data=>resolve(data))
         break;
         case 'getCorpActionTypes':
-          this.MarketDataService.getInstrumentDataGeneral('getCorpActionTypes').subscribe(data=>resolve(data))
+          this.InstrumentDataS.getInstrumentDataGeneral('getCorpActionTypes').subscribe(data=>resolve(data))
         break;
         case 'getCurrencyCodes':
           this.CurrenciesDataSrv.getCurrencyCodes().subscribe(data=>resolve(data))
@@ -56,7 +58,7 @@ export class indexDBService {
           this.CurrenciesDataSrv.getCurrencyPairsList().subscribe(data=>resolve(data))
         break;
         case 'getInstrumentAutoCompleteList':
-          this.MarketDataService.getMoexInstruments(undefined,undefined,{Action:'getInstrumentAutoCompleteList'}).subscribe(data=>resolve(data))
+          this.InstrumentDataS.getMoexInstruments(undefined,undefined,{Action:'getInstrumentAutoCompleteList'}).subscribe(data=>resolve(data))
         break;
         case 'bcTransactionType_Ext':
             this.AccountingDataService.GetTransactionType_Ext('',0,'','','bcTransactionType_Ext').subscribe(data=>resolve(data))

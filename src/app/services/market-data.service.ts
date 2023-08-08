@@ -2,24 +2,13 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { Instruments, InstrumentsMapCodes, instrumentCorpActions, instrumentDetails, marketData, marketDataSources, marketSourceSegements } from '../models/intefaces.model';
-interface InstrumentDataSet {
-  data:Instruments[],
-  action:string
-}
 @Injectable({
   providedIn: 'root'
 })
 export class AppMarketDataService {
   private subjectMarketData = new Subject<marketData[]> ()
   private subjectCharMarketData = new Subject<marketData[]> ()
-  private subjectCorpData = new Subject<instrumentCorpActions[]> ()
-  private subjectInstrument = new Subject<InstrumentDataSet> ()
-  private subjectInstrumentDetails = new Subject<instrumentDetails[]> ()
-  private subjectCorpActions = new Subject<instrumentCorpActions[]> ()
-  private httpOptions = {
-    headers: new HttpHeaders({}),
-    responseType: 'text'
-  };
+
   constructor(private http:HttpClient) { }
   calculateMA(dayCount:number, data:number[]) {
     console.log('calculateMA', data);
@@ -131,7 +120,13 @@ export class AppMarketDataService {
     })
     return logMarketDateLoading;
   }
-
+  getInstrumentsCodes (mapcode:string, resasarray?:boolean, secid?:string):Observable<InstrumentsMapCodes[]> {
+    const params = {mapcode:mapcode,secid:secid, resasarray:resasarray}
+    return this.http.get <InstrumentsMapCodes[]> ('/api/AAM/MD/getInstrumentsCodes/',{params:params})
+  }
+  getMoexInstrumentsList ():Observable<any[]> {
+    return this.http.get <any[]> ('/api/AAM/MD/getMoexInstrumentsList/')
+  }
   insertMarketData (dataToInsert:any,sourceCode:string, gloabalSource:string): Observable<number> {
     return  this.http.post <number> ('/api/AAM/MD/importData/',
     {'dataToInsert': dataToInsert,'sourceCode':sourceCode, 'gloabalSource':gloabalSource})
@@ -147,38 +142,7 @@ export class AppMarketDataService {
     let params = {sourceType:sourceType};
     return this.http.get <marketDataSources[]> ('/api/AAM/MD/getMarketDataSources/', { params: params })
   }
-  getMoexInstrumentsList ():Observable<any[]> {
-    return this.http.get <any[]> ('/api/AAM/MD/getMoexInstrumentsList/')
-  }
-  getInstrumentsCodes (mapcode:string, resasarray?:boolean, secid?:string):Observable<InstrumentsMapCodes[]> {
-    const params = {mapcode:mapcode,secid:secid, resasarray:resasarray}
-    return this.http.get <InstrumentsMapCodes[]> ('/api/AAM/MD/getInstrumentsCodes/',{params:params})
-  }
-  getInstrumentDataGeneral (dataType:string, fieldtoCheck?:string): Observable <any[]> {
-    const params = {dataType:dataType}
-    fieldtoCheck!==null? Object.assign(params,{fieldtoCheck:fieldtoCheck}) : null;
-    return this.http.get <any[]> ('/api/AAM/MD/getInstrumentDataGeneral/',{params:params})
-  }
-  getMoexInstruments (rowslimit:number=100000,sorting:string=' secid ASC', searchParameters?:any):Observable<Instruments[]> {
-    let params = {};
-    (searchParameters !== null) ?  params = {...params,...searchParameters}: null;
-    (rowslimit !== null) ?  Object.assign(params,{'rowslimit':rowslimit}): null;
-    (sorting !== null) ?  Object.assign(params,{'sorting':sorting}): null;
-    return this.http.get <Instruments[]> ('/api/AAM/MD/getMoexInstruments/',{params:params})
-  }
-  getRedisMoexInstruments ():Observable<Instruments[]> {
-    return this.http.get <Instruments[]> ('/api/AAM/Redis/getMoexInstrumentsList/')
-  }
-  getInstrumentDataDetails (secid?:string): Observable <instrumentDetails[]> {
-    let params = {};
-    secid?  Object.assign(params,{secid:secid}): null;
-    return this.http.get <instrumentDetails[]> ('/api/AAM/MD/getInstrumentDetails/',{params:params})
-  }
-  getInstrumentDataCorpActions (isin?:string): Observable <instrumentCorpActions[]> {
-    let params = {};
-    isin?  Object.assign(params,{isin:isin}): null;
-    return this.http.get <instrumentCorpActions[]> ('/api/AAM/MD/getInstrumentDataCorpActions/',{params:params})
-  }
+  
   sendReloadMarketData ( dataSet:marketData[]) {
     this.subjectMarketData.next(dataSet); 
   }
@@ -191,42 +155,6 @@ export class AppMarketDataService {
   getMarketDataForChart(): Observable<marketData[]> { 
     return this.subjectCharMarketData.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
   }
-  sendCorpActionData ( dataSet:instrumentCorpActions[]) {
-    this.subjectCorpData.next(dataSet); 
-  }
-  getCorpActionData(): Observable<instrumentCorpActions[]> { 
-    return this.subjectCorpData.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
-  }
-  createInstrument (data:any): Observable<Instruments[]>  { 
-    return this.http.post  <Instruments[]> ('/api/AAM/MD/InstrumentCreate/',{'data': data})
-  } 
-  deleteInstrument (id:string): Observable<Instruments[]> { 
-    return this.http.post  <Instruments[]> ('/api/AAM/MD/InstrumentDelete/',{'id': id})
-  } 
-  updateInstrument (data:any):  Observable<Instruments[]>  { 
-    return this.http.post <Instruments[]> ('/api/AAM/MD/InstrumentEdit/',{'data': data})
-  }
-  sendInstrumentDataToUpdateTableSource ( data:Instruments[], action: string) {
-    let dataSet = {
-      data: data,
-      action:action
-    }
-    this.subjectInstrument.next(dataSet); 
-  }
-  getInstrumentDataToUpdateTableSource(): Observable<InstrumentDataSet> { 
-    return this.subjectInstrument.asObservable(); 
-  }
-  updateInstrumentDetails (data:any, action:string):  Observable<instrumentDetails[]>  { 
-    return this.http.post <instrumentDetails[]> ('/api/AAM/MD/UpdateInstrumentDetails/',{data:data, action:action})
-  }
-  updateInstrumentDataCorpActions (data:any, action:string):  Observable<instrumentDetails[]>  { 
-    return this.http.post <instrumentDetails[]> ('/api/AAM/MD/UpdateInstrumentDataCorpActions/',{data:data, action:action})
-  }
-  sendReloadInstrumentDetails ( dataSet:instrumentDetails[]) {
-    this.subjectInstrumentDetails.next(dataSet); 
-  }
-  sendReloadDataCorpActions ( dataSet:instrumentCorpActions[]) {
-    this.subjectCorpActions.next(dataSet); 
-  }
+ 
 }
 

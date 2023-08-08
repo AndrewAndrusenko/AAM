@@ -18,6 +18,7 @@ import localeFr from '@angular/common/locales/fr';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import { AuthService } from 'src/app/services/auth.service';
+import { InstrumentDataService } from 'src/app/services/instrument-data.service';
 registerLocaleData(localeFr, 'fr');
 /* 
 export class extends  */
@@ -76,13 +77,14 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
     private AuthServiceS:AuthService,  
     private AutoCompService:AtuoCompleteService,
     private HandlingCommonTasksS:HandlingCommonTasksService,
+    private InstrumentDataS:InstrumentDataService,
     private CommonDialogsService:HadlingCommonDialogsService,
     private fb:FormBuilder, 
     public snack:MatSnackBar
   ) {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToInstrumentData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
-    this.MarketDataService.getInstrumentDataGeneral('getBoardsDataFromInstruments').subscribe(boardsData => this.boardIDs=boardsData)
+    this.InstrumentDataS.getInstrumentDataGeneral('getBoardsDataFromInstruments').subscribe(boardsData => this.boardIDs=boardsData)
     this.MarketDataService.getMarketDataSources('stock').subscribe(marketSourcesData => this.marketSources = marketSourcesData);
     this.loadingDataState = {Message:'',State: 'None'};
     this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data=>{

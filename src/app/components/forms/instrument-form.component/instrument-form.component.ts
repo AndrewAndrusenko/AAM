@@ -10,6 +10,7 @@ import { indexDBService } from 'src/app/services/indexDB.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { Observable, distinctUntilChanged, filter, map, observable, startWith, switchMap } from 'rxjs';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
+import { InstrumentDataService } from 'src/app/services/instrument-data.service';
 
 @Component({
   selector: 'app-inv-instrument-modify-form',
@@ -57,8 +58,8 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
     private fb:FormBuilder, 
     private AuthServiceS:AuthService,  
     private CommonDialogsService:HadlingCommonDialogsService,
-    private MarketDataService: AppMarketDataService,
     private indexDBServiceS:indexDBService,
+    private InstrumentDataS:InstrumentDataService,
     private AtuoCompService:AtuoCompleteService,
   ) 
   {    
@@ -114,11 +115,11 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
     if (['Create','Create_Example'].includes(this.action)) {
       this.isin.setErrors({isinIsTaken:true});
       this.secid.setErrors({secidIsTaken:true})
-      this.SecidUniqueAsyncValidator = customAsyncValidators.MD_SecidUniqueAsyncValidator (this.MarketDataService, '', this.secid.errors);
-      this.ISINuniqueAsyncValidator = customAsyncValidators.MD_ISINuniqueAsyncValidator (this.MarketDataService, '', this.isin.errors);
+      this.SecidUniqueAsyncValidator = customAsyncValidators.MD_SecidUniqueAsyncValidator (this.InstrumentDataS, '', this.secid.errors);
+      this.ISINuniqueAsyncValidator = customAsyncValidators.MD_ISINuniqueAsyncValidator (this.InstrumentDataS, '', this.isin.errors);
     } else {
-      this.SecidUniqueAsyncValidator = customAsyncValidators.MD_SecidUniqueAsyncValidator (this.MarketDataService, this.secid.value);
-      this.ISINuniqueAsyncValidator = customAsyncValidators.MD_ISINuniqueAsyncValidator (this.MarketDataService, this.isin.value);
+      this.SecidUniqueAsyncValidator = customAsyncValidators.MD_SecidUniqueAsyncValidator (this.InstrumentDataS, this.secid.value);
+      this.ISINuniqueAsyncValidator = customAsyncValidators.MD_ISINuniqueAsyncValidator (this.InstrumentDataS, this.isin.value);
     }
     this.isin.setAsyncValidators([this.ISINuniqueAsyncValidator]);
     this.secid.setAsyncValidators([this.SecidUniqueAsyncValidator]);
@@ -165,7 +166,7 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
   ngOnChanges(changes: SimpleChanges) {
 
     this.revomeAsyncValidators();
-    this.MarketDataService.getMoexInstruments(undefined,undefined, {secid:[changes['secidParam'].currentValue,changes['secidParam'].currentValue]}).subscribe (instrumentData => {
+    this.InstrumentDataS.getMoexInstruments(undefined,undefined, {secid:[changes['secidParam'].currentValue,changes['secidParam'].currentValue]}).subscribe (instrumentData => {
       this.instrumentModifyForm.patchValue(instrumentData[0]);
       this.addAsyncValidators('Edit');
       this.filtersecurityType(this.group.value)
@@ -182,7 +183,7 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
     } else {
       this.CommonDialogsService.dialogCloseAll();
       this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' instrument'}, action)
-      this.MarketDataService.sendInstrumentDataToUpdateTableSource(this.addJoinedFieldsToResult(result), action)
+      this.InstrumentDataS.sendInstrumentDataToUpdateTableSource(this.addJoinedFieldsToResult(result), action)
     }
   }
   addJoinedFieldsToResult (result:Instruments[]):Instruments[] {
@@ -195,15 +196,15 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
     switch (action) {
       case 'Create_Example':
       case 'Create':
-        this.MarketDataService.createInstrument(this.instrumentModifyForm.value).subscribe(result =>this.snacksBox(result,'Created'))
+        this.InstrumentDataS.createInstrument(this.instrumentModifyForm.value).subscribe(result =>this.snacksBox(result,'Created'))
       break;
       case 'Edit':
-        this.MarketDataService.updateInstrument (this.instrumentModifyForm.value).subscribe(result => this.snacksBox(result,'Updated'))
+        this.InstrumentDataS.updateInstrument (this.instrumentModifyForm.value).subscribe(result => this.snacksBox(result,'Updated'))
       break;
       case 'Delete':
         this.CommonDialogsService.confirmDialog('Delete Instrument ' + this.secid.value).pipe(
           filter (isConfirmed => isConfirmed.isConfirmed),
-          switchMap(data => this.MarketDataService.deleteInstrument (this.id.value))
+          switchMap(data => this.InstrumentDataS.deleteInstrument (this.id.value))
         ).subscribe (result =>this.snacksBox(result,'Deleted'));
       break;
     }

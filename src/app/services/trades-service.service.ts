@@ -28,8 +28,5 @@ export class AppTradeService {
   getTradeInformation():Observable<trades[]> {
     return this.http.get <trades[]> ('api/AAM/MD/getTradeData/')
   }
-  getcouponPeriodInfo(vdate:string,tidinstrument:string):Observable<couponPeriodInfo[]> {
-    const params = {'vdate':vdate,'tidinstrument':tidinstrument };
-    return this.http.get <couponPeriodInfo[]> ('api/AAM/MD/getcouponPeriodInfo/', {params:params})
-  }
+
 }

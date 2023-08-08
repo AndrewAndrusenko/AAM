@@ -6,6 +6,7 @@ import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dia
 import { AppMarketDataService } from 'src/app/services/market-data.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
+import { InstrumentDataService } from 'src/app/services/instrument-data.service';
 
 @Component({
   selector: 'instrument-corp-action-form',
@@ -57,8 +58,8 @@ export class AppInstrumentCorpActionFormComponent {
   constructor (
     private fb:FormBuilder, 
     private CommonDialogsService:HadlingCommonDialogsService,
-    private MarketDataService: AppMarketDataService,
     private indexDBServiceS: indexDBService,
+    private InstrumentDataS:InstrumentDataService,
     private AtuoCompService:AtuoCompleteService,
   ) 
   {   
@@ -103,7 +104,7 @@ export class AppInstrumentCorpActionFormComponent {
       this.CommonDialogsService.snackResultHandler(result)
     } else {
       this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' instrument details'}, action,undefined,false)
-      this.MarketDataService.sendReloadDataCorpActions(result)
+      this.InstrumentDataS.sendReloadDataCorpActions(result)
       this.modal_principal_parent.emit(true)
     }
   }
@@ -114,15 +115,15 @@ export class AppInstrumentCorpActionFormComponent {
     switch (action) {
       case 'Create_Example':
       case 'Create':
-        this.MarketDataService.updateInstrumentDataCorpActions(this.CorpActionsForm.value,'Create').subscribe(result => this.snacksBox(result))
+        this.InstrumentDataS.updateInstrumentDataCorpActions(this.CorpActionsForm.value,'Create').subscribe(result => this.snacksBox(result))
       break;
       case 'Edit':
-        this.MarketDataService.updateInstrumentDataCorpActions (this.CorpActionsForm.value,'Edit').subscribe(result => this.snacksBox(result))
+        this.InstrumentDataS.updateInstrumentDataCorpActions (this.CorpActionsForm.value,'Edit').subscribe(result => this.snacksBox(result))
       break;
       case 'Delete':
         this.CommonDialogsService.confirmDialog('Delete Action: '+ this.actiontype.value + ' for '+ this.secid.value).pipe(
           filter (isConfirmed => (isConfirmed.isConfirmed)),
-          switchMap(data => this.MarketDataService.updateInstrumentDataCorpActions(this.CorpActionsForm.value,'Delete'))
+          switchMap(data => this.InstrumentDataS.updateInstrumentDataCorpActions(this.CorpActionsForm.value,'Delete'))
         ).subscribe(result => this.snacksBox(result,'Deleted'))
       break;
     }

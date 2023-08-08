@@ -13,6 +13,7 @@ import { formatNumber } from '@angular/common';
 import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { AppInstrumentCorpActionFormComponent } from '../../forms/instrument-corp-action-form.component/instrument-corp-action-form.component';
+import { InstrumentDataService } from 'src/app/services/instrument-data.service';
 @Component({
   selector: 'app-table-inst-corp-actions',
   templateUrl: './instrument-corp-actions-table.html',
@@ -43,10 +44,10 @@ export class AppTableCorporateActionsComponent  implements AfterViewInit {
   @Input () instrument:any;
   refCorpActionForm : MatDialogRef<AppInstrumentCorpActionFormComponent>
   constructor(
-    private MarketDataService: AppMarketDataService,
     private AuthServiceS:AuthService,  
     private HandlingCommonTasksS:HandlingCommonTasksService,
     private indexDBServiceS:indexDBService,
+    private InstrumentDataS:InstrumentDataService,
     private CommonDialogsService:HadlingCommonDialogsService,
     private dialog: MatDialog,
   ) {
@@ -89,7 +90,7 @@ export class AppTableCorporateActionsComponent  implements AfterViewInit {
   }
   submitQuery () {
     this.dataSource.data=null;
-    this.MarketDataService.getInstrumentDataCorpActions().subscribe(corpActionData => {
+    this.InstrumentDataS.getInstrumentDataCorpActions().subscribe(corpActionData => {
       this.updateCAdataTable(corpActionData);
       this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (corpActionData.length,'en-US') + ' rows'}, 'Loaded ');
     })
