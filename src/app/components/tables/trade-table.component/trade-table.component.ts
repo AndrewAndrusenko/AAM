@@ -1,36 +1,26 @@
-import {AfterViewInit, Component, ViewEncapsulation, EventEmitter, Output, ViewChild, Input, ChangeDetectionStrategy, ElementRef} from '@angular/core';
+import {AfterViewInit, Component, EventEmitter, Output, ViewChild, Input, ChangeDetectionStrategy, ElementRef} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
-import {Observable, Subscription } from 'rxjs';
+import {Observable, map, startWith } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
-import {animate, state, style, transition, trigger} from '@angular/animations';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { Instruments, instrumentCorpActions, instrumentDetails, marketDataSources, trades } from 'src/app/models/intefaces.model';
+import { Instruments, trades } from 'src/app/models/intefaces.model';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { menuColorGl, investmentNodeColorChild, additionalLightGreen } from 'src/app/models/constants.model';
-import { indexDBService } from 'src/app/services/indexDB.service';
+import { AbstractControl, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { investmentNodeColorChild, additionalLightGreen } from 'src/app/models/constants.model';
 import { formatNumber } from '@angular/common';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { AppTradeService } from 'src/app/services/trades-service.service';
 import { AppTradeModifyFormComponent } from '../../forms/trade-form.component/trade-form.component';
+import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 @Component({
   selector: 'app-trade-table',
-  
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './trade-table.component.html',
   styleUrls: ['./trade-table.component.scss'],
-  encapsulation: ViewEncapsulation.None,
-  animations: [
-    trigger('detailExpand', [
-      state('collapsed', style({height: '0px', minHeight: '0'})),
-      state('expanded', style({height: '*'})),
-      transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
-    ]),
-  ],
 })
 export class AppTradeTableComponent  implements AfterViewInit {
   accessState: string = 'none';
@@ -49,12 +39,22 @@ export class AppTradeTableComponent  implements AfterViewInit {
   panelOpenStateSecond = false;
   accessToClientData: string = 'true';
   instruments: string[] = ['ClearAll'];
+  counterparties: string[] = ['ClearAll'];
+  id_secid:string[]=['0'];
+  id_cptys:number[]=[0];
   investmentNodeColor = investmentNodeColorChild;
   additionalLightGreen = additionalLightGreen;
   filterednstrumentsLists : Observable<string[]>;
-  menuColorGl=menuColorGl;
+  filteredCptyLists : Observable<string[]>;
   searchParametersFG: FormGroup;
-
+  dataRange = new FormGroup ({
+    dateRangeStart: new FormControl<Date | null>(null),
+    dateRangeEnd: new FormControl<Date | null>(null),
+  });
+  dataRangeVdate = new FormGroup ({
+    dateRangeStart: new FormControl<Date | null>(null),
+    dateRangeEnd: new FormControl<Date | null>(null),
+  });
   dialogTradeModify: MatDialogRef<AppTradeModifyFormComponent>;
 
   defaultFilterPredicate?: (data: any, filter: string) => boolean;
@@ -64,16 +64,20 @@ export class AppTradeTableComponent  implements AfterViewInit {
     private AuthServiceS:AuthService,  
     private HandlingCommonTasksS:HandlingCommonTasksService,
     private CommonDialogsService:HadlingCommonDialogsService,
+    private AutoCompService:AtuoCompleteService,
     private dialog: MatDialog,
     private fb:FormBuilder, 
   ) {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.searchParametersFG = this.fb.group ({
-      secidList: null,
-      amount:{value:null, disabled:true},
-      marketSource : {value:null, disabled:false},
-      boards : {value:null, disabled:false}
+      type:null,
+      secidList: []  ,
+      cptyList:  [],
+      tdate : this.dataRange,
+      vdate : this.dataRangeVdate,
+      price:null,
+      qty:null,
     });
    
      this.TradeService.getTradeDataToUpdateTableSource().subscribe(data =>{
@@ -99,8 +103,17 @@ export class AppTradeTableComponent  implements AfterViewInit {
     this.dialogTradeModify.componentInstance.data = action ==='Create'? null :element;
   }
   async ngAfterViewInit() {
-    this.TradeService.getTradeInformation().subscribe (tradesData => this.updateTradesDataTable(tradesData))  
-
+    this.TradeService.getTradeInformation(null).subscribe (tradesData => this.updateTradesDataTable(tradesData));  
+    this.AutoCompService.getSecidLists();
+    this.AutoCompService.getCounterpartyLists();
+    this.filterednstrumentsLists = this.secidList.valueChanges.pipe(
+      startWith(''),
+      map(value => this.AutoCompService.filterList(value || '','secid'))
+    );
+    this.filteredCptyLists = this.cptyList.valueChanges.pipe(
+      startWith(''),
+      map(value => this.AutoCompService.filterList(value || '','cpty'))
+    );
   }
   updateTradesDataTable (tradesData:trades[]) {
     this.dataSource  = new MatTableDataSource(tradesData);
@@ -116,19 +129,23 @@ export class AppTradeTableComponent  implements AfterViewInit {
     !event.hasOwnProperty('isUserInput') || event.isUserInput ? this.dataSource.filter = filterValue.trim().toLowerCase() : null;
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
-  changedValueofChip (value:string) {this.instruments[this.instruments.length-1] = value}
-  add(event: MatChipInputEvent): void {
+  changedValueofChip (value:string, chipArray:string[],control:AbstractControl, id_elem:any, id_array:any[]) {
+    chipArray.push(value);
+    id_array.push(id_elem)
+    control.patchValue (id_array)
+  }
+  add(event: MatChipInputEvent,chipArray:string[]): void {
     const value = (event.value || '').trim();
     const valueArray = event.value.split(',');
-    (value)? this.instruments = [...this.instruments,...valueArray] : null;
+    (value)? chipArray = [...chipArray,...valueArray] : null;
     event.chipInput!.clear();
   }
-  remove(account: string): void {
-    const index = this.instruments.indexOf(account);
-    (index >= 0)? this.instruments.splice(index, 1) : null;
+  remove(account: string, chipArray:string[]): void {
+    const index = chipArray.indexOf(account);
+    (index >= 0)? chipArray.splice(index, 1) : null;
   }
-  clearAll(event) {event.target.textContent.trim() === 'ClearAll cancel'? this.instruments = ['ClearAll']: null}
-  addChips (el: any, column: string) {(['accountNo'].includes(column))? this.instruments.push(el):null;}
+  clearAll(event, chipArray:string[]) {event.target.textContent.trim() === 'ClearAll cancel'? chipArray = ['ClearAll']: null}
+  addChips (el: any, column: string) {(['secid'].includes(column))? this.instruments.push(el):null;}
   updateFilter (el: any) {
     this.filterALL.nativeElement.value = el;
     this.dataSource.filter = el.trim();
@@ -141,15 +158,14 @@ export class AppTradeTableComponent  implements AfterViewInit {
   }
   async submitQuery () {
     return new Promise((resolve, reject) => {
+      let searchObj = this.searchParametersFG.value;
       this.dataSource.data? this.dataSource.data = null : null;
-      let searchObj = {};
-      let instrumentsList = [];
-      this.instruments.indexOf('ClearAll') !== -1? this.instruments.splice(this.instruments.indexOf('ClearAll'),1) : null;
-      this.instruments.length===1? instrumentsList = [...this.instruments,...this.instruments]: instrumentsList = this.instruments;
-      this.instruments.length? Object.assign (searchObj , {'secid': instrumentsList}): null;
-      /* this.marketSource.value != null&&this.marketSource.value.length !=0? Object.assign (searchObj , {'sourcecode': this.marketSource.value}): null;
-      this.boards.value != null&&this.boards.value.length !=0? Object.assign (searchObj , {'boardid': this.boards.value}): null; */
-      this.TradeService.getTradeInformation().subscribe(data => {
+      searchObj = {...searchObj, ...this.qty.value? this.HandlingCommonTasksS.toNumberRange(this.qty.value,this.qty,'qty') : null}
+      searchObj = {...searchObj, ...this.price.value? this.HandlingCommonTasksS.toNumberRange(this.price.value,this.price,'price') : null}
+      searchObj = {...searchObj, ...this.tdate.value? this.HandlingCommonTasksS.toDateRange(this.tdate, 'tdate') : null}
+      searchObj = {...searchObj, ...this.vdate.value? this.HandlingCommonTasksS.toDateRange(this.vdate,'vdate') : null}
+      console.log('searchObj',searchObj);
+      this.TradeService.getTradeInformation(searchObj).subscribe(data => {
         this.dataSource  = new MatTableDataSource(data);
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
@@ -167,7 +183,11 @@ export class AppTradeTableComponent  implements AfterViewInit {
 
   selectInstrument (element:Instruments) {this.modal_principal_parent.emit(element)}
   exportToExcel() {this.HandlingCommonTasksS.exportToExcel (this.dataSource.data,"tradesData")  }
-  get  marketSource () {return this.searchParametersFG.get('marketSource') } 
-  get  boards () {return this.searchParametersFG.get('boards') } 
+  get  type () {return this.searchParametersFG.get('type') } 
+  get  tdate () {return this.searchParametersFG.get('tdate') } 
+  get  vdate () {return this.searchParametersFG.get('vdate') } 
   get  secidList () {return this.searchParametersFG.get('secidList') } 
+  get  cptyList () {return this.searchParametersFG.get('cptyList') } 
+  get  qty () {return this.searchParametersFG.get('qty') } 
+  get  price () {return this.searchParametersFG.get('price') } 
 }

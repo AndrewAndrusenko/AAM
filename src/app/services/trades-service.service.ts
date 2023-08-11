@@ -25,8 +25,9 @@ export class AppTradeService {
   getTradeDataToUpdateTableSource(): Observable<TradesDataSet> { 
     return this.reloadTradeTable.asObservable(); 
   }
-  getTradeInformation():Observable<trades[]> {
-    return this.http.get <trades[]> ('api/AAM/MD/getTradeData/')
+  getTradeInformation(serachFilters:any):Observable<trades[]> {
+    let params = {...serachFilters}
+    return this.http.get <trades[]> ('api/AAM/MD/getTradeData/',{params:params})
   }
 
 }

@@ -3,8 +3,6 @@
     </span>
   <span class="example-spacer"></span>
 </mat-toolbar>
-<!-- <pre>{{tradeModifyForm.errors|json}}</pre> -->
-<!-- <pre style="font-size: 16px;">{{id_price_currency?.errors | json}}</pre> -->
 <form class="submit" [formGroup]="tradeModifyForm" style="background-color: rgb(40, 39, 39);">
   <button mat-raised-button color="accent" 
     [disabled]="!(tradeModifyForm.valid && submitbox.checked)"

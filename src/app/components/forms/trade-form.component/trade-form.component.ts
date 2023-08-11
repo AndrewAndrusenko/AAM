@@ -1,5 +1,5 @@
 import { AfterContentInit, Component,  EventEmitter,  Input, Output} from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ClientData, Instruments, trades } from 'src/app/models/intefaces.model';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { menuColorGl } from 'src/app/models/constants.model';
@@ -21,6 +21,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
   accessState: string = 'none';
   disabledControlElements: boolean = false;
   public tradeModifyForm: FormGroup;
+
   @Input() action: string = 'View';
   @Output() public modal_principal_parent = new EventEmitter();
   public title: string;
@@ -28,7 +29,6 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
   public data: any;
   panelOpenStateFirst = false;
   panelOpenStateSecond = false;
-  menuColorGl=menuColorGl
   filteredCurrenciesList: Observable<string[]>;
   filteredSetCurrenciesList: Observable<string[]>;
   filterednstrumentsLists : Observable<string[]>;
@@ -67,6 +67,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
       tidorder:{value:null, disabled: false},allocatedqty:{value:null, disabled: false},idportfolio:{value:null, disabled: false},
       id_buyer_instructions:{value:null, disabled: false},id_seller_instructions:{value:null, disabled: false},id_broker:{value:null, disabled: false}, details:{value:null, disabled: false},cpty_name:{value:null, disabled: false},security_group_name :{value:null, disabled: false},   secid_name:{value:null, disabled: false}, trade_amount:[null], facevalue:[null],faceunit:[null],faceunit_name:[null], code_price_currency:[null],  price_currency_name:[null], settlement_currency_name:[null], code_settlement_currency:[null], settlement_amount:[null],settlement_rate:[null]
     })
+
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.indexDBServiceS.getIndexDBStaticTables('getMoexSecurityTypes').then (data=>this.securityTypes = data['data']);
@@ -137,7 +138,6 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     });
   }
   secidChanged (item:any) {
-    console.log('item',item);
     this.tidinstrument.patchValue(item.secid)
     this.secid_name.patchValue(item.name+' ('+item.security_type_name+')')
     this.price_type.patchValue(this.securityTypes.filter(el=>el['security_type_name']===item.security_type_name)[0]['price_type'])

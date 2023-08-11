@@ -53,7 +53,6 @@ async function getCurrencyData (request,response) {
     break;
   }
   sql = pgp.as.format(sql,request.query);
-  console.log('sql',sql);
   db_common_api.queryExecute(sql,response,undefined,request.query.dataType);
 }
 async function modifyRatesData (request,response) {
