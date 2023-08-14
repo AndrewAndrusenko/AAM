@@ -22,11 +22,14 @@ async function queryExecute (sql, response, responseType, sqlID) {
     })
   })
 } 
-async function fUpdateTableDB (table, fields,idfieldName, request, response) {
+async function fUpdateTableDB (table, fields,idfieldName, request, response,dates) {
   return new Promise ((resolve) => {
     let fieldsWithQuetes =  fields.join('","')
-    let values = fields.map(el=>'${'+el+'}');
-    let updatePairs = fields.map(el=> '"'+el+'"'+'=${'+el+'}');
+    let values = fields.map(el=>{dates.includes(el)? '${'+el+'}::timestamptz':'${'+el+'}'});
+
+    console.log('fields',fields);
+    console.log('dates',dates);
+    let updatePairs = fields.map(el=> dates.includes(el)? '"'+el+'"'+'=${'+el+'}::timestamptz': '"'+el+'"'+'=${'+el+'}');
     switch (request.body.action) {
       case 'Create':
         sqlText = 'INSERT INTO public."'+ table +'" ("'+ fieldsWithQuetes +'") VALUES ('+ values + ') RETURNING *;'
@@ -39,6 +42,7 @@ async function fUpdateTableDB (table, fields,idfieldName, request, response) {
             break;
           }
           sql = pgp.as.format(sqlText,request.body.data);
+          console.log('update sql',sql);
     resolve(queryExecute (sql, response,undefined,'fUpdateTableDB '+request.body.action+' ',table))
   })
 }

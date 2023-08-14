@@ -58,14 +58,14 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
       price:[null, { validators: [ Validators.required, Validators.pattern('[0-9]*([0-9.]{0,8})?$')], updateOn: 'blur' }],
       price_type:[1, { validators:  Validators.required, updateOn: 'blur' }],
       accured_interest:[null, { validators: Validators.pattern('[0-9]*([0-9.]{0,3})?$'), updateOn: 'blur' }],
-      f1ee_trade:[null, { validators: Validators.pattern('[0-9]*([0-9.]{0,3})?$'), updateOn: 'blur' }],
+      fee_trade:[null, { validators: Validators.pattern('[0-9]*([0-9.]{0,3})?$'), updateOn: 'blur' }],
       fee_settlement:[null, { validators: Validators.pattern('[0-9]*([0-9.]{0,3})?$'), updateOn: 'blur' }],
       fee_exchange:[null, { validators: Validators.pattern('[0-9]*([0-9.]{0,3})?$'), updateOn: 'blur' }],
       id_cpty:[null, { validators:  Validators.required, updateOn: 'blur' }],
-      id_price_currency:['810'],
-      id_settlement_currency:['810'],
+      id_price_currency:[null],
+      id_settlement_currency:[null],
       tidorder:{value:null, disabled: false},allocatedqty:{value:null, disabled: false},idportfolio:{value:null, disabled: false},
-      id_buyer_instructions:{value:null, disabled: false},id_seller_instructions:{value:null, disabled: false},id_broker:{value:null, disabled: false}, details:{value:null, disabled: false},cpty_name:{value:null, disabled: false},security_group_name :{value:null, disabled: false},   secid_name:{value:null, disabled: false}, trade_amount:[null], facevalue:[null],faceunit:[null],faceunit_name:[null], code_price_currency:[null],  price_currency_name:[null], settlement_currency_name:[null], code_settlement_currency:[null], settlement_amount:[null],settlement_rate:[null]
+      id_buyer_instructions:{value:null, disabled: false},id_seller_instructions:{value:null, disabled: false},id_broker:{value:null, disabled: false}, details:{value:null, disabled: false},cpty_name:{value:null, disabled: false},security_group_name :{value:null, disabled: false},   secid_name:{value:null, disabled: false}, trade_amount:[null], facevalue:[null],faceunit:[null],faceunit_name:[null], code_price_currency:[null],  price_currency_name:[null], settlement_currency_name:[null], code_settlement_currency:[null], settlement_amount:[null],settlement_rate:[null], coupon_details:[null]
     })
 
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
@@ -76,7 +76,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
       this.id_price_currency.updateValueAndValidity();
       this.id_settlement_currency.setValidators([this.AutoCompService.currencyValirator()]);
       this.id_settlement_currency.updateValueAndValidity();
-      this.faceunit_name.patchValue(this.AutoCompService.getCurrecyData(this.faceunit.value)['CurrencyCode'])
+      this.faceunit.value? this.faceunit_name.patchValue(this.AutoCompService.getCurrecyData(this.faceunit.value)['CurrencyCode']):null;
       this.checkCurrenciesHints()
     });
     this.AutoCompService.getSecidLists().then (()=>this.tidinstrument.setValidators(this.AutoCompService.secidValirator()) );
@@ -87,6 +87,8 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
   }
 
   ngAfterContentInit (): void {
+    this.tradeModifyForm.patchValue(this.data);
+
     this.filterednstrumentsLists = this.tidinstrument.valueChanges.pipe(
       startWith(''),
       distinctUntilChanged(),
@@ -109,7 +111,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
       );
       this.price.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>this.fullAmountCalcualtion(false));
       this.qty.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>this.fullAmountCalcualtion(true));
-      this.settlement_rate.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>this.fullAmountCalcualtion(false));
+      this.settlement_rate.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>this.settlementAmountUpdate());
       this.vdate.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>this.fullAmountCalcualtion(true));
       this.id_price_currency.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>this.changeSettlementRate());
       this.id_settlement_currency.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>{
@@ -117,10 +119,10 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
         this.settlement_rate.updateValueAndValidity();
         this.changeSettlementRate();
       })
-      this.tradeModifyForm.patchValue(this.data);
-      this.price_type.value==2? this.id_price_currency.patchValue(this.faceunit.value): null;
+      // this.price_type.value==2&&this.id_price_currency.value!==this.faceunit.value? this.id_price_currency.patchValue(this.faceunit.value): null;
       this.action == 'View'|| this.disabledControlElements?  this.tradeModifyForm.disable() : null;
       this.fullAmountCalcualtion(true);
+      this.changeSettlementRate();
   }
   changeSettlementRate () {
     if (this.id_price_currency.value === this.id_settlement_currency.value) {
@@ -168,6 +170,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
   }
   checkCurrenciesHints (){
     if (this.id_price_currency.value) {  
+      console.log('this.id_price_currency.value',this.id_price_currency.value,this.idtrade.value);
       let el_price_currency = this.AutoCompService.getCurrecyData(this.id_price_currency.value)
       this.code_price_currency.patchValue(el_price_currency['CurrencyCode'])
       this.price_currency_name.patchValue(el_price_currency['CurrencyName'])
@@ -184,30 +187,35 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     } else {
       this.CommonDialogsService.dialogCloseAll();
       this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' instrument'}, action)
-      this.TradeService.sendTradeDataToUpdateTableSource(this.addJoinedFieldsToResult(result), action)
+      this.TradeService.getTradeInformation({idtrade:result[0].idtrade}).subscribe(
+        data=>this.TradeService.sendTradeDataToUpdateTableSource(data,action)
+      );
     }
   }
-  addJoinedFieldsToResult (result:trades[]):trades[] {
-/*     result[0].board_title = this.moexBoards.find(el=>el.boardid===result[0].primary_boardid).board_title;
-    result[0].security_type_title = this.securityTypes.find(el=>el.security_type_name===result[0].type).security_type_title */
-    return result;
-  }
+
   updateInstrumentData(action:string){
     if (this.tradeModifyForm.invalid) {return}
     switch (action) {
       case 'Create_Example':
       case 'Create':
-        this.TradeService.updateInstrument(this.tradeModifyForm.value).subscribe(result =>this.snacksBox(result,'Created'))
+        this.TradeService.updateTrade(this.tradeModifyForm.value,'Create').subscribe(result =>this.snacksBox(result,'Created'))
       break;
       case 'Edit':
-        this.TradeService.updateInstrument (this.tradeModifyForm.value).subscribe(result => this.snacksBox(result,'Updated'))
+        this.TradeService.updateTrade (this.tradeModifyForm.value,'Edit').subscribe(result => this.snacksBox(result,'Updated'))
       break;
       case 'Delete':
         this.CommonDialogsService.confirmDialog('Delete Instrument ' + this.tidinstrument.value).pipe(
           filter (isConfirmed => isConfirmed.isConfirmed),
-          switchMap(data => this.TradeService.updateInstrument (this.idtrade.value))
+          switchMap(data => this.TradeService.updateTrade (this.tradeModifyForm.value,'Delete'))
         ).subscribe (result =>this.snacksBox(result,'Deleted'));
       break;
+    }
+  }
+  settlementAmountUpdate() {
+    if (this.id_settlement_currency.valid&&this.id_settlement_currency.valid&&Number(this.settlement_rate.value)) {
+      this.settlement_amount.patchValue((Number(this.trade_amount.value)*Number(this.settlement_rate.value)).toFixed(2))
+    } else { 
+      this.settlement_amount.patchValue(!this.id_settlement_currency.value? this.trade_amount.value : 'Error');
     }
   }
   tradeAmountsUpdate() {
@@ -219,16 +227,13 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
         this.trade_amount.patchValue(this.price.value*this.qty.value);
       break;
     }
-    if (this.id_settlement_currency.valid&&this.id_settlement_currency.valid&&Number(this.settlement_rate.value)) {
-      this.settlement_amount.patchValue((Number(this.trade_amount.value)*Number(this.settlement_rate.value)).toFixed(2))
-    } else { 
-      this.settlement_amount.patchValue(!this.id_settlement_currency.value? this.trade_amount.value : 'Error');
-    }
+    this.settlementAmountUpdate();
   }
   fullAmountCalcualtion(accured_interest_update:boolean) {
+    console.log('fullAmountCalcualtion',);
     if (this.price_type.value==='2'&&accured_interest_update) {
       this.InstrumentDataS.getcouponPeriodInfo(this.vdate.value,this.tidinstrument.value,this.facevalue.value,this.qty.value).subscribe (coupon=>{ 
-        this.details.patchValue(coupon.coupon_details);
+        this.coupon_details.patchValue(coupon.coupon_details);
         this.accured_interest.patchValue(coupon.accured_interest);
         this.tradeAmountsUpdate();
       })
@@ -243,7 +248,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
   get qty() {return this.tradeModifyForm.get('qty')}
   get price() {return this.tradeModifyForm.get('price')}
   get accured_interest() {return this.tradeModifyForm.get('accured_interest')} 
-  get f1ee_trade() {return this.tradeModifyForm.get('f1ee_trade')} 
+  get fee_trade() {return this.tradeModifyForm.get('fee_trade')} 
   get fee_settlement() {return this.tradeModifyForm.get('fee_settlement')} 
   get fee_exchange() {return this.tradeModifyForm.get('fee_exchange')} 
   get tdate() {return this.tradeModifyForm.get('tdate')} 
@@ -271,4 +276,5 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
   get settlement_currency_name() {return this.tradeModifyForm.get('settlement_currency_name')}
   get settlement_amount() {return this.tradeModifyForm.get('settlement_amount')}
   get settlement_rate() {return this.tradeModifyForm.get('settlement_rate')}
+  get coupon_details() {return this.tradeModifyForm.get('coupon_details')}
 }

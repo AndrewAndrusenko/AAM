@@ -40,8 +40,6 @@ export class AppTradeTableComponent  implements AfterViewInit {
   accessToClientData: string = 'true';
   instruments: string[] = ['ClearAll'];
   counterparties: string[] = ['ClearAll'];
-  id_secid:string[]=['0'];
-  id_cptys:number[]=[0];
   investmentNodeColor = investmentNodeColorChild;
   additionalLightGreen = additionalLightGreen;
   filterednstrumentsLists : Observable<string[]>;
@@ -72,7 +70,7 @@ export class AppTradeTableComponent  implements AfterViewInit {
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.searchParametersFG = this.fb.group ({
       type:null,
-      secidList: []  ,
+      secidList: [],
       cptyList:  [],
       tdate : this.dataRange,
       vdate : this.dataRangeVdate,
@@ -129,22 +127,27 @@ export class AppTradeTableComponent  implements AfterViewInit {
     !event.hasOwnProperty('isUserInput') || event.isUserInput ? this.dataSource.filter = filterValue.trim().toLowerCase() : null;
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
-  changedValueofChip (value:string, chipArray:string[],control:AbstractControl, id_elem:any, id_array:any[]) {
-    chipArray.push(value);
-    id_array.push(id_elem)
-    control.patchValue (id_array)
+  changedValueofChip (value:string, chipArray:string[],control:AbstractControl) {
+    console.log('changedValueofChip',);
+    chipArray[chipArray.length-1] = value;
   }
-  add(event: MatChipInputEvent,chipArray:string[]): void {
+  add(event: MatChipInputEvent,chipArray:string[],control:AbstractControl): any[] {
     const value = (event.value || '').trim();
     const valueArray = event.value.split(',');
     (value)? chipArray = [...chipArray,...valueArray] : null;
     event.chipInput!.clear();
+    return chipArray;
   }
-  remove(account: string, chipArray:string[]): void {
+  remove(account: string, chipArray:string[],control:AbstractControl): void {
     const index = chipArray.indexOf(account);
     (index >= 0)? chipArray.splice(index, 1) : null;
   }
-  clearAll(event, chipArray:string[]) {event.target.textContent.trim() === 'ClearAll cancel'? chipArray = ['ClearAll']: null}
+  clearAll(event, chipArray:string[],control:AbstractControl) : string [] {
+    if (event.target.textContent.trim() === 'ClearAll cancel') {
+      chipArray = ['ClearAll'];
+    };
+    return chipArray;
+  }
   addChips (el: any, column: string) {(['secid'].includes(column))? this.instruments.push(el):null;}
   updateFilter (el: any) {
     this.filterALL.nativeElement.value = el;
@@ -156,33 +159,55 @@ export class AppTradeTableComponent  implements AfterViewInit {
     this.dataSource.filter = ''
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
   }
-  async submitQuery () {
+  async submitQuery (reset:boolean=false) {
     return new Promise((resolve, reject) => {
-      let searchObj = this.searchParametersFG.value;
+      let searchObj = reset?  {} : this.searchParametersFG.value;
       this.dataSource.data? this.dataSource.data = null : null;
-      searchObj = {...searchObj, ...this.qty.value? this.HandlingCommonTasksS.toNumberRange(this.qty.value,this.qty,'qty') : null}
-      searchObj = {...searchObj, ...this.price.value? this.HandlingCommonTasksS.toNumberRange(this.price.value,this.price,'price') : null}
+      searchObj.cptyList = [0,1].includes(this.counterparties.length)&&this.counterparties[0]==='ClearAll'? null : this.counterparties.map(el=>el.toLocaleLowerCase())
+      searchObj.secidList = [0,1].includes(this.instruments.length)&&this.instruments[0]==='ClearAll'? null : this.instruments.map(el=>el.toLocaleLowerCase())
+      if (this.qty.value) {
+        let qtyRange = this.HandlingCommonTasksS.toNumberRange(this.qty.value,this.qty,'qty');
+        qtyRange? searchObj = {...searchObj, ... qtyRange} : searchObj.qty=null;
+      } else {searchObj.qty=null};
+      if (this.price.value) {
+        let priceRange = this.HandlingCommonTasksS.toNumberRange(this.price.value,this.price,'price');
+        priceRange? searchObj = {...searchObj, ... priceRange} : searchObj.price=null;
+      } else  {searchObj.price=null};
+      this.price.value? searchObj = {...searchObj, ... this.HandlingCommonTasksS.toNumberRange(this.price.value,this.price,'price')} :null;
       searchObj = {...searchObj, ...this.tdate.value? this.HandlingCommonTasksS.toDateRange(this.tdate, 'tdate') : null}
       searchObj = {...searchObj, ...this.vdate.value? this.HandlingCommonTasksS.toDateRange(this.vdate,'vdate') : null}
       console.log('searchObj',searchObj);
       this.TradeService.getTradeInformation(searchObj).subscribe(data => {
+        console.log('data',data);
         this.dataSource  = new MatTableDataSource(data);
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
-        this.instruments.unshift('ClearAll')
         this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ');
         resolve(data) 
       });
     });
   }
-  toggleAllSelection(elem:string, allSelected: boolean) {
-/*     allSelected? this.searchParametersFG.get(elem).patchValue(
-      elem==='marketSource'? [...this.marketSources.map(item => item.segments.map(el => el.sourceCode)),0].flat() : [...this.boardIDs.map(item => item.boardid
-    ), 0]) : this.searchParametersFG.get(elem).patchValue([]); */
-  }
-
   selectInstrument (element:Instruments) {this.modal_principal_parent.emit(element)}
-  exportToExcel() {this.HandlingCommonTasksS.exportToExcel (this.dataSource.data,"tradesData")  }
+  exportToExcel() {this.HandlingCommonTasksS.exportToExcel (this.dataSource.data.map(el=>{
+    return {
+      IDtrade:Number(el['idtrade']),
+      TradeDate:new Date(el['tdate']),
+      Type:(el['trtype']),
+      Secid:(el['tidinstrument']),
+      SecidName:(el['secid_name']),
+      ValueDate:new Date(el['vdate']),
+      Price:Number(el['price']),
+      PriceCurrency:(el['id_price_currency']),
+      CounterParty:(el['cpty']),
+      Quantity:Number(el['qty']),
+      TradeAmount:Number(el['trade_amount']),
+      SettlementCurrency:(el['id_settlement_currency']),
+      PriceType:Number(el['price_type']),
+      Facevalue:Number(el['facevalue']),
+      Faceunit:(el['faceunit']),
+      SecidType:(el['secid_type']),
+    }
+  }),"tradesData")  }
   get  type () {return this.searchParametersFG.get('type') } 
   get  tdate () {return this.searchParametersFG.get('tdate') } 
   get  vdate () {return this.searchParametersFG.get('vdate') } 

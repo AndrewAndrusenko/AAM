@@ -10,17 +10,6 @@
       <mat-icon>close</mat-icon>
     </button>
   </mat-form-field>
-<!--   <mat-form-field  style="width: 20%;" class = "filterField" title="filter by BoardID">
-    <mat-label class="whiteTextFilter">BoardID</mat-label>
-    <mat-select  #BoardID  [formControl]="boardsOne" > 
-      <mat-option 
-        *ngFor="let board of boardIDs" 
-        [value]="board.boardid.toString()"
-        (onSelectionChange)="applyFilter($event)">
-          {{board.boardid}} - {{board.board_title}}
-      </mat-option>
-    </mat-select>
-  </mat-form-field> -->
   <mat-form-field class = "filterField"  style="font-size: 22px;" title="All columns">
     <mat-label class="whiteTextFilter">Search (all columns)...</mat-label>
     <input 
@@ -41,7 +30,7 @@
   </button>
   <button color = "accent" mat-raised-button title="Reload Table"
   style=" margin-left:1%; font-size: 18px;"
-  (click)="submitQuery()">
+  (click)="submitQuery(true)">
   Reload 
   <mat-icon matSuffix >refresh</mat-icon>
 </button>
@@ -66,7 +55,7 @@
           Submit
         </button>
         <button color = "accent" mat-raised-button 
-          style="margin:1%; font-size: 18px;"
+          style="margin-top:4%;margin-left: 1%; font-size: 18px;"
           (click)="searchParametersFG.reset();
            instruments=['ClearAll']">
           ClearAll
@@ -74,16 +63,17 @@
       </span>
       <mat-form-field  class="search-filed">
       <mat-select placeholder="Type" formControlName="type">
+        <mat-option [value]="null">ALL</mat-option>
         <mat-option [value]="'BUY'">BUY</mat-option>
         <mat-option [value]="'SELL'">SELL</mat-option>
       </mat-select>
     </mat-form-field>
 
-    <mat-form-field appearance="fill" formControlName="tdate" class="search-filed">
+    <mat-form-field appearance="fill"  class="search-filed">
       <mat-label >Enter a date range</mat-label>
       <mat-date-range-input [formGroup]="dataRange" [rangePicker]="pickerTDate" >
         <input matStartDate placeholder="Start date" formControlName="dateRangeStart" >
-        <input matEndDate placeholder="End date" formControlName="dateRangeEnd">
+        <input matEndDate placeholder="End date" formControlName="tdate" formControlName="dateRangeEnd">
       </mat-date-range-input>
       <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
       <mat-datepicker-toggle matSuffix [for]="pickerTDate"></mat-datepicker-toggle>
@@ -93,10 +83,10 @@
     </mat-form-field>
 
 
-    <mat-form-field appearance="fill" formControlName="vdate" class="search-filed">
+    <mat-form-field appearance="fill"  class="search-filed">
       <mat-label>Enter a date range</mat-label>
       <mat-date-range-input [formGroup]="dataRangeVdate" [rangePicker]="pickerVDate" >
-        <input matStartDate placeholder="Start date" formControlName="dateRangeStart">
+        <input matStartDate placeholder="Start date" formControlName="vdate" formControlName="dateRangeStart">
         <input matEndDate placeholder="End date" formControlName="dateRangeEnd">
       </mat-date-range-input>
       <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
@@ -106,8 +96,8 @@
       <mat-error *ngIf="dataRange.controls.dateRangeEnd.hasError('matEndDateInvalid')">Invalid end date</mat-error>
     </mat-form-field>
 
-    <mat-form-field class="search-filed"> 
-      <input matInput placeholder="Quantity" formControlName="qty">
+    <mat-form-field class="search-filed" style="width: 16%;"> 
+      <input matInput placeholder="Quantity (Value or Min - Max)" formControlName="qty">
       <mat-hint *ngIf="qty.valid">
         Qty or QtyMin-QtyMax
       </mat-hint>
@@ -115,8 +105,8 @@
         Incorrect Range
       </mat-error>
     </mat-form-field>
-    <mat-form-field class="search-filed">
-      <input matInput placeholder="Price" formControlName="price">
+    <mat-form-field class="search-filed" style="width: 15%;">
+      <input matInput placeholder="Price (Value or Min - Max)" formControlName="price">
       <mat-hint *ngIf="price.valid">
         Price or PriceMin-PriceMax
       </mat-hint>
@@ -129,8 +119,8 @@
       <mat-form-field  appearance="fill" style="width: 40%; " class="search-filed">
         <mat-chip-list #chipList   >
           <mat-chip *ngFor="let secid of instruments" 
-          (removed)="remove(secid,instruments)"
-          (click)=" clearAll($event,instruments);">
+          (removed)="remove(secid,instruments,secidList)"
+          (click)=" instruments = clearAll($event,instruments,secidList);">
             {{secid}}
             <button matChipRemove>
               <mat-icon>cancel</mat-icon>
@@ -144,10 +134,10 @@
           [matChipInputFor]="chipList"
           [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
           [matChipInputAddOnBlur]="true"
-          (matChipInputTokenEnd)="add($event,instruments)"
+          (matChipInputTokenEnd)="instruments = add($event,instruments,secidList)"
           matTooltip="Type secid or paste multiple secid codes separated by comma and press enter" >
         </mat-chip-list>
-        <mat-autocomplete #auto="matAutocomplete" (optionSelected)="changedValueofChip($event.option.value,instruments,secidList,$event.option.value,id_secid)">
+        <mat-autocomplete #auto="matAutocomplete" (optionSelected)="changedValueofChip($event.option.value,instruments,secidList)">
           <mat-option *ngFor="let secid of filterednstrumentsLists | async" [value]="secid.toString().split(',')[0]">
             {{secid.toString().replaceAll(',',' - ')}}
           </mat-option>
@@ -159,8 +149,8 @@
       <mat-form-field appearance="fill" style="width: 40%;" class="search-filed">
         <mat-chip-list #chipListCpty   >
           <mat-chip *ngFor="let cpty of counterparties" 
-          (removed)="remove(cpty,counterparties)"
-          (click)=" clearAll($event,counterparties);">
+          (removed)="remove(cpty,counterparties,cptyList)"
+          (click)=" counterparties = clearAll($event,counterparties,cptyList);">
             {{cpty}}
             <button matChipRemove>
               <mat-icon>cancel</mat-icon>
@@ -174,10 +164,10 @@
           [matChipInputFor]="chipListCpty"
           [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
           [matChipInputAddOnBlur]="true"
-          (matChipInputTokenEnd)="add($event,counterparties)"
+          (matChipInputTokenEnd)="counterparties = add($event,counterparties,cptyList)"
           matTooltip="Type cpty name or paste multiple names separated by comma and press enter" >
         </mat-chip-list>
-        <mat-autocomplete #autoCpty="matAutocomplete" (optionSelected)="changedValueofChip($event.option.value[0],counterparties,cptyList,$event.option.value[1],id_cptys)">
+        <mat-autocomplete #autoCpty="matAutocomplete" (optionSelected)="changedValueofChip($event.option.value[0],counterparties,cptyList)">
           <mat-option *ngFor="let cpty of filteredCptyLists | async"[value]="[cpty['clientname'],cpty['idclient']] ">
             {{cpty['clientname']}} -  {{cpty['idclient']}} 
           </mat-option>

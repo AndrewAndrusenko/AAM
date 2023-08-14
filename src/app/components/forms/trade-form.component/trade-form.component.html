@@ -17,7 +17,7 @@
               showErrors()">
     Submit Data
   </mat-checkbox>
-  <h3 style="color:rgb(177, 174, 174)" *ngIf="tradeModifyForm.valid"> 
+  <h3 style="color:rgb(177, 174, 174);margin-left: 1%;" *ngIf="tradeModifyForm.valid"> 
     To save data please select 'Submit data' check and then press button 
   </h3>
   <p>
@@ -96,6 +96,7 @@
     <mat-form-field style="width: 45%;" >
       <input matInput placeholder="Instrument" formControlName="secid_name" [readonly]="true" >
     </mat-form-field>
+
   </p>
   <p>
     <mat-form-field style="width: 13%;" title="price" >
@@ -238,6 +239,11 @@
       <mat-form-field style="width: 25%;" title="id_broker" >
         <input matInput placeholder="Broker" formControlName="id_broker"  >
       </mat-form-field>
+      <p style="margin: 1%;">
+      <mat-label *ngIf="price_type.value=='2'"> 
+        {{coupon_details.value}}
+       </mat-label>
+      </p>
     </div>
   </mat-expansion-panel>
   <br>
@@ -254,8 +260,8 @@
       </mat-panel-description>
     </mat-expansion-panel-header >
     <mat-form-field style="width: 20%;" >
-      <input matInput placeholder="Fee Trade " formControlName="f1ee_trade" >
-      <mat-error  *ngIf="f1ee_trade?.errors?.['pattern']">
+      <input matInput placeholder="Fee Trade " formControlName="fee_trade" >
+      <mat-error  *ngIf="fee_trade?.errors?.['pattern']">
         Only numbers!    
       </mat-error>
     </mat-form-field>

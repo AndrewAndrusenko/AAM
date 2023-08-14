@@ -10,8 +10,8 @@ interface TradesDataSet {
   providedIn: 'root'
 })
 export class AppTradeService {
-  updateInstrument(value: any):Observable <trades[]> {
-    return this.http.post <trades[]> ('api/AAM/MD/getTradeData/',value)
+  updateTrade(data:any, action:string):Observable <trades[]> {
+    return this.http.post <trades[]> ('api/AAM/MD/UpdateTradeData/',{data:data,action:action})
   }
   constructor(private http:HttpClient) { }
   private reloadTradeTable = new Subject <any> (); 

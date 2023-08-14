@@ -195,15 +195,16 @@ appServer.post('/AAM/MD/InstrumentEdit/',jsPassport.authenticate('session') , ui
 appServer.post('/AAM/MD/UpdateInstrumentDetails/',jsPassport.authenticate('session') , uiAmmMarketData.fUpdateInstrumentDetails)
 appServer.post('/AAM/MD/UpdateInstrumentDataCorpActions/',jsPassport.authenticate('session') , uiAmmMarketData.fUpdateInstrumentDataCorpActions)
 /*----------------------TradeData----------------------------------------------------*/
-appServer.get('/AAM/MD/getTradeData/',jsPassport.authenticate('session') , uiAmmTradeData.fGetTradesData)
-appServer.get('/AAM/MD/getcouponPeriodInfo/',jsPassport.authenticate('session') , uiAmmTradeData.GetAccuredInterest)
+appServer.get('/AAM/MD/getTradeData/',jsPassport.authenticate('session'), uiAmmTradeData.fGetTradesData)
+appServer.get('/AAM/MD/getcouponPeriodInfo/',jsPassport.authenticate('session'), uiAmmTradeData.fGetAccuredInterest)
+appServer.post('/AAM/MD/UpdateTradeData/',jsPassport.authenticate('session'), uiAmmTradeData.fUpdateTradeData)
 
 /*----------------------CurrencyData----------------------------------------------------*/
-appServer.get('/AAM/getCurrencyData/',jsPassport.authenticate('session') , uiAmmCurrencyData.getCurrencyData)
-appServer.get('/AAM/getCbrRateDaily/',jsPassport.authenticate('session') , uiAmmCurrencyData.getCbrRateDaily)
-appServer.post('/AAM/modifyRatesData/',jsPassport.authenticate('session') , uiAmmCurrencyData.modifyRatesData)
+appServer.get('/AAM/getCurrencyData/',jsPassport.authenticate('session'), uiAmmCurrencyData.getCurrencyData)
+appServer.get('/AAM/getCbrRateDaily/',jsPassport.authenticate('session'), uiAmmCurrencyData.getCbrRateDaily)
+appServer.post('/AAM/modifyRatesData/',jsPassport.authenticate('session'), uiAmmCurrencyData.modifyRatesData)
 
-RedisService.TestRedis();
-RedisService.redisSetInstrumentList();
-appServer.get('/AAM/Redis/getMoexInstrumentsList/',jsPassport.authenticate('session') , RedisService.redisGetInstrumentList)
+// RedisService.TestRedis();
+// RedisService.redisSetInstrumentList();
+appServer.get('/AAM/Redis/getMoexInstrumentsList/',jsPassport.authenticate('session'), RedisService.redisGetInstrumentList)
 appServer.listen (port,'localhost', () => {console.log (`AAM Server is running on port ${port}`)})

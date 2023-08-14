@@ -32,7 +32,8 @@ export class InstrumentDataService {
         let last_coupon_date = new Date(coupon[1].date);
         let value_date = new Date(vdate);
         coupon_data.days = Math.round( Math.ceil(Math.abs((value_date.getTime()-last_coupon_date.getTime()))/(1000 * 3600 * 24)));
-        coupon_data.coupon_details = (''+JSON.stringify(coupon[0]) + ', lastCouponDate:'+ coupon[1].date.toString()+ ', days:' + coupon_data.days.toString() +', facevalue: '+ facevalue.toString());
+        coupon[0].date = value_date.toLocaleDateString()
+        coupon_data.coupon_details = (JSON.stringify(coupon[0]) + ', lastCouponDate:'+ new Date(coupon[1].date).toLocaleDateString()+ ', days:' + coupon_data.days.toString() +', facevalue: '+ facevalue.toString()).replaceAll('"','')
         coupon_data.accured_interest = (facevalue*qty*coupon[0].couponrate/100*coupon_data.days/365).toFixed(2);
         return (coupon_data)
       })
