@@ -73,3 +73,11 @@
   font-size:large;
   font-weight: 700;
 }
+.mat-focused label {
+  color:rgb(0, 47, 255) !important;
+  transform: 1.2 !important;
+  font-size:x-large !important;
+ }
+ :host ::ng-deep .mat-form-field-label {
+  color:rgb(1, 15, 18) !important;
+ }

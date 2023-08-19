@@ -24,8 +24,10 @@ async function queryExecute (sql, response, responseType, sqlID) {
 } 
 async function fUpdateTableDB (table, fields,idfieldName, request, response,dates) {
   return new Promise ((resolve) => {
+    dates = !dates? []:dates; 
     let fieldsWithQuetes =  fields.join('","')
-    let values = fields.map(el=>{dates.includes(el)? '${'+el+'}::timestamptz':'${'+el+'}'});
+    let values = fields.map(el=>dates.includes(el)? '${'+el+'}::timestamptz':'${'+el+'}');
+    console.log('fields value',fields,values,request.body.data,request.query);
     let updatePairs = fields.map(el=> dates.includes(el)? '"'+el+'"'+'=${'+el+'}::timestamptz': '"'+el+'"'+'=${'+el+'}');
     switch (request.body.action) {
       case 'Create':

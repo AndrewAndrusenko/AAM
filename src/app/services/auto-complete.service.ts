@@ -47,7 +47,6 @@ export class AtuoCompleteService {
     }
   }
   getCurrecyData (codeNum:string):string {
-    console.log('codeNum',codeNum);
     return this.fullCurrenciesList.filter(el=>el['CurrencyCodeNum']===codeNum)[0]
   }
   secidValirator ():ValidatorFn {

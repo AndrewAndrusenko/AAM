@@ -15,6 +15,7 @@ import { formatNumber } from '@angular/common';
 import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { investmentNodeColor } from 'src/app/models/constants.model';
+import { HandlingTableSelectionService } from 'src/app/services/handling-table-selection.service';
 
 @Component({
   selector: 'app-table-acc-accounts',
@@ -53,6 +54,7 @@ export class AppTableAccAccountsComponent  implements OnInit {
     private AccountingDataService:AppAccountingService, 
     private CommonDialogsService:HadlingCommonDialogsService,
     private AuthServiceS:AuthService,  
+    private SelectionService:HandlingTableSelectionService,
     private dialog: MatDialog ,
     private HandlingCommonTasksS:HandlingCommonTasksService
   ) {   
@@ -105,18 +107,9 @@ export class AppTableAccAccountsComponent  implements OnInit {
     this.dialogRef.componentInstance.action = actionType;
     this.dialogRef.componentInstance.data = row;
   }
-  isAllSelected() {
-    if (!this.dataSource) return false
-    const numSelected = this.selection.selected.length;
-    const numRows = this.dataSource.data.length||null;
-    return numSelected === numRows;
-  }
-  toggleAllRows() {
-    this.isAllSelected()? this.selection.clear(): this.selection.select(...this.dataSource.data);
-  }
-  checkboxLabel(row?: bAccounts): string {
-    return !row? `${this.isAllSelected() ? 'deselect' : 'select'} all`: `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${ 1}`;
-  }
+  isAllSelected() { return this.SelectionService.isAllSelected(this.dataSource, this.selection)} 
+  toggleAllRows(forceSelectAll:boolean=false) { return this.SelectionService.toggleAllRows(this.dataSource, this.selection,forceSelectAll)} 
+  checkboxLabel(row?: bAccounts): string {return this.SelectionService.checkboxLabel(this.dataSource, this.selection, row)}
   add(event: MatChipInputEvent): void {
     const value = (event.value || '').trim();
     (value)? this.accounts.push(value) : null;

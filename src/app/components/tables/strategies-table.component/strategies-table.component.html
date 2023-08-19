@@ -55,7 +55,7 @@
       </ng-container>
       <ng-container matColumnDef="expandedDetail" >
         <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplayWithExpand.length">
-          <div class="element-detail"
+          <div class="element-detail" *ngIf="strategyTableInitParams.action!=='Select'"
           [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
           <h1 style = "color: rgb(85, 167, 238); font-style: italic; margin-top: 1%;"> {{element['name']}}: Portfolios List </h1>
           <app-portfolio-tablee style="width: 100%;"

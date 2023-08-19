@@ -52,6 +52,7 @@ export class LoginComponent  {
   handleLoginClick(){
     this.authService.validate(this.login.value, this.password.value)
     .then(response => {
+      console.log('resp',response);
       this.authService.setUserInfo({'user' : response ['username']});
       this.router.navigate(['tree']);    
     })

@@ -3,13 +3,13 @@
   margin-left:4%;
 }
 .mat-form-field {
-font-size: 18px;
-border-radius: 9px;
-width: 400px;
-background-color: rgb(111, 110, 110);
-margin: 10px;
-padding:10px;
-}
+  font-size: 20px;
+  border-radius: 9px;
+  width: 400px;
+  background-color: var(--formFieldLightGray);
+  margin: 10px;
+  padding:10px;
+  }
 .mat-error {
   color: rgb(90, 1, 1);
   transform: (1.1);
@@ -17,3 +17,4 @@ padding:10px;
   font-size:1.5vh;
   font-style: italic;
 }
+

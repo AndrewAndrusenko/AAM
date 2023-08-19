@@ -42,7 +42,6 @@ export class AppClientsTableComponent  {
   dialogNewAccountRef: MatDialogRef<AppNewAccountComponent, any>;
   @Output() public modal_principal_parent = new EventEmitter();
   action ='';
-  readOnly: boolean = false;
   investmentNodeColor=investmentNodeColor
   constructor(
     private dialog: MatDialog,    

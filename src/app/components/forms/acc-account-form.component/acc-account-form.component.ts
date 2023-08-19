@@ -120,7 +120,6 @@ export class AppAccAccountModifyFormComponent implements OnInit {
   selectClient () {
     this.dialogChoseClient = this.dialog.open(AppClientsTableComponent ,{minHeight:'600px', minWidth:'90vw', autoFocus: false, maxHeight: '90vh'});
     this.dialogChoseClient.componentInstance.action = "Select";
-    this.dialogChoseClient.componentInstance.readOnly = true;
     this.dialogChoseClient.componentInstance.modal_principal_parent.subscribe ((item:ClientData)=>{
       this.accountModifyForm.controls['clientId'].patchValue(item.idclient)
       this.accountLedgerModifyForm.controls['clientID'].patchValue(item.idclient)

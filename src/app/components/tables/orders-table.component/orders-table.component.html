@@ -1,0 +1,275 @@
+<ng-container *ngIf="accessState!=='none'">
+  <mat-form-field  class = "filterField" title="only by SecID" >
+    <mat-label class="whiteTextFilter">Search by SecID..</mat-label>
+    <input 
+      (keyup)="applyFilter($event,'secid')"
+      matInput type="text" #filterSecid  
+      matTooltip="Use context menu to add filter">
+    <button matSuffix 
+      mat-icon-button aria-label="Clear" 
+      (click)="clearFilter(filterSecid)">
+      <mat-icon>close</mat-icon>
+    </button>
+  </mat-form-field>
+  <mat-form-field class = "filterField"  style="font-size: 22px;" title="All columns">
+    <mat-label class="whiteTextFilter">Search (all columns)...</mat-label>
+    <input 
+      (keyup)="applyFilter($event)"
+      matInput type="text" #filterALL
+      matTooltip="Use context menu to add filter"     >
+    <button matSuffix 
+      mat-icon-button aria-label="Clear" 
+      (click)="clearFilter(filterALL)">
+      <mat-icon>close</mat-icon>
+    </button>
+  </mat-form-field>
+  <button color = "accent" mat-raised-button title="Export To Excel"
+    style=" margin-left:1%; font-size: 18px;"
+    (click)="exportToExcel()">
+    Save as XLS 
+    <mat-icon matSuffix >save_alt</mat-icon>
+  </button>
+  <button color = "accent" mat-raised-button title="Reload Table" *ngIf="tableMode==='Parent'"
+  style=" margin-left:1%; font-size: 18px;"
+  (click)="submitQuery(true)">
+    Reload 
+    <mat-icon matSuffix >refresh</mat-icon>
+  </button>
+  <ng-container *ngIf="!disabledControlElements">
+    <button color = "primary" mat-raised-button title="Create Bulk Orders" *ngIf="tableMode==='Parent'"
+    style=" margin-left:5%; font-size: 18px;"
+    (click)="createBulkOrders()">
+      Create Bulk Orders 
+      <mat-icon matSuffix >refresh</mat-icon>
+    </button>
+  </ng-container>
+  
+<mat-expansion-panel class="headers-align" 
+  (opened)="panelOpenStateSecond = true"
+  (closed)="panelOpenStateSecond = false" >
+  <mat-expansion-panel-header >
+    <mat-panel-title >
+      Complex search
+    </mat-panel-title>
+    <mat-panel-description>
+      Tap to {{panelOpenStateSecond? 'hide': 'open'}} additional parameters
+      <mat-icon color = 'accent'>filter_alt</mat-icon>
+    </mat-panel-description>
+  </mat-expansion-panel-header >
+  <form class="submit" [formGroup]="searchParametersFG"  style="font-size: 18px; margin-left: 0.5%; ">
+    <span style="display: flex;    align-items:flex-start;  margin-right: 1%;margin-top: 0.2%;">
+      <span style="display:grid; width: 11%; margin-right: 2%;">
+        <button color = "primary"  class= "button-color" mat-raised-button 
+          style="margin:1%; font-size: 18px;"
+          (click)="submitQuery()">
+          Submit
+        </button>
+        <button color = "accent" mat-raised-button 
+          style="margin-top:4%;margin-left: 1%; font-size: 18px;"
+          (click)="searchParametersFG.reset();
+           instruments=['ClearAll']">
+          ClearAll
+        </button>
+      </span>
+      <mat-form-field  class="search-filed">
+      <mat-select placeholder="Type" formControlName="type">
+        <mat-option [value]="null">ALL</mat-option>
+        <mat-option [value]="'BUY'">BUY</mat-option>
+        <mat-option [value]="'SELL'">SELL</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill"  class="search-filed">
+      <mat-label >Enter a date range</mat-label>
+      <mat-date-range-input [formGroup]="dataRange" [rangePicker]="pickerTDate" >
+        <input matStartDate placeholder="Start date" formControlName="dateRangeStart" >
+        <input matEndDate placeholder="End date" formControlName="tdate" formControlName="dateRangeEnd">
+      </mat-date-range-input>
+      <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
+      <mat-datepicker-toggle matSuffix [for]="pickerTDate"></mat-datepicker-toggle>
+      <mat-date-range-picker  #pickerTDate></mat-date-range-picker>
+      <mat-error *ngIf="dataRange.controls.dateRangeStart.hasError('matStartDateInvalid')">Invalid start date</mat-error>
+      <mat-error *ngIf="dataRange.controls.dateRangeEnd.hasError('matEndDateInvalid')">Invalid end date</mat-error>
+    </mat-form-field>
+    <mat-form-field class="search-filed" style="width: 16%;"> 
+      <input matInput placeholder="Quantity (Value or Min - Max)" formControlName="qty">
+      <mat-hint *ngIf="qty.valid">
+        Qty or QtyMin-QtyMax
+      </mat-hint>
+      <mat-error *ngIf="qty?.errors?.['incorrectRange']">
+        Incorrect Range
+      </mat-error>
+    </mat-form-field>
+    <mat-form-field class="search-filed" style="width: 15%;">
+      <input matInput placeholder="Price (Value or Min - Max)" formControlName="price">
+      <mat-hint *ngIf="price.valid">
+        Price or PriceMin-PriceMax
+      </mat-hint>
+      <mat-error *ngIf="price?.errors?.['incorrectRange']">
+        Incorrect Range
+      </mat-error>
+    </mat-form-field>
+  </span>
+<p style="margin-top: 1%;">
+      <mat-form-field  appearance="fill" style="width: 40%; " class="search-filed">
+        <mat-chip-list #chipList   >
+          <mat-chip *ngFor="let secid of instruments" 
+          (removed)="remove(secid,instruments,secidList)"
+          (click)=" instruments = clearAll($event,instruments,secidList);">
+            {{secid}}
+            <button matChipRemove>
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </mat-chip>
+          <input #iputForChip
+          [matAutocomplete]="auto"
+          matInput
+          placeholder="Add secid or secid,secid1,secid2.."
+          formControlName="secidList"
+          [matChipInputFor]="chipList"
+          [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+          [matChipInputAddOnBlur]="true"
+          (matChipInputTokenEnd)="instruments = add($event,instruments,secidList)"
+          matTooltip="Type secid or paste multiple secid codes separated by comma and press enter" >
+        </mat-chip-list>
+        <mat-autocomplete #auto="matAutocomplete" (optionSelected)="changedValueofChip($event.option.value,instruments,secidList)">
+          <mat-option *ngFor="let secid of filterednstrumentsLists | async" [value]="secid.toString().split(',')[0]">
+            {{secid.toString().replaceAll(',',' - ')}}
+          </mat-option>
+        </mat-autocomplete>
+        <mat-hint style="color:rgb(104, 246, 246); font-style: italic;">
+          Instruments List
+        </mat-hint>
+      </mat-form-field>
+    </p>
+  </form>
+</mat-expansion-panel>
+  <div class="mat-elevation-z8">
+    <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class="mat-elevation-z8" [class]="tableMode=='Child'? 'childTable':'parentTable'">
+      <ng-container   matColumnDef="select">
+        <th mat-header-cell *matHeaderCellDef>
+          <mat-checkbox style="  vertical-align: top;"
+          (change)="$event ? toggleAllRows() : null;"
+                        [checked]="(!this.dataSource)? false : selection.hasValue() && isAllSelected()"
+                        [indeterminate]="selection.hasValue() && !isAllSelected()"
+                        [aria-label]="checkboxLabel()">
+          </mat-checkbox>
+        </th>
+        <td mat-cell *matCellDef="let row">
+          <mat-checkbox (click)="$event.stopPropagation()"
+                        (change)="selectItem(row);
+                        $event ? selection.toggle(row) : null"
+                        [checked]="(!this.dataSource)? false: selection.isSelected(row)"
+                        [aria-label]="checkboxLabel(row)">
+          </mat-checkbox>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay| slice:1; let i=index">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> {{columnsHeaderToDisplay[i]}}</th>
+        <td 
+          mat-cell *matCellDef="let element">
+          <span [ngSwitch]="true==true">
+            <p *ngSwitchDefault>{{element[column]}}</p>
+            <p style="text-align:center" *ngSwitchCase="['primary_boardid','emitent_inn'].includes(column)">{{element[column]}}</p>
+            <p *ngSwitchCase="['amount'].includes(column)">{{element[column] | currency:' ' + element['currencycode']+' '}} </p>
+            <p *ngSwitchCase="['generated'].includes(column)">{{element[column] | date}} </p>
+            <p *ngSwitchCase="['Type'].includes(column)&&element[column]==='BUY'" class="upClass">{{element[column]=='BUY'}}</p>
+            <p *ngSwitchCase="['Type'].includes(column)&&element[column]==='SELL'" class="downClass">{{element[column]=='BUY'}}</p>
+            <p *ngSwitchCase="['id'].includes(column)">
+              <button mat-stroked-button style="font-size: 18px; margin-left: 0; width: 57%;margin-top: 8%;"  
+              [matTooltip]="'Order details'" [class]="element['ordertype']=='Client'?' edit-item-button':'edit-child-button'"
+              (click)="openTradeModifyForm(disabledControlElements? 'View': 'Edit',element)">
+              {{element[column] }}
+              </button> 
+            </p>
+            <p  *ngSwitchCase="['action'].includes(column) " >
+              <button  *ngIf="disabledControlElements" mat-icon-button color="accent"
+                matTooltip="View Order"
+                (click)="openTradeModifyForm('View', element)">
+                <mat-icon >pageview</mat-icon>
+              </button>
+              <ng-container  *ngIf="!disabledControlElements">
+                <button 
+                  mat-icon-button 
+                  color="accent" 
+                  matTooltip="Delete Order"
+                  (click)="openTradeModifyForm('Delete',element)">
+                  <mat-icon >delete</mat-icon>
+                </button>
+                <button  
+                  *ngIf="!disabledControlElements&&element['ordertype']=='Bulk'" mat-icon-button color="accent"
+                  matTooltip="Unmerge Bulk"
+                  (click)="
+                  expandAllowed=false;
+                  unmergeBulk([element['id']])">
+                  <mat-icon >undo</mat-icon>
+              </button>
+              </ng-container>
+            </p>
+          </span>
+        </td>
+      </ng-container>
+      <ng-container   matColumnDef="expand">
+        <th  mat-header-cell *matHeaderCellDef aria-label="row actions">More</th>
+        <td  mat-cell *matCellDef="let element">
+          <button style="width: 5%;" mat-icon-button aria-label="expand row" (click)="(expandedElement = expandedElement === element ? null : element); $event.stopPropagation()">
+            <mat-icon *ngIf="expandedElement !== element">keyboard_arrow_down</mat-icon>
+            <mat-icon *ngIf="expandedElement === element">keyboard_arrow_up</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+      <ng-container 
+      matColumnDef="expandedDetail" class="element-detail"  >
+        <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplayWithExpand.length" >
+          <div class="element-detail" *ngIf="tableMode!=='Child' && element['ordertype'] == 'Bulk' "     
+            [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
+              <app-orders-table style="width: 100%" class="myclass" 
+                [tableMode]="'Child'" 
+                [dataToShow]="fullOrdersSet"
+                [bulkOrder]="element['id']"
+                >
+              </app-orders-table >
+          </div>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="columnsToDisplayWithExpand"></tr>
+      <tr mat-row [cdkContextMenuTriggerFor]="instrumentcontextmenu"  *matRowDef="let element; columns: columnsToDisplayWithExpand; let i=index"
+      tabindex=0
+        class="element-row"
+        [class.expanded-row]="expandedElement === element"
+        (keydown)="$event['code']=='Space'? selectItem(element['id']) : null"
+        (click)="tableMode==='Select'? selectOrder(element): showOrders($event,element) ">
+        <ng-template  #instrumentcontextmenu>
+          <div class="tree-menu-context" cdkMenu >
+            <ng-container *ngIf="disabledControlElements">
+              <button 
+                (click)="openTradeModifyForm('View', element)"
+                class="tree-menu-item" cdkMenuItem>
+                <mat-icon class="menu-icon" matPrefix>pageview</mat-icon> 
+                View Trade
+              </button> 
+            </ng-container>
+            <ng-container *ngIf="!disabledControlElements" title="Edit block">
+              <button 
+                class="tree-menu-item" cdkMenuItem
+                (click)="openTradeModifyForm('Delete', element)">
+                <mat-icon class="menu-icon" matPrefix>delete</mat-icon> 
+                Delete Trade
+              </button> 
+              <button *ngIf="element['ordertype']=='Bulk'"
+                class="tree-menu-item" cdkMenuItem
+                (click)="unmergeBulk([element['id']])">
+                <mat-icon class="menu-icon" matPrefix>undo</mat-icon> 
+                Unmerge Bulk Order
+              </button> 
+            </ng-container>
+          </div>
+        </ng-template>   
+      </tr>
+      <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row"></tr>
+    </table>
+    <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" [pageSize]="20" aria-label="Select page of users"></mat-paginator>
+  </div>
+</ng-container>
+<h2 *ngIf="tableMode=='Select'" style="color: rgb(224, 73, 73);"> Use context menu to select client</h2>
+

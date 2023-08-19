@@ -19,32 +19,36 @@
   font-size: 20px;
   background-color:#393737;
 }
-.mat-table {
-  background-color:#313131;
+.childTable {
+  background-color:#060b15;
+  width: 100%;
+  font-size: 26px;
+}
+.parentTable {
+  background-color:#1f323e;
   width: 100%;
   font-size: 26px;
 }
 tr.detail-row {
   height: 0;
 }
+.edit-child-button {
+  background: var(--additionalLightGreen);
+}
 .element-row td {
   border-bottom-width: 0;
 }
 .element-detail {
-  border-color: red;
   overflow: hidden;
+  display: flex;
 }
-.mat-column-tidinstrument {
+.mat-column-secid, .mat-column-portfolioname {
   color: var(--additionalLightBlue)
 }
-.mat-column-primary_boardid, .mat-column-emitent_inn {
-  color: var(--additionalLightGreen);
-  text-align: center
+.mat-column-generated {
+  color:var(--additionalLightGreen)
 }
-.mat-column-cpty {
-  color: var(--additionalLightBlue)
-}
-.mat-column-tdate, .mat-column-vdate {
+.mat-column-vdate {
   color:var(--additionalLightGreen)
 }
 .search-filed {

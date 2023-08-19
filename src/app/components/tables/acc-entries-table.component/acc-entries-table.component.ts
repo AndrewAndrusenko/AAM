@@ -101,7 +101,7 @@ export class AppTableAccEntriesComponent implements OnInit {
     })
   }
   ngOnInit(): void {
-    if (this.FirstOpenedAccountingDate) {
+    if (!this.FirstOpenedAccountingDate) {
       this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate);
     }
     switch (this.action) {

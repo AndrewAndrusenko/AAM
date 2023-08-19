@@ -14,7 +14,8 @@ export class AuthService {
 
   public isAuthenticated() : Boolean {
     let userData= localStorage.getItem('userInfo')
-    return userData && JSON.parse(userData) && JSON.parse(userData).user.accessrole !=='testRole'?  true : false;
+    // return userData && JSON.parse(userData) && JSON.parse(userData).user.accessrole !=='testRole'?  true : false;
+    return userData && JSON.parse(userData) ?  true : false;
   }
   async getAllAccessRestrictions () {
     return new Promise <boolean> ((resolve,reject) => { 

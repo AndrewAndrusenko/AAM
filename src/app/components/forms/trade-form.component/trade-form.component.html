@@ -34,22 +34,28 @@
       </mat-error>
     </mat-form-field>
     <mat-form-field style="width: 20%;" >
-      <input matInput [matDatepicker]="tradedate" [placeholder]="'Trade Date'" formControlName="tdate" >
+      <input matInput [matDatepicker]="tradedate" [min]="firstOpenedAccountingDate" [placeholder]="'Trade Date'" formControlName="tdate" >
       <mat-datepicker-toggle matSuffix [for]="tradedate"></mat-datepicker-toggle>
       <mat-datepicker #tradedate></mat-datepicker>
       <mat-error  *ngIf="tdate?.errors?.['required']">
         Required!   
+      </mat-error>
+      <mat-error *ngIf="tdate?.errors?.['matDatepickerMin']" matTooltip="TradeDate in closed period">
+        Inccorect date!   
       </mat-error>
       <mat-hint *ngIf="tdate.valid">
         {{tdate.value|date}}
       </mat-hint>
     </mat-form-field>
     <mat-form-field style="width: 20%;" >
-      <input matInput [matDatepicker]="valuedate" [placeholder]="'Value Date'" formControlName="vdate" >
+      <input matInput [matDatepicker]="valuedate" [min]="tdate.value" [placeholder]="'Value Date'" formControlName="vdate" >
       <mat-datepicker-toggle matSuffix [for]="valuedate"></mat-datepicker-toggle>
       <mat-datepicker #valuedate></mat-datepicker>
       <mat-error *ngIf="vdate?.errors?.['required']">
         Required!   
+      </mat-error>
+      <mat-error *ngIf="vdate?.errors?.['matDatepickerMin']" matTooltip="ValueDate before TradeDate">
+        Inccorect date!   
       </mat-error>
       <mat-hint *ngIf="vdate.valid">
         {{vdate.value|date}}
@@ -59,13 +65,13 @@
       <span style="color: rgb(20, 173, 122)">
         Trade Amount:  {{trade_amount.value | currency :this.code_price_currency.value+' '}} 
       </span> 
-     <br> <span style="color: rgb(126, 105, 243);margin-top: 2%;">
+     <br> <span *ngIf="price_type.value==2" style="color: rgb(126, 105, 243);margin-top: 2%;" >
         Accured Interest :  {{accured_interest.value | currency :this.code_price_currency.value+' '}} 
       </span>
-      <br><span style="margin-top: 2%;" *ngIf="Number(settlement_amount.value)">
+      <br><span style="margin-top: 2%; color: rgb(218, 67, 67);" *ngIf="Number(settlement_amount.value)">
         Settlement Amount :  {{ settlement_amount.value | currency :this.code_settlement_currency.value+' '}} 
       </span>
-      <span  style="margin-top: 2%; color: brown;"  *ngIf="!Number(settlement_amount.value)">
+      <span  style="margin-top: 2%; color: rgb(218, 67, 67);"  *ngIf="!Number(settlement_amount.value)">
         Settlement Amount :  {{ settlement_amount.value }} 
       </span>
     </span>
@@ -89,7 +95,7 @@
     </mat-form-field>
     <button mat-flat-button color="accent" 
     matTooltip="Select Instrument"
-    (click) = "selectSecID()"
+    (click)="selectSecID()"
     style=" width: 5%;  line-height: 80% !important; height: 60px !important;">
     <mat-icon >input</mat-icon>
   </button>
@@ -169,7 +175,7 @@
       <input matInput [placeholder]="'CounterParty'" formControlName="cpty_name" [matAutocomplete]="autoCpty">
       <mat-autocomplete #autoCpty="matAutocomplete" (optionSelected)="id_cpty.patchValue($event.option.viewValue.split('-')[1])">
         <mat-option *ngFor="let cpty of filteredCounterPartiesList | async" [value]="cpty['clientname']">
-          {{cpty['clientname']}} -  {{cpty['idclient']}} -  {{cpty['code']}} 
+          {{cpty['clientname']}} -  {{cpty['idclient']}}
         </mat-option>
       </mat-autocomplete>   
     </mat-form-field>

@@ -8,6 +8,7 @@
 --faovritesNodeColor: rgb(53, 153, 168);
 --faovritesDarkNodeColor: rgb(34, 104, 114);
 --formFieldLightGray: rgb(57, 56, 56);
+--formFieldDeepGray: rgb(25, 24, 24);
 --investmentNodeColor : crimson;
 --investmentNodeColorChild: rgb(184, 28, 59);
 --faovritesNodeColor: rgb(53, 153, 168);
@@ -16,8 +17,15 @@
 --additionalLightBlue: rgb(85, 167, 238);
 --additionalLightRed: rgb(252, 66, 81);
 }
-
-
+.upClass {
+color: green;
+}
+.downClass {
+  color: red;
+}
+.edit-item-button {
+  background: var(--investmentNodeColorChild)
+}
 .whiteTextFilter {
   color: white;
   font-size: 18px;
@@ -67,8 +75,10 @@
   font-size: 18px;
 }
 .mat-select-disabled .mat-select-value {
-  color: black;
+  color: rgb(226, 229, 232);
+  font: optional;
 }
+
 .mat-expansion-panel-body {
   padding: 0 !important;
 }
@@ -112,9 +122,18 @@
   font-size: 20px !important;
 }
 .mat-error {
-  color: rgb(158, 0, 0);
+  color: rgb(234, 54, 54);
   transform: (1.1);
   height: 110%;
   font-size: 16px;
   font-style: italic;
+}
+input.ng-invalid.ng-touched {
+  color: rgb(234, 54, 54);
+}
+::ng-deep .mat-form-field-disabled {
+  background:rgb(6, 6, 6)  !important;
+}
+::ng-deep .mat-form-field-disabled .mat-input-element {
+  color:white !important;
 }

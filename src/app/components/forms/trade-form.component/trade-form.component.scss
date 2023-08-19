@@ -26,9 +26,7 @@
   font-size: 20px;
   font-weight:lighter;
 }
-input.ng-invalid.ng-touched {
-  color: rgb(158, 0, 0);
-}
+
 .example-spacer {
   flex: 1 1 auto;
 }
@@ -36,13 +34,7 @@ input.ng-invalid.ng-touched {
   color: blue;
   // transform: scale (4);
 }
-.mat-error {
-  color: rgb(158, 0, 0);
-  transform: (1.1);
-  height: 110%;
-  font-size: 16px;
-  font-style: italic;
-}
+
 .mat-checkbox {
   transform: scale(1.2);
   margin-left:2%;

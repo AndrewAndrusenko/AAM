@@ -6,7 +6,6 @@ var pgp = require ('pg-promise')({capSQL:true});
 async function queryExecute (sql, response, responseType) {//General query to postgres execution via pool
   return new Promise ((resolve) => {
     pool.query (sql,  (err, res) => {
-      console.log('sql',sql);
       if (err) {
         console.log (err.stack.split("\n", 1).join(""))
         err.detail = err.stack

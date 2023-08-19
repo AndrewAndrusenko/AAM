@@ -71,6 +71,8 @@ import { AppInvInstrumentDetailsFormComponent } from './components/forms/instrum
 import { TablePortfolios } from './components/tables/portfolios-table.component/portfolios-table.component';
 import { LoginComponent } from './components/main-page/login.component/login.component';
 import { NgxIndexedDBModule } from 'ngx-indexed-db';
+import { AppOrderTableComponent } from './components/tables/orders-table.component/orders-table.component';
+import { OrdersTabComponent } from './components/main-page/tabs/trades-orders-tab/trades-orders-tab';
 const appInitializerFn = (accessRestirictions:AuthService) => {
     return () => {
         //return accessRestirictions.getAllAccessRestrictions()
@@ -163,7 +165,9 @@ const appInitializerFn = (accessRestirictions:AuthService) => {
         AccSWIFTTabComponent,
         AppTradeTableComponent,
         AppTradeModifyFormComponent,
-        AppTableCurrenciesDataComponent
+        AppTableCurrenciesDataComponent,
+        AppOrderTableComponent,
+        OrdersTabComponent
      ],
     bootstrap: [AppComponent],
     providers: [ 
@@ -192,3 +196,5 @@ import { AuthService } from './services/auth.service';
 import { AppInstrumentCorpActionFormComponent } from './components/forms/instrument-corp-action-form.component/instrument-corp-action-form.component';
 import { AccSWIFTTabComponent } from './components/main-page/tabs/SWIFT-tab.component/SWIFT-tab.component';
 import { AppTableCurrenciesDataComponent } from './components/tables/currencies-data-table.component/currencies-data-table.component';
+
+

@@ -11,8 +11,11 @@ interface InstrumentDataSet {
 }
 interface coupon_data {
   days:number, 
-  accured_interest:string,
-  coupon_details:string
+  accuredInterest:string,
+  couponDetails:string
+  couponPeriod:number,
+  couponPeriodAmount:number,
+  currentCouponAmount:number,
 }
 @Injectable({
   providedIn: 'root'
@@ -24,17 +27,31 @@ export class InstrumentDataService {
   private subjectCorpActions = new Subject<instrumentCorpActions[]> ()
   constructor(private http:HttpClient) { }
 
-  getcouponPeriodInfo(vdate:string,tidinstrument:string,facevalue:number,qty:number):Observable<coupon_data> {
+  getcouponPeriodInfo(vdate:string,tidinstrument:string,facevalue:number,qty:number):Observable<any> {
     const params = {'vdate':new Date(vdate).toISOString(),'tidinstrument':tidinstrument };
-    let coupon_data : coupon_data = {days:0, accured_interest:null,coupon_details:null}
-    return this.http.get <coupon_data> ('api/AAM/MD/getcouponPeriodInfo/', {params:params}).pipe(
+    let coupon_data : coupon_data = {days:0, accuredInterest:null,couponDetails:null, couponPeriod:null, couponPeriodAmount:null,currentCouponAmount:null}
+    return this.http.get <any> ('api/AAM/MD/getcouponPeriodInfo/', {params:params}).pipe(
       map(coupon => {
-        let last_coupon_date = new Date(coupon[1].date);
-        let value_date = new Date(vdate);
-        coupon_data.days = Math.round( Math.ceil(Math.abs((value_date.getTime()-last_coupon_date.getTime()))/(1000 * 3600 * 24)));
-        coupon[0].date = value_date.toLocaleDateString()
-        coupon_data.coupon_details = (JSON.stringify(coupon[0]) + ', lastCouponDate:'+ new Date(coupon[1].date).toLocaleDateString()+ ', days:' + coupon_data.days.toString() +', facevalue: '+ facevalue.toString()).replaceAll('"','')
-        coupon_data.accured_interest = (facevalue*qty*coupon[0].couponrate/100*coupon_data.days/365).toFixed(2);
+        console.log('arrat',(coupon.length));
+        if (coupon.length<2||coupon[0]['couponrate']==0) {
+          return (coupon_data = {days:0, accuredInterest:'0',couponDetails:'zero coupon rate or only one coupon period', couponPeriod:0, couponPeriodAmount:0,currentCouponAmount:0})
+        }
+        let lastCouponDate = new Date(coupon[1]['date']);
+        let currentCouponDate = new Date(coupon[0]['date']);
+        let valueDate = new Date(vdate);
+        coupon_data.couponPeriod = Math.round( Math.ceil(Math.abs((currentCouponDate.getTime()-lastCouponDate.getTime()))/(1000 * 3600 * 24)));
+        coupon_data.days = Math.round( Math.ceil(Math.abs((valueDate.getTime()-lastCouponDate.getTime()))/(1000 * 3600 * 24)));
+        coupon_data.couponPeriodAmount = Number((coupon_data.couponPeriod/365*facevalue*coupon[0]['couponrate']/100).toFixed(2));
+        coupon_data.currentCouponAmount = Number(((coupon_data.couponPeriodAmount)*coupon_data.days/coupon_data.couponPeriod).toFixed(2)); 
+        coupon_data.couponDetails = (JSON.stringify(coupon[0]) + ', lastCouponDate:'+ new Date(coupon[1]['coupon_date']).toLocaleDateString()+ ', days:' + coupon_data.days.toString() +', facevalue: '+ facevalue.toString()+valueDate.getTime()+','+lastCouponDate.getTime()).replaceAll('"','')
+        switch (coupon[0]['currency']) {
+          case 810:
+            coupon_data.accuredInterest = (coupon_data.currentCouponAmount*qty).toFixed(2);
+          break;
+          default:
+            coupon_data.accuredInterest = (facevalue*qty*coupon[0]['couponrate']/100*coupon_data.days/365).toFixed(2);
+          break;
+        }
         return (coupon_data)
       })
     )

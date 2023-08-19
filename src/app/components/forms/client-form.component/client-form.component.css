@@ -23,7 +23,6 @@ margin-bottom:10px;
 .client_form {
   margin-left: 1%;
 }
-
 :host ::ng-deep  .mat-slide-toggle {
   transform: scale(2);
   margin-left: 12%;
@@ -34,23 +33,20 @@ margin-bottom:10px;
   content: "\E15B"; 
   font-family: "Material Icons"; position: absolute; bottom: 1%; left: 2%; font-size: 20px; font-weight: bold; 
 }
-
 ::ng-deep .mat-slide-toggle.mat-checked:not(.mat-disabled) .mat-slide-toggle-thumb:before { 
   height: 110%;
   content: "\E876"; 
   
   font-family: "Material Icons"; position: absolute; bottom: 1%; left: 2%; font-size: 20px; font-weight: bold; 
 }
-
 .mat-form-field {
-font-size: 18px;
-border-radius: 9px;
-width: 400px;
-background-color: rgb(111, 110, 110);
-margin: 10px;
-padding:10px;
+  font-size: 20px;
+  border-radius: 9px;
+  width: 400px;
+  background-color: var(--formFieldLightGray);
+  margin: 10px;
+  padding:10px;
 }
-
 .content-container {
   display: flex;
   flex-direction: column;
@@ -58,7 +54,6 @@ padding:10px;
 .content-container > * {
   width: 100%;
 }
-
 .dialog-headline{
 font-weight: 500;
 margin-top: -1em;

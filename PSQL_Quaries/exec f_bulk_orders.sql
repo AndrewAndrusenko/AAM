@@ -1,0 +1,1 @@
+select * from f_create_bulk_orders (ARRAY[1,3,4,2,5,6,8,7,29,30])
