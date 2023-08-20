@@ -34,6 +34,8 @@ import { SelectionModel } from '@angular/cdk/collections';
 })
 export class AppOrderTableComponent  implements AfterViewInit {
   accessState: string = 'none';
+  selectedRowIndex = -1;
+  selectedRowID = -1;
   disabledControlElements: boolean = false;
   @Input() tableMode:string;
   @Input() dataToShow:orders[];
@@ -118,11 +120,18 @@ export class AppOrderTableComponent  implements AfterViewInit {
     }
   }
 
-  unmergeBulk (id:number[]) {
-    this.TradeService.unmergerBulkOrder(id.map(el=>Number(el))).subscribe(data => this.submitQuery())
+  unmergeBulk (id?:number[]) {
+    let bulkOrdersIds:number[] = !id? this.selection.selected.map(el=>el.ordertype==='Bulk'? Number(el.id):null) : id.map(el=>Number(el));
+    this.TradeService.unmergerBulkOrder(bulkOrdersIds).subscribe(data => {
+      this.selection.clear();
+      this.submitQuery();
+    })
   }
   createBulkOrders () {
-    this.TradeService.createBulkOrder(this.selection.selected.map(el=>el.ordertype==='Client'? Number(el.id):null)).subscribe(data =>this.submitQuery())
+    this.TradeService.createBulkOrder(this.selection.selected.map(el=>el.ordertype==='Client'? Number(el.id):null)).subscribe(data => {
+      this.selection.clear();
+      this.submitQuery();
+    })
   }
   filterChildOrders(parent:string):orders[] {
     let childOrders =  this.fullOrdersSet.filter(el=>el.parent_order===Number(parent));
@@ -204,16 +213,44 @@ export class AppOrderTableComponent  implements AfterViewInit {
         this.dataSource.sort = this.sort;
         this.dataSource.data = this.excludeOrdersWithParent()
         this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ');
+        console.log('selection',this.selection.selected);
         resolve(data) 
       });
     });
   }
   selectOrder (element:orders) {this.modal_principal_parent.emit(element)}
   showOrders($event:Event,element:orders) {
+    this.highlight(element)
     this.expandAllowed? this.expandedElement = this.expandedElement === element ? null : element:this.expandAllowed=true;
   }
-  selectItem (event:any) {
-    console.log('event row',event);
+  keyDownEvent(event:_KeyboardEvent) {
+    switch (event.code) {
+      case 'Space':
+        this.selectItem()
+      break;
+      case 'ArrowDown':
+        this.rowsMoveDown()
+      break;
+      case 'ArrowUp':
+        this.rowsMoveUp()
+      break;
+    }
+  }
+  highlight(row){
+    console.log('highlight',row);
+    this.selectedRowIndex = this.dataSource.data.findIndex(el=>el.id===row.id);
+    this.selectedRowID = row.id;
+}
+  selectItem (row?) {
+    this.selection.toggle(row? row: this.dataSource.data[this.selectedRowIndex])
+  }
+  rowsMoveDown() {
+    this.selectedRowIndex =this.selectedRowIndex+1
+    this.selectedRowID = this.dataSource.data[this.selectedRowIndex].id
+  }
+  rowsMoveUp () {
+    this.selectedRowIndex =this.selectedRowIndex-1
+    this.selectedRowID = this.dataSource.data[this.selectedRowIndex].id
   }
   openTradeModifyForm (action:string, element:any) {
     this.dialogOrderModify = this.dialog.open (AppTradeModifyFormComponent,{minHeight:'600px', minWidth:'40vw', autoFocus: false, maxHeight: '90vh'})
