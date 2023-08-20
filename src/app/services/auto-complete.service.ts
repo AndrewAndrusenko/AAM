@@ -39,7 +39,8 @@ export class AtuoCompleteService {
    return this.indexDBServiceS.getIndexDBStaticTables('getCurrencyCodes').then(data=> this.fullCurrenciesList = data['data'])
   }
   getCurrencyPairsList () {
-   return this.indexDBServiceS.getIndexDBStaticTables('getCurrencyPairsList').then(data=> this.fullCurrencyPairsList = data['data'])
+   return this.indexDBServiceS.getIndexDBStaticTables('getCurrencyPairsList').then(data=> {
+    this.fullCurrencyPairsList = data['data']})
   }
   currencyValirator ():ValidatorFn {
     return (control:AbstractControl): ValidationErrors => {

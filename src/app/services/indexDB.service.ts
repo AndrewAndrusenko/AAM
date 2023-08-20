@@ -23,7 +23,6 @@ export class indexDBService {
     private InstrumentDataS:InstrumentDataService,
   ) { }
   indexDBcacheData (key:string,data:any) {
-    // console.log('data',data[0]);
     this.dbService
     .add('AAMCache', {code:key, data:data})
     .subscribe((result) => {
@@ -74,7 +73,6 @@ export class indexDBService {
   }
   getUserData () {
     let userData = JSON.parse(localStorage.getItem('userInfo'))
-    console.log('userData',userData);
   }
   indexidCacheData (key:string, data:any) {
     this.dbService.add('AAMCache', {code:key, data:data}).pipe(

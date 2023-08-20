@@ -58,7 +58,6 @@ export class AppTradeService {
     return this.http.post <bulkModifedSet[]>('api/AAM/MD/ModifyBulkOrder',{bulkOrders:bulkOrders,action:'unmergerBulkOrder'})
   }
   createBulkOrder (clientOrders:number[]) :Observable<bulkModifedSet[]> {
-    console.log('clientOrders',clientOrders);
     return this.http.post <bulkModifedSet[]>('api/AAM/MD/ModifyBulkOrder',{clientOrders:clientOrders,action:'createBulkOrder'})
   }
 }

@@ -32,7 +32,6 @@ export class InstrumentDataService {
     let coupon_data : coupon_data = {days:0, accuredInterest:null,couponDetails:null, couponPeriod:null, couponPeriodAmount:null,currentCouponAmount:null}
     return this.http.get <any> ('api/AAM/MD/getcouponPeriodInfo/', {params:params}).pipe(
       map(coupon => {
-        console.log('arrat',(coupon.length));
         if (coupon.length<2||coupon[0]['couponrate']==0) {
           return (coupon_data = {days:0, accuredInterest:'0',couponDetails:'zero coupon rate or only one coupon period', couponPeriod:0, couponPeriodAmount:0,currentCouponAmount:0})
         }

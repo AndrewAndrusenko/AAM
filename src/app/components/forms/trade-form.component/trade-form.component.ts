@@ -4,7 +4,7 @@ import { ClientData, Instruments, trades } from 'src/app/models/intefaces.model'
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { menuColorGl } from 'src/app/models/constants.model';
 import { AuthService } from 'src/app/services/auth.service';
-import { Observable, distinctUntilChanged, filter, map, observable, startWith, switchMap } from 'rxjs';
+import { Observable, Subscription, distinctUntilChanged, filter, map, observable, startWith, switchMap } from 'rxjs';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import { AppTradeService } from 'src/app/services/trades-service.service';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -22,7 +22,6 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
   accessState: string = 'none';
   disabledControlElements: boolean = false;
   public tradeModifyForm: FormGroup;
-
   @Input() action: string = 'View';
   @Output() public modal_principal_parent = new EventEmitter();
   public title: string;
@@ -39,6 +38,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
   dialogInstrumentTabletRef: MatDialogRef<AppInstrumentTableComponent>;
   securityTypes: any[];
   formerrors: any;
+  private arraySubscrition = new Subscription ()
   constructor (
     private fb:FormBuilder, 
     private AuthServiceS:AuthService,  
@@ -67,14 +67,13 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
       id_cpty:[null, { validators:  Validators.required, updateOn: 'blur' }],
       id_price_currency:[null],
       id_settlement_currency:[null],
+      settlement_rate:[null],
       tidorder:{value:null, disabled: false},allocatedqty:{value:null, disabled: false},idportfolio:{value:null, disabled: false},
-      id_buyer_instructions:{value:null, disabled: false},id_seller_instructions:{value:null, disabled: false},id_broker:{value:null, disabled: false}, details:{value:null, disabled: false},cpty_name:{value:null, disabled: false},security_group_name :{value:null, disabled: false},   secid_name:{value:null, disabled: false}, trade_amount:[null], facevalue:[null],faceunit:[null],faceunit_name:[null], code_price_currency:[null],  price_currency_name:[null], settlement_currency_name:[null], code_settlement_currency:[null], settlement_amount:[null],settlement_rate:[null], coupon_details:[null]
+      id_buyer_instructions:{value:null, disabled: false},id_seller_instructions:{value:null, disabled: false},id_broker:{value:null, disabled: false}, details:{value:null, disabled: false},cpty_name:{value:null, disabled: false},security_group_name :{value:null, disabled: false},   secid_name:{value:null, disabled: false}, trade_amount:[null], facevalue:[null],faceunit:[null],faceunit_name:[null], code_price_currency:[null],  price_currency_name:[null], settlement_currency_name:[null], code_settlement_currency:[null], settlement_amount:[null], coupon_details:[null]
     })
-
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data => this.firstOpenedAccountingDate = data[0].FirstOpenedDate);
-
     this.indexDBServiceS.getIndexDBStaticTables('getMoexSecurityTypes').then (data=>this.securityTypes = data['data']);
     this.AutoCompService.getCurrencyList().then(()=>{
       this.id_price_currency.setValidators([this.AutoCompService.currencyValirator(),Validators.required]);
@@ -87,13 +86,8 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     this.AutoCompService.getSecidLists().then (()=>this.tidinstrument.setValidators(this.AutoCompService.secidValirator()) );
     this.AutoCompService.getCounterpartyLists().then (()=>this.id_cpty.setValidators(this.AutoCompService.counterPartyalirator(this.cpty_name)));
   }
-  showErrors () {
-   Object.entries(this.tradeModifyForm.controls).forEach(el=>el[1].errors? console.log(el[0],el[1].errors):null)
-  }
-
   ngAfterContentInit (): void {
     this.tradeModifyForm.patchValue(this.data);
-
     this.filterednstrumentsLists = this.tidinstrument.valueChanges.pipe(
       startWith(''),
       distinctUntilChanged(),
@@ -104,32 +98,32 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
       distinctUntilChanged(),
       map(value => this.AutoCompService.filterList(value || '','currency'))
       );
-      this.filteredSetCurrenciesList = this.id_settlement_currency.valueChanges.pipe (
-        startWith (''),
-        distinctUntilChanged(),
-        map(value => this.AutoCompService.filterList(value || '','currency'))
-        );
-      this.filteredCounterPartiesList = this.cpty_name.valueChanges.pipe (
-        startWith (''),
-        distinctUntilChanged(),
-        map(value => this.AutoCompService.filterList(value || '','cpty'))
+    this.filteredSetCurrenciesList = this.id_settlement_currency.valueChanges.pipe (
+      startWith (''),
+      distinctUntilChanged(),
+      map(value => this.AutoCompService.filterList(value || '','currency'))
       );
-      this.price.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>this.fullAmountCalcualtion(false));
-      this.qty.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>this.fullAmountCalcualtion(true));
-      this.settlement_rate.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>this.settlementAmountUpdate());
-      this.vdate.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>this.fullAmountCalcualtion(true));
-      this.id_price_currency.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>this.fullAmountCalcualtion(true));
-      this.id_settlement_currency.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>{
-        this.id_settlement_currency.value? this.settlement_rate.setValidators([ Validators.required, Validators.pattern('[0-9]*([0-9.]{0,8})?$')]): this.settlement_rate.removeValidators(Validators.required);
-        this.settlement_rate.updateValueAndValidity();
-        this.changeSettlementRate();
-      })
-      // this.price_type.value==2&&this.id_price_currency.value!==this.faceunit.value? this.id_price_currency.patchValue(this.faceunit.value): null;
-      this.action == 'View'|| this.disabledControlElements?  this.tradeModifyForm.disable() : null;
-      this.fullAmountCalcualtion(true);
+    this.filteredCounterPartiesList = this.cpty_name.valueChanges.pipe (
+      startWith (''),
+      distinctUntilChanged(),
+      map(value => this.AutoCompService.filterList(value || '','cpty'))
+    );
+    this.price.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>this.fullAmountCalcualtion(false));
+    this.qty.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>this.fullAmountCalcualtion(true));
+    this.settlement_rate.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>this.settlementAmountUpdate());
+    this.vdate.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>this.fullAmountCalcualtion(true));
+    this.id_price_currency.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>this.fullAmountCalcualtion(true));
+    this.id_settlement_currency.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>{
+      this.id_settlement_currency.value? this.settlement_rate.setValidators([ Validators.required, Validators.pattern('[0-9]*([0-9.]{0,8})?$')]): 
+      this.settlement_rate.removeValidators(Validators.required);
+      this.settlement_rate.updateValueAndValidity();
+      this.id_settlement_currency.value !== this.id_price_currency.value&&this.settlement_rate.value==1? this.settlement_rate.patchValue(null) : null;
       this.changeSettlementRate();
+    })
+    this.action == 'View'|| this.disabledControlElements?  this.tradeModifyForm.disable() : null;
+    this.fullAmountCalcualtion(true);
+    this.changeSettlementRate();
   }
-
   selectClient (){
     this.dialogClientsTabletRef = this.dialog.open(AppClientsTableComponent ,{minHeight:'400px', minWidth:'90vw', autoFocus: false, maxHeight: '90vh'});
     this.dialogClientsTabletRef.componentInstance.action = 'Select';
@@ -139,8 +133,25 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
       this.dialogClientsTabletRef.close(); 
     });
   }
+  selectSecID (){
+    this.dialogInstrumentTabletRef = this.dialog.open(AppInstrumentTableComponent ,{minHeight:'400px', minWidth:'90vw', autoFocus: false, maxHeight: '90vh'});
+    this.dialogInstrumentTabletRef.componentInstance.FormMode = 'Select';
+    this.dialogInstrumentTabletRef.componentInstance.modal_principal_parent.subscribe ((item:Instruments )=>{
+      this.secidChanged(item)
+      this.dialogInstrumentTabletRef.close(); 
+    });
+  }  
+  secidAutocolmplete (secidDesc:string) {
+    let secidArr = secidDesc.split(' - ');
+    let instrument = {name:'',security_type_name:'',faceunit:'',facevalue:0,secid:''}  ;
+    instrument.name = secidArr[1];
+    instrument.security_type_name=secidArr[2];
+    instrument.faceunit = !Number.isNaN(+secidArr[3])? secidArr[3] :'810';
+    instrument.facevalue=Number(secidArr[4])
+    instrument.secid=secidArr[0];
+    this.secidChanged(instrument)
+  }
   secidChanged (item:any) {
-    console.log('item',item);
     this.tidinstrument.patchValue(item.secid)
     this.secid_name.patchValue(item.name+' ('+item.security_type_name+')')
     this.price_type.patchValue(this.securityTypes.filter(el=>el['security_type_name']===item.security_type_name)[0]['price_type'])
@@ -152,32 +163,11 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     this.price_type.value==2? this.checkCurrenciesHints() : this.clearCurrencies();
     this.fullAmountCalcualtion(true);
   }
-
-  secidAutocolmplete (secidDesc:string) {
-    let secidArr = secidDesc.split(' - ');
-    let instrument = {name:'',security_type_name:'',faceunit:'',facevalue:0,secid:''}  ;
-    instrument.name = secidArr[1];
-    instrument.security_type_name=secidArr[2];
-    instrument.faceunit = !Number.isNaN(+secidArr[3])? secidArr[3] :'810';
-    instrument.facevalue=Number(secidArr[4])
-    instrument.secid=secidArr[0];
-    this.secidChanged(instrument)
-  }
-  selectSecID (){
-    this.dialogInstrumentTabletRef = this.dialog.open(AppInstrumentTableComponent ,{minHeight:'400px', minWidth:'90vw', autoFocus: false, maxHeight: '90vh'});
-    this.dialogInstrumentTabletRef.componentInstance.FormMode = 'Select';
-    this.dialogInstrumentTabletRef.componentInstance.modal_principal_parent.subscribe ((item:Instruments )=>{
-      this.secidChanged(item)
-      this.dialogInstrumentTabletRef.close(); 
-    });
-  }
   clearCurrencies(): any {
-   ['code_price_currency', 'price_currency_name', 'code_settlement_currency','settlement_currency_name','settlement_rate'].forEach(key => this.tradeModifyForm.get(key).patchValue(null))
+    ['code_price_currency', 'price_currency_name', 'code_settlement_currency','settlement_currency_name','settlement_rate'].forEach(key => this.tradeModifyForm.get(key).patchValue(null))
   }
   checkCurrenciesHints (){
-    console.log('curr',this.id_price_currency.value);
     if (this.id_price_currency.value) {  
-      console.log('curr1',this.id_price_currency.value);
       let el_price_currency = this.AutoCompService.getCurrecyData(this.id_price_currency.value)
       this.code_price_currency.patchValue(el_price_currency['CurrencyCode'])
       this.price_currency_name.patchValue(el_price_currency['CurrencyName'])
@@ -187,37 +177,8 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
       this.code_settlement_currency.patchValue(el_settlement_currency['CurrencyCode'])
       this.settlement_currency_name.patchValue(el_settlement_currency['CurrencyName'])
     }
-  }
-  snacksBox(result:any, action?:string){
-    if (result['name']=='error') {
-      this.CommonDialogsService.snackResultHandler(result)
-    } else {
-      this.CommonDialogsService.dialogCloseAll();
-      this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' instrument'}, action)
-      this.TradeService.getTradeInformation({idtrade:result[0].idtrade}).subscribe(
-        data=>this.TradeService.sendTradeDataToUpdateTableSource(data,action)
-      );
-    }
-  }
+  } 
 
-  updateInstrumentData(action:string){
-    if (this.tradeModifyForm.invalid) {return}
-    switch (action) {
-      case 'Create_Example':
-      case 'Create':
-        this.TradeService.updateTrade(this.tradeModifyForm.value,'Create').subscribe(result =>this.snacksBox(result,'Created'))
-      break;
-      case 'Edit':
-        this.TradeService.updateTrade (this.tradeModifyForm.value,'Edit').subscribe(result => this.snacksBox(result,'Updated'))
-      break;
-      case 'Delete':
-        this.CommonDialogsService.confirmDialog('Delete Instrument ' + this.tidinstrument.value).pipe(
-          filter (isConfirmed => isConfirmed.isConfirmed),
-          switchMap(data => this.TradeService.updateTrade (this.tradeModifyForm.value,'Delete'))
-        ).subscribe (result =>this.snacksBox(result,'Deleted'));
-      break;
-    }
-  }
   changeSettlementRate () {
     if (this.id_price_currency.value === this.id_settlement_currency.value) {
       this.settlement_rate.patchValue(1)
@@ -254,6 +215,38 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
       })
     } else {this.tradeAmountsUpdate()}
   }
+  updateInstrumentData(action:string){
+    if (this.tradeModifyForm.invalid) {return}
+    switch (action) {
+      case 'Create_Example':
+      case 'Create':
+        this.TradeService.updateTrade(this.tradeModifyForm.value,'Create').subscribe(result =>this.snacksBox(result,'Created'))
+      break;
+      case 'Edit':
+        this.TradeService.updateTrade (this.tradeModifyForm.value,'Edit').subscribe(result => this.snacksBox(result,'Updated'))
+      break;
+      case 'Delete':
+        this.CommonDialogsService.confirmDialog('Delete Instrument ' + this.tidinstrument.value).pipe(
+          filter (isConfirmed => isConfirmed.isConfirmed),
+          switchMap(data => this.TradeService.updateTrade (this.tradeModifyForm.value,'Delete'))
+        ).subscribe (result =>this.snacksBox(result,'Deleted'));
+      break;
+    }
+  }
+  snacksBox(result:any, action?:string){
+    if (result['name']=='error') {
+      this.CommonDialogsService.snackResultHandler(result)
+    } else {
+      this.CommonDialogsService.dialogCloseAll();
+      this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' instrument'}, action)
+      this.TradeService.getTradeInformation({idtrade:result[0].idtrade}).subscribe(
+        data=>this.TradeService.sendTradeDataToUpdateTableSource(data,action)
+      );
+    }
+  }
+  showErrors () {
+    Object.entries(this.tradeModifyForm.controls).forEach(el=>el[1].errors? console.log(el[0],el[1].errors):null)
+   }
   Number(value) {
     return Number(value)? true:false
   }

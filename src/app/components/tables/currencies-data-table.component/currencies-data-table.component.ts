@@ -96,7 +96,7 @@ export class AppTableCurrenciesDataComponent  implements AfterViewInit {
       sourceCode: [[],Validators.required],
       overwritingCurrentData : [false]
     });
-    this.AutoCompService.getCurrencyPairsList();
+    this.AutoCompService.getCurrencyPairsList().then();
     this.secidList.setValidators(this.AutoCompService.secidValirator())
     this.filteredPairsLists = this.secidList.valueChanges.pipe(
       startWith(''),

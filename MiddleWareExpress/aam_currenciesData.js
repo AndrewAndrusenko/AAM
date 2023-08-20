@@ -33,7 +33,6 @@ async function getCurrencyData (request,response) {
       sql = 'SELECT rate FROM public.dcurrencies_rates '+
       ' WHERE rate_date::timestamp without time zone = ${date} and sourcecode=ANY(array[${sourcecode}]) LIMIT 1 ;'
     break;
-    case 'getPairsList':
     case 'getCurrencyCodes':
       sql = 'SELECT  "CurrencyCodeNum","CurrencyCode","CurrencyName" FROM public."dCurrencies";'
     break;

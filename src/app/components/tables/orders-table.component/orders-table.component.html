@@ -37,10 +37,16 @@
   </button>
   <ng-container *ngIf="!disabledControlElements">
     <button color = "primary" mat-raised-button title="Create Bulk Orders" *ngIf="tableMode==='Parent'"
-    style=" margin-left:5%; font-size: 18px;"
+    style=" margin-left:2%; font-size: 18px;"
     (click)="createBulkOrders()">
       Create Bulk Orders 
-      <mat-icon matSuffix >refresh</mat-icon>
+      <mat-icon matSuffix >call_merge</mat-icon>
+    </button>
+    <button color = "warn" mat-raised-button title="Unmerge Bulk Orders" *ngIf="tableMode==='Parent'"
+    style=" margin-left:1%; font-size: 18px;"
+    (click)="unmergeBulk()">
+    Unmerge Bulk Orders 
+      <mat-icon matSuffix >call_split</mat-icon>
     </button>
   </ng-container>
   
@@ -202,7 +208,7 @@
                   (click)="
                   expandAllowed=false;
                   unmergeBulk([element['id']])">
-                  <mat-icon >undo</mat-icon>
+                  <mat-icon >call_split</mat-icon>
               </button>
               </ng-container>
             </p>
@@ -233,12 +239,13 @@
         </td>
       </ng-container>
       <tr mat-header-row *matHeaderRowDef="columnsToDisplayWithExpand"></tr>
-      <tr mat-row [cdkContextMenuTriggerFor]="instrumentcontextmenu"  *matRowDef="let element; columns: columnsToDisplayWithExpand; let i=index"
+      <tr mat-row [cdkContextMenuTriggerFor]="instrumentcontextmenu"  *matRowDef="let element; columns: columnsToDisplayWithExpand; let dataindex=dataIndex;"
       tabindex=0
+      [ngClass]="{'highlight': this.selectedRowID  == element.id}"
         class="element-row"
         [class.expanded-row]="expandedElement === element"
-        (keydown)="$event['code']=='Space'? selectItem(element['id']) : null"
-        (click)="tableMode==='Select'? selectOrder(element): showOrders($event,element) ">
+        (keydown)="keyDownEvent($event)"
+        (click)="tableMode==='Select'? selectOrder(element): showOrders($event,element)">
         <ng-template  #instrumentcontextmenu>
           <div class="tree-menu-context" cdkMenu >
             <ng-container *ngIf="disabledControlElements">

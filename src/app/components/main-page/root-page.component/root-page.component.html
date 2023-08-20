@@ -1,3 +1,6 @@
+<div>
+  {{sidenav.opened}}
+</div>
 <app-app-menu style="width: 100vw;"
   [treeOpened] = "opened">
 </app-app-menu>
@@ -6,13 +9,15 @@
   <mat-drawer #sidenav class="example-sidenav" mode="side" [(opened)]="opened">
     <app-tree-menu></app-tree-menu>
   </mat-drawer>
-  <div class="example-sidenav-content">
-    <button 
-      style="height: 100%; background-color: rgb(108, 107, 107); width: 20px; border-radius: 5px; border-color:rgb(67, 79, 79);" (click)="sidenav.toggle()"> 
-      <mat-icon style="margin-left: -8px; color: white;">chevron_right</mat-icon>
-    </button>
-    <app-app-tabs 
-    style="width: 80vw;"
+  <div class="example-sidenav-content"
+  [style.width]="sidenav.opened===true?  '80vw' : '99vw'">
+  <button 
+  style="height: 100%; background-color: rgb(108, 107, 107); width: 1.5%; border-radius: 5px; border-color:rgb(67, 79, 79);" (click)="sidenav.toggle()"> 
+  <mat-icon style="margin-left: -8px; color: white;">chevron_right</mat-icon>
+</button>
+<app-app-tabs 
+[style.width]="sidenav.opened===true?  '80vw' : '99vw'">
+    
     ></app-app-tabs>
   </div>
 </mat-drawer-container>
