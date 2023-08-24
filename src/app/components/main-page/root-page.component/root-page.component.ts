@@ -15,6 +15,7 @@ export class DashboardComponent implements OnDestroy,OnInit {
   checked = false;
   constructor (
     private appMenuService : AppMenuServiceService,
+    private AuthServiceS:AuthService,  
     private indexDBServiceS:indexDBService,
 
     ) {
@@ -24,6 +25,7 @@ export class DashboardComponent implements OnDestroy,OnInit {
     this.indexDBServiceS.indexdbDeleteAllCache('AAMCache').subscribe(data => {
       console.log('Cache has been cleared', data)
       this.indexDBServiceS.getIndexDBStaticTables('bcTransactionType_Ext').then ( (data) => console.log('Cache:', data['data'].length,' saved for bcTransactionType_Ext'));
+      this.AuthServiceS.getObjectStatuses();
     })
   }
   ngOnDestroy() { 

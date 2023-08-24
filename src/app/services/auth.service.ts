@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, tap } from 'rxjs';
-import { accessRestriction } from '../models/intefaces.model';
+import { accessRestriction, objectStatus } from '../models/intefaces.model';
 interface userRoles {
   value: string;
 }
@@ -11,6 +11,7 @@ interface userRoles {
 export class AuthService {
   constructor(private http : HttpClient) { }
   accessRestrictions: accessRestriction[] = [];
+  objectStatuses: objectStatus[] = [];
 
   public isAuthenticated() : Boolean {
     let userData= localStorage.getItem('userInfo')
@@ -19,14 +20,22 @@ export class AuthService {
   }
   async getAllAccessRestrictions () {
     return new Promise <boolean> ((resolve,reject) => { 
-    let userData = JSON.parse(localStorage.getItem('userInfo'))
-    const params = {'accessRole': userData.user.accessrole}
-    this.http.get <accessRestriction[]>('/api/accessRestriction/',{ params: params }).subscribe((data) => {
-     this.accessRestrictions = data;
-     console.log('length',this.accessRestrictions);
-     data.length? resolve(true) : reject(false)
+      let userData = JSON.parse(localStorage.getItem('userInfo'))
+      const params = {accessRole: userData.user.accessrole,action:'getAccessRestriction'}
+      this.http.get <accessRestriction[]>('/api/accessRestriction/',{ params: params }).subscribe((data) => {
+        this.accessRestrictions = data;
+        console.log('length',this.accessRestrictions);
+        data.length? resolve(true) : reject(false)
+      })
     })
-  })
+  }
+  async getObjectStatuses () {
+      let userData = JSON.parse(localStorage.getItem('userInfo'))
+      const params = {accessRole: userData.user.accessrole,action:'getObjectStatuses'}
+      this.http.get <objectStatus[]>('/api/accessRestriction/',{ params: params }).subscribe((data) => {
+        this.objectStatuses = data;
+        // console.log('objectStatuses',this.objectStatuses);
+      })
   }
   verifyAccessRestrictions (elementid:string ):Observable <accessRestriction>  {
     let userData = JSON.parse(localStorage.getItem('userInfo'))

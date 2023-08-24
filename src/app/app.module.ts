@@ -167,7 +167,7 @@ const appInitializerFn = (accessRestirictions:AuthService) => {
         AppTradeModifyFormComponent,
         AppTableCurrenciesDataComponent,
         AppOrderTableComponent,
-        OrdersTabComponent
+        OrdersTabComponent,
      ],
     bootstrap: [AppComponent],
     providers: [ 

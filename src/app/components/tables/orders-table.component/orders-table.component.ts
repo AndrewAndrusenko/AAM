@@ -4,7 +4,7 @@ import {MatSort} from '@angular/material/sort';
 import {Observable, map, startWith } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { orders } from 'src/app/models/intefaces.model';
+import { objectStatus, orders } from 'src/app/models/intefaces.model';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
 import { AbstractControl, FormBuilder, FormControl, FormGroup } from '@angular/forms';
@@ -19,6 +19,7 @@ import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { HandlingTableSelectionService } from 'src/app/services/handling-table-selection.service';
 import { SelectionModel } from '@angular/cdk/collections';
+import { indexDBService } from 'src/app/services/indexDB.service';
 @Component({
   selector: 'app-orders-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -34,14 +35,18 @@ import { SelectionModel } from '@angular/cdk/collections';
 })
 export class AppOrderTableComponent  implements AfterViewInit {
   accessState: string = 'none';
+  orderStatuses:objectStatus[];
+  ordersPermissions:string[];
   selectedRowIndex = -1;
   selectedRowID = -1;
   disabledControlElements: boolean = false;
-  @Input() tableMode:string;
+  @Input() tableMode:string[];
   @Input() dataToShow:orders[];
   @Input() bulkOrder:number;
+  @Input() allocationFilters:{secid:string, type:string};
   fullOrdersSet:orders[];
-  columnsToDisplay = ['select','id','ordertype','type','secid','secid_type','security_group_name','qty','price','amount','qty_executed','status','parent_order','portfolioname','idcurrency','generated','action']
+
+  columnsToDisplay = ['select','id','ordertype','type','secid','secid_type','security_group_name','qty','price','amount','qty_executed','status','parent_order','portfolioname','idcurrency','generated','action'];
   columnsHeaderToDisplay = ['ID','Order','Type','SecID','Class','Group','Quantity','Price','Amount','QtyClosed','Status','ParentID','Portfolio','Currency','Created','Action']
   expandedElement: orders  | null;
   expandAllowed: boolean = true;
@@ -62,7 +67,6 @@ export class AppOrderTableComponent  implements AfterViewInit {
     dateRangeStart: new FormControl<Date | null>(null),
     dateRangeEnd: new FormControl<Date | null>(null),
   });
-
   dialogOrderModify: MatDialogRef<AppTradeModifyFormComponent>;
 
   defaultFilterPredicate?: (data: any, filter: string) => boolean;
@@ -73,11 +77,17 @@ export class AppOrderTableComponent  implements AfterViewInit {
     private HandlingCommonTasksS:HandlingCommonTasksService,
     private SelectionService:HandlingTableSelectionService,
     private CommonDialogsService:HadlingCommonDialogsService,
+    private indexDBServiceS:indexDBService,
     private AutoCompService:AtuoCompleteService,
     private dialog: MatDialog,
     private fb:FormBuilder, 
   ) {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
+    this.orderStatuses = this.AuthServiceS.objectStatuses.filter(el =>el.id_object==='Order');
+    this.ordersPermissions = this.AuthServiceS.accessRestrictions.filter(el=>el.elementid==='dorders_status_list')[0].elementvalue.split(',');
+    console.log('this.ordersPermissions ',this.ordersPermissions );
+    console.log('orderStatuses',this.orderStatuses);
+    console.log('FIRST orderStatuses',this.orderStatuses[0]);
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.searchParametersFG = this.fb.group ({
       type:null,
@@ -104,11 +114,22 @@ export class AppOrderTableComponent  implements AfterViewInit {
      this.dataSource.sort = this.sort;
     })
   }
+  ngOnInit(): void {
+    this.indexDBServiceS.getIndexDBStaticTables('getObjectStatuses')
+    console.log('tablemode',this.tableMode);
+    if (this.tableMode.includes('Allocation'))   {
+      this.columnsToDisplayWithExpand = ['select','id','ordertype','type','secid','qty','price','amount','qty_executed','status','parent_order','portfolioname','idcurrency','generated','expand']
+    } 
+    if (this.tableMode.includes('Child')) {
+      this.columnsToDisplayWithExpand.splice(this.columnsToDisplayWithExpand.indexOf('action'),1);
+    }
+  }
   async ngAfterViewInit() {
-    if (this.tableMode!=='Child') {
+    if (this.tableMode.includes('Parent')) {
       this.TradeService.getOrderInformation(null).subscribe (ordersData => {
         this.fullOrdersSet = ordersData;
         this.updateordersDataTable(ordersData)
+        this.tableMode.includes('Allocation')? this.dataSource.data =  this.dataSource.data.filter(el=>el.secid===this.allocationFilters.secid&&el.type===this.allocationFilters.type) : null;
       });  
       this.AutoCompService.getSecidLists();
       this.filterednstrumentsLists = this.secidList.valueChanges.pipe(
@@ -119,7 +140,30 @@ export class AppOrderTableComponent  implements AfterViewInit {
       this.dataSource  = new MatTableDataSource(this.dataToShow.filter(el=>el.parent_order===Number(this.bulkOrder)))
     }
   }
+  executeOrders () {
+    console.log('sele',this.selection.selected);
+  }
+  confirmAllocation () {
 
+  }
+  checkChangeStatus(changeType:string,currentStatus:string):boolean {
+    this.orderStatuses = this.AuthServiceS.objectStatuses.filter(el =>el.id_object==='Order');
+    let index =  this.orderStatuses.findIndex(el=>el.status_code===currentStatus);
+    return (!index&&changeType==='down')||(index===this.orderStatuses.length-1&&changeType==='up')? false : true;
+  }
+  setStatus (changeType:string,currentStatus:string) :string {
+    this.orderStatuses = this.AuthServiceS.objectStatuses.filter(el =>el.id_object==='Order');
+    let factor = changeType==='up'? 1 : -Math.abs(1) 
+    return this.orderStatuses[this.orderStatuses.findIndex(el=>el.status_code===currentStatus) + factor].status_code
+  }
+  changeOrderStatus (newStatus:string,id:number) {
+    if (this.ordersPermissions.includes(newStatus)) { 
+      this.TradeService.changeOrderStatus(newStatus,Number(id)).subscribe(data=>{
+        this.dataSource.data[this.dataSource.data.findIndex(el=>el.id===id)].status = data[0].status;
+        this.dataSource.paginator = this.paginator;
+      })
+    } else {this.CommonDialogsService.snackResultHandler({name:'error', detail: 'There is no permission for operation'}, 'ChangeStatus')}
+  }
   unmergeBulk (id?:number[]) {
     let bulkOrdersIds:number[] = !id? this.selection.selected.map(el=>el.ordertype==='Bulk'? Number(el.id):null) : id.map(el=>Number(el));
     this.TradeService.unmergerBulkOrder(bulkOrdersIds).subscribe(data => {
@@ -128,10 +172,14 @@ export class AppOrderTableComponent  implements AfterViewInit {
     })
   }
   createBulkOrders () {
-    this.TradeService.createBulkOrder(this.selection.selected.map(el=>el.ordertype==='Client'? Number(el.id):null)).subscribe(data => {
+    console.log('this.selection.selected',this.selection.selected);
+    this.selection.selected.filter(el=>['created','confirmed'].includes(el.status)).length? this.TradeService.createBulkOrder(this.selection.selected.map(el=>el.ordertype==='Client'? Number(el.id):null)).subscribe(data => {
       this.selection.clear();
       this.submitQuery();
-    })
+    }):this.CommonDialogsService.snackResultHandler({name:'error',detail:'Confirmed or created orders have not been selected'},'CreateBulkOrder');
+  }
+  applyOrderTypeFilter (value:string){
+    this.dataSource.data = value!=='All'? this.fullOrdersSet.filter(el=>value==='Bulk'? el.ordertype===value:el.ordertype===value&&!el.parent_order) : this.fullOrdersSet.filter(order=>!order.parent_order)
   }
   filterChildOrders(parent:string):orders[] {
     let childOrders =  this.fullOrdersSet.filter(el=>el.parent_order===Number(parent));
@@ -242,6 +290,7 @@ export class AppOrderTableComponent  implements AfterViewInit {
     this.selectedRowID = row.id;
 }
   selectItem (row?) {
+    console.log('selectItem',);
     this.selection.toggle(row? row: this.dataSource.data[this.selectedRowIndex])
   }
   rowsMoveDown() {

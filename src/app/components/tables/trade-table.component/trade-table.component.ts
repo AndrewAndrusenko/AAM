@@ -94,7 +94,7 @@ export class AppTradeTableComponent  implements AfterViewInit {
     })
   }
   openTradeModifyForm (action:string, element:any) {
-    this.dialogTradeModify = this.dialog.open (AppTradeModifyFormComponent,{minHeight:'600px', minWidth:'40vw', autoFocus: false, maxHeight: '90vh'})
+    this.dialogTradeModify = this.dialog.open (AppTradeModifyFormComponent,{minHeight:'600px', minWidth:'60vw', maxWidth:'80vw', autoFocus: false, maxHeight: '90vh'})
     this.dialogTradeModify.componentInstance.action = action;
     this.dialogTradeModify.componentInstance.data = action ==='Create'? null :element;
   }

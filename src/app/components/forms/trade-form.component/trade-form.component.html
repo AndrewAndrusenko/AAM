@@ -1,287 +1,371 @@
 <mat-toolbar color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4">
-  <span>{{action}} Instrument | ID {{idtrade.value}} 
-    </span>
+  <span style="margin-right: 2%;">{{action}} Instrument | ID {{idtrade.value}} </span>
   <span class="example-spacer"></span>
+  <button mat-raised-button color="accent" style=" width: 15%; font-size: 18px; margin-left: 1%;"  (click)="sidenav1.toggle()">Show +</button>
 </mat-toolbar>
-<form class="submit" [formGroup]="tradeModifyForm" style="background-color: rgb(40, 39, 39);">
-  <button mat-raised-button color="accent" 
-    [disabled]="!(tradeModifyForm.valid && submitbox.checked)"
-    (click)="updateInstrumentData(action)"
-    style="margin-top: 1%; width: 35%; font-size: 18px; margin-left: 1%;">
-    {{action}} Trade
-  </button> 
-  <br>
-  <mat-checkbox style= "font-size: 14px; color:rgb(255, 255, 255); margin-top: 0.5%;" #submitbox checked="false" 
-    (click)=" tradeModifyForm.markAllAsTouched();
-              tradeModifyForm.updateValueAndValidity();
-              showErrors()">
-    Submit Data
-  </mat-checkbox>
-  <h3 style="color:rgb(177, 174, 174);margin-left: 1%;" *ngIf="tradeModifyForm.valid"> 
-    To save data please select 'Submit data' check and then press button 
-  </h3>
-  <p>
-    <span style="display: flex;   align-items:flex-start;  margin-right: 1%;margin-top: 0.2%;">
+<mat-drawer-container class="example-container" >
+  <mat-drawer #sidenav1 class="example-sidenav" mode="side"  position="end" style="width: 35vw;">
+    <app-app-clients-table></app-app-clients-table>
+  </mat-drawer>
+  <div class="example-sidenav-content">
+<mat-tab-group mat-stretch-tabs>
+<mat-tab label="Trade Details">
+    <form class="submit" [formGroup]="tradeModifyForm" style="background-color: rgb(40, 39, 39);">
+      <button mat-raised-button color="accent" 
+        [disabled]="!(tradeModifyForm.valid && submitbox.checked)"
+        (click)="updateInstrumentData(action)"
+        style="margin-top: 1%; width: 35%; font-size: 18px; margin-left: 1%;">
+        {{action}} Trade
+      </button> 
+      <br>
+      <mat-checkbox style= "font-size: 14px; color:rgb(255, 255, 255); margin-top: 0.5%;" #submitbox checked="false" 
+        (click)=" tradeModifyForm.markAllAsTouched();
+                  tradeModifyForm.updateValueAndValidity();
+                  showErrors()">
+        Submit Data 
+      </mat-checkbox>
+      <span style="color:rgb(177, 174, 174);margin-left: 5%;" *ngIf="tradeModifyForm.valid"> 
+        To save data please select 'Submit data' check and then press button </span>
+      <p>
+        <span style="display: flex;   align-items:flex-start;  margin-right: 1%;margin-top: 0.2%;">
 
-    <mat-form-field  style="width: 12%;" title="Security Group Code">
-      <mat-label>Type</mat-label>
-      <mat-select  #securityGroup formControlName="trtype"> 
-        <mat-option  [value]="'BUY'"> BUY</mat-option>
-        <mat-option  [value]="'SELL'"> SELL</mat-option>
-      </mat-select>
-      <mat-error  *ngIf="trtype?.errors?.['required']">
-        Required!   
-      </mat-error>
-    </mat-form-field>
-    <mat-form-field style="width: 20%;" >
-      <input matInput [matDatepicker]="tradedate" [min]="firstOpenedAccountingDate" [placeholder]="'Trade Date'" formControlName="tdate" >
-      <mat-datepicker-toggle matSuffix [for]="tradedate"></mat-datepicker-toggle>
-      <mat-datepicker #tradedate></mat-datepicker>
-      <mat-error  *ngIf="tdate?.errors?.['required']">
-        Required!   
-      </mat-error>
-      <mat-error *ngIf="tdate?.errors?.['matDatepickerMin']" matTooltip="TradeDate in closed period">
-        Inccorect date!   
-      </mat-error>
-      <mat-hint *ngIf="tdate.valid">
-        {{tdate.value|date}}
-      </mat-hint>
-    </mat-form-field>
-    <mat-form-field style="width: 20%;" >
-      <input matInput [matDatepicker]="valuedate" [min]="tdate.value" [placeholder]="'Value Date'" formControlName="vdate" >
-      <mat-datepicker-toggle matSuffix [for]="valuedate"></mat-datepicker-toggle>
-      <mat-datepicker #valuedate></mat-datepicker>
-      <mat-error *ngIf="vdate?.errors?.['required']">
-        Required!   
-      </mat-error>
-      <mat-error *ngIf="vdate?.errors?.['matDatepickerMin']" matTooltip="ValueDate before TradeDate">
-        Inccorect date!   
-      </mat-error>
-      <mat-hint *ngIf="vdate.valid">
-        {{vdate.value|date}}
-      </mat-hint>
-    </mat-form-field>
-      <span style="display:grid;  margin-top: 2%; font-size:18px ; margin-bottom: -5%;">
-      <span style="color: rgb(20, 173, 122)">
-        Trade Amount:  {{trade_amount.value | currency :this.code_price_currency.value+' '}} 
-      </span> 
-     <br> <span *ngIf="price_type.value==2" style="color: rgb(126, 105, 243);margin-top: 2%;" >
-        Accured Interest :  {{accured_interest.value | currency :this.code_price_currency.value+' '}} 
-      </span>
-      <br><span style="margin-top: 2%; color: rgb(218, 67, 67);" *ngIf="Number(settlement_amount.value)">
-        Settlement Amount :  {{ settlement_amount.value | currency :this.code_settlement_currency.value+' '}} 
-      </span>
-      <span  style="margin-top: 2%; color: rgb(218, 67, 67);"  *ngIf="!Number(settlement_amount.value)">
-        Settlement Amount :  {{ settlement_amount.value }} 
-      </span>
-    </span>
-    </span>
-  </p>
-  <p>
-    <mat-form-field style="width: 27%;" title="Type to find(any filed). Click to select">
-      <input matInput [placeholder]="'SecID'" formControlName="tidinstrument" [matAutocomplete]="autoSecID"  >
-      <mat-autocomplete #autoSecID="matAutocomplete" 
-        (optionSelected)="secidAutocolmplete($event.option.viewValue) ">
-        <mat-option #selectedsecid *ngFor="let instrument of filterednstrumentsLists | async" [value]="instrument[0]" >
-          {{instrument[0]}} - {{instrument[1]}} - {{instrument[2]}} - {{instrument[3]}} - {{instrument[4]}}
-        </mat-option>
-      </mat-autocomplete>   
-      <mat-error  *ngIf="tidinstrument?.errors?.['required']">
-        Required!    
-      </mat-error>
-      <mat-error  *ngIf="tidinstrument?.errors?.['noSecid']">
-        Inccorect Code! 
-      </mat-error>
-    </mat-form-field>
-    <button mat-flat-button color="accent" 
-    matTooltip="Select Instrument"
-    (click)="selectSecID()"
-    style=" width: 5%;  line-height: 80% !important; height: 60px !important;">
-    <mat-icon >input</mat-icon>
-  </button>
-    <mat-form-field style="width: 45%;" >
-      <input matInput placeholder="Instrument" formControlName="secid_name" [readonly]="true" >
-    </mat-form-field>
-
-  </p>
-  <p>
-    <mat-form-field style="width: 13%;" title="price" >
-      <input matInput placeholder="Price" formControlName="price" >
-      <mat-error  *ngIf="price?.errors?.['required']">
-        Required!    
-      </mat-error>
-      <mat-error  *ngIf="price?.errors?.['pattern']">
-        Required!    
-      </mat-error>
-      <mat-hint>
-        {{price_type.value==2?'percent':'absolute'}}
-      </mat-hint>
-    </mat-form-field>
-    <mat-form-field style="width: 20%;" title="Quantity" >
-      <input matInput placeholder="Quantity" formControlName="qty"  >
-      <mat-error  *ngIf="qty?.errors?.['required']">
-        Required!    
-      </mat-error>
-      <mat-error  *ngIf="qty?.errors?.['pattern']">
-        Only numbers!    
-      </mat-error>
-      <mat-hint>
-        {{qty?.errors?.['pattern']? 'Format 0,00' :qty.value | number}}
-      </mat-hint>
-    </mat-form-field>
-    <mat-form-field style="width: 17%;" title="Type to find(any filed). Click to select" >
-      <input matInput [placeholder]="'Currency'" 
-      [value]="price_type.value=='2'? faceunit.value:id_price_currency.value"
-      formControlName="id_price_currency" 
-      [matAutocomplete]="auto" [readonly]="price_type.value=='2'? true:false">
-      <mat-autocomplete #auto="matAutocomplete" 
-        (optionSelected)="code_price_currency.patchValue($event.option.viewValue.split('-')[1]);
-                          price_currency_name.patchValue($event.option.viewValue.split('-')[2]);">
-        <mat-option *ngFor="let currency of filteredCurrenciesList | async" [value]="currency['CurrencyCodeNum']">
-          {{currency['CurrencyCodeNum']}} -  {{currency['CurrencyCode']}} -  {{currency['CurrencyName']}} 
-        </mat-option>
-      </mat-autocomplete>   
-      <mat-error  *ngIf="id_price_currency?.errors?.['required']">
-        Required!    
-      </mat-error>
-      <mat-error  *ngIf="id_price_currency?.errors?.['currencyCode']">
-        Inccorect Code! 
-      </mat-error>
-      <mat-hint *ngIf="id_price_currency.valid&&id_price_currency.value">
-        {{code_price_currency.value}} - {{price_currency_name.value}}
-      </mat-hint>
-    </mat-form-field>
-    <mat-form-field *ngIf="price_type.value==2">
-      <input matInput placeholder="Face Value" [value]="facevalue.value  | currency:faceunit_name.value+' '" [readonly]="true">
-    </mat-form-field>
-   </p>
-  <p>
-    <mat-form-field style="width: 20%;"  >
-      <input matInput placeholder="ID_Cpty" formControlName="id_cpty"  >
-      <mat-error  *ngIf="id_cpty?.errors?.['required']">
-        Required!    
-      </mat-error>
-      <mat-error  *ngIf="id_cpty?.errors?.['noCounterParty']">
-        Inccorect Code! 
-      </mat-error>
-    </mat-form-field>
-    <button mat-flat-button color="accent" 
-      matTooltip="Select Client"
-      (click) = "selectClient()"
-      style=" width: 5%;  line-height: 80% !important; height: 60px !important;">
-      <mat-icon >input</mat-icon>
-    </button>
-    <mat-form-field style="width: 50%;" title="Type to find(any filed). Click to select">
-      <input matInput [placeholder]="'CounterParty'" formControlName="cpty_name" [matAutocomplete]="autoCpty">
-      <mat-autocomplete #autoCpty="matAutocomplete" (optionSelected)="id_cpty.patchValue($event.option.viewValue.split('-')[1])">
-        <mat-option *ngFor="let cpty of filteredCounterPartiesList | async" [value]="cpty['clientname']">
-          {{cpty['clientname']}} -  {{cpty['idclient']}}
-        </mat-option>
-      </mat-autocomplete>   
-    </mat-form-field>
-  </p>
-  <mat-form-field style="width: 90%;"  >
-    <input matInput placeholder="Details" formControlName="details"  >
-  </mat-form-field>
-  <br>
-  <br>
-  <h3 style="color:rgb(252, 113, 113)" *ngIf="tradeModifyForm.invalid"> Please check the form. Data is invalid</h3>
-  <mat-expansion-panel class="headers-align" title=""
-    (opened)="panelOpenStateSecond = true"
-    (closed)="panelOpenStateSecond = false" >
-      <mat-expansion-panel-header >
-      <mat-panel-title>
-        Details
-      </mat-panel-title>
-      <mat-panel-description>
-        Tap to {{panelOpenStateSecond? 'hide': 'open'}} additional details
-        <mat-icon color = 'accent'>event</mat-icon>
-      </mat-panel-description>
-    </mat-expansion-panel-header >
-    <div style="width: 100%;">
-      <mat-form-field style="width: 17%;" >
-        <mat-label>Type</mat-label>
-          <mat-select  placeholder="Price Type" formControlName="price_type"  > 
-            <mat-option  [value]="'1'">1 - Absolute</mat-option>
-            <mat-option  [value]="'2'">2 - Percent</mat-option>
+        <mat-form-field  style="width: 12%;" title="Security Group Code">
+          <mat-label>Type</mat-label>
+          <mat-select  #securityGroup formControlName="trtype"> 
+            <mat-option  [value]="'BUY'"> BUY</mat-option>
+            <mat-option  [value]="'SELL'"> SELL</mat-option>
           </mat-select>
-          <mat-error  *ngIf="price_type?.errors?.['required']">
+          <mat-error  *ngIf="trtype?.errors?.['required']">
             Required!   
           </mat-error>
-      </mat-form-field>
-      <mat-form-field style="width: 20%;" title="Type to find(any filed). Click to select" >
-        <input matInput [placeholder]="'Settlement Currency'" 
-        formControlName="id_settlement_currency" 
-        [matAutocomplete]="autoSet" >
-        <mat-autocomplete #autoSet="matAutocomplete" 
-          (optionSelected)="code_settlement_currency.patchValue($event.option.viewValue.split('-')[1]);
-                            settlement_currency_name.patchValue($event.option.viewValue.split('-')[2])">
-          <mat-option *ngFor="let currency of filteredSetCurrenciesList | async" [value]="currency['CurrencyCodeNum']">
-            {{currency['CurrencyCodeNum']}} -  {{currency['CurrencyCode']}} -  {{currency['CurrencyName']}} 
-          </mat-option>
-        </mat-autocomplete>   
-        <mat-error  *ngIf="id_settlement_currency?.errors?.['currencyCode']">
-          Inccorect Code! 
-        </mat-error>
-        <mat-hint *ngIf="id_settlement_currency.valid&&id_settlement_currency.value">
-          {{code_settlement_currency.value}} - {{settlement_currency_name.value}}
-        </mat-hint>
-      </mat-form-field>
-      <mat-form-field style="width: 20%;" >
-        <input matInput placeholder="Settlement Rate" formControlName="settlement_rate" >
-        <mat-error *ngIf="settlement_rate?.errors?.['required']">
-          Required!   
-        </mat-error>
-        <mat-error  *ngIf="settlement_rate?.errors?.['pattern']">
-          Only numbers! 0.00   
-        </mat-error>
-      </mat-form-field>
-      <mat-form-field style="width: 25%;" >
-        <input matInput placeholder="Buyer SSI" formControlName="id_buyer_instructions" >
-      </mat-form-field>
-      <mat-form-field style="width: 25%;" >
-        <input matInput placeholder="Seller SSI" formControlName="id_seller_instructions" >
-      </mat-form-field>
-      <mat-form-field style="width: 25%;" title="id_broker" >
-        <input matInput placeholder="Broker" formControlName="id_broker"  >
-      </mat-form-field>
-      <p style="margin: 1%;">
-      <mat-label *ngIf="price_type.value=='2'"> 
-        {{coupon_details.value}}
-       </mat-label>
+        </mat-form-field>
+        <mat-form-field style="width: 20%;" >
+          <input matInput [matDatepicker]="tradedate" [min]="firstOpenedAccountingDate" [placeholder]="'Trade Date'" formControlName="tdate" >
+          <mat-datepicker-toggle matSuffix [for]="tradedate"></mat-datepicker-toggle>
+          <mat-datepicker #tradedate></mat-datepicker>
+          <mat-error  *ngIf="tdate?.errors?.['required']">
+            Required!   
+          </mat-error>
+          <mat-error *ngIf="tdate?.errors?.['matDatepickerMin']" matTooltip="TradeDate in closed period">
+            Inccorect date!   
+          </mat-error>
+          <mat-hint *ngIf="tdate.valid">
+            {{tdate.value|date}}
+          </mat-hint>
+        </mat-form-field>
+        <mat-form-field style="width: 20%;" >
+          <input matInput [matDatepicker]="valuedate" [min]="tdate.value" [placeholder]="'Value Date'" formControlName="vdate" >
+          <mat-datepicker-toggle matSuffix [for]="valuedate"></mat-datepicker-toggle>
+          <mat-datepicker #valuedate></mat-datepicker>
+          <mat-error *ngIf="vdate?.errors?.['required']">
+            Required!   
+          </mat-error>
+          <mat-error *ngIf="vdate?.errors?.['matDatepickerMin']" matTooltip="ValueDate before TradeDate">
+            Inccorect date!   
+          </mat-error>
+          <mat-hint *ngIf="vdate.valid">
+            {{vdate.value|date}}
+          </mat-hint>
+        </mat-form-field>
+          <span style="display:grid;  margin-top: 2%; font-size:18px ; margin-bottom: -5%;">
+          <span style="color: rgb(20, 173, 122)">
+            Trade Amount:  {{trade_amount.value | currency :this.code_price_currency.value+' '}} 
+          </span> 
+        <br> <span *ngIf="price_type.value==2" style="color: rgb(126, 105, 243);margin-top: 2%;" >
+            Accured Interest :  {{accured_interest.value | currency :this.code_price_currency.value+' '}} 
+          </span>
+          <br><span style="margin-top: 2%; color: rgb(218, 67, 67);" *ngIf="Number(settlement_amount.value)">
+            Settlement Amount :  {{ settlement_amount.value | currency :this.code_settlement_currency.value+' '}} 
+          </span>
+          <span  style="margin-top: 2%; color: rgb(218, 67, 67);"  *ngIf="!Number(settlement_amount.value)">
+            Settlement Amount :  {{ settlement_amount.value }} 
+          </span>
+        </span>
+        </span>
       </p>
-    </div>
-  </mat-expansion-panel>
-  <br>
-  <mat-expansion-panel class="headers-align" title="instrumentDetailsTable"
-    (opened)="panelOpenStateFirst = true"
-    (closed)="panelOpenStateFirst = false" >
-    <mat-expansion-panel-header style="margin-bottom: 1%;">
-      <mat-panel-title title="Details">
-        Fees
-      </mat-panel-title>
-      <mat-panel-description >
-        Tap to {{panelOpenStateFirst? 'hide': 'open'}} fees
-        <mat-icon color = 'accent'>list</mat-icon>
-      </mat-panel-description>
-    </mat-expansion-panel-header >
-    <mat-form-field style="width: 20%;" >
-      <input matInput placeholder="Fee Trade " formControlName="fee_trade" >
-      <mat-error  *ngIf="fee_trade?.errors?.['pattern']">
-        Only numbers!    
-      </mat-error>
-    </mat-form-field>
-    <mat-form-field style="width: 20%;" >
-      <input matInput placeholder="Fee Settlement " formControlName="fee_settlement" >
-      <mat-error  *ngIf="fee_settlement?.errors?.['pattern']">
-        Only numbers!    
-      </mat-error>
-    </mat-form-field>
-    <mat-form-field style="width: 20%;" >
-      <input matInput placeholder="Fee Exchange " formControlName="fee_exchange" >
-      <mat-error  *ngIf="fee_exchange?.errors?.['pattern']">
-        Only numbers!    
-      </mat-error>
-    </mat-form-field>
-  </mat-expansion-panel>
-</form>
+      <p>
+        <mat-form-field style="width: 27%;" title="Type to find(any filed). Click to select">
+          <input matInput [placeholder]="'SecID'" formControlName="tidinstrument" [matAutocomplete]="autoSecID"  >
+          <mat-autocomplete #autoSecID="matAutocomplete" 
+            (optionSelected)="secidAutocolmplete($event.option.viewValue) ">
+            <mat-option #selectedsecid *ngFor="let instrument of filterednstrumentsLists | async" [value]="instrument[0]" >
+              {{instrument[0]}} - {{instrument[1]}} - {{instrument[2]}} - {{instrument[3]}} - {{instrument[4]}}
+            </mat-option>
+          </mat-autocomplete>   
+          <mat-error  *ngIf="tidinstrument?.errors?.['required']">
+            Required!    
+          </mat-error>
+          <mat-error  *ngIf="tidinstrument?.errors?.['noSecid']">
+            Inccorect Code! 
+          </mat-error>
+        </mat-form-field>
+        <button mat-flat-button color="accent" 
+        matTooltip="Select Instrument"
+        (click)="selectSecID()"
+        style=" width: 5%;  line-height: 80% !important; height: 60px !important;">
+        <mat-icon >input</mat-icon>
+      </button>
+        <mat-form-field style="width: 45%;" >
+          <input matInput placeholder="Instrument" formControlName="secid_name" [readonly]="true" >
+        </mat-form-field>
+
+      </p>
+      <p>
+        <mat-form-field style="width: 13%;" title="price" >
+          <input matInput placeholder="Price" formControlName="price" >
+          <mat-error  *ngIf="price?.errors?.['required']">
+            Required!    
+          </mat-error>
+          <mat-error  *ngIf="price?.errors?.['pattern']">
+            Required!    
+          </mat-error>
+          <mat-hint>
+            {{price_type.value==2?'percent':'absolute'}}
+          </mat-hint>
+        </mat-form-field>
+        <mat-form-field style="width: 20%;" title="Quantity" >
+          <input matInput placeholder="Quantity" formControlName="qty"  >
+          <mat-error  *ngIf="qty?.errors?.['required']">
+            Required!    
+          </mat-error>
+          <mat-error  *ngIf="qty?.errors?.['pattern']">
+            Only numbers!    
+          </mat-error>
+          <mat-hint>
+            {{qty?.errors?.['pattern']? 'Format 0,00' :qty.value | number}}
+          </mat-hint>
+        </mat-form-field>
+        <mat-form-field style="width: 17%;" title="Type to find(any filed). Click to select" >
+          <input matInput [placeholder]="'Currency'" 
+          [value]="price_type.value=='2'? faceunit.value:id_price_currency.value"
+          formControlName="id_price_currency" 
+          [matAutocomplete]="auto" [readonly]="price_type.value=='2'? true:false">
+          <mat-autocomplete #auto="matAutocomplete" 
+            (optionSelected)="code_price_currency.patchValue($event.option.viewValue.split('-')[1]);
+                              price_currency_name.patchValue($event.option.viewValue.split('-')[2]);">
+            <mat-option *ngFor="let currency of filteredCurrenciesList | async" [value]="currency['CurrencyCodeNum']">
+              {{currency['CurrencyCodeNum']}} -  {{currency['CurrencyCode']}} -  {{currency['CurrencyName']}} 
+            </mat-option>
+          </mat-autocomplete>   
+          <mat-error  *ngIf="id_price_currency?.errors?.['required']">
+            Required!    
+          </mat-error>
+          <mat-error  *ngIf="id_price_currency?.errors?.['currencyCode']">
+            Inccorect Code! 
+          </mat-error>
+          <mat-hint *ngIf="id_price_currency.valid&&id_price_currency.value">
+            {{code_price_currency.value}} - {{price_currency_name.value}}
+          </mat-hint>
+        </mat-form-field>
+        <mat-form-field *ngIf="price_type.value==2">
+          <input matInput placeholder="Face Value" [value]="facevalue.value  | currency:faceunit_name.value+' '" [readonly]="true">
+        </mat-form-field>
+      </p>
+      <p>
+        <mat-form-field style="width: 20%;"  >
+          <input matInput placeholder="ID_Cpty" formControlName="id_cpty"  >
+          <mat-error  *ngIf="id_cpty?.errors?.['required']">
+            Required!    
+          </mat-error>
+          <mat-error  *ngIf="id_cpty?.errors?.['noCounterParty']">
+            Inccorect Code! 
+          </mat-error>
+        </mat-form-field>
+        <button mat-flat-button color="accent" 
+          matTooltip="Select Client"
+          (click) = "selectClient()"
+          style=" width: 5%;  line-height: 80% !important; height: 60px !important;">
+          <mat-icon >input</mat-icon>
+        </button>
+        <mat-form-field style="width: 50%;" title="Type to find(any filed). Click to select">
+          <input matInput [placeholder]="'CounterParty'" formControlName="cpty_name" [matAutocomplete]="autoCpty">
+          <mat-autocomplete #autoCpty="matAutocomplete" (optionSelected)="id_cpty.patchValue($event.option.viewValue.split('-')[1])">
+            <mat-option *ngFor="let cpty of filteredCounterPartiesList | async" [value]="cpty['clientname']">
+              {{cpty['clientname']}} -  {{cpty['idclient']}}
+            </mat-option>
+          </mat-autocomplete>   
+        </mat-form-field>
+      </p>
+      <mat-form-field style="width: 90%;"  >
+        <input matInput placeholder="Details" formControlName="details"  >
+      </mat-form-field>
+      <br>
+      <br>
+      <h3 style="color:rgb(252, 113, 113)" *ngIf="tradeModifyForm.invalid"> Please check the form. Data is invalid</h3>
+      <mat-expansion-panel class="headers-align" title=""
+        (opened)="panelOpenStateSecond = true"
+        (closed)="panelOpenStateSecond = false" >
+          <mat-expansion-panel-header >
+          <mat-panel-title>
+            Details
+          </mat-panel-title>
+          <mat-panel-description>
+            Tap to {{panelOpenStateSecond? 'hide': 'open'}} additional details
+            <mat-icon color = 'accent'>event</mat-icon>
+          </mat-panel-description>
+        </mat-expansion-panel-header >
+        <div style="width: 100%;">
+          <mat-form-field style="width: 17%;" >
+            <mat-label>Type</mat-label>
+              <mat-select  placeholder="Price Type" formControlName="price_type"  > 
+                <mat-option  [value]="'1'">1 - Absolute</mat-option>
+                <mat-option  [value]="'2'">2 - Percent</mat-option>
+              </mat-select>
+              <mat-error  *ngIf="price_type?.errors?.['required']">
+                Required!   
+              </mat-error>
+          </mat-form-field>
+          <mat-form-field style="width: 20%;" title="Type to find(any filed). Click to select" >
+            <input matInput [placeholder]="'Settlement Currency'" 
+            formControlName="id_settlement_currency" 
+            [matAutocomplete]="autoSet" >
+            <mat-autocomplete #autoSet="matAutocomplete" 
+              (optionSelected)="code_settlement_currency.patchValue($event.option.viewValue.split('-')[1]);
+                                settlement_currency_name.patchValue($event.option.viewValue.split('-')[2])">
+              <mat-option *ngFor="let currency of filteredSetCurrenciesList | async" [value]="currency['CurrencyCodeNum']">
+                {{currency['CurrencyCodeNum']}} -  {{currency['CurrencyCode']}} -  {{currency['CurrencyName']}} 
+              </mat-option>
+            </mat-autocomplete>   
+            <mat-error  *ngIf="id_settlement_currency?.errors?.['currencyCode']">
+              Inccorect Code! 
+            </mat-error>
+            <mat-hint *ngIf="id_settlement_currency.valid&&id_settlement_currency.value">
+              {{code_settlement_currency.value}} - {{settlement_currency_name.value}}
+            </mat-hint>
+          </mat-form-field>
+          <mat-form-field style="width: 20%;" >
+            <input matInput placeholder="Settlement Rate" formControlName="settlement_rate" >
+            <mat-error *ngIf="settlement_rate?.errors?.['required']">
+              Required!   
+            </mat-error>
+            <mat-error  *ngIf="settlement_rate?.errors?.['pattern']">
+              Only numbers! 0.00   
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field style="width: 25%;" >
+            <input matInput placeholder="Buyer SSI" formControlName="id_buyer_instructions" >
+          </mat-form-field>
+          <mat-form-field style="width: 25%;" >
+            <input matInput placeholder="Seller SSI" formControlName="id_seller_instructions" >
+          </mat-form-field>
+          <mat-form-field style="width: 25%;" title="id_broker" >
+            <input matInput placeholder="Broker" formControlName="id_broker"  >
+          </mat-form-field>
+          <p style="margin: 1%;">
+          <mat-label *ngIf="price_type.value=='2'"> 
+            {{coupon_details.value}}
+          </mat-label>
+          </p>
+        </div>
+      </mat-expansion-panel>
+      <br>
+      <mat-expansion-panel class="headers-align" title="instrumentDetailsTable"
+        (opened)="panelOpenStateFirst = true"
+        (closed)="panelOpenStateFirst = false" >
+        <mat-expansion-panel-header style="margin-bottom: 1%;">
+          <mat-panel-title title="Details">
+            Fees
+          </mat-panel-title>
+          <mat-panel-description >
+            Tap to {{panelOpenStateFirst? 'hide': 'open'}} fees
+            <mat-icon color = 'accent'>list</mat-icon>
+          </mat-panel-description>
+        </mat-expansion-panel-header >
+        <mat-form-field style="width: 20%;" >
+          <input matInput placeholder="Fee Trade " formControlName="fee_trade" >
+          <mat-error  *ngIf="fee_trade?.errors?.['pattern']">
+            Only numbers!    
+          </mat-error>
+        </mat-form-field>
+        <mat-form-field style="width: 20%;" >
+          <input matInput placeholder="Fee Settlement " formControlName="fee_settlement" >
+          <mat-error  *ngIf="fee_settlement?.errors?.['pattern']">
+            Only numbers!    
+          </mat-error>
+        </mat-form-field>
+        <mat-form-field style="width: 20%;" >
+          <input matInput placeholder="Fee Exchange " formControlName="fee_exchange" >
+          <mat-error  *ngIf="fee_exchange?.errors?.['pattern']">
+            Only numbers!    
+          </mat-error>
+        </mat-form-field>
+      </mat-expansion-panel>
+    </form>
+  </mat-tab>
+  <mat-tab label="Allocation" style="width: 100%;">
+    <form class="submit" [formGroup]="tradeModifyForm" style="background-color: rgb(40, 39, 39);">
+      <p>
+        <span style="display: flex;   align-items:flex-start;  margin-right: 1%;margin-top: 0.2%;">
+
+        <mat-form-field  style="width: 12%;" title="Security Group Code">
+          <mat-label>Type</mat-label>
+          <mat-select  #securityGroup formControlName="trtype"> 
+            <mat-option  [value]="'BUY'"> BUY</mat-option>
+            <mat-option  [value]="'SELL'"> SELL</mat-option>
+          </mat-select>
+          <mat-error  *ngIf="trtype?.errors?.['required']">
+            Required!   
+          </mat-error>
+        </mat-form-field>
+        <mat-form-field style="width: 20%;" >
+          <input matInput [matDatepicker]="tradedate" [min]="firstOpenedAccountingDate" [placeholder]="'Trade Date'" formControlName="tdate" >
+          <mat-datepicker-toggle matSuffix [for]="tradedate"></mat-datepicker-toggle>
+          <mat-datepicker #tradedate></mat-datepicker>
+          <mat-error  *ngIf="tdate?.errors?.['required']">
+            Required!   
+          </mat-error>
+          <mat-error *ngIf="tdate?.errors?.['matDatepickerMin']" matTooltip="TradeDate in closed period">
+            Inccorect date!   
+          </mat-error>
+          <mat-hint *ngIf="tdate.valid">
+            {{tdate.value|date}}
+          </mat-hint>
+        </mat-form-field>
+        <mat-form-field style="width: 27%;" title="Type to find(any filed). Click to select">
+          <input matInput [placeholder]="'SecID'" formControlName="tidinstrument" [matAutocomplete]="autoSecID"  >
+          <mat-error  *ngIf="tidinstrument?.errors?.['required']">
+            Required!    
+          </mat-error>
+          <mat-error  *ngIf="tidinstrument?.errors?.['noSecid']">
+            Inccorect Code! 
+          </mat-error>
+        </mat-form-field>
+        <mat-form-field style="width: 13%;" title="price" >
+          <input matInput placeholder="Price" formControlName="price" >
+          <mat-error  *ngIf="price?.errors?.['required']">
+            Required!    
+          </mat-error>
+          <mat-error  *ngIf="price?.errors?.['pattern']">
+            Required!    
+          </mat-error>
+          <mat-hint>
+            {{price_type.value==2?'percent':'absolute'}}
+          </mat-hint>
+        </mat-form-field>
+        <mat-form-field style="width: 20%;" title="Quantity" >
+          <input matInput placeholder="Quantity" formControlName="qty"  >
+          <mat-error  *ngIf="qty?.errors?.['required']">
+            Required!    
+          </mat-error>
+          <mat-error  *ngIf="qty?.errors?.['pattern']">
+            Only numbers!    
+          </mat-error>
+          <mat-hint>
+            {{qty?.errors?.['pattern']? 'Format 0,00' :qty.value | number}}
+          </mat-hint>
+        </mat-form-field>
+        </span>
+      </p>
+    </form>
+    <app-orders-table style="width: 100%;" 
+    [tableMode]="['Allocation','Parent']"
+    [allocationFilters]="{secid:tidinstrument.value,type:trtype.value}"
+    ></app-orders-table>
+    
+  </mat-tab>
+</mat-tab-group>
+
+  </div>
+</mat-drawer-container>
+
+

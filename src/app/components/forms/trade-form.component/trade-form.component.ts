@@ -1,4 +1,4 @@
-import { AfterContentInit, Component,  EventEmitter,  Input, Output} from '@angular/core';
+import { AfterContentInit, Component,  ElementRef,  EventEmitter,  Input, Output, ViewChild} from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ClientData, Instruments, trades } from 'src/app/models/intefaces.model';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
@@ -50,7 +50,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     private InstrumentDataS:InstrumentDataService,
     private dialog: MatDialog, 
   ) 
-  {    
+  {   
     this.tradeModifyForm = this.fb.group ({
       idtrade:{value:null, disabled: false},
       trtype:[null, { validators:  Validators.required, updateOn: 'blur' }], action:{value:null, disabled: false},
@@ -71,6 +71,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
       tidorder:{value:null, disabled: false},allocatedqty:{value:null, disabled: false},idportfolio:{value:null, disabled: false},
       id_buyer_instructions:{value:null, disabled: false},id_seller_instructions:{value:null, disabled: false},id_broker:{value:null, disabled: false}, details:{value:null, disabled: false},cpty_name:{value:null, disabled: false},security_group_name :{value:null, disabled: false},   secid_name:{value:null, disabled: false}, trade_amount:[null], facevalue:[null],faceunit:[null],faceunit_name:[null], code_price_currency:[null],  price_currency_name:[null], settlement_currency_name:[null], code_settlement_currency:[null], settlement_amount:[null], coupon_details:[null]
     })
+
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data => this.firstOpenedAccountingDate = data[0].FirstOpenedDate);
@@ -216,6 +217,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     } else {this.tradeAmountsUpdate()}
   }
   updateInstrumentData(action:string){
+    let srDisabled = this.settlement_rate.disabled? this.settlement_rate.enable() : false
     if (this.tradeModifyForm.invalid) {return}
     switch (action) {
       case 'Create_Example':
@@ -232,6 +234,8 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
         ).subscribe (result =>this.snacksBox(result,'Deleted'));
       break;
     }
+    srDisabled? this.settlement_rate.disable():null;
+
   }
   snacksBox(result:any, action?:string){
     if (result['name']=='error') {

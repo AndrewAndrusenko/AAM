@@ -77,6 +77,9 @@ htmltemplate:string,
 elementtype:string, 
 elementvalue:string
 }
+export interface objectStatus {
+  id_object:string, status_code:string,step:number
+}
 export interface InstrumentData {
   secid :string, 
   shortname :string, 

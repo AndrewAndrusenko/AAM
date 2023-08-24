@@ -1,56 +1,84 @@
 <ng-container *ngIf="accessState!=='none'">
-  <mat-form-field  class = "filterField" title="only by SecID" >
-    <mat-label class="whiteTextFilter">Search by SecID..</mat-label>
-    <input 
-      (keyup)="applyFilter($event,'secid')"
-      matInput type="text" #filterSecid  
-      matTooltip="Use context menu to add filter">
-    <button matSuffix 
-      mat-icon-button aria-label="Clear" 
-      (click)="clearFilter(filterSecid)">
-      <mat-icon>close</mat-icon>
+  <ng-container  *ngIf="tableMode.includes('Parent')&&tableMode.length===1">  <!-- Parent Mode Block -->
+    <mat-form-field  class = "filterField" style="width: 10%;"> <!-- Order Type Filter -->
+      <mat-label class="whiteTextFilter">Order type</mat-label>
+      <mat-select  (selectionChange)="applyOrderTypeFilter($event.value)">
+        <mat-option [value]="'All'">ALL</mat-option>
+        <mat-option [value]="'Bulk'">Bulk</mat-option>
+        <mat-option [value]="'Client'">Client</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field class = "filterField"  style="font-size: 22px;" title="Filter All columns">
+      <mat-label class="whiteTextFilter">Search (all columns)...</mat-label>
+      <input 
+        (keyup)="applyFilter($event)"
+        matInput type="text" #filterALL
+        matTooltip="Use context menu to add filter"     >
+      <button matSuffix 
+        mat-icon-button aria-label="Clear" 
+        (click)="clearFilter(filterALL)">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-form-field>
+    <button color = "accent" mat-raised-button title="Export To Excel"
+      style=" margin-left:1%; font-size: 18px;"
+      (click)="exportToExcel()">
+      Save as XLS 
+      <mat-icon matSuffix >save_alt</mat-icon>
     </button>
-  </mat-form-field>
-  <mat-form-field class = "filterField"  style="font-size: 22px;" title="All columns">
-    <mat-label class="whiteTextFilter">Search (all columns)...</mat-label>
-    <input 
-      (keyup)="applyFilter($event)"
-      matInput type="text" #filterALL
-      matTooltip="Use context menu to add filter"     >
-    <button matSuffix 
-      mat-icon-button aria-label="Clear" 
-      (click)="clearFilter(filterALL)">
-      <mat-icon>close</mat-icon>
+    <button  *ngIf="tableMode.includes('Parent')"
+      color = "accent" mat-raised-button title="Reload Table" 
+      style=" margin-left:1%; font-size: 18px;"
+      (click)="submitQuery(true)">
+      Reload 
+      <mat-icon matSuffix >refresh</mat-icon>
     </button>
-  </mat-form-field>
-  <button color = "accent" mat-raised-button title="Export To Excel"
-    style=" margin-left:1%; font-size: 18px;"
-    (click)="exportToExcel()">
-    Save as XLS 
-    <mat-icon matSuffix >save_alt</mat-icon>
-  </button>
-  <button color = "accent" mat-raised-button title="Reload Table" *ngIf="tableMode==='Parent'"
-  style=" margin-left:1%; font-size: 18px;"
-  (click)="submitQuery(true)">
-    Reload 
-    <mat-icon matSuffix >refresh</mat-icon>
-  </button>
-  <ng-container *ngIf="!disabledControlElements">
-    <button color = "primary" mat-raised-button title="Create Bulk Orders" *ngIf="tableMode==='Parent'"
-    style=" margin-left:2%; font-size: 18px;"
-    (click)="createBulkOrders()">
-      Create Bulk Orders 
-      <mat-icon matSuffix >call_merge</mat-icon>
-    </button>
-    <button color = "warn" mat-raised-button title="Unmerge Bulk Orders" *ngIf="tableMode==='Parent'"
-    style=" margin-left:1%; font-size: 18px;"
-    (click)="unmergeBulk()">
-    Unmerge Bulk Orders 
-      <mat-icon matSuffix >call_split</mat-icon>
-    </button>
+    <ng-container  *ngIf="!disabledControlElements"> <!-- Edit Buks Orders Block -->
+      <button  title="Create Bulk Orders"
+        color = "primary" mat-raised-button style=" margin-left:2%; font-size: 18px;"
+        (click)="createBulkOrders()">
+        Create Bulk Orders 
+        <mat-icon matSuffix >call_merge</mat-icon>
+      </button>
+      <button title="Unmerge Bulk Orders"  
+        color = "warn" mat-raised-button style=" margin-left:1%; font-size: 18px;"
+        (click)="unmergeBulk()">
+        Unmerge Bulk Orders 
+        <mat-icon matSuffix>call_split</mat-icon>
+      </button>
+    </ng-container>
   </ng-container>
+  <ng-container  *ngIf="tableMode.includes('Allocation')">  <!-- Allocation Mode Block -->
+    <mat-form-field class = "filterField"  style="font-size: 22px;" title="Filter All columns">
+      <mat-label class="whiteTextFilter">Search (all columns)...</mat-label>
+      <input 
+        (keyup)="applyFilter($event)"
+        matInput type="text" #filterALL
+        matTooltip="Use context menu to add filter"     >
+      <button matSuffix 
+        mat-icon-button aria-label="Clear" 
+        (click)="clearFilter(filterALL)">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-form-field>
+    <ng-container  *ngIf="!disabledControlElements"> <!-- Edit Block for Allocation -->
+      <button  title="Execute selected orders" 
+        color = "primary" mat-raised-button style=" margin-left:2%; font-size: 18px;"
+        (click)="executeOrders()">
+        Execute Orders
+        <mat-icon matSuffix >gavel</mat-icon>
+      </button>
+      <button title="Confirm Allocation"  
+        color = "accent" mat-raised-button style=" margin-left:1%; font-size: 18px;"
+        (click)="confirmAllocation()">
+        Confirm Allocation
+        <mat-icon matSuffix>done_all</mat-icon>
+      </button>
+    </ng-container>
+  </ng-container>
+    
   
-<mat-expansion-panel class="headers-align" 
+<mat-expansion-panel class="headers-align"  *ngIf="tableMode.includes('Parent')&&tableMode.length===1"
   (opened)="panelOpenStateSecond = true"
   (closed)="panelOpenStateSecond = false" >
   <mat-expansion-panel-header >
@@ -62,9 +90,9 @@
       <mat-icon color = 'accent'>filter_alt</mat-icon>
     </mat-panel-description>
   </mat-expansion-panel-header >
-  <form class="submit" [formGroup]="searchParametersFG"  style="font-size: 18px; margin-left: 0.5%; ">
-    <span style="display: flex;    align-items:flex-start;  margin-right: 1%;margin-top: 0.2%;">
-      <span style="display:grid; width: 11%; margin-right: 2%;">
+  <form class="submit" [formGroup]="searchParametersFG"  style="font-size: 18px; margin-left: 0.5%; "> <!-- complexSearch Form -->
+    <span style="display: flex;    align-items:flex-start;  margin-right: 1%;margin-top: 0.2%;"> 
+      <span style="display:grid; width: 11%; margin-right: 2%;"> <!-- submitQuery/CleaAll Buttons -->
         <button color = "primary"  class= "button-color" mat-raised-button 
           style="margin:1%; font-size: 18px;"
           (click)="submitQuery()">
@@ -77,46 +105,45 @@
           ClearAll
         </button>
       </span>
-      <mat-form-field  class="search-filed">
-      <mat-select placeholder="Type" formControlName="type">
-        <mat-option [value]="null">ALL</mat-option>
-        <mat-option [value]="'BUY'">BUY</mat-option>
-        <mat-option [value]="'SELL'">SELL</mat-option>
-      </mat-select>
-    </mat-form-field>
-
-    <mat-form-field appearance="fill"  class="search-filed">
-      <mat-label >Enter a date range</mat-label>
-      <mat-date-range-input [formGroup]="dataRange" [rangePicker]="pickerTDate" >
-        <input matStartDate placeholder="Start date" formControlName="dateRangeStart" >
-        <input matEndDate placeholder="End date" formControlName="tdate" formControlName="dateRangeEnd">
-      </mat-date-range-input>
-      <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
-      <mat-datepicker-toggle matSuffix [for]="pickerTDate"></mat-datepicker-toggle>
-      <mat-date-range-picker  #pickerTDate></mat-date-range-picker>
-      <mat-error *ngIf="dataRange.controls.dateRangeStart.hasError('matStartDateInvalid')">Invalid start date</mat-error>
-      <mat-error *ngIf="dataRange.controls.dateRangeEnd.hasError('matEndDateInvalid')">Invalid end date</mat-error>
-    </mat-form-field>
-    <mat-form-field class="search-filed" style="width: 16%;"> 
-      <input matInput placeholder="Quantity (Value or Min - Max)" formControlName="qty">
-      <mat-hint *ngIf="qty.valid">
-        Qty or QtyMin-QtyMax
-      </mat-hint>
-      <mat-error *ngIf="qty?.errors?.['incorrectRange']">
-        Incorrect Range
-      </mat-error>
-    </mat-form-field>
-    <mat-form-field class="search-filed" style="width: 15%;">
-      <input matInput placeholder="Price (Value or Min - Max)" formControlName="price">
-      <mat-hint *ngIf="price.valid">
-        Price or PriceMin-PriceMax
-      </mat-hint>
-      <mat-error *ngIf="price?.errors?.['incorrectRange']">
-        Incorrect Range
-      </mat-error>
-    </mat-form-field>
-  </span>
-<p style="margin-top: 1%;">
+      <mat-form-field  class="search-filed"> <!-- Order Type Filter -->
+        <mat-select placeholder="Type" formControlName="type">
+          <mat-option [value]="null">ALL</mat-option>
+          <mat-option [value]="'BUY'">BUY</mat-option>
+          <mat-option [value]="'SELL'">SELL</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="fill"  class="search-filed"> <!-- Date Filter -->
+        <mat-label >Enter a date range</mat-label>
+        <mat-date-range-input [formGroup]="dataRange" [rangePicker]="pickerTDate" >
+          <input matStartDate placeholder="Start date" formControlName="dateRangeStart" >
+          <input matEndDate placeholder="End date" formControlName="tdate" formControlName="dateRangeEnd">
+        </mat-date-range-input>
+        <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
+        <mat-datepicker-toggle matSuffix [for]="pickerTDate"></mat-datepicker-toggle>
+        <mat-date-range-picker  #pickerTDate></mat-date-range-picker>
+        <mat-error *ngIf="dataRange.controls.dateRangeStart.hasError('matStartDateInvalid')">Invalid start date</mat-error>
+        <mat-error *ngIf="dataRange.controls.dateRangeEnd.hasError('matEndDateInvalid')">Invalid end date</mat-error>
+      </mat-form-field>
+      <mat-form-field class="search-filed" style="width: 16%;"> <!-- Quantity Filter -->
+        <input matInput placeholder="Quantity (Value or Min - Max)" formControlName="qty">
+        <mat-hint *ngIf="qty.valid">
+          Qty or QtyMin-QtyMax
+        </mat-hint>
+        <mat-error *ngIf="qty?.errors?.['incorrectRange']">
+          Incorrect Range
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field class="search-filed" style="width: 15%;"> <!-- Price Filter -->
+        <input matInput placeholder="Price (Value or Min - Max)" formControlName="price">
+        <mat-hint *ngIf="price.valid">
+          Price or PriceMin-PriceMax
+        </mat-hint>
+        <mat-error *ngIf="price?.errors?.['incorrectRange']">
+          Incorrect Range
+        </mat-error>
+      </mat-form-field>
+    </span>
+    <p style="margin-top: 1%;">
       <mat-form-field  appearance="fill" style="width: 40%; " class="search-filed">
         <mat-chip-list #chipList   >
           <mat-chip *ngFor="let secid of instruments" 
@@ -151,7 +178,7 @@
   </form>
 </mat-expansion-panel>
   <div class="mat-elevation-z8">
-    <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class="mat-elevation-z8" [class]="tableMode=='Child'? 'childTable':'parentTable'">
+    <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class="mat-elevation-z8" [class]="tableMode.includes('Child')? 'childTable':'parentTable'">
       <ng-container   matColumnDef="select">
         <th mat-header-cell *matHeaderCellDef>
           <mat-checkbox style="  vertical-align: top;"
@@ -163,13 +190,14 @@
         </th>
         <td mat-cell *matCellDef="let row">
           <mat-checkbox (click)="$event.stopPropagation()"
-                        (change)="selectItem(row);
-                        $event ? selection.toggle(row) : null"
+                        (change)="selectItem(row);"
                         [checked]="(!this.dataSource)? false: selection.isSelected(row)"
                         [aria-label]="checkboxLabel(row)">
           </mat-checkbox>
         </td>
       </ng-container>
+                     <!--    $event ? selection.toggle(row) : null" -->
+      
       <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay| slice:1; let i=index">
         <th mat-header-cell *matHeaderCellDef mat-sort-header> {{columnsHeaderToDisplay[i]}}</th>
         <td 
@@ -179,6 +207,7 @@
             <p style="text-align:center" *ngSwitchCase="['primary_boardid','emitent_inn'].includes(column)">{{element[column]}}</p>
             <p *ngSwitchCase="['amount'].includes(column)">{{element[column] | currency:' ' + element['currencycode']+' '}} </p>
             <p *ngSwitchCase="['generated'].includes(column)">{{element[column] | date}} </p>
+            <p *ngSwitchCase="['status'].includes(column)">{{element[column] | titlecase}} </p>
             <p *ngSwitchCase="['Type'].includes(column)&&element[column]==='BUY'" class="upClass">{{element[column]=='BUY'}}</p>
             <p *ngSwitchCase="['Type'].includes(column)&&element[column]==='SELL'" class="downClass">{{element[column]=='BUY'}}</p>
             <p *ngSwitchCase="['id'].includes(column)">
@@ -188,14 +217,15 @@
               {{element[column] }}
               </button> 
             </p>
-            <p  *ngSwitchCase="['action'].includes(column) " >
+            <p  *ngSwitchCase="['action'].includes(column)" >
               <button  *ngIf="disabledControlElements" mat-icon-button color="accent"
                 matTooltip="View Order"
                 (click)="openTradeModifyForm('View', element)">
                 <mat-icon >pageview</mat-icon>
               </button>
-              <ng-container  *ngIf="!disabledControlElements">
+              <ng-container  *ngIf="!disabledControlElements"> <!-- Edit block -->
                 <button 
+                *ngIf="['created','confirmed'].includes(element['status'])"
                   mat-icon-button 
                   color="accent" 
                   matTooltip="Delete Order"
@@ -203,7 +233,8 @@
                   <mat-icon >delete</mat-icon>
                 </button>
                 <button  
-                  *ngIf="!disabledControlElements&&element['ordertype']=='Bulk'" mat-icon-button color="accent"
+                  *ngIf="element['ordertype']=='Bulk'&&['created','confirmed'].includes(element['status'])"
+                  mat-icon-button color="accent"
                   matTooltip="Unmerge Bulk"
                   (click)="
                   expandAllowed=false;
@@ -218,7 +249,8 @@
       <ng-container   matColumnDef="expand">
         <th  mat-header-cell *matHeaderCellDef aria-label="row actions">More</th>
         <td  mat-cell *matCellDef="let element">
-          <button style="width: 5%;" mat-icon-button aria-label="expand row" (click)="(expandedElement = expandedElement === element ? null : element); $event.stopPropagation()">
+          <button *ngIf="element['ordertype']==='Bulk'"
+          style="width: 5%;" mat-icon-button aria-label="expand row" (click)="(expandedElement = expandedElement === element ? null : element); $event.stopPropagation()">
             <mat-icon *ngIf="expandedElement !== element">keyboard_arrow_down</mat-icon>
             <mat-icon *ngIf="expandedElement === element">keyboard_arrow_up</mat-icon>
           </button>
@@ -227,10 +259,10 @@
       <ng-container 
       matColumnDef="expandedDetail" class="element-detail"  >
         <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplayWithExpand.length" >
-          <div class="element-detail" *ngIf="tableMode!=='Child' && element['ordertype'] == 'Bulk' "     
+          <div class="element-detail" *ngIf="tableMode.includes('Parent') && element['ordertype'] == 'Bulk' "     
             [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
               <app-orders-table style="width: 100%" class="myclass" 
-                [tableMode]="'Child'" 
+                [tableMode]="tableMode.includes('Allocation')? ['Allocation','Child'] : ['Child']"
                 [dataToShow]="fullOrdersSet"
                 [bulkOrder]="element['id']"
                 >
@@ -245,7 +277,7 @@
         class="element-row"
         [class.expanded-row]="expandedElement === element"
         (keydown)="keyDownEvent($event)"
-        (click)="tableMode==='Select'? selectOrder(element): showOrders($event,element)">
+        (click)="tableMode.includes('Select')? selectOrder(element): showOrders($event,element)">
         <ng-template  #instrumentcontextmenu>
           <div class="tree-menu-context" cdkMenu >
             <ng-container *ngIf="disabledControlElements">
@@ -257,18 +289,30 @@
               </button> 
             </ng-container>
             <ng-container *ngIf="!disabledControlElements" title="Edit block">
-              <button 
-                class="tree-menu-item" cdkMenuItem
-                (click)="openTradeModifyForm('Delete', element)">
-                <mat-icon class="menu-icon" matPrefix>delete</mat-icon> 
-                Delete Trade
+              <button *ngIf="checkChangeStatus('up',element['status'])"
+                class="tree-menu-item" cdkMenuItem 
+                (click)="changeOrderStatus(setStatus('up',element['status']),element['id'])">
+                <mat-icon class="menu-icon" matPrefix>trending_up</mat-icon> 
+                 {{'Move to status: "'}}<span style="color: rgb(31, 108, 38)">{{' '+ setStatus('up',element['status'])| titlecase}}</span>{{'"'}}
               </button> 
-              <button *ngIf="element['ordertype']=='Bulk'"
+              <button *ngIf="checkChangeStatus('down',element['status'])"
+              class="tree-menu-item" cdkMenuItem
+              (click)="changeOrderStatus(setStatus('down',element['status']),element['id'])">
+              <mat-icon class="menu-icon" matPrefix>trending_down</mat-icon> 
+              {{'Return to: "'}}<span style="color: rgb(161, 35, 35)">{{' '+ setStatus('down',element['status'])+' '| titlecase}}</span>{{'"'}}
+              </button> 
+              <button *ngIf="element['ordertype']=='Bulk'&&['created','confirmed'].includes(element['status'])"
                 class="tree-menu-item" cdkMenuItem
                 (click)="unmergeBulk([element['id']])">
                 <mat-icon class="menu-icon" matPrefix>undo</mat-icon> 
                 Unmerge Bulk Order
               </button> 
+              <button *ngIf="['created','confirmed'].includes(element['status'])"
+              class="tree-menu-item" cdkMenuItem
+              (click)="openTradeModifyForm('Delete', element)">
+              <mat-icon class="menu-icon" matPrefix>delete</mat-icon> 
+              Delete Order
+            </button> 
             </ng-container>
           </div>
         </ng-template>   
@@ -278,5 +322,5 @@
     <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" [pageSize]="20" aria-label="Select page of users"></mat-paginator>
   </div>
 </ng-container>
-<h2 *ngIf="tableMode=='Select'" style="color: rgb(224, 73, 73);"> Use context menu to select client</h2>
+<h2 *ngIf="tableMode.includes('Select')" style="color: rgb(224, 73, 73);"> Use context menu to select client</h2>
 

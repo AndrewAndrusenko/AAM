@@ -101,9 +101,8 @@ async function fGetOrderData (request,response) {
   db_common_api.queryExecute(sql,response,undefined,'GetOrderData');
 }
 async function fUpdateOrderData (request, response) {
-  let fields = ['idtrade','qty','price','tdate','vdate','trtype','tidinstrument','id_broker','id_price_currency','id_settlement_currency','id_buyer_instructions','id_seller_instructions','accured_interest','fee_trade','fee_settlement','fee_exchange','price_type','id_cpty','details','trade_amount','settlement_amount','settlement_rate']
-  let dates=['tdate','vdate']
- db_common_api.fUpdateTableDB ('dtrades',fields,'idtrade',request, response,dates)
+  let fields = ['status']
+ db_common_api.fUpdateTableDB ('dorders',fields,'id',request, response)
 }
 async function fModifyBulkOrder (request,response) {
   let sql = '';

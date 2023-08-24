@@ -32,15 +32,16 @@ async function fUpdateTableDB (table, fields,idfieldName, request, response,date
     switch (request.body.action) {
       case 'Create':
         sqlText = 'INSERT INTO public."'+ table +'" ("'+ fieldsWithQuetes +'") VALUES ('+ values + ') RETURNING *;'
-        break;
-        case 'Edit':
-          sqlText = 'UPDATE public."'+ table +'" SET ' + updatePairs + ' WHERE "'+ idfieldName +'"=${'+ idfieldName +'} RETURNING *'
-          break;
-          case 'Delete':
-            sqlText = 'DELETE FROM public."'+ table +'" WHERE "'+ idfieldName +'"=${'+ idfieldName +'} RETURNING *;'
-            break;
-          }
-          sql = pgp.as.format(sqlText,request.body.data);
+      break;
+      case 'Edit':
+        sqlText = 'UPDATE public."'+ table +'" SET ' + updatePairs + ' WHERE "'+ idfieldName +'"=${'+ idfieldName +'} RETURNING *'
+      break;
+      case 'Delete':
+        sqlText = 'DELETE FROM public."'+ table +'" WHERE "'+ idfieldName +'"=${'+ idfieldName +'} RETURNING *;'
+      break;
+      }
+    console.log('sqlText',sqlText);
+    sql = pgp.as.format(sqlText,request.body.data);
     resolve(queryExecute (sql, response,undefined,'fUpdateTableDB '+request.body.action+' ',table))
   })
 }

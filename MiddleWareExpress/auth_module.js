@@ -42,22 +42,19 @@ async function getLoginsArray (request,response) {
   })
 }
 async function getAccessRestriction (request,response) {
-  const query = {
-    text: ' SELECT id, accessrole, elementid, tsmodule, htmltemplate, elementtype, elementvalue ' +
-    ' FROM public."aAccessConstraints"' + 
-    ' WHERE accessrole = $1',
-    values : [request.query.accessRole]
-  }
-  if (request.query.elementid) {
-    query.text +=' AND elementid=$2';
-    query.values.push(request.query.elementid)
-  }
-  sql = pgp.as.format(query.text,query.values)
+  let sql;
+  switch (request.query.action) {
+    case 'getAccessRestriction':
+    sql = 'SELECT id, accessrole, elementid, tsmodule, htmltemplate, elementtype, elementvalue FROM public."aAccessConstraints"' + 
+    ' WHERE accessrole = ${accessRole};' 
+    break;
+    case 'getObjectStatuses':
+    sql = 'SELECT id_object, status_code, step 	FROM public."aObjectsStatuses" ORDER BY id_object, step  ;' 
+    break;
+   }
+  sql = pgp.as.format(sql,request.query)
   console.log('getAccessRestriction------------',sql );
-  pool.query ({text:sql,values:""}, (err, res) => {if (err) {console.log (err.stack)} else {
-    return request.query.elementid?  response.status(200).json(res.rows[0]) : response.status(200).json(res.rows)
-  }
-  })
+  pool.query ({text:sql,values:""}, (err, res) => {if (err) {console.log (err.stack)} else  return  response.status(200).json(res.rows)})
 }
 module.exports = {
   encryptPsw,
