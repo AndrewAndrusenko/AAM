@@ -94,11 +94,8 @@ export class AppTableBalanceSheetComponent   {
     private dialog: MatDialog,
     private fb:FormBuilder, 
   ) {
-    this.AuthServiceS.verifyAccessRestrictions('accessToBalanceData').subscribe ((accessData) => {
-      console.log('access',accessData);
-      this.accessState=accessData.elementvalue;
-      this.disabledControlElements = this.accessState === 'full'? false : true;
-    })
+    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
+    this.disabledControlElements = this.accessState === 'full'? false : true;
     this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data=>{
       this.FirstOpenedAccountingDate = data[0].FirstOpenedDate;
       this.LastClosedDate = data[0].LastClosedDate;

@@ -1,8 +1,7 @@
-import { AfterContentInit, Component,  ElementRef,  EventEmitter,  Input, Output, ViewChild} from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { ClientData, Instruments, trades } from 'src/app/models/intefaces.model';
+import { AfterContentInit, Component,  EventEmitter,  Input, Output, ViewChild} from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ClientData, Instruments} from 'src/app/models/intefaces.model';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
-import { menuColorGl } from 'src/app/models/constants.model';
 import { AuthService } from 'src/app/services/auth.service';
 import { Observable, Subscription, distinctUntilChanged, filter, map, observable, startWith, switchMap } from 'rxjs';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
@@ -13,6 +12,8 @@ import { AppInstrumentTableComponent } from '../../tables/instrument-table.compo
 import { indexDBService } from 'src/app/services/indexDB.service';
 import { InstrumentDataService } from 'src/app/services/instrument-data.service';
 import { AppAccountingService } from 'src/app/services/accounting.service';
+import { AppOrderTableComponent } from '../../tables/orders-table.component/orders-table.component';
+import { HandlingTableSelectionService } from 'src/app/services/handling-table-selection.service';
 @Component({
   selector: 'app-trade-modify-form',
   templateUrl: './trade-form.component.html',
@@ -22,8 +23,10 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
   accessState: string = 'none';
   disabledControlElements: boolean = false;
   public tradeModifyForm: FormGroup;
+  tabIndex=1;
   @Input() action: string = 'View';
   @Output() public modal_principal_parent = new EventEmitter();
+  @ViewChild('ordersTable',{ static: false }) orderTable : AppOrderTableComponent
   public title: string;
   public actionType : string;
   public data: any;
@@ -42,6 +45,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
   constructor (
     private fb:FormBuilder, 
     private AuthServiceS:AuthService,  
+    private SelectionService:HandlingTableSelectionService,
     private CommonDialogsService:HadlingCommonDialogsService,
     private TradeService: AppTradeService,
     private AccountingDataService:AppAccountingService, 
@@ -68,7 +72,10 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
       id_price_currency:[null],
       id_settlement_currency:[null],
       settlement_rate:[null],
-      tidorder:{value:null, disabled: false},allocatedqty:{value:null, disabled: false},idportfolio:{value:null, disabled: false},
+      tidorder:{value:null, disabled: false},
+      allocatedqty:{value:0, disabled: false},
+      unalloacted:{value:0, disabled: false},
+      idportfolio:{value:null, disabled: false},
       id_buyer_instructions:{value:null, disabled: false},id_seller_instructions:{value:null, disabled: false},id_broker:{value:null, disabled: false}, details:{value:null, disabled: false},cpty_name:{value:null, disabled: false},security_group_name :{value:null, disabled: false},   secid_name:{value:null, disabled: false}, trade_amount:[null], facevalue:[null],faceunit:[null],faceunit_name:[null], code_price_currency:[null],  price_currency_name:[null], settlement_currency_name:[null], code_settlement_currency:[null], settlement_amount:[null], coupon_details:[null]
     })
 
@@ -87,7 +94,16 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     this.AutoCompService.getSecidLists().then (()=>this.tidinstrument.setValidators(this.AutoCompService.secidValirator()) );
     this.AutoCompService.getCounterpartyLists().then (()=>this.id_cpty.setValidators(this.AutoCompService.counterPartyalirator(this.cpty_name)));
   }
+  ngOnDestroy(): void {
+    this.arraySubscrition.unsubscribe()
+  }
   ngAfterContentInit (): void {
+    this.arraySubscrition.add(this.TradeService.getReloadOrdersForExecution().subscribe(data=>{
+      console.log('getReloadOrdersForExecution',data);
+      this.allocatedqty.patchValue(Number(this.allocatedqty.value)+Number(data.data.filter(alloc=>alloc['id_joined']===this.idtrade.value)[0].allocated));
+    }))
+
+    console.log('data form',this.data);
     this.tradeModifyForm.patchValue(this.data);
     this.filterednstrumentsLists = this.tidinstrument.valueChanges.pipe(
       startWith(''),
@@ -124,6 +140,21 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     this.action == 'View'|| this.disabledControlElements?  this.tradeModifyForm.disable() : null;
     this.fullAmountCalcualtion(true);
     this.changeSettlementRate();
+  }
+  executeOrders () {
+    let qtyForAllocation = this.qty.value - this.allocatedqty.value;
+    if (qtyForAllocation<1) {
+      this.CommonDialogsService.snackResultHandler({name:'error',detail:'The whole volume has been allocated!'},'Allocation');
+      return
+    };
+    let ordersForExecution = this.orderTable.selection.selected.map(el=> Number(el.id));
+    ordersForExecution.length? this.TradeService.executeOrders(ordersForExecution,Number(qtyForAllocation),this.idtrade.value).subscribe(data=>{
+      this.CommonDialogsService.snackResultHandler({name:'sucess',detail:'Orders have been allocated'},'Allocation',undefined,false)
+      this.TradeService.sendReloadOrdersForExecution(data,this.idtrade.value,ordersForExecution);
+    }) : this.CommonDialogsService.snackResultHandler({name:'error',detail:'No bulk order has been selected!'},'Allocation');
+  } 
+  confirmAllocation () {
+
   }
   selectClient (){
     this.dialogClientsTabletRef = this.dialog.open(AppClientsTableComponent ,{minHeight:'400px', minWidth:'90vw', autoFocus: false, maxHeight: '90vh'});
@@ -179,7 +210,6 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
       this.settlement_currency_name.patchValue(el_settlement_currency['CurrencyName'])
     }
   } 
-
   changeSettlementRate () {
     if (this.id_price_currency.value === this.id_settlement_currency.value) {
       this.settlement_rate.patchValue(1)
@@ -228,7 +258,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
         this.TradeService.updateTrade (this.tradeModifyForm.value,'Edit').subscribe(result => this.snacksBox(result,'Updated'))
       break;
       case 'Delete':
-        this.CommonDialogsService.confirmDialog('Delete Instrument ' + this.tidinstrument.value).pipe(
+        this.CommonDialogsService.confirmDialog('Delete Trade ID  ' + this.idtrade.value).pipe(
           filter (isConfirmed => isConfirmed.isConfirmed),
           switchMap(data => this.TradeService.updateTrade (this.tradeModifyForm.value,'Delete'))
         ).subscribe (result =>this.snacksBox(result,'Deleted'));
@@ -238,13 +268,14 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
 
   }
   snacksBox(result:any, action?:string){
+    console.log('snacksBox',result,action);
     if (result['name']=='error') {
       this.CommonDialogsService.snackResultHandler(result)
     } else {
       this.CommonDialogsService.dialogCloseAll();
       this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' instrument'}, action)
       this.TradeService.getTradeInformation({idtrade:result[0].idtrade}).subscribe(
-        data=>this.TradeService.sendTradeDataToUpdateTableSource(data,action)
+        data=>this.TradeService.sendTradeDataToUpdateTableSource(action==='Deleted'? result:data,action)
       );
     }
   }
@@ -254,6 +285,10 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
   Number(value) {
     return Number(value)? true:false
   }
+  toggleAllRows(forceSelectAll:boolean=false) { 
+    return this.SelectionService.toggleAllRows(this.orderTable.dataSource, this.orderTable.selection,forceSelectAll);
+  }
+  isAllSelected() { return this.SelectionService.isAllSelected(this.orderTable.dataSource, this.orderTable.selection)}  
 
   get idtrade() {return this.tradeModifyForm.get('idtrade')}
   get trtype() {return this.tradeModifyForm.get('trtype')}
@@ -289,4 +324,5 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
   get settlement_amount() {return this.tradeModifyForm.get('settlement_amount')}
   get settlement_rate() {return this.tradeModifyForm.get('settlement_rate')}
   get coupon_details() {return this.tradeModifyForm.get('coupon_details')}
+  get allocatedqty() {return this.tradeModifyForm.get('allocatedqty')}
 }

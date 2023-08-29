@@ -202,11 +202,12 @@ appServer.post('/AAM/MD/UpdateTradeData/',jsPassport.authenticate('session'), ui
 appServer.get('/AAM/MD/getOrderData/',jsPassport.authenticate('session'), uiAmmTradeData.fGetOrderData)
 appServer.post('/AAM/MD/UpdateOrderData/',jsPassport.authenticate('session'), uiAmmTradeData.fUpdateOrderData)
 appServer.post('/AAM/MD/ModifyBulkOrder/',jsPassport.authenticate('session'), uiAmmTradeData.fModifyBulkOrder)
+appServer.post('/AAM/MD/Allocation/',jsPassport.authenticate('session'), uiAmmTradeData.fAllocation)
 
 /*----------------------CurrencyData----------------------------------------------------*/
 appServer.get('/AAM/getCurrencyData/',jsPassport.authenticate('session'), uiAmmCurrencyData.getCurrencyData)
 appServer.get('/AAM/getCbrRateDaily/',jsPassport.authenticate('session'), uiAmmCurrencyData.getCbrRateDaily)
-appServer.post('/AAM/modifyBulkOrder/',jsPassport.authenticate('session'), uiAmmCurrencyData.modifyRatesData)
+appServer.post('/AAM/modifyRatesData/',jsPassport.authenticate('session'), uiAmmCurrencyData.modifyRatesData)
 
 // RedisService.TestRedis();
 // RedisService.redisSetInstrumentList();

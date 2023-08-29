@@ -1,7 +1,7 @@
 import {AfterViewInit, Component, EventEmitter, Output, ViewChild, Input, ChangeDetectionStrategy, ElementRef} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
-import {Observable, map, startWith } from 'rxjs';
+import {Observable, Subscription, map, startWith } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { Instruments, trades } from 'src/app/models/intefaces.model';
@@ -23,6 +23,7 @@ import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
   styleUrls: ['./trade-table.component.scss'],
 })
 export class AppTradeTableComponent  implements AfterViewInit {
+  private arraySubscrition = new Subscription ()
   accessState: string = 'none';
   disabledControlElements: boolean = false;
   @Input() FormMode:string
@@ -75,9 +76,15 @@ export class AppTradeTableComponent  implements AfterViewInit {
       price:null,
       qty:null,
     });
-   
-     this.TradeService.getTradeDataToUpdateTableSource().subscribe(data =>{
-     let index =  this.dataSource.data.findIndex(elem=>elem.idtrade===data.data[0].idtrade)
+    this.arraySubscrition.add(this.TradeService.getReloadOrdersForExecution().subscribe(data=>{
+      console.log('Trade Table getReloadOrdersForExecution');
+      let i = this.dataSource.data.findIndex(el=>el.idtrade===data.idtrade);
+      i!==-1? this.dataSource.data[i].allocatedqty =Number(data.data.filter(alloc=>alloc['id_joined']==this.dataSource.data[i].idtrade)[0].allocated)+Number(this.dataSource.data[i].allocatedqty) : null;
+      this.dataSource.paginator = this.paginator;
+    }))
+    this.arraySubscrition.add(this.TradeService.getTradeDataToUpdateTableSource().subscribe(data =>{
+      console.log('getTradeDataToUpdateTableSource',data);
+      let index =  this.dataSource.data.findIndex(elem=>elem.idtrade===data.data[0].idtrade)
       switch (data.action) {
         case 'Deleted':
           this.dataSource.data.splice(index,1)
@@ -89,14 +96,12 @@ export class AppTradeTableComponent  implements AfterViewInit {
           this.dataSource.data[index] = {...data.data[0]}
         break;
       }
-     this.dataSource.paginator = this.paginator;
-     this.dataSource.sort = this.sort;
-    })
+      this.dataSource.paginator = this.paginator;
+      this.dataSource.sort = this.sort;
+    }));
   }
-  openTradeModifyForm (action:string, element:any) {
-    this.dialogTradeModify = this.dialog.open (AppTradeModifyFormComponent,{minHeight:'600px', minWidth:'60vw', maxWidth:'80vw', autoFocus: false, maxHeight: '90vh'})
-    this.dialogTradeModify.componentInstance.action = action;
-    this.dialogTradeModify.componentInstance.data = action ==='Create'? null :element;
+  ngOnDestroy(): void {
+    this.arraySubscrition.unsubscribe()
   }
   async ngAfterViewInit() {
     this.TradeService.getTradeInformation(null).subscribe (tradesData => this.updateTradesDataTable(tradesData));  
@@ -110,6 +115,12 @@ export class AppTradeTableComponent  implements AfterViewInit {
       startWith(''),
       map(value => this.AutoCompService.filterList(value || '','cpty'))
     );
+  }  
+  openTradeModifyForm (action:string, element:any,tabIndex:number=0) {
+    this.dialogTradeModify = this.dialog.open (AppTradeModifyFormComponent,{minHeight:'600px', minWidth:'60vw', maxWidth:'80vw', autoFocus: false, maxHeight: '90vh'})
+    this.dialogTradeModify.componentInstance.action = action;
+    this.dialogTradeModify.componentInstance.tabIndex=tabIndex;
+    this.dialogTradeModify.componentInstance.data = action ==='Create'? null :element;
   }
   updateTradesDataTable (tradesData:trades[]) {
     this.dataSource  = new MatTableDataSource(tradesData);
@@ -173,13 +184,13 @@ export class AppTradeTableComponent  implements AfterViewInit {
       this.price.value? searchObj = {...searchObj, ... this.HandlingCommonTasksS.toNumberRange(this.price.value,this.price,'price')} :null;
       searchObj = {...searchObj, ...this.tdate.value? this.HandlingCommonTasksS.toDateRange(this.tdate, 'tdate') : null}
       searchObj = {...searchObj, ...this.vdate.value? this.HandlingCommonTasksS.toDateRange(this.vdate,'vdate') : null}
-      this.TradeService.getTradeInformation(searchObj).subscribe(data => {
+      this.arraySubscrition.add(this.TradeService.getTradeInformation(searchObj).subscribe(data => {
         this.dataSource  = new MatTableDataSource(data);
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
         this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ');
         resolve(data) 
-      });
+      }));
     });
   }
   selectInstrument (element:Instruments) {this.modal_principal_parent.emit(element)}

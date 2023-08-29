@@ -1,9 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
-import { couponPeriodInfo, orders, trades } from '../models/intefaces.model';
-import { number } from 'echarts';
-import { Action } from 'rxjs/internal/scheduler/Action';
+import { orders, trades } from '../models/intefaces.model';
 interface tradesDataSet {
   data:trades[],
   action:string
@@ -26,6 +24,8 @@ export class AppTradeService {
   }
   constructor(private http:HttpClient) { }
   private reloadTradeTable = new Subject <any> (); 
+  private reloadExecution = new Subject <{data:orders[],idtrade:number,ordersForExecution:number[]}> (); 
+  private updateOrdersStatus = new Subject <{data:orders[],bulksForUpdate:number[]}>(); 
   sendTradeDataToUpdateTableSource ( data:trades[], action: string) {
     let dataSet = {
       data: data,
@@ -61,8 +61,24 @@ export class AppTradeService {
     console.log('createBulkOrder service',clientOrders);
     return this.http.post <bulkModifedSet[]>('api/AAM/MD/ModifyBulkOrder',{clientOrders:clientOrders,action:'createBulkOrder'})
   }
-  changeOrderStatus (newStatus:string, id:number) {
-    let data={status:newStatus,id:id}
-    return this.http.post <orders[]> ('api/AAM/MD/UpdateOrderData/',{data:data,action:'Edit'})
+  changeOrderStatus (newStatus:string, ordersToUpdate:number[]) {
+    return this.http.post <orders[]> ('api/AAM/MD/ModifyBulkOrder/',{newStatus:newStatus,ordersToUpdate:ordersToUpdate,action:'ordersStatusChange'})
+  }
+  executeOrders (ordersForExecution:number[],qtyForAllocation:number,tradeId:number):Observable<orders[]>{
+    let data={ordersForExecution:ordersForExecution,qtyForAllocation:qtyForAllocation,tradeId:tradeId}
+    console.log('params',data);
+    return this.http.post <orders[]>('api/AAM/MD/Allocation',{data:data,action:'executeOrders'})
+  }
+  sendReloadOrdersForExecution (data:orders[],idtrade:number,ordersForExecution:number[]) {
+    this.reloadExecution.next({data:data,idtrade:idtrade,ordersForExecution:ordersForExecution});
+  }
+  getReloadOrdersForExecution ():Observable<{data:orders[],idtrade:number,ordersForExecution:number[]}> {
+    return this.reloadExecution.asObservable();
+  }
+  sendUpdateOrdersChangedStatus (updatedOrders:orders[],bulksForUpdate:number[]) {
+    this.updateOrdersStatus.next({data:updatedOrders,bulksForUpdate:bulksForUpdate});
+  }
+  getUpdateOrdersChangedStatus ():Observable<{data:orders[],bulksForUpdate:number[]}> {
+    return this.updateOrdersStatus.asObservable();
   }
 }

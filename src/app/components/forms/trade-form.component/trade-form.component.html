@@ -1,20 +1,44 @@
 <mat-toolbar color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4">
   <span style="margin-right: 2%;">{{action}} Instrument | ID {{idtrade.value}} </span>
   <span class="example-spacer"></span>
-  <button mat-raised-button color="accent" style=" width: 15%; font-size: 18px; margin-left: 1%;"  (click)="sidenav1.toggle()">Show +</button>
+  <ng-container  *ngIf="!disabledControlElements&&tabIndex===1" style="margin-bottom: 1%;">
+    
+    <button  title="Execute selected orders" 
+      color = "accent" mat-raised-button style=" margin-left:2%; font-size: 18px;"
+      (click)="toggleAllRows((orderTable.selection.hasValue() && orderTable.isAllSelected())? false : true  );   
+      ordersTable.dataSource.paginator = ordersTable.paginator;">
+      {{(orderTable!==undefined&&orderTable.selection.hasValue() && orderTable.isAllSelected())? 'Unselect' : 'Select' }} 
+      <mat-icon matSuffix >
+        {{(orderTable!==undefined&&orderTable.selection.hasValue() && orderTable.isAllSelected())?'remove':'select_all'}}
+      </mat-icon>
+    </button>
+    <button  title="Execute selected orders" 
+      color = "accent" mat-raised-button style=" margin-left:2%; font-size: 18px;"
+      (click)="executeOrders()">
+      Execute Orders
+      <mat-icon matSuffix >gavel</mat-icon>
+    </button>
+    <button title="Confirm Allocation"  
+      color = "accent" mat-raised-button style=" margin-left:1%; font-size: 18px;"
+      (click)="confirmAllocation()">
+      Confirm Allocation
+      <mat-icon matSuffix>done_all</mat-icon>
+    </button>
+  </ng-container>
+  <!-- <button mat-raised-button color="accent" style=" width: 15%; font-size: 18px; margin-left: 1%;"  (click)="sidenav1.toggle()">Show +</button> -->
 </mat-toolbar>
 <mat-drawer-container class="example-container" >
   <mat-drawer #sidenav1 class="example-sidenav" mode="side"  position="end" style="width: 35vw;">
     <app-app-clients-table></app-app-clients-table>
   </mat-drawer>
-  <div class="example-sidenav-content">
-<mat-tab-group mat-stretch-tabs>
+  <div class="example-sidenav-content" >
+<mat-tab-group mat-stretch-tabs [(selectedIndex)]="tabIndex" >
 <mat-tab label="Trade Details">
     <form class="submit" [formGroup]="tradeModifyForm" style="background-color: rgb(40, 39, 39);">
       <button mat-raised-button color="accent" 
         [disabled]="!(tradeModifyForm.valid && submitbox.checked)"
         (click)="updateInstrumentData(action)"
-        style="margin-top: 1%; width: 35%; font-size: 18px; margin-left: 1%;">
+        style="margin-top: 1%; width: 20%; font-size: 18px; margin-left: 1%;">
         {{action}} Trade
       </button> 
       <br>
@@ -68,24 +92,26 @@
           </mat-hint>
         </mat-form-field>
           <span style="display:grid;  margin-top: 2%; font-size:18px ; margin-bottom: -5%;">
-          <span style="color: rgb(20, 173, 122)">
+          <span >
             Trade Amount:  {{trade_amount.value | currency :this.code_price_currency.value+' '}} 
           </span> 
-        <br> <span *ngIf="price_type.value==2" style="color: rgb(126, 105, 243);margin-top: 2%;" >
+        <br> <span *ngIf="price_type.value==2" style="margin-top: 2%;" >
             Accured Interest :  {{accured_interest.value | currency :this.code_price_currency.value+' '}} 
           </span>
-          <br><span style="margin-top: 2%; color: rgb(218, 67, 67);" *ngIf="Number(settlement_amount.value)">
+          <br><span style="margin-top: 2%; " *ngIf="Number(settlement_amount.value)">
             Settlement Amount :  {{ settlement_amount.value | currency :this.code_settlement_currency.value+' '}} 
           </span>
-          <span  style="margin-top: 2%; color: rgb(218, 67, 67);"  *ngIf="!Number(settlement_amount.value)">
+          <span  style="margin-top: 2%;"  *ngIf="!Number(settlement_amount.value)">
             Settlement Amount :  {{ settlement_amount.value }} 
           </span>
         </span>
         </span>
       </p>
       <p>
-        <mat-form-field style="width: 27%;" title="Type to find(any filed). Click to select">
-          <input matInput [placeholder]="'SecID'" formControlName="tidinstrument" [matAutocomplete]="autoSecID"  >
+        <mat-form-field 
+        style="width: 27%;" [title]="!allocatedqty.value? 'Type to find(any filed). Click to select':'Readonly. Trade has been allocated'">
+          <input matInput [readonly]="!allocatedqty.value? false:true"
+          [placeholder]="'SecID'" formControlName="tidinstrument" [matAutocomplete]="autoSecID"  >
           <mat-autocomplete #autoSecID="matAutocomplete" 
             (optionSelected)="secidAutocolmplete($event.option.viewValue) ">
             <mat-option #selectedsecid *ngFor="let instrument of filterednstrumentsLists | async" [value]="instrument[0]" >
@@ -99,8 +125,8 @@
             Inccorect Code! 
           </mat-error>
         </mat-form-field>
-        <button mat-flat-button color="accent" 
-        matTooltip="Select Instrument"
+        <button mat-flat-button color="accent" [disabled]="!allocatedqty.value? false:true"
+        [matTooltip]="!allocatedqty.value? 'Select Instrument':'Readonly. Trade has been allocated'"
         (click)="selectSecID()"
         style=" width: 5%;  line-height: 80% !important; height: 60px !important;">
         <mat-icon >input</mat-icon>
@@ -124,7 +150,11 @@
           </mat-hint>
         </mat-form-field>
         <mat-form-field style="width: 20%;" title="Quantity" >
-          <input matInput placeholder="Quantity" formControlName="qty"  >
+          <input matInput 
+          [readonly]="!allocatedqty.value? false:true"
+          [title]="!allocatedqty.value? 'Quantity':'Readonly. Trade has been allocated'" 
+          placeholder="Quantity" 
+          formControlName="qty"  >
           <mat-error  *ngIf="qty?.errors?.['required']">
             Required!    
           </mat-error>
@@ -293,11 +323,11 @@
     </form>
   </mat-tab>
   <mat-tab label="Allocation" style="width: 100%;">
-    <form class="submit" [formGroup]="tradeModifyForm" style="background-color: rgb(40, 39, 39);">
+    <form class="submit" [formGroup]="tradeModifyForm" style="background-color: rgb(40, 39, 39);"  >
       <p>
         <span style="display: flex;   align-items:flex-start;  margin-right: 1%;margin-top: 0.2%;">
 
-        <mat-form-field  style="width: 12%;" title="Security Group Code">
+        <mat-form-field  style="width: 12%;" title="Security Group Code" >
           <mat-label>Type</mat-label>
           <mat-select  #securityGroup formControlName="trtype"> 
             <mat-option  [value]="'BUY'"> BUY</mat-option>
@@ -308,9 +338,8 @@
           </mat-error>
         </mat-form-field>
         <mat-form-field style="width: 20%;" >
-          <input matInput [matDatepicker]="tradedate" [min]="firstOpenedAccountingDate" [placeholder]="'Trade Date'" formControlName="tdate" >
-          <mat-datepicker-toggle matSuffix [for]="tradedate"></mat-datepicker-toggle>
-          <mat-datepicker #tradedate></mat-datepicker>
+          <input matInput [matDatepicker]="" [placeholder]="'Trade Date'" formControlName="tdate" [readonly]="true">
+
           <mat-error  *ngIf="tdate?.errors?.['required']">
             Required!   
           </mat-error>
@@ -322,7 +351,7 @@
           </mat-hint>
         </mat-form-field>
         <mat-form-field style="width: 27%;" title="Type to find(any filed). Click to select">
-          <input matInput [placeholder]="'SecID'" formControlName="tidinstrument" [matAutocomplete]="autoSecID"  >
+          <input matInput [placeholder]="'SecID'" formControlName="tidinstrument" [matAutocomplete]="autoSecID" [readonly]="true" >
           <mat-error  *ngIf="tidinstrument?.errors?.['required']">
             Required!    
           </mat-error>
@@ -331,7 +360,7 @@
           </mat-error>
         </mat-form-field>
         <mat-form-field style="width: 13%;" title="price" >
-          <input matInput placeholder="Price" formControlName="price" >
+          <input matInput placeholder="Price" formControlName="price" [readonly]="true" [value]="price.value">
           <mat-error  *ngIf="price?.errors?.['required']">
             Required!    
           </mat-error>
@@ -343,7 +372,7 @@
           </mat-hint>
         </mat-form-field>
         <mat-form-field style="width: 20%;" title="Quantity" >
-          <input matInput placeholder="Quantity" formControlName="qty"  >
+          <input matInput placeholder="Quantity" formControlName="qty" [readonly]="true" [value]="qty.value | number">
           <mat-error  *ngIf="qty?.errors?.['required']">
             Required!    
           </mat-error>
@@ -354,10 +383,12 @@
             {{qty?.errors?.['pattern']? 'Format 0,00' :qty.value | number}}
           </mat-hint>
         </mat-form-field>
+        <mat-label style="width: 20%;" class="mat-form-field" title="Unalloacted">Unalloacted: {{(qty.value-allocatedqty.value)|number}}        </mat-label>
         </span>
       </p>
+
     </form>
-    <app-orders-table style="width: 100%;" 
+    <app-orders-table #ordersTable style="width: 100%;" 
     [tableMode]="['Allocation','Parent']"
     [allocationFilters]="{secid:tidinstrument.value,type:trtype.value}"
     ></app-orders-table>

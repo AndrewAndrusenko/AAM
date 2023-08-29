@@ -22,6 +22,7 @@ export class HandlingTableSelectionService {
       selection.clear();
       return;
     }
+    console.log('toggle',dataSource.data);
     selection.select(...dataSource.data);
   }
 

@@ -32,6 +32,14 @@ export const dbErrorsMap: errorsDescription[] = [
     constraintCode: 'cForeignClientKey',
     errorText:'Attempt to delete a client with opened portfolios. cForeignClientKey blocked transaction'
   },
+  {
+    constraintCode: 'c_fk_AllocatedTrade_dtrades',
+    errorText:'Attempt to delete a trade with an allocated client trades. c_fk_AllocatedTrade_dtrades blocked transaction'
+  },
+  {
+    constraintCode: 'cFkBulkOrders_dorders',
+    errorText:'Attempt to unmerge a allocated bulk order. cFkBulkOrders_dorders blocked transaction'
+  },
   
   
 ]
@@ -406,5 +414,5 @@ export interface currencyRateList extends currencyRate {
   id:number, base_iso:string, quote_iso :string , rate_type:number, nominal:number, pair:string,sourcecode:string
 }
 export interface orders {
-  id:number, generated:Date, type:string, secid:string, qty:number, price:number, amount:number, qty_executed:number, status:string, parent_order:number, id_portfolio:number,portfolioname:string, ordertype:string, idcurrency:number,currencycode:string, security_group_name:string,secid_type:string,secid_name:string, price_type:number, action:string
+  id:number, generated:Date, type:string, secid:string, qty:number, price:number, amount:number, qty_executed:number, status:string, parent_order:number, id_portfolio:number,portfolioname:string, ordertype:string, idcurrency:number,currencycode:string, security_group_name:string,secid_type:string,secid_name:string, price_type:number, action:string, allocated:number,unexecuted:number
 }

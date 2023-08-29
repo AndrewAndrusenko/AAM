@@ -1,3 +1,9 @@
+  <button color = "accent" mat-raised-button title="Reload Table"
+    style=" margin-left:0.2%; font-size: 18px;margin-right: 1%;"
+    (click)="openTradeModifyForm('Create', {})">
+    New Trade
+    <mat-icon matSuffix >create_new_folder</mat-icon>
+  </button>
   <mat-form-field  class = "filterField" title="only by SecID" >
     <mat-label class="whiteTextFilter">Search by SecID..</mat-label>
     <input 
@@ -194,9 +200,23 @@
             </button>
             <ng-container  *ngIf="!disabledControlElements">
               <button mat-icon-button color="accent"
+                matTooltip="Copy Trade"
+                (click)="openTradeModifyForm('Create_Example',element)">
+                <mat-icon >file_copy</mat-icon>
+              </button>
+              <button mat-icon-button color="accent"
                 matTooltip="Edit Trade"
                 (click)="openTradeModifyForm('Edit',element)">
                 <mat-icon >edit</mat-icon>
+              </button>
+              <button mat-icon-button color="accent" *ngIf="element['qty']>element['allocatedqty']"
+                matTooltip="Allocate"
+                (click)="openTradeModifyForm('Edit',element,1)">
+                <mat-icon >share</mat-icon>
+              </button>
+              <button mat-icon-button color="accent" *ngIf="element['qty']<=element['allocatedqty']"
+                matTooltip="Trade has been allocated">
+                <mat-icon >not_interested</mat-icon>
               </button>
               <button 
                 mat-icon-button 
@@ -240,13 +260,13 @@
               <button 
                 class="tree-menu-item" cdkMenuItem 
                 (click)="openTradeModifyForm('Create', element)">
-                <mat-icon class="menu-icon" matPrefix>add_circle</mat-icon>      
+                <mat-icon class="menu-icon" matPrefix>create_new_folder</mat-icon>      
                 New Trade
               </button>
               <button 
                 class="tree-menu-item" cdkMenuItem 
                 (click)="openTradeModifyForm('Create_Example', element)">
-                <mat-icon class="menu-icon" matPrefix>add_circle</mat-icon>      
+                <mat-icon class="menu-icon" matPrefix>file_copy</mat-icon>      
                 New Trade (on sample)
               </button>
               <button 

@@ -4,7 +4,7 @@ async function fGetTradesData (request,response) {
   let conditions = {}
   conditions = {
     'idtrade':{
-      1: '(idtrade =  ${idtrade})',
+      1: '(dtrades.idtrade =  ${idtrade})',
     },
     'type':{
       1: '(trtype =  ${type})',
@@ -40,12 +40,13 @@ async function fGetTradesData (request,response) {
     request.query[key]!=='null'? conditionsTrades +=conditions[key][1] + ' AND ': null;
     }
   });
-  let sql = 'SELECT details, dclients.clientname as cpty_name , mmoexsecuritytypes.security_group_name,mmoexsecuritytypes.security_type_name as secid_type, mmoexsecurities.name as secid_name, idtrade, qty, price, dclients.clientname as cpty, tdate, vdate, tidorder, allocatedqty, idportfolio, trtype, tidinstrument, id_broker, id_price_currency, id_settlement_currency, id_buyer_instructions, id_seller_instructions, accured_interest, fee_trade, fee_settlement, fee_exchange, id_cpty, mmoexsecuritytypes.price_type, trade_amount,faceunit,facevalue,settlement_amount, settlement_rate '+
+  let sql = 'SELECT details, dclients.clientname as cpty_name , mmoexsecuritytypes.security_group_name,mmoexsecuritytypes.security_type_name as secid_type, mmoexsecurities.name as secid_name, dtrades.idtrade, qty, price, dclients.clientname as cpty, tdate, vdate, tidorder, allocated_qty.alloaction as allocatedqty, idportfolio, trtype, tidinstrument, id_broker, id_price_currency, id_settlement_currency, id_buyer_instructions, id_seller_instructions, accured_interest, fee_trade, fee_settlement, fee_exchange, id_cpty, mmoexsecuritytypes.price_type, trade_amount,faceunit,facevalue,settlement_amount, settlement_rate '+
   'FROM public.dtrades ' +
+  'LEFT JOIN (SELECT dtrades_allocated.idtrade, sum (qty) as alloaction FROM  public.dtrades_allocated GROUP BY dtrades_allocated.idtrade) allocated_qty ON allocated_qty.idtrade=dtrades.idtrade '+
 	'LEFT JOIN mmoexsecurities ON dtrades.tidinstrument = mmoexsecurities.secid '+
   'LEFT JOIN mmoexsecuritytypes ON mmoexsecurities.type=mmoexsecuritytypes.security_type_name '+
 	'LEFT JOIN dclients ON dclients.idclient = dtrades.id_cpty ';
-  sql +=conditionsTrades.slice(0,-5) + 'ORDER BY idtrade DESC;'
+  sql +=conditionsTrades.slice(0,-5) + 'ORDER BY dtrades.idtrade DESC;'
   sql = pgp.as.format(sql,request.query);
   db_common_api.queryExecute(sql,response,undefined,'GetTradesData');
 }
@@ -55,7 +56,7 @@ async function fGetAccuredInterest (request,response) {
   db_common_api.queryExecute(sql,response,undefined,'GetAccuredInterest');
 }
 async function fUpdateTradeData (request, response) {
-  let fields = ['idtrade','qty','price','tdate','vdate','trtype','tidinstrument','id_broker','id_price_currency','id_settlement_currency','id_buyer_instructions','id_seller_instructions','accured_interest','fee_trade','fee_settlement','fee_exchange','price_type','id_cpty','details','trade_amount','settlement_amount','settlement_rate']
+  let fields = ['qty','price','tdate','vdate','trtype','tidinstrument','id_broker','id_price_currency','id_settlement_currency','id_buyer_instructions','id_seller_instructions','accured_interest','fee_trade','fee_settlement','fee_exchange','price_type','id_cpty','details','trade_amount','settlement_amount','settlement_rate']
   let dates=['tdate','vdate']
  db_common_api.fUpdateTableDB ('dtrades',fields,'idtrade',request, response,dates)
 }
@@ -90,14 +91,18 @@ async function fGetOrderData (request,response) {
     request.query[key]!=='null'? conditionsTrades +=conditions[key][1] + ' AND ': null;
     }
   });
-  let sql = 'SELECT mmoexsecuritytypes.security_group_name,mmoexsecuritytypes.security_type_name as secid_type, mmoexsecurities.name as secid_name, mmoexsecuritytypes.price_type, dorders.id, generated, dorders.type, dorders.secid, qty, price, amount, qty_executed, status, parent_order, id_portfolio, dportfolios.portfolioname, ordertype, idcurrency,"dCurrencies"."CurrencyCode" as currencycode, 0 as action '+
+  let sql = 'SELECT mmoexsecuritytypes.security_group_name,mmoexsecuritytypes.security_type_name as secid_type, mmoexsecurities.name as secid_name, mmoexsecuritytypes.price_type, dorders.id, generated, dorders.type, dorders.secid, dorders.qty, price, amount, qty_executed, status, parent_order, id_portfolio, dportfolios.portfolioname, ordertype, idcurrency,"dCurrencies"."CurrencyCode" as currencycode, 0 as action, coalesce(allocated_qty.allocated,0) as allocated,  dorders.qty-coalesce(allocated_qty.allocated, 0) as unexecuted '+
   'FROM public.dorders ' +
-  'LEFT JOIN "dCurrencies" ON dorders.idcurrency = "dCurrencies"."CurrencyCodeNum"' +
-	'LEFT JOIN dportfolios ON dorders.id_portfolio = dportfolios.idportfolio '+
-	'LEFT JOIN mmoexsecurities ON dorders.secid = mmoexsecurities.secid '+
+  'LEFT JOIN "dCurrencies" ON dorders.idcurrency = "dCurrencies"."CurrencyCodeNum" ' + 
+  'LEFT JOIN (SELECT COALESCE(id_order,id_bulk_order) as id_joined,id_order,id_bulk_order, sum(dtrades_allocated.qty) AS allocated '+
+              'FROM public.dtrades_allocated GROUP BY  GROUPING SETS ((id_order),(id_bulk_order)) '+
+  ')  as allocated_qty on allocated_qty.id_joined=dorders.id '+
+  'LEFT JOIN dportfolios ON dorders.id_portfolio = dportfolios.idportfolio '+
+  'LEFT JOIN mmoexsecurities ON dorders.secid = mmoexsecurities.secid '+
   'LEFT JOIN mmoexsecuritytypes ON mmoexsecurities.type=mmoexsecuritytypes.security_type_name ';
   sql +=conditionsTrades.slice(0,-5) + 'ORDER BY dorders.id DESC;'
   sql = pgp.as.format(sql,request.query);
+  console.log('ORDERS------------',sql);
   db_common_api.queryExecute(sql,response,undefined,'GetOrderData');
 }
 async function fUpdateOrderData (request, response) {
@@ -111,11 +116,33 @@ async function fModifyBulkOrder (request,response) {
       sql = 'SELECT * FROM public.f_delete_bulk_orders(array[${bulkOrders}])'; 
     break;
     case 'createBulkOrder':
-      console.log('createBulkOrder id', request.body);
       sql = 'SELECT * from public.f_create_bulk_orders(array[${clientOrders}])'; 
+    break;
+    case 'ordersStatusChange':
+      sql='UPDATE dorders '+
+          'SET status = ${newStatus} '+
+          'WHERE id = ANY(ARRAY[${ordersToUpdate}]) OR parent_order = ANY(ARRAY[${ordersToUpdate}])   '+
+          'RETURNING id,status;';
     break;
   }
   sql = pgp.as.format(sql,request.body);
+  db_common_api.queryExecute(sql,response,undefined,request.body.action);
+}
+async function fAllocation(request,response) {
+  let sql = '';
+  switch (request.body.action) {
+    case 'executeOrders':
+      sql= 'WITH allocation as (INSERT INTO public.dtrades_allocated(qty, idtrade, idportfolio, id_order,id_bulk_order) '+
+           'SELECT corrected_qty,${tradeId},id_portfolio,id,parent_order FROM f2_orders_allocation(${qtyForAllocation},ARRAY[${ordersForExecution}]) RETURNING *) '+
+           'SELECT COALESCE(id_order,id_bulk_order,idtrade) as id_joined,id_order,id_bulk_order,idtrade, sum(allocation.qty) AS allocated '+
+           'FROM allocation GROUP BY  GROUPING SETS ((id_order),(id_bulk_order),(idtrade)); ';
+    break;
+    case 'confirmAllocation':
+/*       console.log('confirmAllocation id', request.body);
+      sql = '_create_bulk_orders(array[${clientOrders}])';  */
+    break;
+  }
+  sql = pgp.as.format(sql,request.body.data);
   db_common_api.queryExecute(sql,response,undefined,request.body.action);
 }
 module.exports = {
@@ -124,5 +151,6 @@ module.exports = {
   fUpdateTradeData,
   fGetOrderData,
   fUpdateOrderData,
-  fModifyBulkOrder
+  fModifyBulkOrder,
+  fAllocation
 }

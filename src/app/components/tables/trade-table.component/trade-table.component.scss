@@ -34,19 +34,19 @@ tr.detail-row {
   border-color: red;
   overflow: hidden;
 }
-.mat-column-tidinstrument {
-  color: var(--additionalLightBlue)
-}
 .mat-column-primary_boardid, .mat-column-emitent_inn {
-  color: var(--additionalLightGreen);
+  // color: var(--additionalLightGreen);
   text-align: center
 }
-.mat-column-cpty {
-  color: var(--additionalLightBlue)
-}
-.mat-column-tdate, .mat-column-vdate {
-  color:var(--additionalLightGreen)
-}
+// .mat-column-tidinstrument {
+//   color: var(--additionalLightBlue)
+// }
+// .mat-column-cpty {
+//   color: var(--additionalLightBlue)
+// }
+// .mat-column-tdate, .mat-column-vdate {
+//   color:var(--additionalLightGreen)
+// }
 .search-filed {
   font-size: 18px;
   border-radius: 9px;
