@@ -1,6 +1,6 @@
 import { AfterContentInit, Component,  EventEmitter,  Input, Output, ViewChild} from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ClientData, Instruments} from 'src/app/models/intefaces.model';
+import { ClientData, Instruments, allocation, orders} from 'src/app/models/intefaces.model';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { Observable, Subscription, distinctUntilChanged, filter, map, observable, startWith, switchMap } from 'rxjs';
@@ -14,6 +14,9 @@ import { InstrumentDataService } from 'src/app/services/instrument-data.service'
 import { AppAccountingService } from 'src/app/services/accounting.service';
 import { AppOrderTableComponent } from '../../tables/orders-table.component/orders-table.component';
 import { HandlingTableSelectionService } from 'src/app/services/handling-table-selection.service';
+import { AppallocationTableComponent } from '../../tables/allocation-table.component/allocation-table.component';
+import { MatTableDataSource } from '@angular/material/table';
+import { SelectionModel } from '@angular/cdk/collections';
 @Component({
   selector: 'app-trade-modify-form',
   templateUrl: './trade-form.component.html',
@@ -27,6 +30,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
   @Input() action: string = 'View';
   @Output() public modal_principal_parent = new EventEmitter();
   @ViewChild('ordersTable',{ static: false }) orderTable : AppOrderTableComponent
+  @ViewChild('allocationTable',{ static: false }) allocationTable : AppallocationTableComponent
   public title: string;
   public actionType : string;
   public data: any;
@@ -78,7 +82,6 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
       idportfolio:{value:null, disabled: false},
       id_buyer_instructions:{value:null, disabled: false},id_seller_instructions:{value:null, disabled: false},id_broker:{value:null, disabled: false}, details:{value:null, disabled: false},cpty_name:{value:null, disabled: false},security_group_name :{value:null, disabled: false},   secid_name:{value:null, disabled: false}, trade_amount:[null], facevalue:[null],faceunit:[null],faceunit_name:[null], code_price_currency:[null],  price_currency_name:[null], settlement_currency_name:[null], code_settlement_currency:[null], settlement_amount:[null], coupon_details:[null]
     })
-
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data => this.firstOpenedAccountingDate = data[0].FirstOpenedDate);
@@ -155,6 +158,14 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
   } 
   confirmAllocation () {
 
+  }
+  deleteAllocatedTrades (){
+    if (!this.allocationTable.selection.selected.length) {
+      return this.CommonDialogsService.snackResultHandler({name:'error',detail:'No trades are selected to be deleted'},'DeleteAllocation')
+    }
+    this.TradeService.deleteAllocatedTrades(this.allocationTable.selection.selected.map(el=>Number(el.id))).subscribe(deletedTrades=>{
+      this.TradeService.sendDeletedAllocationTrades(deletedTrades)
+    })
   }
   selectClient (){
     this.dialogClientsTabletRef = this.dialog.open(AppClientsTableComponent ,{minHeight:'400px', minWidth:'90vw', autoFocus: false, maxHeight: '90vh'});
@@ -285,8 +296,8 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
   Number(value) {
     return Number(value)? true:false
   }
-  toggleAllRows(forceSelectAll:boolean=false) { 
-    return this.SelectionService.toggleAllRows(this.orderTable.dataSource, this.orderTable.selection,forceSelectAll);
+  toggleAllRows(dataSource:MatTableDataSource<orders|allocation>,selection:SelectionModel<orders|allocation>, forceSelectAll:boolean=false) { 
+    return this.SelectionService.toggleAllRows(dataSource, selection,forceSelectAll);
   }
   isAllSelected() { return this.SelectionService.isAllSelected(this.orderTable.dataSource, this.orderTable.selection)}  
 

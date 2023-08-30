@@ -2,18 +2,22 @@
   <span style="margin-right: 2%;">{{action}} Instrument | ID {{idtrade.value}} </span>
   <span class="example-spacer"></span>
   <ng-container  *ngIf="!disabledControlElements&&tabIndex===1" style="margin-bottom: 1%;">
-    
-    <button  title="Execute selected orders" 
-      color = "accent" mat-raised-button style=" margin-left:2%; font-size: 18px;"
-      (click)="toggleAllRows((orderTable.selection.hasValue() && orderTable.isAllSelected())? false : true  );   
-      ordersTable.dataSource.paginator = ordersTable.paginator;">
-      {{(orderTable!==undefined&&orderTable.selection.hasValue() && orderTable.isAllSelected())? 'Unselect' : 'Select' }} 
-      <mat-icon matSuffix >
-        {{(orderTable!==undefined&&orderTable.selection.hasValue() && orderTable.isAllSelected())?'remove':'select_all'}}
-      </mat-icon>
+    <button mat-raised-button  [matMenuTriggerFor]="menu" color="accent"  style="margin-left:1%; font-size: 18px; width: 10%;" matRipple="">Select
     </button>
+    <mat-menu #menu="matMenu">
+      <button mat-menu-item style="margin-left:0.5%; font-size: 18px;"
+      (click)="toggleAllRows(orderTable.dataSource,orderTable.selection,(orderTable.selection.hasValue() && orderTable.isAllSelected())? false : true  );   
+      ordersTable.dataSource.paginator = ordersTable.paginator;">
+      {{(orderTable!==undefined&&orderTable.selection.hasValue() && orderTable.isAllSelected())? 'Unselect' : 'Select' }}  Orders 
+      </button>
+      <button mat-menu-item style="margin-left:0.5%; font-size: 18px;"
+      (click)="toggleAllRows(allocationTable.dataSource,  allocationTable.selection, (allocationTable.selection.hasValue() && allocationTable.isAllSelected())? false : true  );   
+      allocationTable.dataSource.paginator = allocationTable.paginator;">
+      {{(allocationTable!==undefined&&allocationTable.selection.hasValue() && allocationTable.isAllSelected())? 'Unselect' : 'Select' }}  Trades 
+    </button>
+    </mat-menu>
     <button  title="Execute selected orders" 
-      color = "accent" mat-raised-button style=" margin-left:2%; font-size: 18px;"
+      color = "accent" mat-raised-button style=" margin-left:1%; font-size: 18px;"
       (click)="executeOrders()">
       Execute Orders
       <mat-icon matSuffix >gavel</mat-icon>
@@ -24,14 +28,14 @@
       Confirm Allocation
       <mat-icon matSuffix>done_all</mat-icon>
     </button>
+    <button title="Delete Allocated Trades"  
+    color = "warn" mat-raised-button style=" margin-left:1%; font-size: 18px;"
+    (click)="deleteAllocatedTrades()">
+    Delete Trades
+    <mat-icon matSuffix>delete</mat-icon>
+  </button>
   </ng-container>
-  <!-- <button mat-raised-button color="accent" style=" width: 15%; font-size: 18px; margin-left: 1%;"  (click)="sidenav1.toggle()">Show +</button> -->
 </mat-toolbar>
-<mat-drawer-container class="example-container" >
-  <mat-drawer #sidenav1 class="example-sidenav" mode="side"  position="end" style="width: 35vw;">
-    <app-app-clients-table></app-app-clients-table>
-  </mat-drawer>
-  <div class="example-sidenav-content" >
 <mat-tab-group mat-stretch-tabs [(selectedIndex)]="tabIndex" >
 <mat-tab label="Trade Details">
     <form class="submit" [formGroup]="tradeModifyForm" style="background-color: rgb(40, 39, 39);">
@@ -386,17 +390,14 @@
         <mat-label style="width: 20%;" class="mat-form-field" title="Unalloacted">Unalloacted: {{(qty.value-allocatedqty.value)|number}}        </mat-label>
         </span>
       </p>
-
     </form>
     <app-orders-table #ordersTable style="width: 100%;" 
-    [tableMode]="['Allocation','Parent']"
-    [allocationFilters]="{secid:tidinstrument.value,type:trtype.value}"
-    ></app-orders-table>
-    
+      [tableMode]="['Allocation','Parent']"
+      [allocationFilters]="{secid:tidinstrument.value,type:trtype.value}">
+    </app-orders-table>
+    <app-allocation-table  #allocationTable style="width: 100%;" 
+    [tableMode]="['Trade']"
+    [tradeData]="tradeModifyForm.value">
+    </app-allocation-table>
   </mat-tab>
 </mat-tab-group>
-
-  </div>
-</mat-drawer-container>
-
-

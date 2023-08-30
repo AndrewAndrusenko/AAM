@@ -168,6 +168,7 @@ const appInitializerFn = (accessRestirictions:AuthService) => {
         AppTableCurrenciesDataComponent,
         AppOrderTableComponent,
         OrdersTabComponent,
+        AppallocationTableComponent
      ],
     bootstrap: [AppComponent],
     providers: [ 
@@ -196,5 +197,6 @@ import { AuthService } from './services/auth.service';
 import { AppInstrumentCorpActionFormComponent } from './components/forms/instrument-corp-action-form.component/instrument-corp-action-form.component';
 import { AccSWIFTTabComponent } from './components/main-page/tabs/SWIFT-tab.component/SWIFT-tab.component';
 import { AppTableCurrenciesDataComponent } from './components/tables/currencies-data-table.component/currencies-data-table.component';
+import { AppallocationTableComponent } from './components/tables/allocation-table.component/allocation-table.component';
 
 

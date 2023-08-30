@@ -1,10 +1,12 @@
 const db_common_api = require('./db_common_api');
 var pgp = require ('pg-promise')({capSQL:true});
 async function fGetTradesData (request,response) {
-  let conditions = {}
+  let sql = '';
+  let conditions = {};
   conditions = {
     'idtrade':{
       1: '(dtrades.idtrade =  ${idtrade})',
+      2: '(dtrades_allocated.idtrade =  ${idtrade})'
     },
     'type':{
       1: '(trtype =  ${type})',
@@ -40,14 +42,35 @@ async function fGetTradesData (request,response) {
     request.query[key]!=='null'? conditionsTrades +=conditions[key][1] + ' AND ': null;
     }
   });
-  let sql = 'SELECT details, dclients.clientname as cpty_name , mmoexsecuritytypes.security_group_name,mmoexsecuritytypes.security_type_name as secid_type, mmoexsecurities.name as secid_name, dtrades.idtrade, qty, price, dclients.clientname as cpty, tdate, vdate, tidorder, allocated_qty.alloaction as allocatedqty, idportfolio, trtype, tidinstrument, id_broker, id_price_currency, id_settlement_currency, id_buyer_instructions, id_seller_instructions, accured_interest, fee_trade, fee_settlement, fee_exchange, id_cpty, mmoexsecuritytypes.price_type, trade_amount,faceunit,facevalue,settlement_amount, settlement_rate '+
-  'FROM public.dtrades ' +
-  'LEFT JOIN (SELECT dtrades_allocated.idtrade, sum (qty) as alloaction FROM  public.dtrades_allocated GROUP BY dtrades_allocated.idtrade) allocated_qty ON allocated_qty.idtrade=dtrades.idtrade '+
-	'LEFT JOIN mmoexsecurities ON dtrades.tidinstrument = mmoexsecurities.secid '+
-  'LEFT JOIN mmoexsecuritytypes ON mmoexsecurities.type=mmoexsecuritytypes.security_type_name '+
-	'LEFT JOIN dclients ON dclients.idclient = dtrades.id_cpty ';
-  sql +=conditionsTrades.slice(0,-5) + 'ORDER BY dtrades.idtrade DESC;'
+  let conditionsAllocatedTrades =' WHERE'
+  Object.entries(conditions).forEach(([key,value]) => {
+  if  (request.query.hasOwnProperty(key)) {
+    request.query[key]!=='null'? conditionsAllocatedTrades +=conditions[key][2] + ' AND ': null;
+    }
+  });
+  console.log('nd',request.query);
+  switch (request.query.action) {
+    case 'getAllocationTrades':
+      sql='SELECT dtrades_allocated.id, dtrades_allocated.qty, dtrades_allocated.idtrade, dtrades_allocated.idportfolio, id_order,dtrades_allocated.id_bulk_order, dportfolios.portfolioname, ROUND(dtrades.trade_amount/dtrades.qty*dtrades_allocated.qty,2) as trade_amount, dtrades.accured_interest,id_settlement_currency, 50000 as current_postion_qty, 200000 as current_account_balance '+
+          'FROM public.dtrades_allocated '+
+          'LEFT JOIN dtrades ON dtrades_allocated.idtrade = dtrades.idtrade '+
+          'LEFT JOIN dportfolios ON dtrades_allocated.idportfolio = dportfolios.idportfolio '
+          
+      sql +=conditionsAllocatedTrades.slice(0,-5) + 'ORDER BY dtrades_allocated.idtrade DESC;'
+    break;
+    default:
+      sql = 'SELECT details, dclients.clientname as cpty_name , mmoexsecuritytypes.security_group_name,mmoexsecuritytypes.security_type_name as secid_type, mmoexsecurities.name as secid_name, dtrades.idtrade, qty, price, dclients.clientname as cpty, tdate, vdate, tidorder, allocated_qty.alloaction as allocatedqty, idportfolio, trtype, tidinstrument, id_broker, id_price_currency, id_settlement_currency, id_buyer_instructions, id_seller_instructions, accured_interest, fee_trade, fee_settlement, fee_exchange, id_cpty, mmoexsecuritytypes.price_type, trade_amount,faceunit,facevalue,settlement_amount, settlement_rate '+
+      'FROM public.dtrades ' +
+      'LEFT JOIN (SELECT dtrades_allocated.idtrade, sum (qty) as alloaction FROM  public.dtrades_allocated GROUP BY dtrades_allocated.idtrade) allocated_qty ON allocated_qty.idtrade=dtrades.idtrade '+
+      'LEFT JOIN mmoexsecurities ON dtrades.tidinstrument = mmoexsecurities.secid '+
+      'LEFT JOIN mmoexsecuritytypes ON mmoexsecurities.type=mmoexsecuritytypes.security_type_name '+
+      'LEFT JOIN dclients ON dclients.idclient = dtrades.id_cpty ';
+      sql +=conditionsTrades.slice(0,-5) + 'ORDER BY dtrades.idtrade DESC;'
+    break;
+}
   sql = pgp.as.format(sql,request.query);
+  console.log('trades-------------------------------------------------------------------------------',sql);
+
   db_common_api.queryExecute(sql,response,undefined,'GetTradesData');
 }
 async function fGetAccuredInterest (request,response) {
@@ -102,7 +125,6 @@ async function fGetOrderData (request,response) {
   'LEFT JOIN mmoexsecuritytypes ON mmoexsecurities.type=mmoexsecuritytypes.security_type_name ';
   sql +=conditionsTrades.slice(0,-5) + 'ORDER BY dorders.id DESC;'
   sql = pgp.as.format(sql,request.query);
-  console.log('ORDERS------------',sql);
   db_common_api.queryExecute(sql,response,undefined,'GetOrderData');
 }
 async function fUpdateOrderData (request, response) {
@@ -140,6 +162,10 @@ async function fAllocation(request,response) {
     case 'confirmAllocation':
 /*       console.log('confirmAllocation id', request.body);
       sql = '_create_bulk_orders(array[${clientOrders}])';  */
+    break;
+    case 'deleteAllocation':
+      console.log('deleteAllocation id', request.body);
+      sql = 'DELETE FROM dtrades_allocated WHERE id=ANY(ARRAY[${tradesIDs}]) RETURNING id'; 
     break;
   }
   sql = pgp.as.format(sql,request.body.data);

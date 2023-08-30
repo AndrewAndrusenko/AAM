@@ -215,6 +215,7 @@
                 <mat-icon >share</mat-icon>
               </button>
               <button mat-icon-button color="accent" *ngIf="element['qty']<=element['allocatedqty']"
+                (click)="openTradeModifyForm('Edit',element,1)"
                 matTooltip="Trade has been allocated">
                 <mat-icon >not_interested</mat-icon>
               </button>

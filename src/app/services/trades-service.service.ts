@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
-import { orders, trades } from '../models/intefaces.model';
+import { allocation, orders, trades } from '../models/intefaces.model';
 interface tradesDataSet {
   data:trades[],
   action:string
@@ -26,6 +26,7 @@ export class AppTradeService {
   private reloadTradeTable = new Subject <any> (); 
   private reloadExecution = new Subject <{data:orders[],idtrade:number,ordersForExecution:number[]}> (); 
   private updateOrdersStatus = new Subject <{data:orders[],bulksForUpdate:number[]}>(); 
+  private allocationDeleted = new Subject <number[]>(); 
   sendTradeDataToUpdateTableSource ( data:trades[], action: string) {
     let dataSet = {
       data: data,
@@ -37,7 +38,7 @@ export class AppTradeService {
     return this.reloadTradeTable.asObservable(); 
   }
   getTradeInformation(serachFilters:any):Observable<trades[]> {
-    let params = {...serachFilters}
+    let params = {...serachFilters,action:'getTradeInformation'}
     return this.http.get <trades[]> ('api/AAM/MD/getTradeData/',{params:params})
   }
   sendOrderDataToUpdateTableSource ( data:orders[], action: string) {
@@ -80,5 +81,19 @@ export class AppTradeService {
   }
   getUpdateOrdersChangedStatus ():Observable<{data:orders[],bulksForUpdate:number[]}> {
     return this.updateOrdersStatus.asObservable();
+  }
+  getAllocationInformation(serachFilters:any):Observable<allocation[]> {
+    let params = {...serachFilters,action:'getAllocationTrades'}
+    return this.http.get <allocation[]> ('api/AAM/MD/getTradeData/',{params:params})
+  }
+  deleteAllocatedTrades(tradesIDs:number[]){
+    let data={tradesIDs:tradesIDs};
+    return this.http.post<number[]> ('api/AAM/MD/Allocation',{data:data,action:'deleteAllocation'})
+  }
+  sendDeletedAllocationTrades (tradesIDs:number[]) {
+    this.allocationDeleted.next(tradesIDs);
+  }
+  getDeletedAllocationTrades ():Observable<number[]> {
+    return this.allocationDeleted.asObservable();
   }
 }
