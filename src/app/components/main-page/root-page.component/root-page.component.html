@@ -5,11 +5,11 @@
   [treeOpened] = "opened">
 </app-app-menu>
 
-<mat-drawer-container class="example-container" >
-  <mat-drawer #sidenav class="example-sidenav" mode="side" [(opened)]="opened">
+<mat-drawer-container class="root-container" >
+  <mat-drawer #sidenav class="root-sidenav" mode="side" [(opened)]="opened">
     <app-tree-menu></app-tree-menu>
   </mat-drawer>
-  <div class="example-sidenav-content"
+  <div class="root-sidenav-content"
   [style.width]="sidenav.opened===true?  '80vw' : '99vw'">
   <button 
   style="height: 100%; background-color: rgb(108, 107, 107); width: 1.5%; border-radius: 5px; border-color:rgb(67, 79, 79);" (click)="sidenav.toggle()"> 

@@ -1,7 +1,7 @@
 import {AfterViewInit, Component, EventEmitter, Output, ViewChild, Input, ChangeDetectionStrategy, ElementRef} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
-import {Observable, Subscription, map, startWith } from 'rxjs';
+import {Observable, Subscription, filter, map, startWith, switchMap, tap } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { objectStatus, orders } from 'src/app/models/intefaces.model';
@@ -46,7 +46,7 @@ export class AppOrderTableComponent  implements AfterViewInit {
   @Input() tableMode:string[];
   @Input() dataToShow:orders[];
   @Input() bulkOrder:number;
-  @Input() allocationFilters:{secid:string, type:string};
+  @Input() allocationFilters:{secid:string, type:string,bulkorders:string[]};
 
   fullOrdersSet:orders[];
 
@@ -77,7 +77,7 @@ export class AppOrderTableComponent  implements AfterViewInit {
   defaultFilterPredicate?: (data: any, filter: string) => boolean;
   secidfilter?: (data: any, filter: string) => boolean;
   constructor(
-    private TradeService: AppTradeService,
+    public TradeService: AppTradeService,
     private AuthServiceS:AuthService,  
     private HandlingCommonTasksS:HandlingCommonTasksService,
     private SelectionService:HandlingTableSelectionService,
@@ -121,7 +121,7 @@ export class AppOrderTableComponent  implements AfterViewInit {
   }
   ngOnInit(): void {
     this.indexDBServiceS.getIndexDBStaticTables('getObjectStatuses');
-    if (this.tableMode.includes('Allocation'))   {
+    if (this.tableMode.includes('Allocation')||this.tableMode.includes('AllocatedOrders'))   {
       this.columnsToDisplayWithExpand = ['select','id','ordertype','type','secid','qty','price','amount','unexecuted','status','allocated','portfolioname','idcurrency','generated','expand'];
     } else {
       this.columnsToDisplayWithExpand = ['select','id','ordertype','type','secid','secid_type','security_group_name','qty','price','amount','unexecuted','status','parent_order','portfolioname','idcurrency','generated','action'];
@@ -135,9 +135,7 @@ export class AppOrderTableComponent  implements AfterViewInit {
   }
   async ngAfterViewInit() {
     this.subscriptions.add(this.TradeService.getReloadOrdersForExecution().subscribe(data=>{
-      console.log('bulk',this.bulkOrder,data.ordersForExecution,data.ordersForExecution.includes(Number(this.bulkOrder)));
       if(data.ordersForExecution.includes(Number(this.bulkOrder))||this.tableMode.includes('Parent')||this.tableMode.includes('Allocation')) {
-
         this.dataSource.data.forEach(ds=> {
           let i = data.data.findIndex(alloc=>alloc['id_joined']===ds.id)
           if (i!==-1){
@@ -150,12 +148,15 @@ export class AppOrderTableComponent  implements AfterViewInit {
     }))
     if (this.tableMode.includes('Parent')) {
       this.TradeService.getOrderInformation(null).subscribe (ordersData => {
-        this.fullOrdersSet = ordersData;
-        this.updateordersDataTable(ordersData)
-        console.log('getOrderInformation',);
-       /*  this.tableMode.includes('Allocation')? this.dataSource.data =  this.dataSource.data.filter(el=>el.secid===this.allocationFilters.secid&&el.type===this.allocationFilters.type) : null;  *//*  DataSource with Client Orders */
-        this.tableMode.includes('Allocation')? this.dataSource.data =  this.dataSource.data.filter(el=>el.secid===this.allocationFilters.secid&&el.type===this.allocationFilters.type&&el.ordertype==='Bulk'&&el.unexecuted>0&&['confirmed','in_execution'].includes(el.status)) : null; /*  DataSource ONLY with Bulk Orders */
-      });  
+        this.updateordersDataTable(ordersData);
+        this.filterForAllocation ()
+      })
+      if (this.tableMode.includes('AllocatedOrders')) {
+        this.subscriptions.add(this.TradeService.getAllocatedOrders().pipe(
+        tap(allocOrders=>console.log('getAllocatedOrders',allocOrders)),
+        switchMap(allocOrders =>this.TradeService.getOrderInformation({id:allocOrders.map(el=>Number(el))}))
+      ).subscribe(ordersData=>this.updateordersDataTable(ordersData)))
+      }
       this.AutoCompService.getSecidLists();
       this.filterednstrumentsLists = this.secidList.valueChanges.pipe(
         startWith(''),
@@ -164,6 +165,14 @@ export class AppOrderTableComponent  implements AfterViewInit {
     } else { 
       this.dataSource  = new MatTableDataSource(this.dataToShow.filter(el=>el.parent_order===Number(this.bulkOrder)))
     }
+  }
+  filterAllocatedOrders(allocOrders:number[]) {
+    console.log('ds',this.dataSource.data);
+    this.updateordersDataTable(this.dataSource.data.filter(el=>allocOrders.includes(el.id)));
+    console.log('all filter',this.dataSource.data.filter(el=>allocOrders.includes(el.id)));
+  }
+  filterForAllocation () {
+    this.tableMode.includes('Allocation')? this.dataSource.data =  this.dataSource.data.filter(el=>el.secid===this.allocationFilters.secid&&el.type===this.allocationFilters.type&&el.ordertype==='Bulk'&&el.unexecuted>0&&['confirmed','in_execution'].includes(el.status)) : null; 
   }
   checkChangeStatus(changeType:string,currentStatus:string):boolean {
     this.orderStatuses = this.AuthServiceS.objectStatuses.filter(el =>el.id_object==='Order');
@@ -176,7 +185,6 @@ export class AppOrderTableComponent  implements AfterViewInit {
     return this.orderStatuses[this.orderStatuses.findIndex(el=>el.status_code===currentStatus) + factor].status_code
   }
   updateSatus (data:orders[]) {
-    console.log('status',data);
     data.forEach(el=>{
       let i=this.dataSource.data.findIndex(ds=>[ds.id,ds.parent_order].includes(el.id))
       i!==-1? this.dataSource.data[i].status = el.status:null;
@@ -200,7 +208,6 @@ export class AppOrderTableComponent  implements AfterViewInit {
       this.TradeService.unmergerBulkOrder(bulkOrdersIds).subscribe(data => {
         this.CommonDialogsService.snackResultHandler(data,'Unmerge ')
         this.selection.clear();
-        console.log('erro',data);
         data.hasOwnProperty('name')? null: this.submitQuery();
       })
     } else {
@@ -230,6 +237,8 @@ export class AppOrderTableComponent  implements AfterViewInit {
     return this.dataSource.data.filter(order=>!order.parent_order)
   }
   updateordersDataTable (ordersData:orders[]) {
+    console.log('orderData',ordersData);
+    this.fullOrdersSet = ordersData;
     this.dataSource  = new MatTableDataSource(ordersData);
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
@@ -260,7 +269,6 @@ export class AppOrderTableComponent  implements AfterViewInit {
   }
   addChips (el: any, column: string) {(['secid'].includes(column))? this.instruments.push(el):null;}
   updateFilter (el: any) {
-    console.log('el',el);
     this.filterALL.nativeElement.value = el;
     this.dataSource.filter = el.trim().toLowerCase();
     (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
@@ -275,7 +283,7 @@ export class AppOrderTableComponent  implements AfterViewInit {
   checkboxLabel(row?: orders): string {
     return this.SelectionService.checkboxLabel(this.dataSource, this.selection, row)
   }
-  async submitQuery (reset:boolean=false) {
+  async submitQuery (reset:boolean=false,showSnackResult:boolean=true) {
     return new Promise((resolve, reject) => {
       let searchObj = reset?  {} : this.searchParametersFG.value;
       this.dataSource.data? this.dataSource.data = null : null;
@@ -296,7 +304,7 @@ export class AppOrderTableComponent  implements AfterViewInit {
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
         this.dataSource.data = this.excludeOrdersWithParent()
-        this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ');
+        showSnackResult? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded '):null;
         resolve(data) 
       });
     });

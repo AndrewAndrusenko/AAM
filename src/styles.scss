@@ -35,6 +35,13 @@ color: green;
   font-size: 18px;
   width: 20%;
 }
+[mat-dialog-title] {
+  margin: -24px -24px 0px -24px !important;
+  padding: 10px 24px;
+  background: #369;
+  color: #fff;
+  cursor: move;
+}
 .tree-menu-context {
   display: inline-flex;
   flex-direction: column;

@@ -3,6 +3,7 @@ import { Subscription } from 'rxjs';
 import { AppMenuServiceService } from 'src/app/services/menu-service.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
+import { MatDialog } from '@angular/material/dialog';
 @Component({
   selector: 'app-root-page',
   templateUrl: './root-page.component.html',
@@ -17,7 +18,7 @@ export class DashboardComponent implements OnDestroy,OnInit {
     private appMenuService : AppMenuServiceService,
     private AuthServiceS:AuthService,  
     private indexDBServiceS:indexDBService,
-
+    public dialog: MatDialog
     ) {
     this.subscriptionName= this.appMenuService.getToggleTree().subscribe (message => this.opened = message.text );
   }

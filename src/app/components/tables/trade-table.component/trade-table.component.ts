@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, EventEmitter, Output, ViewChild, Input, ChangeDetectionStrategy, ElementRef} from '@angular/core';
+import {AfterViewInit, Component, EventEmitter, Output, ViewChild, Input, ChangeDetectionStrategy, ElementRef, TemplateRef, ViewContainerRef} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {Observable, Subscription, map, startWith } from 'rxjs';
@@ -16,6 +16,7 @@ import { AuthService } from 'src/app/services/auth.service';
 import { AppTradeService } from 'src/app/services/trades-service.service';
 import { AppTradeModifyFormComponent } from '../../forms/trade-form.component/trade-form.component';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
+
 @Component({
   selector: 'app-trade-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -52,10 +53,11 @@ export class AppTradeTableComponent  implements AfterViewInit {
     dateRangeStart: new FormControl<Date | null>(null),
     dateRangeEnd: new FormControl<Date | null>(null),
   });
-  dialogTradeModify: MatDialogRef<AppTradeModifyFormComponent>;
-
+  public dialogTradeModify: MatDialogRef<AppTradeModifyFormComponent>
+  
   defaultFilterPredicate?: (data: any, filter: string) => boolean;
   secidfilter?: (data: any, filter: string) => boolean;
+  @ViewChild(TemplateRef) _dialogTemplate: TemplateRef<any>;
   constructor(
     private TradeService: AppTradeService,
     private AuthServiceS:AuthService,  
@@ -82,8 +84,13 @@ export class AppTradeTableComponent  implements AfterViewInit {
       i!==-1? this.dataSource.data[i].allocatedqty =Number(data.data.filter(alloc=>alloc['id_joined']==this.dataSource.data[i].idtrade)[0].allocated)+Number(this.dataSource.data[i].allocatedqty) : null;
       this.dataSource.paginator = this.paginator;
     }))
+    this.arraySubscrition.add(this.TradeService.getNewAllocatedQty().subscribe(data=>{
+      console.log('getNewAllocatedQty',data,this.dataSource.data[1].idtrade);
+      this.dataSource.data[this.dataSource.data.findIndex(el=>(el.idtrade)===data.idtrade)].allocatedqty=data.allocatedqty;  
+      this.dataSource.paginator=this.paginator;
+    }));
     this.arraySubscrition.add(this.TradeService.getTradeDataToUpdateTableSource().subscribe(data =>{
-      console.log('getTradeDataToUpdateTableSource',data);
+      console.log('getTradeDataToUpdateTableSource',' Table');
       let index =  this.dataSource.data.findIndex(elem=>elem.idtrade===data.data[0].idtrade)
       switch (data.action) {
         case 'Deleted':
@@ -101,9 +108,9 @@ export class AppTradeTableComponent  implements AfterViewInit {
     }));
   }
   ngOnDestroy(): void {
-    this.arraySubscrition.unsubscribe()
+    this.arraySubscrition.unsubscribe();
   }
-  async ngAfterViewInit() {
+   async ngAfterViewInit() {
     this.TradeService.getTradeInformation(null).subscribe (tradesData => this.updateTradesDataTable(tradesData));  
     this.AutoCompService.getSecidLists();
     this.AutoCompService.getCounterpartyLists();
@@ -117,7 +124,7 @@ export class AppTradeTableComponent  implements AfterViewInit {
     );
   }  
   openTradeModifyForm (action:string, element:any,tabIndex:number=0) {
-    this.dialogTradeModify = this.dialog.open (AppTradeModifyFormComponent,{minHeight:'600px', minWidth:'60vw', maxWidth:'80vw', autoFocus: false, maxHeight: '90vh'})
+    this.dialogTradeModify = this.dialog.open (AppTradeModifyFormComponent,{minHeight:'600px', minWidth:'60vw', maxWidth:'80vw', maxHeight: '90vh'})
     this.dialogTradeModify.componentInstance.action = action;
     this.dialogTradeModify.componentInstance.tabIndex=tabIndex;
     this.dialogTradeModify.componentInstance.data = action ==='Create'? null :element;

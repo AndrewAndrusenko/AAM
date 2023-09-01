@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { allocation, orders, trades } from '../models/intefaces.model';
 interface tradesDataSet {
   data:trades[],
@@ -26,7 +26,9 @@ export class AppTradeService {
   private reloadTradeTable = new Subject <any> (); 
   private reloadExecution = new Subject <{data:orders[],idtrade:number,ordersForExecution:number[]}> (); 
   private updateOrdersStatus = new Subject <{data:orders[],bulksForUpdate:number[]}>(); 
-  private allocationDeleted = new Subject <number[]>(); 
+  private allocationDeleted = new Subject <allocation[]>(); 
+  private sAllocatedQty = new Subject <{idtrade:number,allocatedqty:number}>(); 
+  private sOrdersAllocated = new BehaviorSubject <number[]>([]); 
   sendTradeDataToUpdateTableSource ( data:trades[], action: string) {
     let dataSet = {
       data: data,
@@ -88,12 +90,25 @@ export class AppTradeService {
   }
   deleteAllocatedTrades(tradesIDs:number[]){
     let data={tradesIDs:tradesIDs};
-    return this.http.post<number[]> ('api/AAM/MD/Allocation',{data:data,action:'deleteAllocation'})
+    return this.http.post<allocation[]> ('api/AAM/MD/Allocation',{data:data,action:'deleteAllocation'})
   }
-  sendDeletedAllocationTrades (tradesIDs:number[]) {
+  sendDeletedAllocationTrades (tradesIDs:allocation[]) {
     this.allocationDeleted.next(tradesIDs);
   }
-  getDeletedAllocationTrades ():Observable<number[]> {
+  getDeletedAllocationTrades ():Observable<allocation[]> {
     return this.allocationDeleted.asObservable();
   }
+  sendNewAllocatedQty (data:{idtrade:number,allocatedqty:number}) {
+    this.sAllocatedQty.next(data);
+  }
+  getNewAllocatedQty ():Observable<{idtrade:number,allocatedqty:number}> {
+    return this.sAllocatedQty.asObservable();
+  }
+  sendAllocatedOrders (ordersAllocated:number[]) {
+    this.sOrdersAllocated.next(ordersAllocated);
+  }
+  getAllocatedOrders ():Observable<number[]> {
+    return this.sOrdersAllocated.asObservable();
+  }
+
 }

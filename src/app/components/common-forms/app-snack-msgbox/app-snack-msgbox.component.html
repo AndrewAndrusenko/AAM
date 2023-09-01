@@ -1,3 +1,5 @@
+<h1 mat-dialog-title cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle>Hi {{'JJJJJJJ'}}</h1>
+<div mat-dialog-content >
 <mat-form-field appearance="fill">
   <mat-label>Message</mat-label>
   <input matInput value="Disco party!" #message>
@@ -9,3 +11,4 @@
 </mat-form-field>
 
 <button mat-stroked-button (click)="openSnackBar (message.value, action.value)">Show snack-bar</button>
+</div>

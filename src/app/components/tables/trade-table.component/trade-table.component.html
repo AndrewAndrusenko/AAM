@@ -198,26 +198,26 @@
               (click)="openTradeModifyForm('View', element)">
               <mat-icon >pageview</mat-icon>
             </button>
+           <!--  matTooltip="Copy Trade"
+            matTooltip="Edit Trade"
+            matTooltip="Allocate"
+            matTooltip="Trade has been allocated" -->
             <ng-container  *ngIf="!disabledControlElements">
               <button mat-icon-button color="accent"
-                matTooltip="Copy Trade"
-                (click)="openTradeModifyForm('Create_Example',element)">
-                <mat-icon >file_copy</mat-icon>
-              </button>
-              <button mat-icon-button color="accent"
-                matTooltip="Edit Trade"
                 (click)="openTradeModifyForm('Edit',element)">
                 <mat-icon >edit</mat-icon>
               </button>
               <button mat-icon-button color="accent" *ngIf="element['qty']>element['allocatedqty']"
-                matTooltip="Allocate"
                 (click)="openTradeModifyForm('Edit',element,1)">
                 <mat-icon >share</mat-icon>
               </button>
               <button mat-icon-button color="accent" *ngIf="element['qty']<=element['allocatedqty']"
-                (click)="openTradeModifyForm('Edit',element,1)"
-                matTooltip="Trade has been allocated">
+                (click)="openTradeModifyForm('Edit',element,1)">
                 <mat-icon >not_interested</mat-icon>
+              </button>
+              <button mat-icon-button color="accent"
+                (click)="openTradeModifyForm('Create_Example',element)">
+                <mat-icon >file_copy</mat-icon>
               </button>
               <button 
                 mat-icon-button 

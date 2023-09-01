@@ -106,13 +106,16 @@ export class AppallocationTableComponent  implements AfterViewInit {
   }
   ngOnInit(): void {
     this.TradeService.getAllocationInformation(this.tableMode.includes('Trade')? {idtrade:this.tradeData.idtrade}:null)
-    .subscribe (allocationData => {
-      this.fullOrdersSet = allocationData;
-      this.updateordersDataTable(allocationData)
-    });  
+    .subscribe (allocationData => this.updateAllocationDataTable(allocationData));  
     this.subscriptions.add(
       this.TradeService.getDeletedAllocationTrades().subscribe(deletedTrades=>{
-        this.dataSource.data.forEach((el,index)=>deletedTrades.includes(el.id)? this.dataSource.data.splice(index,1):null)
+        let arrayToDelete = [];
+        this.dataSource.data.forEach((ds,index)=>{
+          deletedTrades.findIndex(el=>Number(el.id)===Number(ds.id))!==-1? arrayToDelete.push(index):null
+        })
+        console.log('arrayToDelete',arrayToDelete);
+        arrayToDelete.forEach((dlIndex,index)=> this.dataSource.data.splice(dlIndex-index,1));
+        this.updateAllocationDataTable(this.dataSource.data)
       })
     )
   }
@@ -129,18 +132,17 @@ export class AppallocationTableComponent  implements AfterViewInit {
     !event.hasOwnProperty('isUserInput') || event.isUserInput ? this.dataSource.filter = filterValue.trim().toLowerCase() : null;
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
-  filterChildOrders(parent:string):allocation[] {
-    let childOrders =  this.fullOrdersSet.filter(allocation=>allocation.idtrade===Number(parent));
-    return childOrders;
-  }
+
   excludeOrdersWithParent ():allocation[] {
     return this.dataSource.data.filter(allocation=>!allocation.idtrade)
   }
-  updateordersDataTable (ordersData:allocation[]) {
-    console.log('oD',ordersData);
-    this.dataSource  = new MatTableDataSource(ordersData);
+  updateAllocationDataTable (allocationData:allocation[]) {
+    this.dataSource  = new MatTableDataSource(allocationData);
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
+    let orderAllocated = new Set(this.dataSource.data.map(el=>Number(el.id_bulk_order)))
+    this.TradeService.sendAllocatedOrders([...orderAllocated].length? [...orderAllocated]:[0]);
+    console.log('orderAllocated',orderAllocated);
     this.defaultFilterPredicate = this.dataSource.filterPredicate;
     this.secidfilter = this.dataSource.filterPredicate;
   }
@@ -181,7 +183,8 @@ export class AppallocationTableComponent  implements AfterViewInit {
   checkboxLabel(row?: orders): string {
     return this.SelectionService.checkboxLabel(this.dataSource, this.selection, row)
   }
-  async submitQuery (reset:boolean=false) {
+  async submitQuery (reset:boolean=false, showSnackResult:boolean=true) {
+    console.log('submitQuery tradeId',this.tradeData.idtrade);
     return new Promise((resolve, reject) => {
       let searchObj = reset?  {} : this.searchParametersFG.value;
       this.dataSource.data? this.dataSource.data = null : null;
@@ -197,11 +200,8 @@ export class AppallocationTableComponent  implements AfterViewInit {
       this.price.value? searchObj = {...searchObj, ... this.HandlingCommonTasksS.toNumberRange(this.price.value,this.price,'price')} :null;
       searchObj = {...searchObj, ...this.tdate.value? this.HandlingCommonTasksS.toDateRange(this.tdate, 'tdate') : null}
       this.TradeService.getAllocationInformation(searchObj).subscribe(data => {
-        this.fullOrdersSet = data;
-        this.dataSource  = new MatTableDataSource(data);
-        this.dataSource.paginator = this.paginator;
-        this.dataSource.sort = this.sort;
-        this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ');
+        this.updateAllocationDataTable(data)
+        showSnackResult? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ') : null;
         resolve(data) 
       });
     });

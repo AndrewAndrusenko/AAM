@@ -1,4 +1,4 @@
-import { AfterContentInit, Component,  EventEmitter,  Input, Output, ViewChild} from '@angular/core';
+import { AfterContentInit, Component,  EventEmitter,  Input, Output, TemplateRef, ViewChild, ViewContainerRef} from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ClientData, Instruments, allocation, orders} from 'src/app/models/intefaces.model';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
@@ -33,7 +33,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
   @ViewChild('allocationTable',{ static: false }) allocationTable : AppallocationTableComponent
   public title: string;
   public actionType : string;
-  public data: any;
+  @Input() data: any;
   firstOpenedAccountingDate: Date;
   panelOpenStateFirst = false;
   panelOpenStateSecond = false;
@@ -46,6 +46,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
   securityTypes: any[];
   formerrors: any;
   private arraySubscrition = new Subscription ()
+  @ViewChild(TemplateRef) _dialogTemplate: TemplateRef<any>;
   constructor (
     private fb:FormBuilder, 
     private AuthServiceS:AuthService,  
@@ -101,12 +102,6 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     this.arraySubscrition.unsubscribe()
   }
   ngAfterContentInit (): void {
-    this.arraySubscrition.add(this.TradeService.getReloadOrdersForExecution().subscribe(data=>{
-      console.log('getReloadOrdersForExecution',data);
-      this.allocatedqty.patchValue(Number(this.allocatedqty.value)+Number(data.data.filter(alloc=>alloc['id_joined']===this.idtrade.value)[0].allocated));
-    }))
-
-    console.log('data form',this.data);
     this.tradeModifyForm.patchValue(this.data);
     this.filterednstrumentsLists = this.tidinstrument.valueChanges.pipe(
       startWith(''),
@@ -146,15 +141,27 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
   }
   executeOrders () {
     let qtyForAllocation = this.qty.value - this.allocatedqty.value;
+    let unexecutedTotal = this.orderTable.selection.selected.map(el=>Number(el.unexecuted)).reduce((acc, val)=> acc+val,0)
     if (qtyForAllocation<1) {
-      this.CommonDialogsService.snackResultHandler({name:'error',detail:'The whole volume has been allocated!'},'Allocation');
-      return
+      this.CommonDialogsService.snackResultHandler({name:'error',detail:'The whole trade volume has been allocated!'},'Allocation');
+      return;
+    };
+    if (!unexecutedTotal) {
+      this.CommonDialogsService.snackResultHandler({name:'error',detail:'Orders have been allocated!'},'Allocation');
+      return;
     };
     let ordersForExecution = this.orderTable.selection.selected.map(el=> Number(el.id));
-    ordersForExecution.length? this.TradeService.executeOrders(ordersForExecution,Number(qtyForAllocation),this.idtrade.value).subscribe(data=>{
-      this.CommonDialogsService.snackResultHandler({name:'sucess',detail:'Orders have been allocated'},'Allocation',undefined,false)
-      this.TradeService.sendReloadOrdersForExecution(data,this.idtrade.value,ordersForExecution);
-    }) : this.CommonDialogsService.snackResultHandler({name:'error',detail:'No bulk order has been selected!'},'Allocation');
+    if (ordersForExecution.length) {
+      this.TradeService.executeOrders(ordersForExecution,Number(qtyForAllocation),this.idtrade.value).subscribe(data=>{
+        this.CommonDialogsService.snackResultHandler({name:'sucess',detail:'Orders have been allocated'},'Allocation',undefined,false)
+        this.TradeService.sendReloadOrdersForExecution(data,this.idtrade.value,ordersForExecution);
+        this.allocationTable.submitQuery(true,false)
+        this.allocatedqty.patchValue(Number(this.allocatedqty.value) + Number(data.filter(el=>el['id_joined']==this.idtrade.value)[0].allocated))
+        console.log('executeOrders',this.allocatedqty.value,data.filter(el=>el['id_joined']==this.idtrade.value)[0],this.qty.value);
+      })
+    } else {
+      this.CommonDialogsService.snackResultHandler({name:'error',detail:'No bulk order has been selected!'},'Allocation');
+    }
   } 
   confirmAllocation () {
 
@@ -163,8 +170,16 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     if (!this.allocationTable.selection.selected.length) {
       return this.CommonDialogsService.snackResultHandler({name:'error',detail:'No trades are selected to be deleted'},'DeleteAllocation')
     }
-    this.TradeService.deleteAllocatedTrades(this.allocationTable.selection.selected.map(el=>Number(el.id))).subscribe(deletedTrades=>{
+    this.CommonDialogsService.confirmDialog('Delete allocated trades ').pipe(
+      filter (isConfirmed => isConfirmed.isConfirmed),
+      switchMap(data => this.TradeService.deleteAllocatedTrades(this.allocationTable.selection.selected.map(el=>Number(el.id))))
+    ).subscribe (deletedTrades=>{
+      this.allocatedqty.patchValue(
+        Number(this.allocatedqty.value)-deletedTrades.map(el=>el.idtrade==this.idtrade.value? el.qty:null).reduce((acc, value) => acc + Number(value), 0)
+        );
+      this.TradeService.sendNewAllocatedQty({idtrade:this.idtrade.value,allocatedqty:this.allocatedqty.value})
       this.TradeService.sendDeletedAllocationTrades(deletedTrades)
+      this.orderTable.submitQuery(true, false).then(()=>this.orderTable.filterForAllocation())
     })
   }
   selectClient (){
@@ -226,7 +241,10 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
       this.settlement_rate.patchValue(1)
       this.settlement_rate.disable();
       this.settlement_amount.patchValue(this.trade_amount.value)
-    } else {this.settlement_rate.enable()}   
+    } else {
+        this.settlement_rate.enable();
+        this.settlement_rate.value===1? this.settlement_rate.patchValue(null) : null;
+    }   
   }
   settlementAmountUpdate() {
     if (this.id_settlement_currency.valid&&this.id_settlement_currency.valid&&Number(this.settlement_rate.value)) {
@@ -279,7 +297,6 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
 
   }
   snacksBox(result:any, action?:string){
-    console.log('snacksBox',result,action);
     if (result['name']=='error') {
       this.CommonDialogsService.snackResultHandler(result)
     } else {
@@ -293,14 +310,11 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
   showErrors () {
     Object.entries(this.tradeModifyForm.controls).forEach(el=>el[1].errors? console.log(el[0],el[1].errors):null)
    }
-  Number(value) {
-    return Number(value)? true:false
-  }
   toggleAllRows(dataSource:MatTableDataSource<orders|allocation>,selection:SelectionModel<orders|allocation>, forceSelectAll:boolean=false) { 
     return this.SelectionService.toggleAllRows(dataSource, selection,forceSelectAll);
   }
   isAllSelected() { return this.SelectionService.isAllSelected(this.orderTable.dataSource, this.orderTable.selection)}  
-
+  fNumber (value) { return Number(value)}
   get idtrade() {return this.tradeModifyForm.get('idtrade')}
   get trtype() {return this.tradeModifyForm.get('trtype')}
   get qty() {return this.tradeModifyForm.get('qty')}

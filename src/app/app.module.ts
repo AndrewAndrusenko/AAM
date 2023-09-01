@@ -81,6 +81,7 @@ const appInitializerFn = (accessRestirictions:AuthService) => {
 }
 @NgModule({
     imports: [
+        DragDropModule,
         BrowserModule,
         BrowserAnimationsModule,
         MatTreeModule,
@@ -168,7 +169,7 @@ const appInitializerFn = (accessRestirictions:AuthService) => {
         AppTableCurrenciesDataComponent,
         AppOrderTableComponent,
         OrdersTabComponent,
-        AppallocationTableComponent
+        AppallocationTableComponent,
      ],
     bootstrap: [AppComponent],
     providers: [ 
@@ -198,5 +199,6 @@ import { AppInstrumentCorpActionFormComponent } from './components/forms/instrum
 import { AccSWIFTTabComponent } from './components/main-page/tabs/SWIFT-tab.component/SWIFT-tab.component';
 import { AppTableCurrenciesDataComponent } from './components/tables/currencies-data-table.component/currencies-data-table.component';
 import { AppallocationTableComponent } from './components/tables/allocation-table.component/allocation-table.component';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 

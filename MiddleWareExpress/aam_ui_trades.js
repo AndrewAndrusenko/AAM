@@ -86,6 +86,9 @@ async function fUpdateTradeData (request, response) {
 async function fGetOrderData (request,response) {
   let conditions = {}
   conditions = {
+    'id':{
+      1: '( dorders.id::text =  ANY(ARRAY[${id}]))',
+    },
     'idtrade':{
       1: '(idtrade =  ${idtrade})',
     },
@@ -165,7 +168,7 @@ async function fAllocation(request,response) {
     break;
     case 'deleteAllocation':
       console.log('deleteAllocation id', request.body);
-      sql = 'DELETE FROM dtrades_allocated WHERE id=ANY(ARRAY[${tradesIDs}]) RETURNING id'; 
+      sql = 'DELETE FROM dtrades_allocated WHERE id=ANY(ARRAY[${tradesIDs}]) RETURNING *'; 
     break;
   }
   sql = pgp.as.format(sql,request.body.data);

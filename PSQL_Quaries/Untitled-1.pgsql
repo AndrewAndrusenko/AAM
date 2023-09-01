@@ -1,0 +1,1 @@
+SELECT * FROM "aAccesRoles" LIMIT 1000;
