@@ -1,4 +1,9 @@
-<mat-toolbar color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4">
+<mat-toolbar 
+cdkDrag
+cdkDragRootElement=".cdk-overlay-pane" 
+cdkDragHandle
+color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4">
+  
   <span style="margin-right: 2%;">{{action}} Instrument | ID {{idtrade.value}} </span>
   <span class="example-spacer"></span>
   <ng-container  *ngIf="!disabledControlElements&&tabIndex===1" style="margin-bottom: 1%;">
@@ -102,10 +107,10 @@
         <br> <span *ngIf="price_type.value==2" style="margin-top: 2%;" >
             Accured Interest :  {{accured_interest.value | currency :this.code_price_currency.value+' '}} 
           </span>
-          <br><span style="margin-top: 2%; " *ngIf="Number(settlement_amount.value)">
+          <br><span style="margin-top: 2%; " *ngIf="fNumber(settlement_amount.value)">
             Settlement Amount :  {{ settlement_amount.value | currency :this.code_settlement_currency.value+' '}} 
           </span>
-          <span  style="margin-top: 2%;"  *ngIf="!Number(settlement_amount.value)">
+          <span  style="margin-top: 2%;"  *ngIf="!fNumber(settlement_amount.value)">
             Settlement Amount :  {{ settlement_amount.value }} 
           </span>
         </span>
@@ -393,11 +398,41 @@
     </form>
     <app-orders-table #ordersTable style="width: 100%;" 
       [tableMode]="['Allocation','Parent']"
-      [allocationFilters]="{secid:tidinstrument.value,type:trtype.value}">
+      [allocationFilters]="{secid:tidinstrument.value,type:trtype.value,bulkorders:null}">
     </app-orders-table>
+    <mat-expansion-panel class="headers-align" [expanded]="true"
+    (opened)="panelOpenStateFirst = true"
+    (closed)="panelOpenStateFirst = false" >
+    <mat-expansion-panel-header style="margin-bottom: 1%;">
+      <mat-panel-title title="Details">
+        Trades allocated
+      </mat-panel-title>
+      <mat-panel-description >
+        Tap to {{panelOpenStateFirst? 'hide': 'open'}} data
+        <mat-icon color = 'accent'>list</mat-icon>
+      </mat-panel-description>
+    </mat-expansion-panel-header >
     <app-allocation-table  #allocationTable style="width: 100%;" 
     [tableMode]="['Trade']"
     [tradeData]="tradeModifyForm.value">
     </app-allocation-table>
+  </mat-expansion-panel>
+    <mat-expansion-panel class="headers-align" 
+    (opened)="panelOpenStateFirst = true"
+    (closed)="panelOpenStateFirst = false" >
+    <mat-expansion-panel-header style="margin-bottom: 1%;">
+      <mat-panel-title title="Details">
+        Orders allocated
+      </mat-panel-title>
+      <mat-panel-description >
+        Tap to {{panelOpenStateFirst? 'hide': 'open'}} data
+        <mat-icon color = 'accent'>list</mat-icon>
+      </mat-panel-description>
+    </mat-expansion-panel-header >
+    <app-orders-table #ordersTable style="width: 100%;" 
+    [tableMode]="['AllocatedOrders','Parent']"
+    [allocationFilters]="{secid:tidinstrument.value,type:trtype.value,bulkorders:['0']}">
+  </app-orders-table>
+  </mat-expansion-panel>
   </mat-tab>
 </mat-tab-group>
