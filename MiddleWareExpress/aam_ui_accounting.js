@@ -16,11 +16,11 @@ async function fUpdateLedgerAccountAccounting (request, response) {
   db_common_api.fUpdateTableDB ('bLedger',fields,'ledgerNoId',request, response)
 }
 async function fUpdateLLEntryAccounting (request, response) {
-  let fields =  ['ledgerID_Debit', 'dateTime',  'XactTypeCode_Ext', 'ledgerID',  'amount', 'entryDetails', 'extTransactionId']
+  let fields =  ['ledgerID_Debit', 'dateTime',  'XactTypeCode_Ext', 'ledgerID',  'amount', 'entryDetails', 'extTransactionId','idtrade']
   db_common_api.fUpdateTableDB ('bLedgerTransactions',fields,'id',request, response)
 }
 async function fUpdateEntryAccountAccounting (request, response) {
-  let fields =  ['ledgerNoId', 'dataTime', 'XactTypeCode', 'XactTypeCode_Ext', 'accountId',  'amountTransaction', 'entryDetails', 'extTransactionId']
+  let fields =  ['ledgerNoId', 'dataTime', 'XactTypeCode', 'XactTypeCode_Ext', 'accountId',  'amountTransaction', 'entryDetails', 'extTransactionId','idtrade']
   db_common_api.fUpdateTableDB ('bAccountTransaction',fields,'id',request, response)
 }
 async function fGetAccountingData (request,response) {
@@ -274,30 +274,84 @@ async function fGetMT950Transactions (request,response) {
   db_common_api.queryExecute(sql,response,null,request.query.Action);
 }
 async function GetEntryScheme (request, response) {
-  const query = {
-    text:'SELECT '+
-    '"ledgerNoId" , "dataTime", "XactTypeCode", ' +
-    '"XactTypeCode_Ext" , "accountId", "amountTransaction", '+
-    '"entryDetails", "extTransactionId" '+
-    'FROM public."bcSchemeAccountTransaction" '+
-    'WHERE '+
-    '("cxActTypeCode_Ext" = ${cxActTypeCode_Ext} AND "cxActTypeCode" = ${cxActTypeCode} AND "cLedgerType" = ${cLedgerType});'
+  let conditions = {}
+  let sql='';
+  conditions = {
+    'cxActTypeCode_Ext':{
+      1: '("cxActTypeCode_Ext" = ${cxActTypeCode_Ext})',
+    },
+    'cxActTypeCode':{
+      1: '"cxActTypeCode" = ${cxActTypeCode}',
+    },
+    'cLedgerType':{
+      1: '("cLedgerType" = ${cLedgerType})',
+    },
+    'cSchemeGroupId':{
+      1: '("cSchemeGroupId" = ${cSchemeGroupId})',
+    },
+    'price': {
+      1: '(price BETWEEN ${price_min} AND ${price_max})',
+    },
+    'tdate_min': {
+      1: '(tdate::timestamp without time zone >= ${tdate_min}::date )',
+    },
+    'tdate_max': {
+      1: '(tdate::timestamp without time zone <= ${tdate_max}::date )',
+    },
+    'secidList' : {
+      1: '(LOWER(secid) = ANY(array[${secidList}]))  ',
+    }
   }
-  sql = pgp.as.format(query.text,request.query)
+  let conditionsTrades =' WHERE'
+  Object.entries(conditions).forEach(([key,value]) => {
+  if  (request.query.hasOwnProperty(key)) {
+    request.query[key]!=='null'? conditionsTrades +=conditions[key][1] + ' AND ': null;
+    }
+  });
+
+  switch (request.query.entryType) {
+    case 'LL':
+      sql = 'SELECT "ledgerID", "dateTime", "ledgerID_Debit", "amount", "entryDetails",  "XactTypeCode", "XactTypeCode_Ext", "extTransactionId", idtrade FROM public."bcSchemeLedgerTransaction" ';
+    break;
+    default:
+      sql='SELECT "ledgerNoId" , "dataTime", "XactTypeCode", "XactTypeCode_Ext" , "accountId", "amountTransaction", "entryDetails", "extTransactionId",idtrade FROM public."bcSchemeAccountTransaction" ';
+    break;
+  }
+  sql +=conditionsTrades.slice(0,-5);
+  sql = pgp.as.format(sql,request.query)
+  console.log('scheme',sql,request.query);
   pool.query (sql,  (err, res) => {if (err) {
       console.log (err.stack.split("\n", 1).join(""))
       err.detail = err.stack
       return response.send(err)
     } else {
+      console.log('else',res.rows,request.query.entryType,);
       if (res.rows.length !== 0) {
+        console.log('JSON',(JSON.stringify(res.rows[0]),'json request.query)', request.query));
         entryDraftData = JSON.parse (pgp.as.format (JSON.stringify(res.rows[0]), request.query));
-        sql = 'SELECT ' + 
-        '"bLedger"."ledgerNo", "bAccounts"."accountNo", "bcTransactionType_Ext"."xActTypeCode_Ext", "bcTransactionType_DE"."name", '+ 'json_populate_recordset.* ' +
-        'FROM json_populate_recordset(null::public."bAccountTransaction",\'[' + [JSON.stringify(entryDraftData)] +']\') ' +
-        'LEFT JOIN "bcTransactionType_Ext" ON "bcTransactionType_Ext".id = json_populate_recordset."XactTypeCode_Ext" ' +
-        'LEFT JOIN "bcTransactionType_DE" ON "bcTransactionType_DE"."xActTypeCode" = json_populate_recordset."XactTypeCode" ' +
-        'LEFT JOIN "bLedger" ON "bLedger"."ledgerNoId" = json_populate_recordset."ledgerNoId"	' +
-        'LEFT JOIN "bAccounts" ON "bAccounts"."accountId" = json_populate_recordset."accountId";'; 	
+        console.log('entryDraftData',entryDraftData);
+
+        switch (request.query.entryType) {
+          case 'LL':
+            sql = 'SELECT ' + 
+            '"bLedger"."ledgerNo", "bLedgerDebit"."ledgerNo", "bcTransactionType_Ext"."xActTypeCode_Ext", "bcTransactionType_DE"."name", '+ 'json_populate_recordset.* ' +
+            'FROM json_populate_recordset(null::public."bcSchemeLedgerTransaction",\'[' + [JSON.stringify(entryDraftData)] +']\') ' +
+            'LEFT JOIN "bcTransactionType_Ext" ON "bcTransactionType_Ext".id = json_populate_recordset."XactTypeCode_Ext" ' +
+            'LEFT JOIN "bcTransactionType_DE" ON "bcTransactionType_DE"."xActTypeCode" = json_populate_recordset."XactTypeCode" ' +
+            'LEFT JOIN "bLedger" ON "bLedger"."ledgerNoId"::text = json_populate_recordset."ledgerID" '+
+            'LEFT JOIN "bLedger" AS "bLedgerDebit" ON "bLedgerDebit"."ledgerNoId"::text = json_populate_recordset."ledgerID_Debit";'
+          break;
+          default:
+            sql = 'SELECT ' + 
+            '"bLedger"."ledgerNo", "bAccounts"."accountNo", "bcTransactionType_Ext"."xActTypeCode_Ext", "bcTransactionType_DE"."name", '+ 'json_populate_recordset.* ' +
+            'FROM json_populate_recordset(null::public."bAccountTransaction",\'[' + [JSON.stringify(entryDraftData)] +']\') ' +
+            'LEFT JOIN "bcTransactionType_Ext" ON "bcTransactionType_Ext".id = json_populate_recordset."XactTypeCode_Ext" ' +
+            'LEFT JOIN "bcTransactionType_DE" ON "bcTransactionType_DE"."xActTypeCode" = json_populate_recordset."XactTypeCode" ' +
+            'LEFT JOIN "bLedger" ON "bLedger"."ledgerNoId" = json_populate_recordset."ledgerNoId"	' +
+            'LEFT JOIN "bAccounts" ON "bAccounts"."accountId" = json_populate_recordset."accountId";'; 	
+          break;
+          
+        }
         db_common_api.queryExecute(sql,response,null,'STP_Get Entry Scheme');
       }
     }

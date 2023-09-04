@@ -199,7 +199,8 @@ export interface bcParametersSchemeAccTrans {
   dAccountNo: string,
   pLedgerNoId: number,
   dLedgerNo: string,
-  pExtTransactionId:string
+  pExtTransactionId:string,
+  cSchemeGroupId:string,
 }
 export interface bAccounts {
   accountNo: string,  
