@@ -51,7 +51,7 @@ async function fGetAccountingData (request,response) {
       '"bAccounts"."idportfolio", clientname AS d_clientname, dportfolios.portfolioname AS "d_portfolioCode", ' +
       '"bcAccountType_Ext"."actCodeShort" ||\': \' || "bcAccountType_Ext"."description" as "d_Account_Type", ' +
       '"bcAccountType_Ext"."actCodeShort" as "d_accountType", "bcAccountType_Ext"."description" as d_accTypeDescription, ' +
-      '"bcEnityType"."entityTypeCode" as d_entityTypeCode, "bcEnityType"."name" as d_entityTypeDescription, 0 as action '+
+      '"bcEnityType"."entityTypeCode" as d_entityTypeCode, "bcEnityType"."name" as d_entityTypeDescription,"bcAccountType_Ext"."xActTypeCode"  as "d_APTypeCodeAccount", 0 as action '+
       'FROM public."bAccounts" '+
       'LEFT JOIN dclients ON "bAccounts"."clientId" = dclients.idclient ' +
       'LEFT JOIN dportfolios ON dportfolios.idportfolio = "bAccounts"."idportfolio" ' +

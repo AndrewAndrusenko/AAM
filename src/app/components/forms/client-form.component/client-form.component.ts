@@ -9,6 +9,7 @@ import { AppInvestmentDataServiceService } from 'src/app/services/investment-dat
 import { AuthService } from 'src/app/services/auth.service';
 import { ClientData } from 'src/app/models/intefaces.model';
 import { filter, switchMap } from 'rxjs';
+import { A } from '@angular/cdk/keycodes';
 @Component({
   selector: 'app-app-client-form',
   templateUrl: './client-form.component.html',
@@ -35,6 +36,10 @@ export class AppClientFormComponent implements OnInit {
     this.accessToPortfolioData = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToPortfolioData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
   }
+  showErrors () {
+    console.log('erro',Object.entries(this.editClienttForm.controls));
+    Object.entries(this.editClienttForm.controls).forEach(el=>el[1].errors? console.log(el[0],el[1].errors):null)
+   }
   ngOnInit(): void {
     this.editClienttForm=this.fb.group ({
       idclient: {value: 0, disabled: false}, 
@@ -56,9 +61,10 @@ export class AppClientFormComponent implements OnInit {
     this.accessState==='none'? null : this.InvestmentDataServiceService.getClientData(clientId, clientname, actionSQL).subscribe(data => {
       this.editClienttForm.patchValue(data[0]);
       this.action === 'Create_Example'? this.clientname.setErrors({uniqueClientName:true}) : null;
+      console.log('act',this.action);
       this.clientname.setAsyncValidators(customAsyncValidators.clientNameCustomAsyncValidator(this.InvestmentDataServiceService, 
       ['Create','Create_Example'].includes(this.action)? 0 : clientId, 
-      this.clientname.value,
+      ['Create','Create_Example'].includes(this.action)? '' : this.clientname.value,
       this.action==='Create_Example'? this.clientname.errors : null));
       this.clientname.updateValueAndValidity();
     })

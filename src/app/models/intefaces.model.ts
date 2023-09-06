@@ -418,5 +418,5 @@ export interface orders {
   id:number, generated:Date, type:string, secid:string, qty:number, price:number, amount:number, qty_executed:number, status:string, parent_order:number, id_portfolio:number,portfolioname:string, ordertype:string, idcurrency:number,currencycode:string, security_group_name:string,secid_type:string,secid_name:string, price_type:number, action:string, allocated:number,unexecuted:number
 }
 export interface allocation {
-  id:number, qty:number, idtrade:number, idportfolio:number, id_order:number,id_bulk_order:number, portfolioname: string,trade_amount:number, accured_interest:number,id_settlement_currency:number,current_postion_qty:number, current_account_balance:number
+  id:number, qty:number, idtrade:number, idportfolio:number, id_order:number,id_bulk_order:number, portfolioname: string,trade_amount:number, accured_interest:number,id_settlement_currency:number,current_postion_qty:number, current_account_balance:number, accountId:number
 }

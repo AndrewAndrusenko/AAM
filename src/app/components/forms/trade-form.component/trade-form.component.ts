@@ -1,9 +1,9 @@
 import { AfterContentInit, Component,  EventEmitter,  Input, Output, TemplateRef, ViewChild, ViewContainerRef} from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ClientData, Instruments, allocation, orders} from 'src/app/models/intefaces.model';
+import { ClientData, Instruments, allocation, bcParametersSchemeAccTrans, orders} from 'src/app/models/intefaces.model';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AuthService } from 'src/app/services/auth.service';
-import { Observable, Subscription, distinctUntilChanged, filter, map, observable, startWith, switchMap } from 'rxjs';
+import { Observable, Subscription, distinctUntilChanged, filter, map, observable, startWith, switchMap, tap } from 'rxjs';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import { AppTradeService } from 'src/app/services/trades-service.service';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -17,6 +17,7 @@ import { HandlingTableSelectionService } from 'src/app/services/handling-table-s
 import { AppallocationTableComponent } from '../../tables/allocation-table.component/allocation-table.component';
 import { MatTableDataSource } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
+import { AccountingTradesService } from 'src/app/services/accounting-trades.service';
 @Component({
   selector: 'app-trade-modify-form',
   templateUrl: './trade-form.component.html',
@@ -53,6 +54,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     private SelectionService:HandlingTableSelectionService,
     private CommonDialogsService:HadlingCommonDialogsService,
     private TradeService: AppTradeService,
+    private accountingTradeService: AccountingTradesService,
     private AccountingDataService:AppAccountingService, 
     private AutoCompService:AtuoCompleteService,
     private indexDBServiceS:indexDBService,
@@ -163,8 +165,30 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
       this.CommonDialogsService.snackResultHandler({name:'error',detail:'No bulk order has been selected!'},'Allocation');
     }
   } 
-  confirmAllocation () {
+  createAccountingForAllocation () {
+    let tradeToConfirm = this.allocationTable.selection.selected;
+    let bcEntryParameters = <any> {}
+    console.log('selection',tradeToConfirm);
 
+    tradeToConfirm.forEach(clientTrade => {
+      bcEntryParameters.id_settlement_currency=this.id_settlement_currency.value;
+      bcEntryParameters.cptyCode='CHASUS';
+      bcEntryParameters.pDate_T=new Date(this.tdate.value).toDateString();
+      bcEntryParameters.pAccountId=clientTrade.accountId;
+      bcEntryParameters.pSettlementAmount=clientTrade.trade_amount;
+      bcEntryParameters.secid=this.tidinstrument.value;
+      bcEntryParameters.allocated_trade_id=clientTrade.id;
+      bcEntryParameters.idtrade=this.idtrade.value;
+    this.accountingTradeService.getAccountingScheme(bcEntryParameters,'Investment_Buy_Basic').pipe(
+      tap (data=>console.log('trade accounting',data)),
+      switchMap(entryDraft=> this.AccountingDataService.updateEntryAccountAccounting (entryDraft[0],'Create',))
+      ).subscribe (result => console.log('created Entry',result))
+    this.accountingTradeService.getAccountingScheme(bcEntryParameters,'Investment_Buy_Basic','LL').pipe(
+      tap (data=>console.log('trade accounting',data)),
+      switchMap(entryDraft=> this.AccountingDataService.updateLLEntryAccountAccounting (entryDraft[0],'Create',))
+      ).subscribe (result => console.log('created Entry',result))
+    })
+    this.allocationTable.selection.clear();
   }
   deleteAllocatedTrades (){
     if (!this.allocationTable.selection.selected.length) {

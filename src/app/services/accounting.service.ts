@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, ReplaySubject, Subject} from 'rxjs';
+import { Observable, ReplaySubject, Subject, of} from 'rxjs';
 import { bAccounts, bAccountsEntriesList, bBalanceData, bBalanceFullData, bcAccountType_Ext, bcEnityType, bcTransactionType_Ext, bLedger, bLedgerAccounts, bLedgerBalanceData, SWIFTSGlobalListmodel, SWIFTStatement950model } from '../models/intefaces.model';
 
 @Injectable({
@@ -149,29 +149,40 @@ export class AppAccountingService {
   sendReloadEntryList ( id:any) {this.relplaySubject.next(id)}
   getReloadEntryList(): Observable<any> {return this.relplaySubject.asObservable()}
 /*----------------------OverdraftValidators----------------------------------------------------*/
+/*   goodToGo (func:any):boolean {
+    console.log('func',func);
+    for (const letter of func) {if (!letter) {
+      console.log('arg',letter);
+      return false} }
+    return true
+  } */
   getExpectedBalanceOverdraftCheck (accountId: number, transactionAmount:number, transactionDate: string, xactTypeCode: number, id: number, FirstOpenedAccountingDate: string, Action: string ):Observable <bBalanceData[]> {
-    const params = {
-      'accountId': accountId, 
-      'transactionAmount' : parseFloat(transactionAmount.toString().replace(/,/g, '')), 
-      'transactionDate': transactionDate,
-      'xactTypeCode': xactTypeCode,
-      'id': id,
-      'FirstOpenedAccountingDate': FirstOpenedAccountingDate, 
-      'Action': Action
-    }
-    return this.http.get <bBalanceData []>('/api/DEA/accountingOverdraftAccountCheck/', { params: params })
+    if (accountId&&transactionAmount&&transactionAmount) {
+      const params = {
+        'accountId': accountId, 
+        'transactionAmount' : parseFloat(transactionAmount.toString().replace(/,/g, '')), 
+        'transactionDate': transactionDate,
+        'xactTypeCode': xactTypeCode,
+        'id': id,
+        'FirstOpenedAccountingDate': FirstOpenedAccountingDate, 
+        'Action': Action
+      }
+      return this.http.get <bBalanceData []>('/api/DEA/accountingOverdraftAccountCheck/', { params: params })
+    } else return of (null)
   }
   getExpectedBalanceLedgerOverdraftCheck (accountId: number, transactionAmount:number, transactionDate: string, xactTypeCode: number, id: number, FirstOpenedAccountingDate: string, Action: string ):Observable <bLedgerBalanceData[]> {
-    const params = {
-      'accountId': accountId, 
-      'transactionAmount' : parseFloat(transactionAmount.toString().replace(/,/g, '')), 
-      'transactionDate': transactionDate,
-      'xactTypeCode': xactTypeCode,
-      'id': id,
-      'FirstOpenedAccountingDate': FirstOpenedAccountingDate, 
-      'Action': Action
-    }
-    return this.http.get <bLedgerBalanceData []>('/api/DEA/accountingOverdraftLedgerAccountCheck/', { params: params })
+    if (accountId&&transactionAmount&&transactionAmount) {
+      const params = {
+        'accountId': accountId, 
+        'transactionAmount' : parseFloat(transactionAmount.toString().replace(/,/g, '')), 
+        'transactionDate': transactionDate,
+        'xactTypeCode': xactTypeCode,
+        'id': id,
+        'FirstOpenedAccountingDate': FirstOpenedAccountingDate, 
+        'Action': Action
+      }
+      return this.http.get <bLedgerBalanceData []>('/api/DEA/accountingOverdraftLedgerAccountCheck/', { params: params })
+    } else return of (null)
   }
   /*----------------------Balance Sheets----------------------------------------------------*/
   GetALLClosedBalances (searchParameters:any, id: number, lastClosedDate:string, Sender: string, Action: string):Observable <bBalanceFullData[]> {

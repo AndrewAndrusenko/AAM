@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, EventEmitter, Output, ViewChild, Input, ChangeDetectionStrategy, ElementRef, TemplateRef, ViewContainerRef} from '@angular/core';
+import {AfterViewInit, Component, EventEmitter, Output, ViewChild, Input, ChangeDetectionStrategy, ElementRef, TemplateRef} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {Observable, Subscription, map, startWith, switchMap, tap } from 'rxjs';
@@ -8,7 +8,6 @@ import { Instruments, trades } from 'src/app/models/intefaces.model';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
 import { AbstractControl, FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { investmentNodeColorChild, additionalLightGreen } from 'src/app/models/constants.model';
 import { formatNumber } from '@angular/common';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
@@ -16,8 +15,6 @@ import { AuthService } from 'src/app/services/auth.service';
 import { AppTradeService } from 'src/app/services/trades-service.service';
 import { AppTradeModifyFormComponent } from '../../forms/trade-form.component/trade-form.component';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
-import { AccountingTradesService } from 'src/app/services/accounting-trades.service';
-import { AppAccountingService } from 'src/app/services/accounting.service';
 
 @Component({
   selector: 'app-trade-table',
@@ -62,8 +59,6 @@ export class AppTradeTableComponent  implements AfterViewInit {
   @ViewChild(TemplateRef) _dialogTemplate: TemplateRef<any>;
   constructor(
     private TradeService: AppTradeService,
-    private AccountingDataService:AppAccountingService, 
-    private accountingTradeService: AccountingTradesService,
     private AuthServiceS:AuthService,  
     private HandlingCommonTasksS:HandlingCommonTasksService,
     private CommonDialogsService:HadlingCommonDialogsService,
@@ -115,14 +110,7 @@ export class AppTradeTableComponent  implements AfterViewInit {
     this.arraySubscrition.unsubscribe();
   }
   confirmAllocation (idtrade:number) {
-    this.accountingTradeService.getAccountingScheme({},'Investment_Buy_Basic').pipe(
-      tap (data=>console.log('trade accounting',data)),
-      switchMap(entryDraft=> this.AccountingDataService.updateEntryAccountAccounting (entryDraft[0],'Create',))
-      ).subscribe (result => console.log('created Entry',result))
-    this.accountingTradeService.getAccountingScheme({},'Investment_Buy_Basic','LL').pipe(
-      tap (data=>console.log('trade accounting',data)),
-      switchMap(entryDraft=> this.AccountingDataService.updateLLEntryAccountAccounting (entryDraft[0],'Create',))
-      ).subscribe (result => console.log('created Entry',result))
+
   }
 
    async ngAfterViewInit() {

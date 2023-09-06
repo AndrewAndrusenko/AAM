@@ -184,10 +184,10 @@ export class AppallocationTableComponent  implements AfterViewInit {
     return this.SelectionService.checkboxLabel(this.dataSource, this.selection, row)
   }
   async submitQuery (reset:boolean=false, showSnackResult:boolean=true) {
-    console.log('submitQuery tradeId',this.tradeData.idtrade);
     return new Promise((resolve, reject) => {
       let searchObj = reset?  {} : this.searchParametersFG.value;
       this.dataSource.data? this.dataSource.data = null : null;
+      this.tradeData?.idtrade? searchObj.idtrade=this.tradeData.idtrade:null;
       searchObj.secidList = [0,1].includes(this.instruments.length)&&this.instruments[0]==='ClearAll'? null : this.instruments.map(el=>el.toLocaleLowerCase())
       if (this.qty.value) {
         let qtyRange = this.HandlingCommonTasksS.toNumberRange(this.qty.value,this.qty,'qty');
@@ -199,6 +199,7 @@ export class AppallocationTableComponent  implements AfterViewInit {
       } else  {searchObj.price=null};
       this.price.value? searchObj = {...searchObj, ... this.HandlingCommonTasksS.toNumberRange(this.price.value,this.price,'price')} :null;
       searchObj = {...searchObj, ...this.tdate.value? this.HandlingCommonTasksS.toDateRange(this.tdate, 'tdate') : null}
+      console.log('searchObj',searchObj);
       this.TradeService.getAllocationInformation(searchObj).subscribe(data => {
         this.updateAllocationDataTable(data)
         showSnackResult? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ') : null;

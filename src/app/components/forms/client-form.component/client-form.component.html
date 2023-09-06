@@ -1,15 +1,15 @@
 <mat-toolbar color="primary" >
-  {{action==='Create_Example'? 'Create' : action}} Client
+  {{action==='Create_Example'? 'Create' : action}} Client {{editClienttForm.valid}}
 </mat-toolbar>
 <div class="client_form">
   <button mat-raised-button color="primary" 
-    [disabled]="!(editClienttForm.valid && submitbox.checked)"
+    [disabled]="editClienttForm.invalid || !submitbox.checked"
     (click)="editClienttForm.valid? updateClientData(action) : null"
     style="margin-top: 10px; width: 200px; font-size: 18px;">
     {{action==='Create_Example'? 'Create' : action}} Client 
   </button>
-  <mat-checkbox color="primary"  #submitbox checked="false" 
-    (click)=" 
+  <mat-checkbox color="primary"  #submitbox 
+    (click)=" showErrors();
       editClienttForm.markAllAsTouched();
       editClienttForm.controls['clientname'].updateValueAndValidity();
     "

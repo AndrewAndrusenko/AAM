@@ -6,7 +6,7 @@ import { AppAccountingService } from './accounting.service';
 import { InstrumentDataService } from './instrument-data.service';
 export class customAsyncValidators {
 
-  static clientNameCustomAsyncValidator(userService: AppInvestmentDataServiceService, clientId: number, client:string, errors?:ValidationErrors): AsyncValidatorFn {
+  static clientNameCustomAsyncValidator(userService: AppInvestmentDataServiceService, clientId: number, client:string='', errors?:ValidationErrors): AsyncValidatorFn {
     return (control: AbstractControl): Observable<ValidationErrors> => {
       if (control.value.toUpperCase() !== client.toUpperCase() && control.touched||control.dirty) {
         return userService

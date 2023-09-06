@@ -78,7 +78,8 @@ export class AppAccEntryModifyFormComponent {
       d_accountNo: [null, {validators: [Validators.required], updateOn:'blur' } ],  
       d_xActTypeCode_ExtName : {value:null, disabled: false}, 
       d_closingBalance: {value:null, disabled: false}, 
-      d_closingLedgerBalance: {value:null, disabled: false} 
+      d_closingLedgerBalance: {value:null, disabled: false},
+      t_idtrade: {value:null, disabled: false} 
     })    
     this.indexDBServiceS.getIndexDBStaticTables('bcTransactionType_Ext').then (data =>this.TransactionTypes = data['data']);
   }

@@ -27,13 +27,15 @@ color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4"
       Execute Orders
       <mat-icon matSuffix >gavel</mat-icon>
     </button>
-    <button title="Confirm Allocation"  
+    <button title="Create Accounting"  
+      [disabled]="!allocationTable.selection.hasValue()"
       color = "accent" mat-raised-button style=" margin-left:1%; font-size: 18px;"
-      (click)="confirmAllocation()">
+      (click)="  createAccountingForAllocation()">
       Confirm Allocation
       <mat-icon matSuffix>done_all</mat-icon>
     </button>
     <button title="Delete Allocated Trades"  
+    [disabled]="!allocationTable.selection.hasValue()"
     color = "warn" mat-raised-button style=" margin-left:1%; font-size: 18px;"
     (click)="deleteAllocatedTrades()">
     Delete Trades
@@ -42,7 +44,7 @@ color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4"
   </ng-container>
 </mat-toolbar>
 <mat-tab-group mat-stretch-tabs [(selectedIndex)]="tabIndex" >
-<mat-tab label="Trade Details">
+  <mat-tab label="Trade Details">
     <form class="submit" [formGroup]="tradeModifyForm" style="background-color: rgb(40, 39, 39);">
       <button mat-raised-button color="accent" 
         [disabled]="!(tradeModifyForm.valid && submitbox.checked)"
