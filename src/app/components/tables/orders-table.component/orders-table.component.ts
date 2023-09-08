@@ -153,7 +153,6 @@ export class AppOrderTableComponent  implements AfterViewInit {
       })
       if (this.tableMode.includes('AllocatedOrders')) {
         this.subscriptions.add(this.TradeService.getAllocatedOrders().pipe(
-        tap(allocOrders=>console.log('getAllocatedOrders',allocOrders)),
         switchMap(allocOrders =>this.TradeService.getOrderInformation({id:allocOrders.map(el=>Number(el))}))
       ).subscribe(ordersData=>this.updateordersDataTable(ordersData)))
       }
@@ -167,9 +166,7 @@ export class AppOrderTableComponent  implements AfterViewInit {
     }
   }
   filterAllocatedOrders(allocOrders:number[]) {
-    console.log('ds',this.dataSource.data);
     this.updateordersDataTable(this.dataSource.data.filter(el=>allocOrders.includes(el.id)));
-    console.log('all filter',this.dataSource.data.filter(el=>allocOrders.includes(el.id)));
   }
   filterForAllocation () {
     this.tableMode.includes('Allocation')? this.dataSource.data =  this.dataSource.data.filter(el=>el.secid===this.allocationFilters.secid&&el.type===this.allocationFilters.type&&el.ordertype==='Bulk'&&el.unexecuted>0&&['confirmed','in_execution'].includes(el.status)) : null; 
@@ -237,7 +234,6 @@ export class AppOrderTableComponent  implements AfterViewInit {
     return this.dataSource.data.filter(order=>!order.parent_order)
   }
   updateordersDataTable (ordersData:orders[]) {
-    console.log('orderData',ordersData);
     this.fullOrdersSet = ordersData;
     this.dataSource  = new MatTableDataSource(ordersData);
     this.dataSource.paginator = this.paginator;

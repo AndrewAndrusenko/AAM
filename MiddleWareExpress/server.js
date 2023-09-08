@@ -166,6 +166,7 @@ appServer.post('/DEA/updateLedgerAccountAccounting/',jsPassport.authenticate('se
 /*----------------------EntryUI----------------------------------------------------*/
 appServer.post('/DEA/updateEntryAccountAccounting/',jsPassport.authenticate('session') , uiAmmAccountingModule.fUpdateEntryAccountAccounting)
 appServer.post('/DEA/updateLLEntryAccountAccounting/',jsPassport.authenticate('session') , uiAmmAccountingModule.fUpdateLLEntryAccounting)
+appServer.post('/DEA/deleteAllocationAccounting/',jsPassport.authenticate('session') , uiAmmAccountingModule.fdeleteAllocationAccounting)
 /*----------------------OverdraftValidators----------------------------------------------------*/
 appServer.get('/DEA/accountingOverdraftAccountCheck/',jsPassport.authenticate('session') , uiAmmAccountingModule.faccountingOverdraftAccountCheck)
 appServer.get('/DEA/accountingOverdraftLedgerAccountCheck/',jsPassport.authenticate('session') , uiAmmAccountingModule.faccountingOverdraftLedgerAccountCheck)

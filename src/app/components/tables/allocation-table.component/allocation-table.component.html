@@ -176,10 +176,17 @@
             <p *ngSwitchDefault>{{element[column]}}</p>
             <!-- <p *ngSwitchCase="['trade_amount'].includes(column)">{{element[column] | currency:' ' + element['id_settlement_currency'] +' '}} </p> -->
             <p *ngSwitchCase="['trade_amount'].includes(column)">{{element[column] | number}} </p>
-            <p *ngSwitchCase="['id'].includes(column)">
+<!--             <p *ngSwitchCase="['id'].includes(column)">
               <button mat-stroked-button style="font-size: 18px; margin-left: 0; width: 57%;margin-top: 8%;"  
               [matTooltip]="'Order details'" [class]="element['ordertype']=='Client'?' edit-item-button':'edit-child-button'"
               (click)="openOrderModifyForm(disabledControlElements? 'View': 'Edit',element)">
+              {{element[column] }}
+              </button> 
+            </p> -->
+            <p *ngSwitchCase="['entries'].includes(column)">
+              <button mat-flat-button style="font-size: 18px; margin-left: 0; width: 15%;margin-top: 8%;"  
+              [matTooltip]="'List of entries'" 
+              (click)="showEntries(element.id)">
               {{element[column] }}
               </button> 
             </p>

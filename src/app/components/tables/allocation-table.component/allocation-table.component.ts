@@ -20,6 +20,7 @@ import { HandlingTableSelectionService } from 'src/app/services/handling-table-s
 import { SelectionModel } from '@angular/cdk/collections';
 import { indexDBService } from 'src/app/services/indexDB.service';
 import { MatCheckbox } from '@angular/material/checkbox';
+import { AppTableAccEntriesComponent } from '../acc-entries-table.component/acc-entries-table.component';
 @Component({
   selector: 'app-allocation-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -39,8 +40,8 @@ export class AppallocationTableComponent  implements AfterViewInit {
   @Input() tradeData:trades;
   @Input() allocationFilters:{secid:string, type:string};
   fullOrdersSet:allocation[];
-  columnsToDisplay = ['select','id','portfolioname','qty', 'trade_amount', 'current_postion_qty', 'current_account_balance','id_order','id_bulk_order'];
-  columnsHeaderToDisplay = ['ID', 'pCode','Quantity','Amount','Position','Balance', 'Order','Bulk']
+  columnsToDisplay = ['select','id','portfolioname','qty', 'trade_amount', 'current_postion_qty', 'current_account_balance','id_order','id_bulk_order','entries'];
+  columnsHeaderToDisplay = ['ID', 'pCode','Quantity','Amount','Position','Balance', 'Order','Bulk','Entries']
   dataSource: MatTableDataSource<allocation>;
   public selection = new SelectionModel<allocation>(true, []);
   @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -59,6 +60,7 @@ export class AppallocationTableComponent  implements AfterViewInit {
     dateRangeEnd: new FormControl<Date | null>(null),
   });
   dialogOrderModify: MatDialogRef<AppTradeModifyFormComponent>;
+  dialogShowEntriesList: MatDialogRef<AppTableAccEntriesComponent>;
 
   defaultFilterPredicate?: (data: any, filter: string) => boolean;
   secidfilter?: (data: any, filter: string) => boolean;
@@ -71,6 +73,8 @@ export class AppallocationTableComponent  implements AfterViewInit {
     private indexDBServiceS:indexDBService,
     private AutoCompService:AtuoCompleteService,
     private fb:FormBuilder, 
+    private dialog: MatDialog, 
+
   ) {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.orderStatuses = this.AuthServiceS.objectStatuses.filter(el =>el.id_object==='Order');
@@ -113,7 +117,6 @@ export class AppallocationTableComponent  implements AfterViewInit {
         this.dataSource.data.forEach((ds,index)=>{
           deletedTrades.findIndex(el=>Number(el.id)===Number(ds.id))!==-1? arrayToDelete.push(index):null
         })
-        console.log('arrayToDelete',arrayToDelete);
         arrayToDelete.forEach((dlIndex,index)=> this.dataSource.data.splice(dlIndex-index,1));
         this.updateAllocationDataTable(this.dataSource.data)
       })
@@ -125,6 +128,14 @@ export class AppallocationTableComponent  implements AfterViewInit {
       startWith(''),
       map(value => this.AutoCompService.filterList(value || '','secid'))
     );
+  }
+  showEntries (idtrade : number) {
+    this.dialogShowEntriesList = this.dialog.open(AppTableAccEntriesComponent ,{minHeight:'600px', minWidth:'1700px', autoFocus: false, maxHeight: '90vh'});
+    this.dialogShowEntriesList.componentInstance.paramRowData = {idtrade:idtrade}; 
+    this.dialogShowEntriesList.componentInstance.action = 'ViewEntriesByIdTrade';
+    this.dialogShowEntriesList.componentInstance.modal_principal_parent.subscribe ((item)=>{
+      this.dialogShowEntriesList.close(); 
+    });
   }
   applyFilter(event: any, col?:string) {
     this.dataSource.filterPredicate = col === undefined? this.defaultFilterPredicate : this.secidfilter
@@ -142,7 +153,6 @@ export class AppallocationTableComponent  implements AfterViewInit {
     this.dataSource.sort = this.sort;
     let orderAllocated = new Set(this.dataSource.data.map(el=>Number(el.id_bulk_order)))
     this.TradeService.sendAllocatedOrders([...orderAllocated].length? [...orderAllocated]:[0]);
-    console.log('orderAllocated',orderAllocated);
     this.defaultFilterPredicate = this.dataSource.filterPredicate;
     this.secidfilter = this.dataSource.filterPredicate;
   }
@@ -168,7 +178,6 @@ export class AppallocationTableComponent  implements AfterViewInit {
   }
   addChips (el: any, column: string) {(['secid'].includes(column))? this.instruments.push(el):null;}
   updateFilter (el: any) {
-    console.log('el',el);
     this.filterALL.nativeElement.value = el;
     this.dataSource.filter = el.trim().toLowerCase();
     (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
@@ -199,7 +208,6 @@ export class AppallocationTableComponent  implements AfterViewInit {
       } else  {searchObj.price=null};
       this.price.value? searchObj = {...searchObj, ... this.HandlingCommonTasksS.toNumberRange(this.price.value,this.price,'price')} :null;
       searchObj = {...searchObj, ...this.tdate.value? this.HandlingCommonTasksS.toDateRange(this.tdate, 'tdate') : null}
-      console.log('searchObj',searchObj);
       this.TradeService.getAllocationInformation(searchObj).subscribe(data => {
         this.updateAllocationDataTable(data)
         showSnackResult? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ') : null;

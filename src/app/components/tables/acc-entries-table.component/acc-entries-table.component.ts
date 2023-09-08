@@ -88,7 +88,8 @@ export class AppTableAccEntriesComponent implements OnInit {
       noAccountLedger: null,
       amount:{value:null, disabled:true},
       entryType : {value:[], disabled:false},
-      ExtID:{value:null, disabled:false}
+      ExtID:{value:null, disabled:false},
+      idtrade:{value:null, disabled:false}
     })
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToEntriesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
@@ -109,6 +110,11 @@ export class AppTableAccEntriesComponent implements OnInit {
         this.accounts = [this.paramRowData.accountNo];
         this.dataRange.controls['dateRangeStart'].setValue(new Date (this.paramRowData.dateBalance))
         this.dataRange.controls['dateRangeEnd'].setValue(new Date (this.paramRowData.dateBalance))
+        this.submitQuery(false);
+      break;
+      case 'ViewEntriesByIdTrade':
+        console.log('ViewEntriesByIdTrade',);
+        this.idtrade.setValue(this.paramRowData.idtrade)
         this.submitQuery(false);
       break;
       case 'ViewEntriesByExternalId':
@@ -185,6 +191,7 @@ export class AppTableAccEntriesComponent implements OnInit {
       'dateRangeEnd': new Date (this.gRange.get('dateRangeEnd').value).toDateString()});
     ( this.entryTypes.value != null&&this.entryTypes.value.length !=0)? Object.assign (searchObj , {'entryTypes': [this.entryTypes.value]}): null;
     (this.ExtId.value) == null?  null : Object.assign (searchObj , {'extTransactionId': this.ExtId.value});
+    (this.idtrade.value) == null?  null : Object.assign (searchObj , {'idtrade': this.idtrade.value});
     this.AccountingDataService.GetAccountsEntriesListAccounting(searchObj,null,null, null, 'GetAccountsEntriesListAccounting').subscribe (EntriesList  => {
       this.dataSource  = new MatTableDataSource(EntriesList);
       this.dataSource.paginator = this.paginator;
@@ -225,4 +232,5 @@ export class AppTableAccEntriesComponent implements OnInit {
   get  dateRangeEnd() {return this.searchParametersFG.get('dateRangeEnd') } 
   get  entryTypes () {return this.searchParametersFG.get('entryType') } 
   get  ExtId () {return this.searchParametersFG.get('ExtID') } 
+  get  idtrade () {return this.searchParametersFG.get('idtrade') } 
 }

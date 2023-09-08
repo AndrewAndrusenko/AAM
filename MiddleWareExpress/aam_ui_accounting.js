@@ -47,7 +47,7 @@ async function fGetAccountingData (request,response) {
     break;
     case 'GetAccountDataWholeList':
       query.text ='SELECT '+
-      '"accountNo", "accountTypeExt", "Information", "clientId", "currencyCode","bAccounts"."entityTypeCode", "accountId", '+
+      '"accountNo", "accountTypeExt", "Information", "clientId", "currencyCode","bAccounts"."entityTypeCode", "accountId", secid,'+
       '"bAccounts"."idportfolio", clientname AS d_clientname, dportfolios.portfolioname AS "d_portfolioCode", ' +
       '"bcAccountType_Ext"."actCodeShort" ||\': \' || "bcAccountType_Ext"."description" as "d_Account_Type", ' +
       '"bcAccountType_Ext"."actCodeShort" as "d_accountType", "bcAccountType_Ext"."description" as d_accTypeDescription, ' +
@@ -99,6 +99,10 @@ async function fGetAccountingData (request,response) {
         'extTransactionId' : {
           1: ' ("extTransactionId" = ${extTransactionId:raw})',
           2: ' ("extTransactionId" = ${extTransactionId:raw}) '
+        },
+        'idtrade' : {
+          1: ' ("idtrade" = ${idtrade:raw})',
+          2: ' ("idtrade" = ${idtrade:raw}) '
         },
       }
       let conditionsAccountLedger =' WHERE'
@@ -207,6 +211,7 @@ async function fGetAccountingData (request,response) {
           1: ' ("XactTypeCode_Ext" = ANY(array[${entryTypes:raw}]))',
         }
  */      }
+
       let conditionsBalance =' WHERE'
       let conditionsAccountProject =' WHERE'
       let conditionsLedgerProject =' WHERE'
@@ -238,6 +243,7 @@ async function fGetAccountingData (request,response) {
       query.text += ' ORDER BY "dateBalance"::timestamp without time zone DESC;';
     break;
   }
+  console.log('request.query',request.query);
   query.text = pgp.as.format(query.text,request.query);
   db_common_api.queryExecute(query.text,response,null, request.query.queryCode === undefined?  request.query.Action : request.query.queryCode );
 }
@@ -302,6 +308,7 @@ async function GetEntryScheme (request, response) {
       1: '(LOWER(secid) = ANY(array[${secidList}]))  ',
     }
   }
+  // console.log('request.query.entryType',request.query.entryType);
   let conditionsTrades =' WHERE'
   Object.entries(conditions).forEach(([key,value]) => {
   if  (request.query.hasOwnProperty(key)) {
@@ -317,6 +324,9 @@ async function GetEntryScheme (request, response) {
       sql='SELECT "ledgerNoId" , "dataTime", "XactTypeCode", "XactTypeCode_Ext" , "accountId", "amountTransaction", "entryDetails", "extTransactionId",idtrade FROM public."bcSchemeAccountTransaction" ';
     break;
   }
+//  console.log('request.query',request.hasOwnProperty('query'));
+//  console.log('request.query',request.query);
+
   sql +=conditionsTrades.slice(0,-5);
   sql = pgp.as.format(sql,request.query)
   console.log('scheme',sql,request.query);
@@ -325,17 +335,14 @@ async function GetEntryScheme (request, response) {
       err.detail = err.stack
       return response.send(err)
     } else {
-      console.log('else',res.rows,request.query.entryType,);
       if (res.rows.length !== 0) {
-        console.log('JSON',(JSON.stringify(res.rows[0]),'json request.query)', request.query));
-        entryDraftData = JSON.parse (pgp.as.format (JSON.stringify(res.rows[0]), request.query));
-        console.log('entryDraftData',entryDraftData);
-
+        let entryDraftData = [];
+        res.rows.forEach(draft=> entryDraftData.push(JSON.stringify(JSON.parse (pgp.as.format (JSON.stringify(draft), request.query)))));
         switch (request.query.entryType) {
           case 'LL':
             sql = 'SELECT ' + 
             '"bLedger"."ledgerNo", "bLedgerDebit"."ledgerNo", "bcTransactionType_Ext"."xActTypeCode_Ext", "bcTransactionType_DE"."name", '+ 'json_populate_recordset.* ' +
-            'FROM json_populate_recordset(null::public."bcSchemeLedgerTransaction",\'[' + [JSON.stringify(entryDraftData)] +']\') ' +
+            'FROM json_populate_recordset(null::public."bcSchemeLedgerTransaction",\'[' + entryDraftData +']\') ' +
             'LEFT JOIN "bcTransactionType_Ext" ON "bcTransactionType_Ext".id = json_populate_recordset."XactTypeCode_Ext" ' +
             'LEFT JOIN "bcTransactionType_DE" ON "bcTransactionType_DE"."xActTypeCode" = json_populate_recordset."XactTypeCode" ' +
             'LEFT JOIN "bLedger" ON "bLedger"."ledgerNoId"::text = json_populate_recordset."ledgerID" '+
@@ -344,7 +351,7 @@ async function GetEntryScheme (request, response) {
           default:
             sql = 'SELECT ' + 
             '"bLedger"."ledgerNo", "bAccounts"."accountNo", "bcTransactionType_Ext"."xActTypeCode_Ext", "bcTransactionType_DE"."name", '+ 'json_populate_recordset.* ' +
-            'FROM json_populate_recordset(null::public."bAccountTransaction",\'[' + [JSON.stringify(entryDraftData)] +']\') ' +
+            'FROM json_populate_recordset(null::public."bAccountTransaction",\'[' + entryDraftData +']\') ' +
             'LEFT JOIN "bcTransactionType_Ext" ON "bcTransactionType_Ext".id = json_populate_recordset."XactTypeCode_Ext" ' +
             'LEFT JOIN "bcTransactionType_DE" ON "bcTransactionType_DE"."xActTypeCode" = json_populate_recordset."XactTypeCode" ' +
             'LEFT JOIN "bLedger" ON "bLedger"."ledgerNoId" = json_populate_recordset."ledgerNoId"	' +
@@ -352,6 +359,9 @@ async function GetEntryScheme (request, response) {
           break;
           
         }
+        console.log('sql drafts',sql);
+        // console.log('entryDraftData',[entryDraftData,entryDraftData1]);
+
         db_common_api.queryExecute(sql,response,null,'STP_Get Entry Scheme');
       }
     }
@@ -386,6 +396,11 @@ async function faccountingBalanceDayOpen (request, response) {
   sql = pgp.as.format(sqlText,request.body.data);
   db_common_api.queryExecute(sql,response,null,'Balance Day Open');
 }
+async function fdeleteAllocationAccounting (request,response) {
+  let sql = "select * from f_delete_allocation_accounting(ARRAY[${trades_to_delete}]);"
+  sql = pgp.as.format(sql,request.body);
+  db_common_api.queryExecute(sql,response,null,'fdeleteAllocationAccounting');
+}
 module.exports = {
   fGetMT950Transactions,
   fGetAccountingData,
@@ -398,5 +413,6 @@ module.exports = {
   faccountingOverdraftAccountCheck,
   faccountingOverdraftLedgerAccountCheck,
   faccountingBalanceCloseInsert,
-  faccountingBalanceDayOpen
+  faccountingBalanceDayOpen,
+  fdeleteAllocationAccounting
 }

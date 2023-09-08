@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, ReplaySubject, Subject, of} from 'rxjs';
-import { bAccounts, bAccountsEntriesList, bBalanceData, bBalanceFullData, bcAccountType_Ext, bcEnityType, bcTransactionType_Ext, bLedger, bLedgerAccounts, bLedgerBalanceData, SWIFTSGlobalListmodel, SWIFTStatement950model } from '../models/intefaces.model';
+import { bAccounts, bAccountsEntriesList, bAccountTransaction, bBalanceData, bBalanceFullData, bcAccountType_Ext, bcEnityType, bcTransactionType_Ext, bLedger, bLedgerAccounts, bLedgerBalanceData, bLedgerTransaction, SWIFTSGlobalListmodel, SWIFTStatement950model } from '../models/intefaces.model';
 
 @Injectable({
   providedIn: 'root'
@@ -140,14 +140,18 @@ export class AppAccountingService {
   sendReloadLedgerAccontList ( id:any) {this.subjectReloadLedgerAccontList.next(id)}
   getReloadLedgerAccontList(): Observable<any> { return this.subjectReloadLedgerAccontList.asObservable()}
 /*----------------------EntryUI----------------------------------------------------*/
-  updateEntryAccountAccounting (data:any, action:string):  Observable<any[]> { 
-  return this.http.post <any[]> ('api/DEA/updateEntryAccountAccounting/',{data:data, action:action})
+  updateEntryAccountAccounting (data:any, action:string):  Observable<bAccountTransaction[]> { 
+  return this.http.post <bAccountTransaction[]> ('api/DEA/updateEntryAccountAccounting/',{data:data, action:action})
   }
-  updateLLEntryAccountAccounting (data:any, action:string):  Observable<any[]> { 
-  return this.http.post <any[]> ('api/DEA/updateLLEntryAccountAccounting/',{data:data, action:action})
+  updateLLEntryAccountAccounting (data:any, action:string):  Observable<bLedgerTransaction[]> { 
+    return this.http.post <bLedgerTransaction[]> ('api/DEA/updateLLEntryAccountAccounting/',{data:data, action:action})
   }
   sendReloadEntryList ( id:any) {this.relplaySubject.next(id)}
   getReloadEntryList(): Observable<any> {return this.relplaySubject.asObservable()}
+  deleteAllocationAccounting (tradesToDelete:number[]):Observable<{id:number,amount:number}[]> {
+    return this.http.post <{id:number,amount:number}[]> ('api/DEA/deleteAllocationAccounting/',{trades_to_delete:tradesToDelete})
+
+  }
 /*----------------------OverdraftValidators----------------------------------------------------*/
 /*   goodToGo (func:any):boolean {
     console.log('func',func);

@@ -1,5 +1,5 @@
 <mat-toolbar color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4">
-  <span>{{title}} Account</span>
+  <span>{{title}} Account {{accountTypeExt.value}}</span>
   <span class="example-spacer"></span>
   <mat-checkbox style= "font-size: 14px; color:rgb(255, 255, 255); padding: 1%;" #submitbox checked="false" 
     (click)=" accountModifyForm.markAllAsTouched();
@@ -32,7 +32,7 @@
         <mat-form-field style="width: 6%;">
           <input matInput placeholder="ID" formControlName="accountId" [readonly]="true">
         </mat-form-field>
-        <mat-form-field style="width: 35%;">
+        <mat-form-field style="width: 25%;">
           <input matInput placeholder="Account Number" formControlName="accountNo">
           <mat-error  *ngIf="accountNo.invalid && accountNo.value !== '' ">
             Account number ins't unique      
@@ -43,17 +43,39 @@
         </mat-form-field>
 
         
-        <mat-form-field style = "width: 15%;">
-          <input matInput placeholder = "Currency" formControlName="currencyCode">
-          <mat-error  *ngIf="currencyCode.invalid && currencyCode.touched && currencyCode.value !== '' ">
+        <mat-form-field style = "width: 15%;" *ngIf="accountTypeExt.value!=13">
+          <input matInput placeholder = "Currency" formControlName="currencyCode"
+          [matAutocomplete]="auto" >
+          <mat-autocomplete #auto="matAutocomplete" 
+            (optionSelected)="currencyCode.patchValue($event.option.viewValue.split('-')[0].trim())">
+            <mat-option *ngFor="let currency of filteredCurrenciesList | async" [value]="currency['CurrencyCodeNum']">
+              {{currency['CurrencyCodeNum']}} -  {{currency['CurrencyCode']}} -  {{currency['CurrencyName']}} 
+            </mat-option>
+          </mat-autocomplete>   
+          <mat-error  *ngIf="currencyCode?.errors?.['pattern']">
             Only dights   
           </mat-error>
-          <mat-error  *ngIf="currencyCode.invalid  && currencyCode.value == ''">
+          <mat-error  *ngIf="currencyCode.errors?.['required']">
             Required!    
           </mat-error>
         </mat-form-field>
-
-        <mat-form-field  style="width: 27%;">
+        <mat-form-field style="width: 25%;" *ngIf="accountTypeExt.value==13"  >
+          <input matInput 
+          [placeholder]="'SecID'" formControlName="secid" [matAutocomplete]="autoSecID"  >
+          <mat-autocomplete #autoSecID="matAutocomplete" 
+            (optionSelected)="secidAutocolmplete($event.option.viewValue) ">
+            <mat-option #selectedsecid *ngFor="let instrument of filterednstrumentsLists | async" [value]="instrument[0]" >
+              {{instrument[0]}} - {{instrument[1]}} - {{instrument[2]}} - {{instrument[3]}} - {{instrument[4]}}
+            </mat-option>
+          </mat-autocomplete>   
+          <mat-error  *ngIf="secid?.errors?.['required']">
+            Required!    
+          </mat-error>
+          <mat-error  *ngIf="secid?.errors?.['noSecid']">
+            Inccorect Code! 
+          </mat-error>
+        </mat-form-field>
+        <mat-form-field  style="width: 25%;">
           <mat-label>Type Code</mat-label>
           <mat-select   formControlName="accountTypeExt" > 
             <ng-container *ngFor="let AccountType of AccountTypes">
@@ -67,6 +89,7 @@
           </mat-error>
         </mat-form-field>
       </p>
+
       <p> 
         <mat-form-field style="width: 15%;" >
           <input matInput placeholder="ClientID" formControlName="clientId">

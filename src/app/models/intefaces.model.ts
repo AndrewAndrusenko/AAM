@@ -17,7 +17,7 @@ export const dbErrorsMap: errorsDescription[] = [
     errorText:'Attempt to delete a strategy which has portfolios linked to it. cForeignKeyStrategyPortfolios blocked transaction'
   },
   {
-    constraintCode: 'bAccountTransaction',
+    constraintCode: 'cForeignAcountIdAccountTransaction',
     errorText:'Attempt to delete an account which has entries linked to it. bAccountTransaction blocked transaction'
   },
   {
@@ -40,7 +40,10 @@ export const dbErrorsMap: errorsDescription[] = [
     constraintCode: 'cFkBulkOrders_dorders',
     errorText:'Attempt to unmerge a allocated bulk order. cFkBulkOrders_dorders blocked transaction'
   },
-  
+  {
+    constraintCode: 'cForeignAllocacatedTrade',
+    errorText:'Attempt to delete an allocated trade with generated entries. cForeignAllocacatedTrade blocked transaction'
+  },
   
 ]
 export const indexDbConfigAAM: DBConfig  = {
@@ -208,6 +211,7 @@ export interface bAccounts {
   Information: string,  
   clientId: number,  
   currencyCode: number,  
+  secid:number,
   entityTypeCode: number, 
   accountId: number,
   idportfolio: number
@@ -240,6 +244,13 @@ export interface bLedgerAccounts extends bLedger {
   d_APTypeCodeAccount: string,
   action:string
 }
+export interface bAccountTransaction {
+  ledgerNoId: number, dataTime:Date, XactTypeCode: number, XactTypeCode_Ext: number, accountId: number,  amountTransaction: number, entryDetails: string, extTransactionId: number,idtrade: number
+}
+export interface bLedgerTransaction {
+  ledgerID_Debit: number, dateTime:Date,  XactTypeCode_Ext: number, ledgerID: number,  amount: number, entryDetails: string, extTransactionId: number,idtrade: number
+}
+
 export interface bAccountsEntriesList {
   d_transactionType:string,
   t_id: number,
@@ -418,5 +429,5 @@ export interface orders {
   id:number, generated:Date, type:string, secid:string, qty:number, price:number, amount:number, qty_executed:number, status:string, parent_order:number, id_portfolio:number,portfolioname:string, ordertype:string, idcurrency:number,currencycode:string, security_group_name:string,secid_type:string,secid_name:string, price_type:number, action:string, allocated:number,unexecuted:number
 }
 export interface allocation {
-  id:number, qty:number, idtrade:number, idportfolio:number, id_order:number,id_bulk_order:number, portfolioname: string,trade_amount:number, accured_interest:number,id_settlement_currency:number,current_postion_qty:number, current_account_balance:number, accountId:number
+  id:number, qty:number, idtrade:number, idportfolio:number, id_order:number,id_bulk_order:number, portfolioname: string,trade_amount:number, accured_interest:number,id_settlement_currency:number,current_postion_qty:number, current_account_balance:number, accountId:number,depoAccountId:number,entries:number
 }

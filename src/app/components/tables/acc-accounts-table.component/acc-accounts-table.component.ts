@@ -103,7 +103,7 @@ export class AppTableAccAccountsComponent  implements OnInit {
     this.modal_principal_parent.emit('CLOSE_PARENT_MODAL');
   }
   openAccountModifyForm (actionType:string, row: any ) {
-    this.dialogRef = this.dialog.open(AppAccAccountModifyFormComponent ,{minHeight:'400px', maxWidth:'1000px' });
+    this.dialogRef = this.dialog.open(AppAccAccountModifyFormComponent ,{minHeight:'400px',minWidth:'40vw', maxWidth:'80vw', maxHeight: '90vh' });
     this.dialogRef.componentInstance.action = actionType;
     this.dialogRef.componentInstance.data = row;
   }

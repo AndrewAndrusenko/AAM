@@ -78,18 +78,15 @@ export class AppTradeTableComponent  implements AfterViewInit {
       qty:null,
     });
     this.arraySubscrition.add(this.TradeService.getReloadOrdersForExecution().subscribe(data=>{
-      console.log('Trade Table getReloadOrdersForExecution');
       let i = this.dataSource.data.findIndex(el=>el.idtrade===data.idtrade);
       i!==-1? this.dataSource.data[i].allocatedqty =Number(data.data.filter(alloc=>alloc['id_joined']==this.dataSource.data[i].idtrade)[0].allocated)+Number(this.dataSource.data[i].allocatedqty) : null;
       this.dataSource.paginator = this.paginator;
     }))
     this.arraySubscrition.add(this.TradeService.getNewAllocatedQty().subscribe(data=>{
-      console.log('getNewAllocatedQty',data,this.dataSource.data[1].idtrade);
       this.dataSource.data[this.dataSource.data.findIndex(el=>(el.idtrade)===data.idtrade)].allocatedqty=data.allocatedqty;  
       this.dataSource.paginator=this.paginator;
     }));
     this.arraySubscrition.add(this.TradeService.getTradeDataToUpdateTableSource().subscribe(data =>{
-      console.log('getTradeDataToUpdateTableSource',' Table');
       let index =  this.dataSource.data.findIndex(elem=>elem.idtrade===data.data[0].idtrade)
       switch (data.action) {
         case 'Deleted':

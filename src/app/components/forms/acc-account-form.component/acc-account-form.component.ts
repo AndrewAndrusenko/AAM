@@ -8,9 +8,10 @@ import { AppAccountingService } from 'src/app/services/accounting.service';
 import { ClientData, bcAccountType_Ext, bcEnityType } from 'src/app/models/intefaces.model';
 import { AppClientsTableComponent } from '../../tables/clients-table.component/clients-table.component';
 import { TablePortfolios } from '../../tables/portfolios-table.component/portfolios-table.component';
-import { Subscription, filter, switchMap } from 'rxjs';
+import { Observable, Subscription, distinctUntilChanged, filter, map, startWith, switchMap, tap } from 'rxjs';
 import { MatTabGroup as MatTabGroup } from '@angular/material/tabs';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
+import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 
 @Component({
   selector: 'app-acc-account-modify-form',
@@ -39,12 +40,16 @@ export class AppAccAccountModifyFormComponent implements OnInit {
   AccountTypes: bcAccountType_Ext[] = [];
   formDisabledFields: string[] = [];
   formLedgerDisabledFields: string[] = []; 
+  filteredCurrenciesList: Observable<string[]>;
+  filterednstrumentsLists : Observable<string[]>;
+
   private subscriptionName: Subscription
   constructor (
     private fb:FormBuilder, 
     private dialog: MatDialog, 
     private AccountingDataService:AppAccountingService, 
     private CommonDialogsService:HadlingCommonDialogsService,
+    private AutoCompService:AtuoCompleteService,
   ) 
   { this.AccountingDataService.GetEntityTypeList('',0,'','','bcEnityType').subscribe (data => this.EnityTypes=data)
     this.AccountingDataService.GetAccountTypeList('',0,'','','bcAccountType_Ext').subscribe (data => this.AccountTypes=data)
@@ -55,7 +60,8 @@ export class AppAccAccountModifyFormComponent implements OnInit {
       accountTypeExt:[null, [Validators.required]] ,  
       Information: {value:null, disabled: false},  
       clientId: {value:null, disabled: true},  
-      currencyCode: [null, [Validators.required, Validators.pattern('[0-9]*') ]],  
+      currencyCode: [810, [Validators.required, Validators.pattern('[0-9]*') ]],  
+      secid:[null, { validators:  Validators.required }],  
       entityTypeCode: [null, [Validators.required]], 
       accountId: {value:null, disabled: false},
       idportfolio: {value:null, disabled: true},
@@ -82,8 +88,25 @@ export class AppAccAccountModifyFormComponent implements OnInit {
   }
   ngOnInit(): void {
     (this.aType == 1)? this.accountLedgerModifyForm.patchValue(this.data): this.accountModifyForm.patchValue(this.data)
+    this.AutoCompService.getCurrencyList().then(()=>{
+      this.filteredCurrenciesList = this.currencyCode.valueChanges.pipe (
+        startWith (''),
+        distinctUntilChanged(),
+        map(value => this.AutoCompService.filterList(value || '','currency'))
+        );
+      this.currencyCode.setValidators([this.AutoCompService.currencyValirator(),Validators.required])});
+    this.AutoCompService.getSecidLists().then (()=>{   
+      this.filterednstrumentsLists = this.secid.valueChanges.pipe(
+        startWith(''),
+        distinctUntilChanged(),
+        map((value: any) => this.AutoCompService.filterList(value || '','secid'))
+      );
+      this.secid.setValidators(this.AutoCompService.secidValirator());
+    });
+
   }
   ngAfterContentInit(): void {
+
     let accType = this.d_APTypeCodeAccount.value == 1 ? 'Active' : 'Passive'
     this.accountLedgerModifyForm.controls['d_APType'].patchValue(accType)
     let accountNoToCheck =   this.accountNo.value;
@@ -103,6 +126,9 @@ export class AppAccAccountModifyFormComponent implements OnInit {
       customAsyncValidators.AccountingUniqueLedgerNoAsyncValidator(this.AccountingDataService, accountNoToCheckLedger) 
     )
     this.ledgerNo.updateValueAndValidity();  
+  }
+  secidAutocolmplete (el:any) {
+    console.log('secidAutocolmplete',);
   }
   selectPortfolio () {
     this.dialogChoseAccount = this.dialog.open(TablePortfolios ,{minHeight:'600px', minWidth:'1300px', autoFocus: false, maxHeight: '90vh'});
@@ -182,6 +208,7 @@ export class AppAccAccountModifyFormComponent implements OnInit {
   get  accountTypeExt ()   {return this.accountModifyForm.get('accountTypeExt') } 
   get  clientId ()   {return this.accountModifyForm.get('clientId') } 
   get  currencyCode ()   {return this.accountModifyForm.get('currencyCode') } 
+  get  secid ()   {return this.accountModifyForm.get('secid') } 
   get  entityTypeCode ()   {return this.accountModifyForm.get('entityTypeCode') } 
   get  accountId ()   {return this.accountModifyForm.get('accountId') } 
   get  d_clientname ()   {return this.accountModifyForm.get('d_clientname') } 

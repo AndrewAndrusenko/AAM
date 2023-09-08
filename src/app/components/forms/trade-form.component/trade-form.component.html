@@ -31,16 +31,23 @@ color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4"
       [disabled]="!allocationTable.selection.hasValue()"
       color = "accent" mat-raised-button style=" margin-left:1%; font-size: 18px;"
       (click)="  createAccountingForAllocation()">
-      Confirm Allocation
-      <mat-icon matSuffix>done_all</mat-icon>
+      Create Accounting
+      <mat-icon matSuffix>account_balance</mat-icon>
     </button>
     <button title="Delete Allocated Trades"  
-    [disabled]="!allocationTable.selection.hasValue()"
-    color = "warn" mat-raised-button style=" margin-left:1%; font-size: 18px;"
-    (click)="deleteAllocatedTrades()">
-    Delete Trades
-    <mat-icon matSuffix>delete</mat-icon>
-  </button>
+      [disabled]="!allocationTable.selection.hasValue()"
+      color = "warn" mat-raised-button style=" margin-left:1%; font-size: 18px;"
+      (click)="deleteAllocatedTrades()">
+      Delete Trades
+      <mat-icon matSuffix>delete</mat-icon>
+    </button>
+    <button title="Delete Accounting"  
+      [disabled]="!allocationTable.selection.hasValue()"
+      color = "warn" mat-raised-button style=" margin-left:1%; font-size: 18px;"
+      (click)="deleteAccountingForAllocatedTrades()">
+      Delete Accounting
+      <mat-icon matSuffix>delete</mat-icon>
+    </button>
   </ng-container>
 </mat-toolbar>
 <mat-tab-group mat-stretch-tabs [(selectedIndex)]="tabIndex" >

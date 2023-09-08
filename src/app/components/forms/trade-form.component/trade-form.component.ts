@@ -1,6 +1,6 @@
 import { AfterContentInit, Component,  EventEmitter,  Input, Output, TemplateRef, ViewChild, ViewContainerRef} from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ClientData, Instruments, allocation, bcParametersSchemeAccTrans, orders} from 'src/app/models/intefaces.model';
+import { ClientData, Instruments, allocation, bAccountTransaction, bLedgerTransaction, bcParametersSchemeAccTrans, orders} from 'src/app/models/intefaces.model';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { Observable, Subscription, distinctUntilChanged, filter, map, observable, startWith, switchMap, tap } from 'rxjs';
@@ -47,7 +47,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
   securityTypes: any[];
   formerrors: any;
   private arraySubscrition = new Subscription ()
-  @ViewChild(TemplateRef) _dialogTemplate: TemplateRef<any>;
+
   constructor (
     private fb:FormBuilder, 
     private AuthServiceS:AuthService,  
@@ -159,7 +159,6 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
         this.TradeService.sendReloadOrdersForExecution(data,this.idtrade.value,ordersForExecution);
         this.allocationTable.submitQuery(true,false)
         this.allocatedqty.patchValue(Number(this.allocatedqty.value) + Number(data.filter(el=>el['id_joined']==this.idtrade.value)[0].allocated))
-        console.log('executeOrders',this.allocatedqty.value,data.filter(el=>el['id_joined']==this.idtrade.value)[0],this.qty.value);
       })
     } else {
       this.CommonDialogsService.snackResultHandler({name:'error',detail:'No bulk order has been selected!'},'Allocation');
@@ -167,30 +166,75 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
   } 
   createAccountingForAllocation () {
     let tradeToConfirm = this.allocationTable.selection.selected;
+    let tradeToConfirmProcessStatus = tradeToConfirm.map(el=>{return {id:el.id,bAccountTransaction:1,bLedgerTransaction:1}})
+    let portfolioWitoutAccounts = this.allocationTable.selection.selected.filter(trade=>!trade.accountId||!trade.depoAccountId).map(trade=>{return trade.portfolioname});
+    if (portfolioWitoutAccounts.length) {
+      this.CommonDialogsService.snackResultHandler({name:'error',detail:'There are no opened current or depo accounts for the portfolios: '+[...portfolioWitoutAccounts]});
+      return;
+    }
+    let tradesWithAccounting = this.allocationTable.selection.selected.filter(trade=>trade.entries>0).map(trade=>{return trade.id});
+    if (tradesWithAccounting.length) {
+      this.CommonDialogsService.snackResultHandler({name:'error',detail:'There are created entries for the trades: '+[...tradesWithAccounting]});
+      return;
+    }
     let bcEntryParameters = <any> {}
-    console.log('selection',tradeToConfirm);
-
+    let createdEntries = <bAccountTransaction[]>[]
+    let createdLLEntries = <bLedgerTransaction[]>[]
     tradeToConfirm.forEach(clientTrade => {
       bcEntryParameters.id_settlement_currency=this.id_settlement_currency.value;
       bcEntryParameters.cptyCode='CHASUS';
       bcEntryParameters.pDate_T=new Date(this.tdate.value).toDateString();
       bcEntryParameters.pAccountId=clientTrade.accountId;
+      bcEntryParameters.pDepoAccountId=clientTrade.depoAccountId;
+      bcEntryParameters.pQty=clientTrade.qty;
       bcEntryParameters.pSettlementAmount=clientTrade.trade_amount;
       bcEntryParameters.secid=this.tidinstrument.value;
       bcEntryParameters.allocated_trade_id=clientTrade.id;
       bcEntryParameters.idtrade=this.idtrade.value;
     this.accountingTradeService.getAccountingScheme(bcEntryParameters,'Investment_Buy_Basic').pipe(
-      tap (data=>console.log('trade accounting',data)),
-      switchMap(entryDraft=> this.AccountingDataService.updateEntryAccountAccounting (entryDraft[0],'Create',))
-      ).subscribe (result => console.log('created Entry',result))
+      map(entryDrafts=>entryDrafts.forEach(draft=>this.AccountingDataService.updateEntryAccountAccounting (draft,'Create',).subscribe(el=>createdEntries.push(...el))))
+    ).subscribe (result => {
+      let index = tradeToConfirmProcessStatus.findIndex(el=>el.id===clientTrade.id);
+      index!==-1? tradeToConfirmProcessStatus[index].bAccountTransaction=0 : null;
+      this.createAllocationAccountingStatus(tradeToConfirmProcessStatus,'AL');
+    })
     this.accountingTradeService.getAccountingScheme(bcEntryParameters,'Investment_Buy_Basic','LL').pipe(
-      tap (data=>console.log('trade accounting',data)),
-      switchMap(entryDraft=> this.AccountingDataService.updateLLEntryAccountAccounting (entryDraft[0],'Create',))
-      ).subscribe (result => console.log('created Entry',result))
+      map(entryDrafts=>entryDrafts.forEach(draft=>this.AccountingDataService.updateLLEntryAccountAccounting (draft,'Create',).subscribe(el=>createdLLEntries.push(...el))))
+    ).subscribe (result => {
+      let index = tradeToConfirmProcessStatus.findIndex(el=>el.id===clientTrade.id);
+      index!==-1? tradeToConfirmProcessStatus[index].bLedgerTransaction=0 : null;
+
+      this.createAllocationAccountingStatus(tradeToConfirmProcessStatus,'LL')
+    })
     })
     this.allocationTable.selection.clear();
   }
+  createAllocationAccountingStatus (tradeToConfirmProcessStatus:{id:number,bAccountTransaction:number,bLedgerTransaction:number}[],type:string) {
+    let status = tradeToConfirmProcessStatus.reduce((acc,val)=>acc+val.bAccountTransaction+val.bLedgerTransaction,0)
+    status===0? this.allocationTable.submitQuery(true,false).then(data=>{
+      this.CommonDialogsService.snackResultHandler({name:'success',detail:'Accounting has been created'},'Allocation Accounting',undefined,false)
+    }):null;
+  }
+  deleteAccountingForAllocatedTrades () {
+    let tradesToDelete = this.allocationTable.selection.selected.map(trade=>Number(trade.id))
+    if (!tradesToDelete.length) {
+      return this.CommonDialogsService.snackResultHandler({name:'error',detail:'No trades are selected to be deleted'},'DeleteAllocation')
+    }
+    this.CommonDialogsService.confirmDialog('Delete accouting for allocated trades ').pipe(
+      filter (isConfirmed => isConfirmed.isConfirmed),
+      switchMap(data => this.AccountingDataService.deleteAllocationAccounting (tradesToDelete))
+    ).subscribe (deletedTrades=>{
+      this.allocationTable.selection.clear();
+      this.CommonDialogsService.snackResultHandler({name:'success',detail:deletedTrades.length + ' entries have been deleted'},'Delete accounting: ',null,false)
+      this.allocationTable.submitQuery(true, false);
+    }) 
+  }
   deleteAllocatedTrades (){
+    let tradesToDelete=this.allocationTable.selection.selected.filter(el=>!el.entries)
+    if (tradesToDelete.length!==this.allocationTable.selection.selected.length) {
+      this.CommonDialogsService.snackResultHandler({name:'error',detail:'Trades with entries have been selected. Accounted trades can not be deleted'},'Allocated trades delete',null,false);
+      return;
+    }
     if (!this.allocationTable.selection.selected.length) {
       return this.CommonDialogsService.snackResultHandler({name:'error',detail:'No trades are selected to be deleted'},'DeleteAllocation')
     }
@@ -198,6 +242,8 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
       filter (isConfirmed => isConfirmed.isConfirmed),
       switchMap(data => this.TradeService.deleteAllocatedTrades(this.allocationTable.selection.selected.map(el=>Number(el.id))))
     ).subscribe (deletedTrades=>{
+      this.allocationTable.selection.clear();
+      this.CommonDialogsService.snackResultHandler({name:'success',detail:deletedTrades.length+' have been deleted'},'Delete allocated trades: ',undefined,false)
       this.allocatedqty.patchValue(
         Number(this.allocatedqty.value)-deletedTrades.map(el=>el.idtrade==this.idtrade.value? el.qty:null).reduce((acc, value) => acc + Number(value), 0)
         );
