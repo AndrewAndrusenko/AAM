@@ -4,12 +4,6 @@
     New Trade
     <mat-icon matSuffix >create_new_folder</mat-icon>
   </button>
-  <button color = "accent" mat-raised-button title="Reload Table"
-    style=" margin-left:0.2%; font-size: 18px;margin-right: 1%;"
-    (click)="confirmAllocation(102)">
-    Confirm Allocation
-    <mat-icon matSuffix >create_new_folder</mat-icon>
-  </button>
   <mat-form-field  class = "filterField" title="only by SecID" >
     <mat-label class="whiteTextFilter">Search by SecID..</mat-label>
     <input 
@@ -208,7 +202,7 @@
             matTooltip="Edit Trade"
             matTooltip="Allocate"
             matTooltip="Trade has been allocated" -->
-            <ng-container  *ngIf="!disabledControlElements">
+            <ng-container  *ngIf="element.tdate>=FirstOpenedAccountingDate&&!disabledControlElements">
               <button mat-icon-button color="accent"
                 (click)="openTradeModifyForm('Edit',element)">
                 <mat-icon >edit</mat-icon>
@@ -253,7 +247,7 @@
               <mat-icon class="menu-icon" matPrefix>filter_list</mat-icon> 
               Add to filter
             </button> 
-            <ng-container *ngIf="disabledControlElements">
+            <ng-container *ngIf="element.tdate<FirstOpenedAccountingDate||disabledControlElements">
               <button 
                 (click)="openTradeModifyForm('View', element)"
                 class="tree-menu-item" cdkMenuItem>
@@ -262,7 +256,7 @@
               </button> 
             </ng-container>
             
-            <ng-container *ngIf="!disabledControlElements" title="Edit block">
+            <ng-container *ngIf="element.tdate>=FirstOpenedAccountingDate&&!disabledControlElements" title="Edit block">
 
               <button 
                 class="tree-menu-item" cdkMenuItem 

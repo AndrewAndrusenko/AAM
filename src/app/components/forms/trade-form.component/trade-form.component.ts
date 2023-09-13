@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ClientData, Instruments, allocation, bAccountTransaction, bLedgerTransaction, bcParametersSchemeAccTrans, orders} from 'src/app/models/intefaces.model';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AuthService } from 'src/app/services/auth.service';
-import { Observable, Subscription, distinctUntilChanged, filter, map, observable, startWith, switchMap, tap } from 'rxjs';
+import { Observable, Subscription, distinctUntilChanged, filter, firstValueFrom, map, observable, startWith, switchMap, tap } from 'rxjs';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import { AppTradeService } from 'src/app/services/trades-service.service';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -18,6 +18,7 @@ import { AppallocationTableComponent } from '../../tables/allocation-table.compo
 import { MatTableDataSource } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
 import { AccountingTradesService } from 'src/app/services/accounting-trades.service';
+import { AppAllocationService } from 'src/app/services/allocation.service';
 @Component({
   selector: 'app-trade-modify-form',
   templateUrl: './trade-form.component.html',
@@ -38,6 +39,8 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
   firstOpenedAccountingDate: Date;
   panelOpenStateFirst = false;
   panelOpenStateSecond = false;
+  panellAlocationTable = true;
+  panelOrdersAllocated = true;
   filteredCurrenciesList: Observable<string[]>;
   filteredSetCurrenciesList: Observable<string[]>;
   filterednstrumentsLists : Observable<string[]>;
@@ -54,6 +57,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     private SelectionService:HandlingTableSelectionService,
     private CommonDialogsService:HadlingCommonDialogsService,
     private TradeService: AppTradeService,
+    private AllocationService: AppAllocationService,
     private accountingTradeService: AccountingTradesService,
     private AccountingDataService:AppAccountingService, 
     private AutoCompService:AtuoCompleteService,
@@ -136,7 +140,9 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
       this.settlement_rate.updateValueAndValidity();
       this.id_settlement_currency.value !== this.id_price_currency.value&&this.settlement_rate.value==1? this.settlement_rate.patchValue(null) : null;
       this.changeSettlementRate();
-    })
+    }
+    )
+    this.action == 'View'? this.disabledControlElements=true:null;
     this.action == 'View'|| this.disabledControlElements?  this.tradeModifyForm.disable() : null;
     this.fullAmountCalcualtion(true);
     this.changeSettlementRate();
@@ -164,17 +170,29 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
       this.CommonDialogsService.snackResultHandler({name:'error',detail:'No bulk order has been selected!'},'Allocation');
     }
   } 
-  createAccountingForAllocation () {
+  async createAccountingForAllocation () {
     let tradeToConfirm = this.allocationTable.selection.selected;
     let tradeToConfirmProcessStatus = tradeToConfirm.map(el=>{return {id:el.id,bAccountTransaction:1,bLedgerTransaction:1}})
     let portfolioWitoutAccounts = this.allocationTable.selection.selected.filter(trade=>!trade.accountId||!trade.depoAccountId).map(trade=>{return trade.portfolioname});
-    if (portfolioWitoutAccounts.length) {
-      this.CommonDialogsService.snackResultHandler({name:'error',detail:'There are no opened current or depo accounts for the portfolios: '+[...portfolioWitoutAccounts]});
-      return;
-    }
+
     let tradesWithAccounting = this.allocationTable.selection.selected.filter(trade=>trade.entries>0).map(trade=>{return trade.id});
     if (tradesWithAccounting.length) {
       this.CommonDialogsService.snackResultHandler({name:'error',detail:'There are created entries for the trades: '+[...tradesWithAccounting]});
+      return;
+    }
+    let depoSubAccountsToOpen = tradeToConfirm.filter(trade=>!trade.depoAccountId).map(trade=>Number(trade.idportfolio));
+    console.log('trade',depoSubAccountsToOpen,tradeToConfirm);
+    if (depoSubAccountsToOpen.length) {
+    await firstValueFrom (this.AccountingDataService.createDepoSubAccounts(depoSubAccountsToOpen,this.tidinstrument.value)).then(newDepoAccounts=>{
+      console.log('d',newDepoAccounts);
+      newDepoAccounts.forEach (depoAccount=>{ 
+        let i =tradeToConfirm.findIndex(el=>el.idportfolio==depoAccount.idportfolio);
+        i!==-1? tradeToConfirm[i].depoAccountId=depoAccount.accountId:null;
+      })
+    })}
+    console.log('tradeToConfirm',...tradeToConfirm);
+    if (portfolioWitoutAccounts.length) {
+      this.CommonDialogsService.snackResultHandler({name:'error',detail:'There are no opened current or depo accounts for the portfolios: '+[...portfolioWitoutAccounts]});
       return;
     }
     let bcEntryParameters = <any> {}
@@ -216,7 +234,8 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     }):null;
   }
   deleteAccountingForAllocatedTrades () {
-    let tradesToDelete = this.allocationTable.selection.selected.map(trade=>Number(trade.id))
+    this.AllocationService.deleteAccountingForAllocatedTrades(this.allocationTable);
+/*     let tradesToDelete = this.allocationTable.selection.selected.map(trade=>Number(trade.id))
     if (!tradesToDelete.length) {
       return this.CommonDialogsService.snackResultHandler({name:'error',detail:'No trades are selected to be deleted'},'DeleteAllocation')
     }
@@ -227,7 +246,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
       this.allocationTable.selection.clear();
       this.CommonDialogsService.snackResultHandler({name:'success',detail:deletedTrades.length + ' entries have been deleted'},'Delete accounting: ',null,false)
       this.allocationTable.submitQuery(true, false);
-    }) 
+    })  */
   }
   deleteAllocatedTrades (){
     let tradesToDelete=this.allocationTable.selection.selected.filter(el=>!el.entries)

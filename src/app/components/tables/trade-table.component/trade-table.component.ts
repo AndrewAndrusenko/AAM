@@ -15,6 +15,7 @@ import { AuthService } from 'src/app/services/auth.service';
 import { AppTradeService } from 'src/app/services/trades-service.service';
 import { AppTradeModifyFormComponent } from '../../forms/trade-form.component/trade-form.component';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
+import { AppAccountingService } from 'src/app/services/accounting.service';
 
 @Component({
   selector: 'app-trade-table',
@@ -23,7 +24,8 @@ import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
   styleUrls: ['./trade-table.component.scss'],
 })
 export class AppTradeTableComponent  implements AfterViewInit {
-  private arraySubscrition = new Subscription ()
+  private arraySubscrition = new Subscription ();
+  FirstOpenedAccountingDate: Date;
   accessState: string = 'none';
   disabledControlElements: boolean = false;
   @Input() FormMode:string
@@ -59,6 +61,7 @@ export class AppTradeTableComponent  implements AfterViewInit {
   @ViewChild(TemplateRef) _dialogTemplate: TemplateRef<any>;
   constructor(
     private TradeService: AppTradeService,
+    private AccountingDataService:AppAccountingService, 
     private AuthServiceS:AuthService,  
     private HandlingCommonTasksS:HandlingCommonTasksService,
     private CommonDialogsService:HadlingCommonDialogsService,
@@ -68,6 +71,7 @@ export class AppTradeTableComponent  implements AfterViewInit {
   ) {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
+    this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate);
     this.searchParametersFG = this.fb.group ({
       type:null,
       secidList: [],
@@ -124,6 +128,7 @@ export class AppTradeTableComponent  implements AfterViewInit {
     );
   }  
   openTradeModifyForm (action:string, element:any,tabIndex:number=0) {
+    action==='Create_Example'? element.allocatedqty=0:null;
     this.dialogTradeModify = this.dialog.open (AppTradeModifyFormComponent,{minHeight:'600px', minWidth:'60vw', maxWidth:'80vw', maxHeight: '90vh'})
     this.dialogTradeModify.componentInstance.action = action;
     this.dialogTradeModify.componentInstance.tabIndex=tabIndex;

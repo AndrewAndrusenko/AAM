@@ -48,17 +48,30 @@ async function fGetTradesData (request,response) {
     request.query[key]!=='null'? conditionsAllocatedTrades +=conditions[key][2] + ' AND ': null;
     }
   });
+  console.log('request.query.balances',request.query);
   switch (request.query.action) {
     case 'getAllocationTrades':
-      sql='SELECT dtrades_allocated.id, dtrades_allocated.qty, dtrades_allocated.idtrade, dtrades_allocated.idportfolio, id_order,dtrades_allocated.id_bulk_order, dportfolios.portfolioname, ROUND(dtrades.trade_amount/dtrades.qty*dtrades_allocated.qty,2) as trade_amount, dtrades.accured_interest,id_settlement_currency, 50000 as current_postion_qty, 200000 as current_account_balance,"bAccounts"."accountId","bAccountsDepo"."accountId" as "depoAccountId", "entriesForAllocation".count as "entries" '+
-          'FROM public.dtrades_allocated '+
-          'LEFT JOIN dtrades ON dtrades_allocated.idtrade = dtrades.idtrade '+
-          'LEFT JOIN dportfolios ON dtrades_allocated.idportfolio = dportfolios.idportfolio '+
-          'LEFT JOIN (SELECT * FROM "bAccounts" WHERE "bAccounts"."accountTypeExt"=8) as "bAccounts"  ON dtrades_allocated.idportfolio = "bAccounts".idportfolio '+
-          'LEFT JOIN (SELECT * FROM "bAccounts" WHERE "bAccounts"."accountTypeExt"=13) as "bAccountsDepo"  ON dtrades_allocated.idportfolio = "bAccountsDepo".idportfolio '+
-          'LEFT JOIN "entriesForAllocation" ON dtrades_allocated.id = "entriesForAllocation".idtrade '
+      sql='SELECT dtrades_allocated.id, dtrades_allocated.qty, dtrades_allocated.idtrade, dtrades_allocated.idportfolio, id_order,dtrades_allocated.id_bulk_order, dportfolios.portfolioname, ROUND(dtrades.trade_amount/dtrades.qty*dtrades_allocated.qty,2) as trade_amount, dtrades.accured_interest,id_settlement_currency, "bAccounts"."accountId","bAccountsDepo"."accountId" as "depoAccountId", "entriesForAllocation".count as "entries",dtrades.tidinstrument as secid,dtrades.tdate,dtrades.trtype,dtrades.price,dtrades.id_price_currency ';
+      request.query.balances==='true'?  sql+= ', b_accounts_balance."closingBalance" as current_account_balance,b_depo_accounts_balance."closingBalance" as depo_account_balance ' : null;
+      sql+= ' FROM public.dtrades_allocated '+
+      'LEFT JOIN dtrades ON dtrades_allocated.idtrade = dtrades.idtrade '+
+      'LEFT JOIN dportfolios ON dtrades_allocated.idportfolio = dportfolios.idportfolio '+
+      'LEFT JOIN (SELECT * FROM "bAccounts" WHERE "bAccounts"."accountTypeExt"=8) as "bAccounts"  ON dtrades_allocated.idportfolio = "bAccounts".idportfolio '+
+      'LEFT JOIN (SELECT * FROM "bAccounts" WHERE "bAccounts"."accountTypeExt"=15) as "bAccountsDepo"  ON (dtrades_allocated.idportfolio = "bAccountsDepo".idportfolio  and dtrades.tidinstrument="bAccountsDepo".secid)'+
+      'LEFT JOIN "entriesForAllocation" ON dtrades_allocated.id = "entriesForAllocation".idtrade ';
+      request.query.balances==='true'? sql+= 'LEFT JOIN LATERAL ('+
+      '  SELECT "accountId", "openingBalance", CAST ("closingBalance" AS NUMERIC) AS "closingBalance", "closingBalance" AS "EndBalance"'+
+      '    FROM f_checkoverdraftbyaccountandbydate'+
+      '    (dtrades.tdate, "bAccounts"."accountId", 1, 0, 0, ${firstOpenedAccountingDate})) as b_accounts_balance '+
+      '    ON "bAccounts"."accountId"=b_accounts_balance."accountId" '+
+      '  LEFT JOIN LATERAL ('+
+      '  SELECT "accountId", "openingBalance", CAST ("closingBalance" AS NUMERIC) AS "closingBalance", "closingBalance" AS "EndBalance"'+
+      '    FROM f_checkoverdraftbyaccountandbydate'+
+      '    (dtrades.tdate, "bAccountsDepo"."accountId", 1, 0, 0, ${firstOpenedAccountingDate})) as b_depo_accounts_balance '+
+      '    ON "bAccountsDepo"."accountId"=b_depo_accounts_balance."accountId" ': null;
           
       sql +=conditionsAllocatedTrades.slice(0,-5) + 'ORDER BY dtrades_allocated.idtrade DESC;'
+      console.log('allloc---------------------------------\n', sql);
     break;
     default:
       sql = 'SELECT details, dclients.clientname as cpty_name , mmoexsecuritytypes.security_group_name,mmoexsecuritytypes.security_type_name as secid_type, mmoexsecurities.name as secid_name, dtrades.idtrade, qty, price, dclients.clientname as cpty, tdate, vdate, tidorder, allocated_qty.alloaction as allocatedqty, idportfolio, trtype, tidinstrument, id_broker, id_price_currency, id_settlement_currency, id_buyer_instructions, id_seller_instructions, accured_interest, fee_trade, fee_settlement, fee_exchange, id_cpty, mmoexsecuritytypes.price_type, trade_amount,faceunit,facevalue,settlement_amount, settlement_rate '+
@@ -71,9 +84,8 @@ async function fGetTradesData (request,response) {
     break;
 }
   sql = pgp.as.format(sql,request.query);
-  console.log('trades-------------------------------------------------------------------------------',sql);
 
-  db_common_api.queryExecute(sql,response,undefined,'GetTradesData');
+  db_common_api.queryExecute(sql,response,undefined,request.query.action ||'GetTradesData');
 }
 async function fGetAccuredInterest (request,response) {
   let sql = 'SELECT couponrate,actiontype,currency, date::timestamp without time zone   FROM public.mmoexcorpactions where secid=${tidinstrument} AND  date <= (select min(date) FROM public.mmoexcorpactions where date > ${vdate} and secid=${tidinstrument}) ORDER BY date desc LIMIT 2'

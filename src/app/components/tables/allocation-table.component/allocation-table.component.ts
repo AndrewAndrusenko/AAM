@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, EventEmitter, Output, ViewChild, Input, ChangeDetectionStrategy, ElementRef} from '@angular/core';
+import {AfterViewInit, Component, EventEmitter, Output, ViewChild, Input, ChangeDetectionStrategy, ElementRef, ChangeDetectorRef} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {Observable, Subscription, map, startWith } from 'rxjs';
@@ -21,6 +21,8 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { indexDBService } from 'src/app/services/indexDB.service';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { AppTableAccEntriesComponent } from '../acc-entries-table.component/acc-entries-table.component';
+import { AppAccountingService } from 'src/app/services/accounting.service';
+import { AppAllocationService } from 'src/app/services/allocation.service';
 @Component({
   selector: 'app-allocation-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -28,6 +30,7 @@ import { AppTableAccEntriesComponent } from '../acc-entries-table.component/acc-
   styleUrls: ['./allocation-table.component.scss'],
 })
 export class AppallocationTableComponent  implements AfterViewInit {
+  FirstOpenedAccountingDate: Date;
   accessState: string = 'none';
   orderStatuses:objectStatus[];
   ordersPermissions:string[];
@@ -40,8 +43,8 @@ export class AppallocationTableComponent  implements AfterViewInit {
   @Input() tradeData:trades;
   @Input() allocationFilters:{secid:string, type:string};
   fullOrdersSet:allocation[];
-  columnsToDisplay = ['select','id','portfolioname','qty', 'trade_amount', 'current_postion_qty', 'current_account_balance','id_order','id_bulk_order','entries'];
-  columnsHeaderToDisplay = ['ID', 'pCode','Quantity','Amount','Position','Balance', 'Order','Bulk','Entries']
+  columnsToDisplay = ['select','id','portfolioname','qty', 'trade_amount','id_order','id_bulk_order','entries','idtrade','secid','tdate','trtype','price','id_price_currency'];
+  columnsHeaderToDisplay = ['ID', 'pCode','Quantity','Amount', 'Order','Bulk','Entries','IDtrade','SecID','tDate','Type','Price','Curr']
   dataSource: MatTableDataSource<allocation>;
   public selection = new SelectionModel<allocation>(true, []);
   @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -67,10 +70,12 @@ export class AppallocationTableComponent  implements AfterViewInit {
   constructor(
     private TradeService: AppTradeService,
     private AuthServiceS:AuthService,  
+    private AllocationService: AppAllocationService,
+    private AccountingDataService:AppAccountingService, 
+    private ref: ChangeDetectorRef,
     private HandlingCommonTasksS:HandlingCommonTasksService,
     private SelectionService:HandlingTableSelectionService,
     private CommonDialogsService:HadlingCommonDialogsService,
-    private indexDBServiceS:indexDBService,
     private AutoCompService:AtuoCompleteService,
     private fb:FormBuilder, 
     private dialog: MatDialog, 
@@ -80,6 +85,7 @@ export class AppallocationTableComponent  implements AfterViewInit {
     this.orderStatuses = this.AuthServiceS.objectStatuses.filter(el =>el.id_object==='Order');
     this.ordersPermissions = this.AuthServiceS.accessRestrictions.filter(el=>el.elementid==='dorders_status_list')[0].elementvalue.split(',');
     this.disabledControlElements = this.accessState === 'full'? false : true;
+
     this.searchParametersFG = this.fb.group ({
       type:null,
       secidList: [],
@@ -109,8 +115,17 @@ export class AppallocationTableComponent  implements AfterViewInit {
     this.subscriptions.unsubscribe();
   }
   ngOnInit(): void {
-    this.TradeService.getAllocationInformation(this.tableMode.includes('Trade')? {idtrade:this.tradeData.idtrade}:null)
-    .subscribe (allocationData => this.updateAllocationDataTable(allocationData));  
+    if (this.tableMode.includes('Trade'))   {
+      this.columnsToDisplay = ['select','id','portfolioname','qty', 'trade_amount', 'depo_account_balance', 'current_account_balance','id_order','id_bulk_order','entries','idtrade','secid','tdate','trtype','price','id_price_currency'];
+      this.columnsHeaderToDisplay = ['ID', 'pCode','Quantity','Amount','Position','Balance', 'Order','Bulk','Entries','IDtrade','SecID','tDate','Type','Price','Curr']
+    }
+    this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data =>{ 
+      console.log('data',);
+      this.FirstOpenedAccountingDate = data[0].FirstOpenedDate;
+      this.TradeService.getAllocationInformation(this.tableMode.includes('Trade')? {idtrade:this.tradeData.idtrade}:null,new Date (this.FirstOpenedAccountingDate).toDateString(),this.tableMode.includes('Trade')).subscribe (allocationData => {
+        this.updateAllocationDataTable(allocationData);
+      this.ref.markForCheck()});  
+    }); 
     this.subscriptions.add(
       this.TradeService.getDeletedAllocationTrades().subscribe(deletedTrades=>{
         let arrayToDelete = [];
@@ -119,8 +134,9 @@ export class AppallocationTableComponent  implements AfterViewInit {
         })
         arrayToDelete.forEach((dlIndex,index)=> this.dataSource.data.splice(dlIndex-index,1));
         this.updateAllocationDataTable(this.dataSource.data)
-      })
-    )
+    
+      }),
+    );
   }
   async ngAfterViewInit() {
     this.AutoCompService.getSecidLists();
@@ -128,6 +144,12 @@ export class AppallocationTableComponent  implements AfterViewInit {
       startWith(''),
       map(value => this.AutoCompService.filterList(value || '','secid'))
     );
+  }
+  createAccountingForAllocation (){
+
+  }
+  deleteAccountingForAllocatedTrades () {
+    this.AllocationService.deleteAccountingForAllocatedTrades(this);
   }
   showEntries (idtrade : number) {
     this.dialogShowEntriesList = this.dialog.open(AppTableAccEntriesComponent ,{minHeight:'600px', minWidth:'1700px', autoFocus: false, maxHeight: '90vh'});
@@ -208,7 +230,7 @@ export class AppallocationTableComponent  implements AfterViewInit {
       } else  {searchObj.price=null};
       this.price.value? searchObj = {...searchObj, ... this.HandlingCommonTasksS.toNumberRange(this.price.value,this.price,'price')} :null;
       searchObj = {...searchObj, ...this.tdate.value? this.HandlingCommonTasksS.toDateRange(this.tdate, 'tdate') : null}
-      this.TradeService.getAllocationInformation(searchObj).subscribe(data => {
+      this.TradeService.getAllocationInformation(this.tableMode.includes('Trade')? {idtrade:this.tradeData.idtrade}:searchObj,new Date (this.FirstOpenedAccountingDate).toDateString(),this.tableMode.includes('Trade')).subscribe(data => {
         this.updateAllocationDataTable(data)
         showSnackResult? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ') : null;
         resolve(data) 
@@ -252,7 +274,7 @@ export class AppallocationTableComponent  implements AfterViewInit {
     this.dialogOrderModify.componentInstance.data = action ==='Create'? null :element; */
   }
   getTotals (col:string) {
-    return (this.dataSource)?  this.dataSource.data.map(el => el[col]).reduce((acc, value) => acc + Number(value), 0):0;
+    return (this.dataSource&&this.dataSource.data)?  this.dataSource.data.map(el => el[col]).reduce((acc, value) => acc + Number(value), 0):0;
   }
   exportToExcel() {this.HandlingCommonTasksS.exportToExcel (this.dataSource.data.map(el=>{
     return {

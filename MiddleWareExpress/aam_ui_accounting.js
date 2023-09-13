@@ -8,12 +8,17 @@ pg.types.setTypeParser(1114, function(stringValue) {
   return stringValue;  
 });
 async function fUpdateAccountAccounting (request, response) {
-  let fields =  ['accountNo','accountTypeExt','Information','clientId','currencyCode','entityTypeCode','idportfolio']
+  let fields =  ['accountNo','accountTypeExt','Information','clientId','currencyCode','entityTypeCode','idportfolio','secid']
   db_common_api.fUpdateTableDB ('bAccounts',fields,'accountId',request, response)
 }
 async function fUpdateLedgerAccountAccounting (request, response) {
   let fields =  ['accountTypeID', 'name', 'clientID', 'entityTypeCode', 'ledgerNo', 'currecyCode', 'ledgerNoCptyCode', 'ledgerNoTrade', 'externalAccountNo']
   db_common_api.fUpdateTableDB ('bLedger',fields,'ledgerNoId',request, response)
+}
+async function fCreateDepoSubAccounts (request,response) {
+  let sql = "SELECT * FROM f_create_depo_accounts (ARRAY[${portfolioIds}],${secid})";
+  sql = pgp.as.format(sql,request.body);
+  db_common_api.queryExecute(sql,response,undefined,'fCreateDepoSubAccounts');
 }
 async function fUpdateLLEntryAccounting (request, response) {
   let fields =  ['ledgerID_Debit', 'dateTime',  'XactTypeCode_Ext', 'ledgerID',  'amount', 'entryDetails', 'extTransactionId','idtrade']
@@ -39,7 +44,7 @@ async function fGetAccountingData (request,response) {
     case 'GetAccountData':
       query.text ='SELECT '+
         '"accountNo", "accountTypeExt", "Information", "clientId", "currencyCode", "entityTypeCode", "accountId", '+
-        'clientname AS d_clientname, "bAccounts"."idportfolio", dportfolios.portfolioname AS "d_portfolioCode" '+
+        'clientname AS d_clientname, "bAccounts"."idportfolio", dportfolios.portfolioname AS "d_portfolioCode",secid '+
         'FROM public."bAccounts" '+
         'LEFT JOIN dclients ON "bAccounts"."clientId" = dclients.idclient ' +
         'LEFT JOIN dportfolios ON dportfolios.idportfolio = "bAccounts"."idportfolio" ' +
@@ -243,7 +248,6 @@ async function fGetAccountingData (request,response) {
       query.text += ' ORDER BY "dateBalance"::timestamp without time zone DESC;';
     break;
   }
-  console.log('request.query',request.query);
   query.text = pgp.as.format(query.text,request.query);
   db_common_api.queryExecute(query.text,response,null, request.query.queryCode === undefined?  request.query.Action : request.query.queryCode );
 }
@@ -414,5 +418,6 @@ module.exports = {
   faccountingOverdraftLedgerAccountCheck,
   faccountingBalanceCloseInsert,
   faccountingBalanceDayOpen,
-  fdeleteAllocationAccounting
+  fdeleteAllocationAccounting,
+  fCreateDepoSubAccounts
 }

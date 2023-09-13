@@ -410,14 +410,14 @@ color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4"
       [allocationFilters]="{secid:tidinstrument.value,type:trtype.value,bulkorders:null}">
     </app-orders-table>
     <mat-expansion-panel class="headers-align" [expanded]="true"
-    (opened)="panelOpenStateFirst = true"
-    (closed)="panelOpenStateFirst = false" >
+    (opened)="panellAlocationTable = true"
+    (closed)="panellAlocationTable = false" >
     <mat-expansion-panel-header style="margin-bottom: 1%;">
       <mat-panel-title title="Details">
         Trades allocated
       </mat-panel-title>
       <mat-panel-description >
-        Tap to {{panelOpenStateFirst? 'hide': 'open'}} data
+        Tap to {{panellAlocationTable? 'hide': 'open'}} data
         <mat-icon color = 'accent'>list</mat-icon>
       </mat-panel-description>
     </mat-expansion-panel-header >
@@ -427,18 +427,18 @@ color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4"
     </app-allocation-table>
   </mat-expansion-panel>
     <mat-expansion-panel class="headers-align" 
-    (opened)="panelOpenStateFirst = true"
-    (closed)="panelOpenStateFirst = false" >
+    (opened)="panelOrdersAllocated = true"
+    (closed)="panelOrdersAllocated = false" >
     <mat-expansion-panel-header style="margin-bottom: 1%;">
       <mat-panel-title title="Details">
         Orders allocated
       </mat-panel-title>
       <mat-panel-description >
-        Tap to {{panelOpenStateFirst? 'hide': 'open'}} data
+        Tap to {{panelOrdersAllocated ? 'hide': 'open'}} data
         <mat-icon color = 'accent'>list</mat-icon>
       </mat-panel-description>
     </mat-expansion-panel-header >
-    <app-orders-table #ordersTable style="width: 100%;" 
+    <app-orders-table #ordersAllocated style="width: 100%;" 
     [tableMode]="['AllocatedOrders','Parent']"
     [allocationFilters]="{secid:tidinstrument.value,type:trtype.value,bulkorders:['0']}">
   </app-orders-table>

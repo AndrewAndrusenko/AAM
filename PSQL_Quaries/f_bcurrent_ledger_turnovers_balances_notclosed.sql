@@ -1,8 +1,10 @@
--- FUNCTION: public.f_bcurrentturnoversandbalncesnotclosed(date)
+-- FUNCTION: public.f_bcurrent_ledger_turnovers_balances_notclosed(date)
+
+-- DROP FUNCTION IF EXISTS public.f_bcurrent_ledger_turnovers_balances_notclosed(date);
 
 CREATE OR REPLACE FUNCTION public.f_bcurrent_ledger_turnovers_balances_notclosed(
 	lastclosedbalancedate date)
-    RETURNS TABLE("accountId" numeric, "accountNo" text, "dataTime" date, "xActTypeCode" numeric, "openingBalance" numeric, "corrOpeningBalance" numeric, "signedTurnOver" numeric, "totalCredit" numeric, "totalDebit" numeric) 
+    RETURNS TABLE("accountId" numeric, "accountNo" text, "dataTime" date, "xActTypeCode" integer, "openingBalance" numeric, "corrOpeningBalance" numeric, "signedTurnOver" numeric, "totalCredit" numeric, "totalDebit" numeric) 
     LANGUAGE 'sql'
     COST 100
     VOLATILE PARALLEL UNSAFE
@@ -18,21 +20,21 @@ SELECT "ledgerTransactions"."accountID",
   "ledgerTransactions"."accountNo",
   "ledgerTransactions"."dataTime"::date AS "dataTime",
   "ledgerTransactions"."xActTypeCode",
-  COALESCE("IncomingBalances"."closingBalance", 0::numeric) AS "openingBalance",
-  COALESCE("IncomingBalances"."closingBalance", 0::numeric) + 
+  COALESCE("IncomingBalances"."closingBalance", 0) AS "openingBalance",
+  COALESCE("IncomingBalances"."closingBalance", 0) + 
   COALESCE(
 	(SELECT 
 	  SUM(
 		CASE tr."codeTransaction" + "ledgerTransactions"."xActTypeCode"
 		  WHEN 3 THEN tr."amountTransaction"
-		  ELSE tr."amountTransaction" * '-1'::integer::numeric
+		  ELSE tr."amountTransaction" -1
 		END) 
     AS "sCorr"
 	FROM  f_all_ledger_transactions_from_date ($1::date) tr
 	WHERE 
 	  tr."accountID" = "ledgerTransactions"."accountID" AND 
 	  tr."dataTime"::date < "ledgerTransactions"."dataTime"::date), 
-  0::numeric) 
+  0::real) 
   AS "corrOpeningBalance",
   SUM(
 	CASE "ledgerTransactions"."codeTransaction" + "ledgerTransactions"."xActTypeCode"
@@ -40,9 +42,9 @@ SELECT "ledgerTransactions"."accountID",
 		ELSE "ledgerTransactions"."amountTransaction" * -1
 	END) 
 	AS "closingBalance",
-    COALESCE(sum("ledgerTransactions"."amountTransaction") FILTER (WHERE "ledgerTransactions"."codeTransaction" = 1)::money, '$0.00'::money) 
+    COALESCE(sum("ledgerTransactions"."amountTransaction") FILTER (WHERE "ledgerTransactions"."codeTransaction" = 1), 0.00) 
 	AS "totalCredit",
-    COALESCE(sum("ledgerTransactions"."amountTransaction") FILTER (WHERE "ledgerTransactions"."codeTransaction" = 2)::money, '$0.00'::money) 
+    COALESCE(sum("ledgerTransactions"."amountTransaction") FILTER (WHERE "ledgerTransactions"."codeTransaction" = 2), 0.00) 
 	AS "totalDebit"
 FROM f_all_ledger_transactions_from_date ($1::date) as "ledgerTransactions"
   LEFT JOIN 

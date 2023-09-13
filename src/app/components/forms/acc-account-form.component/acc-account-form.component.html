@@ -43,7 +43,7 @@
         </mat-form-field>
 
         
-        <mat-form-field style = "width: 15%;" *ngIf="accountTypeExt.value!=13">
+        <mat-form-field style = "width: 15%;" *ngIf="accountTypeExt.value!=15">
           <input matInput placeholder = "Currency" formControlName="currencyCode"
           [matAutocomplete]="auto" >
           <mat-autocomplete #auto="matAutocomplete" 
@@ -59,7 +59,7 @@
             Required!    
           </mat-error>
         </mat-form-field>
-        <mat-form-field style="width: 25%;" *ngIf="accountTypeExt.value==13"  >
+        <mat-form-field style="width: 25%;" *ngIf="accountTypeExt.value==15"  >
           <input matInput 
           [placeholder]="'SecID'" formControlName="secid" [matAutocomplete]="autoSecID"  >
           <mat-autocomplete #autoSecID="matAutocomplete" 
@@ -77,7 +77,7 @@
         </mat-form-field>
         <mat-form-field  style="width: 25%;">
           <mat-label>Type Code</mat-label>
-          <mat-select   formControlName="accountTypeExt" > 
+          <mat-select   formControlName="accountTypeExt" (selectionChange)="accountTypeChanges()"> 
             <ng-container *ngFor="let AccountType of AccountTypes">
             <mat-option  [value]="AccountType.accountType_Ext">
                 {{AccountType.actCodeShort}} - {{AccountType.description}}
