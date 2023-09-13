@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, ReplaySubject, Subject, of} from 'rxjs';
+import { Observable, ReplaySubject, Subject, firstValueFrom, of} from 'rxjs';
 import { bAccounts, bAccountsEntriesList, bAccountTransaction, bBalanceData, bBalanceFullData, bcAccountType_Ext, bcEnityType, bcTransactionType_Ext, bLedger, bLedgerAccounts, bLedgerBalanceData, bLedgerTransaction, SWIFTSGlobalListmodel, SWIFTStatement950model } from '../models/intefaces.model';
 
 @Injectable({
@@ -10,7 +10,7 @@ export class AppAccountingService {
   constructor(private http:HttpClient) { }
   private subjectReloadAccontList = new Subject<any>();
   private subjectReloadLedgerAccontList = new Subject<any>();
-  private subjectReloadBalanceSheet = new Subject<any>();
+  private subjectNewClosedPeriod = new Subject<any>();
   private subjectFormState = new Subject<any>();
   private subjectEntryDraft = new Subject<any>();
   private subjectLoadedMT950Transactions = new Subject<any>();
@@ -150,7 +150,9 @@ export class AppAccountingService {
   getReloadEntryList(): Observable<any> {return this.relplaySubject.asObservable()}
   deleteAllocationAccounting (tradesToDelete:number[]):Observable<{id:number,amount:number}[]> {
     return this.http.post <{id:number,amount:number}[]> ('api/DEA/deleteAllocationAccounting/',{trades_to_delete:tradesToDelete})
-
+  }
+  createDepoSubAccounts (portfolioIds:number[],secid:string):Observable<bAccounts[]> {
+    return this.http.post <bAccounts[]> ('api/DEA/createDepoSubAccounts/',{portfolioIds:portfolioIds,secid:secid})
   }
 /*----------------------OverdraftValidators----------------------------------------------------*/
 /*   goodToGo (func:any):boolean {
@@ -192,10 +194,14 @@ export class AppAccountingService {
   GetALLClosedBalances (searchParameters:any, id: number, lastClosedDate:string, Sender: string, Action: string):Observable <bBalanceFullData[]> {
     let params = {'id' :id, 'lastClosedDate': lastClosedDate,'Sender':Sender, 'Action': Action};
     (searchParameters !== null) ?  params = {...params,...searchParameters}: null
-    return this.http.get <bBalanceFullData []>('/api/DEA/fGetAccountingData/', { params: params })
+    console.log('lastClosedDate',lastClosedDate);
+    return this.http.get <bBalanceFullData[]>('/api/DEA/fGetAccountingData/', {params:params })
   }
-  sendReloadBalanceSheet ( id:any) {this.subjectReloadBalanceSheet.next(id)}
-  getReloadBalanceSheet(): Observable<any> {return this.subjectReloadBalanceSheet.asObservable()}
+  async sendClosedPeriodChanged () {
+    const newPeriod = await firstValueFrom (this.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate'))
+    console.log('newP service',newPeriod);
+    this.subjectNewClosedPeriod.next(newPeriod)}
+  getClosedPeriodChanged(): Observable<any> {return this.subjectNewClosedPeriod.asObservable()}
 
   accountingBalanceCloseInsert (data:any) {return this.http.post <any[]> ('/api/DEA/accountingBalanceCloseInsert/',{'data': data})}
   accountingBalanceDayOpen (data:any) {return this.http.post <any[]> ('/api/DEA/accountingBalanceDayOpen/',{'data': data})}
