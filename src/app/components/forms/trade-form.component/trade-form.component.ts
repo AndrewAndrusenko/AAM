@@ -91,7 +91,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     })
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
-    this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data => this.firstOpenedAccountingDate = data[0].FirstOpenedDate);
+    this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data => this.firstOpenedAccountingDate = data[0].FirstOpenedDate);
     this.indexDBServiceS.getIndexDBStaticTables('getMoexSecurityTypes').then (data=>this.securityTypes = data['data']);
     this.AutoCompService.getCurrencyList().then(()=>{
       this.id_price_currency.setValidators([this.AutoCompService.currencyValirator(),Validators.required]);
@@ -190,7 +190,6 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
         i!==-1? tradeToConfirm[i].depoAccountId=depoAccount.accountId:null;
       })
     })}
-    console.log('tradeToConfirm',...tradeToConfirm);
     if (portfolioWitoutAccounts.length) {
       this.CommonDialogsService.snackResultHandler({name:'error',detail:'There are no opened current or depo accounts for the portfolios: '+[...portfolioWitoutAccounts]});
       return;
@@ -235,41 +234,9 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
   }
   deleteAccountingForAllocatedTrades () {
     this.AllocationService.deleteAccountingForAllocatedTrades(this.allocationTable);
-/*     let tradesToDelete = this.allocationTable.selection.selected.map(trade=>Number(trade.id))
-    if (!tradesToDelete.length) {
-      return this.CommonDialogsService.snackResultHandler({name:'error',detail:'No trades are selected to be deleted'},'DeleteAllocation')
-    }
-    this.CommonDialogsService.confirmDialog('Delete accouting for allocated trades ').pipe(
-      filter (isConfirmed => isConfirmed.isConfirmed),
-      switchMap(data => this.AccountingDataService.deleteAllocationAccounting (tradesToDelete))
-    ).subscribe (deletedTrades=>{
-      this.allocationTable.selection.clear();
-      this.CommonDialogsService.snackResultHandler({name:'success',detail:deletedTrades.length + ' entries have been deleted'},'Delete accounting: ',null,false)
-      this.allocationTable.submitQuery(true, false);
-    })  */
   }
   deleteAllocatedTrades (){
-    let tradesToDelete=this.allocationTable.selection.selected.filter(el=>!el.entries)
-    if (tradesToDelete.length!==this.allocationTable.selection.selected.length) {
-      this.CommonDialogsService.snackResultHandler({name:'error',detail:'Trades with entries have been selected. Accounted trades can not be deleted'},'Allocated trades delete',null,false);
-      return;
-    }
-    if (!this.allocationTable.selection.selected.length) {
-      return this.CommonDialogsService.snackResultHandler({name:'error',detail:'No trades are selected to be deleted'},'DeleteAllocation')
-    }
-    this.CommonDialogsService.confirmDialog('Delete allocated trades ').pipe(
-      filter (isConfirmed => isConfirmed.isConfirmed),
-      switchMap(data => this.TradeService.deleteAllocatedTrades(this.allocationTable.selection.selected.map(el=>Number(el.id))))
-    ).subscribe (deletedTrades=>{
-      this.allocationTable.selection.clear();
-      this.CommonDialogsService.snackResultHandler({name:'success',detail:deletedTrades.length+' have been deleted'},'Delete allocated trades: ',undefined,false)
-      this.allocatedqty.patchValue(
-        Number(this.allocatedqty.value)-deletedTrades.map(el=>el.idtrade==this.idtrade.value? el.qty:null).reduce((acc, value) => acc + Number(value), 0)
-        );
-      this.TradeService.sendNewAllocatedQty({idtrade:this.idtrade.value,allocatedqty:this.allocatedqty.value})
-      this.TradeService.sendDeletedAllocationTrades(deletedTrades)
-      this.orderTable.submitQuery(true, false).then(()=>this.orderTable.filterForAllocation())
-    })
+    this.AllocationService.deleteAllocatedTrades(this.allocationTable,this.idtrade.value,this.allocatedqty,this.orderTable);
   }
   selectClient (){
     this.dialogClientsTabletRef = this.dialog.open(AppClientsTableComponent ,{minHeight:'400px', minWidth:'90vw', autoFocus: false, maxHeight: '90vh'});
