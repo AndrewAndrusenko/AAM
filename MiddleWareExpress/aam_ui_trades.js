@@ -10,18 +10,23 @@ async function fGetTradesData (request,response) {
     },
     'type':{
       1: '(trtype =  ${type})',
+      2: '(trtype =  ${type})',
     },
     'qty':{
       1: '(qty BETWEEN ${qty_min} AND ${qty_max})',
+      2: '(dtrades_allocated.qty BETWEEN ${qty_min} AND ${qty_max})',
     },
     'price': {
       1: '(price BETWEEN ${price_min} AND ${price_max})',
+      2: '(price BETWEEN ${price_min} AND ${price_max})',
     },
     'tdate_min': {
       1: '(tdate::timestamp without time zone >= ${tdate_min}::date )',
+      2: '(tdate::timestamp without time zone >= ${tdate_min}::date )',
     },
     'tdate_max': {
       1: '(tdate::timestamp without time zone <= ${tdate_max}::date )',
+      2: '(tdate::timestamp without time zone <= ${tdate_max}::date )',
     },
     'vdate_min': {
       1: '(vdate::timestamp without time zone >= ${vdate_min}::date )',
@@ -34,6 +39,7 @@ async function fGetTradesData (request,response) {
     },
     'secidList' : {
       1: '(LOWER(tidinstrument) = ANY(array[${secidList}]))  ',
+      2: '(LOWER(tidinstrument) = ANY(array[${secidList}]))  ',
     }
   }
   let conditionsTrades =' WHERE'
@@ -48,7 +54,6 @@ async function fGetTradesData (request,response) {
     request.query[key]!=='null'? conditionsAllocatedTrades +=conditions[key][2] + ' AND ': null;
     }
   });
-  console.log('request.query.balances',request.query);
   switch (request.query.action) {
     case 'getAllocationTrades':
       sql='SELECT dtrades_allocated.id, dtrades_allocated.qty, dtrades_allocated.idtrade, dtrades_allocated.idportfolio, id_order,dtrades_allocated.id_bulk_order, dportfolios.portfolioname, ROUND(dtrades.trade_amount/dtrades.qty*dtrades_allocated.qty,2) as trade_amount, dtrades.accured_interest,id_settlement_currency, "bAccounts"."accountId","bAccountsDepo"."accountId" as "depoAccountId", "entriesForAllocation".count as "entries",dtrades.tidinstrument as secid,dtrades.tdate,dtrades.trtype,dtrades.price,dtrades.id_price_currency ';
@@ -71,7 +76,6 @@ async function fGetTradesData (request,response) {
       '    ON "bAccountsDepo"."accountId"=b_depo_accounts_balance."accountId" ': null;
           
       sql +=conditionsAllocatedTrades.slice(0,-5) + 'ORDER BY dtrades_allocated.idtrade DESC;'
-      console.log('allloc---------------------------------\n', sql);
     break;
     default:
       sql = 'SELECT details, dclients.clientname as cpty_name , mmoexsecuritytypes.security_group_name,mmoexsecuritytypes.security_type_name as secid_type, mmoexsecurities.name as secid_name, dtrades.idtrade, qty, price, dclients.clientname as cpty, tdate, vdate, tidorder, allocated_qty.alloaction as allocatedqty, idportfolio, trtype, tidinstrument, id_broker, id_price_currency, id_settlement_currency, id_buyer_instructions, id_seller_instructions, accured_interest, fee_trade, fee_settlement, fee_exchange, id_cpty, mmoexsecuritytypes.price_type, trade_amount,faceunit,facevalue,settlement_amount, settlement_rate '+

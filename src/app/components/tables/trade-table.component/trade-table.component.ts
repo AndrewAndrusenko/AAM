@@ -71,7 +71,7 @@ export class AppTradeTableComponent  implements AfterViewInit {
   ) {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
-    this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate);
+    this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate);
     this.searchParametersFG = this.fb.group ({
       type:null,
       secidList: [],
@@ -110,11 +110,7 @@ export class AppTradeTableComponent  implements AfterViewInit {
   ngOnDestroy(): void {
     this.arraySubscrition.unsubscribe();
   }
-  confirmAllocation (idtrade:number) {
-
-  }
-
-   async ngAfterViewInit() {
+  async ngAfterViewInit() {
     this.TradeService.getTradeInformation(null).subscribe (tradesData => this.updateTradesDataTable(tradesData));  
     this.AutoCompService.getSecidLists();
     this.AutoCompService.getCounterpartyLists();
@@ -125,8 +121,35 @@ export class AppTradeTableComponent  implements AfterViewInit {
     this.filteredCptyLists = this.cptyList.valueChanges.pipe(
       startWith(''),
       map(value => this.AutoCompService.filterList(value || '','cpty'))
-    );
+  );
   }  
+  async submitQuery (reset:boolean=false) {
+    this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate);
+    return new Promise((resolve, reject) => {
+      let searchObj = reset?  {} : this.searchParametersFG.value;
+      this.dataSource.data? this.dataSource.data = null : null;
+      searchObj.cptyList = [0,1].includes(this.counterparties.length)&&this.counterparties[0]==='ClearAll'? null : this.counterparties.map(el=>el.toLocaleLowerCase())
+      searchObj.secidList = [0,1].includes(this.instruments.length)&&this.instruments[0]==='ClearAll'? null : this.instruments.map(el=>el.toLocaleLowerCase())
+      if (this.qty.value) {
+        let qtyRange = this.HandlingCommonTasksS.toNumberRange(this.qty.value,this.qty,'qty');
+        qtyRange? searchObj = {...searchObj, ... qtyRange} : searchObj.qty=null;
+      } else {searchObj.qty=null};
+      if (this.price.value) {
+        let priceRange = this.HandlingCommonTasksS.toNumberRange(this.price.value,this.price,'price');
+        priceRange? searchObj = {...searchObj, ... priceRange} : searchObj.price=null;
+      } else  {searchObj.price=null};
+      this.price.value? searchObj = {...searchObj, ... this.HandlingCommonTasksS.toNumberRange(this.price.value,this.price,'price')} :null;
+      searchObj = {...searchObj, ...this.tdate.value? this.HandlingCommonTasksS.toDateRange(this.tdate, 'tdate') : null}
+      searchObj = {...searchObj, ...this.vdate.value? this.HandlingCommonTasksS.toDateRange(this.vdate,'vdate') : null}
+      this.arraySubscrition.add(this.TradeService.getTradeInformation(searchObj).subscribe(data => {
+        this.dataSource  = new MatTableDataSource(data);
+        this.dataSource.paginator = this.paginator;
+        this.dataSource.sort = this.sort;
+        this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ');
+        resolve(data) 
+      }));
+    });
+  }
   openTradeModifyForm (action:string, element:any,tabIndex:number=0) {
     action==='Create_Example'? element.allocatedqty=0:null;
     this.dialogTradeModify = this.dialog.open (AppTradeModifyFormComponent,{minHeight:'600px', minWidth:'60vw', maxWidth:'80vw', maxHeight: '90vh'})
@@ -179,32 +202,7 @@ export class AppTradeTableComponent  implements AfterViewInit {
     this.dataSource.filter = ''
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
   }
-  async submitQuery (reset:boolean=false) {
-    return new Promise((resolve, reject) => {
-      let searchObj = reset?  {} : this.searchParametersFG.value;
-      this.dataSource.data? this.dataSource.data = null : null;
-      searchObj.cptyList = [0,1].includes(this.counterparties.length)&&this.counterparties[0]==='ClearAll'? null : this.counterparties.map(el=>el.toLocaleLowerCase())
-      searchObj.secidList = [0,1].includes(this.instruments.length)&&this.instruments[0]==='ClearAll'? null : this.instruments.map(el=>el.toLocaleLowerCase())
-      if (this.qty.value) {
-        let qtyRange = this.HandlingCommonTasksS.toNumberRange(this.qty.value,this.qty,'qty');
-        qtyRange? searchObj = {...searchObj, ... qtyRange} : searchObj.qty=null;
-      } else {searchObj.qty=null};
-      if (this.price.value) {
-        let priceRange = this.HandlingCommonTasksS.toNumberRange(this.price.value,this.price,'price');
-        priceRange? searchObj = {...searchObj, ... priceRange} : searchObj.price=null;
-      } else  {searchObj.price=null};
-      this.price.value? searchObj = {...searchObj, ... this.HandlingCommonTasksS.toNumberRange(this.price.value,this.price,'price')} :null;
-      searchObj = {...searchObj, ...this.tdate.value? this.HandlingCommonTasksS.toDateRange(this.tdate, 'tdate') : null}
-      searchObj = {...searchObj, ...this.vdate.value? this.HandlingCommonTasksS.toDateRange(this.vdate,'vdate') : null}
-      this.arraySubscrition.add(this.TradeService.getTradeInformation(searchObj).subscribe(data => {
-        this.dataSource  = new MatTableDataSource(data);
-        this.dataSource.paginator = this.paginator;
-        this.dataSource.sort = this.sort;
-        this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ');
-        resolve(data) 
-      }));
-    });
-  }
+
   selectInstrument (element:Instruments) {this.modal_principal_parent.emit(element)}
   exportToExcel() {this.HandlingCommonTasksS.exportToExcel (this.dataSource.data.map(el=>{
     return {

@@ -32,8 +32,8 @@ import { HandlingTableSelectionService } from 'src/app/services/handling-table-s
 export class AppTableAccAccountsComponent  implements OnInit {
   accessState: string = 'none';
   disabledControlElements: boolean = false;
-  columnsToDisplay = ['select','accountNo','d_APTypeCodeAccount','d_Account_Type','Information','d_clientname','d_portfolioCode', 'd_entitytypedescription', 'action']
-  columnsHeaderToDisplay = ['No','Balance','Type','Details','Client','Portfolio','Entity','Action' ];
+  columnsToDisplay = ['select','accountId','accountNo','d_APTypeCodeAccount','d_Account_Type','Information','d_clientname','d_portfolioCode', 'd_entitytypedescription', 'action']
+  columnsHeaderToDisplay = ['ID','No','Balance','Type','Details','Client','Portfolio','Entity','Action' ];
   dataSource: MatTableDataSource<bAccounts>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;

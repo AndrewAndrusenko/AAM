@@ -81,7 +81,7 @@ export class AppTableCurrenciesDataComponent  implements AfterViewInit {
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.MarketDataService.getMarketDataSources('currency').subscribe(marketSourcesData => this.marketSources = marketSourcesData);
     this.loadingDataState={message:'',state:'None',deletedCount:0,loadedCount:0}
-    this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data=>{
+    this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data=>{
       this.FirstOpenedAccountingDate = data[0].FirstOpenedDate;
     });
     this.searchParametersFG = this.fb.group ({

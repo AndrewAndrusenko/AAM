@@ -27,7 +27,6 @@ async function fUpdateTableDB (table, fields,idfieldName, request, response,date
     dates = !dates? []:dates; 
     let fieldsWithQuetes =  fields.join('","')
     let values = fields.map(el=>dates.includes(el)? '${'+el+'}::timestamptz':'${'+el+'}');
-    console.log('fields value',fields,values,request.body.data);
     let updatePairs = fields.map(el=> dates.includes(el)? '"'+el+'"'+'=${'+el+'}::timestamptz': '"'+el+'"'+'=${'+el+'}');
     switch (request.body.action) {
       case 'Create':
@@ -41,7 +40,6 @@ async function fUpdateTableDB (table, fields,idfieldName, request, response,date
       break;
       }
       sql = pgp.as.format(sqlText,request.body.data);
-      console.log('sql',sql, sqlText,request.body.data );
     resolve(queryExecute (sql, response,undefined,'fUpdateTableDB '+request.body.action+' ',table))
   })
 }

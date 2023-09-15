@@ -18,7 +18,6 @@ import { AppTradeModifyFormComponent } from '../../forms/trade-form.component/tr
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import { HandlingTableSelectionService } from 'src/app/services/handling-table-selection.service';
 import { SelectionModel } from '@angular/cdk/collections';
-import { indexDBService } from 'src/app/services/indexDB.service';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { AppTableAccEntriesComponent } from '../acc-entries-table.component/acc-entries-table.component';
 import { AppAccountingService } from 'src/app/services/accounting.service';
@@ -64,7 +63,6 @@ export class AppallocationTableComponent  implements AfterViewInit {
   });
   dialogOrderModify: MatDialogRef<AppTradeModifyFormComponent>;
   dialogShowEntriesList: MatDialogRef<AppTableAccEntriesComponent>;
-
   defaultFilterPredicate?: (data: any, filter: string) => boolean;
   secidfilter?: (data: any, filter: string) => boolean;
   constructor(
@@ -119,8 +117,7 @@ export class AppallocationTableComponent  implements AfterViewInit {
       this.columnsToDisplay = ['select','id','portfolioname','qty', 'trade_amount', 'depo_account_balance', 'current_account_balance','id_order','id_bulk_order','entries','idtrade','secid','tdate','trtype','price','id_price_currency'];
       this.columnsHeaderToDisplay = ['ID', 'pCode','Quantity','Amount','Position','Balance', 'Order','Bulk','Entries','IDtrade','SecID','tDate','Type','Price','Curr']
     }
-    this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data =>{ 
-      console.log('data',);
+    this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data =>{ 
       this.FirstOpenedAccountingDate = data[0].FirstOpenedDate;
       this.TradeService.getAllocationInformation(this.tableMode.includes('Trade')? {idtrade:this.tradeData.idtrade}:null,new Date (this.FirstOpenedAccountingDate).toDateString(),this.tableMode.includes('Trade')).subscribe (allocationData => {
         this.updateAllocationDataTable(allocationData);
@@ -145,11 +142,14 @@ export class AppallocationTableComponent  implements AfterViewInit {
       map(value => this.AutoCompService.filterList(value || '','secid'))
     );
   }
-  createAccountingForAllocation (){
-
+  createAccountingForAllocation () {
+    this.AllocationService.createAccountingForAllocation(this);
   }
   deleteAccountingForAllocatedTrades () {
     this.AllocationService.deleteAccountingForAllocatedTrades(this);
+  }
+  deleteAllocatedTrades () {
+    this.AllocationService.deleteAllocatedTrades(this);
   }
   showEntries (idtrade : number) {
     this.dialogShowEntriesList = this.dialog.open(AppTableAccEntriesComponent ,{minHeight:'600px', minWidth:'1700px', autoFocus: false, maxHeight: '90vh'});
@@ -165,7 +165,6 @@ export class AppallocationTableComponent  implements AfterViewInit {
     !event.hasOwnProperty('isUserInput') || event.isUserInput ? this.dataSource.filter = filterValue.trim().toLowerCase() : null;
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
-
   excludeOrdersWithParent ():allocation[] {
     return this.dataSource.data.filter(allocation=>!allocation.idtrade)
   }
@@ -177,6 +176,31 @@ export class AppallocationTableComponent  implements AfterViewInit {
     this.TradeService.sendAllocatedOrders([...orderAllocated].length? [...orderAllocated]:[0]);
     this.defaultFilterPredicate = this.dataSource.filterPredicate;
     this.secidfilter = this.dataSource.filterPredicate;
+  }
+  async submitQuery (reset:boolean=false, showSnackResult:boolean=true) {
+    this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate')
+    .subscribe(data =>this.FirstOpenedAccountingDate = data[0].FirstOpenedDate);
+    return new Promise((resolve, reject) => {
+      let searchObj = reset?  {} : this.searchParametersFG.value;
+      this.dataSource.data? this.dataSource.data = null : null;
+      this.tradeData?.idtrade? searchObj.idtrade=this.tradeData.idtrade:null;
+      searchObj.secidList = [0,1].includes(this.instruments.length)&&this.instruments[0]==='ClearAll'? null : this.instruments.map(el=>el.toLocaleLowerCase())
+      if (this.qty.value) {
+        let qtyRange = this.HandlingCommonTasksS.toNumberRange(this.qty.value,this.qty,'qty');
+        qtyRange? searchObj = {...searchObj, ... qtyRange} : searchObj.qty=null;
+      } else {searchObj.qty=null};
+      if (this.price.value) {
+        let priceRange = this.HandlingCommonTasksS.toNumberRange(this.price.value,this.price,'price');
+        priceRange? searchObj = {...searchObj, ... priceRange} : searchObj.price=null;
+      } else  {searchObj.price=null};
+      this.price.value? searchObj = {...searchObj, ... this.HandlingCommonTasksS.toNumberRange(this.price.value,this.price,'price')} :null;
+      searchObj = {...searchObj, ...this.tdate.value? this.HandlingCommonTasksS.toDateRange(this.tdate, 'tdate') : null}
+      this.TradeService.getAllocationInformation(this.tableMode.includes('Trade')? {idtrade:this.tradeData.idtrade}:searchObj,new Date (this.FirstOpenedAccountingDate).toDateString(),this.tableMode.includes('Trade')).subscribe(data => {
+        this.updateAllocationDataTable(data)
+        showSnackResult? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ') : null;
+        resolve(data) 
+      });
+    });
   }
   changedValueofChip (value:string, chipArray:string[],control:AbstractControl) {
     chipArray[chipArray.length-1] = value;
@@ -213,32 +237,6 @@ export class AppallocationTableComponent  implements AfterViewInit {
   toggleAllRows(forceSelectAll:boolean=false) { return this.SelectionService.toggleAllRows(this.dataSource, this.selection,forceSelectAll)} 
   checkboxLabel(row?: orders): string {
     return this.SelectionService.checkboxLabel(this.dataSource, this.selection, row)
-  }
-  async submitQuery (reset:boolean=false, showSnackResult:boolean=true) {
-    return new Promise((resolve, reject) => {
-      let searchObj = reset?  {} : this.searchParametersFG.value;
-      this.dataSource.data? this.dataSource.data = null : null;
-      this.tradeData?.idtrade? searchObj.idtrade=this.tradeData.idtrade:null;
-      searchObj.secidList = [0,1].includes(this.instruments.length)&&this.instruments[0]==='ClearAll'? null : this.instruments.map(el=>el.toLocaleLowerCase())
-      if (this.qty.value) {
-        let qtyRange = this.HandlingCommonTasksS.toNumberRange(this.qty.value,this.qty,'qty');
-        qtyRange? searchObj = {...searchObj, ... qtyRange} : searchObj.qty=null;
-      } else {searchObj.qty=null};
-      if (this.price.value) {
-        let priceRange = this.HandlingCommonTasksS.toNumberRange(this.price.value,this.price,'price');
-        priceRange? searchObj = {...searchObj, ... priceRange} : searchObj.price=null;
-      } else  {searchObj.price=null};
-      this.price.value? searchObj = {...searchObj, ... this.HandlingCommonTasksS.toNumberRange(this.price.value,this.price,'price')} :null;
-      searchObj = {...searchObj, ...this.tdate.value? this.HandlingCommonTasksS.toDateRange(this.tdate, 'tdate') : null}
-      this.TradeService.getAllocationInformation(this.tableMode.includes('Trade')? {idtrade:this.tradeData.idtrade}:searchObj,new Date (this.FirstOpenedAccountingDate).toDateString(),this.tableMode.includes('Trade')).subscribe(data => {
-        this.updateAllocationDataTable(data)
-        showSnackResult? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ') : null;
-        resolve(data) 
-      });
-    });
-  }
-  deleteAllocatedTrades () {
-
   }
   keyDownEvent(event:_KeyboardEvent) {
     switch (event.code) {

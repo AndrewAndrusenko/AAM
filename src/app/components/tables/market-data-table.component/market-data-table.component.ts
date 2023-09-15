@@ -87,7 +87,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
     this.InstrumentDataS.getInstrumentDataGeneral('getBoardsDataFromInstruments').subscribe(boardsData => this.boardIDs=boardsData)
     this.MarketDataService.getMarketDataSources('stock').subscribe(marketSourcesData => this.marketSources = marketSourcesData);
     this.loadingDataState = {Message:'',State: 'None'};
-    this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data=>{
+    this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data=>{
       this.FirstOpenedAccountingDate = data[0].FirstOpenedDate;
     });
     this.searchParametersFG = this.fb.group ({

@@ -19,9 +19,6 @@ interface bulkModifedSet {
   providedIn: 'root'
 })
 export class AppTradeService {
-  updateTrade(data:any, action:string):Observable <trades[]> {
-    return this.http.post <trades[]> ('api/AAM/MD/UpdateTradeData/',{data:data,action:action})
-  }
   constructor(private http:HttpClient) { }
   private reloadTradeTable = new Subject <any> (); 
   private reloadExecution = new Subject <{data:orders[],idtrade:number,ordersForExecution:number[]}> (); 
@@ -29,6 +26,9 @@ export class AppTradeService {
   private allocationDeleted = new Subject <allocation[]>(); 
   private sAllocatedQty = new Subject <{idtrade:number,allocatedqty:number}>(); 
   private sOrdersAllocated = new BehaviorSubject <number[]>([]); 
+  updateTrade(data:any, action:string):Observable <trades[]> {
+    return this.http.post <trades[]> ('api/AAM/MD/UpdateTradeData/',{data:data,action:action})
+  }
   sendTradeDataToUpdateTableSource ( data:trades[], action: string) {
     let dataSet = {
       data: data,
@@ -84,8 +84,7 @@ export class AppTradeService {
   }
   getAllocationInformation(serachFilters:any,FirstOpenedAccountingDate:string,balances:boolean=false):Observable<allocation[]> {
     let params = {...serachFilters,action:'getAllocationTrades', firstOpenedAccountingDate:FirstOpenedAccountingDate,balances:balances}
-    return this.http.get <allocation[]> ('api/AAM/MD/getTradeData/',{params:params});
-    
+    return this.http.get <allocation[]> ('api/AAM/MD/getTradeData/',{params:params});    
   }
   deleteAllocatedTrades(tradesIDs:number[]){
     let data={tradesIDs:tradesIDs};

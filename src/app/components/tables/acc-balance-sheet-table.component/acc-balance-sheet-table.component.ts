@@ -20,6 +20,7 @@ import { menuColorGl } from 'src/app/models/constants.model';
 import { formatNumber } from '@angular/common';
 import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import { AuthService } from 'src/app/services/auth.service';
+import { ReadableStreamDefaultReader } from 'stream/web';
 @Component({
   selector: 'app-table-balance-sheet',
   templateUrl: './acc-balance-sheet-table.component.html',
@@ -107,7 +108,7 @@ export class AppTableBalanceSheetComponent   {
     })
   }
   async ngOnInit(): Promise<void> {
-    const period = await firstValueFrom(this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate'))
+    const period = await firstValueFrom(this.AccountingDataService.GetbLastClosedAccountingDate('GetbLastClosedAccountingDate'))
     this.FirstOpenedAccountingDate = period[0].FirstOpenedDate;
     this.LastClosedDate = period[0].LastClosedDate;
     this.AccountingDataService.GetALLClosedBalances(null,null,new Date(this.FirstOpenedAccountingDate).toDateString(), null, 'GetALLClosedBalances').subscribe (Balances => this.updateBalanceData(Balances))
@@ -118,13 +119,13 @@ export class AppTableBalanceSheetComponent   {
       this.dataSource.sort = this.sort;
   }
   async updateResultHandler (result :any, action: string, showSnackMsg:boolean=true,duration?:number, checkBalance=false,refreshData=false) {
-    this.CommonDialogsService.snackResultHandler({detail: result.length}, action,undefined,undefined,duration)
+    this.CommonDialogsService.snackResultHandler(result, action,undefined,undefined,duration)
     if (result['name']!=='error') {
       // await this.submitQuery(showSnackMsg);
-      this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data=>{
+      this.AccountingDataService.GetbLastClosedAccountingDate('GetbLastClosedAccountingDate').subscribe(data=>{
         this.FirstOpenedAccountingDate = data[0].FirstOpenedDate;
         this.LastClosedDate = data[0].LastClosedDate;
-        checkBalance? this.checkBalance(new Date(this.LastClosedDate).toLocaleDateString()):null;
+        checkBalance? this.checkBalance(new Date(this.LastClosedDate).toLocaleDateString(),false):null;
         refreshData? this.AccountingDataService.GetALLClosedBalances(null,null,new Date(this.FirstOpenedAccountingDate).toDateString(), null, 'GetALLClosedBalances').subscribe (Balances => this.updateBalanceData(Balances)):null;
       })
       this.AccountingDataService.GetbbalacedDateWithEntries('GetbbalacedDateWithEntries').subscribe(data => {
@@ -195,10 +196,11 @@ export class AppTableBalanceSheetComponent   {
   } 
   executeClosingBalance () {
     this.AccountingDataService.accountingBalanceCloseInsert ({'closingDate' : new Date(this.firstClosingDate).toDateString()}).subscribe ((result) =>{ 
+      result['name']!=='error'? result['detail']=result[0]['rows_affected']:null;
       this.updateResultHandler(result,'Balance was closed for '+ new Date(this.firstClosingDate).toDateString()+ '. Created rows',false, 7000,true)
     })
   }
-  async checkBalance (dateBalance: string) {
+  async checkBalance (dateBalance: string,showSnackMsg=true) {
     this.totalPassive = 0;
     this.totalActive = 0;
     this.totalDebit = 0;
@@ -206,7 +208,7 @@ export class AppTableBalanceSheetComponent   {
     this.accounts=[];
     this.gRange.get('dateRangeStart').setValue(new Date(dateBalance));  
     this.gRange.get('dateRangeEnd').setValue(new Date(dateBalance));
-     await this.submitQuery();
+     await this.submitQuery(showSnackMsg);
      this.gRange.get('dateRangeStart').setValue(null);  
      this.gRange.get('dateRangeEnd').setValue(null);
      this.AccountingDataService.GetbAccountingSumTransactionPerDate(dateBalance,'SumTransactionPerDate').subscribe ((totalTransaction) => this.entriesTotal = totalTransaction[0].amountTransaction)
@@ -218,7 +220,11 @@ export class AppTableBalanceSheetComponent   {
   openBalance () {
     this.CommonDialogsService.confirmDialog('Open date: ' + new Date(this.LastClosedDate).toLocaleDateString() ).subscribe(action => {
       if (action.isConfirmed===true) {
-        this.AccountingDataService.accountingBalanceDayOpen({'dateToOpen' : new Date(this.LastClosedDate).toLocaleDateString()}).subscribe ((result) => this.updateResultHandler(result, 'Operational day ' + new Date(this.LastClosedDate).toLocaleDateString()+ ' has been opened. Deleted rows ', false, 7000,false,true))
+        this.AccountingDataService.accountingBalanceDayOpen({'dateToOpen' : new Date(this.LastClosedDate).toLocaleDateString()}).subscribe(
+          result => {
+          result['name']!=='error'? result['detail']=result[0]['rows_affected']:null;
+          this.updateResultHandler(result, 'Operational day ' + new Date(this.LastClosedDate).toLocaleDateString()+ ' has been opened. Deleted rows ', false, 7000,false,true)
+        })
       }
     })
   }

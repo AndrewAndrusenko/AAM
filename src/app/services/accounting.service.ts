@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, ReplaySubject, Subject, firstValueFrom, of} from 'rxjs';
 import { bAccounts, bAccountsEntriesList, bAccountTransaction, bBalanceData, bBalanceFullData, bcAccountType_Ext, bcEnityType, bcTransactionType_Ext, bLedger, bLedgerAccounts, bLedgerBalanceData, bLedgerTransaction, SWIFTSGlobalListmodel, SWIFTStatement950model } from '../models/intefaces.model';
-
 @Injectable({
   providedIn: 'root'
 })
@@ -10,7 +9,6 @@ export class AppAccountingService {
   constructor(private http:HttpClient) { }
   private subjectReloadAccontList = new Subject<any>();
   private subjectReloadLedgerAccontList = new Subject<any>();
-  private subjectNewClosedPeriod = new Subject<any>();
   private subjectFormState = new Subject<any>();
   private subjectEntryDraft = new Subject<any>();
   private subjectLoadedMT950Transactions = new Subject<any>();
@@ -79,7 +77,7 @@ export class AppAccountingService {
     return this.http.get <bcTransactionType_Ext []>('/api/DEA/GetEntryScheme/', { params: bcEntryParameters })  
   } 
   sendEntryDraft (data: any) { 
-    this.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe (OpenedDate => {
+    this.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe (OpenedDate => {
       let newEntryDraft = {}
       newEntryDraft['FirstOpenedAccountingDate'] = OpenedDate[0].FirstOpenedDate;
       let entryFormFields = Object.keys (this.AccountsEntriesList)
@@ -97,7 +95,6 @@ export class AppAccountingService {
   getFormState(): Observable<any> {return this.subjectFormState.asObservable() }
   CreateEntryAccountingInsertRow (data:any) { return this.http.post ('/api/DEA/fCreateEntryAccountingInsertRow/',{'data': data})} 
   /*End------------------Create entry by scheme---------------------------------------------------------*/
-
   GetAccountsEntriesListAccounting (searchParameters:any, id: number, MTType:string, Sender: string, Action: string):Observable <bAccountsEntriesList[]> {
     let params = {'id' :id, 'MTType': MTType,'Sender':Sender, 'Action': Action};
     (searchParameters !== null) ?  params = {...params,...searchParameters}: null
@@ -111,10 +108,15 @@ export class AppAccountingService {
     const params = {'currencyCode': currencyCode, 'id' :id, 'clientId': clientId,'accountNo':accountNo, 'Action': Action}
     return this.http.get <bLedgerAccounts []>('/api/DEA/fGetAccountingData/', { params: params })
   }
-  GetbLastClosedAccountingDate (currencyCode: number, id: number, clientId:number, accountNo: string, Action: string):Observable <Date> {
-    const params = {'currencyCode': currencyCode, 'id' :id, 'clientId': clientId,'accountNo':accountNo, 'Action': Action}
+  GetbLastClosedAccountingDate (Action: string):Observable <Date> {
+    const params = {Action: Action}
     return this.http.get <Date>('/api/DEA/fGetAccountingData/', { params: params })
   }
+  GetbParamsgfirstOpenedDate (Action: string):Observable <Date> {
+    const params = {Action: 'GetbParamsgfirstOpenedDate'}
+    return this.http.get <Date>('/api/DEA/fGetAccountingData/', { params: params })
+  }
+  
   GetbbalacedDateWithEntries (Action: string):Observable <Date[]> {
     const params = {'Action': Action}
     return this.http.get <Date[]>('/api/DEA/fGetAccountingData/', { params: params })
@@ -154,14 +156,6 @@ export class AppAccountingService {
   createDepoSubAccounts (portfolioIds:number[],secid:string):Observable<bAccounts[]> {
     return this.http.post <bAccounts[]> ('api/DEA/createDepoSubAccounts/',{portfolioIds:portfolioIds,secid:secid})
   }
-/*----------------------OverdraftValidators----------------------------------------------------*/
-/*   goodToGo (func:any):boolean {
-    console.log('func',func);
-    for (const letter of func) {if (!letter) {
-      console.log('arg',letter);
-      return false} }
-    return true
-  } */
   getExpectedBalanceOverdraftCheck (accountId: number, transactionAmount:number, transactionDate: string, xactTypeCode: number, id: number, FirstOpenedAccountingDate: string, Action: string ):Observable <bBalanceData[]> {
     if (accountId&&transactionAmount&&transactionAmount) {
       const params = {
@@ -197,12 +191,6 @@ export class AppAccountingService {
     console.log('lastClosedDate',lastClosedDate);
     return this.http.get <bBalanceFullData[]>('/api/DEA/fGetAccountingData/', {params:params })
   }
-  async sendClosedPeriodChanged () {
-    const newPeriod = await firstValueFrom (this.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate'))
-    console.log('newP service',newPeriod);
-    this.subjectNewClosedPeriod.next(newPeriod)}
-  getClosedPeriodChanged(): Observable<any> {return this.subjectNewClosedPeriod.asObservable()}
-
   accountingBalanceCloseInsert (data:any) {return this.http.post <any[]> ('/api/DEA/accountingBalanceCloseInsert/',{'data': data})}
   accountingBalanceDayOpen (data:any) {return this.http.post <any[]> ('/api/DEA/accountingBalanceDayOpen/',{'data': data})}
   GetDeepBalanceCheck (dateBalanceToCheck:string, firstDayOfCalculation: string, Action: string):Observable <bBalanceFullData[]> {

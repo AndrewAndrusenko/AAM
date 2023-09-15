@@ -158,6 +158,9 @@ async function fGetAccountingData (request,response) {
     case 'GetbLastClosedAccountingDate':
       query.text ='SELECT "FirstOpenedDate"::date, "LastClosedDate"::date FROM "bLastClosedAccountingDate";'
     break;
+    case 'GetbParamsgfirstOpenedDate':
+      query.text ='SELECT "FirstOpenedDate"::date from "gAppMainParams";'
+    break;
     case 'GetbbalacedDateWithEntries':
       query.text ='SELECT ARRAY_AGG("dateAcc"::date) as datesarray FROM "vbBalancedDatesWithEntries";'
     break;
@@ -312,7 +315,6 @@ async function GetEntryScheme (request, response) {
       1: '(LOWER(secid) = ANY(array[${secidList}]))  ',
     }
   }
-  // console.log('request.query.entryType',request.query.entryType);
   let conditionsTrades =' WHERE'
   Object.entries(conditions).forEach(([key,value]) => {
   if  (request.query.hasOwnProperty(key)) {
@@ -328,12 +330,8 @@ async function GetEntryScheme (request, response) {
       sql='SELECT "ledgerNoId" , "dataTime", "XactTypeCode", "XactTypeCode_Ext" , "accountId", "amountTransaction", "entryDetails", "extTransactionId",idtrade FROM public."bcSchemeAccountTransaction" ';
     break;
   }
-//  console.log('request.query',request.hasOwnProperty('query'));
-//  console.log('request.query',request.query);
-
   sql +=conditionsTrades.slice(0,-5);
   sql = pgp.as.format(sql,request.query)
-  console.log('scheme',sql,request.query);
   pool.query (sql,  (err, res) => {if (err) {
       console.log (err.stack.split("\n", 1).join(""))
       err.detail = err.stack
@@ -363,9 +361,6 @@ async function GetEntryScheme (request, response) {
           break;
           
         }
-        console.log('sql drafts',sql);
-        // console.log('entryDraftData',[entryDraftData,entryDraftData1]);
-
         db_common_api.queryExecute(sql,response,null,'STP_Get Entry Scheme');
       }
     }
@@ -390,13 +385,12 @@ async function faccountingOverdraftLedgerAccountCheck (request, response) {
   db_common_api.queryExecute(sql,response,null,'Ledger Overdraft Check')
 }
 async function faccountingBalanceCloseInsert (request, response) {
-  sqlText = 'SELECT public.f_b_close_balance_for_date(${closingDate})';
+  sqlText = 'call b_p_balance_close(${closingDate})';
   sql = pgp.as.format(sqlText,request.body.data)
   db_common_api.queryExecute(sql,response,null,'Balance Day Close')
 }
 async function faccountingBalanceDayOpen (request, response) {
-  sqlText = 'DELETE FROM public."bAccountStatement" WHERE "dateAcc"::date = ${dateToOpen} RETURNING *; ' +
-            'DELETE FROM public."bLedgerStatement" WHERE "dateAcc"::date = ${dateToOpen} RETURNING *;'
+  sqlText = 'CALL b_p_balance_open (${dateToOpen}); '
   sql = pgp.as.format(sqlText,request.body.data);
   db_common_api.queryExecute(sql,response,null,'Balance Day Open');
 }

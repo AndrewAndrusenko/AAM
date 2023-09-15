@@ -103,7 +103,7 @@ export class AppTableAccEntriesComponent implements OnInit {
   }
   ngOnInit(): void {
     if (!this.FirstOpenedAccountingDate) {
-      this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate);
+      this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate);
     }
     switch (this.action) {
       case 'ShowEntriesForBalanceSheet':
@@ -130,10 +130,29 @@ export class AppTableAccEntriesComponent implements OnInit {
     break;
     }
   }
-  applyFilter(event: Event) {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
-    if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
+  submitQuery (notification:boolean=true, sendNewAllocatedSum:boolean=false) {
+    this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate);
+    this.dataSource? this.dataSource.data = null: null;
+    let searchObj = {};
+    let accountsList = [];
+    (this.accounts.indexOf('ClearAll') !== -1)? this.accounts.splice(this.accounts.indexOf('ClearAll'),1) : null;
+    (this.accounts.length===1)? accountsList = [...this.accounts,...this.accounts]: accountsList = this.accounts;
+    (this.accounts.length)? Object.assign (searchObj , {'noAccountLedger': accountsList}): null;
+    (this.gRange.get('dateRangeStart').value)===null? null : Object.assign (searchObj , {
+      'dateRangeStart':new Date (this.gRange.get('dateRangeStart').value).toDateString()});
+    (this.gRange.get('dateRangeEnd').value)===null? null : Object.assign (searchObj , {
+      'dateRangeEnd': new Date (this.gRange.get('dateRangeEnd').value).toDateString()});
+    ( this.entryTypes.value != null&&this.entryTypes.value.length !=0)? Object.assign (searchObj , {'entryTypes': [this.entryTypes.value]}): null;
+    (this.ExtId.value) == null?  null : Object.assign (searchObj , {'extTransactionId': this.ExtId.value});
+    (this.idtrade.value) == null?  null : Object.assign (searchObj , {'idtrade': this.idtrade.value});
+    this.AccountingDataService.GetAccountsEntriesListAccounting(searchObj,null,null, null, 'GetAccountsEntriesListAccounting').subscribe (EntriesList  => {
+      this.dataSource  = new MatTableDataSource(EntriesList);
+      this.dataSource.paginator = this.paginator;
+      this.dataSource.sort = this.sort;
+      this.accounts.unshift('ClearAll')
+      notification? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (EntriesList.length,'en-US') + ' rows'},'Loaded '):null;
+      this.externalId&&sendNewAllocatedSum? this.newAllocatedSum.emit({swift_item_id:this.externalId, allocated_sum: this.dataSource.data.reduce((acc,value)=>acc+value.t_amountTransaction,0)}) : null;
+    })
   }
   openEntryModifyForm (actionType:string, row: any ) {
     this.dialogRef = this.dialog.open(AppAccEntryModifyFormComponent ,{minHeight:'400px', maxWidth:'1000px',data:{data:row} });
@@ -153,6 +172,19 @@ export class AppTableAccEntriesComponent implements OnInit {
         this.dialogRef.componentInstance.entryModifyForm.disable()
       break;
     }
+  }
+  selectAccounts (typeAccount: string) {
+    this.dialogChooseAccountsList = this.dialog.open(AppTableAccAccountsComponent ,{minHeight:'600px', minWidth:'1700px', autoFocus: false, maxHeight: '90vh'});
+    this.dialogChooseAccountsList.componentInstance.action = "GetALLAccountsDataWholeList";
+    this.dialogChooseAccountsList.componentInstance.readOnly = true;
+    this.dialogChooseAccountsList.componentInstance.multiSelect = true;
+    this.dialogChooseAccountsList.componentInstance.modal_principal_parent.subscribe ((item)=>{
+      this.accounts = [...this.accounts,...this.dialogChooseAccountsList.componentInstance.accounts]
+      this.dialogChooseAccountsList.close(); 
+    });
+  }
+  toggleAllSelection() {
+   this.allSelected.selected? this.entryTypes.patchValue([...this.TransactionTypes.map(item => item.id), 0]) : this.entryTypes.patchValue([]);
   }
   add(event: MatChipInputEvent): void {
     const value = (event.value || '').trim();
@@ -178,41 +210,10 @@ export class AppTableAccEntriesComponent implements OnInit {
     this.dataSource.filter = '';
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
   }
-  submitQuery (notification:boolean=true, sendNewAllocatedSum:boolean=false) {
-    this.dataSource? this.dataSource.data = null: null;
-    let searchObj = {};
-    let accountsList = [];
-    (this.accounts.indexOf('ClearAll') !== -1)? this.accounts.splice(this.accounts.indexOf('ClearAll'),1) : null;
-    (this.accounts.length===1)? accountsList = [...this.accounts,...this.accounts]: accountsList = this.accounts;
-    (this.accounts.length)? Object.assign (searchObj , {'noAccountLedger': accountsList}): null;
-    (this.gRange.get('dateRangeStart').value)===null? null : Object.assign (searchObj , {
-      'dateRangeStart':new Date (this.gRange.get('dateRangeStart').value).toDateString()});
-    (this.gRange.get('dateRangeEnd').value)===null? null : Object.assign (searchObj , {
-      'dateRangeEnd': new Date (this.gRange.get('dateRangeEnd').value).toDateString()});
-    ( this.entryTypes.value != null&&this.entryTypes.value.length !=0)? Object.assign (searchObj , {'entryTypes': [this.entryTypes.value]}): null;
-    (this.ExtId.value) == null?  null : Object.assign (searchObj , {'extTransactionId': this.ExtId.value});
-    (this.idtrade.value) == null?  null : Object.assign (searchObj , {'idtrade': this.idtrade.value});
-    this.AccountingDataService.GetAccountsEntriesListAccounting(searchObj,null,null, null, 'GetAccountsEntriesListAccounting').subscribe (EntriesList  => {
-      this.dataSource  = new MatTableDataSource(EntriesList);
-      this.dataSource.paginator = this.paginator;
-      this.dataSource.sort = this.sort;
-      this.accounts.unshift('ClearAll')
-      notification? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (EntriesList.length,'en-US') + ' rows'},'Loaded '):null;
-      this.externalId&&sendNewAllocatedSum? this.newAllocatedSum.emit({swift_item_id:this.externalId, allocated_sum: this.dataSource.data.reduce((acc,value)=>acc+value.t_amountTransaction,0)}) : null;
-    })
-  }
-  selectAccounts (typeAccount: string) {
-    this.dialogChooseAccountsList = this.dialog.open(AppTableAccAccountsComponent ,{minHeight:'600px', minWidth:'1700px', autoFocus: false, maxHeight: '90vh'});
-    this.dialogChooseAccountsList.componentInstance.action = "GetALLAccountsDataWholeList";
-    this.dialogChooseAccountsList.componentInstance.readOnly = true;
-    this.dialogChooseAccountsList.componentInstance.multiSelect = true;
-    this.dialogChooseAccountsList.componentInstance.modal_principal_parent.subscribe ((item)=>{
-      this.accounts = [...this.accounts,...this.dialogChooseAccountsList.componentInstance.accounts]
-      this.dialogChooseAccountsList.close(); 
-    });
-  }
-  toggleAllSelection() {
-   this.allSelected.selected? this.entryTypes.patchValue([...this.TransactionTypes.map(item => item.id), 0]) : this.entryTypes.patchValue([]);
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
+    if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
   }
   exportToExcel() {
     let data = this.dataSource.data.map( (row,ind) =>({

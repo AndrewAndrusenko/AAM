@@ -77,7 +77,7 @@ export class AppTableSWIFTsInListsComponent  implements OnInit,OnDestroy {
     this.accessToEntriesData = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToEntriesData')[0].elementvalue;
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToSWIFTData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
-    this.AccountingDataService.GetbLastClosedAccountingDate(null,null,null,null,'GetbLastClosedAccountingDate').subscribe(data=>{
+    this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data=>{
       this.FirstOpenedAccountingDate = data[0].FirstOpenedDate;
       this.cDateToProcessSwift.setValue(new Date(this.FirstOpenedAccountingDate))
       this.cDateAccounting.setValue(new Date(this.FirstOpenedAccountingDate))
