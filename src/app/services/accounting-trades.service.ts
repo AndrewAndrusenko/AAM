@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { bcParametersSchemeAccTrans, bcTransactionType_Ext } from '../models/intefaces.model';
+import { bcTransactionType_Ext } from '../models/intefaces.model';
 import { Observable } from 'rxjs';
 
 @Injectable({

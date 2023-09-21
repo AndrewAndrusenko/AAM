@@ -1,3 +1,4 @@
+const { response } = require('express');
 const  db_common_api = require ('./db_common_api')
 const config = require ('./db_config');
 const Pool = require('pg').Pool;
@@ -16,9 +17,19 @@ async function fUpdateLedgerAccountAccounting (request, response) {
   db_common_api.fUpdateTableDB ('bLedger',fields,'ledgerNoId',request, response)
 }
 async function fCreateDepoSubAccounts (request,response) {
-  let sql = "SELECT * FROM f_create_depo_accounts (ARRAY[${portfolioIds}],${secid})";
+  let sql = "SELECT * FROM f_create_depo_accounts (ARRAY[${portfolioIds}],${secid});";
   sql = pgp.as.format(sql,request.body);
   db_common_api.queryExecute(sql,response,undefined,'fCreateDepoSubAccounts');
+}
+async function fcreateFIFOtransactions (request,response) {
+  let sql = '';
+  if (request.body.params.tradeType==='BUY') {
+    sql = "SELECT * FROM f_fifo_create_buy_transactions (ARRAY[${idtrades}]);";
+  } else {
+    sql = "SELECT * FROM f_fifo_create_sell_transactions (${idportfolio},${secid},${qty_to_sell},${sell_price},${id_sell_trade});";
+  }
+  sql = pgp.as.format(sql,request.body.params);
+  db_common_api.queryExecute(sql,response,undefined,'fcreateFIFOtransactions');
 }
 async function fUpdateLLEntryAccounting (request, response) {
   let fields =  ['ledgerID_Debit', 'dateTime',  'XactTypeCode_Ext', 'ledgerID',  'amount', 'entryDetails', 'extTransactionId','idtrade']
@@ -171,7 +182,7 @@ async function fGetAccountingData (request,response) {
       query.text ='SELECT "amountTransaction" FROM f_b_sum_transactions_per_date(${balanceDate});'
     break;
     case 'GetDeepBalanceCheck':
-      query.text ='SELECT * FROM public.f_s_balancesheet_deep_check(${dateBalanceToCheck},${firstDayOfCalculation});'
+      query.text ='SELECT * FROM public.f_a_b_balancesheet_deep_check(${dateBalanceToCheck},${firstDayOfCalculation});'
     break;
     case 'GetALLAccountsDataWholeList' :
       query.text ='SELECT '+
@@ -413,5 +424,6 @@ module.exports = {
   faccountingBalanceCloseInsert,
   faccountingBalanceDayOpen,
   fdeleteAllocationAccounting,
-  fCreateDepoSubAccounts
+  fCreateDepoSubAccounts,
+  fcreateFIFOtransactions
 }

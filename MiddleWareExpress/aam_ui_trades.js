@@ -111,7 +111,7 @@ async function fGetOrderData (request,response) {
       1: '(idtrade =  ${idtrade})',
     },
     'type':{
-      1: '(trtype =  ${type})',
+      1: '(dorders."type" =  ${type})',
     },
     'qty':{
       1: '(qty BETWEEN ${qty_min} AND ${qty_max})',
@@ -176,7 +176,7 @@ async function fAllocation(request,response) {
   switch (request.body.action) {
     case 'executeOrders':
       sql= 'WITH allocation as (INSERT INTO public.dtrades_allocated(qty, idtrade, idportfolio, id_order,id_bulk_order) '+
-           'SELECT corrected_qty,${tradeId},id_portfolio,id,parent_order FROM f2_orders_allocation(${qtyForAllocation},ARRAY[${ordersForExecution}]) RETURNING *) '+
+           'SELECT corrected_qty,${tradeId},id_portfolio,id,parent_order FROM f_i_allocation_orders(${qtyForAllocation},ARRAY[${ordersForExecution}]) RETURNING *) '+
            'SELECT COALESCE(id_order,id_bulk_order,idtrade) as id_joined,id_order,id_bulk_order,idtrade, sum(allocation.qty) AS allocated '+
            'FROM allocation GROUP BY  GROUPING SETS ((id_order),(id_bulk_order),(idtrade)); ';
     break;

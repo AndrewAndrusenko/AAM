@@ -172,6 +172,7 @@ export class AppallocationTableComponent  implements AfterViewInit {
     this.dataSource  = new MatTableDataSource(allocationData);
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
+    console.log('allocationData',allocationData);
     let orderAllocated = new Set(this.dataSource.data.map(el=>Number(el.id_bulk_order)))
     this.TradeService.sendAllocatedOrders([...orderAllocated].length? [...orderAllocated]:[0]);
     this.defaultFilterPredicate = this.dataSource.filterPredicate;
