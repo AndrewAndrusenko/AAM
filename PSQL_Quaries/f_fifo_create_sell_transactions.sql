@@ -52,7 +52,7 @@ WITH
     FROM
       f_fifo_select_unsold_portfolio (p_idportfolio, p_secid, qty_to_sell, sell_price, p_id_sell_trade)
     RETURNING *
-  ) 
+  )
 UPDATE dtrades_allocated_fifo fifo
 SET
   qty_out = COALESCE(fifo.qty_out, 0) + inserted_sell.qty_out,

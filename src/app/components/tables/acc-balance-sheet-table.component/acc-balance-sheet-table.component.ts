@@ -228,15 +228,16 @@ export class AppTableBalanceSheetComponent   {
       }
     })
   }
-  balanceDeepCheck (dataToCheck:string, firstDayOfCalculation: string) {
+  balanceDeepCheck (dataToCheck:Date, firstDayOfCalculation: Date) {
     this.entriesTotal = 0;
     this.totalDebit = 0;
-    this.AccountingDataService.GetDeepBalanceCheck(dataToCheck,firstDayOfCalculation,'GetDeepBalanceCheck').subscribe((balanceDataToReconcile) => {
+    this.AccountingDataService.GetDeepBalanceCheck(new Date(dataToCheck).toDateString(),new Date(firstDayOfCalculation).toDateString(),'GetDeepBalanceCheck').subscribe((balanceDataToReconcile) => {
       this.dataSource  = new MatTableDataSource(balanceDataToReconcile);
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
       balanceDataToReconcile.forEach ( (el) => {
-        new Date(el['dateBalance']).toDateString() == firstDayOfCalculation ? this.entriesTotal += Number(el.OutGoingBalance): this.totalDebit += Number(el.OutGoingBalance)
+      // console.log('compare',new Date(el['dateBalance']).toISOString(), new Date(firstDayOfCalculation).toISOString());
+        new Date(el['dateBalance']).toISOString() ===new Date(firstDayOfCalculation).toISOString() ? this.entriesTotal += Number(el.OutGoingBalance): this.totalDebit += Number(el.OutGoingBalance)
       });
     })
   }

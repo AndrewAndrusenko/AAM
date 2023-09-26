@@ -21,15 +21,20 @@ async function fCreateDepoSubAccounts (request,response) {
   sql = pgp.as.format(sql,request.body);
   db_common_api.queryExecute(sql,response,undefined,'fCreateDepoSubAccounts');
 }
+async function fdeleteFIFOtransactions (request,response) {
+  let sql = 'select * from f_fifo_delete_trades_from_fifo_calc(ARRAY[${idtrades}])';
+  sql = pgp.as.format(sql,request.body.params);
+  db_common_api.queryExecute(sql,response,undefined,'fdeleteFIFOtransactions');
+}
 async function fcreateFIFOtransactions (request,response) {
   let sql = '';
   if (request.body.params.tradeType==='BUY') {
     sql = "SELECT * FROM f_fifo_create_buy_transactions (ARRAY[${idtrades}]);";
   } else {
-    sql = "SELECT * FROM f_fifo_create_sell_transactions (${idportfolio},${secid},${qty_to_sell},${sell_price},${id_sell_trade});";
+    sql = "CALL p_fifo_create_out_transactions (${idportfolio},${secid},${qty_to_sell},${sell_price},${id_sell_trade});";
   }
   sql = pgp.as.format(sql,request.body.params);
-  db_common_api.queryExecute(sql,response,undefined,'fcreateFIFOtransactions');
+  db_common_api.queryExecute(sql,response,undefined,'p_fifo_create_out_transactions');
 }
 async function fUpdateLLEntryAccounting (request, response) {
   let fields =  ['ledgerID_Debit', 'dateTime',  'XactTypeCode_Ext', 'ledgerID',  'amount', 'entryDetails', 'extTransactionId','idtrade']
@@ -179,7 +184,7 @@ async function fGetAccountingData (request,response) {
       query.text ='SELECT "accountingDateToClose" FROM "bAccountingDateToClose";'
     break;
     case 'SumTransactionPerDate':
-      query.text ='SELECT "amountTransaction" FROM f_b_sum_transactions_per_date(${balanceDate});'
+      query.text ='SELECT "amountTransaction" FROM f_a_b_sum_transactions_per_date(${balanceDate});'
     break;
     case 'GetDeepBalanceCheck':
       query.text ='SELECT * FROM public.f_a_b_balancesheet_deep_check(${dateBalanceToCheck},${firstDayOfCalculation});'
@@ -245,19 +250,19 @@ async function fGetAccountingData (request,response) {
       query.text ='SELECT '+
       ' "accountNo", "accountId", "accountType", "datePreviousBalance" ,"dateBalance"::timestamp without time zone , "openingBalance", '+
       ' "totalDebit", "totalCredit", "OutGoingBalance", "checkClosing", "xacttypecode" ' +
-      ' FROM f_s_balancesheet_all() ';
+      ' FROM f_a_b_balancesheet_all() ';
        query.text += conditionsBalance.slice(0,-5);
        query.text += ' UNION '+
       ' SELECT '+
       ' "accountNo", "accountId", \'Account\', null ,"dataTime"::timestamp without time zone , "corrOpeningBalance", "totalDebit", "totalCredit", '+
       ' "corrOpeningBalance" + "signedTurnOver" AS "OutGoingBalance", 0 , "xActTypeCode"'+
-      ' FROM f_bcurrentturnoversandbalncesnotclosed(${lastClosedDate}) ';
+      ' FROM f_a_b_current_turnovers_and_balnces_not_closed(${lastClosedDate}) ';
        query.text += conditionsAccountProject.slice(0,-5) ;
        query.text += ' UNION '+
       ' SELECT '   +
       ' "accountNo", "accountId", \'Ledger\', null ,"dataTime"::timestamp without time zone , "corrOpeningBalance" ,"totalDebit", "totalCredit", '  +
       ' ("corrOpeningBalance" + "signedTurnOver") AS "OutGoingBalance" , 0, "xActTypeCode" ' +
-      ' FROM f_bcurrent_ledger_turnovers_balances_notclosed(${lastClosedDate}) '; 
+      ' FROM f_a_b_bcurrent_ledger_turnovers_balances_notclosed(${lastClosedDate}) '; 
       query.text += conditionsLedgerProject.slice(0,-5) ;
       query.text += ' ORDER BY "dateBalance"::timestamp without time zone DESC;';
     break;
@@ -396,12 +401,12 @@ async function faccountingOverdraftLedgerAccountCheck (request, response) {
   db_common_api.queryExecute(sql,response,null,'Ledger Overdraft Check')
 }
 async function faccountingBalanceCloseInsert (request, response) {
-  sqlText = 'call b_p_balance_close(${closingDate})';
+  sqlText = 'call p_a_b_balance_close(${closingDate})';
   sql = pgp.as.format(sqlText,request.body.data)
   db_common_api.queryExecute(sql,response,null,'Balance Day Close')
 }
 async function faccountingBalanceDayOpen (request, response) {
-  sqlText = 'CALL b_p_balance_open (${dateToOpen}); '
+  sqlText = 'CALL p_a_b_balance_open (${dateToOpen}); '
   sql = pgp.as.format(sqlText,request.body.data);
   db_common_api.queryExecute(sql,response,null,'Balance Day Open');
 }
@@ -425,5 +430,6 @@ module.exports = {
   faccountingBalanceDayOpen,
   fdeleteAllocationAccounting,
   fCreateDepoSubAccounts,
-  fcreateFIFOtransactions
+  fcreateFIFOtransactions,
+  fdeleteFIFOtransactions
 }

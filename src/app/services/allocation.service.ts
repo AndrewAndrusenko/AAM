@@ -119,6 +119,7 @@ export class AppAllocationService {
     }
     this.CommonDialogsService.confirmDialog('Delete accouting for allocated trades ').pipe(
       filter (isConfirmed => isConfirmed.isConfirmed),
+      switchMap(data => this.AccountingDataService.deleteFIFOtransactions (tradesToDelete)),
       switchMap(data => this.AccountingDataService.deleteAllocationAccounting (tradesToDelete))
     ).subscribe (deletedTrades=>{
       allocationTable.selection.clear();

@@ -114,12 +114,17 @@ export class AppallocationTableComponent  implements AfterViewInit {
   }
   ngOnInit(): void {
     if (this.tableMode.includes('Trade'))   {
-      this.columnsToDisplay = ['select','id','portfolioname','qty', 'trade_amount', 'depo_account_balance', 'current_account_balance','id_order','id_bulk_order','entries','idtrade','secid','tdate','trtype','price','id_price_currency'];
-      this.columnsHeaderToDisplay = ['ID', 'pCode','Quantity','Amount','Position','Balance', 'Order','Bulk','Entries','IDtrade','SecID','tDate','Type','Price','Curr']
+      this.columnsToDisplay = ['select','id','portfolioname','qty', 'trade_amount', 'fifo','depo_account_balance', 'current_account_balance','id_order','id_bulk_order','entries','idtrade','secid','tdate','trtype','price','id_price_currency'];
+      this.columnsHeaderToDisplay = ['ID', 'pCode','Quantity','Amount','FIFO','Position','Balance', 'Order','Bulk','Entries','IDtrade','SecID','tDate','Type','Price','Curr']
     }
     this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data =>{ 
       this.FirstOpenedAccountingDate = data[0].FirstOpenedDate;
-      this.TradeService.getAllocationInformation(this.tableMode.includes('Trade')? {idtrade:this.tradeData.idtrade}:null,new Date (this.FirstOpenedAccountingDate).toDateString(),this.tableMode.includes('Trade')).subscribe (allocationData => {
+      this.TradeService.getAllocationInformation(
+        this.tableMode.includes('Trade')? {idtrade:this.tradeData.idtrade}:null,
+        new Date (this.FirstOpenedAccountingDate).toDateString(),
+        this.tableMode.includes('Trade'),
+        this.tradeData?.idtrade? this.tradeData.tidinstrument:null
+        ).subscribe (allocationData => {
         this.updateAllocationDataTable(allocationData);
       this.ref.markForCheck()});  
     }); 
@@ -196,7 +201,12 @@ export class AppallocationTableComponent  implements AfterViewInit {
       } else  {searchObj.price=null};
       this.price.value? searchObj = {...searchObj, ... this.HandlingCommonTasksS.toNumberRange(this.price.value,this.price,'price')} :null;
       searchObj = {...searchObj, ...this.tdate.value? this.HandlingCommonTasksS.toDateRange(this.tdate, 'tdate') : null}
-      this.TradeService.getAllocationInformation(this.tableMode.includes('Trade')? {idtrade:this.tradeData.idtrade}:searchObj,new Date (this.FirstOpenedAccountingDate).toDateString(),this.tableMode.includes('Trade')).subscribe(data => {
+      this.TradeService.getAllocationInformation(
+        this.tableMode.includes('Trade')? {idtrade:this.tradeData.idtrade,secid:this.tradeData.tidinstrument}:searchObj,
+        new Date (this.FirstOpenedAccountingDate).toDateString(), 
+        this.tableMode.includes('Trade'),
+        this.tradeData?.idtrade? this.tradeData.tidinstrument:null
+        ).subscribe(data => {
         this.updateAllocationDataTable(data)
         showSnackResult? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ') : null;
         resolve(data) 

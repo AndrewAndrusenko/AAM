@@ -57,14 +57,17 @@ async function fGetTradesData (request,response) {
   switch (request.query.action) {
     case 'getAllocationTrades':
       sql='SELECT dtrades_allocated.id, dtrades_allocated.qty, dtrades_allocated.idtrade, dtrades_allocated.idportfolio, id_order,dtrades_allocated.id_bulk_order, dportfolios.portfolioname, ROUND(dtrades.trade_amount/dtrades.qty*dtrades_allocated.qty,2) as trade_amount, dtrades.accured_interest,id_settlement_currency, "bAccounts"."accountId","bAccountsDepo"."accountId" as "depoAccountId", "entriesForAllocation".count as "entries",dtrades.tidinstrument as secid,dtrades.tdate,dtrades.trtype,dtrades.price,dtrades.id_price_currency ';
-      request.query.balances==='true'?  sql+= ', b_accounts_balance."closingBalance" as current_account_balance,b_depo_accounts_balance."closingBalance" as depo_account_balance ' : null;
+      request.query.balances==='true'?  sql+= ', b_accounts_balance."closingBalance" as current_account_balance,b_depo_accounts_balance."closingBalance" as depo_account_balance,f_fifo_select_current_positions_for_trade.position as fifo ' : null;
       sql+= ' FROM public.dtrades_allocated '+
       'LEFT JOIN dtrades ON dtrades_allocated.idtrade = dtrades.idtrade '+
       'LEFT JOIN dportfolios ON dtrades_allocated.idportfolio = dportfolios.idportfolio '+
       'LEFT JOIN (SELECT * FROM "bAccounts" WHERE "bAccounts"."accountTypeExt"=8) as "bAccounts"  ON dtrades_allocated.idportfolio = "bAccounts".idportfolio '+
       'LEFT JOIN (SELECT * FROM "bAccounts" WHERE "bAccounts"."accountTypeExt"=15) as "bAccountsDepo"  ON (dtrades_allocated.idportfolio = "bAccountsDepo".idportfolio  and dtrades.tidinstrument="bAccountsDepo".secid)'+
       'LEFT JOIN "entriesForAllocation" ON dtrades_allocated.id = "entriesForAllocation".idtrade ';
-      request.query.balances==='true'? sql+= 'LEFT JOIN LATERAL ('+
+      request.query.balances==='true'? sql+= 'LEFT JOIN  '+
+      '(SELECT * FROM f_fifo_select_current_positions_for_trade(${secid})) '+
+      'AS f_fifo_select_current_positions_for_trade on dtrades_allocated.idportfolio = f_fifo_select_current_positions_for_trade.idportfolio ' +
+      'LEFT JOIN LATERAL ('+
       '  SELECT "accountId", "openingBalance", CAST ("closingBalance" AS NUMERIC) AS "closingBalance", "closingBalance" AS "EndBalance"'+
       '    FROM f_checkoverdraftbyaccountandbydate'+
       '    (dtrades.tdate, "bAccounts"."accountId", 1, 0, 0, ${firstOpenedAccountingDate})) as b_accounts_balance '+
@@ -88,7 +91,6 @@ async function fGetTradesData (request,response) {
     break;
 }
   sql = pgp.as.format(sql,request.query);
-
   db_common_api.queryExecute(sql,response,undefined,request.query.action ||'GetTradesData');
 }
 async function fGetAccuredInterest (request,response) {
@@ -126,7 +128,7 @@ async function fGetOrderData (request,response) {
       1: '(tdate::timestamp without time zone <= ${tdate_max}::date )',
     },
     'secidList' : {
-      1: '(LOWER(secid) = ANY(array[${secidList}]))  ',
+      1: '(LOWER(dorders.secid) = ANY(array[${secidList}]))  ',
     }
   }
   let conditionsTrades =' WHERE'

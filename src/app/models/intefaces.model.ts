@@ -429,6 +429,6 @@ export interface orders {
   id:number, generated:Date, type:string, secid:string, qty:number, price:number, amount:number, qty_executed:number, status:string, parent_order:number, id_portfolio:number,portfolioname:string, ordertype:string, idcurrency:number,currencycode:string, security_group_name:string,secid_type:string,secid_name:string, price_type:number, action:string, allocated:number,unexecuted:number
 }
 export interface allocation {
-  id:number, qty:number, idtrade:number, idportfolio:number, id_order:number,id_bulk_order:number, portfolioname: string,trade_amount:number, accured_interest:number,id_settlement_currency:number, accountId:number,depoAccountId:number,entries:number,current_account_balance:number, depo_account_balance:number,  secid: string,tdate:Date,trtype:string,price:number,id_price_currency:number
+  id:number, qty:number, idtrade:number, idportfolio:number, id_order:number,id_bulk_order:number, portfolioname: string,trade_amount:number, accured_interest:number,id_settlement_currency:number, accountId:number,depoAccountId:number,entries:number,current_account_balance:number, depo_account_balance:number,  secid: string,tdate:Date,trtype:string,price:number,id_price_currency:number,fifo:number
 }
 export interface allocation_fifo {id: number,idtrade : number,tr_type : number,qty : number,qty_out : number,price_in : number,price_out : number,closed: boolean,idportfolio : number,trade_date: Date,secid: string,generated: Date,profit_loss : number,id_sell_trade : number,id_buy_trade }

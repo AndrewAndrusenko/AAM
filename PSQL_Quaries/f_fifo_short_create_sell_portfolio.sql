@@ -1,8 +1,8 @@
 -- FUNCTION: public.f_fifo_create_buy_transactions(numeric[])
 
--- DROP FUNCTION IF EXISTS public.f_fifo_create_buy_transactions(numeric[]);
+-- DROP FUNCTION IF EXISTS public.f_fifo_short_create_sell_portfolio(numeric[]);
 
-CREATE OR REPLACE FUNCTION public.f_fifo_create_buy_transactions(
+CREATE OR REPLACE FUNCTION public.f_fifo_short_create_sell_portfolio(
 	p_idtrades numeric[])
     RETURNS TABLE(id bigint, idtrade bigint, tr_type smallint, qty numeric, qty_out numeric, price_in numeric, price_out numeric, closed boolean, idportfolio numeric, trade_date date, secid character varying, generated date, profit_loss numeric, id_sell_trade numeric, id_buy_trade numeric) 
     LANGUAGE 'plpgsql'
@@ -30,8 +30,8 @@ INSERT INTO
   )
 SELECT
   dtrades_allocated.id,
-  CASE dtrades.trtype WHEN 'BUY' THEN 0 ELSE 1 END,
-  CASE dtrades.trtype WHEN 'BUY' THEN trades_allocated.qty ELSE trades_allocated.qty*1 END ,
+  1,
+  dtrades_allocated.qty,
   0,
   dtrades.trade_amount / dtrades.qty,
   0,
@@ -63,5 +63,5 @@ WHERE
 END;
 $BODY$;
 
-ALTER FUNCTION public.f_fifo_create_buy_transactions(numeric[])
+ALTER FUNCTION public.f_fifo_short_create_sell_portfolio(numeric[])
     OWNER TO postgres;

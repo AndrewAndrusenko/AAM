@@ -169,6 +169,7 @@ appServer.post('/DEA/updateLLEntryAccountAccounting/',jsPassport.authenticate('s
 appServer.post('/DEA/deleteAllocationAccounting/',jsPassport.authenticate('session') , uiAmmAccountingModule.fdeleteAllocationAccounting)
 appServer.post('/DEA/createDepoSubAccounts/',jsPassport.authenticate('session') , uiAmmAccountingModule.fCreateDepoSubAccounts)
 appServer.post('/DEA/createFIFOtransactions/',jsPassport.authenticate('session') , uiAmmAccountingModule.fcreateFIFOtransactions)
+appServer.post('/DEA/deleteFIFOtransactions/',jsPassport.authenticate('session') , uiAmmAccountingModule.fdeleteFIFOtransactions)
 /*----------------------OverdraftValidators----------------------------------------------------*/
 appServer.get('/DEA/accountingOverdraftAccountCheck/',jsPassport.authenticate('session') , uiAmmAccountingModule.faccountingOverdraftAccountCheck)
 appServer.get('/DEA/accountingOverdraftLedgerAccountCheck/',jsPassport.authenticate('session') , uiAmmAccountingModule.faccountingOverdraftLedgerAccountCheck)

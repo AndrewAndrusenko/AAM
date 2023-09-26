@@ -82,8 +82,12 @@ export class AppTradeService {
   getUpdateOrdersChangedStatus ():Observable<{data:orders[],bulksForUpdate:number[]}> {
     return this.updateOrdersStatus.asObservable();
   }
-  getAllocationInformation(serachFilters:any,FirstOpenedAccountingDate:string,balances:boolean=false):Observable<allocation[]> {
-    let params = {...serachFilters,action:'getAllocationTrades', firstOpenedAccountingDate:FirstOpenedAccountingDate,balances:balances}
+  getAllocationInformation(serachFilters:any,FirstOpenedAccountingDate:string,balances:boolean=false,secid:string):Observable<allocation[]> {
+    let params = {...serachFilters,
+      action:'getAllocationTrades',
+      secid:secid,
+      firstOpenedAccountingDate:FirstOpenedAccountingDate,
+      balances:balances}
     return this.http.get <allocation[]> ('api/AAM/MD/getTradeData/',{params:params});    
   }
   deleteAllocatedTrades(tradesIDs:number[]){
