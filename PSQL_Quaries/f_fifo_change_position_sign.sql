@@ -1,10 +1,10 @@
 -- FUNCTION: public.f_fifo_select_current_positions_for_trade(text)
 
--- DROP FUNCTION IF EXISTS public.f_fifo_change_position_sign(numeric);
+DROP FUNCTION IF EXISTS public.f_fifo_change_position_sign(numeric,numeric);
 
 CREATE OR REPLACE FUNCTION public.f_fifo_change_position_sign(
 	trade_id numeric,trade_qty numeric)
-    RETURNS TABLE(idportfolio numeric) 
+    RETURNS TABLE(idportfolio bigint) 
     LANGUAGE 'plpgsql'
     COST 100
     VOLATILE PARALLEL UNSAFE
@@ -14,7 +14,6 @@ AS $BODY$
 DECLARE 
 sold_qty numeric;
 BEGIN
-RETURN QUERY
 SELECT 
 trade_qty - COALESCE(SUM(dtrades_allocated_fifo.qty_out),0) INTO sold_qty
 FROM
@@ -22,6 +21,8 @@ FROM
 WHERE
  dtrades_allocated_fifo.id_sell_trade = trade_id ;
 IF  sold_qty > 0 THEN
+RETURN QUERY
+
 	INSERT INTO
 	  public.dtrades_allocated_fifo (
 		idtrade,
@@ -39,8 +40,8 @@ IF  sold_qty > 0 THEN
 	  )
 	  SELECT
 	  dtrades_allocated.id,
-	  CASE dtrades.trtype WHEN 'BUY' THEN 0 ELSE 1 END,
-	  CASE dtrades.trtype WHEN 'BUY' THEN sold_qty ELSE sold_qty*-1 END ,
+	  CASE dtrades.trtype WHEN 'BUY' THEN 1 ELSE -1 END,
+	  sold_qty,
 	  0,
 	  dtrades.trade_amount / dtrades.qty,
 	  0,

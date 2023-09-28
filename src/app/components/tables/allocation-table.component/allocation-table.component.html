@@ -191,8 +191,8 @@
           <span [ngSwitch]="true==true">
             <p *ngSwitchDefault>{{element[column]}}</p>
             <p *ngSwitchCase="['trade_amount'].includes(column)">{{element[column]|currency :' '}} </p>
-            <p *ngSwitchCase="['depo_account_balance', 'current_account_balance'].includes(column)">
-              <span [style.color]="element[column]<0?'red':'lightgreen'">{{element[column]|currency :' '}} </span>
+            <p *ngSwitchCase="['fifo','depo_account_balance', 'current_account_balance'].includes(column)">
+              <span [style.color]="element[column]<0?'indianred':'lightgreen'">{{element[column]|currency :' '}} </span>
             </p>
             <p *ngSwitchCase="['tdate'].includes(column)">{{element[column] | date}} </p>
             <p *ngSwitchCase="['entries'].includes(column)">

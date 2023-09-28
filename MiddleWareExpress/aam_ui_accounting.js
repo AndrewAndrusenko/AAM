@@ -27,12 +27,12 @@ async function fdeleteFIFOtransactions (request,response) {
   db_common_api.queryExecute(sql,response,undefined,'fdeleteFIFOtransactions');
 }
 async function fcreateFIFOtransactions (request,response) {
-  let sql = '';
+  let sql = "CALL p_fifo_create_out_transactions (${idportfolio},${secid},${qty_to_sell},${sell_price},${id_sell_trade},${tr_type});";
+/*   let sql = '';
   if (request.body.params.tradeType==='BUY') {
     sql = "SELECT * FROM f_fifo_create_buy_transactions (ARRAY[${idtrades}]);";
   } else {
-    sql = "CALL p_fifo_create_out_transactions (${idportfolio},${secid},${qty_to_sell},${sell_price},${id_sell_trade});";
-  }
+  } */
   sql = pgp.as.format(sql,request.body.params);
   db_common_api.queryExecute(sql,response,undefined,'p_fifo_create_out_transactions');
 }

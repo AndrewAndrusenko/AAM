@@ -1,6 +1,6 @@
 -- FUNCTION: public.f_fifo_delete_trades_from_fifo_calc(numeric[])
 
-DROP FUNCTION IF EXISTS public.f_fifo_delete_trades_from_fifo_calc(numeric[]);
+-- DROP FUNCTION IF EXISTS public.f_fifo_delete_trades_from_fifo_calc(numeric[]);
 
 CREATE OR REPLACE FUNCTION public.f_fifo_delete_trades_from_fifo_calc(
 	p_idtrades numeric[])
@@ -40,7 +40,7 @@ FROM
       deleted_fifo.id_buy_trade
   ) deleted_grouped_by_trade ON deleted_grouped_by_trade.id_buy_trade = fifo1.idtrade
 WHERE
-  fifo.id = fifo1.id
+  fifo.id = fifo1.id AND fifo.id_sell_trade=0
 RETURNING fifo.id , fifo.idtrade ,fifo.tr_type ,fifo.qty, fifo.qty_out, fifo.idportfolio, fifo.trade_date ,fifo.closed , fifo.id_buy_trade , 
 				  fifo.id_sell_trade ;
 END;

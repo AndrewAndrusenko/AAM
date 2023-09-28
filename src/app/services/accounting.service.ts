@@ -156,8 +156,8 @@ export class AppAccountingService {
   createDepoSubAccounts (portfolioIds:number[],secid:string):Observable<bAccounts[]> {
     return this.http.post <bAccounts[]> ('api/DEA/createDepoSubAccounts/',{portfolioIds:portfolioIds,secid:secid})
   }
-  createFIFOtransactions (tradeType:string,idtrades:number[],idportfolio:number,secid:string,qty_to_sell:number,sell_price:number,id_sell_trade:number):Observable<allocation_fifo[]> {
-    const params = {tradeType: tradeType,idtrades:idtrades,idportfolio:idportfolio,secid:secid,qty_to_sell:qty_to_sell,sell_price:sell_price, id_sell_trade:id_sell_trade}
+  createFIFOtransactions (tradeType:number,idtrades:number[],idportfolio:number,secid:string,qty_to_sell:number,sell_price:number,id_sell_trade:number):Observable<allocation_fifo[]> {
+    const params = {tr_type: tradeType,idtrades:idtrades,idportfolio:idportfolio,secid:secid,qty_to_sell:qty_to_sell,sell_price:sell_price, id_sell_trade:id_sell_trade}
     return this.http.post <allocation_fifo[]>('api/DEA/createFIFOtransactions/',{params:params})
   }
   deleteFIFOtransactions (idtrades:number[]):Observable<allocation_fifo[]> {

@@ -87,7 +87,7 @@ async function fGetTradesData (request,response) {
       'LEFT JOIN mmoexsecurities ON dtrades.tidinstrument = mmoexsecurities.secid '+
       'LEFT JOIN mmoexsecuritytypes ON mmoexsecurities.type=mmoexsecuritytypes.security_type_name '+
       'LEFT JOIN dclients ON dclients.idclient = dtrades.id_cpty ';
-      sql +=conditionsTrades.slice(0,-5) + 'ORDER BY dtrades.idtrade DESC;'
+      sql +=conditionsTrades.slice(0,-5) + 'ORDER BY dtrades.tdate DESC;'
     break;
 }
   sql = pgp.as.format(sql,request.query);

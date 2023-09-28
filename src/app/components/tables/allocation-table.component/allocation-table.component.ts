@@ -115,7 +115,7 @@ export class AppallocationTableComponent  implements AfterViewInit {
   ngOnInit(): void {
     if (this.tableMode.includes('Trade'))   {
       this.columnsToDisplay = ['select','id','portfolioname','qty', 'trade_amount', 'fifo','depo_account_balance', 'current_account_balance','id_order','id_bulk_order','entries','idtrade','secid','tdate','trtype','price','id_price_currency'];
-      this.columnsHeaderToDisplay = ['ID', 'pCode','Quantity','Amount','FIFO','Position','Balance', 'Order','Bulk','Entries','IDtrade','SecID','tDate','Type','Price','Curr']
+      this.columnsHeaderToDisplay = ['ID', 'pCode','Quantity','Amount','FIFO','Depo','Balance', 'Order','Bulk','Entries','IDtrade','SecID','tDate','Type','Price','Curr']
     }
     this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data =>{ 
       this.FirstOpenedAccountingDate = data[0].FirstOpenedDate;
@@ -177,7 +177,6 @@ export class AppallocationTableComponent  implements AfterViewInit {
     this.dataSource  = new MatTableDataSource(allocationData);
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
-    console.log('allocationData',allocationData);
     let orderAllocated = new Set(this.dataSource.data.map(el=>Number(el.id_bulk_order)))
     this.TradeService.sendAllocatedOrders([...orderAllocated].length? [...orderAllocated]:[0]);
     this.defaultFilterPredicate = this.dataSource.filterPredicate;
