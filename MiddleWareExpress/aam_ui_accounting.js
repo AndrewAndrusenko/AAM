@@ -24,6 +24,7 @@ async function fCreateDepoSubAccounts (request,response) {
 async function fdeleteFIFOtransactions (request,response) {
   let sql = 'select * from f_fifo_delete_trades_from_fifo_calc(ARRAY[${idtrades}])';
   sql = pgp.as.format(sql,request.body.params);
+  console.log('fdeleteFIFOtransactions',sql);
   db_common_api.queryExecute(sql,response,undefined,'fdeleteFIFOtransactions');
 }
 async function fcreateFIFOtransactions (request,response) {

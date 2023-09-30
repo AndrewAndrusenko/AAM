@@ -3,7 +3,7 @@ import { HadlingCommonDialogsService } from './hadling-common-dialogs.service';
 import { AppTradeService } from './trades-service.service';
 import { AppAccountingService } from './accounting.service';
 import { AppallocationTableComponent } from '../components/tables/allocation-table.component/allocation-table.component';
-import { Observable, Subscription, combineLatest, filter, firstValueFrom, forkJoin, map, observable, subscribeOn, switchMap, tap, zip } from 'rxjs';
+import { Observable, Subject, Subscription, combineLatest, filter, firstValueFrom, forkJoin, map, observable, subscribeOn, switchMap, tap, zip } from 'rxjs';
 import { AbstractControl } from '@angular/forms';
 import { AppOrderTableComponent } from '../components/tables/orders-table.component/orders-table.component';
 import { allocation, allocation_fifo, bAccountTransaction, bLedgerTransaction } from '../models/intefaces.model';
@@ -15,6 +15,8 @@ import { number } from 'echarts';
 })
 export class AppAllocationService {
   private tradeToConfirm:allocation[];
+  private deletedAccounting$ = new Subject <any[]>
+  private createdAccounting$ = new Subject <any[]>
   constructor(
     private CommonDialogsService:HadlingCommonDialogsService,
     private TradeService: AppTradeService,
@@ -23,6 +25,7 @@ export class AppAllocationService {
   ) { }
 
   async createAccountingForAllocation (allocationTable:AppallocationTableComponent) {
+    let createdAccountingTransactions = [];
     this.tradeToConfirm = allocationTable.selection.selected;
     let tradeToConfirmProcessStatus = this.tradeToConfirm.map(el=>{return {id:el.id,accounting:1}})
     let portfolioWitoutAccounts = allocationTable.selection.selected.filter(trade=>!trade.accountId||!trade.depoAccountId).map(trade=>{return trade.portfolioname});
@@ -68,9 +71,10 @@ export class AppAllocationService {
         )
       ]).pipe (switchMap(()=>forkJoin(accountingToCreate$))).subscribe(data=>{
         console.log('accountingToCreate',data)
+        createdAccountingTransactions.push(data)
         let index = tradeToConfirmProcessStatus.findIndex(el=>el.id===clientTrade.id);
         index!==-1? tradeToConfirmProcessStatus[index].accounting=0 : null;
-        this.createAllocationAccountingStatus(allocationTable,tradeToConfirmProcessStatus)
+        this.createAllocationAccountingStatus(allocationTable,tradeToConfirmProcessStatus,createdAccountingTransactions)
       })
     })
     allocationTable.selection.clear();
@@ -91,13 +95,15 @@ export class AppAllocationService {
       });
     }); 
   }
-  createAllocationAccountingStatus (allocationTable:AppallocationTableComponent,tradeToConfirmProcessStatus:{id:number,accounting:number}[]) {
+  createAllocationAccountingStatus (allocationTable:AppallocationTableComponent,tradeToConfirmProcessStatus:{id:number,accounting:number}[],createdAccountingTransactions: any[]) {
     let status = tradeToConfirmProcessStatus.reduce((acc,val)=>acc+val.accounting,0)
     status===0? allocationTable.submitQuery(true,false).then(data=>{
+      this.sendCreatedAccounting(createdAccountingTransactions)
+      console.log('submitQuery alloc',);
       this.CommonDialogsService.snackResultHandler({name:'success',detail:'Accounting has been created'},'Allocation Accounting',undefined,false);
     }):null;
   }
-  deleteAccountingForAllocatedTrades (allocationTable:AppallocationTableComponent) {
+  deleteAccountingForAllocatedTrades (allocationTable:AppallocationTableComponent){
     let tradesToDelete = allocationTable.selection.selected.map(trade=>Number(trade.id))
     if (!tradesToDelete.length) {
       return this.CommonDialogsService.snackResultHandler({name:'error',detail:'No trades are selected to be deleted'},'Delete Allocation Accounting')
@@ -107,11 +113,13 @@ export class AppAllocationService {
     }
     this.CommonDialogsService.confirmDialog('Delete accouting for allocated trades ').pipe(
       filter (isConfirmed => isConfirmed.isConfirmed),
-      switchMap(data => this.AccountingDataService.deleteFIFOtransactions (tradesToDelete)),
-      switchMap(data => this.AccountingDataService.deleteAllocationAccounting (tradesToDelete))
+      switchMap(() => 
+        forkJoin( [this.AccountingDataService.deleteFIFOtransactions (tradesToDelete),this.AccountingDataService.deleteAllocationAccounting (tradesToDelete)])
+      )
     ).subscribe (deletedTrades=>{
+      this.sendDeletedAccounting(deletedTrades);
       allocationTable.selection.clear();
-      let result = deletedTrades['name']==='error'? deletedTrades : {name:'success',detail:deletedTrades.length + ' entries have been deleted'};
+      let result = deletedTrades['name']==='error'? deletedTrades : {name:'success',detail:'Accounting and FIFO have been deleted'};
       this.CommonDialogsService.snackResultHandler(result,'Delete accounting: ',undefined,false)
       allocationTable.submitQuery(true, false);
     }) 
@@ -139,5 +147,17 @@ export class AppAllocationService {
       this.TradeService.sendDeletedAllocationTrades(deletedTrades)
       orderTable!==undefined? orderTable.submitQuery(true, false).then(()=>orderTable.filterForAllocation()): null;
     })
+  }
+  getDeletedAccounting ():Observable<any[]>   {
+    return this.deletedAccounting$.asObservable()
+  }
+  sendDeletedAccounting (deletedTransactions:any[]) {
+    this.deletedAccounting$.next(deletedTransactions);
+  }
+  getCreatedAccounting ():Observable<any[]>   {
+    return this.createdAccounting$.asObservable()
+  }
+  sendCreatedAccounting (createdTransactions:any[]) {
+    this.createdAccounting$.next(createdTransactions);
   }
 }

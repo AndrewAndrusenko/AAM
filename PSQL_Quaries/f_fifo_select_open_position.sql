@@ -1,6 +1,6 @@
--- FUNCTION: public.f_fifo_select_open_position(numeric, text, numeric, numeric, numeric)
+-- FUNCTION: public.f_fifo_select_open_position(numeric, text, numeric, numeric, numeric, numeric)
 
--- DROP FUNCTION IF EXISTS public.f_fifo_select_open_position(numeric, text, numeric, numeric, numeric,numeric);
+-- DROP FUNCTION IF EXISTS public.f_fifo_select_open_position(numeric, text, numeric, numeric, numeric, numeric);
 
 CREATE OR REPLACE FUNCTION public.f_fifo_select_open_position(
 	p_idportfolio numeric,
@@ -9,7 +9,7 @@ CREATE OR REPLACE FUNCTION public.f_fifo_select_open_position(
 	out_price numeric,
 	p_idtrade numeric,
 	p_tr_type_to_close numeric)
-    RETURNS TABLE(id bigint, trade_date date, idtrade bigint, tr_type integer, qty numeric, qty_out numeric, price_in numeric, price_out numeric, profit_loss numeric, qty_total numeric, generated timestamp without time zone, secid text, idportfolio numeric, id_sell_trade numeric) 
+    RETURNS TABLE(id bigint, trade_date date, idtrade bigint, tr_type numeric, qty numeric, qty_out numeric, price_in numeric, price_out numeric, profit_loss numeric, qty_total numeric, generated timestamp without time zone, secid text, idportfolio numeric, id_sell_trade numeric) 
     LANGUAGE 'plpgsql'
     COST 100
     VOLATILE PARALLEL UNSAFE
@@ -108,5 +108,5 @@ ORDER BY
 END;
 $BODY$;
 
-ALTER FUNCTION public.f_fifo_select_open_position(numeric, text, numeric, numeric, numeric,numeric)
+ALTER FUNCTION public.f_fifo_select_open_position(numeric, text, numeric, numeric, numeric, numeric)
     OWNER TO postgres;

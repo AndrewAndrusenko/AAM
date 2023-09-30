@@ -445,3 +445,7 @@ color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4"
   </mat-expansion-panel>
   </mat-tab>
 </mat-tab-group>
+<details >
+  <summary style="font-size: 18px;">{{statusDetailsHeader}}</summary>
+  <pre style="font-size: 18px;"> {{statusDetails|json }}</pre>
+</details>

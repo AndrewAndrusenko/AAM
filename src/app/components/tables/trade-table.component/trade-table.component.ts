@@ -55,7 +55,6 @@ export class AppTradeTableComponent  implements AfterViewInit {
     dateRangeEnd: new FormControl<Date | null>(null),
   });
   public dialogTradeModify: MatDialogRef<AppTradeModifyFormComponent>
-  
   defaultFilterPredicate?: (data: any, filter: string) => boolean;
   secidfilter?: (data: any, filter: string) => boolean;
   @ViewChild(TemplateRef) _dialogTemplate: TemplateRef<any>;

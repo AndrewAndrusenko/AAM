@@ -49,6 +49,8 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
   dialogInstrumentTabletRef: MatDialogRef<AppInstrumentTableComponent>;
   securityTypes: any[];
   formerrors: any;
+  statusDetails:any;
+  statusDetailsHeader:string='';
   private arraySubscrition = new Subscription ()
 
   constructor (
@@ -109,6 +111,14 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
   }
   ngAfterContentInit (): void {
     this.tradeModifyForm.patchValue(this.data);
+    this.arraySubscrition.add(this.AllocationService.getDeletedAccounting().subscribe(deletedTransaction=>{
+      this.statusDetailsHeader='Deleted Accounting details'
+      this.statusDetails={...deletedTransaction};
+    }))
+    this.arraySubscrition.add(this.AllocationService.getCreatedAccounting().subscribe(createdTransaction=>{
+      this.statusDetailsHeader='Created Accounting details'
+      this.statusDetails={...createdTransaction};
+    }))
     this.filterednstrumentsLists = this.tidinstrument.valueChanges.pipe(
       startWith(''),
       distinctUntilChanged(),

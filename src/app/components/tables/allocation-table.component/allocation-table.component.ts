@@ -114,8 +114,8 @@ export class AppallocationTableComponent  implements AfterViewInit {
   }
   ngOnInit(): void {
     if (this.tableMode.includes('Trade'))   {
-      this.columnsToDisplay = ['select','id','portfolioname','qty', 'trade_amount', 'fifo','depo_account_balance', 'current_account_balance','id_order','id_bulk_order','entries','idtrade','secid','tdate','trtype','price','id_price_currency'];
-      this.columnsHeaderToDisplay = ['ID', 'pCode','Quantity','Amount','FIFO','Depo','Balance', 'Order','Bulk','Entries','IDtrade','SecID','tDate','Type','Price','Curr']
+      this.columnsToDisplay = ['select','id','portfolioname','qty', 'trade_amount', 'pl','fifo','depo_account_balance', 'current_account_balance','id_order','id_bulk_order','entries','trtype'];
+      this.columnsHeaderToDisplay = ['ID', 'pCode','Quantity','Amount','PL','FIFO','Depo','Balance', 'Order','Bulk','Entries','Type']
     }
     this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data =>{ 
       this.FirstOpenedAccountingDate = data[0].FirstOpenedDate;

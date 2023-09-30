@@ -1,7 +1,8 @@
-SELECT public.f_fifo_select_unsold_portfolio(
-	<p_idportfolio numeric>, 
-	<p_secid text>, 
-	<qty_to_sell numeric>, 
-	<sell_price numeric>, 
-	<p_id_sell_trade numeric>
+SELECT * from public.f_fifo_select_open_position(
+	7, 
+	'GOOG-RM', 
+	4, 
+	1, 
+	1,
+	
 )
