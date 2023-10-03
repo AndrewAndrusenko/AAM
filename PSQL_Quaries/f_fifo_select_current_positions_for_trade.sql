@@ -1,12 +1,10 @@
--- FUNCTION: public.f_fifo_select_current_position_by_sec_and_port(text, text)
+-- FUNCTION: public.f_fifo_select_current_positions_for_trade(text)
 
--- DROP FUNCTION IF EXISTS public.f_fifo_select_current_position_by_sec_and_port(text, text);
+DROP FUNCTION IF EXISTS public.f_fifo_select_current_positions_for_trade(numeric);
 
 CREATE OR REPLACE FUNCTION public.f_fifo_select_current_positions_for_trade(
--- 	p_idportfolio numeric[],
-	p_secid text)
-    RETURNS TABLE(
-	 idportfolio numeric,"position" numeric) 
+	p_idtrade numeric)
+    RETURNS TABLE(idportfolio numeric, "position" numeric) 
     LANGUAGE 'plpgsql'
     COST 100
     VOLATILE PARALLEL UNSAFE
@@ -15,24 +13,41 @@ CREATE OR REPLACE FUNCTION public.f_fifo_select_current_positions_for_trade(
 AS $BODY$
 BEGIN
 RETURN query
-SELECT 
-dtrades_allocated_fifo.idportfolio,
-SUM(CASE
-	WHEN dtrades_allocated_fifo.closed = FALSE THEN dtrades_allocated_fifo.qty - dtrades_allocated_fifo.qty_out
-	ELSE 0
-  END 
-)AS POSITION
+SELECT
+  positions.idportfolio,
+  SUM(rest) AS POSITION
 FROM
-  public.dtrades_allocated_fifo
+  (
+    SELECT DISTINCT
+      ON (idtrade) idtrade,
+      dtrades_allocated_fifo.idportfolio,
+      qty,
+      qty_out,
+      qty - qty_out AS rest
+    FROM
+      public.dtrades_allocated_fifo
+    WHERE
+      dtrades_allocated_fifo.secid = 'GOOG-RM'
+      AND id_buy_trade = 0
+      AND dtrades_allocated_fifo.idportfolio = ANY (
+        SELECT
+          dtrades_allocated_fifo.idportfolio
+        FROM
+          dtrades_allocated
+        WHERE
+          idtrade = p_idtrade
+      )
+    ORDER BY
+      idtrade,
+      dtrades_allocated_fifo.trade_date,
+      qty - qty_out
+  ) AS positions
 WHERE
---   dtrades_allocated_fifo.idportfolio = ANY(p_idportfolio)
---   AND 
-  dtrades_allocated_fifo.secid = p_secid
-GROUP BY dtrades_allocated_fifo.idportfolio;
+  rest > 0
+GROUP BY
+  positions.idportfolio;
 END;
 $BODY$;
 
-ALTER FUNCTION public.f_fifo_select_current_positions_for_trade(
--- 	numeric[], 
-	text)
+ALTER FUNCTION public.f_fifo_select_current_positions_for_trade(numeric)
     OWNER TO postgres;

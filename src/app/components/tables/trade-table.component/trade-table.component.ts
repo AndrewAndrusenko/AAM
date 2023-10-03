@@ -29,8 +29,8 @@ export class AppTradeTableComponent  implements AfterViewInit {
   accessState: string = 'none';
   disabledControlElements: boolean = false;
   @Input() FormMode:string
-  columnsToDisplay = ['idtrade','tdate','trtype','tidinstrument','price','id_price_currency','qty','cpty','vdate','id_settlement_currency','tidorder','allocatedqty','action'];
-  columnsHeaderToDisplay = ['ID','Date','Type','SecID','Price','Currency','Quantity','CParty','ValueDate','Settlement','Order','Allocated','Action'
+  columnsToDisplay = ['idtrade','tdate','trtype','tidinstrument','price','id_price_currency','qty','cpty','vdate','id_settlement_currency','tidorder','allocatedqty','fifo_qty','action'];
+  columnsHeaderToDisplay = ['ID','Date','Type','SecID','Price','Currency','Quantity','CParty','ValueDate','Settlement','Order','Allocated','FIFO','Action'
   ];
   dataSource: MatTableDataSource<trades>;
   @ViewChild(MatPaginator) paginator: MatPaginator;

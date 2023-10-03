@@ -150,9 +150,6 @@ export class AppAccountingService {
   }
   sendReloadEntryList ( id:any) {this.relplaySubject.next(id)}
   getReloadEntryList(): Observable<any> {return this.relplaySubject.asObservable()}
-  deleteAllocationAccounting (tradesToDelete:number[]):Observable<{id:number,amount:number}[]> {
-    return this.http.post <{id:number,amount:number}[]> ('api/DEA/deleteAllocationAccounting/',{trades_to_delete:tradesToDelete})
-  }
   createDepoSubAccounts (portfolioIds:number[],secid:string):Observable<bAccounts[]> {
     return this.http.post <bAccounts[]> ('api/DEA/createDepoSubAccounts/',{portfolioIds:portfolioIds,secid:secid})
   }
@@ -160,9 +157,9 @@ export class AppAccountingService {
     const params = {tr_type: tradeType,idtrades:idtrades,idportfolio:idportfolio,secid:secid,qty_to_sell:qty_to_sell,sell_price:sell_price, id_sell_trade:id_sell_trade}
     return this.http.post <allocation_fifo[]>('api/DEA/createFIFOtransactions/',{params:params})
   }
-  deleteFIFOtransactions (idtrades:number[]):Observable<allocation_fifo[]> {
+  deleteAccountingAndFIFOtransactions (idtrades:number[]):Observable<allocation_fifo[]> {
     const params = {idtrades:idtrades}
-    return this.http.post <allocation_fifo[]>('api/DEA/deleteFIFOtransactions/',{params:params})
+    return this.http.post <allocation_fifo[]>('api/DEA/deleteAccountingFIFOtransactions/',{params:params})
   }
   getExpectedBalanceOverdraftCheck (accountId: number, transactionAmount:number, transactionDate: string, xactTypeCode: number, id: number, FirstOpenedAccountingDate: string, Action: string ):Observable <bBalanceData[]> {
     if (accountId&&transactionAmount&&transactionAmount) {

@@ -19,57 +19,59 @@ AS $BODY$
 BEGIN
 RETURN query
 WITH
-	fifo_open AS (
-		SELECT
-			dtrades_allocated_fifo.id,
-			dtrades_allocated_fifo.trade_date,
-			dtrades_allocated_fifo.idtrade,
-			dtrades_allocated_fifo.tr_type,
-			dtrades_allocated_fifo.qty - COALESCE(dtrades_allocated_fifo.qty_out, 0) AS qty,
-			dtrades_allocated_fifo.qty_out,
-			dtrades_allocated_fifo.price_in,
-			dtrades_allocated_fifo.price_out,
-			dtrades_allocated_fifo.closed,
-			dtrades_allocated_fifo.idportfolio
-		FROM
-			public.dtrades_allocated_fifo
-		WHERE
-			dtrades_allocated_fifo.idportfolio = p_idportfolio
-			AND dtrades_allocated_fifo.secid = p_secid
-			AND closed != TRUE
-			AND dtrades_allocated_fifo.tr_type=p_tr_type_to_close
-		ORDER BY
-			dtrades_allocated_fifo.trade_date,
-			dtrades_allocated_fifo.id
-	),
-	qty_running_total AS (
-		SELECT
-			*,
-			SUM(fifo_open.qty) OVER (
-				ORDER BY
-					fifo_open.trade_date asc ROWS BETWEEN unbounded preceding
-					AND CURRENT ROW
-			) AS qty_total
-		FROM
-			fifo_open
-	),
-	record_above AS (
-		SELECT
-			*
-		FROM
-			qty_running_total
-		WHERE
-			qty_running_total.qty_total >= out_qty
-		ORDER BY
-			qty_running_total.qty_total asc
-		LIMIT
-			1
-	)
+  fifo_open AS (
+    SELECT DISTINCT
+      ON (dtrades_allocated_fifo.idtrade) dtrades_allocated_fifo.idtrade AS id_trade,
+      dtrades_allocated_fifo.id,
+      dtrades_allocated_fifo.trade_date,
+      dtrades_allocated_fifo.idtrade,
+      dtrades_allocated_fifo.tr_type,
+      dtrades_allocated_fifo.qty - dtrades_allocated_fifo.qty_out AS qty,
+      dtrades_allocated_fifo.qty_out,
+      dtrades_allocated_fifo.price_in,
+      dtrades_allocated_fifo.price_out,
+      dtrades_allocated_fifo.closed,
+      dtrades_allocated_fifo.idportfolio
+    FROM
+      public.dtrades_allocated_fifo
+    WHERE
+      dtrades_allocated_fifo.idportfolio = p_idportfolio
+      AND dtrades_allocated_fifo.secid = p_secid
+      AND dtrades_allocated_fifo.tr_type = p_tr_type_to_close
+    ORDER BY
+      dtrades_allocated_fifo.idtrade,
+      out_date DESC,
+      qty ASC,
+      qty_out DESC
+  ),
+  qty_running_total AS (
+    SELECT
+      *,
+      SUM(fifo_open.qty) OVER (
+        ORDER BY
+          fifo_open.trade_date ASC ROWS BETWEEN UNBOUNDED PRECEDING
+          AND CURRENT ROW
+      ) AS qty_total
+    FROM
+      fifo_open
+  ),
+  record_above AS (
+    SELECT
+      *
+    FROM
+      qty_running_total
+    WHERE
+      qty_running_total.qty_total >= out_qty
+    ORDER BY
+      qty_running_total.qty_total ASC
+    LIMIT
+      1
+  )
 SELECT
   qty_running_total.id,
   qty_running_total.trade_date,
-  qty_running_total.idtrade,
-  p_tr_type_to_close*-1 AS tr_type,
+  qty_running_total.id_trade,
+  p_tr_type_to_close * -1 AS tr_type,
   qty_running_total.qty,
   CASE
     WHEN qty_running_total.qty_total <= out_qty THEN qty_running_total.qty
@@ -78,7 +80,7 @@ SELECT
   qty_running_total.price_in,
   out_price AS price_out,
   ROUND(
-    (out_price - qty_running_total.price_in) * (
+    (out_price - qty_running_total.price_in) * p_tr_type_to_close * (
       CASE
         WHEN qty_running_total.qty_total <= out_qty THEN qty_running_total.qty
         ELSE qty_running_total.qty - qty_running_total.qty_total + out_qty
@@ -94,17 +96,19 @@ SELECT
 FROM
   qty_running_total
 WHERE
-  qty_running_total.qty_total <= out_qty
-  OR qty_running_total.id = (
-    SELECT
-      record_above.id
-    FROM
-      record_above
+  qty_running_total.qty != 0
+  AND (
+    qty_running_total.qty_total <= out_qty
+    OR qty_running_total.id = (
+      SELECT
+        record_above.id
+      FROM
+        record_above
+    )
   )
 ORDER BY
   qty_running_total.trade_date,
   qty_running_total.id;
-
 END;
 $BODY$;
 

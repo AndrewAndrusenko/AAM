@@ -111,14 +111,14 @@ export class AppAllocationService {
     if (allocationTable.selection.selected.filter(el=>el.tdate<allocationTable.FirstOpenedAccountingDate).length) {
       return this.CommonDialogsService.snackResultHandler({name:'error',detail:'Trades with entries in closed period have been selected. Entires in closed period can not been deleted'},'Delete Allocation Accounting',undefined,false);
     }
+    // this.AccountingDataService.deleteAllocationAccounting (tradesToDelete)
     this.CommonDialogsService.confirmDialog('Delete accouting for allocated trades ').pipe(
       filter (isConfirmed => isConfirmed.isConfirmed),
-      switchMap(() => 
-        forkJoin( [this.AccountingDataService.deleteFIFOtransactions (tradesToDelete),this.AccountingDataService.deleteAllocationAccounting (tradesToDelete)])
-      )
+      switchMap(() => this.AccountingDataService.deleteAccountingAndFIFOtransactions (tradesToDelete))  
     ).subscribe (deletedTrades=>{
       this.sendDeletedAccounting(deletedTrades);
       allocationTable.selection.clear();
+      console.log('deleted',deletedTrades);
       let result = deletedTrades['name']==='error'? deletedTrades : {name:'success',detail:'Accounting and FIFO have been deleted'};
       this.CommonDialogsService.snackResultHandler(result,'Delete accounting: ',undefined,false)
       allocationTable.submitQuery(true, false);

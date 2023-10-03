@@ -21,11 +21,10 @@ async function fCreateDepoSubAccounts (request,response) {
   sql = pgp.as.format(sql,request.body);
   db_common_api.queryExecute(sql,response,undefined,'fCreateDepoSubAccounts');
 }
-async function fdeleteFIFOtransactions (request,response) {
-  let sql = 'select * from f_fifo_delete_trades_from_fifo_calc(ARRAY[${idtrades}])';
+async function fdeleteAccountingFIFOtransactions (request,response) {
+  let sql = 'CALL public.p_fifo_delete_accounting_fifo(ARRAY[${idtrades}])';
   sql = pgp.as.format(sql,request.body.params);
-  console.log('fdeleteFIFOtransactions',sql);
-  db_common_api.queryExecute(sql,response,undefined,'fdeleteFIFOtransactions');
+  db_common_api.queryExecute(sql,response,undefined,'fdeleteAccountingFIFOtransactions');
 }
 async function fcreateFIFOtransactions (request,response) {
   let sql = "CALL p_fifo_create_out_transactions (${idportfolio},${secid},${qty_to_sell},${sell_price},${id_sell_trade},${tr_type});";
@@ -411,11 +410,6 @@ async function faccountingBalanceDayOpen (request, response) {
   sql = pgp.as.format(sqlText,request.body.data);
   db_common_api.queryExecute(sql,response,null,'Balance Day Open');
 }
-async function fdeleteAllocationAccounting (request,response) {
-  let sql = "select * from f_delete_allocation_accounting(ARRAY[${trades_to_delete}]);"
-  sql = pgp.as.format(sql,request.body);
-  db_common_api.queryExecute(sql,response,null,'fdeleteAllocationAccounting');
-}
 module.exports = {
   fGetMT950Transactions,
   fGetAccountingData,
@@ -429,8 +423,7 @@ module.exports = {
   faccountingOverdraftLedgerAccountCheck,
   faccountingBalanceCloseInsert,
   faccountingBalanceDayOpen,
-  fdeleteAllocationAccounting,
   fCreateDepoSubAccounts,
   fcreateFIFOtransactions,
-  fdeleteFIFOtransactions
+  fdeleteAccountingFIFOtransactions
 }

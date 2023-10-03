@@ -66,7 +66,7 @@ async function fGetTradesData (request,response) {
       'LEFT JOIN "entriesForAllocation" ON dtrades_allocated.id = "entriesForAllocation".idtrade ';
       request.query.balances==='true'? 
       sql+= 'LEFT JOIN (SELECT * FROM f_fifo_select_pl_for_trade(${idtrade})) AS pl_table ON pl_table.idtrade = dtrades_allocated.id ' +
-      'LEFT JOIN  (SELECT * FROM f_fifo_select_current_positions_for_trade(${secid})) '+
+      'LEFT JOIN  (SELECT * FROM f_fifo_select_current_positions_for_trade(${idtrade})) '+
       'AS f_fifo_select_current_positions_for_trade on dtrades_allocated.idportfolio = f_fifo_select_current_positions_for_trade.idportfolio ' +
       'LEFT JOIN LATERAL ('+
       '  SELECT "accountId", "openingBalance", CAST ("closingBalance" AS NUMERIC) AS "closingBalance", "closingBalance" AS "EndBalance"'+
@@ -82,12 +82,13 @@ async function fGetTradesData (request,response) {
       sql +=conditionsAllocatedTrades.slice(0,-5) + 'ORDER BY dtrades_allocated.idtrade DESC;'
     break;
     default:
-      sql = 'SELECT details, dclients.clientname as cpty_name , mmoexsecuritytypes.security_group_name,mmoexsecuritytypes.security_type_name as secid_type, mmoexsecurities.name as secid_name, dtrades.idtrade, qty, price, dclients.clientname as cpty, tdate, vdate, tidorder, allocated_qty.alloaction as allocatedqty, idportfolio, trtype, tidinstrument, id_broker, id_price_currency, id_settlement_currency, id_buyer_instructions, id_seller_instructions, accured_interest, fee_trade, fee_settlement, fee_exchange, id_cpty, mmoexsecuritytypes.price_type, trade_amount,faceunit,facevalue,settlement_amount, settlement_rate '+
+      sql = 'SELECT details, dclients.clientname as cpty_name , mmoexsecuritytypes.security_group_name,mmoexsecuritytypes.security_type_name as secid_type, mmoexsecurities.name as secid_name, dtrades.idtrade, qty, price, dclients.clientname as cpty, tdate, vdate, tidorder, allocated_qty.alloaction as allocatedqty, idportfolio, trtype, tidinstrument, id_broker, id_price_currency, id_settlement_currency, id_buyer_instructions, id_seller_instructions, accured_interest, fee_trade, fee_settlement, fee_exchange, id_cpty, mmoexsecuritytypes.price_type, trade_amount,faceunit,facevalue,settlement_amount, settlement_rate, balance_qty,fifo_qty '+
       'FROM public.dtrades ' +
       'LEFT JOIN (SELECT dtrades_allocated.idtrade, sum (qty) as alloaction FROM  public.dtrades_allocated GROUP BY dtrades_allocated.idtrade) allocated_qty ON allocated_qty.idtrade=dtrades.idtrade '+
       'LEFT JOIN mmoexsecurities ON dtrades.tidinstrument = mmoexsecurities.secid '+
       'LEFT JOIN mmoexsecuritytypes ON mmoexsecurities.type=mmoexsecuritytypes.security_type_name '+
-      'LEFT JOIN dclients ON dclients.idclient = dtrades.id_cpty ';
+      'LEFT JOIN dclients ON dclients.idclient = dtrades.id_cpty ' +
+      'LEFT JOIN (select * from f_fifo_select_accounting_summary()) accounting_summary ON accounting_summary.idtrade = dtrades.idtrade ' ;
       sql +=conditionsTrades.slice(0,-5) + 'ORDER BY dtrades.tdate DESC;'
     break;
 }

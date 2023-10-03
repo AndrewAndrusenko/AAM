@@ -1,6 +1,6 @@
--- PROCEDURE: public.p_fifo_create_out_transactions(numeric, text, numeric, numeric, numeric, numeric, text)
+-- PROCEDURE: public.p_fifo_create_out_transactions(numeric, text, numeric, numeric, numeric, numeric, numeric, numeric)
 
--- DROP PROCEDURE IF EXISTS public.p_fifo_create_out_transactions(numeric, text, numeric, numeric, numeric, numeric, text);
+-- DROP PROCEDURE IF EXISTS public.p_fifo_create_out_transactions(numeric, text, numeric, numeric, numeric, numeric, numeric, numeric);
 
 CREATE OR REPLACE PROCEDURE public.p_fifo_create_out_transactions(
 	p_idportfolio numeric,
@@ -9,10 +9,8 @@ CREATE OR REPLACE PROCEDURE public.p_fifo_create_out_transactions(
 	execute_price numeric,
 	p_id_trade numeric,
 	p_tr_type_to_close numeric,
-	INOUT rows_affected numeric DEFAULT NULL,
-	INOUT idtrade numeric DEFAULT NULL
-	
-)
+	INOUT rows_affected numeric DEFAULT NULL::numeric,
+	INOUT idtrade numeric DEFAULT NULL::numeric)
 LANGUAGE 'plpgsql'
 AS $BODY$
 DECLARE
@@ -21,7 +19,7 @@ DECLARE
 
 BEGIN
 
-PERFORM f_fifo_create_out_transactions(p_idportfolio,p_secid,qty_to_execute, execute_price,p_id_trade,p_tr_type_to_close);
+PERFORM f_fifo_create_out_transactions(p_tr_type_to_close,p_id_trade);
 GET DIAGNOSTICS out_transaction_count = ROW_COUNT;
   
 PERFORM f_fifo_change_position_sign(p_id_trade,qty_to_execute);
@@ -41,5 +39,5 @@ COMMIT;
 END;
 $BODY$;
 
-ALTER PROCEDURE public.p_fifo_create_out_transactions(numeric, text, numeric, numeric, numeric, numeric, text)
+ALTER PROCEDURE public.p_fifo_create_out_transactions(numeric, text, numeric, numeric, numeric, numeric, numeric, numeric)
     OWNER TO postgres;

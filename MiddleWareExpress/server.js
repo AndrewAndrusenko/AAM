@@ -166,10 +166,9 @@ appServer.post('/DEA/updateLedgerAccountAccounting/',jsPassport.authenticate('se
 /*----------------------EntryUI----------------------------------------------------*/
 appServer.post('/DEA/updateEntryAccountAccounting/',jsPassport.authenticate('session') , uiAmmAccountingModule.fUpdateEntryAccountAccounting)
 appServer.post('/DEA/updateLLEntryAccountAccounting/',jsPassport.authenticate('session') , uiAmmAccountingModule.fUpdateLLEntryAccounting)
-appServer.post('/DEA/deleteAllocationAccounting/',jsPassport.authenticate('session') , uiAmmAccountingModule.fdeleteAllocationAccounting)
 appServer.post('/DEA/createDepoSubAccounts/',jsPassport.authenticate('session') , uiAmmAccountingModule.fCreateDepoSubAccounts)
 appServer.post('/DEA/createFIFOtransactions/',jsPassport.authenticate('session') , uiAmmAccountingModule.fcreateFIFOtransactions)
-appServer.post('/DEA/deleteFIFOtransactions/',jsPassport.authenticate('session') , uiAmmAccountingModule.fdeleteFIFOtransactions)
+appServer.post('/DEA/deleteAccountingFIFOtransactions/',jsPassport.authenticate('session') , uiAmmAccountingModule.fdeleteAccountingFIFOtransactions)
 /*----------------------OverdraftValidators----------------------------------------------------*/
 appServer.get('/DEA/accountingOverdraftAccountCheck/',jsPassport.authenticate('session') , uiAmmAccountingModule.faccountingOverdraftAccountCheck)
 appServer.get('/DEA/accountingOverdraftLedgerAccountCheck/',jsPassport.authenticate('session') , uiAmmAccountingModule.faccountingOverdraftLedgerAccountCheck)
