@@ -3,7 +3,7 @@ import { HadlingCommonDialogsService } from './hadling-common-dialogs.service';
 import { AppTradeService } from './trades-service.service';
 import { AppAccountingService } from './accounting.service';
 import { AppallocationTableComponent } from '../components/tables/allocation-table.component/allocation-table.component';
-import { Observable, Subject, Subscription, combineLatest, filter, firstValueFrom, forkJoin, map, observable, subscribeOn, switchMap, tap, zip } from 'rxjs';
+import { Observable, Subject, Subscription, catchError, combineLatest, filter, firstValueFrom, forkJoin, map, observable, of, subscribeOn, switchMap, tap, zip } from 'rxjs';
 import { AbstractControl } from '@angular/forms';
 import { AppOrderTableComponent } from '../components/tables/orders-table.component/orders-table.component';
 import { allocation, allocation_fifo, bAccountTransaction, bLedgerTransaction } from '../models/intefaces.model';
@@ -43,8 +43,9 @@ export class AppAllocationService {
       this.CommonDialogsService.snackResultHandler({name:'error',detail:'There are no opened current or depo accounts for the portfolios: '+[...portfolioWitoutAccounts]});
       return;
     }
-    let bcEntryParameters = <any> {}
     this.tradeToConfirm.forEach(clientTrade => {
+      let bcEntryParameters = <any> {}
+      console.log('clientTrade',clientTrade.id,clientTrade.trade_amount);
       bcEntryParameters.id_settlement_currency=clientTrade.id_settlement_currency;
       bcEntryParameters.cptyCode='CHASUS';
       bcEntryParameters.pDate_T=new Date(clientTrade.tdate).toDateString();
@@ -57,19 +58,29 @@ export class AppAllocationService {
       bcEntryParameters.idtrade=clientTrade.idtrade;
       let cSchemeGroupId = clientTrade.trtype==='BUY'? 'Investment_Buy_Basic':'Investment_Sell_Basic';
       let accountingToCreate$= <any>[]
-      accountingToCreate$.push(this.AccountingDataService.createFIFOtransactions(clientTrade.trtype==='BUY'? -1 : 1,null,clientTrade.idportfolio,clientTrade.secid,clientTrade.qty,clientTrade.trade_amount/clientTrade.qty, clientTrade.id))
-      forkJoin([
-        this.accountingTradeService.getAccountingScheme(bcEntryParameters,cSchemeGroupId).pipe(
-          map(entryDrafts=>entryDrafts.forEach(draft=>
-            accountingToCreate$.push(this.AccountingDataService.updateEntryAccountAccounting (draft,'Create'))
-          )),
+      // accountingToCreate$.push(
+      this.AccountingDataService.createFIFOtransactions(clientTrade.trtype==='BUY'? -1 : 1,null,clientTrade.idportfolio,clientTrade.secid,clientTrade.qty,clientTrade.trade_amount/clientTrade.qty, clientTrade.id).pipe (
+        tap(data=>data['name']==='error'? this.CommonDialogsService.snackResultHandler(data):createdAccountingTransactions.push(data)),
+        filter(data=>data['name']!=='error'),
+        switchMap(()=> 
+          forkJoin([
+            this.accountingTradeService.getAccountingScheme(bcEntryParameters,cSchemeGroupId).pipe(
+              map(entryDrafts=>entryDrafts.forEach(draft=>
+                accountingToCreate$.push(this.AccountingDataService.updateEntryAccountAccounting (draft,'Create'))
+              )),
+            ),
+            this.accountingTradeService.getAccountingScheme(bcEntryParameters,cSchemeGroupId,'LL').pipe(
+              map(entryDrafts=>entryDrafts.forEach(draft=>{
+                console.log('ledger drafts',...entryDrafts);
+                accountingToCreate$.push(this.AccountingDataService.updateLLEntryAccountAccounting (draft,'Create'))
+              }))
+            )
+          ])
         ),
-        this.accountingTradeService.getAccountingScheme(bcEntryParameters,cSchemeGroupId,'LL').pipe(
-          map(entryDrafts=>entryDrafts.forEach(draft=>
-            accountingToCreate$.push(this.AccountingDataService.updateLLEntryAccountAccounting (draft,'Create'))
-          ))
-        )
-      ]).pipe (switchMap(()=>forkJoin(accountingToCreate$))).subscribe(data=>{
+        tap(data=>console.log('data',data)),
+        tap(data=>console.log('accountingToCreate',accountingToCreate$)),
+        switchMap(()=>forkJoin(accountingToCreate$))
+      ).subscribe(data=>{
         console.log('accountingToCreate',data)
         createdAccountingTransactions.push(data)
         let index = tradeToConfirmProcessStatus.findIndex(el=>el.id===clientTrade.id);

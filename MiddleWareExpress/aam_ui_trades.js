@@ -56,8 +56,8 @@ async function fGetTradesData (request,response) {
   });
   switch (request.query.action) {
     case 'getAllocationTrades':
-      sql='SELECT dtrades_allocated.id, dtrades_allocated.qty, dtrades_allocated.idtrade, dtrades_allocated.idportfolio, id_order,dtrades_allocated.id_bulk_order, dportfolios.portfolioname, ROUND(dtrades.trade_amount/dtrades.qty*dtrades_allocated.qty,2) as trade_amount, dtrades.accured_interest,id_settlement_currency, "bAccounts"."accountId","bAccountsDepo"."accountId" as "depoAccountId", "entriesForAllocation".count as "entries",dtrades.tidinstrument as secid,dtrades.tdate,dtrades.trtype,dtrades.price,dtrades.id_price_currency ';
-      request.query.balances==='true'?  sql+= ', b_accounts_balance."closingBalance" as current_account_balance,b_depo_accounts_balance."closingBalance" as depo_account_balance,f_fifo_select_current_positions_for_trade.position as fifo, pl_table.pl as pl ' : null;
+      sql='SELECT dtrades_allocated.id, dtrades_allocated.qty, dtrades_allocated.idtrade, dtrades_allocated.idportfolio, id_order,dtrades_allocated.id_bulk_order, dportfolios.portfolioname, ROUND(dtrades.trade_amount/dtrades.qty*dtrades_allocated.qty,2) as trade_amount, dtrades.accured_interest,id_settlement_currency, "bAccounts"."accountId","bAccountsDepo"."accountId" as "depoAccountId", "entriesForAllocation".count as "entries",dtrades.tidinstrument as secid,dtrades.tdate,dtrades.trtype,dtrades.price,dtrades.id_price_currency, pl_table.pl as pl ';
+      request.query.balances==='true'?  sql+= ', b_accounts_balance."closingBalance" as current_account_balance,b_depo_accounts_balance."closingBalance" as depo_account_balance,f_fifo_select_current_positions_for_trade.position as fifo ' : null;
       sql+= ' FROM public.dtrades_allocated '+
       'LEFT JOIN dtrades ON dtrades_allocated.idtrade = dtrades.idtrade '+
       'LEFT JOIN dportfolios ON dtrades_allocated.idportfolio = dportfolios.idportfolio '+
@@ -66,7 +66,7 @@ async function fGetTradesData (request,response) {
       'LEFT JOIN "entriesForAllocation" ON dtrades_allocated.id = "entriesForAllocation".idtrade ';
       request.query.balances==='true'? 
       sql+= 'LEFT JOIN (SELECT * FROM f_fifo_select_pl_for_trade(${idtrade})) AS pl_table ON pl_table.idtrade = dtrades_allocated.id ' +
-      'LEFT JOIN  (SELECT * FROM f_fifo_select_current_positions_for_trade(${idtrade})) '+
+      'LEFT JOIN  (SELECT * FROM f_fifo_select_current_positions_for_trade(${idtrade},${secid})) '+
       'AS f_fifo_select_current_positions_for_trade on dtrades_allocated.idportfolio = f_fifo_select_current_positions_for_trade.idportfolio ' +
       'LEFT JOIN LATERAL ('+
       '  SELECT "accountId", "openingBalance", CAST ("closingBalance" AS NUMERIC) AS "closingBalance", "closingBalance" AS "EndBalance"'+
@@ -77,7 +77,8 @@ async function fGetTradesData (request,response) {
       '  SELECT "accountId", "openingBalance", CAST ("closingBalance" AS NUMERIC) AS "closingBalance", "closingBalance" AS "EndBalance"'+
       '    FROM f_checkoverdraftbyaccountandbydate'+
       '    (dtrades.tdate, "bAccountsDepo"."accountId", 1, 0, 0, ${firstOpenedAccountingDate})) as b_depo_accounts_balance '+
-      '    ON "bAccountsDepo"."accountId"=b_depo_accounts_balance."accountId" ': null;
+      '    ON "bAccountsDepo"."accountId"=b_depo_accounts_balance."accountId" '
+      :  sql+= "LEFT JOIN (SELECT * FROM f_fifo_select_pl_for_all_trades('02/02/2022')) AS pl_table ON pl_table.idtrade = dtrades_allocated.id ";
           
       sql +=conditionsAllocatedTrades.slice(0,-5) + 'ORDER BY dtrades_allocated.idtrade DESC;'
     break;
@@ -89,10 +90,11 @@ async function fGetTradesData (request,response) {
       'LEFT JOIN mmoexsecuritytypes ON mmoexsecurities.type=mmoexsecuritytypes.security_type_name '+
       'LEFT JOIN dclients ON dclients.idclient = dtrades.id_cpty ' +
       'LEFT JOIN (select * from f_fifo_select_accounting_summary()) accounting_summary ON accounting_summary.idtrade = dtrades.idtrade ' ;
-      sql +=conditionsTrades.slice(0,-5) + 'ORDER BY dtrades.tdate DESC;'
+      sql +=conditionsTrades.slice(0,-5) + 'ORDER BY dtrades.idtrade DESC;'
     break;
 }
   sql = pgp.as.format(sql,request.query);
+  console.log('alloc /n',sql);
   db_common_api.queryExecute(sql,response,undefined,request.query.action ||'GetTradesData');
 }
 async function fGetAccuredInterest (request,response) {
@@ -180,7 +182,7 @@ async function fAllocation(request,response) {
   switch (request.body.action) {
     case 'executeOrders':
       sql= 'WITH allocation as (INSERT INTO public.dtrades_allocated(qty, idtrade, idportfolio, id_order,id_bulk_order) '+
-           'SELECT corrected_qty,${tradeId},id_portfolio,id,parent_order FROM f_i_allocation_orders(${qtyForAllocation},ARRAY[${ordersForExecution}]) RETURNING *) '+
+           'SELECT corrected_qty,${tradeId},id_portfolio,id,parent_order FROM f_i_allocation_orders(${qtyForAllocation},ARRAY[${ordersForExecution}])  WHERE corrected_qty!=0 RETURNING *) '+
            'SELECT COALESCE(id_order,id_bulk_order,idtrade) as id_joined,id_order,id_bulk_order,idtrade, sum(allocation.qty) AS allocated '+
            'FROM allocation GROUP BY  GROUPING SETS ((id_order),(id_bulk_order),(idtrade)); ';
     break;

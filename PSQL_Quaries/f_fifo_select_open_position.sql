@@ -38,6 +38,7 @@ WITH
       dtrades_allocated_fifo.idportfolio = p_idportfolio
       AND dtrades_allocated_fifo.secid = p_secid
       AND dtrades_allocated_fifo.tr_type = p_tr_type_to_close
+	  AND closed NOTNULL
     ORDER BY
       dtrades_allocated_fifo.idtrade,
       out_date DESC,

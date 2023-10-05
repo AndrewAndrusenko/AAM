@@ -19,11 +19,12 @@ BEGIN
 	FROM
 	  dtrades_allocated_fifo
 	WHERE 
-	  idportfolio=OLD.idportfolio
+	  idportfolio=OLD.idportfolio 
+	  AND secid=OLD.secid
 	ORDER BY
 	  id DESC
 	LIMIT 1;
-   IF (OLD.idtrade != id_last_trade  AND OLD.id_sell_trade != id_last_trade )
+   IF (OLD.idtrade != id_last_trade  AND OLD.id_sell_trade != id_last_trade ) 
    THEN
       RAISE EXCEPTION 'It is not the latest trade in the FIFO calculation. Firstly the trade % has to be deleted from calcualtion', id_last_trade;
    END IF;

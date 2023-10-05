@@ -1,7 +1,7 @@
 import {AfterViewInit, Component, EventEmitter, Output, ViewChild, Input, ChangeDetectionStrategy, ElementRef, ChangeDetectorRef} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
-import {Observable, Subscription, map, startWith } from 'rxjs';
+import {Observable, Subscription, map, startWith, switchMap, tap } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { allocation, objectStatus, orders, trades } from 'src/app/models/intefaces.model';
@@ -42,11 +42,13 @@ export class AppallocationTableComponent  implements AfterViewInit {
   @Input() tradeData:trades;
   @Input() allocationFilters:{secid:string, type:string};
   fullOrdersSet:allocation[];
-  columnsToDisplay = ['select','id','portfolioname','qty', 'trade_amount','id_order','id_bulk_order','entries','idtrade','secid','tdate','trtype','price','id_price_currency'];
-  columnsHeaderToDisplay = ['ID', 'pCode','Quantity','Amount', 'Order','Bulk','Entries','IDtrade','SecID','tDate','Type','Price','Curr']
+  columnsToDisplay = ['select','id','portfolioname','qty', 'trade_amount', 'fifo','depo_account_balance', 'current_account_balance','id_order','id_bulk_order','entries','pl'];
+  columnsHeaderToDisplay = ['ID', 'pCode','Quantity','Amount','FIFO','Depo','Balance', 'Order','Bulk','Entries','PL']
+
   dataSource: MatTableDataSource<allocation>;
   public selection = new SelectionModel<allocation>(true, []);
   @ViewChild(MatPaginator) paginator: MatPaginator;
+
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild('filterALL', { static: false }) filterALL: ElementRef;
   @ViewChild('allSelected', { static: false }) allSelected: MatCheckbox;
@@ -77,13 +79,11 @@ export class AppallocationTableComponent  implements AfterViewInit {
     private AutoCompService:AtuoCompleteService,
     private fb:FormBuilder, 
     private dialog: MatDialog, 
-
   ) {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.orderStatuses = this.AuthServiceS.objectStatuses.filter(el =>el.id_object==='Order');
     this.ordersPermissions = this.AuthServiceS.accessRestrictions.filter(el=>el.elementid==='dorders_status_list')[0].elementvalue.split(',');
     this.disabledControlElements = this.accessState === 'full'? false : true;
-
     this.searchParametersFG = this.fb.group ({
       type:null,
       secidList: [],
@@ -92,42 +92,38 @@ export class AppallocationTableComponent  implements AfterViewInit {
       price:null,
       qty:null,
     });
-     this.TradeService.getOrderDataToUpdateTableSource().subscribe(data =>{
-     let index =  this.dataSource.data.findIndex(elem=>elem.id===data.data[0].id)
-/*       switch (data.action) {
-        case 'Deleted':
-          this.dataSource.data.splice(index,1)
-        break;
-        case 'Created':
-          this.dataSource.data.unshift(data.data[0])
-        break;
-        case 'Updated':
-          this.dataSource.data[index] = {...data.data[0]}
-        break;
-      } */
-     this.dataSource.paginator = this.paginator;
-     this.dataSource.sort = this.sort;
-    })
   }
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }
   ngOnInit(): void {
-    if (this.tableMode.includes('Trade'))   {
-      this.columnsToDisplay = ['select','id','portfolioname','qty', 'trade_amount', 'fifo','depo_account_balance', 'current_account_balance','id_order','id_bulk_order','entries','pl'];
-      this.columnsHeaderToDisplay = ['ID', 'pCode','Quantity','Amount','FIFO','Depo','Balance', 'Order','Bulk','Entries','PL']
+    this.secidfilter =
+    (data: allocation, filter: string) => {
+      let filter_array = filter.split(',').map(el=>[el,1]);
+      this.columnsToDisplay.forEach(col=>filter_array.forEach(fil=>fil[0].toString().toUpperCase()===(data[col])? fil[1]=0:null))
+        console.log('filter_array',filter_array);
+      return !filter || filter_array.reduce((acc,val)=>acc+Number(val[1]),0)===0};
+
+    if (!this.tableMode.includes('Trade'))   {
+      this.columnsToDisplay = ['select','id','portfolioname','trtype','qty', 'trade_amount','pl','id_order','id_bulk_order','entries','idtrade','secid','tdate','price','id_price_currency'];
+      this.columnsHeaderToDisplay = ['ID', 'pCode','Type','Quantity','Amount','PL', 'Order','Bulk','Entries','IDtrade','SecID','tDate','Price','Curr']
     }
-    this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data =>{ 
-      this.FirstOpenedAccountingDate = data[0].FirstOpenedDate;
-      this.TradeService.getAllocationInformation(
-        this.tableMode.includes('Trade')? {idtrade:this.tradeData.idtrade}:null,
+    this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').pipe(
+      tap (data =>this.FirstOpenedAccountingDate = data[0].FirstOpenedDate),
+      switchMap(() => this.TradeService.getAllocationInformation(
+        this.tableMode.includes('Trade')? {idtrade:this.tradeData.idtrade,secid:this.tradeData.tidinstrument}:null,
         new Date (this.FirstOpenedAccountingDate).toDateString(),
         this.tableMode.includes('Trade'),
-        this.tradeData?.idtrade? this.tradeData.tidinstrument:null
-        ).subscribe (allocationData => {
-        this.updateAllocationDataTable(allocationData);
-      this.ref.markForCheck()});  
-    }); 
+        this.tradeData?.idtrade? this.tradeData.tidinstrument:null))
+    ).subscribe (allocationData =>{
+      this.updateAllocationDataTable(allocationData);
+      this.ref.markForCheck()
+      setTimeout(() => {
+        this.dataSource.paginator = this.paginator;
+        this.dataSource.sort = this.sort; 
+        this.dataSource.filterPredicate =this.secidfilter
+      }, 200);
+    });  
     this.subscriptions.add(
       this.TradeService.getDeletedAllocationTrades().subscribe(deletedTrades=>{
         let arrayToDelete = [];
@@ -177,10 +173,13 @@ export class AppallocationTableComponent  implements AfterViewInit {
     this.dataSource  = new MatTableDataSource(allocationData);
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
+    this.dataSource.filterPredicate =this.secidfilter
+    console.log('this.paginator',this.dataSource.data);
     let orderAllocated = new Set(this.dataSource.data.map(el=>Number(el.id_bulk_order)))
     this.TradeService.sendAllocatedOrders([...orderAllocated].length? [...orderAllocated]:[0]);
     this.defaultFilterPredicate = this.dataSource.filterPredicate;
     this.secidfilter = this.dataSource.filterPredicate;
+
   }
   async submitQuery (reset:boolean=false, showSnackResult:boolean=true) {
     this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate')
@@ -282,28 +281,23 @@ export class AppallocationTableComponent  implements AfterViewInit {
     this.dialogOrderModify.componentInstance.data = action ==='Create'? null :element; */
   }
   getTotals (col:string) {
-    return (this.dataSource&&this.dataSource.data)?  this.dataSource.data.map(el => el[col]).reduce((acc, value) => acc + Number(value), 0):0;
+    return (this.dataSource&&this.dataSource.data)?  this.dataSource.filteredData.map(el => el[col]).reduce((acc, value) => acc + Number(value), 0):0;
   }
-  exportToExcel() {this.HandlingCommonTasksS.exportToExcel (this.dataSource.data.map(el=>{
-    return {
-      IDtrade:Number(el['idtrade']),
-      TradeDate:new Date(el['tdate']),
-      Type:(el['trtype']),
-      Secid:(el['tidinstrument']),
-      SecidName:(el['secid_name']),
-      ValueDate:new Date(el['vdate']),
-      Price:Number(el['price']),
-      PriceCurrency:(el['id_price_currency']),
-      CounterParty:(el['cpty']),
-      Quantity:Number(el['qty']),
-      TradeAmount:Number(el['trade_amount']),
-      SettlementCurrency:(el['id_settlement_currency']),
-      PriceType:Number(el['price_type']),
-      Facevalue:Number(el['facevalue']),
-      Faceunit:(el['faceunit']),
-      SecidType:(el['secid_type']),
-    }
-  }),"ordersData")  }
+  exportToExcel() {
+    let numberFields=['id','qty', 'trade_amount','id_order','id_bulk_order','entries','idtrade','price'];
+    let dateFields=['tdate'];
+    let dataToExport =  this.dataSource.data.map(el=>{
+      Object.keys(el).forEach(key=>{
+        switch (true==true) {
+          case  numberFields.includes(key): return el[key]=Number(el[key]) ;
+          case dateFields.includes(key): return el[key]=new Date(el[key])
+          default: return el[key]=el[key]
+        }
+      })
+      return el;
+    });
+    this.HandlingCommonTasksS.exportToExcel (dataToExport,"allocationData");  
+  }
   get  type () {return this.searchParametersFG.get('type') } 
   get  tdate () {return this.searchParametersFG.get('tdate') } 
   get  vdate () {return this.searchParametersFG.get('vdate') } 

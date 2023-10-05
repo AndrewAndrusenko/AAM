@@ -110,8 +110,7 @@ export class AppTradeTableComponent  implements AfterViewInit {
     this.arraySubscrition.unsubscribe();
   }
   async ngAfterViewInit() {
-    // this.TradeService.getTradeInformation(null).subscribe (tradesData => this.updateTradesDataTable(tradesData));  // restore after fix fifo
-    this.submitQuery();//temp for fifo - delete
+    this.TradeService.getTradeInformation(null).subscribe (tradesData => this.updateTradesDataTable(tradesData)); 
     this.AutoCompService.getSecidLists();
     this.AutoCompService.getCounterpartyLists();
     this.filterednstrumentsLists = this.secidList.valueChanges.pipe(
@@ -127,8 +126,6 @@ export class AppTradeTableComponent  implements AfterViewInit {
     this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate);
     return new Promise((resolve, reject) => {
       let searchObj = reset?  {} : this.searchParametersFG.value;
-      searchObj.secidLis=['goog-rm']; //temp for fifo - delete
-      this.instruments.push('goog-rm'); //temp for fifo - delete
       this.dataSource?.data? this.dataSource.data = null : null;
       searchObj.cptyList = [0,1].includes(this.counterparties.length)&&this.counterparties[0]==='ClearAll'? null : this.counterparties.map(el=>el.toLocaleLowerCase())
       searchObj.secidList = [0,1].includes(this.instruments.length)&&this.instruments[0]==='ClearAll'? null : this.instruments.map(el=>el.toLocaleLowerCase())

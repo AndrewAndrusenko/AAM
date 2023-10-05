@@ -1,11 +1,12 @@
 -- FUNCTION: public.f_fifo_change_position_sign(numeric, numeric)
 
--- DROP FUNCTION IF EXISTS public.f_fifo_change_position_sign(numeric, numeric);
+-- DROP FUNCTION IF EXISTS public.f_fifo_change_position_sign(numeric, numeric,numeric);
 
 CREATE OR REPLACE FUNCTION public.f_fifo_change_position_sign(
-	trade_id numeric,
-	trade_qty numeric)
-    RETURNS TABLE(idportfolio bigint) 
+	trade_id numeric, 
+	trade_qty numeric,
+	p_execute_price numeric)
+    RETURNS TABLE(id bigint, idtrade bigint, tr_type smallint, qty numeric, qty_out numeric, price_in numeric, price_out numeric, closed boolean, idportfolio numeric, trade_date date, secid character varying, profit_loss numeric, id_sell_trade numeric, id_buy_trade numeric) 
     LANGUAGE 'plpgsql'
     COST 100
     VOLATILE PARALLEL UNSAFE
@@ -21,7 +22,7 @@ FROM
   public.dtrades_allocated_fifo
 WHERE
   dtrades_allocated_fifo.id_sell_trade = trade_id
-  AND closed ISNULL;
+  AND dtrades_allocated_fifo.closed ISNULL;
 
 IF sold_qty > 0 THEN RETURN QUERY
 INSERT INTO
@@ -48,7 +49,7 @@ SELECT
   END,
   sold_qty,
   0,
-  dtrades.trade_amount / dtrades.qty,
+  p_execute_price,
   0,
   FALSE,
   dtrades_allocated.idportfolio,
@@ -63,11 +64,23 @@ FROM
 WHERE
   dtrades_allocated.id = trade_id
 RETURNING
-  dtrades_allocated_fifo.id;
-
+  dtrades_allocated_fifo.id,
+  dtrades_allocated_fifo.idtrade,
+  dtrades_allocated_fifo.tr_type,
+  dtrades_allocated_fifo.qty,
+  dtrades_allocated_fifo.qty_out,
+  dtrades_allocated_fifo.price_in,
+  dtrades_allocated_fifo.price_out,
+  dtrades_allocated_fifo.closed,
+  dtrades_allocated_fifo.idportfolio,
+  dtrades_allocated_fifo.trade_date,
+  dtrades_allocated_fifo.secid,
+  dtrades_allocated_fifo.profit_loss,
+  dtrades_allocated_fifo.id_sell_trade,
+  dtrades_allocated_fifo.id_buy_trade;
 END IF;
 END;
 $BODY$;
 
-ALTER FUNCTION public.f_fifo_change_position_sign(numeric, numeric)
+ALTER FUNCTION public.f_fifo_change_position_sign(numeric, numeric,numeric)
     OWNER TO postgres;

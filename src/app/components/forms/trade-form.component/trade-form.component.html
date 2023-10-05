@@ -52,9 +52,10 @@ color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4"
 </mat-toolbar>
 <mat-tab-group mat-stretch-tabs [(selectedIndex)]="tabIndex" >
   <mat-tab label="Trade Details">
-    <form class="submit" [formGroup]="tradeModifyForm" style="background-color: rgb(40, 39, 39);">
+    <form class="submit" 
+      [formGroup]="tradeModifyForm" style="background-color: rgb(40, 39, 39);">
       <button mat-raised-button color="accent" 
-        [disabled]="!(tradeModifyForm.valid && submitbox.checked)"
+        [disabled]="!(tradeModifyForm.valid && submitbox.checked&&!allocatedqty.value)"
         (click)="updateInstrumentData(action)"
         style="margin-top: 1%; width: 20%; font-size: 18px; margin-left: 1%;">
         {{action}} Trade
@@ -66,8 +67,12 @@ color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4"
                   showErrors()">
         Submit Data 
       </mat-checkbox>
-      <span style="color:rgb(177, 174, 174);margin-left: 5%;" *ngIf="tradeModifyForm.valid"> 
-        To save data please select 'Submit data' check and then press button </span>
+      <span style="color:rgb(177, 174, 174);margin-left: 5%;" *ngIf="tradeModifyForm.valid&&!allocatedqty.value"> 
+        To save data please select 'Submit data' check and then press button 
+      </span>
+      <span style="color:indianred;margin-left: 5%;" *ngIf="tradeModifyForm.valid&&allocatedqty.value"> 
+        Trade has been allocated. Modifing the trade is forbidden
+      </span>
       <p>
         <span style="display: flex;   align-items:flex-start;  margin-right: 1%;margin-top: 0.2%;">
 
@@ -152,7 +157,6 @@ color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4"
         <mat-form-field style="width: 45%;" >
           <input matInput placeholder="Instrument" formControlName="secid_name" [readonly]="true" >
         </mat-form-field>
-
       </p>
       <p>
         <mat-form-field style="width: 13%;" title="price" >
@@ -183,6 +187,12 @@ color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4"
             {{qty?.errors?.['pattern']? 'Format 0,00' :qty.value | number}}
           </mat-hint>
         </mat-form-field>
+        <mat-form-field style="width: 13%;" *ngIf="price_type.value==2">
+          <input matInput 
+          [value]="(trade_amount.value/qty.value) | number"
+          placeholder="Dirty Price " 
+          [readonly]="true" >
+        </mat-form-field>
         <mat-form-field style="width: 17%;" title="Type to find(any filed). Click to select" >
           <input matInput [placeholder]="'Currency'" 
           [value]="price_type.value=='2'? faceunit.value:id_price_currency.value"
@@ -205,7 +215,7 @@ color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4"
             {{code_price_currency.value}} - {{price_currency_name.value}}
           </mat-hint>
         </mat-form-field>
-        <mat-form-field *ngIf="price_type.value==2">
+        <mat-form-field *ngIf="price_type.value==2" style="width: 15%;" >
           <input matInput placeholder="Face Value" [value]="facevalue.value  | currency:faceunit_name.value+' '" [readonly]="true">
         </mat-form-field>
       </p>
@@ -344,64 +354,67 @@ color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4"
     <form class="submit" [formGroup]="tradeModifyForm" style="background-color: rgb(40, 39, 39);"  >
       <p>
         <span style="display: flex;   align-items:flex-start;  margin-right: 1%;margin-top: 0.2%;">
+          <mat-form-field  style="width: 12%;" title="Security Group Code" >
+            <mat-label>Type</mat-label>
+            <mat-select  #securityGroup formControlName="trtype"> 
+              <mat-option  [value]="'BUY'"> BUY</mat-option>
+              <mat-option  [value]="'SELL'"> SELL</mat-option>
+            </mat-select>
+            <mat-error  *ngIf="trtype?.errors?.['required']">
+              Required!   
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field style="width: 20%;" >
+            <input matInput [matDatepicker]="" [placeholder]="'Trade Date'" formControlName="tdate" [readonly]="true">
 
-        <mat-form-field  style="width: 12%;" title="Security Group Code" >
-          <mat-label>Type</mat-label>
-          <mat-select  #securityGroup formControlName="trtype"> 
-            <mat-option  [value]="'BUY'"> BUY</mat-option>
-            <mat-option  [value]="'SELL'"> SELL</mat-option>
-          </mat-select>
-          <mat-error  *ngIf="trtype?.errors?.['required']">
-            Required!   
-          </mat-error>
-        </mat-form-field>
-        <mat-form-field style="width: 20%;" >
-          <input matInput [matDatepicker]="" [placeholder]="'Trade Date'" formControlName="tdate" [readonly]="true">
-
-          <mat-error  *ngIf="tdate?.errors?.['required']">
-            Required!   
-          </mat-error>
-          <mat-error *ngIf="tdate?.errors?.['matDatepickerMin']" matTooltip="TradeDate in closed period">
-            Inccorect date!   
-          </mat-error>
-          <mat-hint *ngIf="tdate.valid">
-            {{tdate.value|date}}
-          </mat-hint>
-        </mat-form-field>
-        <mat-form-field style="width: 27%;" title="Type to find(any filed). Click to select">
-          <input matInput [placeholder]="'SecID'" formControlName="tidinstrument" [matAutocomplete]="autoSecID" [readonly]="true" >
-          <mat-error  *ngIf="tidinstrument?.errors?.['required']">
-            Required!    
-          </mat-error>
-          <mat-error  *ngIf="tidinstrument?.errors?.['noSecid']">
-            Inccorect Code! 
-          </mat-error>
-        </mat-form-field>
-        <mat-form-field style="width: 13%;" title="price" >
-          <input matInput placeholder="Price" formControlName="price" [readonly]="true" [value]="price.value">
-          <mat-error  *ngIf="price?.errors?.['required']">
-            Required!    
-          </mat-error>
-          <mat-error  *ngIf="price?.errors?.['pattern']">
-            Required!    
-          </mat-error>
-          <mat-hint>
-            {{price_type.value==2?'percent':'absolute'}}
-          </mat-hint>
-        </mat-form-field>
-        <mat-form-field style="width: 20%;" title="Quantity" >
-          <input matInput placeholder="Quantity" formControlName="qty" [readonly]="true" [value]="qty.value | number">
-          <mat-error  *ngIf="qty?.errors?.['required']">
-            Required!    
-          </mat-error>
-          <mat-error  *ngIf="qty?.errors?.['pattern']">
-            Only numbers!    
-          </mat-error>
-          <mat-hint>
-            {{qty?.errors?.['pattern']? 'Format 0,00' :qty.value | number}}
-          </mat-hint>
-        </mat-form-field>
-        <mat-label style="width: 20%;" class="mat-form-field" title="Unalloacted">Unalloacted: {{(qty.value-allocatedqty.value)|number}}        </mat-label>
+            <mat-error  *ngIf="tdate?.errors?.['required']">
+              Required!   
+            </mat-error>
+            <mat-error *ngIf="tdate?.errors?.['matDatepickerMin']" matTooltip="TradeDate in closed period">
+              Inccorect date!   
+            </mat-error>
+            <mat-hint *ngIf="tdate.valid">
+              {{tdate.value|date}}
+            </mat-hint>
+          </mat-form-field>
+          <mat-form-field style="width: 27%;" title="Type to find(any filed). Click to select">
+            <input matInput [placeholder]="'SecID'" formControlName="tidinstrument" [matAutocomplete]="autoSecID" [readonly]="true" >
+            <mat-error  *ngIf="tidinstrument?.errors?.['required']">
+              Required!    
+            </mat-error>
+            <mat-error  *ngIf="tidinstrument?.errors?.['noSecid']">
+              Inccorect Code! 
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field style="width: 13%;" title="price" >
+            <input matInput placeholder="Price" formControlName="price" [readonly]="true" [value]="price.value">
+            <mat-error  *ngIf="price?.errors?.['required']">
+              Required!    
+            </mat-error>
+            <mat-error  *ngIf="price?.errors?.['pattern']">
+              Required!    
+            </mat-error>
+            <mat-hint>
+              {{price_type.value==2?'percent':'absolute'}}
+            </mat-hint>
+          </mat-form-field>
+          <mat-form-field style="width: 20%;" title="Quantity" >
+            <input matInput placeholder="Quantity" formControlName="qty" [readonly]="true" [value]="qty.value | number">
+            <mat-error  *ngIf="qty?.errors?.['required']">
+              Required!    
+            </mat-error>
+            <mat-error  *ngIf="qty?.errors?.['pattern']">
+              Only numbers!    
+            </mat-error>
+            <mat-hint>
+              {{qty?.errors?.['pattern']? 'Format 0,00' :qty.value | number}}
+            </mat-hint>
+          </mat-form-field>
+          <span style="display:grid; width: 25%; font-size:1px ">
+            <mat-label style="width: 95%;" class="mat-form-field" title="Unalloacted">Unalloacted: {{(qty.value-allocatedqty.value)|number}} </mat-label>
+            <br>
+            <mat-label style="width: 95%;" class="mat-form-field" title="Unalloacted">Dirty: {{(trade_amount.value/qty.value)|number}}        </mat-label>
+          </span>
         </span>
       </p>
     </form>

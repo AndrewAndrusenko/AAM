@@ -1,6 +1,6 @@
 <ng-container *ngIf="accessState!=='none'" >
   <ng-container  *ngIf="tableMode.includes('Parent')&&tableMode.length===1">  <!-- Parent Mode Block -->
-    <mat-form-field class = "filterField"  style="font-size: 22px;" title="Filter All columns">
+    <mat-form-field style="width: 16%;"class = "filterField"  title="Filter All columns">
       <mat-label class="whiteTextFilter">Search (all columns)...</mat-label>
       <input 
         (keyup)="applyFilter($event)"
@@ -9,6 +9,18 @@
       <button matSuffix 
         mat-icon-button aria-label="Clear" 
         (click)="clearFilter(filterALL)">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-form-field>
+    <mat-form-field style="width: 13%;" class = "filterField" title="only by SecID" >
+      <mat-label class="whiteTextFilter">Search by SecID..</mat-label>
+      <input 
+        (keyup)="applyFilter($event,'secid')"
+        matInput type="text" #filterSecid  
+        matTooltip="Use context menu to add filter">
+      <button matSuffix 
+        mat-icon-button aria-label="Clear" 
+        (click)="clearFilter(filterSecid)">
         <mat-icon>close</mat-icon>
       </button>
     </mat-form-field>
@@ -183,7 +195,7 @@
           <span [ngSwitch]="true==true">
             <p *ngSwitchDefault></p>
             <p *ngSwitchCase="['id'].includes(column)">{{'Totals'}} </p>
-            <p *ngSwitchCase="['qty','trade_amount'].includes(column)">{{getTotals(column)| number }} </p>
+            <p *ngSwitchCase="['qty','trade_amount','pl'].includes(column)">{{getTotals(column)| number }} </p>
            
           </span></h2>
         <td 
@@ -258,7 +270,8 @@
       </tr>
       <tr mat-footer-row *matFooterRowDef="columnsToDisplay; sticky: true"></tr>
     </table>
-    <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" [pageSize]="20" aria-label="Select page of users"></mat-paginator>
+    <mat-paginator [pageSizeOptions]="[5, 15, 25, 100]" [pageSize]="15" aria-label="Select page of allocation"></mat-paginator>
+
   </div>
 </ng-container>
 <h2 *ngIf="tableMode.includes('Select')" style="color: rgb(224, 73, 73);"> Use context menu to select client</h2>

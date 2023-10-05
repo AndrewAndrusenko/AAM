@@ -6,4 +6,4 @@ left join dportfolios on dportfolios.idportfolio=dtrades_allocated_fifo.idportfo
 where lower(dportfolios.portfolioname)='vpi003'
 and secid='GOOG-RM'
 -- where idtrade
-order by out_date::date desc,trade_date::date desc ,idtrade, id_sell_trade asc,qty asc
+order by out_date::date desc,trade_date::date,id_sell_trade desc,idtrade,qty asc

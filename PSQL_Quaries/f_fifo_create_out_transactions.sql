@@ -1,10 +1,11 @@
 -- FUNCTION: public.f_fifo_create_out_transactions(numeric, numeric)
 
--- DROP FUNCTION IF EXISTS public.f_fifo_create_out_transactions(numeric, numeric);
+DROP FUNCTION IF EXISTS public.f_fifo_create_out_transactions(numeric, numeric,numeric);
 
 CREATE OR REPLACE FUNCTION public.f_fifo_create_out_transactions(
 	p_tr_type_to_close numeric,
-	p_id_out_trade numeric)
+	p_id_out_trade numeric,
+	p_execute_price numeric)
     RETURNS TABLE(id bigint, idtrade bigint, tr_type smallint, qty numeric, qty_out numeric, price_in numeric, price_out numeric, closed boolean, idportfolio numeric, trade_date date, secid character varying, profit_loss numeric, id_sell_trade numeric, id_buy_trade numeric) 
     LANGUAGE 'plpgsql'
     COST 100
@@ -60,14 +61,14 @@ SELECT
   f_fifo_select_open_position.profit_loss,
   f_fifo_select_open_position.id_sell_trade,
   f_fifo_select_open_position.idtrade,
-  NULL AS closed,
+  NULL ,
   out_trade_details.tdate AS out_date
 FROM
   f_fifo_select_open_position (
     out_trade_details.idportfolio,
     out_trade_details.tidinstrument,
     out_trade_details.qty,
-    out_trade_details.price,
+    p_execute_price,
     p_id_out_trade,
     p_tr_type_to_close
   )
@@ -93,7 +94,7 @@ FROM
     out_trade_details.idportfolio,
     out_trade_details.tidinstrument,
     out_trade_details.qty,
-    out_trade_details.price,
+    p_execute_price,
     p_id_out_trade,
     p_tr_type_to_close
   )
@@ -115,5 +116,5 @@ RETURNING
 END;
 $BODY$;
 
-ALTER FUNCTION public.f_fifo_create_out_transactions(numeric, numeric)
+ALTER FUNCTION public.f_fifo_create_out_transactions(numeric, numeric,numeric)
     OWNER TO postgres;

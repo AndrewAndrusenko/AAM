@@ -22,17 +22,12 @@ async function fCreateDepoSubAccounts (request,response) {
   db_common_api.queryExecute(sql,response,undefined,'fCreateDepoSubAccounts');
 }
 async function fdeleteAccountingFIFOtransactions (request,response) {
-  let sql = 'CALL public.p_fifo_delete_accounting_fifo(ARRAY[${idtrades}])';
+  let sql = 'SELECT * FROM f_a_delele_accounting_fifo_for_allocated_trade(ARRAY[${idtrades}])';
   sql = pgp.as.format(sql,request.body.params);
   db_common_api.queryExecute(sql,response,undefined,'fdeleteAccountingFIFOtransactions');
 }
 async function fcreateFIFOtransactions (request,response) {
-  let sql = "CALL p_fifo_create_out_transactions (${idportfolio},${secid},${qty_to_sell},${sell_price},${id_sell_trade},${tr_type});";
-/*   let sql = '';
-  if (request.body.params.tradeType==='BUY') {
-    sql = "SELECT * FROM f_fifo_create_buy_transactions (ARRAY[${idtrades}]);";
-  } else {
-  } */
+  let sql = "SELECT * FROM f_fifo_create (${idportfolio},${secid},${qty_to_sell},${sell_price},${id_sell_trade},${tr_type});";
   sql = pgp.as.format(sql,request.body.params);
   db_common_api.queryExecute(sql,response,undefined,'p_fifo_create_out_transactions');
 }
