@@ -112,7 +112,7 @@ async function fgetMarketData (request,response){//Get market data such as marke
     }
   }
   let conditionsMOEXiss =' WHERE'
-  let conditionsmsFS = 'AND'
+  let conditionsmsFS = ' AND'
   Object.entries(conditions).forEach(([key,value]) => {
   if  (request.query.hasOwnProperty(key)) {
     query.values.push(request.query[key]);
@@ -120,6 +120,7 @@ async function fgetMarketData (request,response){//Get market data such as marke
     conditionsmsFS +=conditions[key][2] + ' AND';
     }
   });
+  console.log('con',conditionsMOEXiss.length, conditionsmsFS.length, request.query?.['sourcecode'] !=='msFS');
   switch (request.query.Action) {
     case 'checkLoadedMarketData':
       query.text = 'SELECT sourcecode, count(secid) FROM t_moexdata_foreignshares '+
@@ -131,20 +132,24 @@ async function fgetMarketData (request,response){//Get market data such as marke
       'GROUP BY sourcecode ';
     break;
     default :  
-      query.text = 'SELECT boardid, secid, numtrades, value, open, low, high, close, volume, marketprice2, admittedquote,  globalsource, sourcecode, tradedate, percentprice,currency, spsymbol '+
-      'FROM t_moexdata_foreignshares '+
-      'left join t_moex_boards on t_moex_boards.code = t_moexdata_foreignshares.boardid '
-      query.text +=conditionsMOEXiss.slice(0,-5);
-      query.text +='UNION '+
-      "SELECT exchange, secid,null,null, open,low, high,  close, volume, adj_close, adj_close,  globalsource, sourcecode, date, false as percentprice, 'USD' as currency, '$' as spsymbol "+
-      'FROM public.t_marketstack_eod '+
-      'left join "aInstrumentsCodes" on "aInstrumentsCodes".code=t_marketstack_eod.symbol '+
-      'where "aInstrumentsCodes".mapcode = \'msFS\'  ';
-      query.text +=conditionsmsFS.slice(0,-3);
-      query.text += ' ORDER BY ${sorting:raw} LIMIT ${rowslimit:raw};'
+      if ((conditionsMOEXiss.length>6 || conditionsmsFS.length===4) && request.query?.['sourcecode'] !=='msFS') {
+        query.text = 'SELECT boardid, secid, numtrades, value, open, low, high, close, volume, marketprice2, admittedquote,  globalsource, sourcecode, tradedate, percentprice,currency, spsymbol '+
+        'FROM t_moexdata_foreignshares '+
+        'left join t_moex_boards on t_moex_boards.code = t_moexdata_foreignshares.boardid '
+        query.text +=conditionsMOEXiss.slice(0,-5)+';';
+      } else {
+        query.text ="SELECT exchange as boardid, secid,null,null, open,low, high,  close, volume, adj_close, adj_close,  globalsource, sourcecode, date as tradedate , false as percentprice, 'USD' as currency, '$' as spsymbol "+
+        'FROM public.t_marketstack_eod '+
+        'left join "aInstrumentsCodes" on "aInstrumentsCodes".code=t_marketstack_eod.symbol '+
+        'where "aInstrumentsCodes".mapcode = \'msFS\'  ';
+        query.text +=conditionsmsFS.slice(0,-5)+';';
+        // query.text += ' ORDER BY ${sorting:raw} LIMIT ${rowslimit:raw};'
+      }
     break;
   }
   sql = pgp.as.format(query.text,request.query);
+  console.log('getMTM');
+  console.log(sql);
   db_common_api.queryExecute(sql,response,undefined,'fgetMarketData')
 }
 async function fgetMarketDataSources (request,response) {//Get market sources. Needs to be moved to General data function

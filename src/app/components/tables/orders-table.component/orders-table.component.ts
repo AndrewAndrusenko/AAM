@@ -343,26 +343,21 @@ export class AppOrderTableComponent  implements AfterViewInit {
     this.dialogOrderModify.componentInstance.action = action;
     this.dialogOrderModify.componentInstance.data = action ==='Create'? null :element; */
   }
-  exportToExcel() {this.HandlingCommonTasksS.exportToExcel (this.dataSource.data.map(el=>{
-    return {
-      IDtrade:Number(el['idtrade']),
-      TradeDate:new Date(el['tdate']),
-      Type:(el['trtype']),
-      Secid:(el['tidinstrument']),
-      SecidName:(el['secid_name']),
-      ValueDate:new Date(el['vdate']),
-      Price:Number(el['price']),
-      PriceCurrency:(el['id_price_currency']),
-      CounterParty:(el['cpty']),
-      Quantity:Number(el['qty']),
-      TradeAmount:Number(el['trade_amount']),
-      SettlementCurrency:(el['id_settlement_currency']),
-      PriceType:Number(el['price_type']),
-      Facevalue:Number(el['facevalue']),
-      Faceunit:(el['faceunit']),
-      SecidType:(el['secid_type']),
-    }
-  }),"ordersData")  }
+  exportToExcel() {   
+    let numberFields=['id','qty', 'amount','id_order','id_bulk_order','entries','idtrade','price','unexecuted','parent_order','allocated','idcurrency'];
+    let dateFields=['generated'];
+    let dataToExport =  this.dataSource.data.map(el=>{
+      Object.keys(el).forEach(key=>{
+        switch (true==true) {
+          case  numberFields.includes(key): return el[key]=Number(el[key]) ;
+          case dateFields.includes(key): return el[key]=new Date(el[key])
+          default: return el[key]=el[key]
+        }
+      })
+      return el;
+    });
+    this.HandlingCommonTasksS.exportToExcel (dataToExport,"allocationData");   
+  }
   get  type () {return this.searchParametersFG.get('type') } 
   get  tdate () {return this.searchParametersFG.get('tdate') } 
   get  vdate () {return this.searchParametersFG.get('vdate') } 

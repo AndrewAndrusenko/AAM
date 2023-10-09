@@ -31,8 +31,6 @@ import { AppAllocationService } from 'src/app/services/allocation.service';
 export class AppallocationTableComponent  implements AfterViewInit {
   FirstOpenedAccountingDate: Date;
   accessState: string = 'none';
-  orderStatuses:objectStatus[];
-  ordersPermissions:string[];
   private subscriptions = new Subscription()
   selectedRowIndex = -1;
   selectedRowID = -1;
@@ -41,32 +39,29 @@ export class AppallocationTableComponent  implements AfterViewInit {
   @Input() dataToShow:allocation[];
   @Input() tradeData:trades;
   @Input() allocationFilters:{secid:string, type:string};
-  fullOrdersSet:allocation[];
   columnsToDisplay = ['select','id','portfolioname','qty', 'trade_amount', 'fifo','depo_account_balance', 'current_account_balance','id_order','id_bulk_order','entries','pl'];
   columnsHeaderToDisplay = ['ID', 'pCode','Quantity','Amount','FIFO','Depo','Balance', 'Order','Bulk','Entries','PL']
 
   dataSource: MatTableDataSource<allocation>;
   public selection = new SelectionModel<allocation>(true, []);
   @ViewChild(MatPaginator) paginator: MatPaginator;
-
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild('filterALL', { static: false }) filterALL: ElementRef;
   @ViewChild('allSelected', { static: false }) allSelected: MatCheckbox;
   @Output() public modal_principal_parent = new EventEmitter();
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
-  investmentNodeColor = investmentNodeColorChild;
   panelOpenStateSecond = false;
   instruments: string[] = ['ClearAll'];
+  portfolios: string[] = ['ClearAll'];
   filterednstrumentsLists : Observable<string[]>;
   searchParametersFG: FormGroup;
   dataRange = new FormGroup ({
     dateRangeStart: new FormControl<Date | null>(null),
     dateRangeEnd: new FormControl<Date | null>(null),
   });
-  dialogOrderModify: MatDialogRef<AppTradeModifyFormComponent>;
   dialogShowEntriesList: MatDialogRef<AppTableAccEntriesComponent>;
   defaultFilterPredicate?: (data: any, filter: string) => boolean;
-  secidfilter?: (data: any, filter: string) => boolean;
+  multiFilter?: (data: any, filter: string) => boolean;
   constructor(
     private TradeService: AppTradeService,
     private AuthServiceS:AuthService,  
@@ -81,13 +76,11 @@ export class AppallocationTableComponent  implements AfterViewInit {
     private dialog: MatDialog, 
   ) {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
-    this.orderStatuses = this.AuthServiceS.objectStatuses.filter(el =>el.id_object==='Order');
-    this.ordersPermissions = this.AuthServiceS.accessRestrictions.filter(el=>el.elementid==='dorders_status_list')[0].elementvalue.split(',');
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.searchParametersFG = this.fb.group ({
       type:null,
       secidList: [],
-      cptyList:  [],
+      portfoliosList:  [],
       tdate : this.dataRange,
       price:null,
       qty:null,
@@ -97,12 +90,11 @@ export class AppallocationTableComponent  implements AfterViewInit {
     this.subscriptions.unsubscribe();
   }
   ngOnInit(): void {
-    this.secidfilter =
-    (data: allocation, filter: string) => {
+    this.multiFilter = (data: allocation, filter: string) => {
       let filter_array = filter.split(',').map(el=>[el,1]);
-      this.columnsToDisplay.forEach(col=>filter_array.forEach(fil=>fil[0].toString().toUpperCase()===(data[col])? fil[1]=0:null))
-        console.log('filter_array',filter_array);
-      return !filter || filter_array.reduce((acc,val)=>acc+Number(val[1]),0)===0};
+      this.columnsToDisplay.forEach(col=>filter_array.forEach(fil=>fil[0].toString().toUpperCase()===(data[col])? fil[1]=0:null));
+      return !filter || filter_array.reduce((acc,val)=>acc+Number(val[1]),0)===0;
+    };
 
     if (!this.tableMode.includes('Trade'))   {
       this.columnsToDisplay = ['select','id','portfolioname','trtype','qty', 'trade_amount','pl','id_order','id_bulk_order','entries','idtrade','secid','tdate','price','id_price_currency'];
@@ -121,7 +113,7 @@ export class AppallocationTableComponent  implements AfterViewInit {
       setTimeout(() => {
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort; 
-        this.dataSource.filterPredicate =this.secidfilter
+        this.dataSource.filterPredicate =this.multiFilter
       }, 200);
     });  
     this.subscriptions.add(
@@ -161,7 +153,7 @@ export class AppallocationTableComponent  implements AfterViewInit {
     });
   }
   applyFilter(event: any, col?:string) {
-    this.dataSource.filterPredicate = col === undefined? this.defaultFilterPredicate : this.secidfilter
+    this.dataSource.filterPredicate = col === undefined? this.defaultFilterPredicate : this.multiFilter
     const filterValue = event.hasOwnProperty('isUserInput')?  event.source.value :  (event.target as HTMLInputElement).value 
     !event.hasOwnProperty('isUserInput') || event.isUserInput ? this.dataSource.filter = filterValue.trim().toLowerCase() : null;
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
@@ -173,12 +165,12 @@ export class AppallocationTableComponent  implements AfterViewInit {
     this.dataSource  = new MatTableDataSource(allocationData);
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
-    this.dataSource.filterPredicate =this.secidfilter
+    this.dataSource.filterPredicate =this.multiFilter
     console.log('this.paginator',this.dataSource.data);
     let orderAllocated = new Set(this.dataSource.data.map(el=>Number(el.id_bulk_order)))
     this.TradeService.sendAllocatedOrders([...orderAllocated].length? [...orderAllocated]:[0]);
     this.defaultFilterPredicate = this.dataSource.filterPredicate;
-    this.secidfilter = this.dataSource.filterPredicate;
+    this.multiFilter = this.dataSource.filterPredicate;
 
   }
   async submitQuery (reset:boolean=false, showSnackResult:boolean=true) {
@@ -189,6 +181,7 @@ export class AppallocationTableComponent  implements AfterViewInit {
       this.dataSource.data? this.dataSource.data = null : null;
       this.tradeData?.idtrade? searchObj.idtrade=this.tradeData.idtrade:null;
       searchObj.secidList = [0,1].includes(this.instruments.length)&&this.instruments[0]==='ClearAll'? null : this.instruments.map(el=>el.toLocaleLowerCase())
+      searchObj.portfoliosList = [0,1].includes(this.portfolios.length)&&this.portfolios[0]==='ClearAll'? null : this.portfolios.map(el=>el.toLocaleLowerCase())
       if (this.qty.value) {
         let qtyRange = this.HandlingCommonTasksS.toNumberRange(this.qty.value,this.qty,'qty');
         qtyRange? searchObj = {...searchObj, ... qtyRange} : searchObj.qty=null;
@@ -233,8 +226,8 @@ export class AppallocationTableComponent  implements AfterViewInit {
   }
   addChips (el: any, column: string) {(['secid'].includes(column))? this.instruments.push(el):null;}
   updateFilter (el: any) {
-    this.filterALL.nativeElement.value = el;
-    this.dataSource.filter = el.trim().toLowerCase();
+    this.filterALL.nativeElement.value = this.filterALL.nativeElement.value + el+',';
+    this.dataSource.filter = this.filterALL.nativeElement.value.slice(0,-1).trim().toLowerCase();
     (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
   }
   clearFilter (input:HTMLInputElement) {
@@ -284,7 +277,7 @@ export class AppallocationTableComponent  implements AfterViewInit {
     return (this.dataSource&&this.dataSource.data)?  this.dataSource.filteredData.map(el => el[col]).reduce((acc, value) => acc + Number(value), 0):0;
   }
   exportToExcel() {
-    let numberFields=['id','qty', 'trade_amount','id_order','id_bulk_order','entries','idtrade','price'];
+    let numberFields=['id','qty', 'trade_amount','id_order','id_bulk_order','entries','idtrade','price','pl'];
     let dateFields=['tdate'];
     let dataToExport =  this.dataSource.data.map(el=>{
       Object.keys(el).forEach(key=>{
@@ -302,7 +295,7 @@ export class AppallocationTableComponent  implements AfterViewInit {
   get  tdate () {return this.searchParametersFG.get('tdate') } 
   get  vdate () {return this.searchParametersFG.get('vdate') } 
   get  secidList () {return this.searchParametersFG.get('secidList') } 
-  get  cptyList () {return this.searchParametersFG.get('cptyList') } 
+  get  portfoliosList () {return this.searchParametersFG.get('portfoliosList') } 
   get  qty () {return this.searchParametersFG.get('qty') } 
   get  price () {return this.searchParametersFG.get('price') } 
 }

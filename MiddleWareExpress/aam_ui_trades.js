@@ -40,6 +40,10 @@ async function fGetTradesData (request,response) {
     'secidList' : {
       1: '(LOWER(tidinstrument) = ANY(array[${secidList}]))  ',
       2: '(LOWER(tidinstrument) = ANY(array[${secidList}]))  ',
+    },
+    'portfoliosList' : {
+      1: ' ',
+      2: '(LOWER(dportfolios.portfolioname) = ANY(${portfoliosList}))  ',
     }
   }
   let conditionsTrades =' WHERE'
