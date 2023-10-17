@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
-import { AccountsTableModel, accountTypes, ClientData, InstrumentData, StrategiesGlobalData, StrategyStructure } from '../models/intefaces.model';
+import { AccountsTableModel, accountTypes, ClientData, InstrumentData, portfolioPositions, StrategiesGlobalData, StrategyStructure } from '../models/intefaces.model';
 import { cleanData } from 'jquery';
 
 @Injectable({
@@ -116,5 +116,9 @@ export class AppInvestmentDataServiceService {
   updateAccount (data:any) { 
     return this.http.post <AccountsTableModel[]> ('/api/AAM/AccountEdit/',{'data': data})
   }
-  
+
+  getPortfoliosPositions (params_data: {secidList:string[], idportfolios : number[], report_date: string, report_id_currency :number }):Observable<portfolioPositions[]> {
+
+    return this.http.post <portfolioPositions[]> ('/api/AAM/GetPortfolioPositions/',{params:params_data,action:'getPortfolioPositions'})
+  }
 }

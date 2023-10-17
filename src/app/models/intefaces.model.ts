@@ -431,4 +431,33 @@ export interface orders {
 export interface allocation {
   id:number, qty:number, idtrade:number, idportfolio:number, id_order:number,id_bulk_order:number, portfolioname: string,trade_amount:number, accured_interest:number,id_settlement_currency:number, accountId:number,depoAccountId:number,entries:number,current_account_balance:number, depo_account_balance:number,  secid: string,tdate:Date,trtype:string,price:number,id_price_currency:number,fifo:number,pl:number
 }
-export interface allocation_fifo {id: number,idtrade : number,tr_type : number,qty : number,qty_out : number,price_in : number,price_out : number,closed: boolean,idportfolio : number,trade_date: Date,secid: string,generated: Date,profit_loss : number,id_sell_trade : number,id_buy_trade }
+export interface allocation_fifo {
+  id: number,idtrade : number,tr_type : number,qty : number,qty_out : number,price_in : number,price_out : number,closed: boolean,idportfolio : number,trade_date: Date,secid: string,generated: Date,profit_loss : number,id_sell_trade : number,id_buy_trade 
+}
+export interface portfolioPositions{
+  roi: number,
+  total_pl: number,
+  unrealizedpl: number,
+  pl: number,
+  cost_in_position: number,
+  idportfolio: number, 
+  portfolio_code  :string,
+  secid  :string,
+  strategy_name  :string,
+  mp_name  :string,
+  fact_weight  :number, 
+  current_balance  :number, 
+  mtm_positon :number, 
+  weight  :number, 
+  planned_position: number, 
+  order_amount :number, 
+  order_type :string, 
+  order_qty  :number, 
+  mtm_rate  :number, 
+  mtm_date: Date, 
+  mtm_dirty_price  :number, 
+  cross_rate  :number, 
+  npv  :number, 
+  rate_date: Date, 
+  main_currency_code  :number
+}

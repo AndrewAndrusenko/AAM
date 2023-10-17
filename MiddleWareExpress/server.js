@@ -148,10 +148,12 @@ appServer.post('/AAM/StrategyDataEdit/',jsPassport.authenticate('session') , uiA
 appServer.post('/AAM/StrategyStructureCreate/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fStrategyStructureCreate)
 appServer.post('/AAM/StrategyStructureDelete/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fStrategyStructureDelete)
 appServer.post('/AAM/StrategyStructureEdit/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fStrategyStructureEdit)
+/*----------------------PortofoliosData----------------------------------------------------*/
 
 appServer.post('/AAM/AccountCreate/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fAccountCreate)
 appServer.post('/AAM/AccountDelete/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fAccountDelete)
 appServer.post('/AAM/AccountEdit/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fAccountEdit)
+appServer.post('/AAM/GetPortfolioPositions/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fGetPortfolioPositions)
 
 /* -----------------------Accountting ----------------------------------------------------- */
 appServer.get('/DEA/fGetMT950Transactions/',jsPassport.authenticate('session') , uiAmmAccountingModule.fGetMT950Transactions)
@@ -211,6 +213,7 @@ appServer.post('/AAM/MD/Allocation/',jsPassport.authenticate('session'), uiAmmTr
 appServer.get('/AAM/getCurrencyData/',jsPassport.authenticate('session'), uiAmmCurrencyData.getCurrencyData)
 appServer.get('/AAM/getCbrRateDaily/',jsPassport.authenticate('session'), uiAmmCurrencyData.getCbrRateDaily)
 appServer.post('/AAM/modifyRatesData/',jsPassport.authenticate('session'), uiAmmCurrencyData.modifyRatesData)
+
 
 // RedisService.TestRedis();
 // RedisService.redisSetInstrumentList();

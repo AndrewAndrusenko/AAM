@@ -23,14 +23,15 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 export class AppTableStrategyComponent   {
   columnsToDisplay = [];
   columnsHToDisplay = [];
-  panelOpenState = false;
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
   dataSource: MatTableDataSource<StrategyStructure>;
+  panelOpenState:boolean = false;
   expandedElement: StrategyStructure  | null;
   dialogRef: MatDialogRef<AppStructureStrategyFormComponent>;
-  action ='';
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
+  @ViewChild(AppStructureStrategyFormComponent) newItemForm:AppStructureStrategyFormComponent;
+  @Input() action:string ='';
   @Input() parentStrategyId: any;
   @Input() ModelPortfolio: number;
   @Input() accessState: string = 'none';
@@ -66,6 +67,8 @@ export class AppTableStrategyComponent   {
           this.columnsToDisplay = ['id','sname', 'description', 'weight_of_child'];
         }
         this.columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
+        this.newItemForm.action='Create';
+        this.newItemForm.editStructureStrategyForm.reset();
         this.dataSource = new MatTableDataSource (strategyItems);
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
@@ -73,12 +76,15 @@ export class AppTableStrategyComponent   {
     }
   }
   openStrategyStructureForm (actionType:string, row: any ) {
-    this.dialogRef = this.dialog.open(AppStructureStrategyFormComponent ,{minHeight:'20vh', minWidth:'60vw' });
+    this.panelOpenState=true
+    this.newItemForm.action=actionType
+    this.newItemForm.editStructureStrategyForm.patchValue(row);
+/*     this.dialogRef = this.dialog.open(AppStructureStrategyFormComponent ,{minHeight:'20vh', minWidth:'60vw' });
     this.dialogRef.componentInstance.MP = this.ModelPortfolio;
     this.dialogRef.componentInstance.action = actionType;
     this.dialogRef.componentInstance.data = row;
     this.dialogRef.componentInstance.strategyId=this.parentStrategyId;
-    this.dialogRef.componentInstance.modal_principal_parent.subscribe ((item)=>this.dialogRef.close())
+    this.dialogRef.componentInstance.modal_principal_parent.subscribe ((item)=>this.dialogRef.close()) */
 }
   getTotalWeight () {
     return this.dataSource? this.dataSource.data.map(t => t.weight_of_child).reduce((acc, value) => acc + Number(value)/100, 0):0;

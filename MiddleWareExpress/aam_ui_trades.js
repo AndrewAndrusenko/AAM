@@ -102,7 +102,11 @@ async function fGetTradesData (request,response) {
   db_common_api.queryExecute(sql,response,undefined,request.query.action ||'GetTradesData');
 }
 async function fGetAccuredInterest (request,response) {
-  let sql = 'SELECT couponrate,actiontype,currency, date::timestamp without time zone   FROM public.mmoexcorpactions where secid=${tidinstrument} AND  date <= (select min(date) FROM public.mmoexcorpactions where date > ${vdate} and secid=${tidinstrument}) ORDER BY date desc LIMIT 2'
+  let sql = 'SELECT couponrate,actiontype,currency, date::timestamp without time zone   FROM public.mmoexcorpactions '+
+  ' WHERE secid=${tidinstrument} '+  
+  ' AND date <= (select min(date) FROM public.mmoexcorpactions where date > ${vdate} and secid=${tidinstrument}) '+
+  ' AND actiontype=1 '+
+  ' ORDER BY date desc LIMIT 2;'
   sql = pgp.as.format(sql,request.query);
   db_common_api.queryExecute(sql,response,undefined,'GetAccuredInterest');
 }

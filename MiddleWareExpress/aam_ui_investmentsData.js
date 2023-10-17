@@ -2,6 +2,7 @@ const config = require ('./db_config');
 const Pool = require('pg').Pool;
 const pool = new Pool(config.dbConfig);
 var pgp = require ('pg-promise')({capSQL:true});
+const db_common_api = require('./db_common_api');
 
 async function queryExecute (sql, response, responseType) {//General query to postgres execution via pool
   return new Promise ((resolve) => {
@@ -171,7 +172,22 @@ async function fAccountEdit (request, response) {
   sql = pgp.as.format(query.text,query.values)
   queryExecute (sql,response);
 }
-
+async function fGetPortfolioPositions (request,response) {
+  let sql = '';
+  console.log(request.body);
+  switch (request.body.action) {
+    case 'getPortfolioPositions':
+      sql= 'select * from f_i_get_portfolios_structure_detailed_data(${idportfolios},${report_date},${report_id_currency}); ';
+    break;
+    case 'getALLPortfolioPositions':
+      // sql= 'select * from f_i_get_all_portfolios_structure_detailed_data(${report_date},${report_id_currency}); ';
+    break;
+  }
+  sql = pgp.as.format(sql,request.body.params);
+  console.log('posa',);
+  console.log('',sql);
+  db_common_api.queryExecute(sql,response,undefined,request.body.action);
+}
 module.exports = {
   fGetStrategiesList,
   fEditStrategyData,
@@ -183,5 +199,6 @@ module.exports = {
   fStrategyStructureEdit,
   fAccountCreate,
   fAccountDelete,
-  fAccountEdit
+  fAccountEdit,
+  fGetPortfolioPositions
 }

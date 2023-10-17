@@ -18,7 +18,7 @@ import { AppInvestmentDataServiceService } from 'src/app/services/investment-dat
 export class AppStructureStrategyFormComponent implements OnInit {
   public editStructureStrategyForm=this.fb.group ({
     id: [null, {validators: [Validators.required]}],
-    weight_of_child: [null, {validators: [Validators.required,Validators.pattern('[0-9]*([0-9.]{0,6})?$')], updateOn: 'blur'} ],
+    weight_of_child: [null, {validators: [Validators.required,Validators.pattern('-?[0-9]*([0-9.]{0,6})?$')], updateOn: 'blur'} ],
     sname: [null, { updateOn: 'blur'} ],
     description: {value:'', disabled: true}, 
     id_item: {value:'', disabled: false},

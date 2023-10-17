@@ -1,6 +1,6 @@
-import { AfterContentInit, Component,  EventEmitter,  Input, Output, TemplateRef, ViewChild, ViewContainerRef} from '@angular/core';
+import { AfterContentInit, Component,  EventEmitter,  Input, Output, ViewChild} from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ClientData, Instruments, allocation, bAccountTransaction, bLedgerTransaction, bcParametersSchemeAccTrans, orders} from 'src/app/models/intefaces.model';
+import { ClientData, Instruments, allocation, orders} from 'src/app/models/intefaces.model';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { Observable, Subscription, distinctUntilChanged, filter, firstValueFrom, map, observable, startWith, switchMap, tap } from 'rxjs';
@@ -17,7 +17,6 @@ import { HandlingTableSelectionService } from 'src/app/services/handling-table-s
 import { AppallocationTableComponent } from '../../tables/allocation-table.component/allocation-table.component';
 import { MatTableDataSource } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
-import { AccountingTradesService } from 'src/app/services/accounting-trades.service';
 import { AppAllocationService } from 'src/app/services/allocation.service';
 @Component({
   selector: 'app-trade-modify-form',
@@ -60,7 +59,6 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     private CommonDialogsService:HadlingCommonDialogsService,
     private TradeService: AppTradeService,
     private AllocationService: AppAllocationService,
-    private accountingTradeService: AccountingTradesService,
     private AccountingDataService:AppAccountingService, 
     private AutoCompService:AtuoCompleteService,
     private indexDBServiceS:indexDBService,

@@ -8,7 +8,7 @@
       </app-app-portfolio> 
     </div>
   </mat-tab>  
-  <mat-tab label="Portfolio Details"> Detailed positions with PnL data </mat-tab>
+  <mat-tab label="Portfolio Positions"> <app-inv-portfolio-position-table></app-inv-portfolio-position-table> </mat-tab>
   <mat-tab label="Trades by Account"> Trades history by Account </mat-tab>
 </mat-tab-group  >
 <mat-tab-group  *ngIf="messageReceived.text=='Clients'" mat-stretch-tabs #ClientInfo>

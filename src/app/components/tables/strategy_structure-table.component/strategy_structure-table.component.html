@@ -1,5 +1,5 @@
 <div class="mat-elevation-z8">
-  <mat-expansion-panel class="headers-align" 
+  <mat-expansion-panel class="headers-align" [expanded]="panelOpenState"
   style="margin-left: 1%; margin-right: -1%;" (opened)="panelOpenState = true"  
     (closed)="panelOpenState = false" >
     <mat-expansion-panel-header >
@@ -12,7 +12,7 @@
     </mat-panel-description>
     </mat-expansion-panel-header >
 
-    <app-structure-strategy-form 
+    <app-structure-strategy-form #newMPitemForm
     [disabledControlElements] ="disabledControlElements"
     [strategyId] = parentStrategyId
     [MP] = ModelPortfolio
