@@ -22,7 +22,9 @@ export const rootNodesColor = [
   },
   {
     nodes:['Favorites'],  
-    color:faovritesNodeColor,
-    colorChild:faovritesNodeColorChild
+/*     color:faovritesNodeColor,
+    colorChild:faovritesNodeColorChild */
+    color:investmentNodeColor,
+    colorChild:investmentNodeColorChild
   }
 ]

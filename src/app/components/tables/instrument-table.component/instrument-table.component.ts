@@ -91,6 +91,7 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.searchParametersFG = this.fb.group ({
       secidList: null,
+      MP:null,
       amount:{value:null, disabled:true},
       marketSource : {value:null, disabled:false},
       boards : {value:null, disabled:false}

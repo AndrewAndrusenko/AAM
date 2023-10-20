@@ -12,14 +12,14 @@
         <mat-icon>close</mat-icon>
       </button>
     </mat-form-field>
-    <button color = "accent" mat-raised-button title="Export To Excel"
+    <button color = "accent" mat-raised-button title="Export To Excel (ALT + W)"
       style=" margin-left:1%; font-size: 18px;"
       (click)="exportToExcel()">
       Save as XLS 
       <mat-icon matSuffix >save_alt</mat-icon>
     </button>
     <button  *ngIf="tableMode.includes('Parent')"
-      color = "accent" mat-raised-button title="Reload Table" 
+      color = "accent" mat-raised-button title="Reload Table (ALT + R)" 
       style=" margin-left:1%; font-size: 18px;"
       (click)="submitQuery(true)">
       Reload 
@@ -285,9 +285,7 @@
       </tr>
       <tr mat-footer-row *matFooterRowDef="columnsToDisplay; sticky: true"></tr>
     </table>
-    <mat-paginator [pageSizeOptions]="[5, 15, 25, 100]" [pageSize]="15" aria-label="Select page of allocation"></mat-paginator>
+    <mat-paginator [pageSizeOptions]="[5, 15, 25,50, 100]" [pageSize]="rowsPerPages" aria-label="Select page of allocation"></mat-paginator>
 
   </div>
 </ng-container>
-<h2 *ngIf="tableMode.includes('Select')" style="color: rgb(224, 73, 73);"> Use context menu to select client</h2>
-

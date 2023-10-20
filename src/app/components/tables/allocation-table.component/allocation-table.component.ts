@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, EventEmitter, Output, ViewChild, Input, ChangeDetectionStrategy, ElementRef, ChangeDetectorRef} from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, Output, ViewChild, Input, ChangeDetectionStrategy, ElementRef, ChangeDetectorRef, SimpleChanges, HostListener} from '@angular/core';
 import { MatPaginator as MatPaginator} from '@angular/material/paginator';
 import { MatSort} from '@angular/material/sort';
 import { Observable, Subscription, map, startWith, switchMap, tap } from 'rxjs';
@@ -20,6 +20,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { AppTableAccEntriesComponent } from '../acc-entries-table.component/acc-entries-table.component';
 import { AppAccountingService } from 'src/app/services/accounting.service';
 import { AppAllocationService } from 'src/app/services/allocation.service';
+import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
 @Component({
   selector: 'app-allocation-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -36,11 +37,14 @@ export class AppallocationTableComponent  implements AfterViewInit {
   @Input() tableMode:string[]=['Parent'];
   @Input() dataToShow:allocation[];
   @Input() tradeData:trades;
-  @Input() allocationFilters:{secid:string, type:string};
+  // @Input() allocationFilters:{secid:string, type:string};
+  @Input() rowsPerPages:number = 50;
+  @Input() filters:any;
   columnsToDisplay = ['select','id','portfolioname','qty', 'trade_amount', 'fifo','depo_account_balance', 'current_account_balance','id_order','id_bulk_order','entries','pl'];
   columnsHeaderToDisplay = ['ID', 'pCode','Quantity','Amount','FIFO','Depo','Balance', 'Order','Bulk','Entries','PL']
 
   dataSource: MatTableDataSource<allocation>;
+  fullDataSource: allocation[];
   public selection = new SelectionModel<allocation>(true, []);
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
@@ -60,7 +64,17 @@ export class AppallocationTableComponent  implements AfterViewInit {
   dialogShowEntriesList: MatDialogRef<AppTableAccEntriesComponent>;
   defaultFilterPredicate?: (data: any, filter: string) => boolean;
   multiFilter?: (data: any, filter: string) => boolean;
+  activeTab:string='';
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) { 
+    if (this.activeTab==='Allocation'){
+      event.altKey&&event.key==='r'? this.submitQuery(false,true):null;
+      event.altKey&&event.key==='w'? this.exportToExcel():null;
+    }
+  }
+
   constructor(
+    private TreeMenuSeviceS: TreeMenuSevice,
     private TradeService: AppTradeService,
     private AuthServiceS:AuthService,  
     private AllocationService: AppAllocationService,
@@ -106,6 +120,8 @@ export class AppallocationTableComponent  implements AfterViewInit {
         this.tableMode.includes('Trade'),
         this.tradeData?.idtrade? this.tradeData.tidinstrument:null))
     ).subscribe (allocationData =>{
+      this.fullDataSource=allocationData;
+      console.log('fullDataSource',this.fullDataSource);
       this.updateAllocationDataTable(allocationData);
       this.ref.markForCheck()
       setTimeout(() => {
@@ -128,10 +144,25 @@ export class AppallocationTableComponent  implements AfterViewInit {
   }
   async ngAfterViewInit() {
     this.AutoCompService.getSecidLists();
+    this.filters!==undefined&&this.fullDataSource!==undefined? this.initialFilterOfDataSource(this.filters) : null;
+
     this.filterednstrumentsLists = this.secidList.valueChanges.pipe(
       startWith(''),
       map(value => this.AutoCompService.filterList(value || '','secid'))
     );
+    this.subscriptions.add(this.TreeMenuSeviceS.getActiveTab().subscribe(tabName=>this.activeTab=tabName));
+  }
+  initialFilterOfDataSource (filter:any) {
+    console.log('filter',filter);
+    console.log('fullDataSource',this.fullDataSource);
+    Object.keys(filter).every(key=>{
+     this.dataSource.data = this.fullDataSource.filter(el=>el[key]===filter[key])
+     if (this.dataSource.data.length) {return false}  else return true;
+    })
+   }
+   ngOnChanges(changes: SimpleChanges) {
+    console.log('changes',changes);
+    changes['filters'].currentValue!==undefined&&this.fullDataSource!==undefined? this.initialFilterOfDataSource (changes['filters'].currentValue) : null;
   }
   createAccountingForAllocation () {
     this.AllocationService.createAccountingForAllocation(this);
@@ -164,12 +195,12 @@ export class AppallocationTableComponent  implements AfterViewInit {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
     this.dataSource.filterPredicate =this.multiFilter
-    console.log('this.paginator',this.dataSource.data);
     let orderAllocated = new Set(this.dataSource.data.map(el=>Number(el.id_bulk_order)))
     this.TradeService.sendAllocatedOrders([...orderAllocated].length? [...orderAllocated]:[0]);
     this.defaultFilterPredicate = this.dataSource.filterPredicate;
     this.multiFilter = this.dataSource.filterPredicate;
-
+    console.log('  this.filters!==undefined?',  this.filters!==undefined,  this.filters);
+    this.filters!==undefined? this.initialFilterOfDataSource(this.filters):null;
   }
   async submitQuery (reset:boolean=false, showSnackResult:boolean=true) {
     this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate')

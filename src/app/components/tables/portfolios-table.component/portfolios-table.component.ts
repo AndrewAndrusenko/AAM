@@ -12,6 +12,9 @@ import { HandlingCommonTasksService } from 'src/app/services/handling-common-tas
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { formatNumber } from '@angular/common';
 import { investmentNodeColor } from 'src/app/models/constants.model';
+import { Router } from '@angular/router';
+import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
+import { routesTreeMenu } from 'src/app/app-routing.module';
 @Component({
   selector: 'app-portfolio-tablee',
   templateUrl: './portfolios-table.component.html',
@@ -45,9 +48,11 @@ export class TablePortfolios {
   @Output() public modal_principal_parent = new EventEmitter();
   investmentNodeColor=investmentNodeColor
   expandAllowed: boolean;
+  routesPathsTreeMenu = routesTreeMenu.map (el=>el.path)
   constructor(
+    private TreeMenuSeviceS:TreeMenuSevice, 
+    private router: Router,
     private InvestmentDataService:AppInvestmentDataServiceService, 
-    private dialog: MatDialog,
     private AuthServiceS:AuthService,  
     private CommonDialogsService:HadlingCommonDialogsService,
     private HandlingCommonTasksS:HandlingCommonTasksService
@@ -84,11 +89,10 @@ export class TablePortfolios {
     this.dataSource.filter = filterValue.trim().toLowerCase();
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
-  openAccountForm (actionType:string, row: any ) {
+  openAccountForm (actionType:string, row: AccountsTableModel ) {
+    this.routesPathsTreeMenu.includes('Portfolios')? this.router.navigate(['tree/'+'Portfolios']) : null;
+    this.TreeMenuSeviceS.sendUpdate('Portfolios', row.portfolioname, +row.idportfolio)
     this.expandAllowed = false;
-    this.dialogRef = this.dialog.open(AppNewAccountComponent ,{minHeight:'400px', maxWidth:'1000px' });
-    this.dialogRef.componentInstance.action = actionType;
-    this.dialogRef.componentInstance.portfolioCode = Number(row['idportfolio']);
   }
   async submitQuery () {
     this.dataSource? this.dataSource.data = null : null;

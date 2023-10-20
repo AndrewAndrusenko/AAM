@@ -1,12 +1,12 @@
--- FUNCTION: public.f_i_get_portfolios_structure_detailed_data(integer[], date, integer)
+-- FUNCTION: public.f_i_get_portfolios_structure_detailed_data(text[], date, integer)
 
-DROP FUNCTION IF EXISTS public.f_i_get_portfolios_structure_detailed_data(text[], date, integer);
+-- DROP FUNCTION IF EXISTS public.f_i_get_portfolios_structure_detailed_data(text[], date, integer);
 
 CREATE OR REPLACE FUNCTION public.f_i_get_portfolios_structure_detailed_data(
 	p_idportfolio_codes text[],
 	p_report_date date,
 	p_report_currency integer)
-    RETURNS TABLE(roi numeric,pl numeric,cost_in_position numeric,unrealizedpl numeric, total_pl numeric,idportfolio integer, portfolio_code character varying, secid character varying, strategy_name character varying, mp_name character varying, fact_weight numeric, current_balance numeric, mtm_positon numeric, weight numeric, planned_position numeric, order_amount numeric, order_type text, order_qty numeric, mtm_rate numeric, mtm_date date, mtm_dirty_price numeric, cross_rate numeric, npv numeric, rate_date date, main_currency_code numeric) 
+    RETURNS TABLE(roi numeric, pl numeric, cost_in_position numeric, unrealizedpl numeric, total_pl numeric, idportfolio integer, portfolio_code character varying, secid character varying, strategy_name character varying, mp_name character varying, fact_weight numeric, current_balance numeric, mtm_positon numeric, weight numeric, planned_position numeric, order_amount numeric, order_type text, order_qty numeric, mtm_rate numeric, mtm_date date, mtm_dirty_price numeric, cross_rate numeric, npv numeric, rate_date date, main_currency_code numeric,orders_unaccounted_qty numeric) 
     LANGUAGE 'plpgsql'
     COST 100
     VOLATILE PARALLEL UNSAFE
@@ -15,14 +15,18 @@ CREATE OR REPLACE FUNCTION public.f_i_get_portfolios_structure_detailed_data(
 AS $BODY$
 DECLARE 
 p_idportfolios int[];
+bulks numeric[];
 BEGIN
 IF p_idportfolio_codes  ISNULL THEN
 	SELECT ARRAY_AGG(dportfolios.idportfolio) INTO p_idportfolios FROM dportfolios; 
 ELSE
 	SELECT ARRAY_AGG(dportfolios.idportfolio) INTO p_idportfolios FROM dportfolios
 	WHERE LOWER(portfolioname)=ANY(p_idportfolio_codes); 
-
 END IF;
+SELECT ARRAY_AGG(id) INTO bulks FROM dorders
+WHERE
+  dorders.ordertype = 'Bulk'
+  AND dorders.status != 'accounted';
 RETURN QUERY
 WITH
   current_position AS (
@@ -135,6 +139,7 @@ WITH
 	  LEFT JOIN (SELECT * FROM f_fifo_get_cost_current_positions(p_report_date,	p_idportfolios)) AS positions_cost 
 		 ON (positions_cost.secid= full_portfolio.secid and positions_cost.idportfolio= full_portfolio.idportfolio)
       LEFT JOIN accured_interest_data ON accured_interest_data.secid = full_portfolio.secid
+
       LEFT JOIN cross_currency_quotes ON cross_currency_quotes.base_code = (
         CASE
           WHEN accured_interest_data.price_type = 2 THEN accured_interest_data.faceunit::NUMERIC
@@ -183,7 +188,7 @@ SELECT
     ELSE ABS(
 		ROUND((npv_portfolios.npv * full_portfolio_with_mtm_data.weight / 100 - full_portfolio_with_mtm_data.mtm_positon_base_cur)/ 
 				   (full_portfolio_with_mtm_data.mtm_dirty_price*full_portfolio_with_mtm_data.cross_rate),0)
-	)
+	) -  COALESCE(unaccounted_orders.unaccounted_qty, 0)
   END AS order_qty,
   full_portfolio_with_mtm_data.mtm_rate,
   full_portfolio_with_mtm_data.mtm_date,
@@ -191,10 +196,14 @@ SELECT
   full_portfolio_with_mtm_data.cross_rate,
   ROUND(npv_portfolios.npv,2) as npv,
   full_portfolio_with_mtm_data.rate_date,
-  full_portfolio_with_mtm_data.main_currency_code
+  full_portfolio_with_mtm_data.main_currency_code,
+  COALESCE(unaccounted_orders.unaccounted_qty, 0) as orders_unaccounted_qty
 FROM
   full_portfolio_with_mtm_data
   LEFT JOIN npv_portfolios ON full_portfolio_with_mtm_data.idportfolio = npv_portfolios.idportfolio
+  LEFT JOIN (SELECT * FROM f_i_o_get_orders_unaccounted_qty (bulks)) AS unaccounted_orders ON (
+	unaccounted_orders.secid = full_portfolio_with_mtm_data.secid
+	AND unaccounted_orders.id_portfolio = full_portfolio_with_mtm_data.idportfolio)
 
 ORDER BY
   full_portfolio_with_mtm_data.idportfolio, secid;

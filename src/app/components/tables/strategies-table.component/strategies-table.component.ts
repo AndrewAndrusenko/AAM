@@ -12,6 +12,9 @@ import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dia
 import { AuthService } from 'src/app/services/auth.service';
 import { formatNumber } from '@angular/common';
 import { investmentNodeColor } from 'src/app/models/constants.model';
+import { routesTreeMenu } from 'src/app/app-routing.module';
+import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-table-strategies',
   templateUrl: './strategies-table.component.html',
@@ -29,7 +32,8 @@ export class AppTableStrategiesComponentComponent  implements AfterViewInit {
   disabledControlElements: boolean = false;
   accessToClientData: string = 'none';
   accessToPortfolioData: string = 'none';
-  
+  routesPathsTreeMenu = routesTreeMenu.map (el=>el.path)
+
   StrategiesGlobalDataC = (): StrategiesGlobalData => ( {
     id: 0, 
     name : '', 
@@ -57,8 +61,9 @@ export class AppTableStrategiesComponentComponent  implements AfterViewInit {
   expandAllowed: any;
 
   constructor(
+    private TreeMenuSeviceS:TreeMenuSevice, 
+    private router: Router,
     private InvestmentDataService:AppInvestmentDataServiceService,
-    private dialog: MatDialog,
     private AuthServiceS:AuthService,  
     private HandlingCommonTasksS:HandlingCommonTasksService,
     private CommonDialogsService:HadlingCommonDialogsService,
@@ -87,10 +92,8 @@ export class AppTableStrategiesComponentComponent  implements AfterViewInit {
     this.modal_principal_parent.emit(element);
   }
   openStrategyForm (actionType:string, row: StrategiesGlobalData ) {
-    this.expandAllowed = false;
-    this.StrategyForm = this.dialog.open(AppStrategyFormComponent ,{minHeight:'400px', maxWidth:'1000px' });
-    this.StrategyForm.componentInstance.action = actionType;
-    actionType !=='Create'? this.StrategyForm.componentInstance.strategyId = row['id'] : null;
+    this.routesPathsTreeMenu.includes('Strategies')? this.router.navigate(['tree/'+'Strategies']) : null;
+    this.TreeMenuSeviceS.sendUpdate('Strategies', row.name, +row.id)
   }
   async updateStrategyData (action: string = '') {
     let field = 'level';

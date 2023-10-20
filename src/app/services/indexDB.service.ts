@@ -68,6 +68,9 @@ export class indexDBService {
         case 'getCurrencyPairsList':
           this.InvestmentDataService.getClientData(undefined,undefined,'getCounterPartyList').subscribe(data => resolve(data))
         break
+        case 'getModelPortfolios':
+          this.InvestmentDataService.getGlobalStategiesList(undefined,undefined,'getModelPortfolios').subscribe(data => resolve(data))
+        break
       }
     })
   }

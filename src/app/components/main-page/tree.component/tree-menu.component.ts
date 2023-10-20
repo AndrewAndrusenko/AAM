@@ -146,6 +146,7 @@ export class TreeComponent {
   // SendMessage: when node is selected method sends node rootTypeName to the Tab component to show relevant information structure     
   sendMessage = (node: DynamicFlatNode) => {
     let route = node.item.toLowerCase();
+    console.log('node.item)',node.item)
     this.routesPathsTreeMenu.includes(node.item)? this.router.navigate(['tree/'+node.item]) : null;
     this.TreeMenuSevice.sendUpdate(node.nodeRoot, node.item, +node.id)
   }

@@ -52,7 +52,10 @@ export class AppStructureStrategyFormComponent implements OnInit {
   }
   ngOnChanges(changes: SimpleChanges) {
     this.disabledControlElements? this.editStructureStrategyForm.disable() : null;
-    this.MP===2? this.InvestmentDataService.getGlobalStategiesList (0,'','Get_ModelPortfolios_List').subscribe (data =>this.MPnames = data):null;
+    if (this.MP===2) {
+      this.id. setValidators(null);
+      this.InvestmentDataService.getGlobalStategiesList (0,'','Get_ModelPortfolios_List').subscribe (data =>this.MPnames = data)
+    };
     if (this.MP===1) {
       this.AtuoCompService.getSecidLists();
       this.id.setValidators(this.AtuoCompService.secidValirator())

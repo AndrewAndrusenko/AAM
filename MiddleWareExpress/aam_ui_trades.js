@@ -175,6 +175,9 @@ async function fModifyBulkOrder (request,response) {
     case 'createBulkOrder':
       sql = 'SELECT * from public.f_create_bulk_orders(array[${clientOrders}])'; 
     break;
+    case 'deleteClientOrders':
+      sql = 'DELETE from public.dorders WHERE id = ANY(${clientOrders}) RETURNING *'; 
+    break;
     case 'ordersStatusChange':
       sql='UPDATE dorders '+
           'SET status = ${newStatus} '+

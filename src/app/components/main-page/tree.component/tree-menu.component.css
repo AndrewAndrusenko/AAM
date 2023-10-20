@@ -26,6 +26,7 @@
   }
   .background-highlight{
     background: rgb(142, 156, 212);
+    color:black;
   }
   .tree-menu-context {
     display: inline-flex;

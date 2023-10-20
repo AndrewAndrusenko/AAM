@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, EventEmitter, Output, ViewChild, Input, ChangeDetectionStrategy, ElementRef, TemplateRef} from '@angular/core';
+import {AfterViewInit, Component, EventEmitter, Output, ViewChild, Input, ChangeDetectionStrategy, ElementRef, TemplateRef, HostListener} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {Observable, Subscription, map, startWith, switchMap, tap } from 'rxjs';
@@ -16,6 +16,7 @@ import { AppTradeService } from 'src/app/services/trades-service.service';
 import { AppTradeModifyFormComponent } from '../../forms/trade-form.component/trade-form.component';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import { AppAccountingService } from 'src/app/services/accounting.service';
+import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
 
 @Component({
   selector: 'app-trade-table',
@@ -58,7 +59,16 @@ export class AppTradeTableComponent  implements AfterViewInit {
   defaultFilterPredicate?: (data: any, filter: string) => boolean;
   secidfilter?: (data: any, filter: string) => boolean;
   @ViewChild(TemplateRef) _dialogTemplate: TemplateRef<any>;
+  activeTab:string=''
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) { 
+    if (this.activeTab==='Trades'){
+      event.altKey&&event.key==='r'? this.submitQuery(false):null;
+      event.altKey&&event.key==='w'? this.exportToExcel():null;
+    }
+  }
   constructor(
+    private TreeMenuSeviceS: TreeMenuSevice,
     private TradeService: AppTradeService,
     private AccountingDataService:AppAccountingService, 
     private AuthServiceS:AuthService,  
@@ -110,6 +120,7 @@ export class AppTradeTableComponent  implements AfterViewInit {
     this.arraySubscrition.unsubscribe();
   }
   async ngAfterViewInit() {
+    this.arraySubscrition.add(this.TreeMenuSeviceS.getActiveTab().subscribe(tabName=>this.activeTab=tabName));
     this.TradeService.getTradeInformation(null).subscribe (tradesData => this.updateTradesDataTable(tradesData)); 
     this.AutoCompService.getSecidLists();
     this.AutoCompService.getCounterpartyLists();
@@ -203,26 +214,21 @@ export class AppTradeTableComponent  implements AfterViewInit {
   }
 
   selectInstrument (element:Instruments) {this.modal_principal_parent.emit(element)}
-  exportToExcel() {this.HandlingCommonTasksS.exportToExcel (this.dataSource.data.map(el=>{
-    return {
-      IDtrade:Number(el['idtrade']),
-      TradeDate:new Date(el['tdate']),
-      Type:(el['trtype']),
-      Secid:(el['tidinstrument']),
-      SecidName:(el['secid_name']),
-      ValueDate:new Date(el['vdate']),
-      Price:Number(el['price']),
-      PriceCurrency:(el['id_price_currency']),
-      CounterParty:(el['cpty']),
-      Quantity:Number(el['qty']),
-      TradeAmount:Number(el['trade_amount']),
-      SettlementCurrency:(el['id_settlement_currency']),
-      PriceType:Number(el['price_type']),
-      Facevalue:Number(el['facevalue']),
-      Faceunit:(el['faceunit']),
-      SecidType:(el['secid_type']),
-    }
-  }),"tradesData")  }
+  exportToExcel() {
+  let numberFields=['idtrade','price','id_price_currency','qty','id_settlement_currency','tidorder','allocatedqty','fifo_qty'];
+  let dateFields=['tdate','vdate'];
+  let dataToExport =  this.dataSource.data.map(el=>{
+    Object.keys(el).forEach(key=>{
+      switch (true==true) {
+        case  numberFields.includes(key): return el[key]=Number(el[key]) ;
+        case dateFields.includes(key): return el[key]=new Date(el[key])
+        default: return el[key]=el[key]
+      }
+    })
+    return el;
+  });
+  this.HandlingCommonTasksS.exportToExcel (dataToExport,"tradesData");  
+}
   get  type () {return this.searchParametersFG.get('type') } 
   get  tdate () {return this.searchParametersFG.get('tdate') } 
   get  vdate () {return this.searchParametersFG.get('vdate') } 

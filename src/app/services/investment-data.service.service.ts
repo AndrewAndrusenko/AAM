@@ -72,6 +72,10 @@ export class AppInvestmentDataServiceService {
     const params = {'id': id, 'Name' :Name, 'action':action }
     return this.http.get <StrategiesGlobalData[]> ('/api/AAM/GetStrategiesList/',{ params: params } )
   }
+  getPortfoliosListForMP ( Name:string, action:string) : Observable <string[]>  {
+    const params = {'Name' :Name, 'action':action }
+    return this.http.get <string[]> ('/api/AAM/GetStrategyStructure/',{ params: params } )
+  }
   getAccountTypesList (id:number, Name:string, action:string) : Observable <accountTypes[]>  {
     const params = {'id': id, 'Name' :Name, 'action':action }
     return this.http.get <accountTypes[]> ('/api/AAM/GetStrategiesList/',{ params: params } )

@@ -71,10 +71,19 @@ async function fGetStrategyStructure (request,response) {
       query.text += ' WHERE (id= $1) ORDER BY secid, sname ;'
       query.values = [request.query.id]
     break;
+    case 'getModelPortfolios':
+      query.text = 'SELECT * FROM dstrategiesglobal ORDER BY s_level_id, sname ;'
+      query.values = [request.query.id]
+    break;
+    case 'getPortfoliosByMP_StrtgyID':
+      query.text = 'select ARRAY_AGG(portfolioname) from f_i_get_portfolios_list_by_strategy($1)  ;'
+      query.values = [request.query.Name]
+    break;
     default:
       query.text += ';'
     break;
   }
+  console.log('query.text',query.text);
   sql = pgp.as.format(query.text,query.values)
   queryExecute (sql, response);
 }

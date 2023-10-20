@@ -28,4 +28,11 @@ export class TreeMenuSevice {
   getUpdate(): Observable<any> { //the receiver component calls this function 
     return this.subjectName.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
   }
+  private subjectTabName = new Subject <string>();
+  sendActiveTab(tabName: string) { 
+    this.subjectTabName.next(tabName); 
+  }
+
+  getActiveTab(): Observable<string> { 
+    return this.subjectTabName.asObservable();  }
 }

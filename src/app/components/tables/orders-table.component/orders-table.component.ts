@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, EventEmitter, Output, ViewChild, Input, ChangeDetectionStrategy, ElementRef} from '@angular/core';
+import {AfterViewInit, Component, EventEmitter, Output, ViewChild, Input, ChangeDetectionStrategy, ElementRef, HostListener} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {Observable, Subscription, filter, map, startWith, switchMap, tap } from 'rxjs';
@@ -22,6 +22,7 @@ import { DataSource, SelectionModel } from '@angular/cdk/collections';
 import { indexDBService } from 'src/app/services/indexDB.service';
 import { data, error } from 'jquery';
 import { MatCheckbox } from '@angular/material/checkbox';
+import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
 @Component({
   selector: 'app-orders-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -76,7 +77,16 @@ export class AppOrderTableComponent  implements AfterViewInit {
 
   defaultFilterPredicate?: (data: any, filter: string) => boolean;
   secidfilter?: (data: any, filter: string) => boolean;
+  activeTab:string='';
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) { 
+    if (this.activeTab==='Orders'){
+      event.altKey&&event.key==='r'? this.submitQuery(false,true):null;
+      event.altKey&&event.key==='w'? this.exportToExcel():null;
+    }
+  }
   constructor(
+    private TreeMenuSevice: TreeMenuSevice,
     public TradeService: AppTradeService,
     private AuthServiceS:AuthService,  
     private HandlingCommonTasksS:HandlingCommonTasksService,
@@ -134,6 +144,7 @@ export class AppOrderTableComponent  implements AfterViewInit {
     }
   }
   async ngAfterViewInit() {
+    this.subscriptions.add(this.TreeMenuSevice.getActiveTab().subscribe(tabName=>this.activeTab=tabName));
     this.subscriptions.add(this.TradeService.getReloadOrdersForExecution().subscribe(data=>{
       if(data.ordersForExecution.includes(Number(this.bulkOrder))||this.tableMode.includes('Parent')||this.tableMode.includes('Allocation')) {
         this.dataSource.data.forEach(ds=> {
@@ -170,6 +181,24 @@ export class AppOrderTableComponent  implements AfterViewInit {
   }
   filterForAllocation () {
     this.tableMode.includes('Allocation')? this.dataSource.data =  this.dataSource.data.filter(el=>el.secid===this.allocationFilters.secid&&el.type===this.allocationFilters.type&&el.ordertype==='Bulk'&&el.unexecuted>0&&['confirmed','in_execution'].includes(el.status)) : null; 
+  }
+  deleteClientOrders (){
+    let clientOrdersIds:number[] = this.selection.selected
+    .filter(el=>el.ordertype==='Client')
+    .map(el=> Number(el.id))
+    console.log('clientOrdersIds',clientOrdersIds);
+    if (clientOrdersIds.length>0) {
+      this.CommonDialogsService.confirmDialog('Delete Orders').pipe(
+        filter(isConfirmed=>isConfirmed.isConfirmed),
+        switchMap(()=>this.TradeService.deleteOrders(clientOrdersIds))
+      ).subscribe(data => {
+        this.CommonDialogsService.snackResultHandler(data,'Delete ')
+        this.selection.clear();
+        data.hasOwnProperty('name')? null: this.submitQuery();
+      })
+    } else {
+      this.CommonDialogsService.snackResultHandler({name:'error',detail:'No orders have been selected'})
+    }
   }
   checkChangeStatus(changeType:string,currentStatus:string):boolean {
     this.orderStatuses = this.AuthServiceS.objectStatuses.filter(el =>el.id_object==='Order');
@@ -356,7 +385,7 @@ export class AppOrderTableComponent  implements AfterViewInit {
       })
       return el;
     });
-    this.HandlingCommonTasksS.exportToExcel (dataToExport,"allocationData");   
+    this.HandlingCommonTasksS.exportToExcel (dataToExport,"ordersData");   
   }
   get  type () {return this.searchParametersFG.get('type') } 
   get  tdate () {return this.searchParametersFG.get('tdate') } 

@@ -1,4 +1,17 @@
 <mat-tab-group  *ngIf="messageReceived.text=='Portfolios'" mat-stretch-tabs #AccountInfo >
+
+  <mat-tab label="Portfolio Positions"> 
+    <app-inv-portfolio-position-table
+    [rowsPerPages]="15"
+    [filters]="{portfolio_code:messageReceived.name}">
+    </app-inv-portfolio-position-table>
+    </mat-tab>
+  <mat-tab label="Trades by Account"> 
+    <app-allocation-table
+    [rowsPerPages]="15"
+    [filters]="{portfolioname:messageReceived.name}" >
+    </app-allocation-table>
+  </mat-tab>
   <mat-tab label="Account Summary" > 
     <div class="instrument_form">
       <br>
@@ -8,8 +21,6 @@
       </app-app-portfolio> 
     </div>
   </mat-tab>  
-  <mat-tab label="Portfolio Positions"> <app-inv-portfolio-position-table></app-inv-portfolio-position-table> </mat-tab>
-  <mat-tab label="Trades by Account"> Trades history by Account </mat-tab>
 </mat-tab-group  >
 <mat-tab-group  *ngIf="messageReceived.text=='Clients'" mat-stretch-tabs #ClientInfo>
   <mat-tab label="Client Summary" >
@@ -31,7 +42,7 @@
 </mat-tab-group>
 <mat-tab-group *ngIf="messageReceived.text=='Strategies'" #StrategiesInfo mat-stretch-tabs>
   <mat-tab label="Strategy Structure" >
-    <div class="client_form">
+    <div class="instrument_form">
       <br>
       <app-app-strategy-form
       [action] = "Edit"
@@ -40,14 +51,16 @@
     </div>
   </mat-tab>  
   <mat-tab label="Positions by Strategy"> 
-    <ng-template #context_menu>
-      <div class="example-menu" cdkMenu>
-        <button class="example-menu-item" cdkMenuItem>Cut</button>
-        <button class="example-menu-item" cdkMenuItem>Copy</button>
-        <button class="example-menu-item" cdkMenuItem>Link</button>
-      </div>
-    </ng-template>
-      </mat-tab>
+    <app-inv-portfolio-position-table
+    [rowsPerPages]="25"
+    [filters]="{
+      mp_name:messageReceived.name,
+      strategy_name:messageReceived.name
+    }">
+    </app-inv-portfolio-position-table>
+  </mat-tab>
+<!--   strategy_name:messageReceived.name,
+  join_type:1 -->
   <mat-tab label="Trades by Strategy"> Trades by Strategy history  </mat-tab>
   <mat-tab label="Orders by Strategy"> Orders by Strategy history  </mat-tab>
 </mat-tab-group>

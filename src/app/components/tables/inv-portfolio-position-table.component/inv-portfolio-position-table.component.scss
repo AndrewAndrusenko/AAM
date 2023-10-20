@@ -18,9 +18,20 @@
 .highlight{
   background: #2b2be3; /* green */
 }
+/* th.mat-header-cell  {
+  text-align: center !important;
+
+} */
 .mat-header-cell {
   font-size: 20px;
   background-color:#252525;
+  text-align: center !important;
+
+}
+.mat-cell {
+  border-right: 1px solid rgb(30, 30, 30);
+  align-self: stretch;
+  // text-align: center !important;
 }
 .childTable {
   background-color:#0c1322;
@@ -47,12 +58,6 @@ tr.detail-row {
 /* .mat-column-secid, .mat-column-portfolioname {
   color: var(--additionalLightBlue)
 } */
-.mat-column-generated {
-  color:var(--additionalLightGreen)
-}
-.mat-column-vdate {
-  color:var(--additionalLightGreen)
-}
 .search-filed {
   font-size: 18px;
   border-radius: 9px;

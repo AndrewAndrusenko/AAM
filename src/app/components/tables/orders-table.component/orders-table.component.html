@@ -20,14 +20,14 @@
         <mat-icon>close</mat-icon>
       </button>
     </mat-form-field>
-    <button color = "accent" mat-raised-button title="Export To Excel"
+    <button color = "accent" mat-raised-button title="Export To Excel (ALT + W)"
       style=" margin-left:1%; font-size: 18px;"
       (click)="exportToExcel()">
       Save as XLS 
       <mat-icon matSuffix >save_alt</mat-icon>
     </button>
     <button  *ngIf="tableMode.includes('Parent')"
-      color = "accent" mat-raised-button title="Reload Table" 
+      color = "accent" mat-raised-button title="Reload Table (ALT + R)" 
       style=" margin-left:1%; font-size: 18px;"
       (click)="submitQuery(true)">
       Reload 
@@ -46,6 +46,12 @@
         Unmerge Bulk Orders 
         <mat-icon matSuffix>call_split</mat-icon>
       </button>
+      <button title="Unmerge Bulk Orders"  
+      color = "warn" mat-raised-button style=" margin-left:1%; font-size: 18px;"
+      (click)="deleteClientOrders()">
+      Delete Client Orders 
+      <mat-icon matSuffix>delete</mat-icon>
+    </button>
     </ng-container>
   </ng-container>
   <ng-container  *ngIf="tableMode.includes('Allocation')">  <!-- Allocation Mode Block -->
