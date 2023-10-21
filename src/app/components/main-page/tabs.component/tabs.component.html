@@ -1,5 +1,8 @@
-<mat-tab-group  *ngIf="messageReceived.text=='Portfolios'" mat-stretch-tabs #AccountInfo >
-
+<mat-tab-group  
+  *ngIf="messageReceived.text=='Portfolios'" 
+  mat-stretch-tabs #AccountInfo 
+  (selectedTabChange)="showTabName($event)"
+  >
   <mat-tab label="Portfolio Positions"> 
     <app-inv-portfolio-position-table
     [rowsPerPages]="15"

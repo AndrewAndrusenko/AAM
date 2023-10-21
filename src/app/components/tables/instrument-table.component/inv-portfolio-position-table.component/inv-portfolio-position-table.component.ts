@@ -80,11 +80,13 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
   ngOnInit(): void {
     this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios').then ((data)=>{
       this.mp_strategies_list = data['data']
+      console.log('mp',this.mp_strategies_list);
     })
 
     this.multiFilter = (data: portfolioPositions, filter: string) => {
       let filter_array = filter.split(',').map(el=>[el,1]);
       this.columnsToDisplay.forEach(col=>filter_array.forEach(fil=>{
+        console.log('data',col,data[col]);
         data[col]&&fil[0].toString().toUpperCase()===(data[col]).toString().toUpperCase()? fil[1]=0:null
       })
         );
@@ -100,6 +102,7 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
   async ngAfterViewInit() {
     this.subscriptions.add(this.TreeMenuSevice.getActiveTab().subscribe(tabName=>this.activeTab=tabName));
     this.AutoCompService.getSecidLists();
+    console.log('ngAfterViewInit',);
     this.filters==undefined&&this.fullDataSource!==undefined? this.initialFilterOfDataSource(this.filters) : null;
 
     this.filterednstrumentsLists = this.secidList.valueChanges.pipe(
@@ -114,7 +117,9 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
       );
   }
   setPortfoliosList(e:any) {
+    console.log('e',e.value);
     this.InvestmentDataService.getPortfoliosListForMP(e.value,'getPortfoliosByMP_StrtgyID').subscribe(data=>{
+      console.log('data',data);
       this.portfolios=data[0]['array_agg']
       this.filterALL.nativeElement.value = e.value;
       this.dataSource.filter = e.value.toLowerCase();
@@ -129,6 +134,7 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
    })
   }
   ngOnChanges(changes: SimpleChanges) {
+    console.log('changes',changes);
     changes['filters'].currentValue==undefined&&this.fullDataSource!==undefined?  this.initialFilterOfDataSource (changes['filters'].currentValue):null;
   }
   applyFilter(event: any, col?:string) {

@@ -57,16 +57,117 @@
   <ng-container  *ngIf="tableMode.includes('Allocation')">  <!-- Allocation Mode Block -->
   </ng-container>
     
-  
+<mat-expansion-panel class="headers-align"  *ngIf="tableMode.includes('Parent')&&tableMode.length===1"
+(opened)="panelOpenStateFirst = true"
+(closed)="panelOpenStateFirst = false">
+<mat-expansion-panel-header >
+  <mat-panel-title >
+    <span style="color:black"> Tap to {{panelOpenStateFirst? 'hide': 'open'}} additional parameters</span>
+  </mat-panel-title>
+  <mat-panel-description>
+    Generate Orders
+    <mat-icon color = 'accent'>filter_alt</mat-icon>
+  </mat-panel-description>
+</mat-expansion-panel-header >
+<form class="submit" [formGroup]="searchParametersFG"  style="font-size: 18px; margin-left: 0.5%; "> <!-- complexSearch Form -->
+  <span style="display: flex;    align-items:flex-start;  margin-right: 1%;margin-top: 0.2%;"> 
+    <span style="display:grid; width: 11%; margin-right: 2%;"> <!-- submitQuery/CleaAll Buttons -->
+      <button color = "primary"  class= "button-color" mat-raised-button 
+        style="margin:1%; font-size: 18px;"
+        (click)="submitQuery()">
+        Submit
+      </button>
+      <button color = "accent" mat-raised-button 
+        style="margin-top:4%;margin-left: 1%; font-size: 18px;"
+        (click)="searchParametersFG.reset();
+         instruments=['ClearAll']">
+        ClearAll
+      </button>
+    </span>
+    <mat-form-field  class="search-filed"> <!-- Order Type Filter -->
+      <mat-select placeholder="Type" formControlName="type">
+        <mat-option [value]="null">ALL</mat-option>
+        <mat-option [value]="'BUY'">BUY</mat-option>
+        <mat-option [value]="'SELL'">SELL</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="fill"  class="search-filed"> <!-- Date Filter -->
+      <mat-label >Enter a date range</mat-label>
+      <mat-date-range-input [formGroup]="dataRange" [rangePicker]="pickerTDate" >
+        <input matStartDate placeholder="Start date" formControlName="dateRangeStart" >
+        <input matEndDate placeholder="End date" formControlName="tdate" formControlName="dateRangeEnd">
+      </mat-date-range-input>
+      <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
+      <mat-datepicker-toggle matSuffix [for]="pickerTDate"></mat-datepicker-toggle>
+      <mat-date-range-picker  #pickerTDate></mat-date-range-picker>
+      <mat-error *ngIf="dataRange.controls.dateRangeStart.hasError('matStartDateInvalid')">Invalid start date</mat-error>
+      <mat-error *ngIf="dataRange.controls.dateRangeEnd.hasError('matEndDateInvalid')">Invalid end date</mat-error>
+    </mat-form-field>
+    <mat-form-field class="search-filed" style="width: 16%;"> <!-- Quantity Filter -->
+      <input matInput placeholder="Quantity (Value or Min - Max)" formControlName="qty">
+      <mat-hint *ngIf="qty.valid">
+        Qty or QtyMin-QtyMax
+      </mat-hint>
+      <mat-error *ngIf="qty?.errors?.['incorrectRange']">
+        Incorrect Range
+      </mat-error>
+    </mat-form-field>
+    <mat-form-field class="search-filed" style="width: 15%;"> <!-- Price Filter -->
+      <input matInput placeholder="Price (Value or Min - Max)" formControlName="price">
+      <mat-hint *ngIf="price.valid">
+        Price or PriceMin-PriceMax
+      </mat-hint>
+      <mat-error *ngIf="price?.errors?.['incorrectRange']">
+        Incorrect Range
+      </mat-error>
+    </mat-form-field>
+  </span>
+  <p style="margin-top: 1%;">
+    <mat-form-field  appearance="fill" style="width: 40%; " class="search-filed">
+      <mat-chip-list #chipList   >
+        <mat-chip *ngFor="let secid of instruments" 
+        (removed)="remove(secid,instruments,secidList)"
+        (click)=" instruments = clearAll($event,instruments,secidList);">
+          {{secid}}
+          <button matChipRemove>
+            <mat-icon>cancel</mat-icon>
+          </button>
+        </mat-chip>
+        <input #iputForChip
+        [matAutocomplete]="auto"
+        matInput
+        placeholder="Add secid or secid,secid1,secid2.."
+        formControlName="secidList"
+        [matChipInputFor]="chipList"
+        [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+        [matChipInputAddOnBlur]="true"
+        (matChipInputTokenEnd)="instruments = add($event,instruments,secidList)"
+        matTooltip="Type secid or paste multiple secid codes separated by comma and press enter" >
+      </mat-chip-list>
+      <mat-autocomplete #auto="matAutocomplete" (optionSelected)="changedValueofChip($event.option.value,instruments,secidList)">
+        <mat-option *ngFor="let secid of filterednstrumentsLists | async" [value]="secid.toString().split(',')[0]">
+          {{secid.toString().replaceAll(',',' - ')}}
+        </mat-option>
+      </mat-autocomplete>
+      <mat-hint style="color:rgb(104, 246, 246); font-style: italic;">
+        Instruments List
+      </mat-hint>
+    </mat-form-field>
+  </p>
+</form>
+</mat-expansion-panel>
+
 <mat-expansion-panel class="headers-align"  *ngIf="tableMode.includes('Parent')&&tableMode.length===1"
   (opened)="panelOpenStateSecond = true"
-  (closed)="panelOpenStateSecond = false" >
-  <mat-expansion-panel-header >
+  (closed)="panelOpenStateSecond = false">
+  <mat-expansion-panel-header>
     <mat-panel-title >
-      Complex search
+     
+      <span style="color:black">  Tap to {{panelOpenStateSecond? 'hide': 'open'}} additional parameters</span>
     </mat-panel-title>
     <mat-panel-description>
-      Tap to {{panelOpenStateSecond? 'hide': 'open'}} additional parameters
+     Complex search
+
       <mat-icon color = 'accent'>filter_alt</mat-icon>
     </mat-panel-description>
   </mat-expansion-panel-header >

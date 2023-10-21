@@ -170,7 +170,8 @@ const appInitializerFn = (accessRestirictions:AuthService) => {
         AppOrderTableComponent,
         OrdersTabComponent,
         AppallocationTableComponent,
-        AppaInvPortfolioPositionTableComponent
+        AppaInvPortfolioPositionTableComponent,
+        AppInvGenerateOrdersTable
      ],
     bootstrap: [AppComponent],
     providers: [ 
@@ -202,5 +203,6 @@ import { AppTableCurrenciesDataComponent } from './components/tables/currencies-
 import { AppallocationTableComponent } from './components/tables/allocation-table.component/allocation-table.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { AppaInvPortfolioPositionTableComponent } from './components/tables/inv-portfolio-position-table.component/inv-portfolio-position-table.component';
+import { AppInvGenerateOrdersTable } from './components/tables/inv-generate-orders-table.component/inv-generate-orders-table.component';
 
 

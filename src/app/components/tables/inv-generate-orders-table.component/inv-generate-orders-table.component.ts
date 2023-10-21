@@ -17,19 +17,19 @@ import { HostListener } from '@angular/core';
 import { indexDBService } from 'src/app/services/indexDB.service';
 import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
 @Component({
-  selector: 'app-inv-portfolio-position-table',
+  selector: 'app-inv-generate-orders-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './inv-portfolio-position-table.component.html',
-  styleUrls: ['./inv-portfolio-position-table.component.scss'],
+  templateUrl: './inv-generate-orders-table.component.html',
+  styleUrls: ['./inv-generate-orders-table.component.scss'],
 })
-export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
+export class AppInvGenerateOrdersTable  implements AfterViewInit {
   accessState: string = 'none';
   private subscriptions = new Subscription()
   disabledControlElements: boolean = false;
   @Input() rowsPerPages:number = 15;
   @Input() filters:any;
-  columnsToDisplay = ['portfolio_code','secid','mp_name','fact_weight','current_balance','mtm_positon','weight','planned_position','order_amount','mtm_rate','total_pl','roi','pl','unrealizedpl','cost_in_position','mtm_date','order_type','order_qty','orders_unaccounted_qty','mtm_dirty_price','cross_rate','strategy_name','rate_date'];
-  columnsHeaderToDisplay = ['Code','SecID','MP','Fact %','Balance','PositionMTM','MP %','MP_Position','Deviation','MTM_Rate','Total PL','ROI','FIFO PL','MTM PL','Position Cost','MTM_Date','TypeBS','Deviation Qty','Qty in Active Orders ','MTM_Dirty','CurRate','Strategy','CurDate']
+  columnsToDisplay = ['portfolio_code','secid','fact_weight','weight','order_amount','mtm_positon','planned_position','mtm_rate','mtm_date','orders_unaccounted_qty','mp_name','strategy_name','order_qty','current_balance','order_type','mtm_dirty_price','cross_rate','rate_date'];
+  columnsHeaderToDisplay = ['Code','SecID','Fact %','MP %','Deviation','CurrentMTM','Targeted_MP','MTM_Rate','MTM_Date','Active Orders','MP','Strategy','Deviation Qty','Balance','TypeBS','MTM_Dirty','CurRate','CurDate']
   dataSource: MatTableDataSource<portfolioPositions>;
   fullDataSource: portfolioPositions[];
   @ViewChild('filterALL', { static: false }) filterALL: ElementRef;
@@ -70,6 +70,8 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
       secidList: [],
       idportfolios:  [],
       MP:null,
+      secArray:null,
+      deviation:0.01,
       report_date : [new Date(), { validators:  Validators.required, updateOn: 'blur' }],
       report_id_currency:[840, { validators:  Validators.required, updateOn: 'blur' }],
     });
@@ -81,7 +83,6 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
     this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios').then ((data)=>{
       this.mp_strategies_list = data['data']
     })
-
     this.multiFilter = (data: portfolioPositions, filter: string) => {
       let filter_array = filter.split(',').map(el=>[el,1]);
       this.columnsToDisplay.forEach(col=>filter_array.forEach(fil=>{
@@ -90,9 +91,6 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
         );
       return !filter || filter_array.reduce((acc,val)=>acc+Number(val[1]),0)===0;
     };
-    this.InvestmentDataService.getPortfoliosPositions(this.searchParametersFG.value).subscribe (positionsData =>{
-      this.updatePositionsDataTable(positionsData);
-    });  
     this.AutoCompService.getCurrencyList().then(()=>{
       this.report_id_currency.setValidators([this.AutoCompService.currencyValirator(),Validators.required]);
     });
@@ -101,7 +99,6 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
     this.subscriptions.add(this.TreeMenuSevice.getActiveTab().subscribe(tabName=>this.activeTab=tabName));
     this.AutoCompService.getSecidLists();
     this.filters==undefined&&this.fullDataSource!==undefined? this.initialFilterOfDataSource(this.filters) : null;
-
     this.filterednstrumentsLists = this.secidList.valueChanges.pipe(
       startWith(''),
       distinctUntilChanged(),
@@ -111,16 +108,13 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
       startWith (''),
       distinctUntilChanged(),
       map(value => this.AutoCompService.filterList(value || '','currency'))
-      );
+    );
   }
   setPortfoliosList(e:any) {
     this.InvestmentDataService.getPortfoliosListForMP(e.value,'getPortfoliosByMP_StrtgyID').subscribe(data=>{
-      this.portfolios=data[0]['array_agg']
-      this.filterALL.nativeElement.value = e.value;
-      this.dataSource.filter = e.value.toLowerCase();
-      (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
-    }
-    )
+      this.portfolios=['ClearAll',...data[0]['array_agg']];
+      this.dataSource?.paginator? this.dataSource.paginator.firstPage() : null;
+    })
   }
   initialFilterOfDataSource (filter:any) {
    Object.keys(filter).every(key=>{
@@ -131,28 +125,32 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
   ngOnChanges(changes: SimpleChanges) {
     changes['filters'].currentValue==undefined&&this.fullDataSource!==undefined?  this.initialFilterOfDataSource (changes['filters'].currentValue):null;
   }
+  createOrders (){
+    console.log('sec',this.portfolios)
+    console.log('sec',this.instruments)
+  }
   applyFilter(event: any, col?:string) {
     this.dataSource.filterPredicate = col === undefined? this.defaultFilterPredicate : this.multiFilter
     const filterValue = event.hasOwnProperty('isUserInput')?  event.source.value :  (event.target as HTMLInputElement).value 
     !event.hasOwnProperty('isUserInput') || event.isUserInput ? this.dataSource.filter = filterValue.trim().toLowerCase() : null;
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
- 
   updatePositionsDataTable (positionsData:portfolioPositions[]) {
+    this.MP.value? positionsData = positionsData.filter(el=>el.mp_name===this.MP.value||el.strategy_name===this.MP.value) : null;
     this.fullDataSource=positionsData;
     this.dataSource  = new MatTableDataSource(positionsData);
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
+    this.instruments=['ClearAll',...[...new Set(this.dataSource.data.map(el=>el.secid))]];
     this.filters? this.initialFilterOfDataSource(this.filters) : null;
     this.dataSource.filterPredicate =this.multiFilter
     this.defaultFilterPredicate = this.dataSource.filterPredicate;
     this.multiFilter = this.dataSource.filterPredicate;
-
   }
   async submitQuery (reset:boolean=false, showSnackResult:boolean=true) {
     return new Promise((resolve, reject) => {
       let searchObj = reset?  {} : this.searchParametersFG.value;
-      this.dataSource.data? this.dataSource.data = null : null;
+      this.dataSource?.data? this.dataSource.data = null : null;
       searchObj.secidList = [0,1].includes(this.instruments.length)&&this.instruments[0]==='ClearAll'? null : this.instruments.map(el=>el.toLocaleLowerCase())
       searchObj.idportfolios = [0,1].includes(this.portfolios.length)&&this.portfolios[0]==='ClearAll'? null : this.portfolios.map(el=>el.toLocaleLowerCase())
       this.InvestmentDataService.getPortfoliosPositions(searchObj).subscribe(data => {
@@ -177,9 +175,7 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
     (index >= 0)? chipArray.splice(index, 1) : null;
   }
   clearAll(event, chipArray:string[],control:AbstractControl) : string [] {
-    if (event.target.textContent.trim() === 'ClearAll cancel') {
-      chipArray = ['ClearAll'];
-    };
+    if (['ClearAll cancel','ClearAll'].includes(event.target.textContent.trim())) {chipArray = ['ClearAll']};
     return chipArray;
   }
   addChips (el: any, column: string) {(['secid'].includes(column))? this.instruments.push(el):null;}
@@ -215,4 +211,7 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
   get  idportfolios () {return this.searchParametersFG.get('idportfolios') } 
   get  report_date () {return this.searchParametersFG.get('report_date') } 
   get  report_id_currency () {return this.searchParametersFG.get('report_id_currency') } 
+  get  deviation () {return this.searchParametersFG.get('deviation') } 
+  get  secArray () {return this.searchParametersFG.get('secArray') } 
+  get  MP () {return this.searchParametersFG.get('MP') } 
 }

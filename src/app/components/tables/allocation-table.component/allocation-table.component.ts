@@ -65,14 +65,14 @@ export class AppallocationTableComponent  implements AfterViewInit {
   defaultFilterPredicate?: (data: any, filter: string) => boolean;
   multiFilter?: (data: any, filter: string) => boolean;
   activeTab:string='';
+  tabsNames = ['Trades by Account','Allocation']
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) { 
-    if (this.activeTab==='Allocation'){
+    if (this.tabsNames.includes(this.activeTab)){
       event.altKey&&event.key==='r'? this.submitQuery(false,true):null;
       event.altKey&&event.key==='w'? this.exportToExcel():null;
     }
   }
-
   constructor(
     private TreeMenuSeviceS: TreeMenuSevice,
     private TradeService: AppTradeService,
@@ -107,7 +107,6 @@ export class AppallocationTableComponent  implements AfterViewInit {
       this.columnsToDisplay.forEach(col=>filter_array.forEach(fil=>fil[0].toString().toUpperCase()===(data[col])? fil[1]=0:null));
       return !filter || filter_array.reduce((acc,val)=>acc+Number(val[1]),0)===0;
     };
-
     if (!this.tableMode.includes('Trade'))   {
       this.columnsToDisplay = ['select','id','portfolioname','trtype','qty', 'trade_amount','pl','id_order','id_bulk_order','entries','idtrade','secid','tdate','price','id_price_currency'];
       this.columnsHeaderToDisplay = ['ID', 'pCode','Type','Quantity','Amount','PL', 'Order','Bulk','Entries','IDtrade','SecID','tDate','Price','Curr']
@@ -121,7 +120,6 @@ export class AppallocationTableComponent  implements AfterViewInit {
         this.tradeData?.idtrade? this.tradeData.tidinstrument:null))
     ).subscribe (allocationData =>{
       this.fullDataSource=allocationData;
-      console.log('fullDataSource',this.fullDataSource);
       this.updateAllocationDataTable(allocationData);
       this.ref.markForCheck()
       setTimeout(() => {
@@ -145,7 +143,6 @@ export class AppallocationTableComponent  implements AfterViewInit {
   async ngAfterViewInit() {
     this.AutoCompService.getSecidLists();
     this.filters!==undefined&&this.fullDataSource!==undefined? this.initialFilterOfDataSource(this.filters) : null;
-
     this.filterednstrumentsLists = this.secidList.valueChanges.pipe(
       startWith(''),
       map(value => this.AutoCompService.filterList(value || '','secid'))
@@ -153,15 +150,12 @@ export class AppallocationTableComponent  implements AfterViewInit {
     this.subscriptions.add(this.TreeMenuSeviceS.getActiveTab().subscribe(tabName=>this.activeTab=tabName));
   }
   initialFilterOfDataSource (filter:any) {
-    console.log('filter',filter);
-    console.log('fullDataSource',this.fullDataSource);
     Object.keys(filter).every(key=>{
      this.dataSource.data = this.fullDataSource.filter(el=>el[key]===filter[key])
      if (this.dataSource.data.length) {return false}  else return true;
     })
    }
    ngOnChanges(changes: SimpleChanges) {
-    console.log('changes',changes);
     changes['filters'].currentValue!==undefined&&this.fullDataSource!==undefined? this.initialFilterOfDataSource (changes['filters'].currentValue) : null;
   }
   createAccountingForAllocation () {
@@ -199,7 +193,6 @@ export class AppallocationTableComponent  implements AfterViewInit {
     this.TradeService.sendAllocatedOrders([...orderAllocated].length? [...orderAllocated]:[0]);
     this.defaultFilterPredicate = this.dataSource.filterPredicate;
     this.multiFilter = this.dataSource.filterPredicate;
-    console.log('  this.filters!==undefined?',  this.filters!==undefined,  this.filters);
     this.filters!==undefined? this.initialFilterOfDataSource(this.filters):null;
   }
   async submitQuery (reset:boolean=false, showSnackResult:boolean=true) {

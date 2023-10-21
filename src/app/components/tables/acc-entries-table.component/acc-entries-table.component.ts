@@ -1,7 +1,7 @@
-import {Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
+import {Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
-import {filter } from 'rxjs';
+import {Subscription, filter } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
@@ -19,6 +19,7 @@ import { formatNumber } from '@angular/common';
 import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
+import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
 
 @Component({
   selector: 'app-table-acc-entries',
@@ -38,6 +39,7 @@ export class AppTableAccEntriesComponent implements OnInit {
   columnsToDisplay = ['t_id','d_Debit','d_Credit','t_dataTime','d_xActTypeCodeExtName','t_XactTypeCode','t_amountTransaction','d_entryDetails', 't_extTransactionId']
   columnsHeaderToDisplay = ['ID','Debit','Credit','Date', 'Code', 'Ledger',  'Amount', 'Details', 'ExtID', 'Action'];
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
+  private subscriptions = new Subscription ();
   dataSource: MatTableDataSource<bAccountsEntriesList>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
@@ -72,8 +74,17 @@ export class AppTableAccEntriesComponent implements OnInit {
   filterEntryTypes:string[] = ['ClearAll'];
   paramRowData : any = null;
   investmentNodeColor=investmentNodeColor;
-
+  activeTab:string='';
+  tabsNames = ['Transactions List']
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) { 
+    if (this.tabsNames.includes(this.activeTab)){
+      event.altKey&&event.key==='r'? this.submitQuery(false,true):null;
+      event.altKey&&event.key==='w'? this.exportToExcel():null;
+    }
+  }
   constructor(
+    private TreeMenuSevice: TreeMenuSevice,
     private AccountingDataService:AppAccountingService, 
     private CommonDialogsService:HadlingCommonDialogsService,
     private AuthServiceS:AuthService,  
@@ -129,6 +140,8 @@ export class AppTableAccEntriesComponent implements OnInit {
       })
     break;
     }
+    this.subscriptions.add(this.TreeMenuSevice.getActiveTab().subscribe(tabName=>this.activeTab=tabName));
+
   }
   submitQuery (notification:boolean=true, sendNewAllocatedSum:boolean=false) {
     this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate);

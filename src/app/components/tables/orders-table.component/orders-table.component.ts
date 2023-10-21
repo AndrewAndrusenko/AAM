@@ -66,6 +66,7 @@ export class AppOrderTableComponent  implements AfterViewInit {
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
   investmentNodeColor = investmentNodeColorChild;
   panelOpenStateSecond = false;
+  panelOpenStateFirst = false;
   instruments: string[] = ['ClearAll'];
   filterednstrumentsLists : Observable<string[]>;
   searchParametersFG: FormGroup;
@@ -78,9 +79,10 @@ export class AppOrderTableComponent  implements AfterViewInit {
   defaultFilterPredicate?: (data: any, filter: string) => boolean;
   secidfilter?: (data: any, filter: string) => boolean;
   activeTab:string='';
+  tabsNames = ['Orders']
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) { 
-    if (this.activeTab==='Orders'){
+    if (this.tabsNames.includes(this.activeTab)){
       event.altKey&&event.key==='r'? this.submitQuery(false,true):null;
       event.altKey&&event.key==='w'? this.exportToExcel():null;
     }
@@ -94,7 +96,6 @@ export class AppOrderTableComponent  implements AfterViewInit {
     private CommonDialogsService:HadlingCommonDialogsService,
     private indexDBServiceS:indexDBService,
     private AutoCompService:AtuoCompleteService,
-    private dialog: MatDialog,
     private fb:FormBuilder, 
   ) {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
@@ -109,22 +110,6 @@ export class AppOrderTableComponent  implements AfterViewInit {
       price:null,
       qty:null,
     });
-     this.TradeService.getOrderDataToUpdateTableSource().subscribe(data =>{
-     let index =  this.dataSource.data.findIndex(elem=>elem.id===data.data[0].id)
-      switch (data.action) {
-        case 'Deleted':
-          this.dataSource.data.splice(index,1)
-        break;
-        case 'Created':
-          this.dataSource.data.unshift(data.data[0])
-        break;
-        case 'Updated':
-          this.dataSource.data[index] = {...data.data[0]}
-        break;
-      }
-     this.dataSource.paginator = this.paginator;
-     this.dataSource.sort = this.sort;
-    })
   }
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
@@ -186,7 +171,6 @@ export class AppOrderTableComponent  implements AfterViewInit {
     let clientOrdersIds:number[] = this.selection.selected
     .filter(el=>el.ordertype==='Client')
     .map(el=> Number(el.id))
-    console.log('clientOrdersIds',clientOrdersIds);
     if (clientOrdersIds.length>0) {
       this.CommonDialogsService.confirmDialog('Delete Orders').pipe(
         filter(isConfirmed=>isConfirmed.isConfirmed),
