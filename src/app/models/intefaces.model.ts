@@ -258,6 +258,7 @@ export interface bAccountsEntriesList {
   t_ledgerNoId: number, 
   t_accountId: number, 
   t_extTransactionId : number, 
+  t_idtrade: number,
   t_dataTime: Date, 
   t_amountTransaction: number, 
   t_XactTypeCode: number,  
@@ -435,6 +436,8 @@ export interface allocation_fifo {
   id: number,idtrade : number,tr_type : number,qty : number,qty_out : number,price_in : number,price_out : number,closed: boolean,idportfolio : number,trade_date: Date,secid: string,generated: Date,profit_loss : number,id_sell_trade : number,id_buy_trade 
 }
 export interface portfolioPositions{
+  not_zero_npv:boolean,
+  deviation_percent: number,
   roi: number,
   total_pl: number,
   unrealizedpl: number,

@@ -80,13 +80,13 @@ export class AppOrderTableComponent  implements AfterViewInit {
   secidfilter?: (data: any, filter: string) => boolean;
   activeTab:string='';
   tabsNames = ['Orders']
-  @HostListener('document:keydown', ['$event'])
+/*   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) { 
     if (this.tabsNames.includes(this.activeTab)){
       event.altKey&&event.key==='r'? this.submitQuery(false,true):null;
       event.altKey&&event.key==='w'? this.exportToExcel():null;
     }
-  }
+  } */
   constructor(
     private TreeMenuSevice: TreeMenuSevice,
     public TradeService: AppTradeService,
@@ -203,6 +203,7 @@ export class AppOrderTableComponent  implements AfterViewInit {
     this.dataSource.sort = this.sort;
   }
   changeOrderStatus (newStatus:string,bulksForUpdate:number[]) {
+    this.expandAllowed=false;
     if (this.ordersPermissions.includes(newStatus)) { 
       this.TradeService.changeOrderStatus(newStatus,bulksForUpdate.map(el=>Number(el))).subscribe(data=>{
         this.updateSatus(data);
@@ -356,6 +357,7 @@ export class AppOrderTableComponent  implements AfterViewInit {
     this.dialogOrderModify.componentInstance.action = action;
     this.dialogOrderModify.componentInstance.data = action ==='Create'? null :element; */
   }
+
   exportToExcel() {   
     let numberFields=['id','qty', 'amount','id_order','id_bulk_order','entries','idtrade','price','unexecuted','parent_order','allocated','idcurrency'];
     let dateFields=['generated'];

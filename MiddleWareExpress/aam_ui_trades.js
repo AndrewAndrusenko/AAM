@@ -134,10 +134,10 @@ async function fGetOrderData (request,response) {
       1: '(price BETWEEN ${price_min} AND ${price_max})',
     },
     'tdate_min': {
-      1: '(tdate::timestamp without time zone >= ${tdate_min}::date )',
+      1: '(generated::timestamp without time zone >= ${tdate_min}::date )',
     },
     'tdate_max': {
-      1: '(tdate::timestamp without time zone <= ${tdate_max}::date )',
+      1: '(generated::timestamp without time zone <= ${tdate_max}::date )',
     },
     'secidList' : {
       1: '(LOWER(dorders.secid) = ANY(array[${secidList}]))  ',
@@ -161,6 +161,11 @@ async function fGetOrderData (request,response) {
   sql +=conditionsTrades.slice(0,-5) + 'ORDER BY dorders.id DESC;'
   sql = pgp.as.format(sql,request.query);
   db_common_api.queryExecute(sql,response,undefined,'GetOrderData');
+}
+async function fCreateOrderbyMP (request, response) {
+  let sql = 'SELECT * FROM f_i_o_create_orders_by_mp(${idportfolios},${secidList},${report_date},${report_id_currency},${deviation});'
+  sql = pgp.as.format(sql,request.body.params);
+  db_common_api.queryExecute(sql,response,undefined,'fCreateOrderbyMP');
 }
 async function fUpdateOrderData (request, response) {
   let fields = ['status']
@@ -211,5 +216,6 @@ module.exports = {
   fGetOrderData,
   fUpdateOrderData,
   fModifyBulkOrder,
-  fAllocation
+  fAllocation,
+  fCreateOrderbyMP
 }

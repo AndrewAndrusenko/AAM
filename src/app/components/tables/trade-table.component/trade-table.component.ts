@@ -60,13 +60,13 @@ export class AppTradeTableComponent  implements AfterViewInit {
   secidfilter?: (data: any, filter: string) => boolean;
   @ViewChild(TemplateRef) _dialogTemplate: TemplateRef<any>;
   activeTab:string=''
-  @HostListener('document:keydown', ['$event'])
+/*   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) { 
     if (this.activeTab==='Trades'){
       event.altKey&&event.key==='r'? this.submitQuery(false):null;
       event.altKey&&event.key==='w'? this.exportToExcel():null;
     }
-  }
+  } */
   constructor(
     private TreeMenuSeviceS: TreeMenuSevice,
     private TradeService: AppTradeService,

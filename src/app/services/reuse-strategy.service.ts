@@ -19,7 +19,7 @@ export class MaltsevRouteReuseStrategy implements RouteReuseStrategy {
       curr: ActivatedRouteSnapshot
   ): boolean {
       let ret = future.routeConfig === curr.routeConfig;
-      console.log("shouldReuseRoute called", ret);
+    //   console.log("shouldReuseRoute called", ret);
       if (ret) {
           this.addRedirectsRecursively(future); // update redirects
       }
@@ -28,11 +28,11 @@ export class MaltsevRouteReuseStrategy implements RouteReuseStrategy {
 
   shouldDetach(route: ActivatedRouteSnapshot): boolean {
       const data = this.getRouteData(route);
-      console.log('data route', data);
-      console.log(
-          "shouldDetach check if we want to detach and store route",
-          data && data.reuse
-      );
+    //   console.log('data route', data);
+    //   console.log(
+    //       "shouldDetach check if we want to detach and store route",
+    //       data && data.reuse
+    //   );
       return data && data.reuse;
   }
 
@@ -44,15 +44,13 @@ export class MaltsevRouteReuseStrategy implements RouteReuseStrategy {
           data
       });
       this.addRedirectsRecursively(route);
-      //console.log("store route", this.routeCache);
   }
-
   shouldAttach(route: ActivatedRouteSnapshot): boolean {
       const url = this.getFullRouteUrl(route);
-      console.log(
-          "shouldAttach if retrive route is true",
-          this.routeCache.has(url)
-      );
+    //   console.log(
+    //       "shouldAttach if retrive route is true",
+    //       this.routeCache.has(url)
+    //   );
       return this.routeCache.has(url);
   }
 
@@ -109,7 +107,7 @@ export class MaltsevRouteReuseStrategy implements RouteReuseStrategy {
   }
 
   private getRouteData(route: ActivatedRouteSnapshot): IRouteConfigData {
-    console.log('route.routeConfig.data',route.routeConfig);
+    console.log('route.routeConfig.data',route.routeConfig.path);
       return route.routeConfig && (route.routeConfig.data as IRouteConfigData);
   }
 }

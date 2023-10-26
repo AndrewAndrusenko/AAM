@@ -20,6 +20,7 @@ export class AppAccountingService {
     't_accountId': null, 
     't_ledgerNoId': null, 
     't_extTransactionId' : null, 
+    't_idtrade' : null,
     't_dataTime': null,  
     't_amountTransaction': null, 
     't_XactTypeCode': null,  

@@ -27,7 +27,8 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
   accessState: string = 'none';
   disabledControlElements: boolean = false;
   public tradeModifyForm: FormGroup;
-  tabIndex=1;
+  tabIndex: number ;
+  tabIndexN=0;
   @Input() action: string = 'View';
   @Output() public modal_principal_parent = new EventEmitter();
   @ViewChild('ordersTable',{ static: false }) orderTable : AppOrderTableComponent
@@ -154,6 +155,9 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     this.action == 'View'|| this.disabledControlElements?  this.tradeModifyForm.disable() : null;
     this.fullAmountCalcualtion(true);
     this.changeSettlementRate();
+/*     setTimeout(() => {
+      this.tabIndexN=this.tabIndex;
+    }, 200); */
   }
   executeOrders () {
     let qtyForAllocation = this.qty.value - this.allocatedqty.value;
@@ -313,7 +317,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     }
   }
   showErrors () {
-    Object.entries(this.tradeModifyForm.controls).forEach(el=>el[1].errors? console.log(el[0],el[1].errors):null)
+    // Object.entries(this.tradeModifyForm.controls).forEach(el=>el[1].errors? console.log(el[0],el[1].errors):null)
    }
   toggleAllRows(dataSource:MatTableDataSource<orders|allocation>,selection:SelectionModel<orders|allocation>, forceSelectAll:boolean=false) { 
     return this.SelectionService.toggleAllRows(dataSource, selection,forceSelectAll);

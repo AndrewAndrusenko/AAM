@@ -1,11 +1,11 @@
-<mat-tab-group  
-  *ngIf="messageReceived.text=='Portfolios'" 
+<mat-tab-group  #tabGroup   *ngIf="messageReceived.text=='Portfolios'" 
   mat-stretch-tabs #AccountInfo 
   (selectedTabChange)="showTabName($event)"
   >
   <mat-tab label="Portfolio Positions"> 
     <app-inv-portfolio-position-table
     [rowsPerPages]="15"
+    [searchAllowed]="false"
     [filters]="{portfolio_code:messageReceived.name}">
     </app-inv-portfolio-position-table>
     </mat-tab>

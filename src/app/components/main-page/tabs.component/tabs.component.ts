@@ -1,8 +1,8 @@
-import {Component, OnDestroy } from '@angular/core';
+import {Component, OnDestroy, ViewChild } from '@angular/core';
 import {Subscription } from 'rxjs';
 import {TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import {Title} from "@angular/platform-browser";
-import {MatTabChangeEvent } from '@angular/material/tabs';
+import {MatTabChangeEvent, MatTabGroup } from '@angular/material/tabs';
 @Component({
   selector: 'app-app-tabs',
   templateUrl: './tabs.component.html',
@@ -12,12 +12,17 @@ export class AppTabsComponent implements OnDestroy {
   messageReceived ={text:'AAA', name:'', id:0};
   Edit = "Edit"
   private subscriptions = new Subscription();
+  @ViewChild('tabGroup') tabGroup:MatTabGroup
+  tabsToFollow:string[]=['Portfolios']
+
   constructor (private TreeMenuSevice : TreeMenuSevice, private titleService:Title) {
-    this.subscriptions.add (
+        this.subscriptions.add (
       this.TreeMenuSevice.getUpdate().subscribe( message => {
         this.messageReceived = message;
         this.titleService.setTitle(message.name)
-      })
+        if (this.tabsToFollow.includes(message.text)) 
+          setTimeout(() => {this.TreeMenuSevice.sendActiveTab(this.tabGroup._allTabs['_results'][0].textLabel)}, 200);
+        })
     )
   }
   ngOnDestroy() { this.subscriptions.unsubscribe()}

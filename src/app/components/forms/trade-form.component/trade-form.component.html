@@ -6,13 +6,13 @@ color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4"
   
   <span style="margin-right: 2%;">{{action}} Instrument | ID {{idtrade.value}} </span>
   <span class="example-spacer"></span>
-  <ng-container  *ngIf="!disabledControlElements&&tabIndex===1" style="margin-bottom: 1%;">
+  <ng-container  *ngIf="!disabledControlElements&&tabIndexN===1" style="margin-bottom: 1%;">
     <button mat-raised-button  [matMenuTriggerFor]="menu" color="accent"  style="margin-left:1%; font-size: 18px; width: 10%;" matRipple="">Select
     </button>
     <mat-menu #menu="matMenu">
       <button mat-menu-item style="margin-left:0.5%; font-size: 18px;"
       (click)="toggleAllRows(orderTable.dataSource,orderTable.selection,(orderTable.selection.hasValue() && orderTable.isAllSelected())? false : true  );   
-      ordersTable.dataSource.paginator = ordersTable.paginator;">
+      orderTable.dataSource.paginator = orderTable.paginator;">
       {{(orderTable!==undefined&&orderTable.selection.hasValue() && orderTable.isAllSelected())? 'Unselect' : 'Select' }}  Orders 
       </button>
       <button mat-menu-item style="margin-left:0.5%; font-size: 18px;"
@@ -50,7 +50,7 @@ color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4"
     </button>
   </ng-container>
 </mat-toolbar>
-<mat-tab-group mat-stretch-tabs [(selectedIndex)]="tabIndex" >
+<mat-tab-group mat-stretch-tabs [(selectedIndex)]="tabIndexN" >
   <mat-tab label="Trade Details">
     <form class="submit" 
       [formGroup]="tradeModifyForm" style="background-color: rgb(40, 39, 39);">
@@ -350,7 +350,7 @@ color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4"
       </mat-expansion-panel>
     </form>
   </mat-tab>
-  <mat-tab label="Allocation" style="width: 100%;">
+  <mat-tab *ngIf="action==='Edit'" label="Allocation" style="width: 100%;">
     <form class="submit" [formGroup]="tradeModifyForm" style="background-color: rgb(40, 39, 39);"  >
       <p>
         <span style="display: flex;   align-items:flex-start;  margin-right: 1%;margin-top: 0.2%;">

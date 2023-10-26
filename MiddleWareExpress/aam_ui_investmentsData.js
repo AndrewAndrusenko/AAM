@@ -184,7 +184,8 @@ async function fAccountEdit (request, response) {
 async function fGetPortfolioPositions (request,response) {
   let conditionsDic = {
     'secidList':' LOWER(secid) = ANY(${secidList}) ',
-    'deviation':' ABS(order_amount) >${deviation} ',
+    'deviation':' ABS(order_amount/notnull_npv*100) >${deviation}::numeric ',
+    // 'notnull':' npv !=0 ',
     }
   let conditions =' WHERE'
   Object.entries(conditionsDic).forEach(([key]) => {
@@ -196,8 +197,8 @@ async function fGetPortfolioPositions (request,response) {
   console.log(request.body);
   switch (request.body.action) {
     case 'getPortfolioPositions':
-      sql= 'select * from f_i_get_portfolios_structure_detailed_data(${idportfolios},${report_date},${report_id_currency}) '
-      sql += conditions.slice(0,-5); +';'
+      sql= 'select round(order_amount/notnull_npv*100,2) as deviation_percent,(npv!=0) as not_zero_npv, * from f_i_get_portfolios_structure_detailed_data(${idportfolios},${report_date},${report_id_currency}) '
+      sql += conditions.slice(0,-5) +' ORDER BY secid,portfolio_code;'
     break;
   }
   sql = pgp.as.format(sql,request.body.params);

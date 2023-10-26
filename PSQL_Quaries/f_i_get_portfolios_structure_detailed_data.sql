@@ -6,7 +6,7 @@ CREATE OR REPLACE FUNCTION public.f_i_get_portfolios_structure_detailed_data(
 	p_idportfolio_codes text[],
 	p_report_date date,
 	p_report_currency integer)
-    RETURNS TABLE(roi numeric, pl numeric, cost_in_position numeric, unrealizedpl numeric, total_pl numeric, idportfolio integer, portfolio_code character varying, secid character varying, strategy_name character varying, mp_name character varying, fact_weight numeric, current_balance numeric, mtm_positon numeric, weight numeric, planned_position numeric, order_amount numeric, order_type text, order_qty numeric, mtm_rate numeric, mtm_date date, mtm_dirty_price numeric, cross_rate numeric, npv numeric, rate_date date, main_currency_code numeric,orders_unaccounted_qty numeric) 
+    RETURNS TABLE(notnull_npv numeric, mtm_positon_base_cur numeric, roi numeric, pl numeric, cost_in_position numeric, unrealizedpl numeric, total_pl numeric, idportfolio integer, portfolio_code character varying, secid character varying, strategy_name character varying, mp_name character varying, fact_weight numeric, current_balance numeric, mtm_positon numeric, weight numeric, planned_position numeric, order_amount numeric, order_type text, order_qty numeric, mtm_rate numeric, mtm_date date, mtm_dirty_price numeric, cross_rate numeric, npv numeric, rate_date date, main_currency_code numeric, orders_unaccounted_qty numeric, orders_unaccounted numeric) 
     LANGUAGE 'plpgsql'
     COST 100
     VOLATILE PARALLEL UNSAFE
@@ -15,7 +15,6 @@ CREATE OR REPLACE FUNCTION public.f_i_get_portfolios_structure_detailed_data(
 AS $BODY$
 DECLARE 
 p_idportfolios int[];
-bulks numeric[];
 BEGIN
 IF p_idportfolio_codes  ISNULL THEN
 	SELECT ARRAY_AGG(dportfolios.idportfolio) INTO p_idportfolios FROM dportfolios; 
@@ -23,10 +22,6 @@ ELSE
 	SELECT ARRAY_AGG(dportfolios.idportfolio) INTO p_idportfolios FROM dportfolios
 	WHERE LOWER(portfolioname)=ANY(p_idportfolio_codes); 
 END IF;
-SELECT ARRAY_AGG(id) INTO bulks FROM dorders
-WHERE
-  dorders.ordertype = 'Bulk'
-  AND dorders.status != 'accounted';
 RETURN QUERY
 WITH
   current_position AS (
@@ -47,7 +42,7 @@ WITH
       current_position.account_currency,
 	  modelportfolio_structure.strategy_name,
 	  modelportfolio_structure.mp_name,
-	  pl_data.pl
+	  COALESCE(pl_data.pl,0) AS pl
     FROM
       current_position
       FULL OUTER JOIN (
@@ -153,6 +148,8 @@ WITH
 	  GROUP BY full_portfolio_with_mtm_data.idportfolio
   )
 SELECT
+ npv_portfolios.npv as notnull_npv,
+ full_portfolio_with_mtm_data.mtm_positon_base_cur,
  ROUND((full_portfolio_with_mtm_data.mtm_positon - full_portfolio_with_mtm_data.cost_in_position+full_portfolio_with_mtm_data.pl)
 	   /ABS(full_portfolio_with_mtm_data.cost_in_position)*100,2) AS roi,
   ROUND(full_portfolio_with_mtm_data.pl*full_portfolio_with_mtm_data.cross_rate,2) AS pl,
@@ -176,7 +173,14 @@ SELECT
   ROUND(npv_portfolios.npv * full_portfolio_with_mtm_data.weight / 100, 2) AS planned_position,
   CASE
     WHEN full_portfolio_with_mtm_data.mtm_dirty_price = 0 THEN 0
-    ELSE ROUND((npv_portfolios.npv * full_portfolio_with_mtm_data.weight / 100 - full_portfolio_with_mtm_data.mtm_positon_base_cur), 2)
+    ELSE ROUND(
+			(ABS(
+			 TRUNC((npv_portfolios.npv * full_portfolio_with_mtm_data.weight / 100 - full_portfolio_with_mtm_data.mtm_positon_base_cur)/ 
+					   (full_portfolio_with_mtm_data.mtm_dirty_price*full_portfolio_with_mtm_data.cross_rate)
+			 ,0)) 
+			 -  COALESCE(unaccounted_orders.unaccounted_qty, 0))
+		   *full_portfolio_with_mtm_data.mtm_dirty_price*full_portfolio_with_mtm_data.cross_rate
+		 ,2)
   END AS order_amount,
   CASE
     WHEN full_portfolio_with_mtm_data.secid = 'MONEY' THEN NULL
@@ -186,7 +190,7 @@ SELECT
   CASE
     WHEN full_portfolio_with_mtm_data.mtm_dirty_price = 0 THEN 0
     ELSE ABS(
-		ROUND((npv_portfolios.npv * full_portfolio_with_mtm_data.weight / 100 - full_portfolio_with_mtm_data.mtm_positon_base_cur)/ 
+		TRUNC((npv_portfolios.npv * full_portfolio_with_mtm_data.weight / 100 - full_portfolio_with_mtm_data.mtm_positon_base_cur)/ 
 				   (full_portfolio_with_mtm_data.mtm_dirty_price*full_portfolio_with_mtm_data.cross_rate),0)
 	) -  COALESCE(unaccounted_orders.unaccounted_qty, 0)
   END AS order_qty,
@@ -197,11 +201,15 @@ SELECT
   ROUND(npv_portfolios.npv,2) as npv,
   full_portfolio_with_mtm_data.rate_date,
   full_portfolio_with_mtm_data.main_currency_code,
-  COALESCE(unaccounted_orders.unaccounted_qty, 0) as orders_unaccounted_qty
+  COALESCE(unaccounted_orders.unaccounted_qty, 0) as orders_unaccounted_qty,
+  ROUND(
+	  COALESCE(unaccounted_orders.unaccounted_qty, 0)
+	  *full_portfolio_with_mtm_data.mtm_dirty_price*full_portfolio_with_mtm_data.cross_rate
+  ,2) as orders_unaccounted
 FROM
   full_portfolio_with_mtm_data
   LEFT JOIN npv_portfolios ON full_portfolio_with_mtm_data.idportfolio = npv_portfolios.idportfolio
-  LEFT JOIN (SELECT * FROM f_i_o_get_orders_unaccounted_qty (bulks)) AS unaccounted_orders ON (
+  LEFT JOIN (SELECT * FROM f_i_o_get_orders_unaccounted_qty()) AS unaccounted_orders ON (
 	unaccounted_orders.secid = full_portfolio_with_mtm_data.secid
 	AND unaccounted_orders.id_portfolio = full_portfolio_with_mtm_data.idportfolio)
 
@@ -212,3 +220,4 @@ $BODY$;
 
 ALTER FUNCTION public.f_i_get_portfolios_structure_detailed_data(text[], date, integer)
     OWNER TO postgres;
+select * from f_i_get_portfolios_structure_detailed_data(array['acm002'],'10/25/2023',840)

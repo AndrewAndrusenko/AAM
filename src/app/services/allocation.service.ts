@@ -45,7 +45,6 @@ export class AppAllocationService {
     }
     this.tradeToConfirm.forEach(clientTrade => {
       let bcEntryParameters = <any> {}
-      console.log('clientTrade',clientTrade.id,clientTrade.trade_amount);
       bcEntryParameters.id_settlement_currency=clientTrade.id_settlement_currency;
       bcEntryParameters.cptyCode='CHASUS';
       bcEntryParameters.pDate_T=new Date(clientTrade.tdate).toDateString();
@@ -71,17 +70,13 @@ export class AppAllocationService {
             ),
             this.accountingTradeService.getAccountingScheme(bcEntryParameters,cSchemeGroupId,'LL').pipe(
               map(entryDrafts=>entryDrafts.forEach(draft=>{
-                console.log('ledger drafts',...entryDrafts);
                 accountingToCreate$.push(this.AccountingDataService.updateLLEntryAccountAccounting (draft,'Create'))
               }))
             )
           ])
         ),
-        tap(data=>console.log('data',data)),
-        tap(data=>console.log('accountingToCreate',accountingToCreate$)),
         switchMap(()=>forkJoin(accountingToCreate$))
       ).subscribe(data=>{
-        console.log('accountingToCreate',data)
         createdAccountingTransactions.push(data)
         let index = tradeToConfirmProcessStatus.findIndex(el=>el.id===clientTrade.id);
         index!==-1? tradeToConfirmProcessStatus[index].accounting=0 : null;
@@ -110,7 +105,6 @@ export class AppAllocationService {
     let status = tradeToConfirmProcessStatus.reduce((acc,val)=>acc+val.accounting,0)
     status===0? allocationTable.submitQuery(true,false).then(data=>{
       this.sendCreatedAccounting(createdAccountingTransactions)
-      console.log('submitQuery alloc',);
       this.CommonDialogsService.snackResultHandler({name:'success',detail:'Accounting has been created'},'Allocation Accounting',undefined,false);
     }):null;
   }
@@ -129,7 +123,6 @@ export class AppAllocationService {
     ).subscribe (deletedTrades=>{
       this.sendDeletedAccounting(deletedTrades);
       allocationTable.selection.clear();
-      console.log('deleted',deletedTrades);
       let result = deletedTrades['name']==='error'? deletedTrades : {name:'success',detail:'Accounting and FIFO have been deleted'};
       this.CommonDialogsService.snackResultHandler(result,'Delete accounting: ',undefined,false)
       allocationTable.submitQuery(true, false);

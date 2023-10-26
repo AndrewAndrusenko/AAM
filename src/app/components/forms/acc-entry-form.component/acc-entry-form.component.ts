@@ -105,6 +105,7 @@ export class AppAccEntryModifyFormComponent {
     }
   }
   formInitialSetup (overdraftOverride:boolean=false,updateValidators:boolean=false) {
+    console.log('entry data',this.data);
     this.entryModifyForm.patchValue(this.data);
     this.xActTypeCode_Ext.setValue(Number(this.data.t_XactTypeCode_Ext))
     this.xActTypeCode.setValue(Number(this.data.t_XactTypeCode))

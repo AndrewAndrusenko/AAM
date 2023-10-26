@@ -3,7 +3,8 @@
     <app-portfolio-tablee></app-portfolio-tablee>  
   </mat-tab>
   <mat-tab  label="Portfolios Positions " >
-    <app-inv-portfolio-position-table> 
+    <app-inv-portfolio-position-table
+    [filters]="{not_zero_npv:true}"> 
     </app-inv-portfolio-position-table> 
   </mat-tab>  
 </mat-tab-group>

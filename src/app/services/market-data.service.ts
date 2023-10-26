@@ -120,6 +120,7 @@ export class AppMarketDataService {
     })
     return logMarketDateLoading;
   }
+
   getInstrumentsCodes (mapcode:string, resasarray?:boolean, secid?:string):Observable<InstrumentsMapCodes[]> {
     const params = {mapcode:mapcode,secid:secid, resasarray:resasarray}
     return this.http.get <InstrumentsMapCodes[]> ('/api/AAM/MD/getInstrumentsCodes/',{params:params})
@@ -130,6 +131,9 @@ export class AppMarketDataService {
   insertMarketData (dataToInsert:any,sourceCode:string, gloabalSource:string): Observable<number> {
     return  this.http.post <number> ('/api/AAM/MD/importData/',
     {'dataToInsert': dataToInsert,'sourceCode':sourceCode, 'gloabalSource':gloabalSource})
+  }
+  moveMarketStackToMainTable (dateToMove:string) :Observable<{o_rows_moved:number}[]> {
+    return this.http.post <{o_rows_moved:number}[]> ('/api/AAM/MD/importData/',{date_to_move:dateToMove,gloabalSource:'MScomMoveToMainTable'})
   }
   getMarketData (rowslimit:number=1000000,sorting:string=' tradedate DESC', searchParameters?:any):Observable<marketData[]> {
     let params = {};

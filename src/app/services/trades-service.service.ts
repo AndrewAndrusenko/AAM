@@ -57,6 +57,9 @@ export class AppTradeService {
     let params = {...serachFilters}
     return this.http.get <orders[]> ('api/AAM/MD/getOrderData/',{params:params})
   }
+  createOrderbyMP (params_data: {secidList:string[], idportfolios : number[], report_date: string, report_id_currency :number }):Observable<orders[]>  {
+    return this.http.post <orders[]>('api/AAM/MD/createOrderbyMP/',{params:params_data,action:'createOrderbyMP'})
+  }
   unmergerBulkOrder (bulkOrders:number[]) :Observable<bulkModifedSet[]> {
     return this.http.post <bulkModifedSet[]>('api/AAM/MD/ModifyBulkOrder',{bulkOrders:bulkOrders,action:'unmergerBulkOrder'})
   }

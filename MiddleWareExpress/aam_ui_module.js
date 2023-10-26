@@ -124,7 +124,7 @@ async function fGetportfolioTable (request,response) {
       query.values = [request.query.accountType, request.query.accountType.length ]
     break;  
     default:
-      query.text += ' ORDER BY idportfolio DESC;'
+      query.text += ' ORDER BY portfolioname DESC;'
     break;
   }
   sql = pgp.as.format(query.text,query.values)

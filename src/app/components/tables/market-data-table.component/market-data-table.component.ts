@@ -162,6 +162,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
         this.logLoadingData = await functionToLoadData(sourcesData, dateToLoad);
         this.loadingDataState = {Message:'Loading is complited.', State:'Success'};
         this.marketSources.forEach(el=>el.checkedAll=false);
+
       }
       else {
         if (!this.overwritingCurrentData.value) { 
@@ -294,6 +295,13 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
  }
   getMoexSecurities (){
     this.MarketDataService.getMoexInstrumentsList().subscribe(data=>console.log('inserted - ',data))
+  }
+  msQuoteToMT (){
+    let dateToLoad = this.formatDate(this.dateForLoadingPrices.value)
+    this.MarketDataService.moveMarketStackToMainTable(dateToLoad).subscribe(data=> {
+      console.log('row',data)
+      this.CommonDialogsService.snackResultHandler({name:'success',detail: data[0].o_rows_moved + ' rows'},'Copied ')
+    })  
   }
   get  gRange () {return this.searchParametersFG.get('dataRange') } 
   get  dateRangeStart() {return this.searchParametersFG.get('dateRangeStart') } 

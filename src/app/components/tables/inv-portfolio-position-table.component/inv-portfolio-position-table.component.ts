@@ -16,6 +16,7 @@ import {AppInvestmentDataServiceService } from 'src/app/services/investment-data
 import { HostListener } from '@angular/core';
 import { indexDBService } from 'src/app/services/indexDB.service';
 import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
+import { MatCheckboxChange } from '@angular/material/checkbox';
 @Component({
   selector: 'app-inv-portfolio-position-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -28,8 +29,9 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
   disabledControlElements: boolean = false;
   @Input() rowsPerPages:number = 15;
   @Input() filters:any;
-  columnsToDisplay = ['portfolio_code','secid','mp_name','fact_weight','current_balance','mtm_positon','weight','planned_position','order_amount','mtm_rate','total_pl','roi','pl','unrealizedpl','cost_in_position','mtm_date','order_type','order_qty','orders_unaccounted_qty','mtm_dirty_price','cross_rate','strategy_name','rate_date'];
-  columnsHeaderToDisplay = ['Code','SecID','MP','Fact %','Balance','PositionMTM','MP %','MP_Position','Deviation','MTM_Rate','Total PL','ROI','FIFO PL','MTM PL','Position Cost','MTM_Date','TypeBS','Deviation Qty','Qty in Active Orders ','MTM_Dirty','CurRate','Strategy','CurDate']
+  @Input() searchAllowed:boolean = true;
+  columnsToDisplay = ['portfolio_code','secid','mp_name','fact_weight','current_balance','mtm_positon','weight','planned_position','deviation_percent','order_amount','mtm_rate','roi','total_pl','pl','unrealizedpl','cost_in_position','mtm_date','order_type','order_qty','orders_unaccounted_qty','mtm_dirty_price','cross_rate','strategy_name','rate_date'];
+  columnsHeaderToDisplay = ['Code','SecID','MP','Fact %','Balance','PositionMTM','MP %','MP_Position','DV%','Deviation','MTM_Rate','ROI','Total PL','FIFO PL','MTM PL','Position Cost','MTM_Date','TypeBS','Deviation Qty','Qty in Active Orders ','MTM_Dirty','CurRate','Strategy','CurDate']
   dataSource: MatTableDataSource<portfolioPositions>;
   fullDataSource: portfolioPositions[];
   @ViewChild('filterALL', { static: false }) filterALL: ElementRef;
@@ -70,6 +72,7 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
       secidList: [],
       idportfolios:  [],
       MP:null,
+      notnull:true,
       report_date : [new Date(), { validators:  Validators.required, updateOn: 'blur' }],
       report_id_currency:[840, { validators:  Validators.required, updateOn: 'blur' }],
     });
@@ -81,7 +84,6 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
     this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios').then ((data)=>{
       this.mp_strategies_list = data['data']
     })
-
     this.multiFilter = (data: portfolioPositions, filter: string) => {
       let filter_array = filter.split(',').map(el=>[el,1]);
       this.columnsToDisplay.forEach(col=>filter_array.forEach(fil=>{
@@ -101,7 +103,6 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
     this.subscriptions.add(this.TreeMenuSevice.getActiveTab().subscribe(tabName=>this.activeTab=tabName));
     this.AutoCompService.getSecidLists();
     this.filters==undefined&&this.fullDataSource!==undefined? this.initialFilterOfDataSource(this.filters) : null;
-
     this.filterednstrumentsLists = this.secidList.valueChanges.pipe(
       startWith(''),
       distinctUntilChanged(),
@@ -122,14 +123,22 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
     }
     )
   }
+  showZeroPortfolios(event:MatCheckboxChange) {
+    console.log('check',event.checked);
+    this.initialFilterOfDataSource(event.checked?{rest:true}:{not_zero_npv:true})
+  }
   initialFilterOfDataSource (filter:any) {
+    if (filter?.rest===true) {
+      this.dataSource.data = this.fullDataSource;
+      return;
+    }
    Object.keys(filter).every(key=>{
     this.dataSource.data = this.fullDataSource.filter(el=>el[key]===filter[key])
     if (this.dataSource.data.length) {return false}  else return true;
    })
   }
   ngOnChanges(changes: SimpleChanges) {
-    changes['filters'].currentValue==undefined&&this.fullDataSource!==undefined?  this.initialFilterOfDataSource (changes['filters'].currentValue):null;
+    changes['filters'].currentValue!==undefined&&this.fullDataSource!==undefined?  this.initialFilterOfDataSource (changes['filters'].currentValue):null;
   }
   applyFilter(event: any, col?:string) {
     this.dataSource.filterPredicate = col === undefined? this.defaultFilterPredicate : this.multiFilter
@@ -153,6 +162,7 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
     return new Promise((resolve, reject) => {
       let searchObj = reset?  {} : this.searchParametersFG.value;
       this.dataSource.data? this.dataSource.data = null : null;
+      searchObj.report_date= new Date (searchObj.report_date).toLocaleDateString();
       searchObj.secidList = [0,1].includes(this.instruments.length)&&this.instruments[0]==='ClearAll'? null : this.instruments.map(el=>el.toLocaleLowerCase())
       searchObj.idportfolios = [0,1].includes(this.portfolios.length)&&this.portfolios[0]==='ClearAll'? null : this.portfolios.map(el=>el.toLocaleLowerCase())
       this.InvestmentDataService.getPortfoliosPositions(searchObj).subscribe(data => {

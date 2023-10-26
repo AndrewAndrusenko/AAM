@@ -2,7 +2,6 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { AccountsTableModel, accountTypes, ClientData, InstrumentData, portfolioPositions, StrategiesGlobalData, StrategyStructure } from '../models/intefaces.model';
-import { cleanData } from 'jquery';
 
 @Injectable({
   providedIn: 'root'
@@ -99,8 +98,6 @@ export class AppInvestmentDataServiceService {
   updateStrategy (data:any):Observable <StrategiesGlobalData[]> { 
     return this.http.post <StrategiesGlobalData[]> ('/api/AAM/StrategyDataEdit/',{'data': data})
   }
-
-
   createStrategyStructure (data:any):Observable <StrategyStructure[]> { 
     return this.http.post <StrategyStructure[]> ('/api/AAM/StrategyStructureCreate/',{'data': data})
   } 
@@ -110,7 +107,6 @@ export class AppInvestmentDataServiceService {
   updateStrategyStructure (data:any):Observable <StrategyStructure[]> { 
     return this.http.post <StrategyStructure[]> ('/api/AAM/StrategyStructureEdit/',{'data': data})
   }
-  
   createAccount (data:any) { 
     return this.http.post <AccountsTableModel[]> ('/api/AAM/AccountCreate/',{'data': data})
   } 
@@ -120,9 +116,7 @@ export class AppInvestmentDataServiceService {
   updateAccount (data:any) { 
     return this.http.post <AccountsTableModel[]> ('/api/AAM/AccountEdit/',{'data': data})
   }
-
   getPortfoliosPositions (params_data: {secidList:string[], idportfolios : number[], report_date: string, report_id_currency :number }):Observable<portfolioPositions[]> {
-
     return this.http.post <portfolioPositions[]> ('/api/AAM/GetPortfolioPositions/',{params:params_data,action:'getPortfolioPositions'})
   }
 }

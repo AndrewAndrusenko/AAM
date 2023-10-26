@@ -208,6 +208,7 @@ appServer.get('/AAM/MD/getOrderData/',jsPassport.authenticate('session'), uiAmmT
 appServer.post('/AAM/MD/UpdateOrderData/',jsPassport.authenticate('session'), uiAmmTradeData.fUpdateOrderData)
 appServer.post('/AAM/MD/ModifyBulkOrder/',jsPassport.authenticate('session'), uiAmmTradeData.fModifyBulkOrder)
 appServer.post('/AAM/MD/Allocation/',jsPassport.authenticate('session'), uiAmmTradeData.fAllocation)
+appServer.post('/AAM/MD/createOrderbyMP/',jsPassport.authenticate('session'), uiAmmTradeData.fCreateOrderbyMP)
 
 /*----------------------CurrencyData----------------------------------------------------*/
 appServer.get('/AAM/getCurrencyData/',jsPassport.authenticate('session'), uiAmmCurrencyData.getCurrencyData)

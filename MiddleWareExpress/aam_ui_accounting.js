@@ -133,7 +133,7 @@ async function fGetAccountingData (request,response) {
       });
       query.text ='SELECT \'AL\' AS "d_transactionType","bAccountTransaction".id AS "t_id", "entryDetails" AS "t_entryDetails", ' + 
       '"bAccountTransaction"."ledgerNoId" AS "t_ledgerNoId", "bAccountTransaction"."accountId" AS "t_accountId", ' +
-      '"dataTime"::timestamp without time zone AS "t_dataTime", "extTransactionId" AS "t_extTransactionId", "amountTransaction" AS "t_amountTransaction", '+
+      '"dataTime"::timestamp without time zone AS "t_dataTime", "extTransactionId" AS "t_extTransactionId", idtrade as t_idtrade, "amountTransaction" AS "t_amountTransaction", '+
       '"XactTypeCode" AS "t_XactTypeCode", "bAccountTransaction"."XactTypeCode_Ext" AS "t_XactTypeCode_Ext" , '+
       '"bcTransactionType_Ext"."description" ||\': \' || "bAccountTransaction"."entryDetails" as "d_entryDetails", ' +
       'CASE "bAccountTransaction"."XactTypeCode" ' +
@@ -154,7 +154,7 @@ async function fGetAccountingData (request,response) {
       query.text += ' UNION ' +
       'SELECT \'LL\' AS "d_transactionType", "bLedgerTransactions".id AS "t_id", "entryDetails" AS "t_entryDetails", '+
       '"bLedgerTransactions"."ledgerID_Debit" AS "t_ledgerNoId", "bLedgerTransactions"."ledgerID" AS "t_accountId", '+
-      '"dateTime"::timestamp without time zone AS "t_dataTime", "extTransactionId" AS "t_extTransactionId", "amount" AS "t_amountTransaction", '+
+      '"dateTime"::timestamp without time zone AS "t_dataTime", "extTransactionId" AS "t_extTransactionId", idtrade as t_idtrade,"amount" AS "t_amountTransaction", '+
       '0 AS "t_XactTypeCode", "bLedgerTransactions"."XactTypeCode_Ext" AS "t_XactTypeCode_Ext" , '+
       '"bcTransactionType_Ext"."description" ||\': \' || "bLedgerTransactions"."entryDetails" as "d_entryDetails", '+
       '"bLedgerDebit"."ledgerNo" AS "d_Debit", "bLedger"."ledgerNo" AS "d_Credit",'+

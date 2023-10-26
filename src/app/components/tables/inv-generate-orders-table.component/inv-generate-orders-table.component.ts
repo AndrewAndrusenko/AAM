@@ -16,6 +16,7 @@ import {AppInvestmentDataServiceService } from 'src/app/services/investment-data
 import { HostListener } from '@angular/core';
 import { indexDBService } from 'src/app/services/indexDB.service';
 import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
+import { AppTradeService } from 'src/app/services/trades-service.service';
 @Component({
   selector: 'app-inv-generate-orders-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -28,8 +29,8 @@ export class AppInvGenerateOrdersTable  implements AfterViewInit {
   disabledControlElements: boolean = false;
   @Input() rowsPerPages:number = 15;
   @Input() filters:any;
-  columnsToDisplay = ['portfolio_code','secid','fact_weight','weight','order_amount','mtm_positon','planned_position','mtm_rate','mtm_date','orders_unaccounted_qty','mp_name','strategy_name','order_qty','current_balance','order_type','mtm_dirty_price','cross_rate','rate_date'];
-  columnsHeaderToDisplay = ['Code','SecID','Fact %','MP %','Deviation','CurrentMTM','Targeted_MP','MTM_Rate','MTM_Date','Active Orders','MP','Strategy','Deviation Qty','Balance','TypeBS','MTM_Dirty','CurRate','CurDate']
+  columnsToDisplay = ['portfolio_code','secid','fact_weight','weight','deviation_percent','order_amount','mtm_positon','planned_position','mtm_rate','mtm_date','orders_unaccounted','mp_name','strategy_name','order_qty','orders_unaccounted_qty','current_balance','order_type','mtm_dirty_price','cross_rate','rate_date'];
+  columnsHeaderToDisplay = ['Code','SecID','Fact %','MP %','DV%','Deviation','CurrentMTM','Targeted_MP','MTM_Rate','MTM_Date','Active Orders','MP','Strategy','Deviation Qty','Orders Qty','Balance','TypeBS','MTM_Dirty','CurRate','CurDate']
   dataSource: MatTableDataSource<portfolioPositions>;
   fullDataSource: portfolioPositions[];
   @ViewChild('filterALL', { static: false }) filterALL: ElementRef;
@@ -46,16 +47,18 @@ export class AppInvGenerateOrdersTable  implements AfterViewInit {
   filteredCurrenciesList: Observable<string[]>;
   mp_strategies_list: string[]=[];
   activeTab:string='';
-  tabsNames = ['Portfolio Positions']
-  @HostListener('document:keydown', ['$event'])
+  tabsNames = ['Generate Orders']
+/*   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) { 
+    console.log('activeTab',this.activeTab);
     if (this.tabsNames.includes(this.activeTab)){
       event.altKey&&event.key==='r'? this.submitQuery(false,true):null;
       event.altKey&&event.key==='w'? this.exportToExcel():null;
     }
-  }
+  } */
   constructor(
     private TreeMenuSevice: TreeMenuSevice,
+    private TradeService: AppTradeService,
     private AuthServiceS:AuthService,  
     private indexDBServiceS:indexDBService,
     private InvestmentDataService:AppInvestmentDataServiceService, 
@@ -123,11 +126,18 @@ export class AppInvGenerateOrdersTable  implements AfterViewInit {
    })
   }
   ngOnChanges(changes: SimpleChanges) {
+    console.log('generate',);
     changes['filters'].currentValue==undefined&&this.fullDataSource!==undefined?  this.initialFilterOfDataSource (changes['filters'].currentValue):null;
   }
   createOrders (){
-    console.log('sec',this.portfolios)
-    console.log('sec',this.instruments)
+    let params_data = this.searchParametersFG.value;
+    this.dataSource?.data? this.dataSource.data = null : null;
+    params_data.secidList = [0,1].includes(this.instruments.length)&&this.instruments[0]==='ClearAll'? null : this.instruments.map(el=>el.toLocaleLowerCase())
+    params_data.idportfolios = [0,1].includes(this.portfolios.length)&&this.portfolios[0]==='ClearAll'? null : this.portfolios.map(el=>el.toLocaleLowerCase())
+    this.TradeService.createOrderbyMP(params_data).subscribe(data=>{
+      console.log('orders',data)
+      this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ')
+    })
   }
   applyFilter(event: any, col?:string) {
     this.dataSource.filterPredicate = col === undefined? this.defaultFilterPredicate : this.multiFilter
@@ -153,6 +163,8 @@ export class AppInvGenerateOrdersTable  implements AfterViewInit {
       this.dataSource?.data? this.dataSource.data = null : null;
       searchObj.secidList = [0,1].includes(this.instruments.length)&&this.instruments[0]==='ClearAll'? null : this.instruments.map(el=>el.toLocaleLowerCase())
       searchObj.idportfolios = [0,1].includes(this.portfolios.length)&&this.portfolios[0]==='ClearAll'? null : this.portfolios.map(el=>el.toLocaleLowerCase())
+      searchObj.report_date= new Date (searchObj.report_date).toLocaleDateString();
+
       this.InvestmentDataService.getPortfoliosPositions(searchObj).subscribe(data => {
         this.updatePositionsDataTable(data)
         showSnackResult? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ') : null;
@@ -205,7 +217,7 @@ export class AppInvGenerateOrdersTable  implements AfterViewInit {
       })
       return el;
     });
-    this.HandlingCommonTasksS.exportToExcel (dataToExport,"positionsData");  
+    this.HandlingCommonTasksS.exportToExcel (dataToExport,"generateOrdersData");  
   }
   get  secidList () {return this.searchParametersFG.get('secidList') } 
   get  idportfolios () {return this.searchParametersFG.get('idportfolios') } 

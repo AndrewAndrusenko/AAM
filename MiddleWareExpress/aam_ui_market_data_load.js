@@ -43,7 +43,6 @@ async function fdeleteMarketData (request,response) {//Delete market data if a u
 async function finsertMarketData (request, response) {//Insert market data recieved form moex iss or MScom
   let sql = '';
   data = request.body.dataToInsert
-  console.log('data',request.body.dataToInsert);
   switch (request.body.gloabalSource) {
     case 'MOEXiss':
     sql =  ''+
@@ -80,11 +79,13 @@ async function finsertMarketData (request, response) {//Insert market data recie
       ')'+
     ') ' 
     break;
+    case 'MScomMoveToMainTable':
+      sql='select * from f_t_move_quotes_marketstackget_to_main_table(${date_to_move}::date,0);'
     default:
     break;
   }
-  console.log('execute',);
-  queryExecute (sql, response,'rowCount');
+  sql = pgp.as.format(sql,request.body)
+  queryExecute (sql, response,request.body.gloabalSource==='MScomMoveToMainTable'? undefined :'rowCount');
 }
 async function fgetMarketData (request,response){//Get market data such as market prices, volumes, high, low quotes and etc
   let conditions = {}
@@ -120,7 +121,6 @@ async function fgetMarketData (request,response){//Get market data such as marke
     conditionsmsFS +=conditions[key][2] + ' AND';
     }
   });
-  console.log('con',conditionsMOEXiss.length, conditionsmsFS.length, request.query?.['sourcecode'] !=='msFS');
   switch (request.query.Action) {
     case 'checkLoadedMarketData':
       query.text = 'SELECT sourcecode, count(secid) FROM t_moexdata_foreignshares '+
@@ -148,8 +148,6 @@ async function fgetMarketData (request,response){//Get market data such as marke
     break;
   }
   sql = pgp.as.format(query.text,request.query);
-  console.log('getMTM');
-  console.log(sql);
   db_common_api.queryExecute(sql,response,undefined,'fgetMarketData')
 }
 async function fgetMarketDataSources (request,response) {//Get market sources. Needs to be moved to General data function
@@ -241,7 +239,6 @@ function fGetMoexInstruments(request,response) { //Get general instruments list
         query.text += '  LIMIT ${rowslimit:raw};'
       break;
     }
-    console.log('fGetMoexInstruments');
     query.text = pgp.as.format(query.text,request.query);
     resolve (queryExecute (query, response))
   })

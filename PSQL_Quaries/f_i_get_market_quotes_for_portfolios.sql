@@ -1,6 +1,6 @@
--- FUNCTION: public.f_i_get_market_quotes_for_portfolios(text[])
+-- FUNCTION: public.f_i_get_market_quotes_for_portfolios(text[], date)
 
-DROP FUNCTION IF EXISTS public.f_i_get_market_quotes_for_portfolios(text[],date);
+-- DROP FUNCTION IF EXISTS public.f_i_get_market_quotes_for_portfolios(text[], date);
 
 CREATE OR REPLACE FUNCTION public.f_i_get_market_quotes_for_portfolios(
 	p_secid_list text[],
@@ -17,12 +17,9 @@ BEGIN
 return query
 with last_mtm_dates as (SELECT 
 t_moexdata_foreignshares.secid,
-max(t_moexdata_foreignshares.tradedate) 
-	filter  (
-		where t_moexdata_foreignshares.close notnull and  t_moexdata_foreignshares.tradedate<=p_report_date) 
-as td
+max(t_moexdata_foreignshares.tradedate) filter  (where t_moexdata_foreignshares.close notnull) as td
 FROM t_moexdata_foreignshares 
-where
+where t_moexdata_foreignshares.tradedate<=p_report_date
 						
 group by t_moexdata_foreignshares.secid
 )
@@ -45,5 +42,5 @@ and t_moexdata_foreignshares.close notnull
 END;
 $BODY$;
 
-ALTER FUNCTION public.f_i_get_market_quotes_for_portfolios(text[],date)
+ALTER FUNCTION public.f_i_get_market_quotes_for_portfolios(text[], date)
     OWNER TO postgres;
