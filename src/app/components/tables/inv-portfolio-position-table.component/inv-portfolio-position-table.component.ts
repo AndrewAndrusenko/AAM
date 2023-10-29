@@ -187,7 +187,7 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
     (index >= 0)? chipArray.splice(index, 1) : null;
   }
   clearAll(event, chipArray:string[],control:AbstractControl) : string [] {
-    if (event.target.textContent.trim() === 'ClearAll cancel') {
+    if (event.target.textContent.trim() === 'ClearAll') {
       chipArray = ['ClearAll'];
     };
     return chipArray;

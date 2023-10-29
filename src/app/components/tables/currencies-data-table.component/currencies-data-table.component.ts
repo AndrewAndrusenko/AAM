@@ -216,7 +216,7 @@ export class AppTableCurrenciesDataComponent  implements AfterViewInit {
   }
   clearAll(event) {
     console.log('event', event.target.textContent);
-    event.target.textContent.trim() === 'ClearAll cancel'? this.pairs = ['ClearAll']: null;
+    event.target.textContent.trim() === 'ClearAll'? this.pairs = ['ClearAll']: null;
   }
   addChips (el: any, column: string) {(['accountNo'].includes(column))? this.pairs.push(el):null;}
   updateFilter (event:Event, el: any, column: string) {

@@ -41,6 +41,8 @@ async function fUpdateEntryAccountAccounting (request, response) {
   db_common_api.fUpdateTableDB ('bAccountTransaction',fields,'id',request, response)
 }
 async function fGetAccountingData (request,response) {
+  console.log('request.query 0000',request.query);
+
   let conditions = {}
   const query = {text: ''}
   switch (request.query.Action) {
@@ -96,76 +98,9 @@ async function fGetAccountingData (request,response) {
         'LEFT JOIN "bcAccountType_Ext" ON "bcAccountType_Ext"."accountType_Ext" = "bLedger"."accountTypeID" ;'
     break;
     case 'GetAccountsEntriesListAccounting':
-       conditions = {
-        'noAccountLedger':{
-          1: ' ("bAccounts"."accountNo" = ANY(${noAccountLedger}) OR "bLedger"."ledgerNo" = ANY(${noAccountLedger})) ',
-          2: ' ("bLedger"."ledgerNo" = ANY(${noAccountLedger}) OR "bLedgerDebit"."ledgerNo" = ANY(${noAccountLedger})) '
-        },
-        'dateRangeStart': {
-          1: ' ("dataTime"::date >= ${dateRangeStart}::date )',
-          2: ' ("dateTime"::date >= ${dateRangeStart}::date)'
-        },
-        'dateRangeEnd': {
-          1: ' ("dataTime"::date <= ${dateRangeEnd}::date) ',
-          2: ' ("dateTime"::date <= ${dateRangeEnd}::date)'
-        },
-        'entryTypes' : {
-          1: ' ("XactTypeCode_Ext" = ANY(array[${entryTypes:raw}]))',
-          2: ' ("XactTypeCode_Ext" = ANY(array[${entryTypes:raw}]))  '
-        },
-        'extTransactionId' : {
-          1: ' ("extTransactionId" = ${extTransactionId:raw})',
-          2: ' ("extTransactionId" = ${extTransactionId:raw}) '
-        },
-        'idtrade' : {
-          1: ' ("idtrade" = ${idtrade:raw})',
-          2: ' ("idtrade" = ${idtrade:raw}) '
-        },
-      }
-      let conditionsAccountLedger =' WHERE'
-      let conditionsLedgerToLedger =' WHERE'
-      Object.entries(conditions).forEach(([key,value]) => {
-      if  (request.query.hasOwnProperty(key)) {
-        // query.values.push(request.query[key]);
-        conditionsAccountLedger +=conditions[key][1] + ' AND ';
-        conditionsLedgerToLedger +=conditions[key][2] + ' AND ';
-        }
-      });
-      query.text ='SELECT \'AL\' AS "d_transactionType","bAccountTransaction".id AS "t_id", "entryDetails" AS "t_entryDetails", ' + 
-      '"bAccountTransaction"."ledgerNoId" AS "t_ledgerNoId", "bAccountTransaction"."accountId" AS "t_accountId", ' +
-      '"dataTime"::timestamp without time zone AS "t_dataTime", "extTransactionId" AS "t_extTransactionId", idtrade as t_idtrade, "amountTransaction" AS "t_amountTransaction", '+
-      '"XactTypeCode" AS "t_XactTypeCode", "bAccountTransaction"."XactTypeCode_Ext" AS "t_XactTypeCode_Ext" , '+
-      '"bcTransactionType_Ext"."description" ||\': \' || "bAccountTransaction"."entryDetails" as "d_entryDetails", ' +
-      'CASE "bAccountTransaction"."XactTypeCode" ' +
-      'WHEN 1 THEN  "bLedger"."ledgerNo" ' +
-      'WHEN 2 THEN "bAccounts"."accountNo" ' +
-      'END as "d_Debit",' +
-      'CASE "bAccountTransaction"."XactTypeCode" ' +
-      'WHEN 2 THEN "bLedger"."ledgerNo" ' +
-      'WHEN 1 THEN "bAccounts"."accountNo" ' +
-      'END as "d_Credit",' +
-      '"ledgerNo" AS "d_ledgerNo", "accountNo" AS "d_accountNo", "bcTransactionType_Ext"."xActTypeCode_Ext" AS "d_xActTypeCodeExtName" ' +
-      'FROM "bAccountTransaction" ' +
-      'LEFT join "bcTransactionType_Ext" ON "bAccountTransaction"."XactTypeCode_Ext" = "bcTransactionType_Ext".id ' +
-      'LEFT JOIN "bAccounts" on "bAccounts"."accountId" = "bAccountTransaction"."accountId" ' +
-      'LEFT JOIN "bLedger" ON "bLedger"."ledgerNoId" = "bAccountTransaction"."ledgerNoId" ' ;
+      query.text = 'SELECT * FROM f_a_b_get_all_entries_transactions (${dateRangeStart},${dateRangeEnd},${entryTypes:raw},null,${noAccountLedger}, ${idtrade:raw});'
+      request.query.entryTypes = request.query.entryTypes.map(el=>Number(el))
 
-      query.text +=conditionsAccountLedger.slice(0,-5);
-      query.text += ' UNION ' +
-      'SELECT \'LL\' AS "d_transactionType", "bLedgerTransactions".id AS "t_id", "entryDetails" AS "t_entryDetails", '+
-      '"bLedgerTransactions"."ledgerID_Debit" AS "t_ledgerNoId", "bLedgerTransactions"."ledgerID" AS "t_accountId", '+
-      '"dateTime"::timestamp without time zone AS "t_dataTime", "extTransactionId" AS "t_extTransactionId", idtrade as t_idtrade,"amount" AS "t_amountTransaction", '+
-      '0 AS "t_XactTypeCode", "bLedgerTransactions"."XactTypeCode_Ext" AS "t_XactTypeCode_Ext" , '+
-      '"bcTransactionType_Ext"."description" ||\': \' || "bLedgerTransactions"."entryDetails" as "d_entryDetails", '+
-      '"bLedgerDebit"."ledgerNo" AS "d_Debit", "bLedger"."ledgerNo" AS "d_Credit",'+
-      '"bLedgerDebit"."ledgerNo" AS "d_ledgerNo", "bLedger"."ledgerNo" AS "d_accountNo", '+
-      '"bcTransactionType_Ext"."xActTypeCode_Ext" AS "d_xActTypeCodeExtName" '+
-      'FROM "bLedgerTransactions" '+
-      'LEFT join "bcTransactionType_Ext" ON "bLedgerTransactions"."XactTypeCode_Ext" = "bcTransactionType_Ext".id '+
-      'LEFT JOIN "bLedger"  ON "bLedger"."ledgerNoId" = "bLedgerTransactions"."ledgerID" '+
-      'LEFT JOIN "bLedger" AS "bLedgerDebit" ON "bLedgerDebit"."ledgerNoId" = "bLedgerTransactions"."ledgerID_Debit" ';
-      query.text += conditionsLedgerToLedger.slice(0,-5);
-      query.text +='ORDER BY "t_dataTime" DESC; '
     break;
     case 'GetbLastClosedAccountingDate':
       query.text ='SELECT "FirstOpenedDate"::date, "LastClosedDate"::date FROM "bLastClosedAccountingDate";'
@@ -214,18 +149,12 @@ async function fGetAccountingData (request,response) {
       conditions = {
         'noAccountLedger':{
           1: ' ("accountNo" = ANY(${noAccountLedger})) ',
-          2: ' ("accountNo" = ANY(${noAccountLedger})) ',
-          3: ' ("accountNo" = ANY(${noAccountLedger})) ',
         },
         'dateRangeStart': {
           1: ' ("dateBalance"::date >= ${dateRangeStart}::date )',
-          2: ' ("dataTime"::date >= ${dateRangeStart}::date )',
-          3: ' ("dataTime"::date >= ${dateRangeStart}::date )',
         },
         'dateRangeEnd': {
           1: ' ("dateBalance"::date <= ${dateRangeEnd}::date) ',
-          2: ' ("dataTime"::date <= ${dateRangeEnd}::date) ',
-          3: ' ("dataTime"::date <= ${dateRangeEnd}::date) ',
         }
         /* 'entryTypes' : {
           1: ' ("XactTypeCode_Ext" = ANY(array[${entryTypes:raw}]))',
@@ -233,37 +162,21 @@ async function fGetAccountingData (request,response) {
  */      }
 
       let conditionsBalance =' WHERE'
-      let conditionsAccountProject =' WHERE'
-      let conditionsLedgerProject =' WHERE'
+
       Object.entries(conditions).forEach(([key,value]) => {
-      if  (request.query.hasOwnProperty(key)) {
-        // query.values.push(request.query[key]);
-        conditionsBalance +=conditions[key][1] + ' AND ';
-        conditionsAccountProject +=conditions[key][2] + ' AND ';
-        conditionsLedgerProject +=conditions[key][3] + ' AND ';
-        }
-      });
-      query.text ='SELECT '+
-      ' "accountNo", "accountId", "accountType", "datePreviousBalance" ,"dateBalance"::timestamp without time zone , "openingBalance", '+
-      ' "totalDebit", "totalCredit", "OutGoingBalance", "checkClosing", "xacttypecode" ' +
-      ' FROM f_a_b_balancesheet_all() ';
-       query.text += conditionsBalance.slice(0,-5);
-       query.text += ' UNION '+
-      ' SELECT '+
-      ' "accountNo", "accountId", \'Account\', null ,"dataTime"::timestamp without time zone , "corrOpeningBalance", "totalDebit", "totalCredit", '+
-      ' "corrOpeningBalance" + "signedTurnOver" AS "OutGoingBalance", 0 , "xActTypeCode"'+
-      ' FROM f_a_b_current_turnovers_and_balnces_not_closed(${lastClosedDate}) ';
-       query.text += conditionsAccountProject.slice(0,-5) ;
-       query.text += ' UNION '+
-      ' SELECT '   +
-      ' "accountNo", "accountId", \'Ledger\', null ,"dataTime"::timestamp without time zone , "corrOpeningBalance" ,"totalDebit", "totalCredit", '  +
-      ' ("corrOpeningBalance" + "signedTurnOver") AS "OutGoingBalance" , 0, "xActTypeCode" ' +
-      ' FROM f_a_b_bcurrent_ledger_turnovers_balances_notclosed(${lastClosedDate}) '; 
-      query.text += conditionsLedgerProject.slice(0,-5) ;
-      query.text += ' ORDER BY "dateBalance"::timestamp without time zone DESC;';
+      if  (request.query.hasOwnProperty(key)) { conditionsBalance +=conditions[key][1] + ' AND '}
+    });
+    query.text = 'select * from f_a_b_balancesheet_total_closed_and_notclosed()'
+      query.text += conditionsBalance.slice(0,-5);
     break;
   }
   query.text = pgp.as.format(query.text,request.query);
+  if (['GetAccountsEntriesListAccounting'].includes(request.query.Action)) {
+    query.text = query.text.replaceAll("'null'",null);
+    query.text = query.text.replaceAll("array[0,0]",null);
+    query.text = query.text.replaceAll(",'ClearAll'",',null');
+  }
+  console.log('query.text',query.text);
   db_common_api.queryExecute(query.text,response,null, request.query.queryCode === undefined?  request.query.Action : request.query.queryCode );
 }
 async function fGetMT950Transactions (request,response) {

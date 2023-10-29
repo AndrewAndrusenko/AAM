@@ -131,7 +131,7 @@
           (removed)="remove(secid,instruments,secidList)"
           (click)=" instruments = clearAll($event,instruments,secidList);">
             {{secid}}
-            <button matChipRemove>
+            <button matChipRemove *ngIf="secid!=='ClearAll'">
               <mat-icon>cancel</mat-icon>
             </button>
           </mat-chip>
@@ -163,7 +163,7 @@
           (removed)="remove(portfolio,portfolios,portfoliosList)"
           (click)=" portfolios = clearAll($event,portfolios,portfoliosList);">
             {{portfolio}}
-            <button matChipRemove>
+            <button matChipRemove *ngIf="portfolio!=='ClearAll'">
               <mat-icon>cancel</mat-icon>
             </button>
           </mat-chip>

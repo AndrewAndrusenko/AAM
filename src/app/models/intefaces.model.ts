@@ -252,6 +252,7 @@ export interface bLedgerTransaction {
 }
 
 export interface bAccountsEntriesList {
+  d_portfolioname: string;
   d_transactionType:string,
   t_id: number,
   t_entryDetails:string,
@@ -297,6 +298,7 @@ export interface bAccountingEntriesComplexSearch {
   }
 }
 export interface bBalanceFullData {
+  portfolioname: string,
   accountNo : string, 
   accountId : number, 
   accountType : string, 

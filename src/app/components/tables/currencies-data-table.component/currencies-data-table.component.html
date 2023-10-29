@@ -159,7 +159,7 @@ class="headers-align"
           (removed)="remove(pair)"
           (click)=" clearAll($event);">
             {{pair}}
-            <button matChipRemove>
+            <button matChipRemove *ngIf="pair!=='ClearAll'">
               <mat-icon>cancel</mat-icon>
             </button>
           </mat-chip>

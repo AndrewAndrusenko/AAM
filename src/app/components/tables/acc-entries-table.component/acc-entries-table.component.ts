@@ -36,8 +36,8 @@ import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
 export class AppTableAccEntriesComponent implements OnInit {
   accessState: string = 'none';
   disabledControlElements: boolean = false;
-  columnsToDisplay = ['t_id','d_Debit','d_Credit','t_dataTime','d_xActTypeCodeExtName','t_XactTypeCode','t_amountTransaction','d_entryDetails', 't_extTransactionId']
-  columnsHeaderToDisplay = ['ID','Debit','Credit','Date', 'Code', 'Ledger',  'Amount', 'Details', 'ExtID', 'Action'];
+  columnsToDisplay = ['t_id','portfolioname','d_Debit','d_Credit','t_dataTime','d_xActTypeCodeExtName','t_XactTypeCode','t_amountTransaction','d_entryDetails', 't_idtrade','t_extTransactionId']
+  columnsHeaderToDisplay = ['ID','Code','Debit','Credit','Date', 'Code', 'Ledger',  'Amount', 'Details', 'Trade','ExtID', 'Action'];
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
   private subscriptions = new Subscription ();
   dataSource: MatTableDataSource<bAccountsEntriesList>;
@@ -68,7 +68,6 @@ export class AppTableAccEntriesComponent implements OnInit {
   panelOpenState = false;
   public searchParametersFG: FormGroup;
   public searchParameters: any;
-  accounts: string[] = ['ClearAll'];
   dialogChooseAccountsList: MatDialogRef<AppTableAccAccountsComponent>;
   TransactionTypes: bcTransactionType_Ext[] = [];
   filterEntryTypes:string[] = ['ClearAll'];
@@ -96,9 +95,9 @@ export class AppTableAccEntriesComponent implements OnInit {
   ) {
     this.searchParametersFG = this.fb.group ({
       dataRange : this.dataRange,
-      noAccountLedger: null,
+      noAccountLedger: {value:['ClearAll'], disabled:false},
       amount:{value:null, disabled:true},
-      entryType : {value:[], disabled:false},
+      entryTypes : {value:[0], disabled:false},
       ExtID:{value:null, disabled:false},
       idtrade:{value:null, disabled:false}
     })
@@ -113,12 +112,13 @@ export class AppTableAccEntriesComponent implements OnInit {
     })
   }
   ngOnInit(): void {
+    this.noAccountLedger.patchValue(['ClearAll'])
     if (!this.FirstOpenedAccountingDate) {
       this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate);
     }
     switch (this.action) {
       case 'ShowEntriesForBalanceSheet':
-        this.accounts = [this.paramRowData.accountNo];
+        this.noAccountLedger.value.push(this.paramRowData.accountNo);
         this.dataRange.controls['dateRangeStart'].setValue(new Date (this.paramRowData.dateBalance))
         this.dataRange.controls['dateRangeEnd'].setValue(new Date (this.paramRowData.dateBalance))
         this.submitQuery(false);
@@ -133,11 +133,7 @@ export class AppTableAccEntriesComponent implements OnInit {
         this.submitQuery(false);
       break;
       default :
-      this.AccountingDataService.GetAccountsEntriesListAccounting (null,null,null,null,'GetAccountsEntriesListAccounting').subscribe (EntriesList  => {
-        this.dataSource  = new MatTableDataSource(EntriesList);
-        this.dataSource.paginator = this.paginator;
-        this.dataSource.sort = this.sort;
-      })
+      this.submitQuery(false)
     break;
     }
     this.subscriptions.add(this.TreeMenuSevice.getActiveTab().subscribe(tabName=>this.activeTab=tabName));
@@ -145,24 +141,18 @@ export class AppTableAccEntriesComponent implements OnInit {
   }
   submitQuery (notification:boolean=true, sendNewAllocatedSum:boolean=false) {
     this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate);
+    console.log('this.searchParametersFG.value',this.searchParametersFG.value);
+    let searchObj = this.searchParametersFG.value;
     this.dataSource? this.dataSource.data = null: null;
-    let searchObj = {};
-    let accountsList = [];
-    (this.accounts.indexOf('ClearAll') !== -1)? this.accounts.splice(this.accounts.indexOf('ClearAll'),1) : null;
-    (this.accounts.length===1)? accountsList = [...this.accounts,...this.accounts]: accountsList = this.accounts;
-    (this.accounts.length)? Object.assign (searchObj , {'noAccountLedger': accountsList}): null;
-    (this.gRange.get('dateRangeStart').value)===null? null : Object.assign (searchObj , {
-      'dateRangeStart':new Date (this.gRange.get('dateRangeStart').value).toDateString()});
-    (this.gRange.get('dateRangeEnd').value)===null? null : Object.assign (searchObj , {
-      'dateRangeEnd': new Date (this.gRange.get('dateRangeEnd').value).toDateString()});
-    ( this.entryTypes.value != null&&this.entryTypes.value.length !=0)? Object.assign (searchObj , {'entryTypes': [this.entryTypes.value]}): null;
-    (this.ExtId.value) == null?  null : Object.assign (searchObj , {'extTransactionId': this.ExtId.value});
-    (this.idtrade.value) == null?  null : Object.assign (searchObj , {'idtrade': this.idtrade.value});
+    Object.assign (searchObj , {'dateRangeStart':
+      this.gRange.get('dateRangeStart').value===null? null:new Date (this.gRange.get('dateRangeStart').value).toLocaleDateString()});
+    Object.assign (searchObj , {'dateRangeEnd': 
+      this.gRange.get('dateRangeEnd').value===null? null : new Date (this.gRange.get('dateRangeEnd').value).toLocaleDateString()});
+    Object.assign (searchObj , {'entryTypes': [0,...this.entryTypes.value] });
     this.AccountingDataService.GetAccountsEntriesListAccounting(searchObj,null,null, null, 'GetAccountsEntriesListAccounting').subscribe (EntriesList  => {
       this.dataSource  = new MatTableDataSource(EntriesList);
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
-      this.accounts.unshift('ClearAll')
       notification? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (EntriesList.length,'en-US') + ' rows'},'Loaded '):null;
       this.externalId&&sendNewAllocatedSum? this.newAllocatedSum.emit({swift_item_id:this.externalId, allocated_sum: this.dataSource.data.reduce((acc,value)=>acc+value.t_amountTransaction,0)}) : null;
     })
@@ -192,7 +182,7 @@ export class AppTableAccEntriesComponent implements OnInit {
     this.dialogChooseAccountsList.componentInstance.readOnly = true;
     this.dialogChooseAccountsList.componentInstance.multiSelect = true;
     this.dialogChooseAccountsList.componentInstance.modal_principal_parent.subscribe ((item)=>{
-      this.accounts = [...this.accounts,...this.dialogChooseAccountsList.componentInstance.accounts]
+      this.noAccountLedger.patchValue([...this.noAccountLedger.value,...this.dialogChooseAccountsList.componentInstance.accounts])
       this.dialogChooseAccountsList.close(); 
     });
   }
@@ -202,17 +192,15 @@ export class AppTableAccEntriesComponent implements OnInit {
   add(event: MatChipInputEvent): void {
     const value = (event.value || '').trim();
     const valueArray = event.value.split(',');
-    (value)? this.accounts = [...this.accounts,...valueArray] : null;
+    (value)? this.noAccountLedger.patchValue([...this.noAccountLedger.value,...valueArray]) : null;
     event.chipInput!.clear();
   }
   remove(account: string): void {
-    const index = this.accounts.indexOf(account);
-   (index >= 0)? this.accounts.splice(index, 1) : null
+    const index = this.noAccountLedger.value.indexOf(account);
+   (index >= 0)? this.noAccountLedger.value.splice(index, 1) : null
   }
-  clearAll(event) {
-  event.target.textContent.trim() === 'ClearAll cancel'? this.accounts = ['ClearAll']: null;
-  }
-  addChips (el: any, column: string) {(['d_Debit', 'd_Credit'].includes(column))? this.accounts.push(el):null;}
+  clearAll(event) { event.target.textContent.trim() === 'ClearAll'? this.noAccountLedger.patchValue(['ClearAll']) : null};
+  addChips (el: any, column: string) {(['d_Debit', 'd_Credit'].includes(column))? this.noAccountLedger.value.push(el) : null}
   updateFilter ( el: any) {
     this.filter.nativeElement.value = el;
     this.dataSource.filter = el.trim();
@@ -237,14 +225,17 @@ export class AppTableAccEntriesComponent implements OnInit {
       'Details': row.d_entryDetails,
       'TrType': row.d_transactionType,
       'TrCode' : row.t_XactTypeCode,
-      't_XactTypeCode_Ext': (row.t_XactTypeCode_Ext)
+      't_XactTypeCode_Ext': (row.t_XactTypeCode_Ext),
+      'Trade': (row.t_idtrade),
+      'Code': (row.d_portfolioname) 
     }))
     this.HandlingCommonTasksS.exportToExcel (data,"entriesData")
   }
   get  gRange () {return this.searchParametersFG.get('dataRange') } 
   get  dateRangeStart() {return this.searchParametersFG.get('dateRangeStart') } 
   get  dateRangeEnd() {return this.searchParametersFG.get('dateRangeEnd') } 
-  get  entryTypes () {return this.searchParametersFG.get('entryType') } 
+  get  entryTypes () {return this.searchParametersFG.get('entryTypes') } 
   get  ExtId () {return this.searchParametersFG.get('ExtID') } 
   get  idtrade () {return this.searchParametersFG.get('idtrade') } 
+  get  noAccountLedger () {return this.searchParametersFG.get('noAccountLedger') } 
 }

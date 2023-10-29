@@ -37,8 +37,8 @@ import { ReadableStreamDefaultReader } from 'stream/web';
 export class AppTableBalanceSheetComponent   {
   accessState: string = 'none';
   disabledControlElements: boolean = false;
-  columnsToDisplay = ['accountNo','accountType','datePreviousBalance','dateBalance','openingBalance','totalDebit','totalCredit','OutGoingBalance','checkClosing',"xacttypecode"]
-  columnsHeaderToDisplay = ['No','Type','Previous Balance','Balance', 'Opening Balance','total Debit','total Credit','Closing Balance',    'check Closing',"AP"];
+  columnsToDisplay = ['portfolioname','accountNo','accountType','datePreviousBalance','dateBalance','openingBalance','totalDebit','totalCredit','OutGoingBalance','checkClosing',"xacttypecode"]
+  columnsHeaderToDisplay = ['Code','No','Type','Previous Balance','Balance', 'Opening Balance','total Debit','total Credit','Closing Balance',    'check Closing',"AP"];
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
   dataSource: MatTableDataSource<bBalanceFullData>;
   obj: MatTableDataSource<bBalanceFullData>;
@@ -158,12 +158,6 @@ export class AppTableBalanceSheetComponent   {
     })
   })
   }
-  async checkBalanceDateToClose () {
-    this.AccountingDataService.GetbAccountingDateToClose('GetbAccountingDateToClose').subscribe(currentDateToClose=>{
-      console.log('dates',new Date(currentDateToClose[0].accountingDateToClose).toLocaleDateString(),this.firstClosingDate.toLocaleDateString());
-     
-    })
-  }
   async accountingBalanceClose (overdraftOverride:boolean) {
     const currentDateToClose = await firstValueFrom(this.AccountingDataService.GetbAccountingDateToClose('GetbAccountingDateToClose'));
     if (new Date(currentDateToClose[0].accountingDateToClose).toLocaleDateString()!==this.firstClosingDate.toLocaleDateString()) {
@@ -236,7 +230,6 @@ export class AppTableBalanceSheetComponent   {
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
       balanceDataToReconcile.forEach ( (el) => {
-      // console.log('compare',new Date(el['dateBalance']).toISOString(), new Date(firstDayOfCalculation).toISOString());
         new Date(el['dateBalance']).toISOString() ===new Date(firstDayOfCalculation).toISOString() ? this.entriesTotal += Number(el.OutGoingBalance): this.totalDebit += Number(el.OutGoingBalance)
       });
     })
@@ -256,7 +249,6 @@ export class AppTableBalanceSheetComponent   {
         this.dialogShowAccountInfo.componentInstance.aType = 0;
         this.dialogShowAccountInfo.componentInstance.action = 'View';
         this.dialogShowAccountInfo.componentInstance.data = accountData[0]; 
-        console.log('accountData',accountData[0]);
         this.dialogShowAccountInfo.componentInstance.modal_principal_parent.subscribe ((item)=>{
           this.dialogChooseAccountsList.close(); 
         });
@@ -264,7 +256,6 @@ export class AppTableBalanceSheetComponent   {
     } else {
       this.AccountingDataService.GetLedgerData(null,null,null, row.accountNo,'GetLedgerData').subscribe ((accountData) => {
         this.dialogShowAccountInfo = this.dialog.open(AppAccAccountModifyFormComponent ,{minHeight:'600px', minWidth:'900px', autoFocus: false, maxHeight: '90vh'});
-        console.log('leger',accountData[0]);
 
         this.dialogShowAccountInfo.componentInstance.aType = 1;
         this.dialogShowAccountInfo.componentInstance.action = 'View';
@@ -276,7 +267,6 @@ export class AppTableBalanceSheetComponent   {
     }
   }
   dateClass: MatCalendarCellClassFunction<Date> = (cellDate, view) => {
-    console.log('balacedDateWithEntries', new Date(this.balacedDateWithEntries[1]).toLocaleDateString(),cellDate['_d'].toLocaleDateString());
     const index = this.balacedDateWithEntries.findIndex(x => new Date(x).toLocaleDateString() == cellDate['_d'].toLocaleDateString());
     return (index > -1)? 'date-highlighted' : '';
   };
@@ -296,7 +286,7 @@ export class AppTableBalanceSheetComponent   {
    (index >= 0)? this.accounts.splice(index, 1) : null
   }
   clearAll(event) {
-    event.target.textContent.trim() === 'ClearAll cancel'? this.accounts = ['ClearAll']: null;
+    event.target.textContent.trim() === 'ClearAll'? this.accounts = ['ClearAll']: null;
   }
   addChips (el: any, column: string) {(['accountNo'].includes(column))? this.accounts.push(el):null;}
   updateFilter (event:Event, el: any, column: string) {

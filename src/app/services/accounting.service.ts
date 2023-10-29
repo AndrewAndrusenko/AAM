@@ -14,6 +14,7 @@ export class AppAccountingService {
   private subjectLoadedMT950Transactions = new Subject<any>();
   private relplaySubject = new ReplaySubject(1)
   AccountsEntriesList = <bAccountsEntriesList> {
+    'd_portfolioname' : null,
     'd_transactionType': null,
     't_id': null,
     't_entryDetails':null,
@@ -98,7 +99,9 @@ export class AppAccountingService {
   /*End------------------Create entry by scheme---------------------------------------------------------*/
   GetAccountsEntriesListAccounting (searchParameters:any, id: number, MTType:string, Sender: string, Action: string):Observable <bAccountsEntriesList[]> {
     let params = {'id' :id, 'MTType': MTType,'Sender':Sender, 'Action': Action};
+    console.log('params',searchParameters['noAccountLedger']);
     (searchParameters !== null) ?  params = {...params,...searchParameters}: null
+    console.log('params222',params['noAccountLedger']);
     return this.http.get <bAccountsEntriesList []>('/api/DEA/fGetAccountingData/', { params: params })
   }
   GetAccountsListAccounting (currencyCode: number, id: number, clientId:number, accountNo: string, Action: string):Observable <bAccounts[]> {
@@ -194,7 +197,6 @@ export class AppAccountingService {
   GetALLClosedBalances (searchParameters:any, id: number, lastClosedDate:string, Sender: string, Action: string):Observable <bBalanceFullData[]> {
     let params = {'id' :id, 'lastClosedDate': lastClosedDate,'Sender':Sender, 'Action': Action};
     (searchParameters !== null) ?  params = {...params,...searchParameters}: null
-    console.log('lastClosedDate',lastClosedDate);
     return this.http.get <bBalanceFullData[]>('/api/DEA/fGetAccountingData/', {params:params })
   }
   accountingBalanceCloseInsert (data:any) {return this.http.post <any[]> ('/api/DEA/accountingBalanceCloseInsert/',{'data': data})}
