@@ -21,12 +21,13 @@ export class TreeMenuSevice {
   }
   private subjectName = new Subject<any>(); 
 
-  sendUpdate(nodeRoot: string, item: string, id:number) { //the component that wants to update something, calls this fn
-    this.subjectName.next({ text: nodeRoot, name:item, id:+id }); //next() will feed the value in Subject
+  sendUpdate(nodeRoot: string, item: string, id:number,action?:string) { 
+    console.log('action',action,item);
+    this.subjectName.next({ text: nodeRoot, name:item, id:+id, action:action }); 
   }
 
-  getUpdate(): Observable<any> { //the receiver component calls this function 
-    return this.subjectName.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
+  getUpdate(): Observable<any> { 
+    return this.subjectName.asObservable(); 
   }
   private subjectTabName = new Subject <string>();
   sendActiveTab(tabName: string) { 

@@ -20,21 +20,24 @@ import { routesTreeMenu } from 'src/app/app-routing.module';
   templateUrl: './portfolios-table.component.html',
   styleUrls: ['./portfolios-table.component.css'],
   animations: [
-    trigger('detailExpand', [
-      state('collapsed', style({height: '0px', minHeight: '0'})),
-      state('expanded', style({height: '*'})),
-      transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
-    ]),
+    trigger('detailExpand',
+    [   state('collapsed, void', style({ height: '0px'})),
+        state('expanded', style({ height: '*' })),
+        transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
+        transition('expanded <=> void', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)'))
+    ])
   ],
 })
+
 export class TablePortfolios {
+  
   accessState: string = 'none';
   disabledControlElements: boolean = false;
   accessToClientData: string = 'none';
   dataSource: MatTableDataSource<AccountsTableModel>;
   expandedElement: AccountsTableModel  | null;
-  columnsToDisplay : string[] = ['idportfolio', 'portfolioname','stategy_name', 'description', 'portleverage'];
-  columnsToHeaderDisplay : string[] = ['ID', 'Code','Stategy', 'Stategy Title', 'Leverage'];
+  columnsToDisplay : string[] = ['idportfolio', 'portfolioname','stategy_name', 'description', 'action'];
+  columnsToHeaderDisplay : string[] = ['ID', 'Code','Stategy', 'Stategy Title', 'Action'];
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
@@ -47,9 +50,10 @@ export class TablePortfolios {
   @Input() row: any;
   @Output() public modal_principal_parent = new EventEmitter();
   investmentNodeColor=investmentNodeColor
-  expandAllowed: boolean;
+  expandAllowed: boolean = false;
   routesPathsTreeMenu = routesTreeMenu.map (el=>el.path)
   constructor(
+    private dialog: MatDialog,
     private TreeMenuSeviceS:TreeMenuSevice, 
     private router: Router,
     private InvestmentDataService:AppInvestmentDataServiceService, 
@@ -58,6 +62,7 @@ export class TablePortfolios {
     private HandlingCommonTasksS:HandlingCommonTasksService
   ) 
   { }
+  
   async updatePortfolioData (portfolioid: number, clientid:number, strategyid:number, action: string, accessToClientData:string ) {
     return new Promise<number> (async (resolve) => {
       if (this.accessState !=='none') {
@@ -89,10 +94,16 @@ export class TablePortfolios {
     this.dataSource.filter = filterValue.trim().toLowerCase();
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
-  openAccountForm (actionType:string, row: AccountsTableModel ) {
-    this.routesPathsTreeMenu.includes('Portfolios')? this.router.navigate(['tree/'+'Portfolios']) : null;
-    this.TreeMenuSeviceS.sendUpdate('Portfolios', row.portfolioname, +row.idportfolio)
+  navigateToAccountForm (actionType:string, row: AccountsTableModel ) {
+    this.routesPathsTreeMenu.includes('Portfolios')? this.router.navigate(['tree/'+'Portfolios']) : this.router.navigate(['tree/']);
+    this.TreeMenuSeviceS.sendUpdate('Portfolios', row.portfolioname, +row.idportfolio,'View')
     this.expandAllowed = false;
+  }
+  openAccountForm (actionType:string, row: any ) {
+    this.expandAllowed = false;
+    this.dialogRef = this.dialog.open(AppNewAccountComponent ,{minHeight:'400px', maxWidth:'1000px' });
+    this.dialogRef.componentInstance.action = actionType;
+    this.dialogRef.componentInstance.portfolioCode = Number(row['idportfolio']);
   }
   async submitQuery () {
     this.dataSource? this.dataSource.data = null : null;

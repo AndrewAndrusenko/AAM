@@ -87,8 +87,6 @@
       <mat-error *ngIf="dataRange.controls.dateRangeStart.hasError('matStartDateInvalid')">Invalid start date</mat-error>
       <mat-error *ngIf="dataRange.controls.dateRangeEnd.hasError('matEndDateInvalid')">Invalid end date</mat-error>
     </mat-form-field>
-
-
     <mat-form-field appearance="fill"  class="search-filed">
       <mat-label>Enter a date range</mat-label>
       <mat-date-range-input [formGroup]="dataRangeVdate" [rangePicker]="pickerVDate" >
@@ -101,7 +99,6 @@
       <mat-error *ngIf="dataRange.controls.dateRangeStart.hasError('matStartDateInvalid')">Invalid start date</mat-error>
       <mat-error *ngIf="dataRange.controls.dateRangeEnd.hasError('matEndDateInvalid')">Invalid end date</mat-error>
     </mat-form-field>
-
     <mat-form-field class="search-filed" style="width: 16%;"> 
       <input matInput placeholder="Quantity (Value or Min - Max)" formControlName="qty">
       <mat-hint *ngIf="qty.valid">
@@ -128,7 +125,7 @@
           (removed)="remove(secid,instruments,secidList)"
           (click)=" instruments = clearAll($event,instruments,secidList);">
             {{secid}}
-            <button matChipRemove>
+            <button matChipRemove *ngIf="secid!=='ClearAll'">
               <mat-icon>cancel</mat-icon>
             </button>
           </mat-chip>
@@ -158,7 +155,7 @@
           (removed)="remove(cpty,counterparties,cptyList)"
           (click)=" counterparties = clearAll($event,counterparties,cptyList);">
             {{cpty}}
-            <button matChipRemove>
+            <button matChipRemove *ngIf="cpty!=='ClearAll'">
               <mat-icon>cancel</mat-icon>
             </button>
           </mat-chip>

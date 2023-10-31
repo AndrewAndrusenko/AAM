@@ -9,21 +9,7 @@ const pg = require('pg');
 pg.types.setTypeParser(1114, function(stringValue) {
   return stringValue;  //1114 for time without timezone type
 });
-async function queryExecute (sql, response, responseType) {//General query to postgres execution via pool
-  return new Promise ((resolve) => {
-    pool.query (sql,  (err, res) => {
-      if (err) {
-        console.log (err.stack.split("\n", 1).join(""))
-        err.detail = err.stack
-        resolve (response? response.send(err):err)
-      } else {
-        console.log('UI MArket Data*********************QTY rows',responseType==='rowCount'? res.rowCount:res.rows.length)
-        let result = responseType==='rowCount'? res.rowCount : res.rows;
-        resolve (response? response.status(200).json(result):result)
-      }
-    })
-  })
-}
+
 async function fdeleteMarketData (request,response) {//Delete market data if a user decided to overwirte it
   const query = {
     text: 'DELETE FROM public.t_moexdata_foreignshares WHERE (sourcecode = ANY(array[${sourcecodes}]) AND tradedate::timestamp without time zone = ${dateToLoad}::date);'+
@@ -85,7 +71,7 @@ async function finsertMarketData (request, response) {//Insert market data recie
     break;
   }
   sql = pgp.as.format(sql,request.body)
-  queryExecute (sql, response,request.body.gloabalSource==='MScomMoveToMainTable'? undefined :'rowCount');
+  db_common_api.queryExecute(sql,response,request.body.gloabalSource==='MScomMoveToMainTable'? undefined :'rowCount','finsertMarketData')
 }
 async function fgetMarketData (request,response){//Get market data such as market prices, volumes, high, low quotes and etc
   let conditions = {}
@@ -240,7 +226,7 @@ function fGetMoexInstruments(request,response) { //Get general instruments list
       break;
     }
     query.text = pgp.as.format(query.text,request.query);
-    resolve (queryExecute (query, response))
+    resolve (db_common_api.queryExecute (query, response,undefined,request.query.Action?request.query.Action:'fGetMoexInstruments' ))
   })
 }
 async function fgetInstrumentDetails (request,response) {
@@ -256,7 +242,6 @@ async function fgetInstrumentDataCorpActions (request,response) {
   sql += request.query.isin? "WHERE isin ='"   + request.query.isin +"' ": "";
   sql += " ORDER BY date; "
   db_common_api.queryExecute(sql,response,undefined,'fgetInstrumentDataCorpActions');
-
 }
 async function fgetInstrumentDataGeneral(request,response) { 
   const query = {text: '', values:[]}
@@ -340,7 +325,7 @@ async function fUpdateInstrumentDetails (request, response) {
     break;
   }
   sql = pgp.as.format(sqlText,request.body.data)
-  queryExecute (sql, response);
+  db_common_api.queryExecute (sql, response,null,'fUpdateInstrumentDetails_'+request.body.action);
 }
 async function fUpdateInstrumentDataCorpActions (request, response) {
   let fields = ' secid, currency,  unredemeedvalue,  couponrate,   couponamount,  actiontype,  date, couponamountrur'
@@ -358,7 +343,7 @@ async function fUpdateInstrumentDataCorpActions (request, response) {
     break;
   }
   sql = pgp.as.format(sqlText,request.body.data)
-  queryExecute (sql, response);
+  db_common_api.queryExecute (sql, response,null,'fUpdateInstrumentDataCorpActions_'+request.body.action);
 }
 
 module.exports = {

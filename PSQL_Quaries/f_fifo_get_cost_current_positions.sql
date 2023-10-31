@@ -5,7 +5,7 @@
 CREATE OR REPLACE FUNCTION public.f_fifo_get_cost_current_positions(
 	p_report_date date,
 	p_idportfolios bigint[])
-    RETURNS TABLE(idportfolio numeric, secid character varying, "position" numeric, cost_in_position numeric) 
+    RETURNS TABLE(idportfolio numeric, secid character varying, "position" numeric, cost_in_position numeric,cost_full_position numeric) 
     LANGUAGE 'plpgsql'
     COST 100
     VOLATILE PARALLEL UNSAFE
@@ -18,7 +18,8 @@ SELECT
   positions.idportfolio,
   positions.secid,
   SUM(rest) AS POSITION,
-  ROUND(SUM(cost_in), 2) AS cost_in_position
+  ROUND(SUM(cost_in), 2) AS cost_in_position,
+  ROUND(SUM(cost_fulll), 2) AS cost_full_position
 FROM
   (
     SELECT DISTINCT
@@ -28,7 +29,8 @@ FROM
       dtrades_allocated_fifo.qty,
       dtrades_allocated_fifo.qty_out,
       (dtrades_allocated_fifo.qty - dtrades_allocated_fifo.qty_out) * dtrades_allocated_fifo.tr_type AS rest,
-      (dtrades_allocated_fifo.qty - dtrades_allocated_fifo.qty_out) * dtrades_allocated_fifo.tr_type * dtrades_allocated_fifo.price_in AS cost_in
+      (dtrades_allocated_fifo.qty - dtrades_allocated_fifo.qty_out) * dtrades_allocated_fifo.tr_type * dtrades_allocated_fifo.price_in AS cost_in,
+	  ABS(dtrades_allocated_fifo.qty  * dtrades_allocated_fifo.tr_type * dtrades_allocated_fifo.price_in)  AS cost_fulll
     FROM
       public.dtrades_allocated_fifo
     WHERE
@@ -40,8 +42,8 @@ FROM
       dtrades_allocated_fifo.trade_date,
       qty - qty_out
   ) AS positions
-WHERE
-  rest != 0
+-- WHERE
+--   rest != 0
 GROUP BY
   positions.idportfolio,
   positions.secid;

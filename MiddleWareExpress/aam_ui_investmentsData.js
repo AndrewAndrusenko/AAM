@@ -1,24 +1,6 @@
 const config = require ('./db_config');
-const Pool = require('pg').Pool;
-const pool = new Pool(config.dbConfig);
+const db_common_api = require ('./db_common_api')
 var pgp = require ('pg-promise')({capSQL:true});
-const db_common_api = require('./db_common_api');
-
-async function queryExecute (sql, response, responseType) {//General query to postgres execution via pool
-  return new Promise ((resolve) => {
-    pool.query (sql,  (err, res) => {
-      if (err) {
-        console.log (err.stack.split("\n", 1).join(""))
-        err.detail = err.stack
-        resolve (response? response.send(err):err)
-      } else {
-        console.log('InvestmentModule**********************QTY rows',responseType==='rowCount'? res.rowCount:res.rows.length)
-        let result = responseType==='rowCount'? res.rowCount : res.rows;
-        resolve (response? response.status(200).json(result):result)
-      }
-    })
-  })
-}
 async function fGetStrategiesList (request,response) {
   const query = {text: 'SELECT id, sname as Name, s_level_id as Level, s_description as Description, s_benchmark_account, dportfolios.portfolioname as "Benchmark Account"' +
 	' FROM public.dstrategiesglobal LEFT JOIN public.dportfolios ' + 
@@ -50,7 +32,7 @@ async function fGetStrategiesList (request,response) {
     break;
   }
   sql = pgp.as.format(query.text,query.values)
-  queryExecute (sql, response);
+  db_common_api.queryExecute (sql, response,null,'fGetStrategiesList');
 }
 async function fGetStrategyStructure (request,response) {
   const query = {text: 'SELECT '+
@@ -83,9 +65,8 @@ async function fGetStrategyStructure (request,response) {
       query.text += ';'
     break;
   }
-  console.log('query.text',query.text);
   sql = pgp.as.format(query.text,query.values)
-  queryExecute (sql, response);
+  db_common_api.queryExecute (sql, response,null,'fGetStrategyStructure');
 }
 async function fEditStrategyData (request, response) {
   paramArr = request.body.data
@@ -100,13 +81,12 @@ async function fEditStrategyData (request, response) {
     values: paramArr
   } 
   sql = pgp.as.format(query.text,query.values)
-  queryExecute (sql, response);
+  db_common_api.queryExecute (sql, response,null,'fEditStrategyData');
 }
 async function fStrategyGlobalDataDelete (request, response) {
   const query = {text: 'DELETE FROM public.dstrategiesglobal WHERE id=${id} RETURNING *;', values: request.body}
-  sql = pgp.as.format(query.text,query.values)
-  console.log('DELETE--------------------------------------------------------------',sql);
-  queryExecute (sql, response);
+  sql = pgp.as.format(query.text,query.values);
+  db_common_api.queryExecute (sql, response,null,'fStrategyGlobalDataDelete');
 }
 async function fStrategyGlobalDataCreate (request, response) {
   paramArr = request.body.data
@@ -116,9 +96,9 @@ async function fStrategyGlobalDataCreate (request, response) {
         ' VALUES (${name}, ${level}, ${description}, ${s_benchmark_account}) RETURNING *;',
     values: paramArr
   }
-  sql = pgp.as.format(query.text,query.values)
-  queryExecute (sql, response);
-}
+  sql = pgp.as.format(query.text,query.values);
+  db_common_api.queryExecute (sql, response,null,'fStrategyGlobalDataCreate');
+} 
 async function fStrategyStructureCreate (request, response) {
   paramArr = request.body.data
   const query = {
@@ -128,12 +108,12 @@ async function fStrategyStructureCreate (request, response) {
     values: paramArr
   }
   sql = pgp.as.format(query.text,query.values);
-  queryExecute (sql,response);
+  db_common_api.queryExecute (sql, response,null,'fStrategyStructureCreate');
 }
 async function fStrategyStructureDelete (request, response) {
   const query = {text: 'DELETE FROM public.dstrategies_global_structure WHERE id=${id} RETURNING *;', values: request.body}
   sql = pgp.as.format(query.text,query.values);
-  queryExecute (sql,response);
+  db_common_api.queryExecute (sql, response,null,'fStrategyStructureDelete');
 }
 async function fStrategyStructureEdit (request, response) {
   paramArr = request.body.data
@@ -148,7 +128,7 @@ async function fStrategyStructureEdit (request, response) {
     values: paramArr
   } 
   sql = pgp.as.format(query.text,query.values)
-  queryExecute (sql,response);
+  db_common_api.queryExecute (sql, response,null,'fStrategyStructureEdit');
 }
 async function fAccountCreate (request, response) {
   paramArr = request.body.data
@@ -159,12 +139,12 @@ async function fAccountCreate (request, response) {
     values: paramArr
   }
   sql = pgp.as.format(query.text,query.values)
-  queryExecute (sql,response);
+  db_common_api.queryExecute (sql, response,null,'fAccountCreate');
 }
 async function fAccountDelete (request, response) {
   const query = {text: 'DELETE FROM public.dportfolios WHERE idportfolio=${id} RETURNING *;', values: request.body}
   sql = pgp.as.format(query.text,query.values)
-  queryExecute (sql,response);
+  db_common_api.queryExecute (sql, response,null,'fAccountDelete');
 }
 async function fAccountEdit (request, response) {
   paramArr = request.body.data
@@ -179,7 +159,7 @@ async function fAccountEdit (request, response) {
     values: paramArr
   } 
   sql = pgp.as.format(query.text,query.values)
-  queryExecute (sql,response);
+  db_common_api.queryExecute (sql, response,null,'fAccountEdit');
 }
 async function fGetPortfolioPositions (request,response) {
   let conditionsDic = {
@@ -194,7 +174,6 @@ async function fGetPortfolioPositions (request,response) {
     }
   });
   let sql = '';
-  console.log(request.body);
   switch (request.body.action) {
     case 'getPortfolioPositions':
       sql= 'select round(order_amount/notnull_npv*100,2) as deviation_percent,(npv!=0) as not_zero_npv, * from f_i_get_portfolios_structure_detailed_data(${idportfolios},${report_date},${report_id_currency}) '
@@ -202,8 +181,6 @@ async function fGetPortfolioPositions (request,response) {
     break;
   }
   sql = pgp.as.format(sql,request.body.params);
-  console.log('posa',);
-  console.log('',sql);
   db_common_api.queryExecute(sql,response,undefined,request.body.action);
 }
 module.exports = {

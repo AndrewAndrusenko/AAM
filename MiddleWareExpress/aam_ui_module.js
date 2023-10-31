@@ -1,81 +1,65 @@
-const Module = require('module');
 const config = require('./db_config');
-const Pool = require('pg').Pool;
-const pool = new Pool(config.dbConfig);
+const db_common_api = require('./db_common_api')
 var pgp = require('pg-promise')({
   capSQL: true // to capitalize all generated SQL
 });
-
-async function queryExecute (sql, response, responseType) {//General query to postgres execution via pool
-  return new Promise ((resolve) => {
-    pool.query (sql,  (err, res) => {
-      if (err) {
-        console.log (err.stack.split("\n", 1).join(""))
-        err.detail = err.stack
-        resolve (response? response.send(err):err)
-      } else {
-        console.log('UI_Module**********************',responseType==='rowCount'? res.rowCount:res.rows.length)
-        let result = responseType==='rowCount'? res.rowCount : res.rows;
-        resolve (response? response.status(200).json(result):result)
-      }
-    })
-  })
-}
 async function TreeSQLQueryExc (RootNode, userId, nodeParentFavorite) {
   RootNode = RootNode.split('_')
-  pool.QueryArrayConfig = {values: [], rowMode: "array" }
+  sql = {text:'', rowMode: "array" }
   switch (RootNode[0]) {
     case 'Clients':
-      pool.QueryArrayConfig.text='SELECT dclients.clientname, dclients.idclient from public.dclients order by dclients.clientname ;'; 
+      sql.text='SELECT dclients.clientname, dclients.idclient from public.dclients order by dclients.clientname ;'; 
     break;
     case 'Portfolios':
-      pool.QueryArrayConfig.text='SELECT dportfolios.portfolioname, dportfolios.idportfolio from public.dportfolios order by dportfolios.portfolioname;'; 
+      sql.text='SELECT dportfolios.portfolioname, dportfolios.idportfolio from public.dportfolios order by dportfolios.portfolioname;'; 
     break;
     case 'Strategies':
-      pool.QueryArrayConfig.text='select dstrategiesglobal.sname, dstrategiesglobal.id from public.dstrategiesglobal order by dstrategiesglobal.s_level_id, dstrategiesglobal.sname;'; 
+      sql.text='select dstrategiesglobal.sname, dstrategiesglobal.id from public.dstrategiesglobal order by dstrategiesglobal.s_level_id, dstrategiesglobal.sname;'; 
     break; 
     case 'Instruments':
-      pool.QueryArrayConfig.text='SELECT DISTINCT tidinstrument, tidinstrument as id FROM public.dtrades order by tidinstrument;'
+      sql.text='SELECT DISTINCT tidinstrument, tidinstrument as id FROM public.dtrades order by tidinstrument;'
     break;     
     case 'Instruments':
-      pool.QueryArrayConfig.text='SELECT DISTINCT tidinstrument, tidinstrument as id FROM public.dtrades order by tidinstrument;'
+      sql.text='SELECT DISTINCT tidinstrument, tidinstrument as id FROM public.dtrades order by tidinstrument;'
     break;     
     case 'Non-Trade Operations':
-      pool.QueryArrayConfig.text="SELECT name, id FROM public.dtree_menu_items where rootname='Non-Trade Operations' order by id;"
+      sql.text="SELECT name, id FROM public.dtree_menu_items where rootname='Non-Trade Operations' order by id;"
       break;    
     case 'Accounting':
-      pool.QueryArrayConfig.text="SELECT name, id FROM public.dtree_menu_items where rootname='Accounting' order by id;"
+      sql.text="SELECT name, id FROM public.dtree_menu_items where rootname='Accounting' order by id;"
     break;    
          
-u
     case 'Favorites':
-      pool.QueryArrayConfig.values = [userId, RootNode[1]]
-      pool.QueryArrayConfig.rowMode="array"
+      sql.values = [userId, RootNode[1]]
+      sql.rowMode="array"
       switch (RootNode[1]) {
         case 'Portfolios':
-        sql = "SELECT dportfolios.portfolioname, dtree_menu_favorites.idelement FROM public.dtree_menu_favorites " + 
+          sql.text = "SELECT dportfolios.portfolioname, dtree_menu_favorites.idelement FROM public.dtree_menu_favorites " + 
               "LEFT JOIN dportfolios on dtree_menu_favorites.idelement = dportfolios.idportfolio::text "
         break;   
         case 'Clients':
-          sql = "SELECT dclients.clientname, dtree_menu_favorites.idelement  FROM public.dtree_menu_favorites " + 
+          sql.text = "SELECT dclients.clientname, dtree_menu_favorites.idelement  FROM public.dtree_menu_favorites " + 
           " LEFT JOIN dclients on dtree_menu_favorites.idelement = dclients.idclient::text "
         break;   
         case 'Strategies':
-          sql = "SELECT dstrategiesglobal.sname, dtree_menu_favorites.idelement FROM public.dtree_menu_favorites " + 
+          sql.text = "SELECT dstrategiesglobal.sname, dtree_menu_favorites.idelement FROM public.dtree_menu_favorites " + 
           " LEFT JOIN dstrategiesglobal on dtree_menu_favorites.idelement = dstrategiesglobal.id::text "
         break;   
         case 'Instruments':
-          sql = "SELECT dtree_menu_favorites.nodename, dtree_menu_favorites.idelement FROM public.dtree_menu_favorites " 
-        break;   
+          sql.text = "SELECT dtree_menu_favorites.nodename, dtree_menu_favorites.idelement FROM public.dtree_menu_favorites " 
+        break;  
+        default:
+          sql.text = "SELECT * FROM (SELECT 0 as userid, '0' as nodeparent) as t ";
+        break;
       }
-      pool.QueryArrayConfig.text = sql + " where (userid= $1) and (nodeparent = $2) "
+      sql.text = sql.text + " where (userid= $1) and (nodeparent = $2) "
     break;     
   }
   RootNode[1] ? RootNode = RootNode.join('_') : RootNode = RootNode[0]
   PromQty = new Promise(
-    (resolve, reject) => {
-      pool.query(pool.QueryArrayConfig, (error,result) => {
-        if (result === undefined) {resolve([RootNode,[]])} else {resolve([RootNode,result.rows])} 
+    (resolve) => {
+      db_common_api.queryExecute(sql,null,null,RootNode).then(result => {
+        if (result === undefined) {resolve([RootNode,[]])} else {resolve([RootNode,result])} 
       })
     }
   ) 
@@ -98,7 +82,7 @@ async function fGetportfolioTable (request,response) {
   const query = { text: "SELECT "+
     " dportfolios.idportfolio, dportfolios.idclient , dportfolios.idstategy, " + 
     " dstrategiesglobal.sname as stategy_name, dstrategiesglobal.s_description as description , "+
-    " dportfolios.portfolioname, dportfolios.portleverage " 
+    " dportfolios.portfolioname, dportfolios.portleverage, 0 as action " 
   }
     request.query.accessToClientData!=='none'? query.text += clientDataFields: null;
     query.text += " FROM public.dportfolios "+
@@ -128,7 +112,7 @@ async function fGetportfolioTable (request,response) {
     break;
   }
   sql = pgp.as.format(query.text,query.values)
-  queryExecute (sql, response);
+  db_common_api.queryExecute (sql, response,null,request.query.actionOnAccountTable);
 }
 async function fPutNewFavorite (request, response) {
     paramArr = [request.body.nodename, request.body.nodeparent, request.body.userId, request.body.idelement]
@@ -138,7 +122,7 @@ async function fPutNewFavorite (request, response) {
       rowMode: 'array'
     }
     sql = pgp.as.format(query.text,query.values)
-    queryExecute (sql, response);
+    db_common_api.queryExecute (sql, response,null,'fPutNewFavorite');
 }
 async function fRemoveFavorite (request, response) {
     paramArr = [request.body.nodename, request.body.userId, request.body.idelement]
@@ -147,7 +131,7 @@ async function fRemoveFavorite (request, response) {
       values: paramArr,
     }
     sql = pgp.as.format(query.text,query.values)
-    queryExecute (sql, response);
+    db_common_api.queryExecute (sql, response,null,'fRemoveFavorite');
 }
 async function fGetClientData(request,response) {
   const query = {text: ' SELECT * FROM public.dclients'}
@@ -167,7 +151,7 @@ async function fGetClientData(request,response) {
     break;
   }
   sql = pgp.as.format(query.text,query.values)
-  queryExecute (sql, response);
+  db_common_api.queryExecute (sql, response,null,'fGetClientData');
 }
 async function fEditClientData (request, response) {
   paramArr = request.body.data
@@ -185,7 +169,7 @@ async function fEditClientData (request, response) {
     values: paramArr
   }
   sql = pgp.as.format(query.text,query.values)
-  queryExecute (sql, response);
+  db_common_api.queryExecute (sql, response,null,'fEditClientData');
 }
 async function fCreateClientData (request, response) {
   paramArr = request.body.data
@@ -198,12 +182,12 @@ async function fCreateClientData (request, response) {
     values: paramArr
   }
   sql = pgp.as.format(query.text,query.values)
-  queryExecute (sql, response);
+  db_common_api.queryExecute (sql, response,null,'fCreateClientData');
 }
 async function fClientDataDelete (request, response) {
   const query = {text: 'DELETE FROM public.dclients WHERE idclient=${idclient} RETURNING *;', values:  request.body}
   sql = pgp.as.format(query.text,query.values)
-  queryExecute (sql, response); 
+  db_common_api.queryExecute (sql, response,null,'fClientDataDelete'); 
 }
 
 module.exports = {

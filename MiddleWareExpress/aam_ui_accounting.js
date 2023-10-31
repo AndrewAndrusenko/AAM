@@ -22,7 +22,6 @@ async function fCreateDepoSubAccounts (request,response) {
   db_common_api.queryExecute(sql,response,undefined,'fCreateDepoSubAccounts');
 }
 async function fdeleteAccountingFIFOtransactions (request,response) {
-  console.log('del',request.body.params);
   let sql = 'SELECT * FROM f_a_delele_accounting_fifo_for_allocated_trade(ARRAY[${idtrades}])';
   sql = pgp.as.format(sql,request.body.params);
   db_common_api.queryExecute(sql,response,undefined,'fdeleteAccountingFIFOtransactions');
@@ -41,8 +40,6 @@ async function fUpdateEntryAccountAccounting (request, response) {
   db_common_api.fUpdateTableDB ('bAccountTransaction',fields,'id',request, response)
 }
 async function fGetAccountingData (request,response) {
-  console.log('request.query 0000',request.query);
-
   let conditions = {}
   const query = {text: ''}
   switch (request.query.Action) {
@@ -98,7 +95,7 @@ async function fGetAccountingData (request,response) {
         'LEFT JOIN "bcAccountType_Ext" ON "bcAccountType_Ext"."accountType_Ext" = "bLedger"."accountTypeID" ;'
     break;
     case 'GetAccountsEntriesListAccounting':
-      query.text = 'SELECT * FROM f_a_b_get_all_entries_transactions (${dateRangeStart},${dateRangeEnd},${entryTypes:raw},null,${noAccountLedger}, ${idtrade:raw});'
+      query.text = 'SELECT * FROM f_a_b_get_all_entries_transactions (${dateRangeStart},${dateRangeEnd},${entryTypes:raw},${portfolioCodes},${noAccountLedger}, ${idtrade:raw});'
       request.query.entryTypes = request.query.entryTypes.map(el=>Number(el))
 
     break;
@@ -172,11 +169,13 @@ async function fGetAccountingData (request,response) {
   }
   query.text = pgp.as.format(query.text,request.query);
   if (['GetAccountsEntriesListAccounting'].includes(request.query.Action)) {
+    request.query
+    console.log(' request.query', request.query);
     query.text = query.text.replaceAll("'null'",null);
     query.text = query.text.replaceAll("array[0,0]",null);
     query.text = query.text.replaceAll(",'ClearAll'",',null');
+    console.log('sql',query.text);
   }
-  console.log('query.text',query.text);
   db_common_api.queryExecute(query.text,response,null, request.query.queryCode === undefined?  request.query.Action : request.query.queryCode );
 }
 async function fGetMT950Transactions (request,response) {

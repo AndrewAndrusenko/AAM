@@ -9,7 +9,7 @@ import {MatTabChangeEvent, MatTabGroup } from '@angular/material/tabs';
   styleUrls: ['./tabs.component.css'],
 })
 export class AppTabsComponent implements OnDestroy {
-  messageReceived ={text:'AAA', name:'', id:0};
+  messageReceived ={text:'AAA', name:'', id:0,action:''};
   Edit = "Edit"
   private subscriptions = new Subscription();
   @ViewChild('tabGroup') tabGroup:MatTabGroup

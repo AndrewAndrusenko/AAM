@@ -1,4 +1,4 @@
-import {Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild} from '@angular/core';
+import {Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, SimpleChanges, ViewChild} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {Subscription, filter } from 'rxjs';
@@ -36,7 +36,7 @@ import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
 export class AppTableAccEntriesComponent implements OnInit {
   accessState: string = 'none';
   disabledControlElements: boolean = false;
-  columnsToDisplay = ['t_id','portfolioname','d_Debit','d_Credit','t_dataTime','d_xActTypeCodeExtName','t_XactTypeCode','t_amountTransaction','d_entryDetails', 't_idtrade','t_extTransactionId']
+  columnsToDisplay = ['t_id','d_portfolioname','d_Debit','d_Credit','t_dataTime','d_xActTypeCodeExtName','t_XactTypeCode','t_amountTransaction','d_entryDetails', 't_idtrade','t_extTransactionId']
   columnsHeaderToDisplay = ['ID','Code','Debit','Credit','Date', 'Code', 'Ledger',  'Amount', 'Details', 'Trade','ExtID', 'Action'];
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
   private subscriptions = new Subscription ();
@@ -44,34 +44,30 @@ export class AppTableAccEntriesComponent implements OnInit {
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild('filter',{static:false}) filter: ElementRef;
+  @ViewChild('allSelected') private allSelected: MatOption;
   @Output() public modal_principal_parent = new EventEmitter();
   @Output() newAllocatedSum = new EventEmitter<{swift_item_id:number,allocated_sum:number}>();
   expandedElement: bAccountsEntriesList  | null;
-  accessToClientData: string = 'true';
   @Input() UI_min: boolean = false; 
   @Input() action :string;
   @Input() externalId: number = null;
   @Input() FirstOpenedAccountingDate: Date;
   @Input() swiftID: number;
   @Input() swiftItemID: number;
+  @Input() paramRowData : any = null;
   dialogRef: MatDialogRef<AppAccEntryModifyFormComponent>;
-  menuColorGl=menuColorGl
   filterlFormControl = new FormControl('');
-  ;
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
   dataRange = new FormGroup ({
     dateRangeStart: new FormControl<Date | null>(null),
     dateRangeEnd: new FormControl<Date | null>(null),
   });
-  @ViewChild('allSelected') private allSelected: MatOption;
   
   panelOpenState = false;
-  public searchParametersFG: FormGroup;
-  public searchParameters: any;
+  searchParametersFG: FormGroup;
   dialogChooseAccountsList: MatDialogRef<AppTableAccAccountsComponent>;
   TransactionTypes: bcTransactionType_Ext[] = [];
   filterEntryTypes:string[] = ['ClearAll'];
-  paramRowData : any = null;
   investmentNodeColor=investmentNodeColor;
   activeTab:string='';
   tabsNames = ['Transactions List']
@@ -96,6 +92,7 @@ export class AppTableAccEntriesComponent implements OnInit {
     this.searchParametersFG = this.fb.group ({
       dataRange : this.dataRange,
       noAccountLedger: {value:['ClearAll'], disabled:false},
+      portfolioCodes: {value:['ClearAll'], disabled:false},
       amount:{value:null, disabled:true},
       entryTypes : {value:[0], disabled:false},
       ExtID:{value:null, disabled:false},
@@ -116,6 +113,10 @@ export class AppTableAccEntriesComponent implements OnInit {
     if (!this.FirstOpenedAccountingDate) {
       this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate);
     }
+    this.initiateTable();
+    this.subscriptions.add(this.TreeMenuSevice.getActiveTab().subscribe(tabName=>this.activeTab=tabName));
+  }
+  initiateTable() {
     switch (this.action) {
       case 'ShowEntriesForBalanceSheet':
         this.noAccountLedger.value.push(this.paramRowData.accountNo);
@@ -132,12 +133,17 @@ export class AppTableAccEntriesComponent implements OnInit {
         this.ExtId.setValue(this.externalId)
         this.submitQuery(false);
       break;
+      case 'ViewEntriesByPortfolio':
+        this.portfolioCodes.patchValue([this.paramRowData.portfolioCode,this.paramRowData.portfolioCode])
+        this.submitQuery(false);
+      break;
       default :
-      this.submitQuery(false)
-    break;
+        this.submitQuery(false)
+      break;
     }
-    this.subscriptions.add(this.TreeMenuSevice.getActiveTab().subscribe(tabName=>this.activeTab=tabName));
-
+  }
+  ngOnChanges(changes: SimpleChanges): void {
+    changes['paramRowData']?.currentValue!==undefined? this.initiateTable() : null;
   }
   submitQuery (notification:boolean=true, sendNewAllocatedSum:boolean=false) {
     this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate);
@@ -238,4 +244,5 @@ export class AppTableAccEntriesComponent implements OnInit {
   get  ExtId () {return this.searchParametersFG.get('ExtID') } 
   get  idtrade () {return this.searchParametersFG.get('idtrade') } 
   get  noAccountLedger () {return this.searchParametersFG.get('noAccountLedger') } 
+  get  portfolioCodes () {return this.searchParametersFG.get('portfolioCodes') } 
 }

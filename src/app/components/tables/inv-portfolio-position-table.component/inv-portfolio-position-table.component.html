@@ -17,7 +17,15 @@
     Save as XLS 
     <mat-icon matSuffix >save_alt</mat-icon>
   </button>
-  <h2 style="margin-left: 1%;"><span class="red_color">{{filters.portfolio_code}}</span> - Current positions ({{report_date.value.toLocaleDateString()}}) in USD</h2>
+  <button color = "accent" mat-raised-button title="Reload Table"
+    style=" margin-left:1%; font-size: 18px;"
+    (click)="submitQuery()">
+    Reload 
+    <mat-icon matSuffix >refresh</mat-icon>
+  </button>
+  <h2 *ngIf="searchAllowed!==true"  style="margin-left: 1%;">
+    <span class="red_color">{{filters.portfolio_code}}</span> - Current positions ({{report_date.value.toLocaleDateString()}}) in USD
+  </h2>
 <form class="submit" *ngIf="searchAllowed===true" [formGroup]="searchParametersFG"  style="font-size: 18px; margin-left: 0.5%; "> <!-- complexSearch Form -->
   <span style="display: flex;    align-items:flex-start;  margin-right: 1%;margin-top: 0.2%;"> 
     <span style="display:grid; width: 10%; margin-right: 1%;"> <!-- submitQuery/CleaAll Buttons -->
@@ -34,11 +42,6 @@
          portfolios=['ClearAll']">
         ClearAll
       </button>
-<!--         <button color = "primary" mat-raised-button 
-        style="margin-top:4%;margin-left: 1%; font-size: 18px;"
-        (click)="searchParametersFG.reset()"><mat-icon>call</mat-icon>
-        Create Orders
-      </button> -->
     </span>
     <mat-form-field class="search-filed" title="Date to upload">
       <input matInput formControlName = "report_date" [matDatepicker]="dateForMarketData" placeholder="Report Date">
@@ -65,8 +68,8 @@
         (selectionChange)="setPortfoliosList($event)"  >
         <mat-option *ngFor="let mp of mp_strategies_list" [value]="mp['name']"> {{mp['name']}} </mat-option>
       </mat-select>
-      <mat-checkbox 
-        (change)="showZeroPortfolios($event)"
+      <mat-checkbox #notNull
+        (change)="showZeroPortfolios($event.checked)"
         style="margin-top: 10%;">
         Zero Portfolio
       </mat-checkbox> 
@@ -102,7 +105,7 @@
         (removed)="remove(secid,instruments,secidList)"
         (click)=" instruments = clearAll($event,instruments,secidList);">
           {{secid}}
-          <button matChipRemove>
+          <button matChipRemove *ngIf="portfolio!=='ClearAll'">
             <mat-icon>cancel</mat-icon>
           </button>
         </mat-chip>
@@ -130,7 +133,7 @@
 </form>
   <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort
    class="mat-elevation-z8" 
-    class ="childTable" style="width: 140%;" >
+    class ="childTable" style="width: 150%;" >
     <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i=index" justify="right"  >
       <th mat-header-cell *matHeaderCellDef mat-sort-header> {{columnsHeaderToDisplay[i]}}</th>
       <td mat-footer-cell *matFooterCellDef let> <h2 style="margin-top: 5%;">
@@ -143,7 +146,7 @@
         mat-cell *matCellDef="let element" [cdkContextMenuTriggerFor]="instrumentcontextmenu" >
         <span [ngSwitch]="true==true">
           <p *ngSwitchDefault>{{element[column]}}</p>
-          <p *ngSwitchCase="['order_amount','order_qty','mtm_dirty_price','cost_in_position','orders_unaccounted_qty'].includes(column)">{{element[column]|currency :' '}} </p>
+          <p *ngSwitchCase="['order_amount','order_qty','mtm_dirty_price','cost_in_position','orders_unaccounted_qty','cost_full_position'].includes(column)">{{element[column]|currency :' '}} </p>
           <p *ngSwitchCase="['current_balance','mtm_positon',
           'planned_position','current_account_balance',
           'pl','unrealizedpl','total_pl'].includes(column)">

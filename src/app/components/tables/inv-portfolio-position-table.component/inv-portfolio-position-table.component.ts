@@ -16,7 +16,7 @@ import {AppInvestmentDataServiceService } from 'src/app/services/investment-data
 import { HostListener } from '@angular/core';
 import { indexDBService } from 'src/app/services/indexDB.service';
 import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
-import { MatCheckboxChange } from '@angular/material/checkbox';
+import { MatCheckbox, MatCheckboxChange } from '@angular/material/checkbox';
 @Component({
   selector: 'app-inv-portfolio-position-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,13 +30,14 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
   @Input() rowsPerPages:number = 15;
   @Input() filters:any;
   @Input() searchAllowed:boolean = true;
-  columnsToDisplay = ['portfolio_code','secid','mp_name','fact_weight','current_balance','mtm_positon','weight','planned_position','deviation_percent','order_amount','mtm_rate','roi','total_pl','pl','unrealizedpl','cost_in_position','mtm_date','order_type','order_qty','orders_unaccounted_qty','mtm_dirty_price','cross_rate','strategy_name','rate_date'];
-  columnsHeaderToDisplay = ['Code','SecID','MP','Fact %','Balance','PositionMTM','MP %','MP_Position','DV%','Deviation','MTM_Rate','ROI','Total PL','FIFO PL','MTM PL','Position Cost','MTM_Date','TypeBS','Deviation Qty','Qty in Active Orders ','MTM_Dirty','CurRate','Strategy','CurDate']
+  columnsToDisplay = ['portfolio_code','secid','mp_name','fact_weight','current_balance','mtm_positon','weight','planned_position','deviation_percent','order_amount','mtm_rate','roi','total_pl','pl','unrealizedpl','cost_in_position','mtm_date','order_type','order_qty','orders_unaccounted_qty','mtm_dirty_price','cross_rate','strategy_name','cost_full_position','rate_date'];
+  columnsHeaderToDisplay = ['Code','SecID','MP','Fact %','Balance','PositionMTM','MP %','MP_Position','DV%','Deviation','MTM_Rate','ROI','Total PL','FIFO PL','MTM PL','Position Cost','MTM_Date','TypeBS','Deviation Qty','Qty in Active Orders ','MTM_Dirty','CurRate','Strategy','Cost Full','CurDate']
   dataSource: MatTableDataSource<portfolioPositions>;
   fullDataSource: portfolioPositions[];
   @ViewChild('filterALL', { static: false }) filterALL: ElementRef;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
+  @ViewChild('notNull') notNullCB: MatCheckbox;
   @Output() public modal_principal_parent = new EventEmitter();
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
   instruments: string[] = ['ClearAll'];
@@ -120,12 +121,14 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
       this.filterALL.nativeElement.value = e.value;
       this.dataSource.filter = e.value.toLowerCase();
       (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
-    }
-    )
+    })
   }
-  showZeroPortfolios(event:MatCheckboxChange) {
-    console.log('check',event.checked);
-    this.initialFilterOfDataSource(event.checked?{rest:true}:{not_zero_npv:true})
+  showZeroPortfolios(event:boolean) {
+    if (event) {
+      this.initialFilterOfDataSource(this.filters)
+    } else {
+      this.dataSource.data = this.dataSource.filteredData.filter(el=>el['not_zero_npv']===true)
+    }
   }
   initialFilterOfDataSource (filter:any) {
     if (filter?.rest===true) {
@@ -138,7 +141,10 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
    })
   }
   ngOnChanges(changes: SimpleChanges) {
-    changes['filters'].currentValue!==undefined&&this.fullDataSource!==undefined?  this.initialFilterOfDataSource (changes['filters'].currentValue):null;
+    if (changes['filters'].currentValue!==undefined&&this.fullDataSource!==undefined)  {
+      this.initialFilterOfDataSource (changes['filters'].currentValue);
+      this.notNullCB?.checked===false? this.showZeroPortfolios(false):null;
+    }
   }
   applyFilter(event: any, col?:string) {
     this.dataSource.filterPredicate = col === undefined? this.defaultFilterPredicate : this.multiFilter
@@ -153,6 +159,7 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
     this.filters? this.initialFilterOfDataSource(this.filters) : null;
+    this.notNullCB?.checked===false? this.showZeroPortfolios(false):null;
     this.dataSource.filterPredicate =this.multiFilter
     this.defaultFilterPredicate = this.dataSource.filterPredicate;
     this.multiFilter = this.dataSource.filterPredicate;
@@ -173,7 +180,7 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
     });
   }
   changedValueofChip (value:string, chipArray:string[],control:AbstractControl) {
-    chipArray[chipArray.length-1] = value;
+    chipArray[chipArray.length-1] === 'ClearAll'? chipArray.push(value) : chipArray[chipArray.length-1] = value
   }
   add(event: MatChipInputEvent,chipArray:string[],control:AbstractControl): any[] {
     const value = (event.value || '').trim();

@@ -13,6 +13,9 @@ import { HandlingCommonTasksService } from 'src/app/services/handling-common-tas
 import { formatNumber } from '@angular/common';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { investmentNodeColor } from 'src/app/models/constants.model';
+import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
+import { Router } from '@angular/router';
+import { routesTreeMenu } from 'src/app/app-routing.module';
 @Component({
   selector: 'app-app-clients-table',
   templateUrl: './clients-table.component.html',
@@ -43,8 +46,12 @@ export class AppClientsTableComponent  {
   @Output() public modal_principal_parent = new EventEmitter();
   action ='';
   investmentNodeColor=investmentNodeColor
+  routesPathsTreeMenu = routesTreeMenu.map (el=>el.path)
+
   constructor(
-    private dialog: MatDialog,    
+    private dialog: MatDialog,  
+    private TreeMenuSeviceS:TreeMenuSevice, 
+    private router: Router,  
     private InvestmentDataService:AppInvestmentDataServiceService, 
     private AuthServiceS:AuthService,  
     private CommonDialogsService:HadlingCommonDialogsService,
@@ -72,6 +79,11 @@ export class AppClientsTableComponent  {
   }
   chooseClient (element:ClientData) {
     this.modal_principal_parent.emit(element);
+  }
+  navigateToClientModifyForm (actionType: string, element:ClientData) {
+    this.routesPathsTreeMenu.includes('Clients')? this.router.navigate(['tree/'+'Clients']) : this.router.navigate(['tree/']);
+    this.TreeMenuSeviceS.sendUpdate('Clients', element.clientname, element.idclient,'View')
+    this.expandAllowed = false;
   }
   openClientModifyForm (actionType: string, element:ClientData) {
     this.expandAllowed = false;

@@ -29,11 +29,12 @@ import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
   templateUrl: './orders-table.component.html',
   styleUrls: ['./orders-table.component.scss'],
   animations: [
-    trigger('detailExpand', [
-      state('collapsed', style({height: '0px', minHeight: '0'})),
-      state('expanded', style({height: '*'})),
-      transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
-    ]),
+    trigger('detailExpand',
+    [   state('collapsed, void', style({ height: '0px'})),
+        state('expanded', style({ height: '*' })),
+        transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
+        transition('expanded <=> void', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)'))
+    ])
   ],
 })
 export class AppOrderTableComponent  implements AfterViewInit {
@@ -258,7 +259,7 @@ export class AppOrderTableComponent  implements AfterViewInit {
     this.dataSource.data = this.excludeOrdersWithParent()
   }
   changedValueofChip (value:string, chipArray:string[],control:AbstractControl) {
-    chipArray[chipArray.length-1] = value;
+    chipArray[chipArray.length-1] === 'ClearAll'? chipArray.push(value) : chipArray[chipArray.length-1] = value
   }
   add(event: MatChipInputEvent,chipArray:string[],control:AbstractControl): any[] {
     const value = (event.value || '').trim();
@@ -272,7 +273,7 @@ export class AppOrderTableComponent  implements AfterViewInit {
     (index >= 0)? chipArray.splice(index, 1) : null;
   }
   clearAll(event, chipArray:string[],control:AbstractControl) : string [] {
-    if (event.target.textContent.trim() === 'ClearAll cancel') {
+    if (event.target.textContent.trim() === 'ClearAll') {
       chipArray = ['ClearAll'];
     };
     return chipArray;

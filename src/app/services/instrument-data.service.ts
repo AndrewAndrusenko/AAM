@@ -85,7 +85,7 @@ export class InstrumentDataService {
     this.subjectCorpData.next(dataSet); 
   }
   getCorpActionData(): Observable<instrumentCorpActions[]> { 
-    return this.subjectCorpData.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
+    return this.subjectCorpData.asObservable(); 
   }
   createInstrument (data:any): Observable<Instruments[]>  { 
     return this.http.post  <Instruments[]> ('/api/AAM/MD/InstrumentCreate/',{'data': data})

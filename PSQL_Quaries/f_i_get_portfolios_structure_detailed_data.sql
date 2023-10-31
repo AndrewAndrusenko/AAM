@@ -1,12 +1,12 @@
 -- FUNCTION: public.f_i_get_portfolios_structure_detailed_data(text[], date, integer)
 
--- DROP FUNCTION IF EXISTS public.f_i_get_portfolios_structure_detailed_data(text[], date, integer);
+DROP FUNCTION IF EXISTS public.f_i_get_portfolios_structure_detailed_data(text[], date, integer);
 
 CREATE OR REPLACE FUNCTION public.f_i_get_portfolios_structure_detailed_data(
 	p_idportfolio_codes text[],
 	p_report_date date,
 	p_report_currency integer)
-    RETURNS TABLE(notnull_npv numeric, mtm_positon_base_cur numeric, roi numeric, pl numeric, cost_in_position numeric, unrealizedpl numeric, total_pl numeric, idportfolio integer, portfolio_code character varying, secid character varying, strategy_name character varying, mp_name character varying, fact_weight numeric, current_balance numeric, mtm_positon numeric, weight numeric, planned_position numeric, order_amount numeric, order_type text, order_qty numeric, mtm_rate numeric, mtm_date date, mtm_dirty_price numeric, cross_rate numeric, npv numeric, rate_date date, main_currency_code numeric, orders_unaccounted_qty numeric, orders_unaccounted numeric) 
+    RETURNS TABLE(notnull_npv numeric, mtm_positon_base_cur numeric, roi numeric, pl numeric, cost_in_position numeric,cost_full_position numeric, unrealizedpl numeric, total_pl numeric, idportfolio integer, portfolio_code character varying, secid character varying, strategy_name character varying, mp_name character varying, fact_weight numeric, current_balance numeric, mtm_positon numeric, weight numeric, planned_position numeric, order_amount numeric, order_type text, order_qty numeric, mtm_rate numeric, mtm_date date, mtm_dirty_price numeric, cross_rate numeric, npv numeric, rate_date date, main_currency_code numeric, orders_unaccounted_qty numeric, orders_unaccounted numeric) 
     LANGUAGE 'plpgsql'
     COST 100
     VOLATILE PARALLEL UNSAFE
@@ -122,6 +122,7 @@ WITH
       ROUND(cross_currency_quotes.cross_rate, 6) AS cross_rate,
       cross_currency_quotes.rate_date,
 	  positions_cost.cost_in_position,
+	  positions_cost.cost_full_position,
       CASE
         WHEN accured_interest_data.price_type = 2 THEN accured_interest_data.faceunit::NUMERIC
         WHEN full_portfolio.position_type = 'MONEY' THEN full_portfolio.account_currency
@@ -151,9 +152,10 @@ SELECT
  npv_portfolios.npv as notnull_npv,
  full_portfolio_with_mtm_data.mtm_positon_base_cur,
  ROUND((full_portfolio_with_mtm_data.mtm_positon - full_portfolio_with_mtm_data.cost_in_position+full_portfolio_with_mtm_data.pl)
-	   /ABS(full_portfolio_with_mtm_data.cost_in_position)*100,2) AS roi,
+	   /ABS(full_portfolio_with_mtm_data.cost_full_position)*100,2) AS roi,
   ROUND(full_portfolio_with_mtm_data.pl*full_portfolio_with_mtm_data.cross_rate,2) AS pl,
   ROUND(full_portfolio_with_mtm_data.cost_in_position*full_portfolio_with_mtm_data.cross_rate,2) AS cost_in_position,
+  ROUND(full_portfolio_with_mtm_data.cost_full_position*full_portfolio_with_mtm_data.cross_rate,2) AS cost_full_position,
   ROUND((full_portfolio_with_mtm_data.mtm_positon - full_portfolio_with_mtm_data.cost_in_position)*full_portfolio_with_mtm_data.cross_rate,2) 
   AS unrealizedpl,
   ROUND((full_portfolio_with_mtm_data.mtm_positon - full_portfolio_with_mtm_data.cost_in_position+full_portfolio_with_mtm_data.pl)*full_portfolio_with_mtm_data.cross_rate,2) 
@@ -220,4 +222,3 @@ $BODY$;
 
 ALTER FUNCTION public.f_i_get_portfolios_structure_detailed_data(text[], date, integer)
     OWNER TO postgres;
-select * from f_i_get_portfolios_structure_detailed_data(array['acm002'],'10/25/2023',840)

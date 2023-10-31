@@ -154,7 +154,8 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
     !event.hasOwnProperty('isUserInput') || event.isUserInput ? this.dataSource.filter = filterValue.trim().toLowerCase() : null;
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
-  changedValueofChip (value:string) {this.instruments[this.instruments.length-1] = value}
+  changedValueofChip (value:string) {
+    this.instruments[this.instruments.length-1] === 'ClearAll'? this.instruments.push(value) : this.instruments[this.instruments.length-1] = value}
   add(event: MatChipInputEvent): void {
     const value = (event.value || '').trim();
     const valueArray = event.value.split(',');

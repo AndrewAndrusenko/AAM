@@ -1,3 +1,3 @@
-ALTER function public."__________________"
+ALTER function public."_________"
     SET SCHEMA archive;
 

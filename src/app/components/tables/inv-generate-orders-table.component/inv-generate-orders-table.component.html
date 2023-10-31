@@ -34,11 +34,12 @@
           ClearAll
         </button>
       </span>
-      <mat-form-field class="search-filed" title="Date to upload">
-        <input matInput formControlName = "report_date" [matDatepicker]="dateForMarketData" placeholder="Report Date">
-        <mat-datepicker-toggle matSuffix [for]="dateForMarketData"></mat-datepicker-toggle>
-        <mat-datepicker  #dateForMarketData></mat-datepicker>
-      </mat-form-field> 
+ 
+ <!--      <mat-form-field class="search-filed" title="Date to upload" >
+        <label for=""></label>
+        "report_date.value.toLocaleDateString()">
+
+      </mat-form-field>  -->
       <mat-form-field class="search-filed" title="Type to find(any filed). Click to select" >
         <input matInput [placeholder]="'Report Currency'" 
         formControlName="report_id_currency" 
@@ -59,13 +60,20 @@
           Inccorect format! 
         </mat-error>
       </mat-form-field>
+    <span style="display:grid; width: 20%; min-height: 80%; align-items: flex-end;">
+
+
       <mat-select placeholder="Model Portfolio" class="search-filed"
         formControlName="MP" 
-        style="width: 10%;"
+       style="padding: 3%;"
         (selectionChange)="setPortfoliosList($event)"  
       >
         <mat-option *ngFor="let mp of mp_strategies_list" [value]="mp['name']"> {{mp['name']}} </mat-option>
       </mat-select>
+      <span style="margin-top: 4%; margin-left: 2%;">
+        Date:  {{report_date.value | date}} 
+      </span> 
+    </span> 
     <span style="display:grid; width: 20%; margin-left: 1%; align-items: flex-end;">
 
     <button color = "primary" mat-raised-button 

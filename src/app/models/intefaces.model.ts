@@ -44,7 +44,11 @@ export const dbErrorsMap: errorsDescription[] = [
     constraintCode: 'cForeignAllocacatedTrade',
     errorText:'Attempt to delete an allocated trade with generated entries. cForeignAllocacatedTrade blocked transaction'
   },
-  
+  {
+    constraintCode: 'cFK_dportfolios_benckmarkPortfolio',
+    errorText:'Attempt to delete benchmark account for existing strategy. cFK_dportfolios_benckmarkPortfolio blocked transaction'
+  },
+
 ]
 export const indexDbConfigAAM: DBConfig  = {
   name: 'AAMdb',
@@ -78,6 +82,7 @@ export interface AccountsTableModel {
  sname:string;
  portfolioname:string;
  portleverage:number; 
+ action:number
 }
 export interface accessRestriction {
 id:string, 
@@ -445,6 +450,7 @@ export interface portfolioPositions{
   unrealizedpl: number,
   pl: number,
   cost_in_position: number,
+  cost_full_position:number,
   idportfolio: number, 
   portfolio_code  :string,
   secid  :string,

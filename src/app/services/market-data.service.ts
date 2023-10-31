@@ -151,13 +151,13 @@ export class AppMarketDataService {
     this.subjectMarketData.next(dataSet); 
   }
   getReloadMarketData(): Observable<marketData[]> { 
-    return this.subjectMarketData.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
+    return this.subjectMarketData.asObservable(); 
   }
   sendMarketDataForChart ( dataSet:marketData[]) {
     this.subjectCharMarketData.next(dataSet); 
   }
   getMarketDataForChart(): Observable<marketData[]> { 
-    return this.subjectCharMarketData.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
+    return this.subjectCharMarketData.asObservable(); 
   }
  
 }

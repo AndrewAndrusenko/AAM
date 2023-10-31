@@ -182,7 +182,7 @@ export class AppTradeTableComponent  implements AfterViewInit {
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
   changedValueofChip (value:string, chipArray:string[],control:AbstractControl) {
-    chipArray[chipArray.length-1] = value;
+    chipArray[chipArray.length-1] === 'ClearAll'? chipArray.push(value) : chipArray[chipArray.length-1] = value
   }
   add(event: MatChipInputEvent,chipArray:string[],control:AbstractControl): any[] {
     const value = (event.value || '').trim();
@@ -196,7 +196,7 @@ export class AppTradeTableComponent  implements AfterViewInit {
     (index >= 0)? chipArray.splice(index, 1) : null;
   }
   clearAll(event, chipArray:string[],control:AbstractControl) : string [] {
-    if (event.target.textContent.trim() === 'ClearAll cancel') {
+    if (event.target.textContent.trim() === 'ClearAll') {
       chipArray = ['ClearAll'];
     };
     return chipArray;

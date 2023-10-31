@@ -208,7 +208,8 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
     this.dataSource.filter = filterValue.trim().toLowerCase();
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
-  changedValueofChip (value:string) {this.instruments[this.instruments.length-1] = value}
+  changedValueofChip (value:string) {
+    this.instruments[this.instruments.length-1] === 'ClearAll'? this.instruments.push(value) : this.instruments[this.instruments.length-1] = value}
   add(event: MatChipInputEvent): void {
     const value = (event.value || '').trim();
     const valueArray = event.value.split(',');
@@ -221,7 +222,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
   }
   clearAll(event) {
     console.log('event', event.target.textContent);
-    event.target.textContent.trim() === 'ClearAll cancel'? this.instruments = ['ClearAll']: null;
+    event.target.textContent.trim() === 'ClearAll'? this.instruments = ['ClearAll']: null;
   }
   addChips (el: any, column: string) {(['accountNo'].includes(column))? this.instruments.push(el):null;}
   updateFilter (event:Event, el: any, column: string) {

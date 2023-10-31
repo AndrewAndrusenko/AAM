@@ -1,14 +1,20 @@
 <mat-tab-group  #tabGroup   *ngIf="messageReceived.text=='Portfolios'" 
   mat-stretch-tabs #AccountInfo 
-  (selectedTabChange)="showTabName($event)"
-  >
+  (selectedTabChange)="showTabName($event)"  >
+
   <mat-tab label="Portfolio Positions"> 
     <app-inv-portfolio-position-table
     [rowsPerPages]="15"
     [searchAllowed]="false"
     [filters]="{portfolio_code:messageReceived.name}">
     </app-inv-portfolio-position-table>
-    </mat-tab>
+  </mat-tab>
+  <mat-tab label="Portfolio Transactions"> 
+    <app-table-acc-entries
+    [paramRowData]="{portfolioCode:messageReceived.name}"
+    [action]="'ViewEntriesByPortfolio'"    >
+    </app-table-acc-entries>
+  </mat-tab>
   <mat-tab label="Trades by Account"> 
     <app-allocation-table
     [rowsPerPages]="15"
@@ -19,7 +25,7 @@
     <div class="instrument_form">
       <br>
       <app-app-portfolio
-      [action]="'Edit'"
+      [action]="'View'"
       [portfolioCode]="messageReceived.id">
       </app-app-portfolio> 
     </div>
@@ -30,7 +36,7 @@
     <div class="client_form">
       <br>
       <app-app-client-form
-      [action] = "Edit"
+      [action]="'View'"
       [client]="messageReceived.id">
       </app-app-client-form> 
     </div>
@@ -58,12 +64,11 @@
     [rowsPerPages]="25"
     [filters]="{
       mp_name:messageReceived.name,
-      strategy_name:messageReceived.name
+      strategy_name:messageReceived.name,
+      not_zero_npv:true
     }">
     </app-inv-portfolio-position-table>
   </mat-tab>
-<!--   strategy_name:messageReceived.name,
-  join_type:1 -->
   <mat-tab label="Trades by Strategy"> Trades by Strategy history  </mat-tab>
   <mat-tab label="Orders by Strategy"> Orders by Strategy history  </mat-tab>
 </mat-tab-group>

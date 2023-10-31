@@ -173,7 +173,7 @@ export class AppInvGenerateOrdersTable  implements AfterViewInit {
     });
   }
   changedValueofChip (value:string, chipArray:string[],control:AbstractControl) {
-    chipArray[chipArray.length-1] = value;
+    chipArray[chipArray.length-1] === 'ClearAll'? chipArray.push(value) : chipArray[chipArray.length-1] = value
   }
   add(event: MatChipInputEvent,chipArray:string[],control:AbstractControl): any[] {
     const value = (event.value || '').trim();

@@ -72,7 +72,7 @@ export class AppNewAccountComponent {
     if (result['name']=='error') {
       this.CommonDialogsService.snackResultHandler(result)
     } else {
-      this.CommonDialogsService.snackResultHandler({name:'success', detail: result + ' portfolio'}, action)
+      this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' portfolio'}, action)
       this.InvestmentDataService.sendReloadPortfoliosData (Number(this.newAccountForm.controls['idportfolio']));
     }
   }
@@ -88,8 +88,8 @@ export class AppNewAccountComponent {
       case 'Delete':
         this.CommonDialogsService.confirmDialog('Delete Portfolio ' + this.portfolioname.value).pipe (
           filter (isConfirmed => isConfirmed.isConfirmed),
-          switchMap(data => this.InvestmentDataService.deleteAccount (this.portfolioname.value))
-        ).subscribe (result =>this.snacksBox(result.length,'Deleted'));
+          switchMap(data => this.InvestmentDataService.deleteAccount (this.id.value))
+        ).subscribe (result =>this.snacksBox(result,'Deleted'));
       break;
     }
   }

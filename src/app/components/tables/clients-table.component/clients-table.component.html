@@ -27,10 +27,35 @@
               <button mat-stroked-button style="width: 90; font-size: 18px; margin-top: 5%;"  
               [matTooltip]="action==='Select'? 'Click to select client':'Client details'"
               [style.background-color] = "action==='Select'? '': investmentNodeColor"
-              (click)="action==='Select'? chooseClient(element) : openClientModifyForm(disabledControlElements? 'View': 'Edit',element)">
+              (click)="action==='Select'? chooseClient(element) : navigateToClientModifyForm (disabledControlElements? 'View': 'Edit',element)">
                 {{element[column] }}
               </button> 
             </p>
+            <p  *ngSwitchCase="['action'].includes(column) " >
+              <button  *ngIf="disabledControlElements" mat-icon-button color="accent"
+                matTooltip="View Client"
+                (click)="openClientModifyForm('View', element)">
+                <mat-icon >pageview</mat-icon>
+              </button>
+              <ng-container  *ngIf="!disabledControlElements">
+                <button mat-icon-button color="accent"
+                  matTooltip="Edit Client"
+                  (click)="openClientModifyForm('Edit',element)">
+                  <mat-icon >edit</mat-icon>
+                </button>
+                <button mat-icon-button color="accent"
+                  matTooltip="Copy Client"
+                  (click)="openClientModifyForm('Create_Example',element)">
+                  <mat-icon >file_copy</mat-icon>
+                </button>
+                <button 
+                  mat-icon-button 
+                  color="accent" 
+                  matTooltip="Delete Client"
+                  (click)="openClientModifyForm('Delete',element)">
+                  <mat-icon >delete</mat-icon>
+                </button>
+              </ng-container>
             <p *ngSwitchDefault>
               {{element[column]}}
             </p>

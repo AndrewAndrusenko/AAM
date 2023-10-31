@@ -11,17 +11,17 @@ export class LogProcessingService {
 
   constructor() { }
 
-  sendLogObject ( LogObject:cFormValidationLog[]) { //the component that wants to update something, calls this fn
+  sendLogObject ( LogObject:cFormValidationLog[]) { 
     this.subjectErrorLogObject.next(LogObject); //next() will feed the value in Subject
   }
-  getLogObject(): Observable<cFormValidationLog[]> { //the receiver component calls this function 
-    return this.subjectErrorLogObject.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
+  getLogObject(): Observable<cFormValidationLog[]> { 
+    return this.subjectErrorLogObject.asObservable(); 
   }
-  sendCreatedLogObject ( LogObject:bAccountsEntriesList) { //the component that wants to update something, calls this fn
+  sendCreatedLogObject ( LogObject:bAccountsEntriesList) { 
     this.subjectCreatedtLogObject.next(LogObject); //next() will feed the value in Subject
   }
-  geCreatedtLogObject(): Observable<bAccountsEntriesList> { //the receiver component calls this function 
-    return this.subjectCreatedtLogObject.asObservable(); //it returns as an observable to which the receiver funtion will subscribe
+  geCreatedtLogObject(): Observable<bAccountsEntriesList> { 
+    return this.subjectCreatedtLogObject.asObservable(); 
   }
 }
 

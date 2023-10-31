@@ -188,7 +188,7 @@
           (removed)="remove(account)"
           (click)=" clearAll($event);">
             {{account}}
-            <button matChipRemove>
+            <button matChipRemove *ngIf="account!=='ClearAll'">
               <mat-icon>cancel</mat-icon>
             </button>
           </mat-chip>
