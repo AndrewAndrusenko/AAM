@@ -1,10 +1,10 @@
 -- FUNCTION: public.f_i_model_portfolios_select_mp_structure_for_accounts(bigint[])
 
--- DROP FUNCTION IF EXISTS public.f_i_model_portfolios_select_mp_structure_for_accounts(bigint[]);
+DROP FUNCTION IF EXISTS public.f_i_model_portfolios_select_mp_structure_for_accounts(bigint[]);
 
 CREATE OR REPLACE FUNCTION public.f_i_model_portfolios_select_mp_structure_for_accounts(
 	p_idportfolios bigint[])
-    RETURNS TABLE(id integer, code character varying, strategy_name character varying, mp_name character varying, mp_weight numeric, instrument character varying, instrument_weight numeric, instrument_corrected_weight numeric, total_type text, total_weight numeric) 
+    RETURNS TABLE(mp_id int, id integer, code character varying, strategy_name character varying, mp_name character varying, mp_weight numeric, instrument character varying, instrument_weight numeric, instrument_corrected_weight numeric, total_type text, total_weight numeric) 
     LANGUAGE 'plpgsql'
     COST 100
     VOLATILE PARALLEL UNSAFE
@@ -14,6 +14,7 @@ AS $BODY$
 BEGIN
 RETURN QUERY
 SELECT
+  modelportfolios.id AS mp_id,
   dportfolios.idportfolio AS id,
   dportfolios.portfolioname AS code,
   dstrategiesglobal.sname AS strategy_name,
@@ -40,7 +41,7 @@ WHERE
   idportfolio = ANY(p_idportfolios)
 GROUP BY GROUPING SETS (  
   (dportfolios.idportfolio ,dportfolios.portfolioname,  dstrategiesglobal.sname,  modelportfolios.sname,  dstrategies_global_structure.weight_of_child,
-   mp_structure.id_strategy_child, mp_structure.weight_of_child),
+   mp_structure.id_strategy_child, mp_structure.weight_of_child,modelportfolios.id),
   (dportfolios.idportfolio)
 );
 -- order by idportfolio;

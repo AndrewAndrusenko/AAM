@@ -8,7 +8,7 @@
         <mat-option [value]="'Client'">Client</mat-option>
       </mat-select>
     </mat-form-field>
-    <mat-form-field class = "filterField"  style="font-size: 22px;" title="Filter All columns">
+    <mat-form-field class = "filterField"  style="font-size: 22px; width: 15%;" title="Filter All columns" >
       <mat-label class="whiteTextFilter">Search (all columns)...</mat-label>
       <input 
         (keyup)="applyFilter($event)"
@@ -53,6 +53,12 @@
       <mat-icon matSuffix>delete</mat-icon>
     </button>
     </ng-container>
+    <mat-checkbox style="font-size:larger; margin-left: 3%;"
+    
+      (change)="showClientOrders($event.checked)">
+      Show all client orders
+    </mat-checkbox>
+
   </ng-container>
   <ng-container  *ngIf="tableMode.includes('Allocation')">  <!-- Allocation Mode Block -->
   </ng-container>

@@ -42,10 +42,10 @@ export class AppTableStrategiesComponentComponent  implements AfterViewInit {
     description: '', 
     s_benchmark_account: 0,
     'Benchmark Account': '', 
+    action:0
   });
-  columnsToDisplay = ['id','name',  'level', 'description', 'Benchmark Account'];
-  columnsHeaderToDisplay = ['ID','Title',  'Level', 'Description', 'Benchmark'];
-  columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
+  columnsToDisplay = ['id','name',  'level', 'description', 'Benchmark Account','action'];
+  columnsHeaderToDisplay = ['ID','Title',  'Level', 'Description', 'Benchmark','Action'];
   dataSource: MatTableDataSource<StrategiesGlobalData>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
@@ -61,6 +61,7 @@ export class AppTableStrategiesComponentComponent  implements AfterViewInit {
   expandAllowed: any;
 
   constructor(
+    private dialog: MatDialog,
     private TreeMenuSeviceS:TreeMenuSevice, 
     private router: Router,
     private InvestmentDataService:AppInvestmentDataServiceService,
@@ -75,7 +76,6 @@ export class AppTableStrategiesComponentComponent  implements AfterViewInit {
     this.InvestmentDataService.getReloadStrategyList().subscribe (data => this.updateStrategyData(this.strategyTableInitParams.action))
   }
   async ngAfterViewInit() {
-    this.columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
     this.updateStrategyData(this.strategyTableInitParams.action)
   }
   clearFilter (input:HTMLInputElement) {
@@ -91,9 +91,15 @@ export class AppTableStrategiesComponentComponent  implements AfterViewInit {
   chooseStrategy (element:StrategiesGlobalData) {
     this.modal_principal_parent.emit(element);
   }
-  openStrategyForm (actionType:string, row: StrategiesGlobalData ) {
+  NavigateToStrategyForm (actionType:string, row: StrategiesGlobalData ) {
     this.routesPathsTreeMenu.includes('Strategies')? this.router.navigate(['tree/'+'Strategies']) : null;
     this.TreeMenuSeviceS.sendUpdate('Strategies', row.name, +row.id)
+  }
+  openStrategyForm (actionType:string, row: StrategiesGlobalData ) {
+    this.expandAllowed = false;
+    this.StrategyForm = this.dialog.open(AppStrategyFormComponent ,{minHeight:'400px', maxWidth:'1000px' });
+    this.StrategyForm.componentInstance.action = actionType;
+    actionType !=='Create'? this.StrategyForm.componentInstance.strategyId = row['id'] : null;
   }
   async updateStrategyData (action: string = '') {
     let field = 'level';

@@ -2,7 +2,7 @@ const config = require ('./db_config');
 const db_common_api = require ('./db_common_api')
 var pgp = require ('pg-promise')({capSQL:true});
 async function fGetStrategiesList (request,response) {
-  const query = {text: 'SELECT id, sname as Name, s_level_id as Level, s_description as Description, s_benchmark_account, dportfolios.portfolioname as "Benchmark Account"' +
+  const query = {text: 'SELECT id, sname as Name, s_level_id as Level, s_description as Description, s_benchmark_account, dportfolios.portfolioname as "Benchmark Account", 0 as action ' +
 	' FROM public.dstrategiesglobal LEFT JOIN public.dportfolios ' + 
   ' ON dportfolios.idportfolio = dstrategiesglobal.s_benchmark_account'}
   switch (request.query.action) {

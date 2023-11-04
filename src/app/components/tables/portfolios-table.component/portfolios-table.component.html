@@ -17,7 +17,7 @@
   </button>
   <h2 *ngIf="action=='Select_Benchmark'" style="color: rgb(224, 73, 73);">Use double click to select benchmark Portfolio</h2>
   <div class="mat-elevation-z8">
-    <table  mat-table [style.background-color]="strategyId||clientId? '#5e5e5e': '#313131'"
+    <table  mat-table 
     [dataSource]="dataSource" multiTemplateDataRows  matSort class="mat-elevation-z8">
       <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i=index">
         <th mat-header-cell *matHeaderCellDef mat-sort-header> {{columnsToHeaderDisplay[i]}}</th>
@@ -27,7 +27,7 @@
           <span [ngSwitch]="true==true">
             <p *ngSwitchCase="['portfolioname'].includes(column)">
               <button mat-stroked-button style="font-size: 18px; margin-top: 3%;"  matTooltip="Portfolio details"
-              [style.background-color] =  "investmentNodeColor"
+              class =  "navigate-button"
               (click)="navigateToAccountForm(disabledControlElements? 'View': 'Edit', element)">
                 {{element[column] }}
               </button> 

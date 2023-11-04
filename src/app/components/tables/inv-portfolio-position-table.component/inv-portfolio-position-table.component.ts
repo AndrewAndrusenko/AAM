@@ -1,7 +1,7 @@
 import {AfterViewInit, Component, EventEmitter, Output, ViewChild, Input, ChangeDetectionStrategy, ElementRef, SimpleChanges} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
-import {Observable, Subscription, distinctUntilChanged, map, startWith, switchMap, tap } from 'rxjs';
+import {Observable, Subscription, distinctUntilChanged, filter, map, startWith, switchMap, tap } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {portfolioPositions, trades } from 'src/app/models/intefaces.model';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
@@ -101,7 +101,6 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
     });
   }
   async ngAfterViewInit() {
-    this.subscriptions.add(this.TreeMenuSevice.getActiveTab().subscribe(tabName=>this.activeTab=tabName));
     this.AutoCompService.getSecidLists();
     this.filters==undefined&&this.fullDataSource!==undefined? this.initialFilterOfDataSource(this.filters) : null;
     this.filterednstrumentsLists = this.secidList.valueChanges.pipe(
@@ -114,6 +113,15 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
       distinctUntilChanged(),
       map(value => this.AutoCompService.filterList(value || '','currency'))
       );
+    this.subscriptions.add(this.InvestmentDataService.getClientsPortfolios().pipe(
+      tap(() => this.dataSource? this.dataSource.data = null: null),
+      filter(portfolios=>portfolios.length>0)
+    ).subscribe(portfoliosData=> {
+      this.portfolios= ['ClearAll',...portfoliosData.map(el=>el.code)];
+      this.submitQuery(undefined,false)
+    }));
+    this.subscriptions.add(this.TreeMenuSevice.getActiveTab().subscribe(tabName=>this.activeTab=tabName));
+
   }
   setPortfoliosList(e:any) {
     this.InvestmentDataService.getPortfoliosListForMP(e.value,'getPortfoliosByMP_StrtgyID').subscribe(data=>{
@@ -141,10 +149,10 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
    })
   }
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['filters'].currentValue!==undefined&&this.fullDataSource!==undefined)  {
+    if (changes['filters']?.currentValue!==undefined&&this.fullDataSource!==undefined)  {
       this.initialFilterOfDataSource (changes['filters'].currentValue);
-      this.notNullCB?.checked===false? this.showZeroPortfolios(false):null;
     }
+    this.notNullCB?.checked===false? this.showZeroPortfolios(false):null;
   }
   applyFilter(event: any, col?:string) {
     this.dataSource.filterPredicate = col === undefined? this.defaultFilterPredicate : this.multiFilter
@@ -152,7 +160,6 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
     !event.hasOwnProperty('isUserInput') || event.isUserInput ? this.dataSource.filter = filterValue.trim().toLowerCase() : null;
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
- 
   updatePositionsDataTable (positionsData:portfolioPositions[]) {
     this.fullDataSource=positionsData;
     this.dataSource  = new MatTableDataSource(positionsData);
@@ -163,20 +170,16 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
     this.dataSource.filterPredicate =this.multiFilter
     this.defaultFilterPredicate = this.dataSource.filterPredicate;
     this.multiFilter = this.dataSource.filterPredicate;
-
   }
-  async submitQuery (reset:boolean=false, showSnackResult:boolean=true) {
-    return new Promise((resolve, reject) => {
-      let searchObj = reset?  {} : this.searchParametersFG.value;
-      this.dataSource.data? this.dataSource.data = null : null;
-      searchObj.report_date= new Date (searchObj.report_date).toLocaleDateString();
-      searchObj.secidList = [0,1].includes(this.instruments.length)&&this.instruments[0]==='ClearAll'? null : this.instruments.map(el=>el.toLocaleLowerCase())
-      searchObj.idportfolios = [0,1].includes(this.portfolios.length)&&this.portfolios[0]==='ClearAll'? null : this.portfolios.map(el=>el.toLocaleLowerCase())
-      this.InvestmentDataService.getPortfoliosPositions(searchObj).subscribe(data => {
-        this.updatePositionsDataTable(data)
-        showSnackResult? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ') : null;
-        resolve(data) 
-      });
+  submitQuery (reset:boolean=false, showSnackResult:boolean=true) {
+    let searchObj = reset?  {} : this.searchParametersFG.value;
+    this.dataSource?.data? this.dataSource.data = null : null;
+    searchObj.report_date= new Date (searchObj.report_date).toLocaleDateString();
+    searchObj.secidList = [0,1].includes(this.instruments.length)&&this.instruments[0]==='ClearAll'? null : this.instruments.map(el=>el.toLocaleLowerCase())
+    searchObj.idportfolios = [0,1].includes(this.portfolios.length)&&this.portfolios[0]==='ClearAll'? null : this.portfolios.map(el=>el.toLocaleLowerCase())
+    this.InvestmentDataService.getPortfoliosPositions(searchObj).subscribe(data => {
+      this.updatePositionsDataTable(data)
+      showSnackResult? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ') : null;
     });
   }
   changedValueofChip (value:string, chipArray:string[],control:AbstractControl) {

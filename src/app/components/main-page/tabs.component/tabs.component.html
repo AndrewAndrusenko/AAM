@@ -32,6 +32,17 @@
   </mat-tab>  
 </mat-tab-group  >
 <mat-tab-group  *ngIf="messageReceived.text=='Clients'" mat-stretch-tabs #ClientInfo>
+  <mat-tab label="Client Transactions"> 
+    <app-table-acc-entries
+    [action]="'None'"    >
+    </app-table-acc-entries>
+  </mat-tab>
+  <mat-tab label="Client Portfolios">
+    <app-portfolio-tablee 
+      [clientId]="messageReceived.id"
+      [actionOnAccountTable]="'Get_Portfolios_By_CientId'">
+    </app-portfolio-tablee> 
+  </mat-tab>
   <mat-tab label="Client Summary" >
     <div class="client_form">
       <br>
@@ -41,15 +52,27 @@
       </app-app-client-form> 
     </div>
   </mat-tab>  
-  <mat-tab label="Client Portfolios">
-    <app-portfolio-tablee 
-      [clientId]="messageReceived.id"
-      [actionOnAccountTable]="'Get_Portfolios_By_CientId'">
-    </app-portfolio-tablee> 
+  <mat-tab label="Client Positions"> 
+    <app-inv-portfolio-position-table
+    [rowsPerPages]="15"
+    [searchAllowed]="false">
+    </app-inv-portfolio-position-table>
   </mat-tab>
-  <mat-tab label="Positions"> Positions table  </mat-tab>
+  <mat-tab label="Client Trades"> 
+    <app-allocation-table
+    [rowsPerPages]="15"
+    [filters]="{disabledControlElements:true}" >
+    </app-allocation-table>
+  </mat-tab>
+
 </mat-tab-group>
 <mat-tab-group *ngIf="messageReceived.text=='Strategies'" #StrategiesInfo mat-stretch-tabs>
+  <mat-tab label="Portfolios by Strategy"> 
+    <app-portfolio-tablee
+    [strategyMpName]="messageReceived.name"
+    [actionOnAccountTable]="'Get_Portfolios_By_StrategyId'">
+    </app-portfolio-tablee>
+  </mat-tab>
   <mat-tab label="Strategy Structure" >
     <div class="instrument_form">
       <br>
@@ -61,16 +84,22 @@
   </mat-tab>  
   <mat-tab label="Positions by Strategy"> 
     <app-inv-portfolio-position-table
-    [rowsPerPages]="25"
-    [filters]="{
-      mp_name:messageReceived.name,
-      strategy_name:messageReceived.name,
-      not_zero_npv:true
-    }">
+      [rowsPerPages]="25"
+      [filters]="{
+        mp_name:messageReceived.name,
+        strategy_name:messageReceived.name,
+        not_zero_npv:true
+      }">
     </app-inv-portfolio-position-table>
   </mat-tab>
-  <mat-tab label="Trades by Strategy"> Trades by Strategy history  </mat-tab>
-  <mat-tab label="Orders by Strategy"> Orders by Strategy history  </mat-tab>
+  <mat-tab label="Trades by Strategy">
+    <app-allocation-table
+    [rowsPerPages]="15"
+    [filters]="{disabledControlElements:true}" >
+    </app-allocation-table>
+  </mat-tab>
+  <mat-tab label="Orders by Strategy"> 
+  </mat-tab>
 </mat-tab-group>
 <mat-tab-group *ngIf="messageReceived.text=='Instruments'" mat-stretch-tabs #InstrumentInfo>
   <mat-tab label="Instrment Details" >

@@ -10,15 +10,14 @@ import {AppInvestmentDataServiceService } from 'src/app/services/investment-data
 import {AuthService } from 'src/app/services/auth.service';
 import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
-import { formatNumber } from '@angular/common';
-import { investmentNodeColor } from 'src/app/models/constants.model';
 import { Router } from '@angular/router';
 import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { routesTreeMenu } from 'src/app/app-routing.module';
+import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-portfolio-tablee',
   templateUrl: './portfolios-table.component.html',
-  styleUrls: ['./portfolios-table.component.css'],
+  styleUrls: ['./portfolios-table.component.scss'],
   animations: [
     trigger('detailExpand',
     [   state('collapsed, void', style({ height: '0px'})),
@@ -28,9 +27,7 @@ import { routesTreeMenu } from 'src/app/app-routing.module';
     ])
   ],
 })
-
 export class TablePortfolios {
-  
   accessState: string = 'none';
   disabledControlElements: boolean = false;
   accessToClientData: string = 'none';
@@ -44,14 +41,14 @@ export class TablePortfolios {
   readOnly: boolean = true;
   dialogRef: MatDialogRef<AppNewAccountComponent>;
   @Input() clientId: number;
-  @Input() strategyId: number;
+  @Input() strategyMpName: string;
   @Input() actionOnAccountTable: string;
   @Input() action: string;
   @Input() row: any;
   @Output() public modal_principal_parent = new EventEmitter();
-  investmentNodeColor=investmentNodeColor
   expandAllowed: boolean = false;
-  routesPathsTreeMenu = routesTreeMenu.map (el=>el.path)
+  routesPathsTreeMenu = routesTreeMenu.map (el=>el.path);
+  arraySubscrition = new Subscription()
   constructor(
     private dialog: MatDialog,
     private TreeMenuSeviceS:TreeMenuSevice, 
@@ -60,31 +57,33 @@ export class TablePortfolios {
     private AuthServiceS:AuthService,  
     private CommonDialogsService:HadlingCommonDialogsService,
     private HandlingCommonTasksS:HandlingCommonTasksService
-  ) 
-  { }
-  
-  async updatePortfolioData (portfolioid: number, clientid:number, strategyid:number, action: string, accessToClientData:string ) {
-    return new Promise<number> (async (resolve) => {
-      if (this.accessState !=='none') {
-        this.dataSource? this.dataSource.data=null : null;
-        this.InvestmentDataService.getPortfoliosData('', portfolioid,clientid,strategyid,action,accessToClientData).subscribe (portfoliosData=>{
-          this.dataSource  = new MatTableDataSource(portfoliosData);
-          this.dataSource.paginator = this.paginator;
-          this.dataSource.sort = this.sort;
-          resolve (portfoliosData.length);
-        })
-      } 
+  )   { }
+  updatePortfolioData (portfolioid: number, clientid:number, strategyMpName:string, action: string, accessToClientData:string,snack:boolean=true ) {
+    this.dataSource? this.dataSource.data=null : null;
+    this.InvestmentDataService.getPortfoliosData('', portfolioid,clientid,strategyMpName,action,accessToClientData).subscribe (portfoliosData=>{
+      this.dataSource  = new MatTableDataSource(portfoliosData);
+      this.dataSource.paginator = this.paginator;
+      this.dataSource.sort = this.sort;
+      snack? this.CommonDialogsService.snackResultHandler(Object.hasOwn(portfoliosData,'name')? portfoliosData : {name:'success', detail: portfoliosData.length},'Loaded '):null;
+      ['Get_Portfolios_By_CientId','Get_Portfolios_By_StrategyId'].includes(action)? this.InvestmentDataService.sendClientsPortfolios(portfoliosData.map(el=> {return {id:el.idportfolio,code:el.portfolioname}})):null;
     })
   }
   ngOnInit(): void {
     this.accessToClientData = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToClientData')[0].elementvalue;
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToPortfolioData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
-    this.updatePortfolioData (undefined, this.clientId,this.strategyId,this.actionOnAccountTable,this.accessToClientData);
-    if (this.accessState !=='none') this.InvestmentDataService.getReloadPortfoliosData().subscribe(data => this.updatePortfolioData (undefined, this.clientId,this.strategyId,this.actionOnAccountTable,this.accessToClientData));
+    console.log('strategyMpName',this.strategyMpName);
+    this.updatePortfolioData (undefined, this.clientId,this.strategyMpName,this.actionOnAccountTable,this.accessToClientData,false);
+    this.arraySubscrition.add (
+      this.InvestmentDataService.getReloadPortfoliosData().subscribe(data => this.updatePortfolioData (undefined, this.clientId,this.strategyMpName,this.actionOnAccountTable,this.accessToClientData))
+    )
+  }
+  ngOnDestroy(): void {
+    this.arraySubscrition.unsubscribe();
   }
   ngOnChanges(changes: SimpleChanges) {
-    this.updatePortfolioData (undefined, this.clientId,this.strategyId,this.actionOnAccountTable,this.accessToClientData);
+    console.log('this.clientId,',this.clientId,this.actionOnAccountTable);
+    this.updatePortfolioData (undefined, this.clientId,this.strategyMpName,this.actionOnAccountTable,this.accessToClientData,false);
   }
   chooseAccount (element) {
     this.modal_principal_parent.emit(element);
@@ -107,7 +106,7 @@ export class TablePortfolios {
   }
   async submitQuery () {
     this.dataSource? this.dataSource.data = null : null;
-    this.updatePortfolioData (undefined,this.clientId,this.strategyId,this.actionOnAccountTable,this.accessToClientData).then (rowsCount => this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (rowsCount,'en-US') + ' rows'},'Loaded '));
+    this.updatePortfolioData (undefined,this.clientId,this.strategyMpName,this.actionOnAccountTable,this.accessToClientData);
   }
   exportToExcel() {
     this.HandlingCommonTasksS.exportToExcel (this.dataSource.data,"PortfolioData")

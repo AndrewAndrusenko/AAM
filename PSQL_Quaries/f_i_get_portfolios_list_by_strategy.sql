@@ -1,15 +1,10 @@
--- FUNCTION: public.f_i_get_cross_rates(bigint[], date, numeric)
+-- FUNCTION: public.f_i_get_portfolios_list_by_strategy(text)
 
 DROP FUNCTION IF EXISTS public.f_i_get_portfolios_list_by_strategy(text);
 
-CREATE OR REPLACE FUNCTION public.f_i_get_portfolios_list_by_strategy (p_mp_strategy text)
-    RETURNS TABLE(  
-		idportfolio int,
-		idstategy int,
-		portfolioname char varying,
-		strategy char varying,
-		mp char varying,
-		id_strategy_parent int) 
+CREATE OR REPLACE FUNCTION public.f_i_get_portfolios_list_by_strategy(
+	p_mp_strategy text)
+    RETURNS TABLE(strategy_name char varying, idportfolio integer, idstategy integer, portfolioname character varying, strategy character varying, mp character varying, id_strategy_parent integer) 
     LANGUAGE 'plpgsql'
     COST 100
     VOLATILE PARALLEL UNSAFE
@@ -19,6 +14,7 @@ AS $BODY$
 BEGIN
 RETURN QUERY
 SELECT
+  dstrategiesglobal.s_description AS strategy_name,
   dportfolios.idportfolio,
   dportfolios.idstategy,
   dportfolios.portfolioname,

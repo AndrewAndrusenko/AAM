@@ -124,7 +124,7 @@ async function fgetMarketData (request,response){//Get market data such as marke
         'left join t_moex_boards on t_moex_boards.code = t_moexdata_foreignshares.boardid '
         query.text +=conditionsMOEXiss.slice(0,-5)+';';
       } else {
-        query.text ="SELECT exchange as boardid, secid,null,null, open,low, high,  close, volume, adj_close, adj_close,  globalsource, sourcecode, date as tradedate , false as percentprice, 'USD' as currency, '$' as spsymbol "+
+        query.text ="SELECT exchange as boardid, secid,null,volume as value, open,low, high,  close, volume, adj_close, adj_close,  globalsource, sourcecode, date as tradedate , false as percentprice, 'USD' as currency, '$' as spsymbol "+
         'FROM public.t_marketstack_eod '+
         'left join "aInstrumentsCodes" on "aInstrumentsCodes".code=t_marketstack_eod.symbol '+
         'where "aInstrumentsCodes".mapcode = \'msFS\'  ';

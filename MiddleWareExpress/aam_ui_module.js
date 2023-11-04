@@ -88,15 +88,14 @@ async function fGetportfolioTable (request,response) {
     query.text += " FROM public.dportfolios "+
     " LEFT JOIN public.dstrategiesglobal ON dportfolios.idstategy = public.dstrategiesglobal.id " +
     " LEFT JOIN public.dclients ON dportfolios.idclient = public.dclients.idclient "
-  
   switch (request.query.actionOnAccountTable) {
     case 'Get_Portfolios_By_CientId':
       query.text += ' WHERE (dportfolios.idclient = $1);'
       query.values = [request.query.clientId]
     break;
     case 'Get_Portfolios_By_StrategyId':
-      query.text += ' WHERE (public.dstrategiesglobal.id= $1);'
-      query.values = [request.query.strategyId]
+      query.text = 'SELECT idportfolio, portfolioname, strategy as stategy_name, strategy_name as description, 0 as action from f_i_get_portfolios_list_by_strategy($1);'
+      query.values = [request.query.strategyMpName]
     break;
     case 'Get_Portfolio_By_idPortfolio':
       query.text += ' WHERE (public.dportfolios.idportfolio= $1);'

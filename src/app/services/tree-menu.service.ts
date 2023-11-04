@@ -16,13 +16,11 @@ export class TreeMenuSevice {
     return this.http.post ('/api/Favorites/newItem/',{'nodename': nodename, 'nodeparent' : nodeparent, 'userId' : userId, 'idelement':idelement}).toPromise()
   }
   public removeItemFromFavorites (nodename:string, userId:number, idelement:string) {
-    console.log('idelement',idelement);
     return this.http.post ('/api/Favorites/deleteItem/',{'nodename': nodename, 'userId' : userId, 'idelement':idelement}).toPromise()
   }
   private subjectName = new Subject<any>(); 
 
   sendUpdate(nodeRoot: string, item: string, id:number,action?:string) { 
-    console.log('action',action,item);
     this.subjectName.next({ text: nodeRoot, name:item, id:+id, action:action }); 
   }
 

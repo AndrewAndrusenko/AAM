@@ -14,13 +14,14 @@ export class AppInvestmentDataServiceService {
   private subjectReloadStrategyStructure = new Subject<any>(); 
   private subjectReloadPortfoliosData = new Subject<any>(); 
   private subjectReloadClientTable = new Subject<ClientData[]>(); 
+  private subjectClientsPortfolios = new Subject<{id:number,code:string}[]>(); 
   
-  getPortfoliosData (accountType:string, idportfolio: number, clientId: number, strategyId: number, action:string, accessToClientData:string='none'):Observable <AccountsTableModel[]> {
+  getPortfoliosData (accountType:string, idportfolio: number, clientId: number, strategyMpName: string, action:string, accessToClientData:string='none'):Observable <AccountsTableModel[]> {
     const params = {
       accountType: accountType,
       idportfolio: idportfolio,
       clientId: clientId, 
-      strategyId :strategyId, 
+      strategyMpName :strategyMpName, 
       actionOnAccountTable: action,
       accessToClientData:accessToClientData
     }
@@ -32,6 +33,13 @@ export class AppInvestmentDataServiceService {
   getReloadPortfoliosData(): Observable<any> { 
     return this.subjectReloadPortfoliosData.asObservable(); 
   }
+  sendClientsPortfolios (portfolios: {id:number,code:string}[]) {
+    this.subjectClientsPortfolios.next(portfolios);
+  }
+  getClientsPortfolios ():Observable <{id:number,code:string}[]> {
+    return this.subjectClientsPortfolios.asObservable()
+  }
+  
   getInstrumentData (secid: string): Observable <InstrumentData[]>  {
     const params = {'secid': secid}
     return this.http.get <InstrumentData[]> ('/api/AAM/InstrumentData/',{ params: params } )

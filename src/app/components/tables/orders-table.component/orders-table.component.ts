@@ -52,8 +52,8 @@ export class AppOrderTableComponent  implements AfterViewInit {
 
   fullOrdersSet:orders[];
 
-  columnsToDisplay = ['select','id','ordertype','type','secid','secid_type','security_group_name','qty','price','amount','unexecuted','status','parent_order','portfolioname','idcurrency','generated','action','allocated'];
-  columnsHeaderToDisplay = ['ID','Order','Type','SecID','Class','Group','Quantity','Price','Amount','Unexecuted','Status','ParentID','Portfolio','Currency','Created','Action','Allocated']
+  columnsToDisplay = ['select','id','ordertype','type','secid','security_group_name','mp_name','qty','price','amount','unexecuted','status','parent_order','portfolioname','idcurrency','generated','action','allocated'];
+  columnsHeaderToDisplay = ['ID','Order','Type','SecID','Group','MP','Quantity','Price','Amount','Unexecuted','Status','ParentID','Portfolio','Currency','Created','Action','Allocated']
   expandedElement: orders  | null;
   expandAllowed: boolean = true;
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
@@ -120,7 +120,7 @@ export class AppOrderTableComponent  implements AfterViewInit {
     if (this.tableMode.includes('Allocation')||this.tableMode.includes('AllocatedOrders'))   {
       this.columnsToDisplayWithExpand = ['select','id','ordertype','type','secid','qty','price','amount','unexecuted','status','allocated','portfolioname','idcurrency','generated','expand'];
     } else {
-      this.columnsToDisplayWithExpand = ['select','id','ordertype','type','secid','secid_type','security_group_name','qty','price','amount','unexecuted','status','parent_order','portfolioname','idcurrency','generated','action'];
+      this.columnsToDisplayWithExpand = ['select','id','ordertype','type','secid','security_group_name','mp_name','qty','price','amount','unexecuted','status','portfolioname','idcurrency','generated','action'];
     }
     if (this.tableMode.includes('Child')) {
       this.columnsToDisplayWithExpand.splice(this.columnsToDisplayWithExpand.indexOf('action'),1);
@@ -247,6 +247,10 @@ export class AppOrderTableComponent  implements AfterViewInit {
   }
   excludeOrdersWithParent ():orders[] {
     return this.dataSource.data.filter(order=>!order.parent_order)
+  }
+  showClientOrders (show:boolean) {
+    this.disabledControlElements=show;
+    this.dataSource.data = show? this.fullOrdersSet.filter(order=>order.ordertype==='Client') : this.fullOrdersSet.filter(order=>!order.parent_order)
   }
   updateordersDataTable (ordersData:orders[]) {
     this.fullOrdersSet = ordersData;

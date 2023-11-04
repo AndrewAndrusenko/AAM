@@ -22,6 +22,7 @@ export class AuthService {
     return new Promise <boolean> ((resolve,reject) => { 
       let userData = JSON.parse(localStorage.getItem('userInfo'))
       const params = {accessRole: userData.user.accessrole,action:'getAccessRestriction'}
+      console.log('params',params);
       this.http.get <accessRestriction[]>('/api/accessRestriction/',{ params: params }).subscribe((data) => {
         this.accessRestrictions = data;
         console.log('length',this.accessRestrictions);

@@ -53,7 +53,6 @@ export class AppTableStrategyComponent   {
     this.InvestmentDataService.getReloadStrategyStructure().subscribe ((id) => this.updateStrategyStructure(id));
   }
   ngOnChanges(changes: SimpleChanges) {
-    console.log('Structure Changes',changes); 
     Object.hasOwn(changes,'parentStrategyId')? this.updateStrategyStructure(changes['parentStrategyId'].currentValue) : null;
   }
   updateStrategyStructure (id:number) {

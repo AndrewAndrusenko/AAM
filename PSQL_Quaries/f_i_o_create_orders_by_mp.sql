@@ -32,7 +32,8 @@ INSERT INTO
     order_type,
     idcurrency,
     child_orders,
-    ordertype
+    ordertype,
+	mp_id
   )
 SELECT
   NOW()::TIMESTAMP WITHOUT TIME ZONE,
@@ -48,7 +49,8 @@ SELECT
   0,
   main_currency_code,
   NULL,
-  'Client'
+  'Client',
+  f_i_get_portfolios_structure_detailed_data.mp_id
 FROM
   f_i_get_portfolios_structure_detailed_data (p_portfolio_code,p_report_date,p_report_currency)
 WHERE

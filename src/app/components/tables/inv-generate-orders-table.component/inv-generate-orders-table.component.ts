@@ -126,7 +126,6 @@ export class AppInvGenerateOrdersTable  implements AfterViewInit {
    })
   }
   ngOnChanges(changes: SimpleChanges) {
-    console.log('generate',);
     changes['filters'].currentValue==undefined&&this.fullDataSource!==undefined?  this.initialFilterOfDataSource (changes['filters'].currentValue):null;
   }
   createOrders (){
@@ -189,6 +188,12 @@ export class AppInvGenerateOrdersTable  implements AfterViewInit {
   clearAll(event, chipArray:string[],control:AbstractControl) : string [] {
     if (['ClearAll cancel','ClearAll'].includes(event.target.textContent.trim())) {chipArray = ['ClearAll']};
     return chipArray;
+  }
+  resetSPform () {
+    this.searchParametersFG.reset();
+    this.instruments=['ClearAll'];
+    this.portfolios=['ClearAll'];
+    this.report_date.patchValue(new Date());
   }
   addChips (el: any, column: string) {(['secid'].includes(column))? this.instruments.push(el):null;}
   updateFilter (el: any) {

@@ -23,8 +23,8 @@
     Reload 
     <mat-icon matSuffix >refresh</mat-icon>
   </button>
-  <h2 *ngIf="searchAllowed!==true"  style="margin-left: 1%;">
-    <span class="red_color">{{filters.portfolio_code}}</span> - Current positions ({{report_date.value.toLocaleDateString()}}) in USD
+  <h2 *ngIf="searchAllowed!==true&&filters?.portfolio_code"  style="margin-left: 1%;">
+    <span class="red_color">{{filters?.portfolio_code}}</span> - Current positions ({{report_date.value.toLocaleDateString()}}) in USD
   </h2>
 <form class="submit" *ngIf="searchAllowed===true" [formGroup]="searchParametersFG"  style="font-size: 18px; margin-left: 0.5%; "> <!-- complexSearch Form -->
   <span style="display: flex;    align-items:flex-start;  margin-right: 1%;margin-top: 0.2%;"> 
@@ -183,6 +183,4 @@
     <tr mat-footer-row *matFooterRowDef="columnsToDisplay; sticky: true"></tr>
   </table>
   <mat-paginator [pageSizeOptions]="[5, 15, 25, 100]" [pageSize]="rowsPerPages" aria-label="Select page of allocation"></mat-paginator>
-
 </ng-container>
-

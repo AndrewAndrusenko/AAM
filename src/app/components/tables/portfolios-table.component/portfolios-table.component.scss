@@ -3,9 +3,12 @@
   color: cadetblue;
 }
 .mat-table {
+  background-color:#313131;
   width: 100%;
-  /* background-color: #313131; */
-  /* background-color: #5e5e5e; */
+  font-size: 26px;
+}
+.navigate-button {
+  background-color: var(--investmentNodeColor );
 }
 .mat-header-cell {
   margin-left: 10px;

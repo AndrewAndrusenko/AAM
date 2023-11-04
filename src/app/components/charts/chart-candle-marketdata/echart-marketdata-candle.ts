@@ -48,7 +48,7 @@ export class NgEchartMarketDataCandleComponent  {
     this.marketData.forEach((el,i)=>{
       if (el.secid===secid) {
         this.seriesCandle.push([el.open,el.close,el.low,el.high])
-        seriesMarketPrice.push(el.marketprice2)
+        seriesMarketPrice.push(el.close)
         seriesLow.push(el.low)
         seriesHigh.push(el.high)
         seriesVolumes.push([seriesVolumes.length, el.volume, el.close < el.open ? 1 : -1]);

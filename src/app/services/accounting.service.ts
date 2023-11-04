@@ -99,9 +99,7 @@ export class AppAccountingService {
   /*End------------------Create entry by scheme---------------------------------------------------------*/
   GetAccountsEntriesListAccounting (searchParameters:any, id: number, MTType:string, Sender: string, Action: string):Observable <bAccountsEntriesList[]> {
     let params = {'id' :id, 'MTType': MTType,'Sender':Sender, 'Action': Action};
-    console.log('params',searchParameters['noAccountLedger']);
     (searchParameters !== null) ?  params = {...params,...searchParameters}: null
-    console.log('params222',params['noAccountLedger']);
     return this.http.get <bAccountsEntriesList []>('/api/DEA/fGetAccountingData/', { params: params })
   }
   GetAccountsListAccounting (currencyCode: number, id: number, clientId:number, accountNo: string, Action: string):Observable <bAccounts[]> {

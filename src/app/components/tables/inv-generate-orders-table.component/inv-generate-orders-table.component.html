@@ -28,18 +28,11 @@
         </button>
         <button color = "accent" mat-raised-button 
           style="margin-top:4%;margin-left: 1%; font-size: 18px;"
-          (click)="searchParametersFG.reset();
-           instruments=['ClearAll'];
-           portfolios=['ClearAll']">
+          (click)="resetSPform()"
+           >
           ClearAll
         </button>
       </span>
- 
- <!--      <mat-form-field class="search-filed" title="Date to upload" >
-        <label for=""></label>
-        "report_date.value.toLocaleDateString()">
-
-      </mat-form-field>  -->
       <mat-form-field class="search-filed" title="Type to find(any filed). Click to select" >
         <input matInput [placeholder]="'Report Currency'" 
         formControlName="report_id_currency" 
@@ -61,13 +54,10 @@
         </mat-error>
       </mat-form-field>
     <span style="display:grid; width: 20%; min-height: 80%; align-items: flex-end;">
-
-
       <mat-select placeholder="Model Portfolio" class="search-filed"
         formControlName="MP" 
-       style="padding: 3%;"
-        (selectionChange)="setPortfoliosList($event)"  
-      >
+        style="padding: 3%;"
+        (selectionChange)="setPortfoliosList($event)">
         <mat-option *ngFor="let mp of mp_strategies_list" [value]="mp['name']"> {{mp['name']}} </mat-option>
       </mat-select>
       <span style="margin-top: 4%; margin-left: 2%;">
@@ -75,14 +65,12 @@
       </span> 
     </span> 
     <span style="display:grid; width: 20%; margin-left: 1%; align-items: flex-end;">
-
-    <button color = "primary" mat-raised-button 
-    style="margin-top:4%;margin-left: 1%; font-size: 18px; width: 95%; height: 100%;"
-    (click)="createOrders()"><mat-icon>call</mat-icon>
-    Create Orders
-  </button>
-
-  </span>
+      <button color = "primary" mat-raised-button 
+        style="margin-top:4%;margin-left: 1%; font-size: 18px; width: 95%; height: 100%;"
+        (click)="createOrders()"><mat-icon>call</mat-icon>
+        Create Orders
+      </button>
+    </span>
   </span>
   <span style="display: flex;    align-items:flex-start;  margin-right: 1%;margin-top: 0.2%;"> 
     <mat-form-field  appearance="fill" style="width: 50%; margin-bottom: 0.5%; " class="search-filed">

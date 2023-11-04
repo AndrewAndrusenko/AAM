@@ -6,7 +6,7 @@ CREATE OR REPLACE FUNCTION public.f_i_get_portfolios_structure_detailed_data(
 	p_idportfolio_codes text[],
 	p_report_date date,
 	p_report_currency integer)
-    RETURNS TABLE(notnull_npv numeric, mtm_positon_base_cur numeric, roi numeric, pl numeric, cost_in_position numeric,cost_full_position numeric, unrealizedpl numeric, total_pl numeric, idportfolio integer, portfolio_code character varying, secid character varying, strategy_name character varying, mp_name character varying, fact_weight numeric, current_balance numeric, mtm_positon numeric, weight numeric, planned_position numeric, order_amount numeric, order_type text, order_qty numeric, mtm_rate numeric, mtm_date date, mtm_dirty_price numeric, cross_rate numeric, npv numeric, rate_date date, main_currency_code numeric, orders_unaccounted_qty numeric, orders_unaccounted numeric) 
+    RETURNS TABLE(mp_id int, notnull_npv numeric, mtm_positon_base_cur numeric, roi numeric, pl numeric, cost_in_position numeric, cost_full_position numeric, unrealizedpl numeric, total_pl numeric, idportfolio integer, portfolio_code character varying, secid character varying, strategy_name character varying, mp_name character varying, fact_weight numeric, current_balance numeric, mtm_positon numeric, weight numeric, planned_position numeric, order_amount numeric, order_type text, order_qty numeric, mtm_rate numeric, mtm_date date, mtm_dirty_price numeric, cross_rate numeric, npv numeric, rate_date date, main_currency_code numeric, orders_unaccounted_qty numeric, orders_unaccounted numeric) 
     LANGUAGE 'plpgsql'
     COST 100
     VOLATILE PARALLEL UNSAFE
@@ -42,11 +42,13 @@ WITH
       current_position.account_currency,
 	  modelportfolio_structure.strategy_name,
 	  modelportfolio_structure.mp_name,
+	  modelportfolio_structure.mp_id,
 	  COALESCE(pl_data.pl,0) AS pl
     FROM
       current_position
       FULL OUTER JOIN (
         SELECT
+		  f_i_model_portfolios_select_mp_structure_for_accounts.mp_id,
           id,
           instrument,
           code,
@@ -84,6 +86,7 @@ WITH
   ),
   full_portfolio_with_mtm_data AS (
     SELECT
+	  full_portfolio.mp_id,
 	  full_portfolio.pl,
 	  full_portfolio.strategy_name,
 	  full_portfolio.mp_name,
@@ -149,6 +152,7 @@ WITH
 	  GROUP BY full_portfolio_with_mtm_data.idportfolio
   )
 SELECT
+ full_portfolio_with_mtm_data.mp_id,
  npv_portfolios.npv as notnull_npv,
  full_portfolio_with_mtm_data.mtm_positon_base_cur,
  ROUND((full_portfolio_with_mtm_data.mtm_positon - full_portfolio_with_mtm_data.cost_in_position+full_portfolio_with_mtm_data.pl)

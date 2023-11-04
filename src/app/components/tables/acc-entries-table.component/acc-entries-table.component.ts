@@ -1,7 +1,7 @@
 import {Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, SimpleChanges, ViewChild} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
-import {Subscription, filter } from 'rxjs';
+import {Subscription, filter, tap } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
@@ -20,6 +20,7 @@ import { HandlingCommonTasksService } from 'src/app/services/handling-common-tas
 import { AuthService } from 'src/app/services/auth.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
 import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
+import { AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
 
 @Component({
   selector: 'app-table-acc-entries',
@@ -87,6 +88,8 @@ export class AppTableAccEntriesComponent implements OnInit {
     private dialog: MatDialog,
     private fb:FormBuilder ,
     private indexDBServiceS:indexDBService,
+    private InvestmentDataService:AppInvestmentDataServiceService, 
+
 
   ) {
     this.searchParametersFG = this.fb.group ({
@@ -115,6 +118,13 @@ export class AppTableAccEntriesComponent implements OnInit {
     }
     this.initiateTable();
     this.subscriptions.add(this.TreeMenuSevice.getActiveTab().subscribe(tabName=>this.activeTab=tabName));
+    this.subscriptions.add(this.InvestmentDataService.getClientsPortfolios().pipe(
+      tap(() => this.dataSource? this.dataSource.data = null: null),
+      filter(portfolios=>portfolios.length>0)
+    ).subscribe(portfolios=> {
+      this.portfolioCodes.patchValue(['ClearAll',...portfolios.map(el=>el.code)]);
+      this.submitQuery(false)
+    }))
   }
   initiateTable() {
     switch (this.action) {
@@ -125,7 +135,6 @@ export class AppTableAccEntriesComponent implements OnInit {
         this.submitQuery(false);
       break;
       case 'ViewEntriesByIdTrade':
-        console.log('ViewEntriesByIdTrade',);
         this.idtrade.setValue(this.paramRowData.idtrade)
         this.submitQuery(false);
       break;
@@ -137,6 +146,8 @@ export class AppTableAccEntriesComponent implements OnInit {
         this.portfolioCodes.patchValue([this.paramRowData.portfolioCode,this.paramRowData.portfolioCode])
         this.submitQuery(false);
       break;
+      case 'None':
+      break;
       default :
         this.submitQuery(false)
       break;
@@ -147,7 +158,6 @@ export class AppTableAccEntriesComponent implements OnInit {
   }
   submitQuery (notification:boolean=true, sendNewAllocatedSum:boolean=false) {
     this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate);
-    console.log('this.searchParametersFG.value',this.searchParametersFG.value);
     let searchObj = this.searchParametersFG.value;
     this.dataSource? this.dataSource.data = null: null;
     Object.assign (searchObj , {'dateRangeStart':

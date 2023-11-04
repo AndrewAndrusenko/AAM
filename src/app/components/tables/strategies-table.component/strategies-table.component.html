@@ -27,48 +27,51 @@
         <td  mat-cell *matCellDef="let element">
           <span [ngSwitch]="true==true">
             <p *ngSwitchCase="['name'].includes(column)">
-              <button mat-stroked-button style="width: 90; font-size: 18px; margin-top:2%;height: 4vh;" 
+              <button mat-stroked-button style=" font-size: 18px; margin-top:2%;height: 3.1vh;" 
               [matTooltip]="this.strategyTableInitParams.action==='Select'? 'Click to select strategy':'Strategy details'"
               [style.background-color] = "this.strategyTableInitParams.action==='Select'? '': investmentNodeColor"
-              (click)="this.strategyTableInitParams.action==='Select'? chooseStrategy(element) : openStrategyForm(disabledControlElements? 'View': 'Edit',element)">
+              (click)="this.strategyTableInitParams.action==='Select'? chooseStrategy(element) : NavigateToStrategyForm(disabledControlElements? 'View': 'Edit',element)">
                 {{element[column] }}
               </button> 
             </p>
             <p *ngSwitchCase="['level'].includes(column)">
                  {{element[column]===1? 'Model Portfolio' : 'Strategy' }}
             </p>
+            <p  *ngSwitchCase="['action'].includes(column) " >
+              <button  *ngIf="disabledControlElements" mat-icon-button color="accent"
+                matTooltip="View Strategy"
+                (click)="openStrategyForm('View', element)">
+                <mat-icon >pageview</mat-icon>
+              </button>
+              <ng-container  *ngIf="!disabledControlElements">
+                <button mat-icon-button color="accent"
+                  matTooltip="Edit Strategy"
+                  (click)="openStrategyForm('Edit',element)">
+                  <mat-icon >edit</mat-icon>
+                </button>
+                <button mat-icon-button color="accent"
+                  matTooltip="Copy Strategy"
+                  (click)="openStrategyForm('Create_Example',element)">
+                  <mat-icon >file_copy</mat-icon>
+                </button>
+                <button 
+                  mat-icon-button 
+                  color="accent" 
+                  matTooltip="Delete Strategy"
+                  (click)="openStrategyForm('Delete',element)">
+                  <mat-icon >delete</mat-icon>
+                </button>
+              </ng-container>
             <p *ngSwitchDefault>
               {{element[column]}}
             </p>
           </span>
         </td>
       </ng-container>
-      <ng-container matColumnDef="expand">
-        <th mat-header-cell *matHeaderCellDef aria-label="row actions">Expand</th>
-        <td mat-cell *matCellDef="let element">
-          <button mat-icon-button 
-            (click)="(expandedElement = expandedElement === element ? null : element); $event.stopPropagation()">
-            <mat-icon *ngIf="expandedElement !== element">keyboard_arrow_down</mat-icon>
-            <mat-icon *ngIf="expandedElement === element">keyboard_arrow_up</mat-icon>
-          </button>
-        </td>
-      </ng-container>
-      <ng-container matColumnDef="expandedDetail" >
-        <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplayWithExpand.length">
-          <div class="element-detail" *ngIf="strategyTableInitParams.action!=='Select'"
-          [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
-          <h1 style = "color: rgb(85, 167, 238); font-style: italic; margin-top: 1%;"> {{element['name']}}: Portfolios List </h1>
-          <app-portfolio-tablee style="width: 100%;"
-              [actionOnAccountTable]="'Get_Portfolios_By_StrategyId'"
-              [strategyId]="element['id']"
-            ></app-portfolio-tablee>
-          </div>
-        </td>
-      </ng-container>
-      <tr mat-header-row *matHeaderRowDef="columnsToDisplayWithExpand"></tr>
-        <tr mat-row [cdkContextMenuTriggerFor]="instrumentcontextmenu"  *matRowDef="let element; columns: columnsToDisplayWithExpand;"
-          class="element-row"
-          [class.expanded-row]="expandedElement === element"
+
+      <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+        <tr mat-row [cdkContextMenuTriggerFor]="instrumentcontextmenu"  *matRowDef="let element; columns: columnsToDisplay;"
+          
           (click)="this.strategyTableInitParams.action==='Select'? chooseStrategy(element): showPortfolios($event,element) ">
           <ng-template  #instrumentcontextmenu>
             <div  class="tree-menu-context" cdkMenu >
@@ -109,7 +112,6 @@
             </div>
           </ng-template>
         </tr>
-      <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row"    ></tr>
     </table>
     <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" [pageSize]="20" aria-label="Select page of users"></mat-paginator>
   </div>

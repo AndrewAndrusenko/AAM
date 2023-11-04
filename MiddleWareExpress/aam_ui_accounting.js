@@ -170,11 +170,9 @@ async function fGetAccountingData (request,response) {
   query.text = pgp.as.format(query.text,request.query);
   if (['GetAccountsEntriesListAccounting'].includes(request.query.Action)) {
     request.query
-    console.log(' request.query', request.query);
     query.text = query.text.replaceAll("'null'",null);
     query.text = query.text.replaceAll("array[0,0]",null);
     query.text = query.text.replaceAll(",'ClearAll'",',null');
-    console.log('sql',query.text);
   }
   db_common_api.queryExecute(query.text,response,null, request.query.queryCode === undefined?  request.query.Action : request.query.queryCode );
 }
