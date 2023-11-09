@@ -32,7 +32,7 @@ async function fGetStrategiesList (request,response) {
     break;
   }
   sql = pgp.as.format(query.text,query.values)
-  db_common_api.queryExecute (sql, response,null,'fGetStrategiesList');
+  db_common_api.queryExecute (sql, response,null,request.query.action? request.query.action : 'fGetStrategiesList');
 }
 async function fGetStrategyStructure (request,response) {
   const query = {text: 'SELECT '+

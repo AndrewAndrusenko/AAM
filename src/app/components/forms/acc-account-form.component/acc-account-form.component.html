@@ -19,8 +19,6 @@
     {{action}} Ledger Account
   </button>
 </mat-toolbar>
-
-
 <mat-tab-group mat-stretch-tabs [selectedIndex]="aType*1" >
   <mat-tab  label="Clients">
     <form class="submit" [formGroup]="accountModifyForm" >
@@ -58,12 +56,14 @@
           <mat-error  *ngIf="currencyCode.errors?.['required']">
             Required!    
           </mat-error>
+          <mat-error  *ngIf="currencyCode.errors?.['currencyCode']">
+            Inccorect code!    
+          </mat-error>
         </mat-form-field>
         <mat-form-field style="width: 25%;" *ngIf="accountTypeExt.value==15"  >
           <input matInput 
           [placeholder]="'SecID'" formControlName="secid" [matAutocomplete]="autoSecID"  >
-          <mat-autocomplete #autoSecID="matAutocomplete" 
-            (optionSelected)="secidAutocolmplete($event.option.viewValue) ">
+          <mat-autocomplete #autoSecID="matAutocomplete" >
             <mat-option #selectedsecid *ngFor="let instrument of filterednstrumentsLists | async" [value]="instrument[0]" >
               {{instrument[0]}} - {{instrument[1]}} - {{instrument[2]}} - {{instrument[3]}} - {{instrument[4]}}
             </mat-option>

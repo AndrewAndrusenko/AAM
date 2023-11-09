@@ -55,7 +55,7 @@ export class AppStrategyFormComponent {
   }
   ngOnInit(): void {
 
-    this.getStrategyData (this.strategyId);
+    // this.getStrategyData (this.strategyId);
     this.action === 'View'||this.disabledControlElements? this.editStrategyForm.disable() : null;
   }
   getStrategyData (strategyId:number) {

@@ -3,12 +3,12 @@ import { FormBuilder, FormControl, Validators } from '@angular/forms';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { AppConfimActionComponent } from '../../common-forms/app-confim-action/app-confim-action.component';
 import { StrategiesGlobalData } from 'src/app/models/intefaces.model';
-import { customAsyncValidators } from 'src/app/services/customAsyncValidators.service';
 import { distinctUntilChanged, filter, map, Observable, startWith, switchMap } from 'rxjs';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AppInstrumentTableComponent } from '../../tables/instrument-table.component/instrument-table.component';
 import { AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
+import { indexDBService } from 'src/app/services/indexDB.service';
 
 @Component({
   selector: 'app-structure-strategy-form',
@@ -44,17 +44,17 @@ export class AppStructureStrategyFormComponent implements OnInit {
     private AtuoCompService:AtuoCompleteService,
     private CommonDialogsService:HadlingCommonDialogsService,
     private dialog: MatDialog, 
-    ) {
-    }
-    ngOnInit(): void {
-      this.action !== "Create"? this.editStructureStrategyForm.patchValue(this.data) : null;
-      this.action === "Create_Example"?  this.action = "Create" : null;
+    private indexDBServiceS:indexDBService,
+  ) {}
+  ngOnInit(): void {
+    this.action !== "Create"? this.editStructureStrategyForm.patchValue(this.data) : null;
+    this.action === "Create_Example"?  this.action = "Create" : null;
   }
   ngOnChanges(changes: SimpleChanges) {
     this.disabledControlElements? this.editStructureStrategyForm.disable() : null;
     if (this.MP===2) {
       this.id. setValidators(null);
-      this.InvestmentDataService.getGlobalStategiesList (0,'','Get_ModelPortfolios_List').subscribe (data =>this.MPnames = data)
+      this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios').then (data => this.MPnames = data['data'].filter(el=>el.level===1))
     };
     if (this.MP===1) {
       this.AtuoCompService.getSecidLists();
@@ -78,7 +78,6 @@ export class AppStructureStrategyFormComponent implements OnInit {
   }
   updateStrategyStructureData (action:string){
        this.id_child_integer.patchValue(+(this.id.value||0))
-       console.log('this.editStructureStrategyForm.value',this.editStructureStrategyForm.value);
     switch (action) {
       case 'Create':
         this.editStructureStrategyForm.controls['id_strategy_parent'].setValue(this.strategyId)

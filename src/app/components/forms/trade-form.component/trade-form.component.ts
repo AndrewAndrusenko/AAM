@@ -94,15 +94,15 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data => this.firstOpenedAccountingDate = data[0].FirstOpenedDate);
     this.indexDBServiceS.getIndexDBStaticTables('getMoexSecurityTypes').then (data=>this.securityTypes = data['data']);
-    this.AutoCompService.getCurrencyList().then(()=>{
-      this.id_price_currency.setValidators([this.AutoCompService.currencyValirator(),Validators.required]);
-      this.id_price_currency.updateValueAndValidity();
-      this.id_settlement_currency.setValidators([this.AutoCompService.currencyValirator(),Validators.required]);
-      this.id_settlement_currency.updateValueAndValidity();
-      this.faceunit.value? this.faceunit_name.patchValue(this.AutoCompService.getCurrecyData(this.faceunit.value)['CurrencyCode']):null;
-      this.checkCurrenciesHints()
-    });
-    this.AutoCompService.getSecidLists().then (()=>this.tidinstrument.setValidators(this.AutoCompService.secidValirator()) );
+    this.AutoCompService.getCurrencyList();
+    this.id_price_currency.setValidators([this.AutoCompService.currencyValirator(),Validators.required]);
+    this.id_price_currency.updateValueAndValidity();
+    this.id_settlement_currency.setValidators([this.AutoCompService.currencyValirator(),Validators.required]);
+    this.id_settlement_currency.updateValueAndValidity();
+    this.faceunit.value? this.faceunit_name.patchValue(this.AutoCompService.getCurrecyData(this.faceunit.value)['CurrencyCode']):null;
+    this.checkCurrenciesHints()
+    this.AutoCompService.getSecidLists();
+    this.tidinstrument.setValidators(this.AutoCompService.secidValirator());
     this.AutoCompService.getCounterpartyLists().then (()=>this.id_cpty.setValidators(this.AutoCompService.counterPartyalirator(this.cpty_name)));
   }
   ngOnDestroy(): void {

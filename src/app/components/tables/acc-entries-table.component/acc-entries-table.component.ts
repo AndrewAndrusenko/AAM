@@ -49,6 +49,7 @@ export class AppTableAccEntriesComponent implements OnInit {
   @Output() public modal_principal_parent = new EventEmitter();
   @Output() newAllocatedSum = new EventEmitter<{swift_item_id:number,allocated_sum:number}>();
   expandedElement: bAccountsEntriesList  | null;
+  @Input() rowsPerPages: number = 20; 
   @Input() UI_min: boolean = false; 
   @Input() action :string;
   @Input() externalId: number = null;
@@ -89,8 +90,6 @@ export class AppTableAccEntriesComponent implements OnInit {
     private fb:FormBuilder ,
     private indexDBServiceS:indexDBService,
     private InvestmentDataService:AppInvestmentDataServiceService, 
-
-
   ) {
     this.searchParametersFG = this.fb.group ({
       dataRange : this.dataRange,
@@ -108,6 +107,7 @@ export class AppTableAccEntriesComponent implements OnInit {
     this.AccountingDataService.getReloadEntryList().pipe(
       filter(id=> id==undefined||(id===this.externalId))
     ).subscribe(id =>{
+      console.log('getReloadEntryList',);
       this.submitQuery(false,id? true:false)
     })
   }
@@ -121,10 +121,14 @@ export class AppTableAccEntriesComponent implements OnInit {
     this.subscriptions.add(this.InvestmentDataService.getClientsPortfolios().pipe(
       tap(() => this.dataSource? this.dataSource.data = null: null),
       filter(portfolios=>portfolios.length>0)
-    ).subscribe(portfolios=> {
+      ).subscribe(portfolios=> {
+      console.log('Portfolios entries',);
       this.portfolioCodes.patchValue(['ClearAll',...portfolios.map(el=>el.code)]);
       this.submitQuery(false)
     }))
+  }
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
   }
   initiateTable() {
     switch (this.action) {

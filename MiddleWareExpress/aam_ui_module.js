@@ -150,7 +150,7 @@ async function fGetClientData(request,response) {
     break;
   }
   sql = pgp.as.format(query.text,query.values)
-  db_common_api.queryExecute (sql, response,null,'fGetClientData');
+  db_common_api.queryExecute (sql, response,null,request.query.action? request.query.action :'fGetClientDataALL');
 }
 async function fEditClientData (request, response) {
   paramArr = request.body.data

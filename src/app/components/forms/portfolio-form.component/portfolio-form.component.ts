@@ -50,7 +50,7 @@ export class AppNewAccountComponent {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToPortfolioData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
   }
-  ngAfterViewInit(): void {
+  ngOnInit(): void {
     this.action === 'View'||this.disabledControlElements? this.newAccountForm.disable() : null;
     if (this.accessState !=='none'&&this.action!=='Create') {
       this.InvestmentDataService.getPortfoliosData('',this.portfolioCode,0,undefined,'Get_Portfolio_By_idPortfolio', this.accessToClientData).subscribe (data => {
@@ -61,7 +61,7 @@ export class AppNewAccountComponent {
           this.newAccountForm.get('portfolioname').setValue(null)
         }
       })
-    }
+    } 
   }
   ngOnChanges (changes: SimpleChanges) {
     if (this.accessState !=='none') {

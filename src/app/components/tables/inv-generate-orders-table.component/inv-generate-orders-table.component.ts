@@ -11,7 +11,7 @@ import {formatNumber } from '@angular/common';
 import {HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import {HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import {AuthService } from 'src/app/services/auth.service';
-import {AtuoCompleteService } from 'src/app/services/auto-complete.service';
+import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import {AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
 import { HostListener } from '@angular/core';
 import { indexDBService } from 'src/app/services/indexDB.service';
@@ -76,7 +76,7 @@ export class AppInvGenerateOrdersTable  implements AfterViewInit {
       secArray:null,
       deviation:0.01,
       report_date : [new Date(), { validators:  Validators.required, updateOn: 'blur' }],
-      report_id_currency:[840, { validators:  Validators.required, updateOn: 'blur' }],
+      report_id_currency:[840, { validators:  Validators.required}],
     });
   }
   ngOnDestroy(): void {
@@ -94,9 +94,8 @@ export class AppInvGenerateOrdersTable  implements AfterViewInit {
         );
       return !filter || filter_array.reduce((acc,val)=>acc+Number(val[1]),0)===0;
     };
-    this.AutoCompService.getCurrencyList().then(()=>{
-      this.report_id_currency.setValidators([this.AutoCompService.currencyValirator(),Validators.required]);
-    });
+    this.AutoCompService.getCurrencyList();
+    this.report_id_currency.setValidators([this.AutoCompService.currencyValirator(),Validators.required]);
   }
   async ngAfterViewInit() {
     this.subscriptions.add(this.TreeMenuSevice.getActiveTab().subscribe(tabName=>this.activeTab=tabName));
@@ -134,7 +133,6 @@ export class AppInvGenerateOrdersTable  implements AfterViewInit {
     params_data.secidList = [0,1].includes(this.instruments.length)&&this.instruments[0]==='ClearAll'? null : this.instruments.map(el=>el.toLocaleLowerCase())
     params_data.idportfolios = [0,1].includes(this.portfolios.length)&&this.portfolios[0]==='ClearAll'? null : this.portfolios.map(el=>el.toLocaleLowerCase())
     this.TradeService.createOrderbyMP(params_data).subscribe(data=>{
-      console.log('orders',data)
       this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ')
     })
   }
@@ -156,19 +154,15 @@ export class AppInvGenerateOrdersTable  implements AfterViewInit {
     this.defaultFilterPredicate = this.dataSource.filterPredicate;
     this.multiFilter = this.dataSource.filterPredicate;
   }
-  async submitQuery (reset:boolean=false, showSnackResult:boolean=true) {
-    return new Promise((resolve, reject) => {
-      let searchObj = reset?  {} : this.searchParametersFG.value;
-      this.dataSource?.data? this.dataSource.data = null : null;
-      searchObj.secidList = [0,1].includes(this.instruments.length)&&this.instruments[0]==='ClearAll'? null : this.instruments.map(el=>el.toLocaleLowerCase())
-      searchObj.idportfolios = [0,1].includes(this.portfolios.length)&&this.portfolios[0]==='ClearAll'? null : this.portfolios.map(el=>el.toLocaleLowerCase())
-      searchObj.report_date= new Date (searchObj.report_date).toLocaleDateString();
-
-      this.InvestmentDataService.getPortfoliosPositions(searchObj).subscribe(data => {
-        this.updatePositionsDataTable(data)
-        showSnackResult? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ') : null;
-        resolve(data) 
-      });
+ submitQuery (reset:boolean=false, showSnackResult:boolean=true) {
+    let searchObj = reset?  {} : this.searchParametersFG.value;
+    this.dataSource?.data? this.dataSource.data = null : null;
+    searchObj.secidList = [0,1].includes(this.instruments.length)&&this.instruments[0]==='ClearAll'? null : this.instruments.map(el=>el.toLocaleLowerCase())
+    searchObj.idportfolios = [0,1].includes(this.portfolios.length)&&this.portfolios[0]==='ClearAll'? null : this.portfolios.map(el=>el.toLocaleLowerCase())
+    searchObj.report_date= new Date (searchObj.report_date).toLocaleDateString();
+    this.InvestmentDataService.getPortfoliosPositions(searchObj).subscribe(data => {
+      this.updatePositionsDataTable(data)
+      showSnackResult? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ') : null;
     });
   }
   changedValueofChip (value:string, chipArray:string[],control:AbstractControl) {

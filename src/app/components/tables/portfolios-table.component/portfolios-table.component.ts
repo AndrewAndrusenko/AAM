@@ -40,6 +40,7 @@ export class TablePortfolios {
   @ViewChild(MatSort) sort: MatSort;
   readOnly: boolean = true;
   dialogRef: MatDialogRef<AppNewAccountComponent>;
+  @Input() sendClientsPortfolio: boolean=true;
   @Input() clientId: number;
   @Input() strategyMpName: string;
   @Input() actionOnAccountTable: string;
@@ -65,15 +66,18 @@ export class TablePortfolios {
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
       snack? this.CommonDialogsService.snackResultHandler(Object.hasOwn(portfoliosData,'name')? portfoliosData : {name:'success', detail: portfoliosData.length},'Loaded '):null;
-      ['Get_Portfolios_By_CientId','Get_Portfolios_By_StrategyId'].includes(action)? this.InvestmentDataService.sendClientsPortfolios(portfoliosData.map(el=> {return {id:el.idportfolio,code:el.portfolioname}})):null;
+      if (['Get_Portfolios_By_CientId','Get_Portfolios_By_StrategyId'].includes(action)&&this.sendClientsPortfolio) {
+        this.InvestmentDataService.sendClientsPortfolios(portfoliosData.map(el=> {return {id:el.idportfolio,code:el.portfolioname}}))
+      }
     })
   }
   ngOnInit(): void {
     this.accessToClientData = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToClientData')[0].elementvalue;
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToPortfolioData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
-    console.log('strategyMpName',this.strategyMpName);
-    this.updatePortfolioData (undefined, this.clientId,this.strategyMpName,this.actionOnAccountTable,this.accessToClientData,false);
+    if (!['Get_Portfolios_By_CientId','Get_Portfolios_By_StrategyId'].includes(this.actionOnAccountTable)||this.action==='Select') 
+      {this.updatePortfolioData (undefined, this.clientId,this.strategyMpName,this.actionOnAccountTable,this.accessToClientData,false)
+    };
     this.arraySubscrition.add (
       this.InvestmentDataService.getReloadPortfoliosData().subscribe(data => this.updatePortfolioData (undefined, this.clientId,this.strategyMpName,this.actionOnAccountTable,this.accessToClientData))
     )
@@ -82,7 +86,6 @@ export class TablePortfolios {
     this.arraySubscrition.unsubscribe();
   }
   ngOnChanges(changes: SimpleChanges) {
-    console.log('this.clientId,',this.clientId,this.actionOnAccountTable);
     this.updatePortfolioData (undefined, this.clientId,this.strategyMpName,this.actionOnAccountTable,this.accessToClientData,false);
   }
   chooseAccount (element) {

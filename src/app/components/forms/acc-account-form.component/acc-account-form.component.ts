@@ -60,7 +60,7 @@ export class AppAccAccountModifyFormComponent implements OnInit {
       accountTypeExt:[null, [Validators.required]] ,  
       Information: {value:null, disabled: false},  
       clientId: {value:null, disabled: true},  
-      currencyCode: [810],  
+      currencyCode: [null],  
       secid:[null],  
       entityTypeCode: [null, [Validators.required]], 
       accountId: {value:null, disabled: false},
@@ -88,21 +88,18 @@ export class AppAccAccountModifyFormComponent implements OnInit {
   }
   ngOnInit(): void {
     (this.aType == 1)? this.accountLedgerModifyForm.patchValue(this.data): this.accountModifyForm.patchValue(this.data);
-    this.AutoCompService.getCurrencyList().then(()=>{
-      this.filteredCurrenciesList = this.currencyCode.valueChanges.pipe (
-        startWith (''),
-        distinctUntilChanged(),
-        map(value => this.AutoCompService.filterList(value || '','currency'))
-        );
-    });
-    this.AutoCompService.getSecidLists().then (()=>{   
-      this.filterednstrumentsLists = this.secid.valueChanges.pipe(
+    this.AutoCompService.getCurrencyList();
+    this.filteredCurrenciesList = this.currencyCode.valueChanges.pipe (
+      startWith (''),
+      distinctUntilChanged(),
+      map(value => this.AutoCompService.filterList(value || '','currency'))
+      );
+    this.AutoCompService.getSecidLists();
+    this.filterednstrumentsLists = this.secid.valueChanges.pipe(
         startWith(''),
         distinctUntilChanged(),
         map((value: any) => this.AutoCompService.filterList(value || '','secid'))
-      );
-    });
-
+    );
   }
   ngAfterContentInit(): void {
     let accType = this.d_APTypeCodeAccount.value == 1 ? 'Active' : 'Passive'
@@ -127,13 +124,15 @@ export class AppAccAccountModifyFormComponent implements OnInit {
     this.setValidators();
   }
   setValidators () {
-    this.accountTypeExt.value==15? this.secid.setValidators(this.AutoCompService.secidValirator()): this.currencyCode.setValidators(this.AutoCompService.currencyValirator())
-  }
-  secidAutocolmplete (el:any) {
-    console.log('secidAutocolmplete',);
+    if (this.accountTypeExt.value==15) {
+      this.secid.setValidators(this.AutoCompService.secidValirator());
+      this.currencyCode.clearValidators(); 
+      this.currencyCode.updateValueAndValidity()
+    } else {
+       this.currencyCode.setValidators(this.AutoCompService.currencyValirator());
+    }
   }
   accountTypeChanges (){
-    console.log('type',this.accountTypeExt.value);
     this.setValidators();
   }
   selectPortfolio () {

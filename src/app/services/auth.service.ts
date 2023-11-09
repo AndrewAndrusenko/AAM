@@ -22,10 +22,8 @@ export class AuthService {
     return new Promise <boolean> ((resolve,reject) => { 
       let userData = JSON.parse(localStorage.getItem('userInfo'))
       const params = {accessRole: userData.user.accessrole,action:'getAccessRestriction'}
-      console.log('params',params);
       this.http.get <accessRestriction[]>('/api/accessRestriction/',{ params: params }).subscribe((data) => {
         this.accessRestrictions = data;
-        console.log('length',this.accessRestrictions);
         data.length? resolve(true) : reject(false)
       })
     })
@@ -35,7 +33,6 @@ export class AuthService {
       const params = {accessRole: userData.user.accessrole,action:'getObjectStatuses'}
       this.http.get <objectStatus[]>('/api/accessRestriction/',{ params: params }).subscribe((data) => {
         this.objectStatuses = data;
-        // console.log('objectStatuses',this.objectStatuses);
       })
   }
   verifyAccessRestrictions (elementid:string ):Observable <accessRestriction>  {
@@ -50,7 +47,6 @@ export class AuthService {
         elementvalue:'none'})) 
   } 
   setUserInfo(user){
-    console.log ('user',user)
     localStorage.setItem('userInfo',JSON.stringify(user));
   }
   validate(login, password) {

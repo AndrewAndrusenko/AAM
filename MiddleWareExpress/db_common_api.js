@@ -15,7 +15,7 @@ async function queryExecute (sql, response, responseType, sqlID) {
       } else {
         let rows = [];
         res.length? res.map(el => rows.push(...el.rows) ): rows = res.rows;
-        // sqlID==='finsertMarketData'? console.log('res',res.rowCount) : null;
+        // sqlID==='Get_Client_Data'? console.log('res',res.rows) : null;
         result = responseType === 'rowCount'?  res.rowCount : rows;
         console.log('N:',new Date().getSeconds()+10, 'db_api; ', sqlID, ';  QTY rows ;', responseType === 'rowCount'?  res.rowCount :rows.length)
         resolve (response? response.status(200).json(result):result)

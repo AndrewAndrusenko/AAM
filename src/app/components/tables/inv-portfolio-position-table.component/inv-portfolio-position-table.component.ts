@@ -13,10 +13,10 @@ import {HandlingCommonTasksService } from 'src/app/services/handling-common-task
 import {AuthService } from 'src/app/services/auth.service';
 import {AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import {AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
-import { HostListener } from '@angular/core';
-import { indexDBService } from 'src/app/services/indexDB.service';
-import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
-import { MatCheckbox, MatCheckboxChange } from '@angular/material/checkbox';
+import {HostListener } from '@angular/core';
+import {indexDBService } from 'src/app/services/indexDB.service';
+import {TreeMenuSevice } from 'src/app/services/tree-menu.service';
+import {MatCheckbox } from '@angular/material/checkbox';
 @Component({
   selector: 'app-inv-portfolio-position-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -29,7 +29,7 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
   disabledControlElements: boolean = false;
   @Input() rowsPerPages:number = 15;
   @Input() filters:any;
-  @Input() searchAllowed:boolean = true;
+  @Input() readOnly:boolean = false;
   columnsToDisplay = ['portfolio_code','secid','mp_name','fact_weight','current_balance','mtm_positon','weight','planned_position','deviation_percent','order_amount','mtm_rate','roi','total_pl','pl','unrealizedpl','cost_in_position','mtm_date','order_type','order_qty','orders_unaccounted_qty','mtm_dirty_price','cross_rate','strategy_name','cost_full_position','rate_date'];
   columnsHeaderToDisplay = ['Code','SecID','MP','Fact %','Balance','PositionMTM','MP %','MP_Position','DV%','Deviation','MTM_Rate','ROI','Total PL','FIFO PL','MTM PL','Position Cost','MTM_Date','TypeBS','Deviation Qty','Qty in Active Orders ','MTM_Dirty','CurRate','Strategy','Cost Full','CurDate']
   dataSource: MatTableDataSource<portfolioPositions>;
@@ -75,7 +75,7 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
       MP:null,
       notnull:true,
       report_date : [new Date(), { validators:  Validators.required, updateOn: 'blur' }],
-      report_id_currency:[840, { validators:  Validators.required, updateOn: 'blur' }],
+      report_id_currency:[840, { validators:  Validators.required}],
     });
   }
   ngOnDestroy(): void {
@@ -96,32 +96,44 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
     this.InvestmentDataService.getPortfoliosPositions(this.searchParametersFG.value).subscribe (positionsData =>{
       this.updatePositionsDataTable(positionsData);
     });  
-    this.AutoCompService.getCurrencyList().then(()=>{
-      this.report_id_currency.setValidators([this.AutoCompService.currencyValirator(),Validators.required]);
-    });
+
   }
   async ngAfterViewInit() {
-    this.AutoCompService.getSecidLists();
-    this.filters==undefined&&this.fullDataSource!==undefined? this.initialFilterOfDataSource(this.filters) : null;
-    this.filterednstrumentsLists = this.secidList.valueChanges.pipe(
-      startWith(''),
-      distinctUntilChanged(),
-      map(value => this.AutoCompService.filterList(value || '','secid'))
-    );
-    this.filteredCurrenciesList = this.report_id_currency.valueChanges.pipe (
-      startWith (''),
-      distinctUntilChanged(),
-      map(value => this.AutoCompService.filterList(value || '','currency'))
+    if (this.readOnly===false) {
+      this.AutoCompService.getSecidLists();
+      // this.AutoCompService.nextSecid();
+      this.AutoCompService.getCurrencyList();
+      this.report_id_currency.setValidators([this.AutoCompService.currencyValirator(),Validators.required]);
+      this.filterednstrumentsLists = this.secidList.valueChanges.pipe(
+        startWith(''),
+        distinctUntilChanged(),
+        map(value => this.AutoCompService.filterList(value || '','secid'))
       );
+      this.filteredCurrenciesList = this.report_id_currency.valueChanges.pipe (
+        startWith (''),
+        distinctUntilChanged(),
+        map(value => this.AutoCompService.filterList(value || '','currency'))
+        );
+    }
+    this.filters==undefined&&this.fullDataSource!==undefined? this.initialFilterOfDataSource(this.filters) : null;
     this.subscriptions.add(this.InvestmentDataService.getClientsPortfolios().pipe(
       tap(() => this.dataSource? this.dataSource.data = null: null),
+      tap(portfolios => portfolios.length===0?  this.filters = {null_data:true}: null),
       filter(portfolios=>portfolios.length>0)
     ).subscribe(portfoliosData=> {
-      this.portfolios= ['ClearAll',...portfoliosData.map(el=>el.code)];
-      this.submitQuery(undefined,false)
+      this.filters = {portfolio_code: portfoliosData.map(el=>el.code)};
+      this.fullDataSource!==undefined? this.initialFilterOfDataSource(this.filters) : null;
+      this.notNullCB?.checked===false&&this.fullDataSource!==undefined? this.showZeroPortfolios(false):null;
     }));
     this.subscriptions.add(this.TreeMenuSevice.getActiveTab().subscribe(tabName=>this.activeTab=tabName));
-
+    this.multiFilter = (data: portfolioPositions, filter: string) => {
+      let filter_array = filter.split(',').map(el=>[el,1]);
+      this.columnsToDisplay.forEach(col=>filter_array.forEach(fil=>{
+        data[col]&&fil[0].toString().toUpperCase()===(data[col]).toString().toUpperCase()? fil[1]=0:null
+      })
+        );
+      return !filter || filter_array.reduce((acc,val)=>acc+Number(val[1]),0)===0;
+    };
   }
   setPortfoliosList(e:any) {
     this.InvestmentDataService.getPortfoliosListForMP(e.value,'getPortfoliosByMP_StrtgyID').subscribe(data=>{
@@ -143,10 +155,14 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
       this.dataSource.data = this.fullDataSource;
       return;
     }
-   Object.keys(filter).every(key=>{
-    this.dataSource.data = this.fullDataSource.filter(el=>el[key]===filter[key])
-    if (this.dataSource.data.length) {return false}  else return true;
-   })
+    if (filter?.null_data===true) {
+      this.dataSource.data=null;
+    } else {
+    Object.keys(filter).every(key=>{
+      this.dataSource.data = this.fullDataSource.filter(el=>filter[key].includes(el[key]))
+      if (this.dataSource.data.length) {return false}  else return true;
+     })
+    }
   }
   ngOnChanges(changes: SimpleChanges) {
     if (changes['filters']?.currentValue!==undefined&&this.fullDataSource!==undefined)  {
@@ -154,22 +170,16 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
     }
     this.notNullCB?.checked===false? this.showZeroPortfolios(false):null;
   }
-  applyFilter(event: any, col?:string) {
-    this.dataSource.filterPredicate = col === undefined? this.defaultFilterPredicate : this.multiFilter
-    const filterValue = event.hasOwnProperty('isUserInput')?  event.source.value :  (event.target as HTMLInputElement).value 
-    !event.hasOwnProperty('isUserInput') || event.isUserInput ? this.dataSource.filter = filterValue.trim().toLowerCase() : null;
-    if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
-  }
+
   updatePositionsDataTable (positionsData:portfolioPositions[]) {
     this.fullDataSource=positionsData;
     this.dataSource  = new MatTableDataSource(positionsData);
+    this.dataSource.filterPredicate =this.multiFilter
+    this.filterALL? this.filterALL.nativeElement.value=null : null;
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
     this.filters? this.initialFilterOfDataSource(this.filters) : null;
     this.notNullCB?.checked===false? this.showZeroPortfolios(false):null;
-    this.dataSource.filterPredicate =this.multiFilter
-    this.defaultFilterPredicate = this.dataSource.filterPredicate;
-    this.multiFilter = this.dataSource.filterPredicate;
   }
   submitQuery (reset:boolean=false, showSnackResult:boolean=true) {
     let searchObj = reset?  {} : this.searchParametersFG.value;
@@ -207,6 +217,11 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
     this.filterALL.nativeElement.value = this.filterALL.nativeElement.value + el+',';
     this.dataSource.filter = this.filterALL.nativeElement.value.slice(0,-1).trim().toLowerCase();
     (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
+  }
+  applyFilter(event: any) {
+    const filterValue = (event.target as HTMLInputElement).value 
+    this.dataSource.filter = filterValue.trim().toLowerCase();
+    this.dataSource.paginator? this.dataSource.paginator.firstPage():null;
   }
   clearFilter (input:HTMLInputElement) {
     input.value=''

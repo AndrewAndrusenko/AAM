@@ -4,6 +4,7 @@ import { AppMenuServiceService } from 'src/app/services/menu-service.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
 import { MatDialog } from '@angular/material/dialog';
+import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 @Component({
   selector: 'app-root-page',
   templateUrl: './root-page.component.html',
@@ -18,7 +19,9 @@ export class DashboardComponent implements OnDestroy,OnInit {
     private appMenuService : AppMenuServiceService,
     private AuthServiceS:AuthService,  
     private indexDBServiceS:indexDBService,
-    public dialog: MatDialog
+    public dialog: MatDialog,
+    private AutoCompService:AtuoCompleteService,
+
     ) {
     this.subscriptionName= this.appMenuService.getToggleTree().subscribe (message => this.opened = message.text );
   }
@@ -28,6 +31,9 @@ export class DashboardComponent implements OnDestroy,OnInit {
       this.indexDBServiceS.getIndexDBStaticTables('bcTransactionType_Ext').then ( (data) => console.log('Cache:', data['data'].length,' saved for bcTransactionType_Ext'));
       this.AuthServiceS.getObjectStatuses();
     })
+    this.AutoCompService.createSecIDpipe(0);
+    this.AutoCompService.createCurrencypipe(0);
+
   }
   ngOnDestroy() { 
     this.subscriptionName.unsubscribe();

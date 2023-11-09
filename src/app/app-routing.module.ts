@@ -12,6 +12,7 @@ import { ClientsTabComponent } from './components/main-page/tabs/clients-tab/cli
 import { AccSWIFTTabComponent } from './components/main-page/tabs/SWIFT-tab.component/SWIFT-tab.component';
 import { AppTableSWIFT950ItemsComponent } from './components/tables/swift-950-table.component/swift-items-table.component';
 import { OrdersTabComponent } from './components/main-page/tabs/trades-orders-tab/trades-orders-tab';
+import { AppTabsComponent } from './components/main-page/tabs.component/tabs.component';
 export const routesTreeMenu =[
   {
     path: "Instruments",
@@ -23,6 +24,12 @@ export const routesTreeMenu =[
     data: { reuse: true },
     component: StrategiesTabComponent
   },
+  {
+    path: "tree",
+    data: { reuse: true },
+    component: AppTabsComponent
+  },
+
   {
     path: "Accounts",
     data: { reuse: true },

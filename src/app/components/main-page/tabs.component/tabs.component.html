@@ -5,20 +5,22 @@
   <mat-tab label="Portfolio Positions"> 
     <app-inv-portfolio-position-table
     [rowsPerPages]="15"
-    [searchAllowed]="false"
-    [filters]="{portfolio_code:messageReceived.name}">
+    [readOnly]="false"
+    [filters]="{portfolio_code:[messageReceived.name]}">
     </app-inv-portfolio-position-table>
   </mat-tab>
   <mat-tab label="Portfolio Transactions"> 
     <app-table-acc-entries
     [paramRowData]="{portfolioCode:messageReceived.name}"
-    [action]="'ViewEntriesByPortfolio'"    >
+    [action]="'ViewEntriesByPortfolio'"   
+    [rowsPerPages]="15"
+     >
     </app-table-acc-entries>
   </mat-tab>
   <mat-tab label="Trades by Account"> 
     <app-allocation-table
     [rowsPerPages]="15"
-    [filters]="{portfolioname:messageReceived.name}" >
+    [filters]="{portfolioname:[messageReceived.name]}" >
     </app-allocation-table>
   </mat-tab>
   <mat-tab label="Account Summary" > 
@@ -34,7 +36,8 @@
 <mat-tab-group  *ngIf="messageReceived.text=='Clients'" mat-stretch-tabs #ClientInfo>
   <mat-tab label="Client Transactions"> 
     <app-table-acc-entries
-    [action]="'None'"    >
+    [action]="'None'"    
+    [rowsPerPages]="15">
     </app-table-acc-entries>
   </mat-tab>
   <mat-tab label="Client Portfolios">
@@ -55,13 +58,13 @@
   <mat-tab label="Client Positions"> 
     <app-inv-portfolio-position-table
     [rowsPerPages]="15"
-    [searchAllowed]="false">
+    [readOnly]="false">
     </app-inv-portfolio-position-table>
   </mat-tab>
   <mat-tab label="Client Trades"> 
     <app-allocation-table
     [rowsPerPages]="15"
-    [filters]="{disabledControlElements:true}" >
+    [filters]="{disabled_controls:true}" >
     </app-allocation-table>
   </mat-tab>
 
@@ -84,18 +87,21 @@
   </mat-tab>  
   <mat-tab label="Positions by Strategy"> 
     <app-inv-portfolio-position-table
-      [rowsPerPages]="25"
+      [rowsPerPages]="15"
+      [readOnly]="false"
       [filters]="{
-        mp_name:messageReceived.name,
-        strategy_name:messageReceived.name,
-        not_zero_npv:true
+        mp_name:[messageReceived.name],
+        strategy_name:[messageReceived.name]
       }">
     </app-inv-portfolio-position-table>
   </mat-tab>
   <mat-tab label="Trades by Strategy">
     <app-allocation-table
     [rowsPerPages]="15"
-    [filters]="{disabledControlElements:true}" >
+    [filters]="{
+      mp_name:messageReceived.name,
+      disabled_controls:true
+    }" >
     </app-allocation-table>
   </mat-tab>
   <mat-tab label="Orders by Strategy"> 

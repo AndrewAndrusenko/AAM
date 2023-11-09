@@ -76,6 +76,7 @@
           <div class="element-detail" *ngIf="accessToPortfolioData!=='none'&&action!=='Select'"
             [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
               <app-portfolio-tablee style="width: 100%" class="myclass" 
+                [sendClientsPortfolio]="false"
                 [clientId]="element['idclient']" 
                 [actionOnAccountTable]="'Get_Portfolios_By_CientId'">
               </app-portfolio-tablee >

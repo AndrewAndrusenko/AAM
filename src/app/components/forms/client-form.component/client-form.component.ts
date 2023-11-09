@@ -8,7 +8,7 @@ import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dia
 import { AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { ClientData } from 'src/app/models/intefaces.model';
-import { filter, switchMap } from 'rxjs';
+import { distinctUntilChanged, distinctUntilKeyChanged, filter, switchMap, tap } from 'rxjs';
 @Component({
   selector: 'app-app-client-form',
   templateUrl: './client-form.component.html',
@@ -68,7 +68,7 @@ export class AppClientFormComponent implements OnInit {
     })
   }
   ngOnChanges(changes: SimpleChanges) {
-    this.updataDataSourse(changes['client'].currentValue, null, 'Get_Client_Data');
+    this.editClienttForm? this.updataDataSourse(changes['client'].currentValue, null, 'Get_Client_Data'):null;
   }
   snacksBox(result:ClientData[], action?:string){
     if (result['name']=='error') {

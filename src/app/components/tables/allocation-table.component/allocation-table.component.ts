@@ -22,6 +22,7 @@ import { AppAccountingService } from 'src/app/services/accounting.service';
 import { AppAllocationService } from 'src/app/services/allocation.service';
 import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
+import { indexDBService } from 'src/app/services/indexDB.service';
 @Component({
   selector: 'app-allocation-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -77,6 +78,7 @@ export class AppallocationTableComponent  implements AfterViewInit {
     private InvestmentDataService:AppInvestmentDataServiceService, 
     private TradeService: AppTradeService,
     private AuthServiceS:AuthService,  
+    private indexDBServiceS:indexDBService,
     private AllocationService: AppAllocationService,
     private AccountingDataService:AppAccountingService, 
     private ref: ChangeDetectorRef,
@@ -88,7 +90,6 @@ export class AppallocationTableComponent  implements AfterViewInit {
     private dialog: MatDialog, 
   ) {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
-
     this.searchParametersFG = this.fb.group ({
       type:null,
       secidList: [],
@@ -102,10 +103,9 @@ export class AppallocationTableComponent  implements AfterViewInit {
     this.subscriptions.unsubscribe();
   }
   ngOnInit(): void {
-    if (this.accessState !== 'full' || this.filters?.disabledControlElements===true) {
+    if (this.accessState !== 'full' || this.filters?.disabled_controls===true) {
       this.disabledControlElements = true;
-      this.filters?.disabledControlElements? delete this.filters.disabledControlElements : null;
-      console.log('filters1111',this.filters);
+      this.filters?.disabled_controls? delete this.filters.disabled_controls : null;
     } 
     else {
       this.disabledControlElements = false
@@ -152,10 +152,12 @@ export class AppallocationTableComponent  implements AfterViewInit {
     );
     this.subscriptions.add(this.InvestmentDataService.getClientsPortfolios().pipe(
       tap(() => this.dataSource? this.dataSource.data = null: null),
+      tap(portfolios => portfolios.length===0?  this.filters = {null_data:true}: null),
       filter(portfolios=>portfolios.length>0)
     ).subscribe(portfoliosData=> {
-      this.portfolios= ['ClearAll',...portfoliosData.map(el=>el.code)];
-      this.submitQuery(undefined,false)
+      console.log('Portfolios allocattion',);
+      this.filters = {portfolioname: portfoliosData.map(el=>el.code)};
+      this.fullDataSource!==undefined? this.initialFilterOfDataSource(this.filters) : null;
     }));
     this.multiFilter = (data: allocation, filter: string) => {
       let filter_array = filter.split(',').map(el=>[el,1]);
@@ -163,14 +165,22 @@ export class AppallocationTableComponent  implements AfterViewInit {
       return !filter || filter_array.reduce((acc,val)=>acc+Number(val[1]),0)===0;
     };
   }
-  initialFilterOfDataSource (filter:any) {
-    console.log('filters',filter);
-    Object.keys(filter).every(key=>{
-     this.dataSource.data = this.fullDataSource.filter(el=>el[key]===filter[key])
-     if (this.dataSource.data.length) {return false}  else return true;
-    })
-   }
-   ngOnChanges(changes: SimpleChanges) {
+  async initialFilterOfDataSource (filter:any) {
+    this.filters?.disabled_controls? delete this.filters.disabled_controls : null;
+    if (filter.mp_name) {
+      let mpList = await this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios');
+      mpList['data'].filter(el=>el.level===1).map(el=>el.name).includes(filter.mp_name)? null: delete filter.mp_name;
+    }
+    if (filter?.null_data===true) {
+      this.dataSource.data=null;
+    } else {
+      Object.keys(filter).every(key=>{
+      this.dataSource.data = this.fullDataSource.filter(el=>filter[key].includes(el[key]))
+      if (this.dataSource.data.length) {return false}  else return true;
+      })
+    }
+  }
+  ngOnChanges(changes: SimpleChanges) {
     changes?.['filters']?.currentValue!==undefined&&this.fullDataSource!==undefined? this.initialFilterOfDataSource (changes['filters'].currentValue) : null;
   }
   createAccountingForAllocation () {
@@ -188,11 +198,10 @@ export class AppallocationTableComponent  implements AfterViewInit {
     this.dialogShowEntriesList.componentInstance.action = 'ViewEntriesByIdTrade';
     this.subscriptions.add(this.dialogShowEntriesList.componentInstance.modal_principal_parent.subscribe (()=>this.dialogShowEntriesList.close()));
   }
-  applyFilter(event: any, col?:string) {
-    this.dataSource.filterPredicate = col === undefined? this.defaultFilterPredicate : this.multiFilter
-    const filterValue = event.hasOwnProperty('isUserInput')?  event.source.value :  (event.target as HTMLInputElement).value 
-    !event.hasOwnProperty('isUserInput') || event.isUserInput ? this.dataSource.filter = filterValue.trim().toLowerCase() : null;
-    if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
+  applyFilter(event: any) {
+    const filterValue = (event.target as HTMLInputElement).value 
+    this.dataSource.filter = filterValue.trim().toLowerCase();
+    this.dataSource.paginator? this.dataSource.paginator.firstPage():null;
   }
   excludeOrdersWithParent ():allocation[] {
     return this.dataSource.data.filter(allocation=>!allocation.idtrade)
@@ -200,14 +209,15 @@ export class AppallocationTableComponent  implements AfterViewInit {
   updateAllocationDataTable (allocationData:allocation[]) {
     this.fullDataSource = allocationData;
     this.dataSource  = new MatTableDataSource(allocationData);
+    this.filters!==undefined&&this.fullDataSource!==undefined? this.initialFilterOfDataSource(this.filters):null;
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
-    this.dataSource.filterPredicate =this.multiFilter
-    let orderAllocated = new Set(this.dataSource.data.map(el=>Number(el.id_bulk_order)))
-    this.TradeService.sendAllocatedOrders([...orderAllocated].length? [...orderAllocated]:[0]);
-    this.defaultFilterPredicate = this.dataSource.filterPredicate;
-    this.multiFilter = this.dataSource.filterPredicate;
-    this.filters!==undefined&&this.fullDataSource!==undefined? this.initialFilterOfDataSource(this.filters):null;
+    this.dataSource.filterPredicate = this.multiFilter
+    this.filterALL? this.filterALL.nativeElement.value=null : null;
+    if (!this.tableMode.includes('Trade'))  {
+      let orderAllocated = new Set(this.dataSource.data.map(el=>Number(el.id_bulk_order)))
+      this.TradeService.sendAllocatedOrders([...orderAllocated].length? [...orderAllocated]:[0]);
+    }
   }
   async submitQuery (reset:boolean=false, showSnackResult:boolean=true) {
     this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate')
@@ -233,8 +243,7 @@ export class AppallocationTableComponent  implements AfterViewInit {
         new Date (this.FirstOpenedAccountingDate).toDateString(), 
         this.tableMode.includes('Trade'),
         this.tradeData?.idtrade? this.tradeData.tidinstrument:null
-        ).subscribe(data => {
-          console.log('data',data);
+      ).subscribe(data => {
         this.updateAllocationDataTable(data)
         showSnackResult? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ') : null;
         resolve(data) 
@@ -293,7 +302,7 @@ export class AppallocationTableComponent  implements AfterViewInit {
   highlight(row){
     this.selectedRowIndex = this.dataSource.data.findIndex(el=>el.id===row.id);
     this.selectedRowID = row.id;
-}
+  }
   selectItem (row?) {
     this.selection.toggle(row? row: this.dataSource.data[this.selectedRowIndex])
   }
