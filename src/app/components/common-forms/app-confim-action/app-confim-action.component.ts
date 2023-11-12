@@ -10,12 +10,15 @@ export class AppConfimActionComponent {
   constructor(private dialog: MatDialog, public dialogRefConfirm: MatDialogRef<AppConfimActionComponent>) {
   }
   public actionToConfim : {'action':string ,'isConfirmed': boolean, data?:any}
+  @Input () jsonData:any;
+  @Input () captionTitle:string;
+  @Input () dialogType:string ='confirmDialog';
 
-  submitAction (actionToConfim) {
+  submitAction () {
     this.actionToConfim.isConfirmed = true;
     this.dialogRefConfirm.close(this.actionToConfim);
   }
-  cancelAction (actionToConfim) {
+  cancelAction () {
     this.actionToConfim.isConfirmed = false;
     this.dialogRefConfirm.close(this.actionToConfim);
   }

@@ -1,17 +1,31 @@
 
-<h1 class="dialog-headline">
+<h1 class="dialog-headline" *ngIf="dialogType==='confirmDialog'">
   Please confirm your action: {{actionToConfim.action}} 
 </h1>
+<h1 class="dialog-headline" *ngIf="dialogType==='jsonData'">
+  {{captionTitle}} 
+</h1>
+
 <div class="content-container"> 
-<button mat-raised-button color="success" type="submit" 
-(click)="submitAction(actionToConfim.action)"
-style="margin-top: 10px; width:max-content; font-size: 18px; float: inline-start">
+  <ng-container *ngIf="dialogType==='confirmDialog'">
+  
+  <button mat-raised-button color="success" type="submit" 
+  (click)="submitAction()"
+  style="margin-top: 10px; width:max-content; font-size: 18px; float: inline-start">
   {{actionToConfim.action}} 
 </button>
-
 <button mat-raised-button color="successd" 
-(click)="cancelAction(actionToConfim.action)"
+(click)="cancelAction()"
 style="margin-top: 10px; width: 200px; font-size: 18px; float: inline-end;">
-  Cancel
+Cancel
 </button>
+</ng-container>
+<ng-container *ngIf="dialogType==='jsonData'">
+  <pre *ngIf="jsonData" style="font-size: 18px;"> {{jsonData|json }}</pre>
+  <button mat-raised-button color="success" type="submit" 
+  (click)="submitAction()"
+  style="margin-top: 10px; width:max-content; font-size: 18px; float: inline-start">
+  {{actionToConfim.action}} 
+</button>
+</ng-container>
 </div> 

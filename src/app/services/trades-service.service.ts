@@ -57,6 +57,9 @@ export class AppTradeService {
     let params = {...serachFilters}
     return this.http.get <orders[]> ('api/AAM/MD/getOrderData/',{params:params})
   }
+  getBulkOrderDetails(id_bulk_order:number):Observable<orders[]> {
+    return this.http.get <orders[]> ('api/AAM/MD/getOrderData/',{params:{id_bulk_order:id_bulk_order,action:'f_i_get_bulk_order_details'}})
+  }
   createOrderbyMP (params_data: {secidList:string[], idportfolios : number[], report_date: string, report_id_currency :number }):Observable<orders[]>  {
     return this.http.post <orders[]>('api/AAM/MD/createOrderbyMP/',{params:params_data,action:'createOrderbyMP'})
   }
@@ -95,6 +98,15 @@ export class AppTradeService {
       firstOpenedAccountingDate:FirstOpenedAccountingDate,
       balances:balances}
     return this.http.get <allocation[]> ('api/AAM/MD/getTradeData/',{params:params});    
+  }
+  getEntriesPerAllocatedTrade (p_trades_to_check:number[]):Observable<{idtrade: number,entries_qty: number}[]> {
+    console.log('p_trades_to_check',p_trades_to_check);
+    let params = {
+      action:'get_qty_entries_per_allocated_trade',
+      p_trades_to_check:p_trades_to_check.length===1? [...p_trades_to_check,...p_trades_to_check] : p_trades_to_check
+
+    }
+    return this.http.get <{idtrade: number,entries_qty: number}[]> ('api/AAM/MD/getTradeData/',{params:params});    
   }
   deleteAllocatedTrades(tradesIDs:number[]){
     let data={tradesIDs:tradesIDs};

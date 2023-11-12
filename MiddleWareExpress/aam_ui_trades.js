@@ -1,6 +1,7 @@
 const db_common_api = require('./db_common_api');
 var pgp = require ('pg-promise')({capSQL:true});
 async function fGetTradesData (request,response) {
+
   let sql = '';
   let conditions = {};
   conditions = {
@@ -44,6 +45,10 @@ async function fGetTradesData (request,response) {
     'portfoliosList' : {
       1: ' ',
       2: '(LOWER(dportfolios.portfolioname) = ANY(${portfoliosList}))  ',
+    },
+    'id_bulk_order' : {
+      1: ' ',
+      2: '(dtrades_allocated.id_bulk_order = ${id_bulk_order})  ',
     }
   }
   let conditionsTrades =' WHERE'
@@ -59,6 +64,10 @@ async function fGetTradesData (request,response) {
     }
   });
   switch (request.query.action) {
+    case 'get_qty_entries_per_allocated_trade':
+      request.query.p_trades_to_check=request.query.p_trades_to_check.map(el=>Number(el))
+      sql='SELECT * FROM f_a_b_get_qty_entries_per_allocated_trade(${p_trades_to_check});'
+    break;
     case 'getAllocationTrades':
       sql='SELECT dtrades_allocated.id, dtrades_allocated.qty, dtrades_allocated.idtrade, dtrades_allocated.idportfolio, id_order,dtrades_allocated.id_bulk_order, dportfolios.portfolioname, ROUND(dtrades.trade_amount/dtrades.qty*dtrades_allocated.qty,2) as trade_amount, dtrades.accured_interest,id_settlement_currency, "bAccounts"."accountId","bAccountsDepo"."accountId" as "depoAccountId", "entriesForAllocation".count as "entries",dtrades.tidinstrument as secid,dtrades.tdate,dtrades.trtype,dtrades.price,dtrades.id_price_currency, pl_table.pl as pl, dstrategiesglobal.sname as mp_name ';
       request.query.balances==='true'?  sql+= ', b_accounts_balance."closingBalance" as current_account_balance,b_depo_accounts_balance."closingBalance" as depo_account_balance,f_fifo_select_current_positions_for_trade.position as fifo ' : null;
@@ -116,7 +125,8 @@ async function fUpdateTradeData (request, response) {
  db_common_api.fUpdateTableDB ('dtrades',fields,'idtrade',request, response,dates)
 }
 async function fGetOrderData (request,response) {
-  let conditions = {}
+  let conditions = {};
+  let sql='';
   conditions = {
     'id':{
       1: '( dorders.id::text =  ANY(ARRAY[${id}]))',
@@ -149,17 +159,24 @@ async function fGetOrderData (request,response) {
     request.query[key]!=='null'? conditionsTrades +=conditions[key][1] + ' AND ': null;
     }
   });
-  let sql = 'SELECT mmoexsecuritytypes.security_group_name,mmoexsecuritytypes.security_type_name as secid_type, mmoexsecurities.name as secid_name, mmoexsecuritytypes.price_type, dorders.id, generated, dorders.type, dorders.secid, dorders.qty, price, amount, qty_executed, status, parent_order, id_portfolio, dportfolios.portfolioname, ordertype, idcurrency,"dCurrencies"."CurrencyCode" as currencycode, 0 as action, coalesce(allocated_qty.allocated,0) as allocated,  dorders.qty-coalesce(allocated_qty.allocated, 0) as unexecuted, dstrategiesglobal.sname as mp_name '+
-  'FROM public.dorders ' +
-  'LEFT JOIN "dCurrencies" ON dorders.idcurrency = "dCurrencies"."CurrencyCodeNum" ' + 
-  'LEFT JOIN dstrategiesglobal ON dstrategiesglobal.id = dorders.mp_id '+
-  'LEFT JOIN (SELECT COALESCE(id_order,id_bulk_order) as id_joined,id_order,id_bulk_order, sum(dtrades_allocated.qty) AS allocated '+
-              'FROM public.dtrades_allocated GROUP BY  GROUPING SETS ((id_order),(id_bulk_order)) '+
-  ')  as allocated_qty on allocated_qty.id_joined=dorders.id '+
-  'LEFT JOIN dportfolios ON dorders.id_portfolio = dportfolios.idportfolio '+
-  'LEFT JOIN mmoexsecurities ON dorders.secid = mmoexsecurities.secid '+
-  'LEFT JOIN mmoexsecuritytypes ON mmoexsecurities.type=mmoexsecuritytypes.security_type_name ';
-  sql +=conditionsTrades.slice(0,-5) + 'ORDER BY dorders.id DESC;'
+  switch (request.query.action) {
+    case 'f_i_get_bulk_order_details':
+     sql='SELECT * FROM f_i_get_bulk_order_details(${id_bulk_order});';
+    break;
+    default:
+      sql = 'SELECT mmoexsecuritytypes.security_group_name,mmoexsecuritytypes.security_type_name as secid_type, mmoexsecurities.name as secid_name, mmoexsecuritytypes.price_type, dorders.id, generated, dorders.type, dorders.secid, dorders.qty, price, amount, qty_executed, status, parent_order, id_portfolio, dportfolios.portfolioname, ordertype, idcurrency,"dCurrencies"."CurrencyCode" as currencycode, 0 as action, coalesce(allocated_qty.allocated,0) as allocated,  dorders.qty-coalesce(allocated_qty.allocated, 0) as unexecuted, dstrategiesglobal.sname as mp_name '+
+      'FROM public.dorders ' +
+      'LEFT JOIN "dCurrencies" ON dorders.idcurrency = "dCurrencies"."CurrencyCodeNum" ' + 
+      'LEFT JOIN dstrategiesglobal ON dstrategiesglobal.id = dorders.mp_id '+
+      'LEFT JOIN (SELECT COALESCE(id_order,id_bulk_order) as id_joined,id_order,id_bulk_order, sum(dtrades_allocated.qty) AS allocated '+
+                  'FROM public.dtrades_allocated GROUP BY  GROUPING SETS ((id_order),(id_bulk_order)) '+
+      ')  as allocated_qty on allocated_qty.id_joined=dorders.id '+
+      'LEFT JOIN dportfolios ON dorders.id_portfolio = dportfolios.idportfolio '+
+      'LEFT JOIN mmoexsecurities ON dorders.secid = mmoexsecurities.secid '+
+      'LEFT JOIN mmoexsecuritytypes ON mmoexsecurities.type=mmoexsecuritytypes.security_type_name ';
+      sql +=conditionsTrades.slice(0,-5) + 'ORDER BY dorders.id DESC;'
+    break;
+  }
   sql = pgp.as.format(sql,request.query);
   db_common_api.queryExecute(sql,response,undefined,'GetOrderData');
 }

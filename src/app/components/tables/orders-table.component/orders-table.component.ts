@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, EventEmitter, Output, ViewChild, Input, ChangeDetectionStrategy, ElementRef, HostListener} from '@angular/core';
+import {AfterViewInit, Component, EventEmitter, Output, ViewChild, Input, ChangeDetectionStrategy, ElementRef, HostListener, SimpleChanges} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {Observable, Subscription, filter, map, startWith, switchMap, tap } from 'rxjs';
@@ -49,14 +49,14 @@ export class AppOrderTableComponent  implements AfterViewInit {
   @Input() dataToShow:orders[];
   @Input() bulkOrder:number;
   @Input() allocationFilters:{secid:string, type:string,bulkorders:string[]};
-
-  fullOrdersSet:orders[];
+  @Input() filters:any;
 
   columnsToDisplay = ['select','id','ordertype','type','secid','security_group_name','mp_name','qty','price','amount','unexecuted','status','parent_order','portfolioname','idcurrency','generated','action','allocated'];
   columnsHeaderToDisplay = ['ID','Order','Type','SecID','Group','MP','Quantity','Price','Amount','Unexecuted','Status','ParentID','Portfolio','Currency','Created','Action','Allocated']
   expandedElement: orders  | null;
   expandAllowed: boolean = true;
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
+  fullOrdersSet:orders[];
   dataSource: MatTableDataSource<orders>;
   public selection = new SelectionModel<orders>(true, []);
   @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -76,7 +76,6 @@ export class AppOrderTableComponent  implements AfterViewInit {
     dateRangeEnd: new FormControl<Date | null>(null),
   });
   dialogOrderModify: MatDialogRef<AppTradeModifyFormComponent>;
-
   defaultFilterPredicate?: (data: any, filter: string) => boolean;
   secidfilter?: (data: any, filter: string) => boolean;
   activeTab:string='';
@@ -117,10 +116,23 @@ export class AppOrderTableComponent  implements AfterViewInit {
   }
   ngOnInit(): void {
     this.indexDBServiceS.getIndexDBStaticTables('getObjectStatuses');
-    if (this.tableMode.includes('Allocation')||this.tableMode.includes('AllocatedOrders'))   {
+    if (this.tableMode.includes('Allocation')) {
       this.columnsToDisplayWithExpand = ['select','id','ordertype','type','secid','qty','price','amount','unexecuted','status','allocated','portfolioname','idcurrency','generated','expand'];
     } else {
       this.columnsToDisplayWithExpand = ['select','id','ordertype','type','secid','security_group_name','mp_name','qty','price','amount','unexecuted','status','portfolioname','idcurrency','generated','action'];
+    }
+    if (this.tableMode.includes('Parent')) {
+      this.TradeService.getOrderInformation(null).subscribe (ordersData => {
+        this.updateordersDataTable(ordersData);
+        this.filterForAllocation ()
+      })
+      this.AutoCompService.getSecidLists();
+      this.filterednstrumentsLists = this.secidList.valueChanges.pipe(
+        startWith(''),
+        map(value => this.AutoCompService.filterList(value || '','secid'))
+      );
+    } else { 
+      this.dataSource  = new MatTableDataSource(this.dataToShow.filter(el=>el.parent_order===Number(this.bulkOrder)))
     }
     if (this.tableMode.includes('Child')) {
       this.columnsToDisplayWithExpand.splice(this.columnsToDisplayWithExpand.indexOf('action'),1);
@@ -129,7 +141,7 @@ export class AppOrderTableComponent  implements AfterViewInit {
       })
     }
   }
-  async ngAfterViewInit() {
+  ngAfterViewInit() {
     this.subscriptions.add(this.TreeMenuSevice.getActiveTab().subscribe(tabName=>this.activeTab=tabName));
     this.subscriptions.add(this.TradeService.getReloadOrdersForExecution().subscribe(data=>{
       if(data.ordersForExecution.includes(Number(this.bulkOrder))||this.tableMode.includes('Parent')||this.tableMode.includes('Allocation')) {
@@ -143,23 +155,26 @@ export class AppOrderTableComponent  implements AfterViewInit {
         this.dataSource.paginator = this.paginator;
       }
     }))
-    if (this.tableMode.includes('Parent')) {
-      this.TradeService.getOrderInformation(null).subscribe (ordersData => {
-        this.updateordersDataTable(ordersData);
-        this.filterForAllocation ()
-      })
-      if (this.tableMode.includes('AllocatedOrders')) {
-        this.subscriptions.add(this.TradeService.getAllocatedOrders().pipe(
-        switchMap(allocOrders =>this.TradeService.getOrderInformation({id:allocOrders.map(el=>Number(el))}))
-      ).subscribe(ordersData=>this.updateordersDataTable(ordersData)))
-      }
-      this.AutoCompService.getSecidLists();
-      this.filterednstrumentsLists = this.secidList.valueChanges.pipe(
-        startWith(''),
-        map(value => this.AutoCompService.filterList(value || '','secid'))
-      );
-    } else { 
-      this.dataSource  = new MatTableDataSource(this.dataToShow.filter(el=>el.parent_order===Number(this.bulkOrder)))
+
+  }
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['filters']?.currentValue!==undefined&&this.fullOrdersSet!==undefined)  {
+      this.initialFilterOfDataSource (changes['filters'].currentValue);
+      this.dataSource.data = this.excludeOrdersWithParent()
+    }
+  }
+  initialFilterOfDataSource (filter:any) {
+    if (filter?.rest===true) {
+      this.dataSource.data = this.fullOrdersSet;
+      return;
+    }
+    if (filter?.null_data===true) {
+      this.dataSource.data=null;
+    } else {
+    Object.keys(filter).every(key=>{
+      this.dataSource.data = this.fullOrdersSet.filter(el=>filter[key].includes(el[key]))
+      if (this.dataSource.data.length) {return false}  else return true;
+     })
     }
   }
   filterAllocatedOrders(allocOrders:number[]) {

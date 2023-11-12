@@ -105,6 +105,13 @@
     </app-allocation-table>
   </mat-tab>
   <mat-tab label="Orders by Strategy"> 
+    <app-orders-table style="width: 150%;"
+    [tableMode]="['Parent']" 
+    [filters]="{
+      mp_name:[messageReceived.name],
+      strategy_name:[messageReceived.name]
+    }"
+    ></app-orders-table>
   </mat-tab>
 </mat-tab-group>
 <mat-tab-group *ngIf="messageReceived.text=='Instruments'" mat-stretch-tabs #InstrumentInfo>

@@ -436,25 +436,9 @@ color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4"
     </mat-expansion-panel-header >
     <app-allocation-table  #allocationTable style="width: 100%;" 
     [tableMode]="['Trade']"
+    [rowsPerPages]="10"
     [tradeData]="tradeModifyForm.value">
     </app-allocation-table>
-  </mat-expansion-panel>
-    <mat-expansion-panel class="headers-align" 
-    (opened)="panelOrdersAllocated = true"
-    (closed)="panelOrdersAllocated = false" >
-    <mat-expansion-panel-header style="margin-bottom: 1%;">
-      <mat-panel-title title="Details">
-        Orders allocated
-      </mat-panel-title>
-      <mat-panel-description >
-        Tap to {{panelOrdersAllocated ? 'hide': 'open'}} data
-        <mat-icon color = 'accent'>list</mat-icon>
-      </mat-panel-description>
-    </mat-expansion-panel-header >
-    <app-orders-table #ordersAllocated style="width: 100%;" 
-    [tableMode]="['AllocatedOrders','Parent']"
-    [allocationFilters]="{secid:tidinstrument.value,type:trtype.value,bulkorders:['0']}">
-  </app-orders-table>
   </mat-expansion-panel>
   </mat-tab>
 </mat-tab-group>

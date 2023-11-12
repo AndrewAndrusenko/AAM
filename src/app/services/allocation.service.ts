@@ -23,26 +23,27 @@ export class AppAllocationService {
     private AccountingDataService:AppAccountingService, 
     private accountingTradeService: AccountingTradesService,
   ) { }
-
-  async createAccountingForAllocation (allocationTable:AppallocationTableComponent) {
-    let createdAccountingTransactions = [];
+  createAccountingForAllocation (allocationTable:AppallocationTableComponent) {
     this.tradeToConfirm = allocationTable.selection.selected;
+    this.TradeService.getEntriesPerAllocatedTrade(this.tradeToConfirm.map(el=>Number(el.id))).pipe(
+      tap(entriesData=>entriesData.length?  
+        this.CommonDialogsService.snackResultHandler({name:'error',detail:'There are created entries for the trades: '+[...entriesData.map(el=>el.idtrade)]}) : null),
+      filter(entriesData=>entriesData.length===0),
+      tap(()=>console.log('portfolioWitoutAccounts', this.tradeToConfirm.filter(trade=>!trade.accountId||!trade.depoAccountId).map(trade=>{return trade.portfolioname}))),
+      switchMap(()=>this.createNewDepoAccounts(new Set(this.tradeToConfirm.filter(trade=>!trade.depoAccountId).map(el=>el.secid)))),
+      tap(()=>{
+        let portfolioWitoutAccounts = this.tradeToConfirm.filter(trade=>!trade.accountId||!trade.depoAccountId)
+        console.log('portfolioWitoutAccounts',portfolioWitoutAccounts);
+        portfolioWitoutAccounts.length? this.CommonDialogsService.snackResultHandler({name:'error',detail:'There are no opened current or depo accounts for the portfolios: '+[...portfolioWitoutAccounts.map(trade=>trade.portfolioname)]}) : null;
+      }),
+      filter(()=>this.tradeToConfirm.filter(trade=>!trade.accountId||!trade.depoAccountId).length===0),
+      // switchMap(()=>this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate')      )
+    ).subscribe(()=>this.entriesCreationForAllocation(allocationTable))
+    allocationTable.selection.clear();
+  }
+  entriesCreationForAllocation (allocationTable:AppallocationTableComponent) {
+    let createdAccountingTransactions = [];
     let tradeToConfirmProcessStatus = this.tradeToConfirm.map(el=>{return {id:el.id,accounting:1}})
-    let portfolioWitoutAccounts = allocationTable.selection.selected.filter(trade=>!trade.accountId||!trade.depoAccountId).map(trade=>{return trade.portfolioname});
-    let tradesWithAccounting = allocationTable.selection.selected.filter(trade=>trade.entries>0).map(trade=>{return trade.id});
-    if (tradesWithAccounting.length) {
-      this.CommonDialogsService.snackResultHandler({name:'error',detail:'There are created entries for the trades: '+[...tradesWithAccounting]});
-      return;
-    }
-    let secidSet = new Set(this.tradeToConfirm.filter(trade=>!trade.depoAccountId).map(el=>el.secid));
-    if (secidSet.size) {
-      await this.createNewDepoAccounts(secidSet).then(tradeWithDepo=>tradeWithDepo);
-    }
-    portfolioWitoutAccounts = allocationTable.selection.selected.filter(trade=>!trade.accountId||!trade.depoAccountId).map(trade=>{return trade.portfolioname});
-    if (portfolioWitoutAccounts.length) {
-      this.CommonDialogsService.snackResultHandler({name:'error',detail:'There are no opened current or depo accounts for the portfolios: '+[...portfolioWitoutAccounts]});
-      return;
-    }
     this.tradeToConfirm.forEach(clientTrade => {
       let bcEntryParameters = <any> {}
       bcEntryParameters.id_settlement_currency=clientTrade.id_settlement_currency;
@@ -57,7 +58,6 @@ export class AppAllocationService {
       bcEntryParameters.idtrade=clientTrade.idtrade;
       let cSchemeGroupId = clientTrade.trtype==='BUY'? 'Investment_Buy_Basic':'Investment_Sell_Basic';
       let accountingToCreate$= <any>[]
-      // accountingToCreate$.push(
       this.AccountingDataService.createFIFOtransactions(clientTrade.trtype==='BUY'? -1 : 1,null,clientTrade.idportfolio,clientTrade.secid,clientTrade.qty,clientTrade.trade_amount/clientTrade.qty, clientTrade.id).pipe (
         tap(data=>data['name']==='error'? this.CommonDialogsService.snackResultHandler(data):createdAccountingTransactions.push(data)),
         filter(data=>data['name']!=='error'),
@@ -83,10 +83,10 @@ export class AppAllocationService {
         this.createAllocationAccountingStatus(allocationTable,tradeToConfirmProcessStatus,createdAccountingTransactions)
       })
     })
-    allocationTable.selection.clear();
   }
   async createNewDepoAccounts (secidSet:Set<string>,) {
     return new Promise <true>  ((resolve, resject) =>{
+      if (secidSet.size===0) {resolve(true)} 
       let index = 0
       secidSet.forEach(async secidItem=>{
         let portfoliosIDsToOpenDepo = this.tradeToConfirm.filter(trade=>trade.secid===secidItem&&!trade.depoAccountId).map(trade=>Number(trade.idportfolio));
@@ -113,11 +113,14 @@ export class AppAllocationService {
     if (!tradesToDelete.length) {
       return this.CommonDialogsService.snackResultHandler({name:'error',detail:'No trades are selected to be deleted'},'Delete Allocation Accounting')
     }
-    if (allocationTable.selection.selected.filter(el=>el.tdate<allocationTable.FirstOpenedAccountingDate).length) {
-      return this.CommonDialogsService.snackResultHandler({name:'error',detail:'Trades with entries in closed period have been selected. Entires in closed period can not been deleted'},'Delete Allocation Accounting',undefined,false);
-    }
-    // this.AccountingDataService.deleteAllocationAccounting (tradesToDelete)
-    this.CommonDialogsService.confirmDialog('Delete accouting for allocated trades ').pipe(
+    this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').pipe(
+      tap (data =>{
+        if (allocationTable.selection.selected.filter(el=>el.tdate<data[0].FirstOpenedDate).length) {
+          return this.CommonDialogsService.snackResultHandler({name:'error',detail:'Trades with entries in closed period have been selected. Entires in closed period can not been deleted'},'Delete Allocation Accounting',undefined,false);
+        }
+      }),
+      filter(data=>allocationTable.selection.selected.filter(el=>el.tdate<data[0].FirstOpenedDate).length===0),
+      switchMap(()=>this.CommonDialogsService.confirmDialog('Delete accouting for allocated trades ')),
       filter (isConfirmed => isConfirmed.isConfirmed),
       switchMap(() => this.AccountingDataService.deleteAccountingAndFIFOtransactions (tradesToDelete))  
     ).subscribe (deletedTrades=>{

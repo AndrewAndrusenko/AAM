@@ -6,7 +6,7 @@ CREATE OR REPLACE FUNCTION public.f_i_get_portfolios_structure_detailed_data(
 	p_idportfolio_codes text[],
 	p_report_date date,
 	p_report_currency integer)
-    RETURNS TABLE(mp_id int, notnull_npv numeric, mtm_positon_base_cur numeric, roi numeric, pl numeric, cost_in_position numeric, cost_full_position numeric, unrealizedpl numeric, total_pl numeric, idportfolio integer, portfolio_code character varying, secid character varying, strategy_name character varying, mp_name character varying, fact_weight numeric, current_balance numeric, mtm_positon numeric, weight numeric, planned_position numeric, order_amount numeric, order_type text, order_qty numeric, mtm_rate numeric, mtm_date date, mtm_dirty_price numeric, cross_rate numeric, npv numeric, rate_date date, main_currency_code numeric, orders_unaccounted_qty numeric, orders_unaccounted numeric) 
+    RETURNS TABLE(report_currency integer, mp_id integer, notnull_npv numeric, mtm_positon_base_cur numeric, roi numeric, pl numeric, cost_in_position numeric, cost_full_position numeric, unrealizedpl numeric, total_pl numeric, idportfolio integer, portfolio_code character varying, secid character varying, strategy_name character varying, mp_name character varying, fact_weight numeric, current_balance numeric, mtm_positon numeric, weight numeric, planned_position numeric, order_amount numeric, order_type text, order_qty numeric, mtm_rate numeric, mtm_date date, mtm_dirty_price numeric, cross_rate numeric, npv numeric, rate_date date, main_currency_code numeric, orders_unaccounted_qty numeric, orders_unaccounted numeric) 
     LANGUAGE 'plpgsql'
     COST 100
     VOLATILE PARALLEL UNSAFE
@@ -152,6 +152,7 @@ WITH
 	  GROUP BY full_portfolio_with_mtm_data.idportfolio
   )
 SELECT
+ p_report_currency,
  full_portfolio_with_mtm_data.mp_id,
  npv_portfolios.npv as notnull_npv,
  full_portfolio_with_mtm_data.mtm_positon_base_cur,

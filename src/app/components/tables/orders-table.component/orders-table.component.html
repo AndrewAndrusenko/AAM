@@ -182,8 +182,6 @@
           </mat-checkbox>
         </td>
       </ng-container>
-                     <!--    $event ? selection.toggle(row) : null" -->
-      
       <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay| slice:1; let i=index">
         <th mat-header-cell *matHeaderCellDef mat-sort-header> {{columnsHeaderToDisplay[i]}}</th>
         <td 
@@ -195,11 +193,10 @@
             <p *ngSwitchCase="['generated'].includes(column)">{{element[column] | date}} </p>
             <p *ngSwitchCase="['Type'].includes(column)&&element[column]==='BUY'" class="upClass">{{element[column]=='BUY'}}</p>
             <p *ngSwitchCase="['Type'].includes(column)&&element[column]==='SELL'" class="downClass">{{element[column]=='BUY'}}</p>
-            <p *ngSwitchCase="['id'].includes(column)">
+            <p *ngSwitchCase="['id'].includes(column)&&element['ordertype']=='Bulk'">
               <button mat-stroked-button style="font-size: 18px; margin-left: 0; width: 57%;margin-top: 8%;"  
-              [matTooltip]="'Order details'" [class]="element['ordertype']=='Client'?' edit-item-button':'edit-child-button'"
-              (click)="openOrderModifyForm(disabledControlElements? 'View': 'Edit',element)">
-              {{element[column] }}
+                [matTooltip]="'Order number'" [class]="'edit-item-button'"             >
+                {{element[column] }}
               </button> 
             </p>
             <p  *ngSwitchCase="['status'].includes(column)" >{{ element[column] }}
@@ -302,9 +299,16 @@
           </button>
         </td>
       </ng-container>
-      <ng-container 
-      matColumnDef="expandedDetail" class="element-detail"  >
+      <ng-container   matColumnDef="expandedDetail" class="element-detail"  >
         <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplayWithExpand.length" >
+          <div class="element-detail" *ngIf="tableMode.includes('Parent') && element['ordertype'] == 'Bulk' "     
+          [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
+            <button [style.background-color]="'black'" mat-stroked-button 
+              style=" font-size: large; margin: 0.2%; border-radius: 5%; width: 25%;"
+              (click)="exportToExcel()">
+              Orders 
+            </button>
+          </div>
           <div class="element-detail" *ngIf="tableMode.includes('Parent') && element['ordertype'] == 'Bulk' "     
             [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
               <app-orders-table #childOrdersTable style="width: 100%" class="myclass" 
@@ -313,6 +317,24 @@
                 [bulkOrder]="element['id']"
                 >
               </app-orders-table >
+          </div>
+          <div class="element-detail" 
+          *ngIf="tableMode.includes('Parent') && element['ordertype'] == 'Bulk' && element['unexecuted']*1!=element['qty']*1 "     
+          [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
+            <button [style.background-color]="'black'" mat-stroked-button 
+              style=" font-size: large; margin: 0.2%; border-radius: 5%; width: 25%;"
+              (click)="exportToExcel()">
+              Trades
+            </button>
+          </div>
+          <div class="element-detail" 
+          *ngIf="tableMode.includes('Parent') && element['ordertype'] == 'Bulk' && element['unexecuted']*1!=element['qty']*1 "     
+          [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
+            <app-allocation-table *ngIf="element == expandedElement"  style="width: 100%" class="myclass" 
+              [tableMode]="['Orders','Child']"
+              [rowsPerPages]="15"
+              [filters]="{id_bulk_order:[element.id],disabled_controls:true}">
+            </app-allocation-table >
           </div>
         </td>
       </ng-container>

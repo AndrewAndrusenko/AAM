@@ -170,7 +170,6 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
     }
     this.notNullCB?.checked===false? this.showZeroPortfolios(false):null;
   }
-
   updatePositionsDataTable (positionsData:portfolioPositions[]) {
     this.fullDataSource=positionsData;
     this.dataSource  = new MatTableDataSource(positionsData);

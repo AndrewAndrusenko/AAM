@@ -1,13 +1,17 @@
 <mat-tab-group mat-stretch-tabs #tabGroup
 (selectedTabChange)="showTabName($event)" >
-<mat-tab label="Generate Orders"><app-inv-generate-orders-table></app-inv-generate-orders-table>  </mat-tab>
-  <mat-tab   label="Orders "> 
-    <app-orders-table style="width: 150%;"
-    [tableMode]="['Parent']" 
-    ></app-orders-table>
-  </mat-tab>
+<mat-tab   label="Orders "> 
+  <app-orders-table style="width: 150%;"
+  [tableMode]="['Parent']" 
+  ></app-orders-table>
+</mat-tab>
   <mat-tab  label="Trades" >
     <app-trade-table style="width: 150%;"></app-trade-table>
   </mat-tab>  
-  <mat-tab label="Allocation"><app-allocation-table></app-allocation-table>  </mat-tab>
+  <mat-tab label="Generate Orders">
+    <app-inv-generate-orders-table></app-inv-generate-orders-table>  
+  </mat-tab>
+  <mat-tab label="Allocation">
+    <app-allocation-table></app-allocation-table>  
+  </mat-tab>
 </mat-tab-group>

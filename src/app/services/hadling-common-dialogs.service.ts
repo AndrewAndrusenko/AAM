@@ -22,6 +22,14 @@ export class HadlingCommonDialogsService {
     this.dialogRefConfirm.componentInstance.actionToConfim = {'action':actionToConfim ,'isConfirmed': false}
     return this.dialogRefConfirm.afterClosed()
   }
+  jsonDataDialog (jsonData:any,captionTitle:string='') {
+    this.dialogRefConfirm = this.dialog.open(AppConfimActionComponent, {panelClass: 'custom-modalbox',} );
+    this.dialogRefConfirm.componentInstance.actionToConfim = {'action':'' ,'isConfirmed': false}
+    
+    this.dialogRefConfirm.componentInstance.dialogType = 'jsonData'
+    this.dialogRefConfirm.componentInstance.jsonData = jsonData;
+    this.dialogRefConfirm.componentInstance.captionTitle = captionTitle;
+  }
   snackResultHandler (result :any, action?: string, postion:any = 'top', closeAll:boolean=true, duration:number=3000) {
     this.verticalPosition=postion;
     if (result['name']=='error') { 
