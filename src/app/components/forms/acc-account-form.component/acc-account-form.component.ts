@@ -19,7 +19,7 @@ import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
   styleUrls: ['./acc-account-form.component.scss'],
 })
 export class AppAccAccountModifyFormComponent implements OnInit {
-
+  private subscriptions = new Subscription
   public panelOpenState = true;
   public accountModifyForm: FormGroup;
   public accountLedgerModifyForm: FormGroup;
@@ -43,7 +43,6 @@ export class AppAccAccountModifyFormComponent implements OnInit {
   filteredCurrenciesList: Observable<string[]>;
   filterednstrumentsLists : Observable<string[]>;
 
-  private subscriptionName: Subscription
   constructor (
     private fb:FormBuilder, 
     private dialog: MatDialog, 
@@ -131,6 +130,8 @@ export class AppAccAccountModifyFormComponent implements OnInit {
     } else {
        this.currencyCode.setValidators(this.AutoCompService.currencyValirator());
     }
+    this.subscriptions.add(this.AutoCompService.recieveCurrencyListReady().subscribe(()=>this.currencyCode.updateValueAndValidity()));
+
   }
   accountTypeChanges (){
     this.setValidators();

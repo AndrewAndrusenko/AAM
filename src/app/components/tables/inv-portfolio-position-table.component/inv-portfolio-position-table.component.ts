@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, EventEmitter, Output, ViewChild, Input, ChangeDetectionStrategy, ElementRef, SimpleChanges} from '@angular/core';
+import {Component, EventEmitter, Output, ViewChild, Input, ChangeDetectionStrategy, ElementRef, SimpleChanges} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {Observable, Subscription, distinctUntilChanged, filter, map, startWith, switchMap, tap } from 'rxjs';
@@ -23,10 +23,11 @@ import {MatCheckbox } from '@angular/material/checkbox';
   templateUrl: './inv-portfolio-position-table.component.html',
   styleUrls: ['./inv-portfolio-position-table.component.scss'],
 })
-export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
+export class AppaInvPortfolioPositionTableComponent {
   accessState: string = 'none';
-  private subscriptions = new Subscription()
   disabledControlElements: boolean = false;
+  private subscriptions = new Subscription()
+  @Input() useGetClientsPortfolios:boolean = false;
   @Input() rowsPerPages:number = 15;
   @Input() filters:any;
   @Input() readOnly:boolean = false;
@@ -48,7 +49,7 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
   multiFilter?: (data: any, filter: string) => boolean;
   filteredCurrenciesList: Observable<string[]>;
   mp_strategies_list: string[]=[];
-  activeTab:string='';
+/*   activeTab:string='';
   tabsNames = ['Portfolio Positions']
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) { 
@@ -56,7 +57,7 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
       event.altKey&&event.key==='r'? this.submitQuery(false,true):null;
       event.altKey&&event.key==='w'? this.exportToExcel():null;
     }
-  }
+  } */
   constructor(
     private TreeMenuSevice: TreeMenuSevice,
     private AuthServiceS:AuthService,  
@@ -75,7 +76,7 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
       MP:null,
       notnull:true,
       report_date : [new Date(), { validators:  Validators.required, updateOn: 'blur' }],
-      report_id_currency:[840, { validators:  Validators.required}],
+      report_id_currency:['840', { validators:  Validators.required}],
     });
   }
   ngOnDestroy(): void {
@@ -96,14 +97,22 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
     this.InvestmentDataService.getPortfoliosPositions(this.searchParametersFG.value).subscribe (positionsData =>{
       this.updatePositionsDataTable(positionsData);
     });  
-
-  }
-  async ngAfterViewInit() {
+    this.filters==undefined&&this.fullDataSource!==undefined? this.initialFilterOfDataSource(this.filters) : null;
+    if (this.useGetClientsPortfolios===true) {
+      this.subscriptions.add(this.InvestmentDataService.getClientsPortfolios().pipe(
+        tap(() => this.dataSource? this.dataSource.data = null: null),
+        tap(portfolios => portfolios.length===0?  this.filters = {null_data:true}: null),
+        filter(portfolios=>portfolios.length>0)
+      ).subscribe(portfoliosData=> {
+        this.filters = {portfolio_code: portfoliosData.map(el=>el.code)};
+        this.fullDataSource!==undefined? this.initialFilterOfDataSource(this.filters) : null;
+        this.notNullCB?.checked===false&&this.fullDataSource!==undefined? this.showZeroPortfolios(false):null;
+      }));
+    }
     if (this.readOnly===false) {
+      this.subscriptions.add(this.AutoCompService.recieveCurrencyListReady().subscribe(()=>this.report_id_currency.updateValueAndValidity()));
       this.AutoCompService.getSecidLists();
-      // this.AutoCompService.nextSecid();
       this.AutoCompService.getCurrencyList();
-      this.report_id_currency.setValidators([this.AutoCompService.currencyValirator(),Validators.required]);
       this.filterednstrumentsLists = this.secidList.valueChanges.pipe(
         startWith(''),
         distinctUntilChanged(),
@@ -113,19 +122,8 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
         startWith (''),
         distinctUntilChanged(),
         map(value => this.AutoCompService.filterList(value || '','currency'))
-        );
+      );
     }
-    this.filters==undefined&&this.fullDataSource!==undefined? this.initialFilterOfDataSource(this.filters) : null;
-    this.subscriptions.add(this.InvestmentDataService.getClientsPortfolios().pipe(
-      tap(() => this.dataSource? this.dataSource.data = null: null),
-      tap(portfolios => portfolios.length===0?  this.filters = {null_data:true}: null),
-      filter(portfolios=>portfolios.length>0)
-    ).subscribe(portfoliosData=> {
-      this.filters = {portfolio_code: portfoliosData.map(el=>el.code)};
-      this.fullDataSource!==undefined? this.initialFilterOfDataSource(this.filters) : null;
-      this.notNullCB?.checked===false&&this.fullDataSource!==undefined? this.showZeroPortfolios(false):null;
-    }));
-    this.subscriptions.add(this.TreeMenuSevice.getActiveTab().subscribe(tabName=>this.activeTab=tabName));
     this.multiFilter = (data: portfolioPositions, filter: string) => {
       let filter_array = filter.split(',').map(el=>[el,1]);
       this.columnsToDisplay.forEach(col=>filter_array.forEach(fil=>{
@@ -133,7 +131,8 @@ export class AppaInvPortfolioPositionTableComponent  implements AfterViewInit {
       })
         );
       return !filter || filter_array.reduce((acc,val)=>acc+Number(val[1]),0)===0;
-    };
+    }
+    // this.subscriptions.add(this.TreeMenuSevice.getActiveTab().subscribe(tabName=>this.activeTab=tabName));
   }
   setPortfoliosList(e:any) {
     this.InvestmentDataService.getPortfoliosListForMP(e.value,'getPortfoliosByMP_StrtgyID').subscribe(data=>{

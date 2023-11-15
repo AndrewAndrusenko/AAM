@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/internal/Observable';
-import { Subject, exhaustMap, tap } from 'rxjs';
+import { Subject, Subscription, exhaustMap, tap } from 'rxjs';
 import { indexDBService } from './indexDB.service';
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
+import { Stream } from 'stream';
 
 @Injectable({
   providedIn: 'root'
@@ -15,6 +16,7 @@ export class AtuoCompleteService {
   private subjectSecIDList = new Subject<string[]>();
   private subSecID = new Subject ();
   private subCurrencyList = new Subject ();
+  private subCurrencyListReady = new Subject<boolean> ();
   constructor(
     private indexDBServiceS: indexDBService
   ) { }
@@ -29,23 +31,25 @@ export class AtuoCompleteService {
       default: return [];
     }
   }
-  createSecIDpipe (req:number){
+  createSecIDpipe (){
     this.subSecID.pipe (
       exhaustMap(()=>this.indexDBServiceS.getIndexDBStaticTables('getInstrumentAutoCompleteList')),
-      tap(() => console.log(new Date().getMilliseconds(), ' to new SecIDACpipe'))
     ).subscribe(data => {
       this.fullInstrumentsLists = data['data'];
       this.sendSecIdList(this.fullInstrumentsLists);
     });
   }
-  createCurrencypipe (req:number){
+  createCurrencypipe (){
     this.subCurrencyList.pipe (
       exhaustMap(()=>this.indexDBServiceS.getIndexDBStaticTables('getCurrencyCodes')),
-      tap(() => console.log(new Date().getMilliseconds(), ' new CurrencyACpipe'))
-    ).subscribe(data => this.fullCurrenciesList = data['data']);
+    ).subscribe(data => {
+      this.fullCurrenciesList = data['data'];
+      this.subCurrencyListReady.next(true)
+    });
   }
   getSecidLists() {
     this.subSecID.next(true);
+    
   }
   getCounterpartyLists() {
     return this.indexDBServiceS.getIndexDBStaticTables('getCounterPartyList').then(data => this.fullCounterPatiesList = data['data']);
@@ -83,6 +87,12 @@ export class AtuoCompleteService {
   }
   recieveSecIdList(): Observable<string[]> {
     return this.subjectSecIDList.asObservable();
+  }
+  sendCurrencyListReady(ready:boolean) {
+    this.subCurrencyListReady.next(ready);
+  }
+  recieveCurrencyListReady(): Observable<boolean> {
+    return this.subCurrencyListReady.asObservable();
   }
 
 }

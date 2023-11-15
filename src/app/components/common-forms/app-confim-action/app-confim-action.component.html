@@ -21,7 +21,7 @@ Cancel
 </button>
 </ng-container>
 <ng-container *ngIf="dialogType==='jsonData'">
-  <pre *ngIf="jsonData" style="font-size: 18px;"> {{jsonData|json }}</pre>
+  <pre *ngIf="jsonData" style="font-size: larger;"> {{jsonData|json }}</pre>
   <button mat-raised-button color="success" type="submit" 
   (click)="submitAction()"
   style="margin-top: 10px; width:max-content; font-size: 18px; float: inline-start">

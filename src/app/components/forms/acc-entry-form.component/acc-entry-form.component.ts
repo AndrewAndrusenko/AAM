@@ -155,6 +155,10 @@ export class AppAccEntryModifyFormComponent {
   }
   ngAfterViewInit(): void {
     this.data? this.formInitialSetup() :null;
+    if (this.action==='Create_Example') {
+      this.id.patchValue(0)
+      this.action='Create'
+    }; 
   }
   ngOnDestroy(): void {
     this.Ref? console.log('ngOnDestroy',this.Ref): null;

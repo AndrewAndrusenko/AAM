@@ -1,9 +1,4 @@
 <mat-tab-group  mat-stretch-tabs>
-  <mat-tab label="Currencies">
-    <app-table-currencies-data
-    FormMode="QuotesMode"
-    ></app-table-currencies-data> 
-  </mat-tab>
   <mat-tab label="Instruments List"> 
     <app-app-instrument-table [FormMode]="'DB'"></app-app-instrument-table >  
   </mat-tab>
@@ -11,7 +6,6 @@
     <app-table-market-data
     FormMode="QuotesMode"
     ></app-table-market-data> 
-    <!-- <app-table-acc-accounts style="width: 150%;"></app-table-acc-accounts> -->
   </mat-tab>  
     <mat-tab   label="Charts"> 
     <app-echart-marketdata-candle  style="height: 100%;"> </app-echart-marketdata-candle>
@@ -19,12 +13,12 @@
       FormMode="ChartMode"
     ></app-table-market-data> 
   </mat-tab>
-  <mat-tab label="Corporate Actions">
-    <app-table-inst-corp-actions></app-table-inst-corp-actions>
-  </mat-tab>
-<!--   <mat-tab label="Currencies">
+  <mat-tab label="Currencies">
     <app-table-currencies-data
     FormMode="QuotesMode"
     ></app-table-currencies-data> 
-  </mat-tab> -->
+  </mat-tab>
+  <mat-tab label="Corporate Actions">
+    <app-table-inst-corp-actions></app-table-inst-corp-actions>
+  </mat-tab>
 </mat-tab-group>

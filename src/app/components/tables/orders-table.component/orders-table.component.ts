@@ -18,9 +18,8 @@ import { AppTradeModifyFormComponent } from '../../forms/trade-form.component/tr
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { HandlingTableSelectionService } from 'src/app/services/handling-table-selection.service';
-import { DataSource, SelectionModel } from '@angular/cdk/collections';
+import { SelectionModel } from '@angular/cdk/collections';
 import { indexDBService } from 'src/app/services/indexDB.service';
-import { data, error } from 'jquery';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
 @Component({
@@ -37,7 +36,7 @@ import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
     ])
   ],
 })
-export class AppOrderTableComponent  implements AfterViewInit {
+export class AppOrderTableComponent {
   accessState: string = 'none';
   orderStatuses:objectStatus[];
   ordersPermissions:string[];
@@ -57,10 +56,12 @@ export class AppOrderTableComponent  implements AfterViewInit {
   expandAllowed: boolean = true;
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
   fullOrdersSet:orders[];
+  fullfilteredOrdersSet:orders[];
   dataSource: MatTableDataSource<orders>;
   public selection = new SelectionModel<orders>(true, []);
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
+  @ViewChild(MatCheckbox) showClientOrdersCB: MatCheckbox;
   @ViewChild('filterALL', { static: false }) filterALL: ElementRef;
   @ViewChild('allSelected', { static: false }) allSelected: MatCheckbox;
   @Output() public modal_principal_parent = new EventEmitter();
@@ -109,6 +110,7 @@ export class AppOrderTableComponent  implements AfterViewInit {
       tdate : this.dataRange,
       price:null,
       qty:null,
+      status:null
     });
   }
   ngOnDestroy(): void {
@@ -121,18 +123,34 @@ export class AppOrderTableComponent  implements AfterViewInit {
     } else {
       this.columnsToDisplayWithExpand = ['select','id','ordertype','type','secid','security_group_name','mp_name','qty','price','amount','unexecuted','status','portfolioname','idcurrency','generated','action'];
     }
-    if (this.tableMode.includes('Parent')) {
-      this.TradeService.getOrderInformation(null).subscribe (ordersData => {
-        this.updateordersDataTable(ordersData);
-        this.filterForAllocation ()
-      })
-      this.AutoCompService.getSecidLists();
-      this.filterednstrumentsLists = this.secidList.valueChanges.pipe(
-        startWith(''),
-        map(value => this.AutoCompService.filterList(value || '','secid'))
-      );
-    } else { 
-      this.dataSource  = new MatTableDataSource(this.dataToShow.filter(el=>el.parent_order===Number(this.bulkOrder)))
+    switch (this.tableMode.join()) {
+      case 'Parent':
+        this.TradeService.getOrderInformation(null).subscribe (ordersData => {
+          this.updateordersDataTable(ordersData);
+        })
+        this.AutoCompService.getSecidLists();
+        this.filterednstrumentsLists = this.secidList.valueChanges.pipe(
+          startWith(''),
+          map(value => this.AutoCompService.filterList(value || '','secid'))
+        );
+      break;
+      case 'Allocation,Child':
+      case 'Child':
+        this.dataSource  = new MatTableDataSource(this.dataToShow.filter(el=>el.parent_order===Number(this.bulkOrder)))
+      break;
+      case 'Allocation,Parent':
+        this.TradeService.getOrderInformation({
+          type:this.allocationFilters.type,
+          secidList:[this.allocationFilters.secid.toLowerCase()],
+          status:['confirmed','in_execution','executed']}).subscribe (ordersData => this.updateordersDataTable(ordersData));
+        this.subscriptions.add(
+          this.TradeService.getReloadOrdersForExecution().pipe(
+          switchMap(()=>this.TradeService.getOrderInformation({
+            type:this.allocationFilters.type,
+            secidList:[this.allocationFilters.secid.toLowerCase()],
+            status:['confirmed','in_execution','executed']}))
+          ).subscribe (ordersData =>this.updateordersDataTable(ordersData)));
+      break;
     }
     if (this.tableMode.includes('Child')) {
       this.columnsToDisplayWithExpand.splice(this.columnsToDisplayWithExpand.indexOf('action'),1);
@@ -140,22 +158,7 @@ export class AppOrderTableComponent  implements AfterViewInit {
         data.bulksForUpdate.includes(this.bulkOrder)? this.updateSatus(data.data) : null;
       })
     }
-  }
-  ngAfterViewInit() {
-    this.subscriptions.add(this.TreeMenuSevice.getActiveTab().subscribe(tabName=>this.activeTab=tabName));
-    this.subscriptions.add(this.TradeService.getReloadOrdersForExecution().subscribe(data=>{
-      if(data.ordersForExecution.includes(Number(this.bulkOrder))||this.tableMode.includes('Parent')||this.tableMode.includes('Allocation')) {
-        this.dataSource.data.forEach(ds=> {
-          let i = data.data.findIndex(alloc=>alloc['id_joined']===ds.id)
-          if (i!==-1){
-            ds.allocated = Number(ds.allocated)+Number(data.data[i]['allocated']);
-            ds.unexecuted = Number(ds.qty) - Number(ds.allocated);
-          }
-        })
-        this.dataSource.paginator = this.paginator;
-      }
-    }))
-
+    // this.subscriptions.add(this.TreeMenuSevice.getActiveTab().subscribe(tabName=>this.activeTab=tabName));
   }
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['filters']?.currentValue!==undefined&&this.fullOrdersSet!==undefined)  {
@@ -164,6 +167,7 @@ export class AppOrderTableComponent  implements AfterViewInit {
     }
   }
   initialFilterOfDataSource (filter:any) {
+    this.showClientOrdersCB.checked= false;
     if (filter?.rest===true) {
       this.dataSource.data = this.fullOrdersSet;
       return;
@@ -179,9 +183,6 @@ export class AppOrderTableComponent  implements AfterViewInit {
   }
   filterAllocatedOrders(allocOrders:number[]) {
     this.updateordersDataTable(this.dataSource.data.filter(el=>allocOrders.includes(el.id)));
-  }
-  filterForAllocation () {
-    this.tableMode.includes('Allocation')? this.dataSource.data =  this.dataSource.data.filter(el=>el.secid===this.allocationFilters.secid&&el.type===this.allocationFilters.type&&el.ordertype==='Bulk'&&el.unexecuted>0&&['confirmed','in_execution'].includes(el.status)) : null; 
   }
   deleteClientOrders (){
     let clientOrdersIds:number[] = this.selection.selected
@@ -261,11 +262,12 @@ export class AppOrderTableComponent  implements AfterViewInit {
     return childOrders;
   }
   excludeOrdersWithParent ():orders[] {
+    this.fullfilteredOrdersSet = this.dataSource.data;
     return this.dataSource.data.filter(order=>!order.parent_order)
   }
   showClientOrders (show:boolean) {
     this.disabledControlElements=show;
-    this.dataSource.data = show? this.fullOrdersSet.filter(order=>order.ordertype==='Client') : this.fullOrdersSet.filter(order=>!order.parent_order)
+    this.dataSource.data = show? this.fullfilteredOrdersSet.filter(order=>order.ordertype==='Client') : this.fullfilteredOrdersSet.filter(order=>!order.parent_order)
   }
   updateordersDataTable (ordersData:orders[]) {
     this.fullOrdersSet = ordersData;
@@ -275,6 +277,7 @@ export class AppOrderTableComponent  implements AfterViewInit {
     this.defaultFilterPredicate = this.dataSource.filterPredicate;
     this.dataSource.filterPredicate = function(data, filter: string): boolean {return data.secid.toLowerCase().includes(filter)};
     this.secidfilter = this.dataSource.filterPredicate;
+    this.filters!==undefined&&this.fullOrdersSet!==undefined? this.initialFilterOfDataSource(this.filters):null;
     this.dataSource.data = this.excludeOrdersWithParent()
   }
   changedValueofChip (value:string, chipArray:string[],control:AbstractControl) {
@@ -326,6 +329,14 @@ export class AppOrderTableComponent  implements AfterViewInit {
         let priceRange = this.HandlingCommonTasksS.toNumberRange(this.price.value,this.price,'price');
         priceRange? searchObj = {...searchObj, ... priceRange} : searchObj.price=null;
       } else  {searchObj.price=null};
+      if (this.tableMode.join()==='Allocation,Parent') {
+          searchObj= {
+            type:this.allocationFilters.type,
+          secidList:[this.allocationFilters.secid.toLowerCase()],
+          status:['confirmed','in_execution','executed']
+        }
+      }  
+      console.log('alloc submitQuery',searchObj);
       this.price.value? searchObj = {...searchObj, ... this.HandlingCommonTasksS.toNumberRange(this.price.value,this.price,'price')} :null;
       searchObj = {...searchObj, ...this.tdate.value? this.HandlingCommonTasksS.toDateRange(this.tdate, 'tdate') : null}
       this.TradeService.getOrderInformation(searchObj).subscribe(data => {

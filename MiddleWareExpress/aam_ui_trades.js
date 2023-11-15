@@ -1,7 +1,6 @@
 const db_common_api = require('./db_common_api');
 var pgp = require ('pg-promise')({capSQL:true});
 async function fGetTradesData (request,response) {
-
   let sql = '';
   let conditions = {};
   conditions = {
@@ -67,6 +66,9 @@ async function fGetTradesData (request,response) {
     case 'get_qty_entries_per_allocated_trade':
       request.query.p_trades_to_check=request.query.p_trades_to_check.map(el=>Number(el))
       sql='SELECT * FROM f_a_b_get_qty_entries_per_allocated_trade(${p_trades_to_check});'
+    break;
+    case 'f_i_get_trade_details':
+      sql='SELECT * FROM f_i_get_trade_details(${idtrade});'
     break;
     case 'getAllocationTrades':
       sql='SELECT dtrades_allocated.id, dtrades_allocated.qty, dtrades_allocated.idtrade, dtrades_allocated.idportfolio, id_order,dtrades_allocated.id_bulk_order, dportfolios.portfolioname, ROUND(dtrades.trade_amount/dtrades.qty*dtrades_allocated.qty,2) as trade_amount, dtrades.accured_interest,id_settlement_currency, "bAccounts"."accountId","bAccountsDepo"."accountId" as "depoAccountId", "entriesForAllocation".count as "entries",dtrades.tidinstrument as secid,dtrades.tdate,dtrades.trtype,dtrades.price,dtrades.id_price_currency, pl_table.pl as pl, dstrategiesglobal.sname as mp_name ';
@@ -151,6 +153,9 @@ async function fGetOrderData (request,response) {
     },
     'secidList' : {
       1: '(LOWER(dorders.secid) = ANY(array[${secidList}]))  ',
+    },
+    'status' : {
+      1: '(dorders.status = ANY(array[${status}]))  ',
     }
   }
   let conditionsTrades =' WHERE'

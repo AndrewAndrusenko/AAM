@@ -16,6 +16,7 @@ import { HandlingCommonTasksService } from 'src/app/services/handling-common-tas
 import { AuthService } from 'src/app/services/auth.service';
 import { investmentNodeColor } from 'src/app/models/constants.model';
 import { HandlingTableSelectionService } from 'src/app/services/handling-table-selection.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-table-acc-accounts',
@@ -47,7 +48,6 @@ export class AppTableAccAccountsComponent  implements OnInit {
   dialogRef: MatDialogRef<AppAccAccountModifyFormComponent>;
   selection = new SelectionModel<bAccounts>(true, []);
   accounts: string[] = [];
-  ;
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
   investmentNodeColor=investmentNodeColor;
   constructor(
@@ -63,8 +63,6 @@ export class AppTableAccAccountsComponent  implements OnInit {
     this.accessState !=='none'? this.AccountingDataService.getReloadAccontList().subscribe (id => this.updateAccountsData(this.action)):null;
   }
   async updateAccountsData (action: string) {
-    console.log('Reload Account');
-
     return new Promise<number> (async (resolve) => {
       this.dataSource? this.dataSource.data=null : null;
       this.AccountingDataService.GetAccountsListAccounting (null,null,null,null,this.action).subscribe (AccountsList  => {

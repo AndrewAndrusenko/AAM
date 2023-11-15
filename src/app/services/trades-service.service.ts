@@ -43,6 +43,9 @@ export class AppTradeService {
     let params = {...serachFilters,action:'getTradeInformation'}
     return this.http.get <trades[]> ('api/AAM/MD/getTradeData/',{params:params})
   }
+  getTradeDetails(idtrade:number):Observable<trades[]> {
+    return this.http.get <trades[]> ('api/AAM/MD/getTradeData/',{params:{idtrade:idtrade,action:'f_i_get_trade_details'}})
+  }
   sendOrderDataToUpdateTableSource ( data:orders[], action: string) {
     let dataSet = {
       data: data,

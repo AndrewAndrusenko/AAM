@@ -4,21 +4,21 @@ cdkDragRootElement=".cdk-overlay-pane"
 cdkDragHandle
 color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4">
   
-  <span style="margin-right: 2%;">{{action}} Instrument | ID {{idtrade.value}} </span>
+  <span style="margin-right: 2%;">{{action}} Trade | ID {{idtrade.value}} </span>
   <span class="example-spacer"></span>
-  <ng-container  *ngIf="!disabledControlElements&&tabIndexN===1" style="margin-bottom: 1%;">
+  <ng-container  *ngIf="!disabledControlElements&&tabIndex===1" style="margin-bottom: 1%;">
     <button mat-raised-button  [matMenuTriggerFor]="menu" color="accent"  style="margin-left:1%; font-size: 18px; width: 10%;" matRipple="">Select
     </button>
     <mat-menu #menu="matMenu">
       <button mat-menu-item style="margin-left:0.5%; font-size: 18px;"
-      (click)="toggleAllRows(orderTable.dataSource,orderTable.selection,(orderTable.selection.hasValue() && orderTable.isAllSelected())? false : true  );   
+      (click)="toggleAllRows(orderTable.dataSource,orderTable.selection,(orderTable?.selection.hasValue() && orderTable.isAllSelected())? false : true  );   
       orderTable.dataSource.paginator = orderTable.paginator;">
-      {{(orderTable!==undefined&&orderTable.selection.hasValue() && orderTable.isAllSelected())? 'Unselect' : 'Select' }}  Orders 
+      {{(orderTable!==undefined&&orderTable?.selection.hasValue() && orderTable.isAllSelected())? 'Unselect' : 'Select' }}  Orders 
       </button>
       <button mat-menu-item style="margin-left:0.5%; font-size: 18px;"
       (click)="toggleAllRows(allocationTable.dataSource,  allocationTable.selection, (allocationTable.selection.hasValue() && allocationTable.isAllSelected())? false : true  );   
       allocationTable.dataSource.paginator = allocationTable.paginator;">
-      {{(allocationTable!==undefined&&allocationTable.selection.hasValue() && allocationTable.isAllSelected())? 'Unselect' : 'Select' }}  Trades 
+      {{(allocationTable!==undefined&&allocationTable?.selection.hasValue() && allocationTable.isAllSelected())? 'Unselect' : 'Select' }}  Trades 
     </button>
     </mat-menu>
     <button  title="Execute selected orders" 
@@ -28,21 +28,21 @@ color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4"
       <mat-icon matSuffix >gavel</mat-icon>
     </button>
     <button title="Create Accounting"  
-      [disabled]="!allocationTable.selection.hasValue()"
+      [disabled]="!allocationTable?.selection.hasValue()"
       color = "accent" mat-raised-button style=" margin-left:1%; font-size: 18px;"
       (click)="  createAccountingForAllocation()">
       Create Accounting
       <mat-icon matSuffix>account_balance</mat-icon>
     </button>
     <button title="Delete Allocated Trades"  
-      [disabled]="!allocationTable.selection.hasValue()"
+      [disabled]="!allocationTable?.selection.hasValue()"
       color = "warn" mat-raised-button style=" margin-left:1%; font-size: 18px;"
       (click)="deleteAllocatedTrades()">
       Delete Trades
       <mat-icon matSuffix>delete</mat-icon>
     </button>
     <button title="Delete Accounting"  
-      [disabled]="!allocationTable.selection.hasValue()"
+      [disabled]="!allocationTable?.selection.hasValue()"
       color = "warn" mat-raised-button style=" margin-left:1%; font-size: 18px;"
       (click)="deleteAccountingForAllocatedTrades()">
       Delete Accounting
@@ -50,7 +50,7 @@ color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4"
     </button>
   </ng-container>
 </mat-toolbar>
-<mat-tab-group mat-stretch-tabs [(selectedIndex)]="tabIndexN" >
+<mat-tab-group mat-stretch-tabs [(selectedIndex)]="tabIndex" >
   <mat-tab label="Trade Details">
     <form class="submit" 
       [formGroup]="tradeModifyForm" style="background-color: rgb(40, 39, 39);">
@@ -249,7 +249,7 @@ color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4"
       </mat-form-field>
       <br>
       <br>
-      <h3 style="color:rgb(252, 113, 113)" *ngIf="tradeModifyForm.invalid"> Please check the form. Data is invalid</h3>
+      <h3 style="margin-left: 0.5%; color:rgb(252, 113, 113)" *ngIf="tradeModifyForm.invalid"> Please check the form. Data is invalid</h3>
       <mat-expansion-panel class="headers-align" title=""
         (opened)="panelOpenStateSecond = true"
         (closed)="panelOpenStateSecond = false" >
@@ -442,7 +442,7 @@ color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4"
   </mat-expansion-panel>
   </mat-tab>
 </mat-tab-group>
-<details >
+<details *ngIf="statusDetailsHeader">
   <summary style="font-size: 18px;">{{statusDetailsHeader}}</summary>
   <pre style="font-size: 18px;"> {{statusDetails|json }}</pre>
 </details>

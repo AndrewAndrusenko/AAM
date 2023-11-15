@@ -25,15 +25,10 @@
   width: 100%;
   font-size: 26px;
 }
-tr.detail-row {
-  height: 0;
-}
-.element-row td {
-  border-bottom-width: 0;
-}
-.element-detail {
-  border-color: red;
-  overflow: hidden;
+tr.mat-row:hover {
+  border: 1px solid blue;
+  border-radius: 10px;
+  background: #2b2be3; /* green */
 }
 .search-filed {
   font-size: 18px;

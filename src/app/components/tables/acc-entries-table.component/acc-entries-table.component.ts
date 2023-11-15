@@ -107,22 +107,16 @@ export class AppTableAccEntriesComponent implements OnInit {
     this.AccountingDataService.getReloadEntryList().pipe(
       filter(id=> id==undefined||(id===this.externalId))
     ).subscribe(id =>{
-      console.log('getReloadEntryList',);
       this.submitQuery(false,id? true:false)
     })
   }
   ngOnInit(): void {
-    this.noAccountLedger.patchValue(['ClearAll'])
-    if (!this.FirstOpenedAccountingDate) {
-      this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate);
-    }
     this.initiateTable();
     this.subscriptions.add(this.TreeMenuSevice.getActiveTab().subscribe(tabName=>this.activeTab=tabName));
     this.subscriptions.add(this.InvestmentDataService.getClientsPortfolios().pipe(
       tap(() => this.dataSource? this.dataSource.data = null: null),
       filter(portfolios=>portfolios.length>0)
       ).subscribe(portfolios=> {
-      console.log('Portfolios entries',);
       this.portfolioCodes.patchValue(['ClearAll',...portfolios.map(el=>el.code)]);
       this.submitQuery(false)
     }))
@@ -151,6 +145,7 @@ export class AppTableAccEntriesComponent implements OnInit {
         this.submitQuery(false);
       break;
       case 'None':
+        this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate);
       break;
       default :
         this.submitQuery(false)
@@ -184,6 +179,9 @@ export class AppTableAccEntriesComponent implements OnInit {
     this.dialogRef.componentInstance.data =  row;
     this.dialogRef.componentInstance.FirstOpenedAccountingDate = this.FirstOpenedAccountingDate;
     switch (actionType) {
+      case 'Create_Example':
+        // this.dialogRef.componentInstance.data.t_id = 0;
+      break;
       case 'Create':
         this.dialogRef.componentInstance.data = {t_XactTypeCode:1, d_transactionType:'AL'};
       break;

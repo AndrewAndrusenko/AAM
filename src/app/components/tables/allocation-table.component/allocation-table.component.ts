@@ -219,6 +219,10 @@ export class AppallocationTableComponent  implements AfterViewInit {
   showOrderDetails (id_bulk_order:number) {
     this.TradeService.getBulkOrderDetails(id_bulk_order).subscribe(data=>this.CommonDialogsService.jsonDataDialog(data[0],'Order Details'))
   }
+  showTradeDetails (idtrade:number) {
+    this.TradeService.getTradeDetails(idtrade).subscribe(data=>this.CommonDialogsService.jsonDataDialog(data[0],'Trade Details'))
+
+  }
   excludeOrdersWithParent ():allocation[] {
     return this.dataSource.data.filter(allocation=>!allocation.idtrade)
   }

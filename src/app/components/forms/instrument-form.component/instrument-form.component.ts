@@ -4,14 +4,12 @@ import { Instruments, instrumentCorpActions, instrumentDetails } from 'src/app/m
 import { MatTabGroup as MatTabGroup } from '@angular/material/tabs';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { menuColorGl } from 'src/app/models/constants.model';
-import { AppMarketDataService } from 'src/app/services/market-data.service';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { Observable, distinctUntilChanged, filter, map, observable, startWith, switchMap } from 'rxjs';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import { InstrumentDataService } from 'src/app/services/instrument-data.service';
-
 @Component({
   selector: 'app-inv-instrument-modify-form',
   templateUrl: './instrument-form.component.html',
@@ -22,8 +20,8 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
   disabledControlElements: boolean = false;
   public panelOpenState = true;
   public instrumentModifyForm: FormGroup;
-  // // public instrumentDetailsForm: FormGroup;
   @Input() action: string = 'View';
+  @Input() dragAllowed: boolean = false;
   @Input() moexBoards = []
   @Input() secidParam:string;
   @Output() public modal_principal_parent = new EventEmitter();
@@ -164,7 +162,6 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
     }
   }
   ngOnChanges(changes: SimpleChanges) {
-
     this.revomeAsyncValidators();
     this.InstrumentDataS.getMoexInstruments(undefined,undefined, {secid:[changes['secidParam'].currentValue,changes['secidParam'].currentValue]}).subscribe (instrumentData => {
       this.instrumentModifyForm.patchValue(instrumentData[0]);

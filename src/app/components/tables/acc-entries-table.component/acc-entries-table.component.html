@@ -1,4 +1,7 @@
 <ng-container *ngIf="accessState!=='none'">
+  <mat-toolbar *ngIf="UI_min"   cdkDrag   cdkDragRootElement=".cdk-overlay-pane"   color="primary"  >
+    List of entries
+  </mat-toolbar>
   <span *ngIf="!UI_min"> 
     <mat-form-field  class = "filterField" >
       <mat-label class="whiteTextFilter">Type to search...</mat-label>

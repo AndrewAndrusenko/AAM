@@ -124,6 +124,7 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
     this.dialogInstrumentModify = this.dialog.open (AppInvInstrumentModifyFormComponent,{minHeight:'600px', minWidth:'800px', maxWidth:'60vw', autoFocus: false, maxHeight: '90vh'})
     this.dialogInstrumentModify.componentInstance.moexBoards = this.boardIDs;
     this.dialogInstrumentModify.componentInstance.action = action;
+    this.dialogInstrumentModify.componentInstance.dragAllowed = true;
     this.dialogInstrumentModify.componentInstance.data = action ==='Create'? null :element;
     this.dialogInstrumentModify.componentInstance.instrumentDetails = this.instrumentDetailsArr.filter(el=> el.secid===element.secid&&element.primary_boardid===el.boardid)
     this.dialogInstrumentModify.componentInstance.instrumentCorpActions = this.instrumentCorpActions.filter(el=> el.isin===element.isin)

@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ClientData, Instruments, allocation, orders} from 'src/app/models/intefaces.model';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AuthService } from 'src/app/services/auth.service';
-import { Observable, Subscription, distinctUntilChanged, filter, firstValueFrom, map, observable, startWith, switchMap, tap } from 'rxjs';
+import { Observable, Subscription, distinctUntilChanged, filter, map, startWith, switchMap, tap } from 'rxjs';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import { AppTradeService } from 'src/app/services/trades-service.service';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -18,6 +18,8 @@ import { AppallocationTableComponent } from '../../tables/allocation-table.compo
 import { MatTableDataSource } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
 import { AppAllocationService } from 'src/app/services/allocation.service';
+import { ViewportScroller } from '@angular/common';
+import { MatTabGroup } from '@angular/material/tabs';
 @Component({
   selector: 'app-trade-modify-form',
   templateUrl: './trade-form.component.html',
@@ -27,12 +29,12 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
   accessState: string = 'none';
   disabledControlElements: boolean = false;
   public tradeModifyForm: FormGroup;
-  tabIndex: number ;
-  tabIndexN=0;
+  tabIndex: number = 0 ;
   @Input() action: string = 'View';
   @Output() public modal_principal_parent = new EventEmitter();
-  @ViewChild('ordersTable',{ static: false }) orderTable : AppOrderTableComponent
-  @ViewChild('allocationTable',{ static: false }) allocationTable : AppallocationTableComponent
+  @ViewChild('ordersTable',{ static: false }) orderTable : AppOrderTableComponent;
+  @ViewChild('allocationTable',{ static: false }) allocationTable : AppallocationTableComponent;
+  @ViewChild(MatTabGroup) tabs : MatTabGroup;
   public title: string;
   public actionType : string;
   @Input() data: any;
@@ -96,11 +98,14 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     this.indexDBServiceS.getIndexDBStaticTables('getMoexSecurityTypes').then (data=>this.securityTypes = data['data']);
     this.AutoCompService.getCurrencyList();
     this.id_price_currency.setValidators([this.AutoCompService.currencyValirator(),Validators.required]);
-    this.id_price_currency.updateValueAndValidity();
     this.id_settlement_currency.setValidators([this.AutoCompService.currencyValirator(),Validators.required]);
-    this.id_settlement_currency.updateValueAndValidity();
+    this.arraySubscrition.add(this.AutoCompService.recieveCurrencyListReady().subscribe(()=>{
+      this.id_price_currency.updateValueAndValidity();
+      this.id_settlement_currency.updateValueAndValidity();
+      this.checkCurrenciesHints()
+    }));
+
     this.faceunit.value? this.faceunit_name.patchValue(this.AutoCompService.getCurrecyData(this.faceunit.value)['CurrencyCode']):null;
-    this.checkCurrenciesHints()
     this.AutoCompService.getSecidLists();
     this.tidinstrument.setValidators(this.AutoCompService.secidValirator());
     this.AutoCompService.getCounterpartyLists().then (()=>this.id_cpty.setValidators(this.AutoCompService.counterPartyalirator(this.cpty_name)));
@@ -155,9 +160,6 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     this.action == 'View'|| this.disabledControlElements?  this.tradeModifyForm.disable() : null;
     this.fullAmountCalcualtion(true);
     this.changeSettlementRate();
-/*     setTimeout(() => {
-      this.tabIndexN=this.tabIndex;
-    }, 200); */
   }
   executeOrders () {
     let qtyForAllocation = this.qty.value - this.allocatedqty.value;

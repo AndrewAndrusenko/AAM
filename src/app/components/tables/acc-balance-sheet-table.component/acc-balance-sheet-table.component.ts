@@ -237,10 +237,9 @@ export class AppTableBalanceSheetComponent   {
   showEntries (row : any) {
     this.dialogShowEntriesList = this.dialog.open(AppTableAccEntriesComponent ,{minHeight:'600px', minWidth:'1700px', autoFocus: false, maxHeight: '90vh'});
     this.dialogShowEntriesList.componentInstance.paramRowData = row; 
+    this.dialogShowEntriesList.componentInstance.UI_min = true; 
     this.dialogShowEntriesList.componentInstance.action = 'ShowEntriesForBalanceSheet';
-    this.dialogShowEntriesList.componentInstance.modal_principal_parent.subscribe ((item)=>{
-      this.dialogChooseAccountsList.close(); 
-    });
+    this.dialogShowEntriesList.componentInstance.modal_principal_parent.subscribe (()=>this.dialogChooseAccountsList.close());
   }
   showAccounInfo (row : any) {
     if (row.accountType==='Account') {

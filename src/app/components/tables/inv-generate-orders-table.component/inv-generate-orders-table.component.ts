@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, EventEmitter, Output, ViewChild, Input, ChangeDetectionStrategy, ElementRef, SimpleChanges} from '@angular/core';
+import {Component, EventEmitter, Output, ViewChild, Input, ChangeDetectionStrategy, ElementRef, SimpleChanges} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {Observable, Subscription, distinctUntilChanged, map, startWith, switchMap, tap } from 'rxjs';
@@ -23,7 +23,7 @@ import { AppTradeService } from 'src/app/services/trades-service.service';
   templateUrl: './inv-generate-orders-table.component.html',
   styleUrls: ['./inv-generate-orders-table.component.scss'],
 })
-export class AppInvGenerateOrdersTable  implements AfterViewInit {
+export class AppInvGenerateOrdersTable{
   accessState: string = 'none';
   private subscriptions = new Subscription()
   disabledControlElements: boolean = false;
@@ -76,7 +76,7 @@ export class AppInvGenerateOrdersTable  implements AfterViewInit {
       secArray:null,
       deviation:0.01,
       report_date : [new Date(), { validators:  Validators.required, updateOn: 'blur' }],
-      report_id_currency:[840, { validators:  Validators.required}],
+      report_id_currency:['840', { validators:  [this.AutoCompService.currencyValirator(),Validators.required]}],
     });
   }
   ngOnDestroy(): void {
@@ -95,10 +95,7 @@ export class AppInvGenerateOrdersTable  implements AfterViewInit {
       return !filter || filter_array.reduce((acc,val)=>acc+Number(val[1]),0)===0;
     };
     this.AutoCompService.getCurrencyList();
-    this.report_id_currency.setValidators([this.AutoCompService.currencyValirator(),Validators.required]);
-  }
-  async ngAfterViewInit() {
-    this.subscriptions.add(this.TreeMenuSevice.getActiveTab().subscribe(tabName=>this.activeTab=tabName));
+    this.subscriptions.add(this.AutoCompService.recieveCurrencyListReady().subscribe(()=>this.report_id_currency.updateValueAndValidity()));
     this.AutoCompService.getSecidLists();
     this.filters==undefined&&this.fullDataSource!==undefined? this.initialFilterOfDataSource(this.filters) : null;
     this.filterednstrumentsLists = this.secidList.valueChanges.pipe(
@@ -111,6 +108,8 @@ export class AppInvGenerateOrdersTable  implements AfterViewInit {
       distinctUntilChanged(),
       map(value => this.AutoCompService.filterList(value || '','currency'))
     );
+    this.subscriptions.add(this.TreeMenuSevice.getActiveTab().subscribe(tabName=>this.activeTab=tabName));
+
   }
   setPortfoliosList(e:any) {
     this.InvestmentDataService.getPortfoliosListForMP(e.value,'getPortfoliosByMP_StrtgyID').subscribe(data=>{

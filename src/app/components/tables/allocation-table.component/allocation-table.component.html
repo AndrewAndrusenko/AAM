@@ -235,6 +235,13 @@
             {{element[column] }}
             </button> 
           </p>
+          <p *ngSwitchCase="['idtrade'].includes(column)">
+            <button mat-flat-button style="font-size: 18px; margin-left: 0; width: 15%;margin-top: 8%;"  
+            [matTooltip]="'Trade details'" 
+            (click)="showTradeDetails(element.idtrade)">
+            {{element[column] }}
+            </button> 
+          </p>
         </span>
         <ng-template  #instrumentcontextmenu>
           <div class="tree-menu-context" cdkMenu *ngIf="filterALL">
@@ -257,5 +264,5 @@
     </tr>
     <tr mat-footer-row *matFooterRowDef="columnsToDisplay; sticky: true"></tr>
   </table>
-  <mat-paginator [pageSizeOptions]="[5, 15, 25,50, 100]" [pageSize]="rowsPerPages" aria-label="Select page of allocation"></mat-paginator>
+  <mat-paginator  [pageSizeOptions]="[5, 15, 25,50, 100]" [pageSize]="rowsPerPages" aria-label="Select page of allocation"></mat-paginator>
 </ng-container>

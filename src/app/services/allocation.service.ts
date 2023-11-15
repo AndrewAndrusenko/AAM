@@ -3,12 +3,12 @@ import { HadlingCommonDialogsService } from './hadling-common-dialogs.service';
 import { AppTradeService } from './trades-service.service';
 import { AppAccountingService } from './accounting.service';
 import { AppallocationTableComponent } from '../components/tables/allocation-table.component/allocation-table.component';
-import { Observable, Subject, Subscription, catchError, combineLatest, filter, firstValueFrom, forkJoin, map, observable, of, subscribeOn, switchMap, tap, zip } from 'rxjs';
+import { Observable, Subject,  filter, firstValueFrom, forkJoin, map,  switchMap, tap } from 'rxjs';
 import { AbstractControl } from '@angular/forms';
 import { AppOrderTableComponent } from '../components/tables/orders-table.component/orders-table.component';
-import { allocation, allocation_fifo, bAccountTransaction, bLedgerTransaction } from '../models/intefaces.model';
+import { allocation } from '../models/intefaces.model';
 import { AccountingTradesService } from './accounting-trades.service';
-import { number } from 'echarts';
+import { error } from 'jquery';
 
 @Injectable({
   providedIn: 'root'
@@ -37,7 +37,6 @@ export class AppAllocationService {
         portfolioWitoutAccounts.length? this.CommonDialogsService.snackResultHandler({name:'error',detail:'There are no opened current or depo accounts for the portfolios: '+[...portfolioWitoutAccounts.map(trade=>trade.portfolioname)]}) : null;
       }),
       filter(()=>this.tradeToConfirm.filter(trade=>!trade.accountId||!trade.depoAccountId).length===0),
-      // switchMap(()=>this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate')      )
     ).subscribe(()=>this.entriesCreationForAllocation(allocationTable))
     allocationTable.selection.clear();
   }
@@ -85,12 +84,16 @@ export class AppAllocationService {
     })
   }
   async createNewDepoAccounts (secidSet:Set<string>,) {
-    return new Promise <true>  ((resolve, resject) =>{
+    return new Promise <true>  ((resolve, reject) =>{
       if (secidSet.size===0) {resolve(true)} 
       let index = 0
       secidSet.forEach(async secidItem=>{
         let portfoliosIDsToOpenDepo = this.tradeToConfirm.filter(trade=>trade.secid===secidItem&&!trade.depoAccountId).map(trade=>Number(trade.idportfolio));
         await firstValueFrom (this.AccountingDataService.createDepoSubAccounts(portfoliosIDsToOpenDepo,secidItem)).then(newDepoAccounts=>{
+          if (newDepoAccounts?.['name']) {
+            this.CommonDialogsService.snackResultHandler(newDepoAccounts)
+            return reject(error)
+          }
           newDepoAccounts.forEach (depoAccount=>{ 
             let i =this.tradeToConfirm.findIndex(el=>el.idportfolio==depoAccount.idportfolio&&el.secid===secidItem);
             i!==-1? this.tradeToConfirm[i].depoAccountId=depoAccount.accountId:null;
@@ -152,7 +155,7 @@ export class AppAllocationService {
         this.TradeService.sendNewAllocatedQty({idtrade:idtrade,allocatedqty:allocatedqty.value})
       }
       this.TradeService.sendDeletedAllocationTrades(deletedTrades)
-      orderTable!==undefined? orderTable.submitQuery(true, false).then(()=>orderTable.filterForAllocation()): null;
+      orderTable!==undefined? orderTable.submitQuery(true, false): null;
     })
   }
   getDeletedAccounting ():Observable<any[]>   {

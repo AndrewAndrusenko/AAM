@@ -5,7 +5,7 @@
   <mat-tab label="Portfolio Positions"> 
     <app-inv-portfolio-position-table
     [rowsPerPages]="15"
-    [readOnly]="false"
+    [readOnly]="true"
     [filters]="{portfolio_code:[messageReceived.name]}">
     </app-inv-portfolio-position-table>
   </mat-tab>
@@ -57,8 +57,9 @@
   </mat-tab>  
   <mat-tab label="Client Positions"> 
     <app-inv-portfolio-position-table
+    [useGetClientsPortfolios]="true"
     [rowsPerPages]="15"
-    [readOnly]="false">
+    [readOnly]="true">
     </app-inv-portfolio-position-table>
   </mat-tab>
   <mat-tab label="Client Trades"> 
@@ -70,6 +71,15 @@
 
 </mat-tab-group>
 <mat-tab-group *ngIf="messageReceived.text=='Strategies'" #StrategiesInfo mat-stretch-tabs>
+  <mat-tab label="Orders by Strategy"> 
+    <app-orders-table style="width: 150%;"
+    [tableMode]="['Parent']" 
+    [filters]="{
+      mp_name:[messageReceived.name],
+      strategy_name:[messageReceived.name]
+    }"
+    ></app-orders-table>
+  </mat-tab>
   <mat-tab label="Portfolios by Strategy"> 
     <app-portfolio-tablee
     [strategyMpName]="messageReceived.name"
@@ -88,7 +98,7 @@
   <mat-tab label="Positions by Strategy"> 
     <app-inv-portfolio-position-table
       [rowsPerPages]="15"
-      [readOnly]="false"
+      [readOnly]="true"
       [filters]="{
         mp_name:[messageReceived.name],
         strategy_name:[messageReceived.name]
@@ -104,15 +114,7 @@
     }" >
     </app-allocation-table>
   </mat-tab>
-  <mat-tab label="Orders by Strategy"> 
-    <app-orders-table style="width: 150%;"
-    [tableMode]="['Parent']" 
-    [filters]="{
-      mp_name:[messageReceived.name],
-      strategy_name:[messageReceived.name]
-    }"
-    ></app-orders-table>
-  </mat-tab>
+
 </mat-tab-group>
 <mat-tab-group *ngIf="messageReceived.text=='Instruments'" mat-stretch-tabs #InstrumentInfo>
   <mat-tab label="Instrment Details" >

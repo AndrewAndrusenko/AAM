@@ -9,7 +9,7 @@ CREATE OR REPLACE FUNCTION public.f_a_b_get_all_entries_transactions(
 	p_portfolio_code text[],
 	p_account text[],
 	p_idtrade numeric)
-    RETURNS TABLE(d_portfolioname character varying, idportfolio bigint, "d_transactionType" text, t_id bigint, "t_entryDetails" character varying, "t_ledgerNoId" bigint, "t_accountId" bigint, "t_dataTime" timestamp without time zone, "t_extTransactionId" bigint, t_idtrade numeric, "t_amountTransaction" numeric, "t_XactTypeCode" bigint, "t_XactTypeCode_Ext" bigint, "d_entryDetails" text, "d_Debit" character varying, "d_Credit" character varying, "d_ledgerNo" character varying, "d_xActTypeCodeExtName" character) 
+    RETURNS TABLE(d_portfolioname character varying, idportfolio bigint, "d_transactionType" text, t_id bigint, "t_entryDetails" character varying, "t_ledgerNoId" bigint, "t_accountId" bigint, "t_dataTime" timestamp without time zone, "t_extTransactionId" bigint, t_idtrade numeric, "t_amountTransaction" numeric, "t_XactTypeCode" bigint, "t_XactTypeCode_Ext" bigint, "d_entryDetails" text, "d_Debit" character varying, "d_Credit" character varying, "d_ledgerNo" character varying, "d_accountNo" character varying, "d_xActTypeCodeExtName" character) 
     LANGUAGE 'plpgsql'
     COST 100
     VOLATILE PARALLEL UNSAFE
@@ -111,6 +111,7 @@ select
 		entries."d_Debit",
 		entries."d_Credit",
 		entries."d_ledgerNo",
+		entries."d_accountNo",
 		entries."d_xActTypeCodeExtName"
 FROM entries 
 LEFT JOIN dportfolios ON entries.idportfolio=dportfolios.idportfolio
@@ -121,4 +122,3 @@ $BODY$;
 
 ALTER FUNCTION public.f_a_b_get_all_entries_transactions(date, date, numeric[], text[], text[], numeric)
     OWNER TO postgres;
---  

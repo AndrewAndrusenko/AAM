@@ -18,6 +18,11 @@
 .highlight{
   background: #2b2be3; /* green */
 }
+tr.mat-row:hover {
+  border: 1px solid blue;
+  border-radius: 10px;
+  background: #2b2be3; /* green */
+}
 .mat-header-cell {
   font-size: 20px;
   background-color:#393737;

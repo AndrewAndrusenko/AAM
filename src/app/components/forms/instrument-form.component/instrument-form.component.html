@@ -1,4 +1,20 @@
-<mat-toolbar color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4">
+<mat-toolbar *ngIf="dragAllowed"  color="primary"
+  cdkDrag  cdkDragRootElement=".cdk-overlay-pane"  cdkDragHandle>
+  <span>{{action}} Instrument</span>
+  <span class="example-spacer"></span>
+  <mat-checkbox style= "font-size: 14px; color:rgb(255, 255, 255); padding: 1%;" #submitbox checked="false" 
+    (click)=" instrumentModifyForm.markAllAsTouched();
+    instrumentModifyForm.updateValueAndValidity();"
+    >Submit Data
+  </mat-checkbox>
+  <button mat-raised-button color="accent" 
+    [disabled]="!(instrumentModifyForm.valid && submitbox.checked)"
+    (click)="updateInstrumentData(action)"
+    style="margin-top: 1px; width: 30%; font-size: 18px; margin-left: 1%;">
+    {{action}} Instrument
+  </button>
+</mat-toolbar>
+<mat-toolbar *ngIf="!dragAllowed" color="primary" style="cursor:default;">
   <span>{{action}} Instrument</span>
   <span class="example-spacer"></span>
   <mat-checkbox style= "font-size: 14px; color:rgb(255, 255, 255); padding: 1%;" #submitbox checked="false" 
@@ -115,7 +131,7 @@
       Required!   
     </mat-error>
     <mat-error  *ngIf="faceunit?.errors?.['currencyCode']">
-      Inccorect Code! Only numbers  
+      Inccorect Code! 
     </mat-error>
   </mat-form-field>
   <mat-form-field style="width: 14%;" title="facevalue">

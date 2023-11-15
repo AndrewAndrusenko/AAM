@@ -31,8 +31,8 @@ export class DashboardComponent implements OnDestroy,OnInit {
       this.indexDBServiceS.getIndexDBStaticTables('bcTransactionType_Ext').then ( (data) => console.log('Cache:', data['data'].length,' saved for bcTransactionType_Ext'));
       this.AuthServiceS.getObjectStatuses();
     })
-    this.AutoCompService.createSecIDpipe(0);
-    this.AutoCompService.createCurrencypipe(0);
+    this.AutoCompService.createSecIDpipe();
+    this.AutoCompService.createCurrencypipe();
 
   }
   ngOnDestroy() { 

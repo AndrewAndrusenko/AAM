@@ -72,7 +72,8 @@ async function fGetAccountingData (request,response) {
       'LEFT JOIN dclients ON "bAccounts"."clientId" = dclients.idclient ' +
       'LEFT JOIN dportfolios ON dportfolios.idportfolio = "bAccounts"."idportfolio" ' +
       'LEFT JOIN "bcAccountType_Ext" ON "bcAccountType_Ext"."accountType_Ext" = "bAccounts"."accountTypeExt" ' +
-      'LEFT JOIN "bcEnityType" ON "bcEnityType"."entityType" = "bAccounts"."entityTypeCode"; '
+      'LEFT JOIN "bcEnityType" ON "bcEnityType"."entityType" = "bAccounts"."entityTypeCode" '+
+      'ORDER BY "accountId" DESC;';
     break;
     case 'GetLedgerData':
       query.text ='SELECT '+
@@ -100,7 +101,7 @@ async function fGetAccountingData (request,response) {
 
     break;
     case 'GetbLastClosedAccountingDate':
-      query.text ='SELECT "FirstOpenedDate"::date, "LastClosedDate"::date FROM "bLastClosedAccountingDate";'
+      query.text ='SELECT "FirstOpenedDate"::date, "LastClosedDate"::date FROM "bLastClosedAccountingDate" ;'
     break;
     case 'GetbParamsgfirstOpenedDate':
       query.text ='SELECT "FirstOpenedDate"::date from "gAppMainParams";'
@@ -294,6 +295,7 @@ async function fCreateEntryAccountingInsertRow (request, response) {
     db_common_api.queryExecute(sqlText,response,'STP_f Create Entry Accounting InsertRow')
 }
 async function faccountingOverdraftAccountCheck (request, response) {
+  console.log('param',request.query);
   let sqlText = 'SELECT "accountId", "openingBalance", CAST ("closingBalance" AS NUMERIC) AS "closingBalance", "closingBalance" AS "EndBalance"'+
   'FROM f_checkoverdraftbyaccountandbydate'+
   '(${transactionDate}, ${accountId}, ${xactTypeCode}, ${transactionAmount}, ${id}, ${FirstOpenedAccountingDate}) ;';
