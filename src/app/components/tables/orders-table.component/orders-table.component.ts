@@ -22,6 +22,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { indexDBService } from 'src/app/services/indexDB.service';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
+import { number } from 'echarts';
 @Component({
   selector: 'app-orders-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -49,9 +50,10 @@ export class AppOrderTableComponent {
   @Input() bulkOrder:number;
   @Input() allocationFilters:{secid:string, type:string,bulkorders:string[]};
   @Input() filters:any;
-
-  columnsToDisplay = ['select','id','ordertype','type','secid','security_group_name','mp_name','qty','price','amount','unexecuted','status','parent_order','portfolioname','idcurrency','generated','action','allocated'];
-  columnsHeaderToDisplay = ['ID','Order','Type','SecID','Group','MP','Quantity','Price','Amount','Unexecuted','Status','ParentID','Portfolio','Currency','Created','Action','Allocated']
+  @Input() UI_min:boolean=true;
+  multiFilter?: (data: any, filter: string) => boolean;
+  columnsToDisplay = ['select','id','ordertype','type','secid','security_group_name','mp_name','qty','price','amount','unexecuted','status','portfolioname','idcurrency','generated','action','parent_order','allocated'];
+  columnsHeaderToDisplay = ['ID','Order','Type','SecID','Group','MP','Quantity','Price','Amount','Unexecuted','Status','Portfolio','Currency','Created','Action','BulkID','Allocated']
   expandedElement: orders  | null;
   expandAllowed: boolean = true;
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
@@ -77,8 +79,6 @@ export class AppOrderTableComponent {
     dateRangeEnd: new FormControl<Date | null>(null),
   });
   dialogOrderModify: MatDialogRef<AppTradeModifyFormComponent>;
-  defaultFilterPredicate?: (data: any, filter: string) => boolean;
-  secidfilter?: (data: any, filter: string) => boolean;
   activeTab:string='';
   tabsNames = ['Orders']
 /*   @HostListener('document:keydown', ['$event'])
@@ -89,7 +89,6 @@ export class AppOrderTableComponent {
     }
   } */
   constructor(
-    private TreeMenuSevice: TreeMenuSevice,
     public TradeService: AppTradeService,
     private AuthServiceS:AuthService,  
     private HandlingCommonTasksS:HandlingCommonTasksService,
@@ -110,8 +109,17 @@ export class AppOrderTableComponent {
       tdate : this.dataRange,
       price:null,
       qty:null,
-      status:null
+      status:null,
+      idportfolio:null
     });
+    this.multiFilter = (data: orders, filter: string) => {
+      let filter_array = filter.split(',').map(el=>[el,1]);
+      let colForFilter=this.columnsToDisplay.slice(1)
+      colForFilter.forEach(col=>filter_array.forEach(fil=>{
+        data[col]!==null && fil[0].toString().toUpperCase()===(data[col]).toString().toUpperCase()? fil[1]=0:null
+      }));
+      return !filter || filter_array.reduce((acc,val)=>acc+Number(val[1]),0)===0;
+    };
   }
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
@@ -121,7 +129,7 @@ export class AppOrderTableComponent {
     if (this.tableMode.includes('Allocation')) {
       this.columnsToDisplayWithExpand = ['select','id','ordertype','type','secid','qty','price','amount','unexecuted','status','allocated','portfolioname','idcurrency','generated','expand'];
     } else {
-      this.columnsToDisplayWithExpand = ['select','id','ordertype','type','secid','security_group_name','mp_name','qty','price','amount','unexecuted','status','portfolioname','idcurrency','generated','action'];
+      this.columnsToDisplayWithExpand = ['select','id','ordertype','type','secid','security_group_name','mp_name','qty','price','amount','unexecuted','status','portfolioname','idcurrency','generated','action','parent_order'];
     }
     switch (this.tableMode.join()) {
       case 'Parent':
@@ -151,6 +159,10 @@ export class AppOrderTableComponent {
             status:['confirmed','in_execution','executed']}))
           ).subscribe (ordersData =>this.updateordersDataTable(ordersData)));
       break;
+      case 'Parent,Per_Portfolio':
+        this.TradeService.getOrderInformation({
+          idportfolio:this.filters.idportfolio}).subscribe (ordersData => this.updateordersDataTable(ordersData));
+      break;
     }
     if (this.tableMode.includes('Child')) {
       this.columnsToDisplayWithExpand.splice(this.columnsToDisplayWithExpand.indexOf('action'),1);
@@ -159,12 +171,71 @@ export class AppOrderTableComponent {
       })
     }
     // this.subscriptions.add(this.TreeMenuSevice.getActiveTab().subscribe(tabName=>this.activeTab=tabName));
+
   }
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['filters']?.currentValue!==undefined&&this.fullOrdersSet!==undefined)  {
-      this.initialFilterOfDataSource (changes['filters'].currentValue);
-      this.dataSource.data = this.excludeOrdersWithParent()
+    switch (this.tableMode.join()) {
+      case 'Parent,Per_Portfolio':
+        this.TradeService.getOrderInformation({
+          idportfolio:this.filters.idportfolio}).subscribe (ordersData => this.updateordersDataTable(ordersData));
+      break;
+      default:
+        if (changes['filters']?.currentValue!==undefined&&this.fullOrdersSet!==undefined)  {
+          this.initialFilterOfDataSource (changes['filters'].currentValue);
+          this.dataSource.data = this.excludeOrdersWithParent()
+        }
+      break;
     }
+  }
+  updateordersDataTable (ordersData:orders[]) {
+    this.fullOrdersSet = ordersData;
+    this.dataSource  = new MatTableDataSource(ordersData);
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.filterPredicate=this.multiFilter;
+    this.dataSource.sort = this.sort;
+    switch (this.tableMode.join()) {
+      case 'Parent,Per_Portfolio':
+      break;
+      default:
+        this.filters!==undefined&&this.fullOrdersSet!==undefined? this.initialFilterOfDataSource(this.filters):null;
+        this.dataSource.data = this.excludeOrdersWithParent()
+      break;
+    }
+  }
+  submitQuery (reset:boolean=false,showSnackResult:boolean=true) {
+    let searchObj = reset?  {} : this.searchParametersFG.value;
+    this.dataSource.data? this.dataSource.data = null : null;
+    searchObj.secidList = [0,1].includes(this.instruments.length)&&this.instruments[0]==='ClearAll'? null : this.instruments.map(el=>el.toLocaleLowerCase())
+    if (this.qty.value) {
+      let qtyRange = this.HandlingCommonTasksS.toNumberRange(this.qty.value,this.qty,'qty');
+      qtyRange? searchObj = {...searchObj, ... qtyRange} : searchObj.qty=null;
+    } else {searchObj.qty=null};
+    if (this.price.value) {
+      let priceRange = this.HandlingCommonTasksS.toNumberRange(this.price.value,this.price,'price');
+      priceRange? searchObj = {...searchObj, ... priceRange} : searchObj.price=null;
+    } else  {searchObj.price=null};
+    switch (this.tableMode.join()) {
+      case 'Parent,Per_Portfolio':
+        searchObj= {idportfolio:this.filters.idportfolio}
+      break;
+      case 'Allocation,Parent': 
+        searchObj= {
+          type:this.allocationFilters.type,
+          secidList:[this.allocationFilters.secid.toLowerCase()],
+          status:['confirmed','in_execution','executed']
+        }  
+    }
+    this.price.value? searchObj = {...searchObj, ... this.HandlingCommonTasksS.toNumberRange(this.price.value,this.price,'price')} :null;
+    searchObj = {...searchObj, ...this.tdate.value? this.HandlingCommonTasksS.toDateRange(this.tdate, 'tdate') : null}
+    this.TradeService.getOrderInformation(searchObj).subscribe(data => {
+      this.updateordersDataTable(data)
+/*       this.fullOrdersSet = data;
+      this.dataSource  = new MatTableDataSource(data);
+      this.dataSource.paginator = this.paginator;
+      this.dataSource.sort = this.sort;
+      this.filters?.only_clients===true? null : this.dataSource.data = this.excludeOrdersWithParent(); */
+      showSnackResult? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded '):null;
+    });
   }
   initialFilterOfDataSource (filter:any) {
     this.showClientOrdersCB.checked= false;
@@ -251,12 +322,6 @@ export class AppOrderTableComponent {
   applyOrderTypeFilter (value:string){
     this.dataSource.data = value!=='All'? this.fullOrdersSet.filter(el=>value==='Bulk'? el.ordertype===value:el.ordertype===value&&!el.parent_order) : this.fullOrdersSet.filter(order=>!order.parent_order)
   }
-  applyFilter(event: any, col?:string) {
-    this.dataSource.filterPredicate = col === undefined? this.defaultFilterPredicate : this.secidfilter
-    const filterValue = event.hasOwnProperty('isUserInput')?  event.source.value :  (event.target as HTMLInputElement).value 
-    !event.hasOwnProperty('isUserInput') || event.isUserInput ? this.dataSource.filter = filterValue.trim().toLowerCase() : null;
-    if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
-  }
   filterChildOrders(parent:string):orders[] {
     let childOrders =  this.fullOrdersSet.filter(el=>el.parent_order===Number(parent));
     return childOrders;
@@ -269,16 +334,20 @@ export class AppOrderTableComponent {
     this.disabledControlElements=show;
     this.dataSource.data = show? this.fullfilteredOrdersSet.filter(order=>order.ordertype==='Client') : this.fullfilteredOrdersSet.filter(order=>!order.parent_order)
   }
-  updateordersDataTable (ordersData:orders[]) {
-    this.fullOrdersSet = ordersData;
-    this.dataSource  = new MatTableDataSource(ordersData);
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
-    this.defaultFilterPredicate = this.dataSource.filterPredicate;
-    this.dataSource.filterPredicate = function(data, filter: string): boolean {return data.secid.toLowerCase().includes(filter)};
-    this.secidfilter = this.dataSource.filterPredicate;
-    this.filters!==undefined&&this.fullOrdersSet!==undefined? this.initialFilterOfDataSource(this.filters):null;
-    this.dataSource.data = this.excludeOrdersWithParent()
+  applyFilter(event: any, col?:string) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim();
+    if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
+  }
+  updateFilter (el: any) {
+    this.filterALL.nativeElement.value = this.filterALL.nativeElement.value + el+',';
+    this.dataSource.filter = this.filterALL.nativeElement.value.slice(0,-1).trim();
+    (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
+  }
+  clearFilter (input:HTMLInputElement) {
+    input.value=''
+    this.dataSource.filter = ''
+    if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
   }
   changedValueofChip (value:string, chipArray:string[],control:AbstractControl) {
     chipArray[chipArray.length-1] === 'ClearAll'? chipArray.push(value) : chipArray[chipArray.length-1] = value
@@ -301,54 +370,10 @@ export class AppOrderTableComponent {
     return chipArray;
   }
   addChips (el: any, column: string) {(['secid'].includes(column))? this.instruments.push(el):null;}
-  updateFilter (el: any) {
-    this.filterALL.nativeElement.value = el;
-    this.dataSource.filter = el.trim().toLowerCase();
-    (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
-  }
-  clearFilter (input:HTMLInputElement) {
-    input.value=''
-    this.dataSource.filter = ''
-    if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
-  }
   isAllSelected() { return this.SelectionService.isAllSelected(this.dataSource, this.selection)} 
   toggleAllRows(forceSelectAll:boolean=false) { return this.SelectionService.toggleAllRows(this.dataSource, this.selection,forceSelectAll)} 
   checkboxLabel(row?: orders): string {
     return this.SelectionService.checkboxLabel(this.dataSource, this.selection, row)
-  }
-  async submitQuery (reset:boolean=false,showSnackResult:boolean=true) {
-    return new Promise((resolve, reject) => {
-      let searchObj = reset?  {} : this.searchParametersFG.value;
-      this.dataSource.data? this.dataSource.data = null : null;
-      searchObj.secidList = [0,1].includes(this.instruments.length)&&this.instruments[0]==='ClearAll'? null : this.instruments.map(el=>el.toLocaleLowerCase())
-      if (this.qty.value) {
-        let qtyRange = this.HandlingCommonTasksS.toNumberRange(this.qty.value,this.qty,'qty');
-        qtyRange? searchObj = {...searchObj, ... qtyRange} : searchObj.qty=null;
-      } else {searchObj.qty=null};
-      if (this.price.value) {
-        let priceRange = this.HandlingCommonTasksS.toNumberRange(this.price.value,this.price,'price');
-        priceRange? searchObj = {...searchObj, ... priceRange} : searchObj.price=null;
-      } else  {searchObj.price=null};
-      if (this.tableMode.join()==='Allocation,Parent') {
-          searchObj= {
-            type:this.allocationFilters.type,
-          secidList:[this.allocationFilters.secid.toLowerCase()],
-          status:['confirmed','in_execution','executed']
-        }
-      }  
-      console.log('alloc submitQuery',searchObj);
-      this.price.value? searchObj = {...searchObj, ... this.HandlingCommonTasksS.toNumberRange(this.price.value,this.price,'price')} :null;
-      searchObj = {...searchObj, ...this.tdate.value? this.HandlingCommonTasksS.toDateRange(this.tdate, 'tdate') : null}
-      this.TradeService.getOrderInformation(searchObj).subscribe(data => {
-        this.fullOrdersSet = data;
-        this.dataSource  = new MatTableDataSource(data);
-        this.dataSource.paginator = this.paginator;
-        this.dataSource.sort = this.sort;
-        this.dataSource.data = this.excludeOrdersWithParent()
-        showSnackResult? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded '):null;
-        resolve(data) 
-      });
-    });
   }
   selectOrder (element:orders) {this.modal_principal_parent.emit(element)}
   showOrders($event:Event,element:orders) {
@@ -371,7 +396,7 @@ export class AppOrderTableComponent {
   highlight(row){
     this.selectedRowIndex = this.dataSource.data.findIndex(el=>el.id===row.id);
     this.selectedRowID = row.id;
-}
+  }
   selectItem (row?) {
     this.selection.toggle(row? row: this.dataSource.data[this.selectedRowIndex])
   }
@@ -383,12 +408,6 @@ export class AppOrderTableComponent {
     this.selectedRowIndex =this.selectedRowIndex-1
     this.selectedRowID = this.dataSource.data[this.selectedRowIndex].id
   }
-  openOrderModifyForm (action:string, element:any) {
-/*     this.dialogOrderModify = this.dialog.open (AppTradeModifyFormComponent,{minHeight:'600px', minWidth:'40vw', autoFocus: false, maxHeight: '90vh'})
-    this.dialogOrderModify.componentInstance.action = action;
-    this.dialogOrderModify.componentInstance.data = action ==='Create'? null :element; */
-  }
-
   exportToExcel() {   
     let numberFields=['id','qty', 'amount','id_order','id_bulk_order','entries','idtrade','price','unexecuted','parent_order','allocated','idcurrency'];
     let dateFields=['generated'];

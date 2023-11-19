@@ -156,6 +156,9 @@ async function fGetOrderData (request,response) {
     },
     'status' : {
       1: '(dorders.status = ANY(array[${status}]))  ',
+    },
+    'idportfolio' : {
+      1: '(dorders.id_portfolio = ${idportfolio}::numeric)  ',
     }
   }
   let conditionsTrades =' WHERE'

@@ -1,12 +1,12 @@
-import {AfterViewInit, Component, EventEmitter, Output, ViewChild, Input, ChangeDetectionStrategy, ElementRef, TemplateRef, HostListener} from '@angular/core';
-import {MatPaginator as MatPaginator} from '@angular/material/paginator';
-import {MatSort} from '@angular/material/sort';
-import {Observable, Subscription, map, startWith, switchMap, tap } from 'rxjs';
-import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
+import { Component, EventEmitter, Output, ViewChild, Input, ChangeDetectionStrategy, ElementRef, TemplateRef} from '@angular/core';
+import { MatPaginator as MatPaginator} from '@angular/material/paginator';
+import { MatSort} from '@angular/material/sort';
+import { Observable, Subscription, map, startWith } from 'rxjs';
+import { MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { Instruments, trades } from 'src/app/models/intefaces.model';
-import {COMMA, ENTER} from '@angular/cdk/keycodes';
-import {MatChipInputEvent} from '@angular/material/chips';
+import { Instruments, orders, trades } from 'src/app/models/intefaces.model';
+import { COMMA, ENTER} from '@angular/cdk/keycodes';
+import { MatChipInputEvent} from '@angular/material/chips';
 import { AbstractControl, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { formatNumber } from '@angular/common';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
@@ -17,14 +17,13 @@ import { AppTradeModifyFormComponent } from '../../forms/trade-form.component/tr
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import { AppAccountingService } from 'src/app/services/accounting.service';
 import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
-
 @Component({
   selector: 'app-trade-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './trade-table.component.html',
   styleUrls: ['./trade-table.component.scss'],
 })
-export class AppTradeTableComponent  implements AfterViewInit {
+export class AppTradeTableComponent  {
   private arraySubscrition = new Subscription ();
   FirstOpenedAccountingDate: Date;
   accessState: string = 'none';
@@ -37,7 +36,6 @@ export class AppTradeTableComponent  implements AfterViewInit {
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild('filterALL', { static: false }) filterALL: ElementRef;
-
   @Output() public modal_principal_parent = new EventEmitter();
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
   panelOpenStateSecond = false;
@@ -56,8 +54,7 @@ export class AppTradeTableComponent  implements AfterViewInit {
     dateRangeEnd: new FormControl<Date | null>(null),
   });
   public dialogTradeModify: MatDialogRef<AppTradeModifyFormComponent>
-  defaultFilterPredicate?: (data: any, filter: string) => boolean;
-  secidfilter?: (data: any, filter: string) => boolean;
+  multiFilter?: (data: any, filter: string) => boolean;
   @ViewChild(TemplateRef) _dialogTemplate: TemplateRef<any>;
   activeTab:string=''
 /*   @HostListener('document:keydown', ['$event'])
@@ -78,7 +75,7 @@ export class AppTradeTableComponent  implements AfterViewInit {
     private dialog: MatDialog,
     private fb:FormBuilder, 
     ) {
-      this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
+    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate);
     this.searchParametersFG = this.fb.group ({
@@ -115,11 +112,14 @@ export class AppTradeTableComponent  implements AfterViewInit {
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
     }));
-  }
-  ngOnDestroy(): void {
-    this.arraySubscrition.unsubscribe();
-  }
-  async ngAfterViewInit() {
+    this.multiFilter = (data: trades, filter: string) => {
+      let filter_array = filter.split(';').map(el=>[el,1]);
+      let colForFilter=this.columnsToDisplay.slice(0,-1)
+      colForFilter.forEach(col=>filter_array.forEach(fil=>{
+        data[col]!==null && fil[0].toString().toUpperCase()===(data[col]).toString().toUpperCase()? fil[1]=0:null
+      }));
+      return !filter || filter_array.reduce((acc,val)=>acc+Number(val[1]),0)===0;
+    };
     this.arraySubscrition.add(this.TreeMenuSeviceS.getActiveTab().subscribe(tabName=>this.activeTab=tabName));
     this.TradeService.getTradeInformation(null).subscribe (tradesData => this.updateTradesDataTable(tradesData)); 
     this.AutoCompService.getSecidLists();
@@ -132,33 +132,34 @@ export class AppTradeTableComponent  implements AfterViewInit {
       startWith(''),
       map(value => this.AutoCompService.filterList(value || '','cpty'))
   );
-  }  
-  async submitQuery (reset:boolean=false) {
+  }
+  ngOnDestroy(): void {
+    this.arraySubscrition.unsubscribe();
+  }
+  submitQuery (reset:boolean=false) {
     this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate);
-    return new Promise((resolve, reject) => {
-      let searchObj = reset?  {} : this.searchParametersFG.value;
-      this.dataSource?.data? this.dataSource.data = null : null;
-      searchObj.cptyList = [0,1].includes(this.counterparties.length)&&this.counterparties[0]==='ClearAll'? null : this.counterparties.map(el=>el.toLocaleLowerCase())
-      searchObj.secidList = [0,1].includes(this.instruments.length)&&this.instruments[0]==='ClearAll'? null : this.instruments.map(el=>el.toLocaleLowerCase())
-      if (this.qty.value) {
-        let qtyRange = this.HandlingCommonTasksS.toNumberRange(this.qty.value,this.qty,'qty');
-        qtyRange? searchObj = {...searchObj, ... qtyRange} : searchObj.qty=null;
-      } else {searchObj.qty=null};
-      if (this.price.value) {
-        let priceRange = this.HandlingCommonTasksS.toNumberRange(this.price.value,this.price,'price');
-        priceRange? searchObj = {...searchObj, ... priceRange} : searchObj.price=null;
-      } else  {searchObj.price=null};
-      this.price.value? searchObj = {...searchObj, ... this.HandlingCommonTasksS.toNumberRange(this.price.value,this.price,'price')} :null;
-      searchObj = {...searchObj, ...this.tdate.value? this.HandlingCommonTasksS.toDateRange(this.tdate, 'tdate') : null}
-      searchObj = {...searchObj, ...this.vdate.value? this.HandlingCommonTasksS.toDateRange(this.vdate,'vdate') : null}
-      this.arraySubscrition.add(this.TradeService.getTradeInformation(searchObj).subscribe(data => {
-        this.dataSource  = new MatTableDataSource(data);
-        this.dataSource.paginator = this.paginator;
-        this.dataSource.sort = this.sort;
-        this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ');
-        resolve(data) 
-      }));
-    });
+    let searchObj = reset?  {} : this.searchParametersFG.value;
+    this.dataSource?.data? this.dataSource.data = null : null;
+    searchObj.cptyList = [0,1].includes(this.counterparties.length)&&this.counterparties[0]==='ClearAll'? null : this.counterparties.map(el=>el.toLocaleLowerCase())
+    searchObj.secidList = [0,1].includes(this.instruments.length)&&this.instruments[0]==='ClearAll'? null : this.instruments.map(el=>el.toLocaleLowerCase())
+    if (this.qty.value) {
+      let qtyRange = this.HandlingCommonTasksS.toNumberRange(this.qty.value,this.qty,'qty');
+      qtyRange? searchObj = {...searchObj, ... qtyRange} : searchObj.qty=null;
+    } else {searchObj.qty=null};
+    if (this.price.value) {
+      let priceRange = this.HandlingCommonTasksS.toNumberRange(this.price.value,this.price,'price');
+      priceRange? searchObj = {...searchObj, ... priceRange} : searchObj.price=null;
+    } else  {searchObj.price=null};
+    this.price.value? searchObj = {...searchObj, ... this.HandlingCommonTasksS.toNumberRange(this.price.value,this.price,'price')} :null;
+    searchObj = {...searchObj, ...this.tdate.value? this.HandlingCommonTasksS.toDateRange(this.tdate, 'tdate') : null}
+    searchObj = {...searchObj, ...this.vdate.value? this.HandlingCommonTasksS.toDateRange(this.vdate,'vdate') : null}
+    this.arraySubscrition.add(this.TradeService.getTradeInformation(searchObj).subscribe(data => {
+      this.dataSource  = new MatTableDataSource(data);
+      this.dataSource.paginator = this.paginator;
+      this.dataSource.sort = this.sort;
+      this.dataSource.filterPredicate=this.multiFilter;
+      this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ');
+    }));
   }
   openTradeModifyForm (action:string, element:any,tabIndex:number=0) {
     action==='Create_Example'? element.allocatedqty=0:null;
@@ -171,15 +172,22 @@ export class AppTradeTableComponent  implements AfterViewInit {
     this.dataSource  = new MatTableDataSource(tradesData);
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
-    this.defaultFilterPredicate = this.dataSource.filterPredicate;
-    this.dataSource.filterPredicate = function(data, filter: string): boolean {return data.tidinstrument.toLowerCase().includes(filter)};
-    this.secidfilter = this.dataSource.filterPredicate;
+    this.dataSource.filterPredicate=this.multiFilter;
   }
-  applyFilter(event: any, col?:string) {
-    this.dataSource.filterPredicate = col === undefined? this.defaultFilterPredicate : this.secidfilter
-    const filterValue = event.hasOwnProperty('isUserInput')?  event.source.value :  (event.target as HTMLInputElement).value 
-    !event.hasOwnProperty('isUserInput') || event.isUserInput ? this.dataSource.filter = filterValue.trim().toLowerCase() : null;
+  applyFilter(event: any) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim() ;
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
+  }
+  updateFilter (el: any) {
+    this.filterALL.nativeElement.value = this.filterALL.nativeElement.value + el+';';
+    this.dataSource.filter = this.filterALL.nativeElement.value.slice(0,-1).trim();
+    (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
+  }
+  clearFilter (input:HTMLInputElement) {
+    input.value=''
+    this.dataSource.filter = ''
+    if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
   }
   changedValueofChip (value:string, chipArray:string[],control:AbstractControl) {
     chipArray[chipArray.length-1] === 'ClearAll'? chipArray.push(value) : chipArray[chipArray.length-1] = value
@@ -202,17 +210,6 @@ export class AppTradeTableComponent  implements AfterViewInit {
     return chipArray;
   }
   addChips (el: any, column: string) {(['secid'].includes(column))? this.instruments.push(el):null;}
-  updateFilter (el: any) {
-    this.filterALL.nativeElement.value = el;
-    this.dataSource.filter = el.trim();
-    (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
-  }
-  clearFilter (input:HTMLInputElement) {
-    input.value=''
-    this.dataSource.filter = ''
-    if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
-  }
-
   selectInstrument (element:Instruments) {this.modal_principal_parent.emit(element)}
   exportToExcel() {
   let numberFields=['idtrade','price','id_price_currency','qty','id_settlement_currency','tidorder','allocatedqty','fifo_qty'];
@@ -228,7 +225,7 @@ export class AppTradeTableComponent  implements AfterViewInit {
     return el;
   });
   this.HandlingCommonTasksS.exportToExcel (dataToExport,"tradesData");  
-}
+  }
   get  type () {return this.searchParametersFG.get('type') } 
   get  tdate () {return this.searchParametersFG.get('tdate') } 
   get  vdate () {return this.searchParametersFG.get('vdate') } 

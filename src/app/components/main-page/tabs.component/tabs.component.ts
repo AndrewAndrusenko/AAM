@@ -14,6 +14,7 @@ export class AppTabsComponent implements OnDestroy {
   private subscriptions = new Subscription();
   @ViewChild('tabGroup') tabGroup:MatTabGroup
   tabsToFollow:string[]=['Portfolios']
+  lastIndexChanged:number = 0
 
   constructor (private TreeMenuSevice : TreeMenuSevice, private titleService:Title) {
         this.subscriptions.add (
@@ -26,6 +27,11 @@ export class AppTabsComponent implements OnDestroy {
     )
   }
   ngOnDestroy() { this.subscriptions.unsubscribe()}
-  showTabName (event:MatTabChangeEvent) {this.TreeMenuSevice.sendActiveTab(event.tab.textLabel.trim())}
+  showTabName (event:MatTabChangeEvent) {
+    this.tabGroup._allTabs['_results'][event.index].textLabel= this.tabGroup._allTabs['_results'][event.index].ariaLabel+' '+this.messageReceived.name;
+    console.log('this.lastIndexChanged',this.lastIndexChanged,event.index);
+    this.tabGroup._allTabs['_results'][this.lastIndexChanged].textLabel= this.tabGroup._allTabs['_results'][this.lastIndexChanged].ariaLabel;
+    this.lastIndexChanged=event.index;
+    this.TreeMenuSevice.sendActiveTab(event.tab.textLabel.trim())}
   SetTitle (title) {this.titleService.setTitle(title)}
 }

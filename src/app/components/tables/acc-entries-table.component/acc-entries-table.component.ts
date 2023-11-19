@@ -74,6 +74,8 @@ export class AppTableAccEntriesComponent implements OnInit {
   activeTab:string='';
   tabsNames = ['Transactions List']
   @HostListener('document:keydown', ['$event'])
+  multiFilter?: (data: any, filter: string) => boolean;
+
   handleKeyboardEvent(event: KeyboardEvent) { 
     if (this.tabsNames.includes(this.activeTab)){
       event.altKey&&event.key==='r'? this.submitQuery(false,true):null;
@@ -108,7 +110,15 @@ export class AppTableAccEntriesComponent implements OnInit {
       filter(id=> id==undefined||(id===this.externalId))
     ).subscribe(id =>{
       this.submitQuery(false,id? true:false)
-    })
+    });
+    this.multiFilter = (data: bAccountsEntriesList, filter: string) => {
+      let filter_array = filter.split(',').map(el=>[el,1]);
+      let colForFilter=this.columnsToDisplay.slice(1)
+      colForFilter.forEach(col=>filter_array.forEach(fil=>{
+        data[col]!==null && fil[0].toString().toUpperCase()===(data[col]).toString().toUpperCase()? fil[1]=0:null
+      }));
+      return !filter || filter_array.reduce((acc,val)=>acc+Number(val[1]),0)===0;
+    };
   }
   ngOnInit(): void {
     this.initiateTable();
@@ -168,6 +178,7 @@ export class AppTableAccEntriesComponent implements OnInit {
       this.dataSource  = new MatTableDataSource(EntriesList);
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
+      this.dataSource.filterPredicate=this.multiFilter;
       notification? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (EntriesList.length,'en-US') + ' rows'},'Loaded '):null;
       this.externalId&&sendNewAllocatedSum? this.newAllocatedSum.emit({swift_item_id:this.externalId, allocated_sum: this.dataSource.data.reduce((acc,value)=>acc+value.t_amountTransaction,0)}) : null;
     })
@@ -220,8 +231,8 @@ export class AppTableAccEntriesComponent implements OnInit {
   clearAll(event) { event.target.textContent.trim() === 'ClearAll'? this.noAccountLedger.patchValue(['ClearAll']) : null};
   addChips (el: any, column: string) {(['d_Debit', 'd_Credit'].includes(column))? this.noAccountLedger.value.push(el) : null}
   updateFilter ( el: any) {
-    this.filter.nativeElement.value = el;
-    this.dataSource.filter = el.trim();
+    this.filter.nativeElement.value = this.filter.nativeElement.value + el+',';
+    this.dataSource.filter = this.filter.nativeElement.value.slice(0,-1).trim();
     (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
   }
   clearFilter (input: HTMLInputElement) {

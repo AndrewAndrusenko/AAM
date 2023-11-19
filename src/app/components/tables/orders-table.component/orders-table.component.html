@@ -1,6 +1,6 @@
-<ng-container *ngIf="accessState!=='none'">
-  <ng-container  *ngIf="tableMode.includes('Parent')&&tableMode.length===1">  <!-- Parent Mode Block -->
-    <mat-form-field  class = "filterField" style="width: 10%;"> <!-- Order Type Filter -->
+<ng-container *ngIf="accessState!=='none'" >
+    <mat-form-field class = "filterField" *ngIf="tableMode.includes('Parent')&&tableMode.length===1"
+    style="width: 10%;"> <!-- Order Type Filter -->
       <mat-label class="whiteTextFilter">Order type</mat-label>
       <mat-select  (selectionChange)="applyOrderTypeFilter($event.value)">
         <mat-option [value]="'All'">ALL</mat-option>
@@ -8,6 +8,7 @@
         <mat-option [value]="'Client'">Client</mat-option>
       </mat-select>
     </mat-form-field>
+  <ng-container  *ngIf="UI_min">  <!-- UI min Block -->
     <mat-form-field class = "filterField"  style="font-size: 22px; width: 15%;" title="Filter All columns" >
       <mat-label class="whiteTextFilter">Search (all columns)...</mat-label>
       <input 
@@ -26,13 +27,14 @@
       Save as XLS 
       <mat-icon matSuffix >save_alt</mat-icon>
     </button>
-    <button  *ngIf="tableMode.includes('Parent')"
-      color = "accent" mat-raised-button title="Reload Table (ALT + R)" 
+    <button  color = "accent" mat-raised-button title="Reload Table (ALT + R)" 
       style=" margin-left:1%; font-size: 18px;"
       (click)="submitQuery(true)">
       Reload 
       <mat-icon matSuffix >refresh</mat-icon>
     </button>
+  </ng-container>
+  <ng-container  *ngIf="tableMode.includes('Parent')&&tableMode.length===1">  <!-- Parent Mode Block -->
     <ng-container  *ngIf="!disabledControlElements"> <!-- Edit Buks Orders Block -->
       <button  title="Create Bulk Orders"
         color = "primary" mat-raised-button style=" margin-left:2%; font-size: 18px;"
@@ -51,13 +53,13 @@
       (click)="deleteClientOrders()">
       Delete Client Orders 
       <mat-icon matSuffix>delete</mat-icon>
-    </button>
-    </ng-container>
-    <mat-checkbox style="font-size:larger; margin-left: 3%;" #showClientOrdersCB
-    
+      </button>
+      <mat-checkbox style="font-size:larger; margin-left: 1%;" #showClientOrdersCB
       (change)="showClientOrders($event.checked)">
-      Show all client orders
-    </mat-checkbox>
+        Show all client orders
+      </mat-checkbox>
+    </ng-container>
+
 
   </ng-container>
   <ng-container  *ngIf="tableMode.includes('Allocation')">  <!-- Allocation Mode Block -->
@@ -217,20 +219,7 @@
               </ng-container>
              </p>
             <p  *ngSwitchCase="['action'].includes(column)" >
-              <button  *ngIf="disabledControlElements" mat-icon-button color="accent"
-                matTooltip="View Order"
-                (click)="openOrderModifyForm('View', element)">
-                <mat-icon >pageview</mat-icon>
-              </button>
               <ng-container  *ngIf="!disabledControlElements"> <!-- Edit block -->
-                <button 
-                *ngIf="['created','confirmed'].includes(element['status'])"
-                  mat-icon-button 
-                  color="accent" 
-                  matTooltip="Delete Order"
-                  (click)="openOrderModifyForm('Delete',element)">
-                  <mat-icon >delete</mat-icon>
-                </button>
                 <button  
                   *ngIf="element['ordertype']=='Bulk'&&['created','confirmed'].includes(element['status'])"
                   mat-icon-button color="accent"
@@ -252,12 +241,7 @@
               Add to filter
             </button> 
               <ng-container *ngIf="disabledControlElements">
-                <button 
-                  (click)="openOrderModifyForm('View', element)"
-                  class="tree-menu-item" cdkMenuItem>
-                  <mat-icon class="menu-icon" matPrefix>pageview</mat-icon> 
-                  View Order
-                </button> 
+
               </ng-container>
               <ng-container *ngIf="!disabledControlElements" title="Edit block">
                 <button *ngIf="checkChangeStatus('up',element['status'])"
@@ -278,12 +262,6 @@
                   <mat-icon class="menu-icon" matPrefix>undo</mat-icon> 
                   Unmerge Bulk Order
                 </button> 
-                <button *ngIf="['created','confirmed'].includes(element['status'])"
-                class="tree-menu-item" cdkMenuItem
-                (click)="openOrderModifyForm('Delete', element)">
-                <mat-icon class="menu-icon" matPrefix>delete</mat-icon> 
-                Delete Order
-              </button> 
               </ng-container>
             </div>
           </ng-template>  
@@ -307,6 +285,7 @@
                 [tableMode]="tableMode.includes('Allocation')? ['Allocation','Child'] : ['Child']"
                 [dataToShow]="fullOrdersSet"
                 [bulkOrder]="element['id']"
+                [UI_min]="false"
                 >
               </app-orders-table >
           </div>

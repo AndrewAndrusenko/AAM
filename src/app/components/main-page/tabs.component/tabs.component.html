@@ -1,15 +1,25 @@
 <mat-tab-group  #tabGroup   *ngIf="messageReceived.text=='Portfolios'" 
-  mat-stretch-tabs #AccountInfo 
+  mat-stretch-tabs 
   (selectedTabChange)="showTabName($event)"  >
-
-  <mat-tab label="Portfolio Positions"> 
+  <mat-tab [label]="'Orders ' + messageReceived.name" aria-label="Orders"
+  > 
+    <app-orders-table style="width: 150%;"
+    [tableMode]="['Parent','Per_Portfolio']" 
+    [filters]="{
+      idportfolio:[messageReceived.id],
+      only_clients:true,
+      filter_dataset:false
+    }"
+    ></app-orders-table>
+  </mat-tab>
+  <mat-tab label="Positions" aria-label="Positions"> 
     <app-inv-portfolio-position-table
     [rowsPerPages]="15"
     [readOnly]="true"
     [filters]="{portfolio_code:[messageReceived.name]}">
     </app-inv-portfolio-position-table>
   </mat-tab>
-  <mat-tab label="Portfolio Transactions"> 
+  <mat-tab label="Transactions" aria-label="Transactions"> 
     <app-table-acc-entries
     [paramRowData]="{portfolioCode:messageReceived.name}"
     [action]="'ViewEntriesByPortfolio'"   
@@ -17,13 +27,13 @@
      >
     </app-table-acc-entries>
   </mat-tab>
-  <mat-tab label="Trades by Account"> 
+  <mat-tab label="Trades" aria-label="Trades"> 
     <app-allocation-table
     [rowsPerPages]="15"
     [filters]="{portfolioname:[messageReceived.name]}" >
     </app-allocation-table>
   </mat-tab>
-  <mat-tab label="Account Summary" > 
+  <mat-tab label="Portfolio Summary" aria-label="Portfolio Summary"> 
     <div class="instrument_form">
       <br>
       <app-app-portfolio

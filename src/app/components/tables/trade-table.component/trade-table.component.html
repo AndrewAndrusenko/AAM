@@ -4,18 +4,6 @@
     New Trade
     <mat-icon matSuffix >create_new_folder</mat-icon>
   </button>
-  <mat-form-field  class = "filterField" title="only by SecID" >
-    <mat-label class="whiteTextFilter">Search by SecID..</mat-label>
-    <input 
-      (keyup)="applyFilter($event,'secid')"
-      matInput type="text" #filterSecid  
-      matTooltip="Use context menu to add filter">
-    <button matSuffix 
-      mat-icon-button aria-label="Clear" 
-      (click)="clearFilter(filterSecid)">
-      <mat-icon>close</mat-icon>
-    </button>
-  </mat-form-field>
   <mat-form-field class = "filterField"  style="font-size: 22px;" title="All columns">
     <mat-label class="whiteTextFilter">Search (all columns)...</mat-label>
     <input 
@@ -227,7 +215,7 @@
           </p>
           <p *ngSwitchCase="['tdate','vdate'].includes(column)"> {{element[column] | date}} </p>
           <p *ngSwitchCase="['idtrade'].includes(column)">
-            <button mat-stroked-button style="font-size: 18px; margin-left: 0; width: 57%;margin-top: 8%;"  
+            <button mat-stroked-button style="font-size: 18px;margin-top: 8%;"  
             [matTooltip]="'Trade details'"
             class = "edit-item-button"
             (click)="openTradeModifyForm(disabledControlElements? 'View': 'Edit',element)">

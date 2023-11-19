@@ -420,6 +420,7 @@ color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4"
     </form>
     <app-orders-table #ordersTable style="width: 100%;" 
       [tableMode]="['Allocation','Parent']"
+      [UI_min]="false"
       [allocationFilters]="{secid:tidinstrument.value,type:trtype.value,bulkorders:null}">
     </app-orders-table>
     <mat-expansion-panel class="headers-align" [expanded]="true"

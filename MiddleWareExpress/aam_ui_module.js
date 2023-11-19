@@ -68,9 +68,8 @@ async function TreeSQLQueryExc (RootNode, userId, nodeParentFavorite) {
 async function FAmmGetTreeData(request,response) {
   Paramlist = request.query.paramList
   Paramlist.splice (Paramlist.indexOf('Favorites'),1)
-  FavoritesList = Paramlist.map (element => 'Favorites_' + element);
+  FavoritesList = Paramlist.filter(el=>!['Trades & Orders','Accounting','Non-Trade Operations'].includes(el)).map (element => 'Favorites_' + element);
   Treelist = [...Paramlist,...FavoritesList]
-
   await Promise.all (Treelist.map(RootNode => TreeSQLQueryExc(RootNode, request.query.userId,'')))
   .then((value) => {
     value.push (['Favorites',FavoritesList])

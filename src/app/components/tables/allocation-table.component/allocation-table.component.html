@@ -229,14 +229,14 @@
             </button> 
           </p>
           <p *ngSwitchCase="['id_bulk_order'].includes(column)">
-            <button mat-flat-button style="font-size: 18px; margin-left: 0; width: 15%;margin-top: 8%;"  
+            <button mat-flat-button style="font-size: 18px; margin-top: 8%;"  
             [matTooltip]="'Order details'" 
             (click)="showOrderDetails(element.id_bulk_order)">
             {{element[column] }}
             </button> 
           </p>
           <p *ngSwitchCase="['idtrade'].includes(column)">
-            <button mat-flat-button style="font-size: 18px; margin-left: 0; width: 15%;margin-top: 8%;"  
+            <button mat-flat-button style="font-size: 18px; margin-top: 8%;"  
             [matTooltip]="'Trade details'" 
             (click)="showTradeDetails(element.idtrade)">
             {{element[column] }}

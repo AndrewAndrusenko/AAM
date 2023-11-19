@@ -1,10 +1,10 @@
--- FUNCTION: public.f_i_o_get_orders_unaccounted_qty(numeric[])
+-- FUNCTION: public.f_i_o_get_orders_unaccounted_qty()
 
-DROP FUNCTION IF EXISTS public.f_i_o_get_orders_unaccounted_qty();
+-- DROP FUNCTION IF EXISTS public.f_i_o_get_orders_unaccounted_qty();
 
 CREATE OR REPLACE FUNCTION public.f_i_o_get_orders_unaccounted_qty(
 	)
-    RETURNS TABLE(id_portfolio numeric, secid character varying, type character varying,  qty numeric, accounted numeric, unaccounted_qty numeric) 
+    RETURNS TABLE(id_portfolio numeric, secid character varying, type character varying, qty numeric, accounted numeric, unaccounted_qty numeric) 
     LANGUAGE 'plpgsql'
     COST 100
     VOLATILE PARALLEL UNSAFE
@@ -27,7 +27,7 @@ WITH
     WHERE
       dtrades_allocated.id_order = ANY (SELECT id FROM unaccounted_orders)
       AND "bAccountTransaction".idtrade NOTNULL
-      AND ("accountId" = 13 OR "ledgerNoId" = 13)
+      AND ("ledgerNoId" = 13)
     GROUP BY
       dtrades_allocated.id_order
   )
@@ -55,3 +55,5 @@ $BODY$;
 
 ALTER FUNCTION public.f_i_o_get_orders_unaccounted_qty()
     OWNER TO postgres;
+select * from f_i_o_get_orders_unaccounted_qty()
+where id_portfolio=11 and secid='GOOG-RM'

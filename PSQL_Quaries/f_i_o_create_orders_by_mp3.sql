@@ -69,7 +69,7 @@ END IF;
 RETURN QUERY
 INSERT INTO
   public.dorders (
-    generated,
+    genarated,
     type,
     secid,
     qty,

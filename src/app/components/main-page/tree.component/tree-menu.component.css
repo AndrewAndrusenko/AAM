@@ -1,5 +1,5 @@
   .mat-tree {
-    background-color:rgb(77, 76, 76);
+    background-color:rgb(67, 66, 66);
   }
 
   .mat-form-field {
@@ -19,6 +19,7 @@
   .mat-flat-button {
     font-size:large;
     color: rgb(255, 255, 255);
+    margin-left: 2.5%;
   }
   .SelectNode:hover{
     color: rgb(36, 36, 36);

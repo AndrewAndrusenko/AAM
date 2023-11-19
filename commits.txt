@@ -1,0 +1,18 @@
+11/15/2023
+Fixing, refactoring, fifo triggers and PL
+Allocation Trades UI : Bulk order and trade details linked to allocated trade via JSON&Dialog
+DB - FIFO Triggers: Fifo triggers to for creation updated. Added restriction to add back traded transaction in order to ensure fifo sequence ;
+DB && UI Creating acconting: Notification if there is no root depo account for given portfolio
+Fixed currency validator => When currency list is obtained, all subscribers are notified and they trigger currency fileds validation
+Trade form UI fixed issue with opening allocation tab and correctly requesting orders list for allocation adding status array for query
+Reduced queries to get first opened Accounting Day
+Entry Form UI: Fixed overdraft validator for entry created based on existed one. There was no need to exclude id of orginal entry from calculation
+11/16/2023
+Portfolio Tabs UI=> Created dynamic tab label. Portfolio code is included in the active tab label
+Tree menu UI => slightly changed design and blocks Trades&Orders, Accounting have been exluded from favorite as hardore fix inside intiation function
+Trade Table UI => default filter has been changed to multiFilter
+Entries, Orders, Allocation Table UI => default filter has been changed to multiFilter
+Orders Table => Fixed reloading and onChange behavior, taking into account table mode and the parent of the view
+Entries Table UI => Blocked UI to modify trades entries linked to FIFO calculation 
+11/17-18/2023
+Orders Creation DB function and UI => Blocked creation of new orders with oppositie direction to the exist ones. For examlple if for any given pair portfolio - secid of potential buy order there is a sell not-accounted order then DB function f_i_o_create_orders_by_mp will generate an error message. The main issue with implementing is to generate exception in postgres function and then use the same dataset one more time to insert new orders. Using SELECT INTO in WITH clause is forbidden and to avoid duplicate query the decesion is to create temp table to store portential new orders

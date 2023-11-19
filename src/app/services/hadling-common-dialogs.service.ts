@@ -39,7 +39,7 @@ export class HadlingCommonDialogsService {
         verticalPosition: this.verticalPosition
       }); 
     } else {
-      this.snack.open(action +': ' + result['detail'] ,'OK',{
+      this.snack.open(result['detail']? action +': ' + result['detail'] : action ,'OK',{
         panelClass: ['snackbar-success'], 
         verticalPosition: this.verticalPosition, 
         duration: duration

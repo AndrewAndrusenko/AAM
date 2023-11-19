@@ -8,16 +8,20 @@
   <div class="root-sidenav-content"
     [style.width]="sidenav.opened===true?  '80vw' : '99vw'">
     <button  title="Hide SideBar Menu" *ngIf="sidenav.opened===true"
-      style="height: 100%; background-color: rgb(108, 107, 107); width: 1.5%; border-radius: 5px; border-color:rgb(67, 79, 79);" (click)="sidenav.toggle()"> 
-      <mat-icon style=" color: black;" title="Hide SideBar Menu">keyboard_arrow_left</mat-icon>
-      <mat-icon style=" color: black;" title="Hide SideBar Menu">chevron_left</mat-icon>
-      <mat-icon style=" color: black;" title="Hide SideBar Menu">chevron_left</mat-icon>
+      style="height: 100%; background-color: rgb(44, 44, 44); width: 2%; border-radius: 5px; border-color:rgb(67, 79, 79);" 
+      
+      (click)="sidenav.toggle()"> 
+      <mat-icon style="justify-items:center; color: black;" title="Hide SideBar Menu">chevron_left</mat-icon>
+      <mat-icon style="align-items: center; color: black;" title="Hide SideBar Menu">chevron_left</mat-icon>
+      <mat-icon style="align-items: center; color: black;" title="Hide SideBar Menu">chevron_left</mat-icon>
     </button>
     <button  title="Show SideBar Menu"  *ngIf="sidenav.opened===false"
-      style="height: 100%; background-color: rgb(108, 107, 107); width: 1.5%; border-radius: 5px; border-color:rgb(67, 79, 79);" (click)="sidenav.toggle()"> 
-      <mat-icon style="margin-left: -8px; color: white;" title="Show SideBar Menu">chevron_right</mat-icon>
-      <mat-icon style="margin-left: -8px; color: white;" title="Show SideBar Menu">chevron_right</mat-icon>
-      <mat-icon style="margin-left: -8px; color: white;" title="Show SideBar Menu">chevron_right</mat-icon>
+      style="height: 100%; background-color:rgb(44, 44, 44); width: 1.8%; border-radius: 5px; border-color:rgb(67, 79, 79);"
+       (click)="sidenav.toggle()"> 
+      
+      <mat-icon style="align-items: center; color: white;" title="Show SideBar Menu">chevron_right</mat-icon>
+      <mat-icon style="align-items: center; color: white;" title="Show SideBar Menu">chevron_right</mat-icon>
+      <mat-icon style="align-items: center; color: white;" title="Show SideBar Menu">chevron_right</mat-icon>
     </button>
     <app-app-tabs [style.width]="sidenav.opened===true?  '80vw' : '99vw'"></app-app-tabs>
   </div>

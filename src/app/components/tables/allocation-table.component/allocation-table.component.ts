@@ -62,7 +62,6 @@ export class AppallocationTableComponent  implements AfterViewInit {
     dateRangeEnd: new FormControl<Date | null>(null),
   });
   dialogShowEntriesList: MatDialogRef<AppTableAccEntriesComponent>;
-  defaultFilterPredicate?: (data: any, filter: string) => boolean;
   multiFilter?: (data: any, filter: string) => boolean;
   activeTab:string='';
   tabsNames = ['Trades by Account','Allocation']
@@ -104,7 +103,6 @@ export class AppallocationTableComponent  implements AfterViewInit {
     this.subscriptions.unsubscribe();
   }
   ngOnInit(): void {
-    console.log('ngOnInit',);
     if (this.accessState !== 'full' || this.filters?.disabled_controls===true) {
       this.disabledControlElements = true;
       this.filters?.disabled_controls? delete this.filters.disabled_controls : null;
@@ -177,7 +175,10 @@ export class AppallocationTableComponent  implements AfterViewInit {
     }));
     this.multiFilter = (data: allocation, filter: string) => {
       let filter_array = filter.split(',').map(el=>[el,1]);
-      this.columnsToDisplay.forEach(col=>filter_array.forEach(fil=>fil[0].toString().toUpperCase()===(data[col])? fil[1]=0:null));
+      let colForFilter=this.columnsToDisplay.slice(1)
+      colForFilter.forEach(col=>filter_array.forEach(fil=>{
+        data[col]!==null && fil[0].toString().toUpperCase()===(data[col]).toString().toUpperCase()? fil[1]=0:null
+      }));
       return !filter || filter_array.reduce((acc,val)=>acc+Number(val[1]),0)===0;
     };
   }
