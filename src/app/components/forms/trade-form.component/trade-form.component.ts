@@ -20,6 +20,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { AppAllocationService } from 'src/app/services/allocation.service';
 import { ViewportScroller } from '@angular/common';
 import { MatTabGroup } from '@angular/material/tabs';
+import { arrayBuffer } from 'stream/consumers';
 @Component({
   selector: 'app-trade-modify-form',
   templateUrl: './trade-form.component.html',
@@ -115,6 +116,17 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
   }
   ngAfterContentInit (): void {
     this.tradeModifyForm.patchValue(this.data);
+    if (this.data['secidAutocolmplete']===true) { this.secidAutocolmplete(this.AutoCompService.fullInstrumentsLists.filter(el=>el[0]===this.data.secid)[0])/* 
+      let instrument = {name:'',security_type_name:'',faceunit:'',facevalue:0,secid:''}  ;
+      let secidArr = this.AutoCompService.fullInstrumentsLists.filter(el=>el[0]===this.data.secid)[0];
+      console.log('secidArr',secidArr);
+      instrument.name = secidArr[1];
+      instrument.security_type_name=secidArr[2];
+      instrument.faceunit = !Number.isNaN(+secidArr[3])? secidArr[3] :'810';
+      instrument.facevalue=Number(secidArr[4])
+      instrument.secid=secidArr[0];
+      this.secidChanged(instrument) */
+    };
     this.arraySubscrition.add(this.AllocationService.getDeletedAccounting().subscribe(deletedTransaction=>{
       this.statusDetailsHeader='Deleted Accounting details'
       this.statusDetails={...deletedTransaction};
@@ -210,8 +222,8 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
       this.dialogInstrumentTabletRef.close(); 
     });
   }  
-  secidAutocolmplete (secidDesc:string) {
-    let secidArr = secidDesc.split(' - ');
+  secidAutocolmplete (secidDesc:string|string[]) {
+    let secidArr = typeof(secidDesc)==='string'? secidDesc.split(' - '):secidDesc;
     let instrument = {name:'',security_type_name:'',faceunit:'',facevalue:0,secid:''}  ;
     instrument.name = secidArr[1];
     instrument.security_type_name=secidArr[2];
@@ -223,7 +235,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
   secidChanged (item:any) {
     this.tidinstrument.patchValue(item.secid)
     this.secid_name.patchValue(item.name+' ('+item.security_type_name+')')
-    this.price_type.patchValue(this.securityTypes.filter(el=>el['security_type_name']===item.security_type_name)[0]['price_type'])
+    this.securityTypes? this.price_type.patchValue(this.securityTypes.filter(el=>el['security_type_name']===item.security_type_name)[0]['price_type']):null;
     this.facevalue.patchValue(item.facevalue)
     this.faceunit.patchValue(item.faceunit)
     this.faceunit.value? this.faceunit_name.patchValue(this.AutoCompService.getCurrecyData(this.faceunit.value)['CurrencyCode']):null;

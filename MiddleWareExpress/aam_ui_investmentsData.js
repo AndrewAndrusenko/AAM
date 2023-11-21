@@ -164,7 +164,7 @@ async function fAccountEdit (request, response) {
 async function fGetPortfolioPositions (request,response) {
   let conditionsDic = {
     'secidList':' LOWER(secid) = ANY(${secidList}) ',
-    'deviation':' ABS(order_amount/notnull_npv*100) >${deviation}::numeric ',
+    'deviation':' ABS(order_amount/notnull_npv*100) > ${deviation}::numeric ',
     // 'notnull':' npv !=0 ',
     }
   let conditions =' WHERE'

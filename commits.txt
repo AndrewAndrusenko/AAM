@@ -14,5 +14,13 @@ Trade Table UI => default filter has been changed to multiFilter
 Entries, Orders, Allocation Table UI => default filter has been changed to multiFilter
 Orders Table => Fixed reloading and onChange behavior, taking into account table mode and the parent of the view
 Entries Table UI => Blocked UI to modify trades entries linked to FIFO calculation 
+--------------------------------------------------------------------------------------------
 11/17-18/2023
-Orders Creation DB function and UI => Blocked creation of new orders with oppositie direction to the exist ones. For examlple if for any given pair portfolio - secid of potential buy order there is a sell not-accounted order then DB function f_i_o_create_orders_by_mp will generate an error message. The main issue with implementing is to generate exception in postgres function and then use the same dataset one more time to insert new orders. Using SELECT INTO in WITH clause is forbidden and to avoid duplicate query the decesion is to create temp table to store portential new orders
+1|| Orders Creation DB function and UI => Blocked creation of new orders with oppositie direction to the exist ones. For examlple if for any given pair portfolio - secid of potential buy order there is a sell not-accounted order then DB function f_i_o_create_orders_by_mp will generate an error message. The main issue with implementing is to generate exception in postgres function and then use the same dataset one more time to insert new orders. Using SELECT INTO in WITH clause is forbidden and to avoid duplicate query the decesion is to create temp table to store portential new orders
+2|| Orders Table UI = > added status filter for retrived dataset and status filter for complex search
+11/20/2023
+1|| Entry Form UI: => Fixed unavaible data about expected balance in disabled form, view mode. Disable instruction was moved to ngAfterInt lifecycle hook. thus all form data has been initiated before disabling controls elements
+2|| Balance sheet UI:=> planned trunovers => Fixed DB function f_a_b_bcurrent_ledger_turnovers_balances_notclosed by adding missing '*' to properly calculate negative transactions 
+3|| Orders-Trades UI: => Option to book a new trade based on order data was added to orders table. Fixed creating bond trade. It was required to pass parameter to the trade form to run secidChange functions to add data regarding face value, faceunit and etc in order to calculate trade amount correctly
+4___ Creating testing data to calculate time weighted rate of return
+

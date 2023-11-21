@@ -1,10 +1,10 @@
--- FUNCTION: public.f_a_b_balancesheet_all()
+-- FUNCTION: public.f_a_b_balancesheet_total_closed_and_notclosed()
 
 DROP FUNCTION IF EXISTS public.f_a_b_balancesheet_total_closed_and_notclosed();
 
 CREATE OR REPLACE FUNCTION public.f_a_b_balancesheet_total_closed_and_notclosed(
 	)
-    RETURNS TABLE(portfolioname character varying, "accountNo" text, "accountId" numeric, "accountType" text, "datePreviousBalance" date, "dateBalance" timestamp without time zone, "openingBalance" numeric, "totalCredit" numeric, "totalDebit" numeric, "OutGoingBalance" numeric, "checkClosing" numeric, xacttypecode integer) 
+    RETURNS TABLE(portfolioname character varying, secid character varying,"accountNo" text, "accountId" numeric, "accountType" text, "datePreviousBalance" date, "dateBalance" timestamp without time zone, "openingBalance" numeric, "totalCredit" numeric, "totalDebit" numeric, "OutGoingBalance" numeric, "checkClosing" numeric, xacttypecode integer) 
     LANGUAGE 'plpgsql'
     COST 100
     VOLATILE PARALLEL UNSAFE
@@ -63,6 +63,7 @@ WITH balances AS (
 	  f_a_b_bcurrent_ledger_turnovers_balances_notclosed (first_opened_date)
 )
 SELECT dportfolios.portfolioname, 	  
+	  "bAccounts".secid,
 	  balances."accountNo",
 	  balances."accountId",
 	  balances."accountType",
@@ -76,7 +77,7 @@ SELECT dportfolios.portfolioname,
 	  balances."xacttypecode"
 FROM balances
 LEFT JOIN "bAccounts" ON balances."accountId"= "bAccounts"."accountId"
-LEFT JOIN dportfolios ON dportfolios.idportfolio= "bAccounts".idportfolio
+LEFT JOIN dportfolios ON (dportfolios.idportfolio= "bAccounts".idportfolio AND balances."accountType"='Account')
 ORDER BY
   balances."dateBalance"::TIMESTAMP WITHOUT TIME ZONE DESC;
 END;

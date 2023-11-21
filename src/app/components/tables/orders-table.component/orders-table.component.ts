@@ -23,6 +23,7 @@ import { indexDBService } from 'src/app/services/indexDB.service';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { number } from 'echarts';
+import { MatSelect } from '@angular/material/select';
 @Component({
   selector: 'app-orders-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -63,6 +64,7 @@ export class AppOrderTableComponent {
   public selection = new SelectionModel<orders>(true, []);
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
+  public dialogTradeModify: MatDialogRef<AppTradeModifyFormComponent>
   @ViewChild(MatCheckbox) showClientOrdersCB: MatCheckbox;
   @ViewChild('filterALL', { static: false }) filterALL: ElementRef;
   @ViewChild('allSelected', { static: false }) allSelected: MatCheckbox;
@@ -96,6 +98,7 @@ export class AppOrderTableComponent {
     private CommonDialogsService:HadlingCommonDialogsService,
     private indexDBServiceS:indexDBService,
     private AutoCompService:AtuoCompleteService,
+    private dialog: MatDialog,
     private fb:FormBuilder, 
   ) {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
@@ -133,7 +136,7 @@ export class AppOrderTableComponent {
     }
     switch (this.tableMode.join()) {
       case 'Parent':
-        this.TradeService.getOrderInformation(null).subscribe (ordersData => {
+        this.TradeService.getOrderInformation({status:['created','confirmed','in_execution','executed']}).subscribe (ordersData => {
           this.updateordersDataTable(ordersData);
         })
         this.AutoCompService.getSecidLists();
@@ -203,7 +206,7 @@ export class AppOrderTableComponent {
     }
   }
   submitQuery (reset:boolean=false,showSnackResult:boolean=true) {
-    let searchObj = reset?  {} : this.searchParametersFG.value;
+    let searchObj = reset?  {status:['created','confirmed','in_execution','executed']} : this.searchParametersFG.value;
     this.dataSource.data? this.dataSource.data = null : null;
     searchObj.secidList = [0,1].includes(this.instruments.length)&&this.instruments[0]==='ClearAll'? null : this.instruments.map(el=>el.toLocaleLowerCase())
     if (this.qty.value) {
@@ -229,11 +232,6 @@ export class AppOrderTableComponent {
     searchObj = {...searchObj, ...this.tdate.value? this.HandlingCommonTasksS.toDateRange(this.tdate, 'tdate') : null}
     this.TradeService.getOrderInformation(searchObj).subscribe(data => {
       this.updateordersDataTable(data)
-/*       this.fullOrdersSet = data;
-      this.dataSource  = new MatTableDataSource(data);
-      this.dataSource.paginator = this.paginator;
-      this.dataSource.sort = this.sort;
-      this.filters?.only_clients===true? null : this.dataSource.data = this.excludeOrdersWithParent(); */
       showSnackResult? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded '):null;
     });
   }
@@ -252,6 +250,7 @@ export class AppOrderTableComponent {
      })
     }
   }
+
   filterAllocatedOrders(allocOrders:number[]) {
     this.updateordersDataTable(this.dataSource.data.filter(el=>allocOrders.includes(el.id)));
   }
@@ -307,7 +306,7 @@ export class AppOrderTableComponent {
       this.TradeService.unmergerBulkOrder(bulkOrdersIds).subscribe(data => {
         this.CommonDialogsService.snackResultHandler(data,'Unmerge ')
         this.selection.clear();
-        data.hasOwnProperty('name')? null: this.submitQuery();
+        data.hasOwnProperty('name')? null: this.submitQuery(true);
       })
     } else {
       this.CommonDialogsService.snackResultHandler({name:'error',detail:'No orders have been selected'})
@@ -316,8 +315,38 @@ export class AppOrderTableComponent {
   createBulkOrders () {
     this.selection.selected.filter(el=>['created','confirmed'].includes(el.status)).length? this.TradeService.createBulkOrder(this.selection.selected.map(el=>el.ordertype==='Client'? Number(el.id):null)).subscribe(data => {
       this.selection.clear();
-      this.submitQuery();
+      this.submitQuery(true);
     }):this.CommonDialogsService.snackResultHandler({name:'error',detail:'Confirmed or created orders have not been selected'},'CreateBulkOrder');
+  }
+  openTradeForm (order:orders) {
+    console.log('order',order);
+    console.log('order',order.price_type.toString()==="2",order.price_type);
+    let mappedData = [
+      {trtype:order.type},
+      {tidinstrument:order.secid},
+      {id_price_currency:order.idcurrency},
+      {id_settlement_currency:order.idcurrency},
+      {secidAutocolmplete:false}
+    ];
+    order.price_type.toString()==="2"? mappedData[4].secidAutocolmplete=true:null;
+    Object.assign(order, ...mappedData);
+    console.log('',...mappedData);
+    this.dialogTradeModify = this.dialog.open (AppTradeModifyFormComponent,{minHeight:'600px', minWidth:'60vw', maxWidth:'80vw', maxHeight: '90vh'})
+    this.dialogTradeModify.componentInstance.action = 'Create_Example';
+    this.dialogTradeModify.componentInstance.tabIndex=0;
+    this.dialogTradeModify.componentInstance.data = order
+  }
+  toggleAllStatuses (statusSelect:MatSelect) {
+    statusSelect.value.length===this.orderStatuses.length? statusSelect.value=[] : statusSelect.value=['all',...this.orderStatuses.map(el=>el.status_code,0)]
+  }
+  filterByStatus (statuses:MatSelect) {
+    let statusArray=statuses.value
+    console.log('',statusArray.length,this.orderStatuses.length,this.showClientOrdersCB.checked);
+    statusArray.length===this.orderStatuses.length+1? this.dataSource.data = this.fullOrdersSet :  this.dataSource.data = this.fullOrdersSet.filter(el=>statusArray.includes(el.status))
+    this.fullfilteredOrdersSet = this.dataSource.data;
+    this.showClientOrdersCB.checked===false? this.dataSource.data = this.excludeOrdersWithParent():null;
+    this.showClientOrdersCB.checked===true? this.showClientOrders(this.showClientOrdersCB.checked):null;
+    statuses.close();
   }
   applyOrderTypeFilter (value:string){
     this.dataSource.data = value!=='All'? this.fullOrdersSet.filter(el=>value==='Bulk'? el.ordertype===value:el.ordertype===value&&!el.parent_order) : this.fullOrdersSet.filter(order=>!order.parent_order)
@@ -327,10 +356,12 @@ export class AppOrderTableComponent {
     return childOrders;
   }
   excludeOrdersWithParent ():orders[] {
+    console.log('excludeOrdersWithParent',);
     this.fullfilteredOrdersSet = this.dataSource.data;
     return this.dataSource.data.filter(order=>!order.parent_order)
   }
   showClientOrders (show:boolean) {
+    console.log('showClientOrders',);
     this.disabledControlElements=show;
     this.dataSource.data = show? this.fullfilteredOrdersSet.filter(order=>order.ordertype==='Client') : this.fullfilteredOrdersSet.filter(order=>!order.parent_order)
   }

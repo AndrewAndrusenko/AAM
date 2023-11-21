@@ -73,15 +73,14 @@ export class AppTableAccEntriesComponent implements OnInit {
   investmentNodeColor=investmentNodeColor;
   activeTab:string='';
   tabsNames = ['Transactions List']
-  @HostListener('document:keydown', ['$event'])
   multiFilter?: (data: any, filter: string) => boolean;
 
-  handleKeyboardEvent(event: KeyboardEvent) { 
+/*   handleKeyboardEvent(event: KeyboardEvent) { 
     if (this.tabsNames.includes(this.activeTab)){
       event.altKey&&event.key==='r'? this.submitQuery(false,true):null;
       event.altKey&&event.key==='w'? this.exportToExcel():null;
     }
-  }
+  } */
   constructor(
     private TreeMenuSevice: TreeMenuSevice,
     private AccountingDataService:AppAccountingService, 
@@ -201,7 +200,6 @@ export class AppTableAccEntriesComponent implements OnInit {
         this.dialogRef.componentInstance.data = {t_XactTypeCode:0, d_transactionType:'LL'} 
       break;
       case 'View':
-        this.dialogRef.componentInstance.entryModifyForm.disable()
       break;
     }
   }

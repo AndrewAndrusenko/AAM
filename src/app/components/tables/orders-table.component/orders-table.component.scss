@@ -1,5 +1,8 @@
-.mat-select-panel {
-  max-height: 80vh !important;
+::ng-deep.mat-select-panel {
+  max-height: 90vh !important;
+}
+.statusSelect {
+  max-height: 80vh;
 }
 .headers-align  .mat-expansion-panel-header {
   background-color: #504f4f;

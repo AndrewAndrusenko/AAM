@@ -8,6 +8,21 @@
         <mat-option [value]="'Client'">Client</mat-option>
       </mat-select>
     </mat-form-field>
+    <mat-form-field class = "filterField" *ngIf="tableMode.includes('Parent')&&tableMode.length===1"
+    style="width: 10%;"> 
+      <mat-label class="whiteTextFilter">Order Status</mat-label>
+      <mat-select [panelClass]="'statusSelect'" color="accent" #statuses multiple  >
+        <button mat-button style="font-size: large;width: 90%; color: rgb(247, 244, 244); background-color: rgb(148, 66, 66); margin-left: 5%; margin-top: 3%; border-radius: 5%;"
+          (click)="filterByStatus(statuses)">
+          <mat-icon>filter_alt</mat-icon>
+          Filter</button>
+        <mat-option [value]="'all'" (click)="toggleAllStatuses(statuses);
+        ">All</mat-option>
+        <ng-container *ngFor="let status of orderStatuses" style="min-height: 200px;">
+          <mat-option [value]="status.status_code">{{status.status_code}}</mat-option>
+        </ng-container>
+      </mat-select>
+    </mat-form-field>
   <ng-container  *ngIf="UI_min">  <!-- UI min Block -->
     <mat-form-field class = "filterField"  style="font-size: 22px; width: 15%;" title="Filter All columns" >
       <mat-label class="whiteTextFilter">Search (all columns)...</mat-label>
@@ -54,13 +69,11 @@
       Delete Client Orders 
       <mat-icon matSuffix>delete</mat-icon>
       </button>
-      <mat-checkbox style="font-size:larger; margin-left: 1%;" #showClientOrdersCB
-      (change)="showClientOrders($event.checked)">
-        Show all client orders
-      </mat-checkbox>
     </ng-container>
-
-
+    <mat-checkbox style="font-size:larger; margin-left: 1%;" #showClientOrdersCB
+    (change)="showClientOrders($event.checked)">
+      Show all client orders
+    </mat-checkbox>
   </ng-container>
   <ng-container  *ngIf="tableMode.includes('Allocation')">  <!-- Allocation Mode Block -->
   </ng-container>
@@ -129,6 +142,15 @@
         <mat-error *ngIf="price?.errors?.['incorrectRange']">
           Incorrect Range
         </mat-error>
+      </mat-form-field>
+      <mat-form-field class="search-filed" style="width: 10%;"> <!-- Status Filter -->
+        <mat-select placeholder="Order Status" formControlName="status"
+          [panelClass]="'statusSelect'" color="accent" #statuses multiple  >
+          <mat-option [value]="'all'" (click)="toggleAllStatuses(statuses);">All</mat-option>
+          <ng-container *ngFor="let status of orderStatuses" style="min-height: 200px;">
+            <mat-option [value]="status.status_code">{{status.status_code}}</mat-option>
+          </ng-container>
+        </mat-select>
       </mat-form-field>
     </span>
     <p style="margin-top: 1%;">
@@ -228,7 +250,15 @@
                   expandAllowed=false;
                   unmergeBulk([element['id']])">
                   <mat-icon >call_split</mat-icon>
-              </button>
+                </button>
+                <button  
+                  mat-icon-button color="accent"
+                  matTooltip="Book Trade"
+                  (click)="
+                  expandAllowed=false;
+                  openTradeForm(element)">
+                  <mat-icon >file_copy</mat-icon>
+                </button>
               </ng-container>
             </p>
           </span>

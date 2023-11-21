@@ -1,8 +1,8 @@
 -- FUNCTION: public.f_i_get_market_quotes_for_portfolios(text[], date)
 
--- DROP FUNCTION IF EXISTS public.f_i_get_market_quotes_for_portfolios(text[], date);
+-- DROP FUNCTION IF EXISTS public.f_i_marks(text[], date);
 
-CREATE OR REPLACE FUNCTION public.f_i_get_market_quotes_for_portfolios(
+CREATE OR REPLACE FUNCTION public.f_i_marks(
 	p_secid_list text[],
 	p_report_date date)
     RETURNS TABLE(tradedate date, boardid character varying, is_primary numeric, board_title character varying, secid character varying, close numeric, currency_code numeric, percentprice boolean) 
@@ -55,5 +55,5 @@ WHERE
 END;
 $BODY$;
 
-ALTER FUNCTION public.f_i_get_market_quotes_for_portfolios(text[], date)
+ALTER FUNCTION public.f_i_marks(text[], date)
     OWNER TO postgres;

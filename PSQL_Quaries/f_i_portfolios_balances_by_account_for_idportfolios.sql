@@ -1,13 +1,11 @@
 -- FUNCTION: public.f_i_portfolios_balances_by_account_for_idportfolios(bigint[], date)
 
-DROP FUNCTION IF EXISTS public.f_i_portfolios_balances_by_account_for_idportfolios(bigint[], date);
+-- DROP FUNCTION IF EXISTS public.f_i_portfolios_balances_by_account_for_idportfolios(bigint[], date);
 
 CREATE OR REPLACE FUNCTION public.f_i_portfolios_balances_by_account_for_idportfolios(
 	p_idportfolios bigint[],
 	p_report_date date)
-    RETURNS TABLE(idportfolio integer, "accountNo" character varying, portfolioname character varying, 
-				  instrument character varying, positon_type text, last_closed_day_with_transactions date,  last_closed_balance numeric,
-				  signed_turnover numeric, current_balance numeric, account_currency numeric) 
+    RETURNS TABLE(idportfolio integer, "accountNo" character varying, portfolioname character varying, instrument character varying, positon_type text, last_closed_day_with_transactions date, last_closed_balance numeric, signed_turnover numeric, current_balance numeric, account_currency numeric) 
     LANGUAGE 'plpgsql'
     COST 100
     VOLATILE PARALLEL UNSAFE
@@ -27,11 +25,11 @@ WITH current_balances AS (
 	  "bAccountStatement"."closingBalance" as last_closed_balance,
 	  CASE
 		WHEN "bAccounts".secid NOTNULL THEN "bAccounts".secid
-		ELSE 'money'
+		ELSE 'MONEY'
 	  END AS "instrument",
 		CASE
 		WHEN "bAccounts".secid NOTNULL THEN 'investment'
-		ELSE 'money'
+		ELSE 'MONEY'
 	  END AS "positon_type",
 	  "bAccountStatement"."dateAcc" AS last_closed_day_with_transactions,
 	  "bAccounts"."currencyCode" as account_currency
