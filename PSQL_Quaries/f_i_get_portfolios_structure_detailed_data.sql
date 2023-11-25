@@ -1,6 +1,6 @@
 -- FUNCTION: public.f_i_get_portfolios_structure_detailed_data(text[], date, integer)
 
-DROP FUNCTION IF EXISTS public.f_i_get_portfolios_structure_detailed_data(text[], date, integer);
+-- DROP FUNCTION IF EXISTS public.f_i_get_portfolios_structure_detailed_data(text[], date, integer);
 
 CREATE OR REPLACE FUNCTION public.f_i_get_portfolios_structure_detailed_data(
 	p_idportfolio_codes text[],
@@ -74,8 +74,8 @@ WITH
     SELECT DISTINCT full_portfolio.secid FROM full_portfolio
   ),
   mtm_data AS (
-    SELECT DISTINCT ON (secid) * 
-	  FROM f_i_get_market_quotes_for_portfolios ((SELECT ARRAY_AGG(instrument_list.secid) FROM instrument_list),p_report_date)
+    SELECT  * 
+	  FROM f_i_get_market_quotes_for_portfolios1 ((SELECT ARRAY_AGG(instrument_list.secid) FROM instrument_list),p_report_date)
     ORDER BY secid, is_primary DESC
   ),
   accured_interest_data AS (

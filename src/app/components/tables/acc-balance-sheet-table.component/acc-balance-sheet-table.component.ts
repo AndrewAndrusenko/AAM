@@ -195,9 +195,7 @@ export class AppTableBalanceSheetComponent   {
     })
   }
   async checkBalance (dateBalance: string,showSnackMsg=true) {
-    this.totalPassive = 0;
-    this.totalActive = 0;
-    this.totalDebit = 0;
+
     this.searchParametersFG.reset();
     this.accounts=[];
     this.gRange.get('dateRangeStart').setValue(new Date(dateBalance));  
@@ -206,10 +204,16 @@ export class AppTableBalanceSheetComponent   {
      this.gRange.get('dateRangeStart').setValue(null);  
      this.gRange.get('dateRangeEnd').setValue(null);
      this.AccountingDataService.GetbAccountingSumTransactionPerDate(dateBalance,'SumTransactionPerDate').subscribe ((totalTransaction) => this.entriesTotal = totalTransaction[0].amountTransaction)
+     this.totalPassive = 0;
+     this.totalActive = 0;
+     this.totalDebit = 0;
      this.dataSource.data.forEach ((el) => {
       this.totalDebit += Number(el.totalDebit);
-      Number(el['xacttypecode']) == 1 ? this.totalPassive = this.totalPassive + Number(el.OutGoingBalance): this.totalActive =this.totalActive + Number(el.OutGoingBalance);
-     })
+      Number(el['xacttypecode']) == 1 ? this.totalPassive = this.totalPassive + Number(el.OutGoingBalance): this.totalActive =this.totalActive + Number(+el.OutGoingBalance);
+     });
+     this.totalActive = Math.round(this.totalActive*100)/100
+     this.totalPassive = Math.round(this.totalPassive*100)/100
+     this.totalDebit = Math.round(this.totalDebit*100)/100
   }
   openBalance () {
     this.CommonDialogsService.confirmDialog('Open date: ' + new Date(this.LastClosedDate).toLocaleDateString() ).subscribe(action => {
@@ -316,7 +320,6 @@ export class AppTableBalanceSheetComponent   {
       this.entryTypes.patchValue([]);
     }
   }
-
   exportToExcel() {
     const fileName = "balancesData.xlsx";
     let data = this.dataSource.data.map( (row,ind) =>({

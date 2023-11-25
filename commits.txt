@@ -23,4 +23,28 @@ Entries Table UI => Blocked UI to modify trades entries linked to FIFO calculati
 2|| Balance sheet UI:=> planned trunovers => Fixed DB function f_a_b_bcurrent_ledger_turnovers_balances_notclosed by adding missing '*' to properly calculate negative transactions 
 3|| Orders-Trades UI: => Option to book a new trade based on order data was added to orders table. Fixed creating bond trade. It was required to pass parameter to the trade form to run secidChange functions to add data regarding face value, faceunit and etc in order to calculate trade amount correctly
 4___ Creating testing data to calculate time weighted rate of return
+--------------------------------------------------------------------------------------------
 
+11/21/2023
+1|| Portfolios NPV historical data to calculate time weighed roi and build chart of portfolio value dynamic change => DB function created => Using balances dynamic data from function f_a_b_balancesheet_total_closed_and_notclosed() for given period we calculate portfolio npv for every date. Balances data from last closed acconting date (or from the start of the period if its closed date) to the end period copied to the temp table and is used to calculate portfolio positions (using lateral join) for every date from the period. Then using lateral join 
+we get closest market price for every position
+2|| Market Chart UI => restored sorting order for retrived market data to build chart correctly
+3|| Allocation Table (Portfolio Trades Tab) => For portfolio trades tab modying functions are closed like creating/deleting accounting or deletion of trade
+
+11/22/23
+1|| TW roi
+2|| Opening date for new depo accounts. Fist opened accounting date is used as opening date for new depo accounts
+3|| Balances closed till november and reconciled. Difference rounded to 2 digts
+4|| UI Accounts form => added date opeining for modying and viewing
+5|| Opening date updated according to the first entry transaction date by the given account
+
+11/23/23
+1|| AutoCompleteService created functionality to notify components about arriving of secid autocomplete list 
+2|| Account Form UI => Added updating of secid validity on receiving notification that secidList is ready
+3|| Account Form UI => Implemented control element to modify date opening of account and modify backend accordingly
+4|| Martket Prices DB function refactored (using lateral join and etc)=> As a result portfolio structure function was speeded up by 40%
+
+11/24/23
+1|| DB f_i_get_npv_dynamic_with_performance_data.sql => refactoring
+2|| DB created function f_i_get_accured_interest_for_period_secidlist() to fetch coupon periods for every date with report period to calculate npv
+3|| DB created function f_i_get_cross_ratesfor_period_currencylist() to fetch cross rate for every date with report period to calculate npv

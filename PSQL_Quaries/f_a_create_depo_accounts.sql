@@ -1,11 +1,10 @@
 -- FUNCTION: public.f_create_depo_accounts(bigint[], text)
 
-DROP FUNCTION IF EXISTS public.f_a_create_depo_accounts(bigint[], text,date);
+-- DROP FUNCTION IF EXISTS public.f_a_create_depo_accounts(bigint[], text);
 
 CREATE OR REPLACE FUNCTION public.f_a_create_depo_accounts(
 	p_portfolio_ids bigint[],
-	p_secid_for_depo text,
-	p_transaction_date date)
+	p_secid_for_depo text)
     RETURNS SETOF "bAccounts" 
     LANGUAGE 'plpgsql'
     COST 100
@@ -16,7 +15,9 @@ AS $BODY$
 DECLARE
 portfolios_without_root_depo text[];
 qty_portfolios_without_root_depo numeric;
+first_accounting_date date;
 BEGIN
+SELECT  "FirstOpenedDate" INTO first_accounting_date FROM public."gAppMainParams";
 SELECT
 	ARRAY_AGG(portfolioname) INTO portfolios_without_root_depo
 FROM
@@ -55,7 +56,7 @@ WITH "newDepoAccounts" AS
 			"currencyCode",
 			"entityTypeCode",
 			idportfolio,
-			p_transaction_date::TIMESTAMP WITHOUT TIME ZONE AS "dateOpening",
+			first_accounting_date::TIMESTAMP WITHOUT TIME ZONE AS "dateOpening",
 			p_secid_for_depo AS SECID
 		FROM "bAccounts"
 		WHERE "accountTypeExt" = 13
@@ -66,5 +67,5 @@ FROM "newDepoAccounts";
 END;
 $BODY$;
 
-ALTER FUNCTION public.f_a_create_depo_accounts(bigint[], text, date)
+ALTER FUNCTION public.f_a_create_depo_accounts(bigint[], text)
     OWNER TO postgres;

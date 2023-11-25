@@ -1,5 +1,5 @@
 <ng-container *ngIf="accessState!=='none'" >
-  <ng-container  *ngIf="tableMode.join()==='Parent'">  <!-- Parent Mode Block -->
+  <ng-container  *ngIf="tableMode.includes('Parent')">  <!-- Parent Mode Block -->
     <mat-form-field style="width: 20%;"class = "filterField"  title="Filter All columns">
       <mat-label class="whiteTextFilter">Search (all columns)...</mat-label>
       <input 

@@ -74,6 +74,7 @@ export class AppTableAccAccountsComponent  implements OnInit {
     })
   }
   ngOnInit(): void {
+    
     this.updateAccountsData(this.action)
   }
   async submitQuery () {

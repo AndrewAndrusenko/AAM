@@ -30,6 +30,7 @@
   <mat-tab label="Trades" aria-label="Trades"> 
     <app-allocation-table
     [rowsPerPages]="15"
+    [tableMode]="['Parent','Portfolio']"
     [filters]="{portfolioname:[messageReceived.name]}" >
     </app-allocation-table>
   </mat-tab>

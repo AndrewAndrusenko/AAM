@@ -9,15 +9,15 @@ pg.types.setTypeParser(1114, function(stringValue) {
   return stringValue;  
 });
 async function fUpdateAccountAccounting (request, response) {
-  let fields =  ['accountNo','accountTypeExt','Information','clientId','currencyCode','entityTypeCode','idportfolio','secid']
-  db_common_api.fUpdateTableDB ('bAccounts',fields,'accountId',request, response)
+  let fields =  ['accountNo','accountTypeExt','Information','clientId','currencyCode','entityTypeCode','idportfolio','secid','dateOpening']
+  db_common_api.fUpdateTableDB ('bAccounts',fields,'accountId',request, response,['dateOpening'])
 }
 async function fUpdateLedgerAccountAccounting (request, response) {
   let fields =  ['accountTypeID', 'name', 'clientID', 'entityTypeCode', 'ledgerNo', 'currecyCode', 'ledgerNoCptyCode', 'ledgerNoTrade', 'externalAccountNo']
   db_common_api.fUpdateTableDB ('bLedger',fields,'ledgerNoId',request, response)
 }
 async function fCreateDepoSubAccounts (request,response) {
-  let sql = "SELECT * FROM f_create_depo_accounts (ARRAY[${portfolioIds}],${secid});";
+  let sql = "SELECT * FROM f_a_create_depo_accounts (ARRAY[${portfolioIds}],${secid});";
   sql = pgp.as.format(sql,request.body);
   db_common_api.queryExecute(sql,response,undefined,'fCreateDepoSubAccounts');
 }
@@ -67,7 +67,7 @@ async function fGetAccountingData (request,response) {
       '"bAccounts"."idportfolio", clientname AS d_clientname, dportfolios.portfolioname AS "d_portfolioCode", ' +
       '"bcAccountType_Ext"."actCodeShort" ||\': \' || "bcAccountType_Ext"."description" as "d_Account_Type", ' +
       '"bcAccountType_Ext"."actCodeShort" as "d_accountType", "bcAccountType_Ext"."description" as d_accTypeDescription, ' +
-      '"bcEnityType"."entityTypeCode" as d_entityTypeCode, "bcEnityType"."name" as d_entityTypeDescription,"bcAccountType_Ext"."xActTypeCode"  as "d_APTypeCodeAccount", 0 as action '+
+      '"bcEnityType"."entityTypeCode" as d_entityTypeCode, "bcEnityType"."name" as d_entityTypeDescription,"bcAccountType_Ext"."xActTypeCode"  as "d_APTypeCodeAccount", 0 as action,"dateOpening"::timestamp without time zone '+
       'FROM public."bAccounts" '+
       'LEFT JOIN dclients ON "bAccounts"."clientId" = dclients.idclient ' +
       'LEFT JOIN dportfolios ON dportfolios.idportfolio = "bAccounts"."idportfolio" ' +

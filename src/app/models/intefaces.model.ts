@@ -220,7 +220,8 @@ export interface bAccounts {
   secid:number,
   entityTypeCode: number, 
   accountId: number,
-  idportfolio: number
+  idportfolio: number,
+  dateOpening: Date
 }
 export interface bAccountsList extends bAccounts {
   d_clientname: string, 

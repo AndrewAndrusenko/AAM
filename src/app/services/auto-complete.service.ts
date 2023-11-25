@@ -17,6 +17,7 @@ export class AtuoCompleteService {
   private subSecID = new Subject ();
   private subCurrencyList = new Subject ();
   private subCurrencyListReady = new Subject<boolean> ();
+  private subSecIdListReady = new Subject<boolean> ();
   constructor(
     private indexDBServiceS: indexDBService
   ) { }
@@ -37,6 +38,7 @@ export class AtuoCompleteService {
     ).subscribe(data => {
       this.fullInstrumentsLists = data['data'];
       this.sendSecIdList(this.fullInstrumentsLists);
+      this.sendSecIdListReady(true);
     });
   }
   createCurrencypipe (){
@@ -93,6 +95,12 @@ export class AtuoCompleteService {
   }
   recieveCurrencyListReady(): Observable<boolean> {
     return this.subCurrencyListReady.asObservable();
+  }
+  sendSecIdListReady(ready:boolean) {
+    this.subSecIdListReady.next(ready);
+  }
+  recieveSecIdListReady(): Observable<boolean> {
+    return this.subSecIdListReady.asObservable();
   }
 
 }

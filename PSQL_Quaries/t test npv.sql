@@ -1,0 +1,1 @@
+select * from f_i_get_npv_dynamic_with_performance_data1( Array(select dportfolios.portfolioname from dportfolios),'10/01/2023','11/23/2023')

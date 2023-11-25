@@ -128,12 +128,13 @@ async function fgetMarketData (request,response){//Get market data such as marke
         'FROM public.t_marketstack_eod '+
         'left join "aInstrumentsCodes" on "aInstrumentsCodes".code=t_marketstack_eod.symbol '+
         'where "aInstrumentsCodes".mapcode = \'msFS\'  ';
-        query.text +=conditionsmsFS.slice(0,-5)+';';
-        // query.text += ' ORDER BY ${sorting:raw} LIMIT ${rowslimit:raw};'
+        query.text +=conditionsmsFS.slice(0,-5);
+        query.text += request.query.hasOwnProperty('sorting')? ' ORDER BY ${sorting:raw} LIMIT ${rowslimit:raw};' : ';';
       }
     break;
   }
   sql = pgp.as.format(query.text,request.query);
+  console.log('',sql);
   db_common_api.queryExecute(sql,response,undefined,'fgetMarketData')
 }
 async function fgetMarketDataSources (request,response) {//Get market sources. Needs to be moved to General data function

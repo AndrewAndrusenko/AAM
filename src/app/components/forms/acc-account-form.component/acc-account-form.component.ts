@@ -57,6 +57,7 @@ export class AppAccAccountModifyFormComponent implements OnInit {
     this.accountModifyForm = this.fb.group ({
       accountNo: [null, {validators: [Validators.required], updateOn:'blur' } ],   
       accountTypeExt:[null, [Validators.required]] ,  
+      dateOpening:[new Date(), [Validators.required]] ,  
       Information: {value:null, disabled: false},  
       clientId: {value:null, disabled: true},  
       currencyCode: [null],  
@@ -84,8 +85,13 @@ export class AppAccAccountModifyFormComponent implements OnInit {
       d_APTypeCodeAccount: {value:null, disabled: false},
       d_APType: {value:null, disabled: true},
     })
+    this.subscriptions.add(this.AutoCompService.recieveCurrencyListReady().subscribe(()=>this.currencyCode.updateValueAndValidity()));
+    this.subscriptions.add(this.AutoCompService.recieveSecIdListReady().subscribe(()=>this.secid.updateValueAndValidity()));
+
   }
   ngOnInit(): void {
+    this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate);
+    console.log('acc',this.data);
     (this.aType == 1)? this.accountLedgerModifyForm.patchValue(this.data): this.accountModifyForm.patchValue(this.data);
     this.AutoCompService.getCurrencyList();
     this.filteredCurrenciesList = this.currencyCode.valueChanges.pipe (
@@ -130,8 +136,6 @@ export class AppAccAccountModifyFormComponent implements OnInit {
     } else {
        this.currencyCode.setValidators(this.AutoCompService.currencyValirator());
     }
-    this.subscriptions.add(this.AutoCompService.recieveCurrencyListReady().subscribe(()=>this.currencyCode.updateValueAndValidity()));
-
   }
   accountTypeChanges (){
     this.setValidators();
@@ -215,6 +219,7 @@ export class AppAccAccountModifyFormComponent implements OnInit {
   get  clientId ()   {return this.accountModifyForm.get('clientId') } 
   get  currencyCode ()   {return this.accountModifyForm.get('currencyCode') } 
   get  secid ()   {return this.accountModifyForm.get('secid') } 
+  get  dateOpening ()   {return this.accountModifyForm.get('dateOpening') } 
   get  entityTypeCode ()   {return this.accountModifyForm.get('entityTypeCode') } 
   get  accountId ()   {return this.accountModifyForm.get('accountId') } 
   get  d_clientname ()   {return this.accountModifyForm.get('d_clientname') } 

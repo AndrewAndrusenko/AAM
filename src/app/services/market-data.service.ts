@@ -135,7 +135,7 @@ export class AppMarketDataService {
   moveMarketStackToMainTable (dateToMove:string) :Observable<{o_rows_moved:number}[]> {
     return this.http.post <{o_rows_moved:number}[]> ('/api/AAM/MD/importData/',{date_to_move:dateToMove,gloabalSource:'MScomMoveToMainTable'})
   }
-  getMarketData (rowslimit:number=1000000,sorting:string=' tradedate DESC', searchParameters?:any):Observable<marketData[]> {
+  getMarketData (rowslimit:number=1000000,sorting:string=null, searchParameters?:any):Observable<marketData[]> {
     let params = {};
     (searchParameters !== null) ?  params = {...params,...searchParameters}: null;
     (rowslimit !== null) ?  Object.assign(params,{'rowslimit':rowslimit}): null;

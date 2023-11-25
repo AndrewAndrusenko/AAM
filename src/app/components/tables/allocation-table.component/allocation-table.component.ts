@@ -127,6 +127,9 @@ export class AppallocationTableComponent  implements AfterViewInit {
       case 'Orders,Child':
         searchObj={id_bulk_order:this.filters.id_bulk_order};
       break;
+      case 'Parent,Portfolio':
+        this.disabledControlElements=true;
+      break;
     }
     let getAllocationData$ = of(this.disabledControlElements);
     getAllocationData$.pipe (
