@@ -186,7 +186,6 @@ export class AppallocationTableComponent  implements AfterViewInit {
     };
   }
   async initialFilterOfDataSource (filter:any) {
-    console.log('alloc initialFilterOfDataSource',);
     this.filters?.disabled_controls? delete this.filters.disabled_controls : null;
     if (filter.mp_name) {
       let mpList = await this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios');
@@ -202,7 +201,6 @@ export class AppallocationTableComponent  implements AfterViewInit {
     }
   }
   ngOnChanges(changes: SimpleChanges) {
-    console.log('ngOnChanges',changes);
     changes?.['filters']?.currentValue!==undefined&&this.fullDataSource!==undefined? this.initialFilterOfDataSource (changes['filters'].currentValue) : null;
   }
   createAccountingForAllocation () {

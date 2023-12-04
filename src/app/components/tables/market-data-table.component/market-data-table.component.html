@@ -50,14 +50,14 @@
       (click)="getMarketData()">
       Get matket data 
     </button>
-    <mat-form-field style="margin-right: 2%; width: 12%;  color: rgb(44, 43, 43);" title="dateForLoadingPrices">
+    <mat-form-field style="margin-right: 2%; width: 12%; " title="dateForLoadingPrices">
       <input matInput formControlName = "dateForLoadingPrices" [matDatepicker]="dateForMarketData" placeholder="Date to upload">
       <mat-datepicker-toggle matSuffix [for]="dateForMarketData"></mat-datepicker-toggle>
       <mat-datepicker  #dateForMarketData></mat-datepicker>
     </mat-form-field> 
     <mat-slide-toggle #deleteOldMarketData formControlName="overwritingCurrentData"
       style="font-size:100%; letter-spacing: .05rem; margin-left: 2%;"
-      [style.color]="deleteOldMarketData.checked ? 'red':'rgb(44, 43, 43)' "
+      [style.color]="deleteOldMarketData.checked ? 'red':'default' "
       >Replace current market data <br>{{deleteOldMarketData.checked? 'allowed!':'forbidden'}}
     </mat-slide-toggle>
     <div *ngIf="loadingDataState.State==='Success'||loadingDataState.State==='terminated'" title="loadingDataState">
@@ -67,7 +67,7 @@
       <pre  style="font-size: 18px;">{{loadedMarketData | json}}</pre>
     </div>
     <span style="display: flex; " title="marketSource-section">
-      <section class="marketSource-section" style="color: rgb(44, 43, 43);"
+      <section class="marketSource-section" 
         *ngFor="let marketSource of marketSources;let i=index" >
         <span class="example-list-section" >
           <mat-checkbox  class="marketSource-margin"

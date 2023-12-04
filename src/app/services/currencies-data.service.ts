@@ -13,9 +13,13 @@ export class CurrenciesDataService {
   convertAmount (amount:string,base:string, quote:string, date: string) {
     this.getCurrencyRate(base,quote,date).subscribe(data => console.log('rate',data))
    }
-   getCurrencyRate (base:string, quote:string, date: string):Observable<currencyRate> {
+   getCurrencyRate (base:string, quote:string, date: string):Observable<currencyRate[]> {
      const params = {base:base,quote:quote,date:date,dataType:'getCurrencyRate'}
-     return this.http.get <currencyRate> ('api/AAM/getCurrencyData/',{params:params})
+     return this.http.get <currencyRate[]> ('api/AAM/getCurrencyData/',{params:params})
+   }
+   getCurrencyCrossRate (base:string, quote:string, date: string,cross:string):Observable<currencyRate[]> {
+     const params = {base:base,quote:quote,date:date,dataType:'getCurrencyCrossRate',cross:cross}
+     return this.http.get <currencyRate[]> ('api/AAM/getCurrencyData/',{params:params})
    }
    getCurrencyRatesList (searchParameters?:any):Observable<currencyRateList[]> {
     let params = {dataType:'getCurrencyRatesList'};

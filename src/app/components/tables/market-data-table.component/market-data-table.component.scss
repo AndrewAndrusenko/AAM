@@ -18,16 +18,18 @@ ul {
 .first-expansion .mat-expansion-panel-header-description {
   justify-content: space-between;
   align-items: center;
-  color:rgb(19, 55, 132);
+  // color:rgb(19, 55, 132);
   font-size: 18px;
 }
 .first-expansion {
-  background-color:  #807f7f;
+  // background-color:  #807f7f;
+  color: rgb(166, 163, 163);
+
 }
 .first-expansion  .mat-expansion-panel-header-title {
   justify-content: space-between;
   align-items: center;
-  color: rgb(44, 43, 43);
+  color: rgb(166, 163, 163);
   font-size: 20px;
 }
 .headers-align  .mat-expansion-panel-header {

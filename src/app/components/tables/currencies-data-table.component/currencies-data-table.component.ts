@@ -31,8 +31,8 @@ export class AppTableCurrenciesDataComponent  implements AfterViewInit {
   @Input() FormMode:string = 'Full'
   loadMarketData: FormGroup;
   marketSources:marketDataSources[] =  [];
-  columnsToDisplay=['id','pair', 'base_code','base_iso','quote_code','quote_iso','rate','rate_date','rate_type','nominal','sourcecode'];
-  columnsHeaderToDisplay=['ID','Pair','Base1','Base2','Quote1','Quote2','Rate','Date','RateType','Ratio','Source'];
+  columnsToDisplay=['id','pair', 'base_code','base_iso','quote_code','quote_iso','rate','inderect_rate','rate_date','rate_type','nominal','sourcecode'];
+  columnsHeaderToDisplay=['ID','Pair','Base1','Base2','Quote1','Quote2','Rate','InD_Rate','Date','RateType','Ratio','Source'];
   dataSource: MatTableDataSource<currencyRateList>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;

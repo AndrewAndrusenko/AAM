@@ -22,7 +22,7 @@ WITH current_balances AS (
 	  "bAccounts"."accountNo",
 	  "bAccounts"."accountId",
 	  dportfolios.portfolioname,
-	  "bAccountStatement"."closingBalance" as last_closed_balance,
+	  "last_balance"."closingBalance" as last_closed_balance,
 	  CASE
 		WHEN "bAccounts".secid NOTNULL THEN "bAccounts".secid
 		ELSE 'MONEY'
@@ -31,27 +31,27 @@ WITH current_balances AS (
 		WHEN "bAccounts".secid NOTNULL THEN 'investment'
 		ELSE 'MONEY'
 	  END AS "positon_type",
-	  "bAccountStatement"."dateAcc" AS last_closed_day_with_transactions,
+	  "last_balance"."dateAcc" AS last_closed_day_with_transactions,
 	  "bAccounts"."currencyCode" as account_currency
 	FROM
 	  "bAccounts"
-	  LEFT JOIN (
-		SELECT DISTINCT
-		  ON ("accountId") "accountId",
+	  LEFT JOIN LATERAL (
+		SELECT  "accountId",
 		  "closingBalance",
 		  "dateAcc"
 		FROM
 		  "bAccountStatement"
+		  WHERE "bAccounts"."accountId" = "bAccountStatement"."accountId" 
+		  AND  "dateAcc" <=p_report_date
 		ORDER BY
-		  "accountId",
 		  "dateAcc" DESC
-	  ) "bAccountStatement" ON "bAccounts"."accountId" = "bAccountStatement"."accountId"
+		  LIMIT 1
+	  ) AS last_balance ON TRUE
 	  LEFT JOIN dportfolios ON dportfolios.idportfolio = "bAccounts".idportfolio
 
 	WHERE
 	  "bAccounts"."accountTypeExt" != 13
 	  AND "dportfolios".idportfolio = ANY (p_idportfolios)
-	  AND "dateAcc" <=p_report_date
 )
 SELECT 
   COALESCE(current_balances.idportfolio,turnovers.idportfolio) as idportfolio,

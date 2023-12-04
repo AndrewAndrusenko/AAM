@@ -433,7 +433,7 @@ export interface currencyRate {
   rate_date:Date, baseCode:number, quoteCode:number, rate:number
 }
 export interface currencyRateList extends currencyRate {
-  id:number, base_iso:string, quote_iso :string , rate_type:number, nominal:number, pair:string,sourcecode:string
+  id:number, base_iso:string, quote_iso :string , rate_type:number, nominal:number, pair:string,sourcecode:string, inderect_rate: number
 }
 export interface orders {
   id:number, generated:Date, type:string, secid:string, qty:number, price:number, amount:number, qty_executed:number, status:string, parent_order:number, id_portfolio:number,portfolioname:string, ordertype:string, idcurrency:number,currencycode:string, security_group_name:string,secid_type:string,secid_name:string, price_type:number, action:string, allocated:number,unexecuted:number,

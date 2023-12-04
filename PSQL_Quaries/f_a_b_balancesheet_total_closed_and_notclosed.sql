@@ -4,7 +4,11 @@ DROP FUNCTION IF EXISTS public.f_a_b_balancesheet_total_closed_and_notclosed();
 
 CREATE OR REPLACE FUNCTION public.f_a_b_balancesheet_total_closed_and_notclosed(
 	)
-    RETURNS TABLE(portfolioname character varying, secid character varying,"accountNo" text, "accountId" numeric, "accountType" text, "datePreviousBalance" date, "dateBalance" timestamp without time zone, "openingBalance" numeric, "totalCredit" numeric, "totalDebit" numeric, "OutGoingBalance" numeric, "checkClosing" numeric, xacttypecode integer) 
+    RETURNS TABLE(portfolioname character varying, secid character varying, "accountNo" text, "accountId" numeric, "accountType" text,
+				  
+				  "datePreviousBalance" date, "dateBalance" timestamp without time zone, "openingBalance" numeric, "totalCredit" numeric,
+				  "totalDebit" numeric, "OutGoingBalance" numeric, "checkClosing" numeric, xacttypecode integer,
+				  currencycode numeric, "dateOpening" date) 
     LANGUAGE 'plpgsql'
     COST 100
     VOLATILE PARALLEL UNSAFE
@@ -74,7 +78,9 @@ SELECT dportfolios.portfolioname,
 	  balances."totalCredit",
 	  balances."OutGoingBalance",
 	  balances."checkClosing",
-	  balances."xacttypecode"
+	  balances."xacttypecode",
+	  "bAccounts"."currencyCode",
+	  "bAccounts"."dateOpening"
 FROM balances
 LEFT JOIN "bAccounts" ON balances."accountId"= "bAccounts"."accountId"
 LEFT JOIN dportfolios ON (dportfolios.idportfolio= "bAccounts".idportfolio AND balances."accountType"='Account')

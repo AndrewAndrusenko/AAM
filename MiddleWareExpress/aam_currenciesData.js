@@ -43,8 +43,11 @@ async function getCurrencyData (request,response) {
       sql = 'SELECT  base_code, id, quote_code, rate, rate_date::timestamp without time zone, rate_type FROM public.dcurrencies_rates ' +
       'WHERE base_code=${base} and quote_code=${quote} and rate_date <= ${date} ORDER by rate_date DESC LIMIT 1;'
     break;
+    case 'getCurrencyCrossRate':
+      sql = 'select * from f_i_get_cross_rate_for_trade(${base},${quote},${date},${cross});';
+    break;
     case 'getCurrencyRatesList':
-      sql = 'SELECT quote_currency."CurrencyCode"||\'/\'||base_currency."CurrencyCode" as pair, id, base_code, base_currency."CurrencyCode" as base_iso, quote_code,quote_currency."CurrencyCode" as quote_iso , rate, rate_date::timestamp without time zone, rate_type, nominal,sourcecode '+
+      sql = 'SELECT quote_currency."CurrencyCode"||\'/\'||base_currency."CurrencyCode" as pair, id, base_code, base_currency."CurrencyCode" as base_iso, quote_code,quote_currency."CurrencyCode" as quote_iso , rate, rate_date::timestamp without time zone, rate_type, nominal,sourcecode,  round(1/rate,5) as inderect_rate '+
       'FROM public.dcurrencies_rates '+
       'left join "dCurrencies" AS base_currency ON base_currency."CurrencyCodeNum"=dcurrencies_rates.base_code '+
       'left join "dCurrencies" AS quote_currency ON quote_currency."CurrencyCodeNum"=dcurrencies_rates.quote_code ';
@@ -52,6 +55,7 @@ async function getCurrencyData (request,response) {
     break;
   }
   sql = pgp.as.format(sql,request.query);
+  console.log('sql',sql);
   db_common_api.queryExecute(sql,response,undefined,request.query.dataType);
 }
 async function modifyRatesData (request,response) {

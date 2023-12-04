@@ -108,6 +108,10 @@ async function fgetMarketData (request,response){//Get market data such as marke
     }
   });
   switch (request.query.Action) {
+
+    case 'getMarketQuote':
+      query.text = 'select * from f_i_get_market_quote_for_trade (${secid},${trade_date});';
+    break;
     case 'checkLoadedMarketData':
       query.text = 'SELECT sourcecode, count(secid) FROM t_moexdata_foreignshares '+
       'WHERE (sourcecode = ANY(array[${sourcecodes}]) AND tradedate::timestamp without time zone = ${dateToLoad}::date) '+

@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ClientData, Instruments, allocation, orders} from 'src/app/models/intefaces.model';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AuthService } from 'src/app/services/auth.service';
-import { Observable, Subscription, distinctUntilChanged, filter, map, startWith, switchMap, tap } from 'rxjs';
+import { Observable, Subscription, debounceTime, distinctUntilChanged, filter, map, startWith, switchMap, tap } from 'rxjs';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import { AppTradeService } from 'src/app/services/trades-service.service';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -21,6 +21,8 @@ import { AppAllocationService } from 'src/app/services/allocation.service';
 import { ViewportScroller } from '@angular/common';
 import { MatTabGroup } from '@angular/material/tabs';
 import { arrayBuffer } from 'stream/consumers';
+import { CurrenciesDataService } from 'src/app/services/currencies-data.service';
+import { AppMarketDataService } from 'src/app/services/market-data.service';
 @Component({
   selector: 'app-trade-modify-form',
   templateUrl: './trade-form.component.html',
@@ -67,6 +69,8 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     private AutoCompService:AtuoCompleteService,
     private indexDBServiceS:indexDBService,
     private InstrumentDataS:InstrumentDataService,
+    private CurrenciesDataS: CurrenciesDataService,
+    private MarketDataService: AppMarketDataService,
     private dialog: MatDialog, 
   ) 
   {   
@@ -91,7 +95,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
       allocatedqty:{value:0, disabled: false},
       unalloacted:{value:0, disabled: false},
       idportfolio:{value:null, disabled: false},
-      id_buyer_instructions:{value:null, disabled: false},id_seller_instructions:{value:null, disabled: false},id_broker:{value:null, disabled: false}, details:{value:null, disabled: false},cpty_name:{value:null, disabled: false},security_group_name :{value:null, disabled: false},   secid_name:{value:null, disabled: false}, trade_amount:[null], facevalue:[null],faceunit:[null],faceunit_name:[null], code_price_currency:[null],  price_currency_name:[null], settlement_currency_name:[null], code_settlement_currency:[null], settlement_amount:[null], coupon_details:[null]
+      id_buyer_instructions:{value:null, disabled: false},id_seller_instructions:{value:null, disabled: false},id_broker:{value:null, disabled: false}, details:{value:null, disabled: false},cpty_name:{value:null, disabled: false},security_group_name :{value:null, disabled: false},   secid_name:{value:null, disabled: false}, trade_amount:[null], facevalue:[null],faceunit:[null],faceunit_name:[null], code_price_currency:[null],  price_currency_name:[null], settlement_currency_name:[null], code_settlement_currency:[null], settlement_amount:[null], coupon_details:[null],market_price:[null]
     })
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
@@ -116,16 +120,8 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
   }
   ngAfterContentInit (): void {
     this.tradeModifyForm.patchValue(this.data);
-    if (this.data['secidAutocolmplete']===true) { this.secidAutocolmplete(this.AutoCompService.fullInstrumentsLists.filter(el=>el[0]===this.data.secid)[0])/* 
-      let instrument = {name:'',security_type_name:'',faceunit:'',facevalue:0,secid:''}  ;
-      let secidArr = this.AutoCompService.fullInstrumentsLists.filter(el=>el[0]===this.data.secid)[0];
-      console.log('secidArr',secidArr);
-      instrument.name = secidArr[1];
-      instrument.security_type_name=secidArr[2];
-      instrument.faceunit = !Number.isNaN(+secidArr[3])? secidArr[3] :'810';
-      instrument.facevalue=Number(secidArr[4])
-      instrument.secid=secidArr[0];
-      this.secidChanged(instrument) */
+    if (this.data?.['secidAutocolmplete']===true) { 
+      this.secidAutocolmplete(this.AutoCompService.fullInstrumentsLists.filter(el=>el[0]===this.data.secid)[0])
     };
     this.arraySubscrition.add(this.AllocationService.getDeletedAccounting().subscribe(deletedTransaction=>{
       this.statusDetailsHeader='Deleted Accounting details'
@@ -160,7 +156,11 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     this.settlement_rate.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>this.settlementAmountUpdate());
     this.vdate.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>this.fullAmountCalcualtion(true));
     this.id_price_currency.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>this.fullAmountCalcualtion(true));
-    this.id_settlement_currency.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>{
+    this.tdate.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>this.getMarketPrice());
+    this.id_settlement_currency.valueChanges.pipe(
+      distinctUntilChanged(),
+      debounceTime(300)
+      ).subscribe(()=>{
       this.id_settlement_currency.value? this.settlement_rate.setValidators([ Validators.required, Validators.pattern('[0-9]*([0-9.]{0,8})?$')]): 
       this.settlement_rate.removeValidators(Validators.required);
       this.settlement_rate.updateValueAndValidity();
@@ -243,6 +243,12 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     this.id_settlement_currency.patchValue( this.price_type.value==2? this.faceunit.value : null);
     this.price_type.value==2? this.checkCurrenciesHints() : this.clearCurrencies();
     this.fullAmountCalcualtion(true);
+    this.getMarketPrice()
+  }
+  getMarketPrice() {
+    this.MarketDataService.getMarketQuote(this.tidinstrument.value,new Date(this.tdate.value).toLocaleDateString()).subscribe(data=>{
+      this.market_price.patchValue(data[0].close)
+      })
   }
   clearCurrencies(): any {
     ['code_price_currency', 'price_currency_name', 'code_settlement_currency','settlement_currency_name','settlement_rate'].forEach(key => this.tradeModifyForm.get(key).patchValue(null))
@@ -267,6 +273,13 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     } else {
         this.settlement_rate.enable();
         this.settlement_rate.value===1? this.settlement_rate.patchValue(null) : null;
+        if (this.id_price_currency.value&&this.id_settlement_currency.value) {
+        this.CurrenciesDataS.getCurrencyCrossRate(this.id_price_currency.value,this.id_settlement_currency.value,new Date(this.tdate.value).toLocaleDateString(),'810').pipe(
+          filter(data=>data.length>0)
+        ).subscribe(data=>{
+          this.settlement_rate.patchValue(data[0].rate);
+          });
+        }
     }   
   }
   settlementAmountUpdate() {
@@ -298,9 +311,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
       })
     } else {this.tradeAmountsUpdate()}
   }
-  updateInstrumentData(action:string){
-    let srDisabled = this.settlement_rate.disabled? this.settlement_rate.enable() : false
-    if (this.tradeModifyForm.invalid) {return}
+  executeTradeUpdate (action:string) {
     switch (action) {
       case 'Create_Example':
       case 'Create':
@@ -316,8 +327,16 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
         ).subscribe (result =>this.snacksBox(result,'Deleted'));
       break;
     }
+  }
+  updateInstrumentData(action:string){
+    let srDisabled = this.settlement_rate.disabled? this.settlement_rate.enable() : false
+    if (this.tradeModifyForm.invalid) {return}
+    if (Math.abs(this.price.value/this.market_price.value-1)>0.2&&action!=='Delete') {
+      this.CommonDialogsService.confirmDialog('Trade and market price difference more than 20%.').pipe(
+        filter (isConfirmed => isConfirmed.isConfirmed)
+      ).subscribe(()=>this.executeTradeUpdate(action))
+    } else this.executeTradeUpdate(action);
     srDisabled? this.settlement_rate.disable():null;
-
   }
   snacksBox(result:any, action?:string){
     if (result['name']=='error') {
@@ -373,4 +392,5 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
   get settlement_rate() {return this.tradeModifyForm.get('settlement_rate')}
   get coupon_details() {return this.tradeModifyForm.get('coupon_details')}
   get allocatedqty() {return this.tradeModifyForm.get('allocatedqty')}
+  get market_price() {return this.tradeModifyForm.get('market_price')}
 }

@@ -141,7 +141,8 @@
           </mat-error>
         </mat-form-field>
         <mat-form-field style="width: 20%;" >
-          <input matInput [matDatepicker]="dateOpeningDP" [placeholder]="'Opening Date'" [min]="FirstOpenedAccountingDate" formControlName="dateOpening" >
+          <input matInput [matDatepicker]="dateOpeningDP" [placeholder]="'Opening Date'" 
+          [min]="dateOpening.dirty? FirstOpenedAccountingDate : dateOpening.value" formControlName="dateOpening" >
           <mat-datepicker-toggle matSuffix [for]="dateOpeningDP"></mat-datepicker-toggle>
           <mat-datepicker #dateOpeningDP></mat-datepicker>
           <mat-error  *ngIf="dateOpening?.errors?.['required']">

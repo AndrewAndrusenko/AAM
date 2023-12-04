@@ -1,9 +1,9 @@
 -- FUNCTION: public.f_i_get_accured_interest_for_period_secidlist(text[], date, date)
 
--- DROP FUNCTION IF EXISTS public.f_i_get_accured_interest_for_period_secidlist(text[], date, date);
+-- DROP FUNCTION IF EXISTS public.f_i_get_deposits_withdrawals_for_portfolios(text[], date, date);
 
-CREATE OR REPLACE FUNCTION public.f_i_get_accured_interest_for_period_secidlist(
-	p_secid_list text[],
+CREATE OR REPLACE FUNCTION public.f_i_get_deposits_withdrawals_for_portfolios(
+	p_portfolios text[],
 	p_period_start date,
 	p_period_end date)
     RETURNS TABLE(start_date date, end_date date, d_qty interval, secid character varying, unredemeedvalue numeric, couponrate numeric, couponamount numeric, actiontype numeric, couponamountrur numeric, currency character varying) 
@@ -46,5 +46,5 @@ WHERE
 END;
 $BODY$;
 
-ALTER FUNCTION public.f_i_get_accured_interest_for_period_secidlist(text[], date, date)
+ALTER FUNCTION public.f_i_get_deposits_withdrawals_for_portfolios(text[], date, date)
     OWNER TO postgres;
