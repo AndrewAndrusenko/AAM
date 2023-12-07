@@ -76,3 +76,14 @@ we get closest market price for every position
 --------------------------------------------------------------------------------------------
 
 4/12/23
+1|| DB refactoring cross_rate functions and implementing option to evaluate dynamic portfolio perfomance in different currencies 978,826,156,810,756 
+2|| UI Account details form => refactored accounts date of opening validation based on min date as firt opened accounting day. Validation uses current date which could be in closed period until it modifed. After that event min validation moves to first opened accounting day
+
+5/12/23
+1|| DB function f_i_get_cross_ratesfor_period_currencylist has been finished and is being used to get cross rates set for report period 
+2|| DB updated functions PSQL_Quaries/f_i_get_npv_dynamic.sql and PSQL_Quaries/f_i_get_portfolios_structure_detailed_data.sql to retrieve only required cross currency rates and apply them correctly
+3|| UI Table to track portfolios npv dynamic perfomance, roi = > editing draft of the table
+
+6/12/23
+1|| UI Table to track portfolios npv dynamic perfomance, roi = > fully implemented with complex search, dynamic currency symbol change, excel export and formatted data
+2|| UI Chart Performance analysis => Time-Weighted Rate of Return => draft of the chart 

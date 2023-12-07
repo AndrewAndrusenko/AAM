@@ -154,6 +154,7 @@ appServer.post('/AAM/AccountCreate/',jsPassport.authenticate('session') , uiAmmI
 appServer.post('/AAM/AccountDelete/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fAccountDelete)
 appServer.post('/AAM/AccountEdit/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fAccountEdit)
 appServer.post('/AAM/GetPortfolioPositions/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fGetPortfolioPositions)
+appServer.post('/AAM/GetPortfolioAnalytics/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fGetPortfolioAnalytics)
 
 /* -----------------------Accountting ----------------------------------------------------- */
 appServer.get('/DEA/fGetMT950Transactions/',jsPassport.authenticate('session') , uiAmmAccountingModule.fGetMT950Transactions)

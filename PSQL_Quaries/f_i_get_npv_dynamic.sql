@@ -1,13 +1,17 @@
 -- FUNCTION: public.f_i_get_npv_dynamic(text[], date, date, numeric)
 
--- DROP FUNCTION IF EXISTS public.f_i_get_npv_dynamic(text[], date, date, numeric);
+DROP FUNCTION IF EXISTS public.f_i_get_npv_dynamic(text[], date, date, numeric);
 
 CREATE OR REPLACE FUNCTION public.f_i_get_npv_dynamic(
 	p_portfolios_list text[],
 	p_report_date_start date,
 	p_report_date_end date,
 	p_report_currency numeric)
-    RETURNS TABLE(report_date date, portfolioname character varying, "accountNo" text, secid character varying, balance numeric, pos_pv numeric, mtm_rate numeric, mtm_date date, boardid character varying, percentprice boolean, couponrate numeric, nominal_currency character varying, board_currency numeric, cross_rate numeric, accured numeric, dirty_price numeric) 
+    RETURNS TABLE(report_date date, portfolioname character varying, "accountNo" text, 
+				  secid character varying, balance numeric, pos_pv numeric, mtm_rate numeric,
+				  mtm_date date, boardid character varying, percentprice boolean, couponrate numeric, 
+				  nominal_currency character varying, board_currency numeric, cross_rate numeric, accured numeric, 
+				  dirty_price numeric, rate_date date) 
     LANGUAGE 'plpgsql'
     COST 100
     VOLATILE PARALLEL UNSAFE
@@ -25,7 +29,6 @@ FROM
   f_a_b_balancesheet_total_closed_and_notclosed ()
 WHERE
   f_a_b_balancesheet_total_closed_and_notclosed.portfolioname = ANY (p_portfolios_list);
-
 RETURN query
 WITH
   dates_with_accounts AS (
@@ -107,7 +110,8 @@ t_moex_boards.currency_code AS board_currency,
 cross_rates.cross_rate,
 ROUND(coupon.unredemeedvalue * coupon.couponrate / 100 * ("dataTime" - coupon.start_date) / 365, 2) AS accured,
 ROUND(CLOSE * unredemeedvalue / 100,2) + 
-ROUND( unredemeedvalue * coupon.couponrate / 100 * ("dataTime" - coupon.start_date) / 365,2) AS dirty_price
+ROUND( unredemeedvalue * coupon.couponrate / 100 * ("dataTime" - coupon.start_date) / 365,2) AS dirty_price,
+cross_rates.rate_date::date
 FROM
   balances_per_dates
   LEFT JOIN LATERAL (
@@ -140,7 +144,14 @@ FROM
     SELECT *
     FROM
       f_i_get_cross_ratesfor_period_currencylist (
-        ARRAY[978, 840, 826, 756, 156, 810],
+      ARRAY (SELECT DISTINCT t_moex_boards.currency_code::bigint FROM t_moex_boards 
+			 UNION
+			 SELECT DISTINCT temp_balance.currencycode::bigint FROM temp_balance 
+			 UNION 
+		     SELECT DISTINCT coupon_schedule.currency::bigint AS code FROM coupon_schedule
+
+			 ),
+		  --         ARRAY[978, 840, 826, 756, 156, 810],
         p_report_date_start,
         p_report_date_end,
         p_report_currency
@@ -173,7 +184,8 @@ GROUP BY
       coupon.start_date,
       coupon.currency,
       cross_rates.cross_rate,
-      t_moex_boards.currency_code
+      t_moex_boards.currency_code,
+		cross_rates.rate_date::date
     ),
     ("dataTime", balances_per_dates.portfolioname)
   )

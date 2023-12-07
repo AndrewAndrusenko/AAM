@@ -171,7 +171,9 @@ const appInitializerFn = (accessRestirictions:AuthService) => {
         OrdersTabComponent,
         AppallocationTableComponent,
         AppInvGenerateOrdersTable,
-        AppaInvPortfolioPositionTableComponent
+        AppaInvPortfolioPositionTableComponent,
+        AppaInvPortfolioNpvRoiPerformanceTableComponent,
+        AppPerformanceTWROiEchartComponentt
 
      ],
     bootstrap: [AppComponent],
@@ -206,5 +208,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 
 import { AppInvGenerateOrdersTable } from './components/tables/inv-generate-orders-table.component/inv-generate-orders-table.component';
 import { AppaInvPortfolioPositionTableComponent } from './components/tables/inv-portfolio-position-table.component/inv-portfolio-position-table.component';
+import { AppaInvPortfolioNpvRoiPerformanceTableComponent } from './components/tables/inv-portfolio-npv_roi_performance/inv-portfolio-npv_roi_performance';
+import { AppPerformanceTWROiEchartComponentt } from './components/charts/performance-twroi-chart.componentt/performance-twroi-chart.componentt';
 
 

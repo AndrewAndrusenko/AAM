@@ -11,7 +11,6 @@ export class AppMarketDataService {
 
   constructor(private http:HttpClient) { }
   calculateMA(dayCount:number, data:number[]) {
-    console.log('calculateMA', data);
     let result = [];
     for (let i = 0, len = data.length; i < len; i++) {
       if (i < dayCount) {
@@ -22,7 +21,6 @@ export class AppMarketDataService {
       for (let j = 0; j < dayCount; j++) {
         sum += + data[i - j];
       }
-      console.log('ma',sum,dayCount,sum / dayCount);
       result.push(sum / dayCount).toFixed(3);
     }
     return result;
@@ -36,11 +34,8 @@ export class AppMarketDataService {
     return this.http.post ('/api/AAM/MD/deleteMarketData/',{ params: params} ).toPromise()
   }
   async loadMarketDataMOEXiss (sourceCodes:marketSourceSegements[],dateToLoad: string)  {
-    console.log('loadMarketDataMOEXiss');
     let logMarketDateLoading = []
-    console.log('sourceCodes',sourceCodes);
     sourceCodes.forEach(source => {
-      console.log('source',dateToLoad);
       let currentPosition = 0;
       let totalRows = 0;
       let pageSize = 100;  
@@ -68,8 +63,6 @@ export class AppMarketDataService {
               'Date': dateToLoad});
               let updone = sourceCodes.reduce((acc,val)=>+val.checked+acc,0)
               updone? null: this.getMarketData().subscribe (marketData => {
-              console.log('updone',updone);
-                console.log('sourceCodes',  sourceCodes)
                 this.sendReloadMarketData (marketData)});
               
             }
@@ -82,11 +75,9 @@ export class AppMarketDataService {
     return logMarketDateLoading;
   }
   loadMarketDataMarketStack (sourceCodes:marketSourceSegements[],dateToLoad: string): any[]  {
-    console.log('loadMarketDataMarketStack');
     let logMarketDateLoading = []
     sourceCodes.forEach(source => {
       this.getInstrumentsCodes('msFS',true).subscribe(codesList => {
-        console.log('codelist',codesList[0].code);
         let List = codesList[0].code
         let firstPosition=0;
         let index = 0;
@@ -99,9 +90,7 @@ export class AppMarketDataService {
           index = index+99 > List.length? List.length: index+99
           slicedCodesList.push(List.slice(firstPosition,index).join())
           params['symbols'] = slicedCodesList[slicedCodesList.length-1];
-          console.log( 'params',params);
           this.http.get <any[]> (source.sourceURL, {params:params} ).subscribe (marketData => {
-            console.log('marketData', marketData);
             return this.insertMarketData (marketData['data'],source.sourceCode,'MScom').subscribe((rowLoaded) =>{
               source.checked = false;
               logMarketDateLoading.push ({
@@ -110,7 +99,6 @@ export class AppMarketDataService {
                 'Total rows fetched from source - ': marketData.length,
                 'Date': dateToLoad
               });
-              console.log('md',marketData);
               this.getMarketData().subscribe (marketData => this.sendReloadMarketData (marketData)); 
               return logMarketDateLoading = marketData
             })

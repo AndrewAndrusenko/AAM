@@ -63,6 +63,11 @@ export const indexDbConfigAAM: DBConfig  = {
     ]
   }]
 }; 
+export interface tableHeaders {
+  fieldName:string,
+  displayName:string
+}
+
 export const portfolioTypes :portfolioType [] = [
   {value: 1, viewValue: 'Model Portfolio'},
   {value: 2, viewValue: 'Strategy (based on MP)'},
@@ -474,4 +479,7 @@ export interface portfolioPositions{
   npv  :number, 
   rate_date: Date, 
   main_currency_code  :number
+}
+export interface PortfolioPerformnceData {
+  portfolioname : string, report_date : Date, npv : number, roi_current_period : number, time_wighted_roi : number, last_npv : number, cash_flow : number, correction_rate : number, correction_rate_compound : number, period_start_date : Date
 }

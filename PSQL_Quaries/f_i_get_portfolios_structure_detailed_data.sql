@@ -81,8 +81,27 @@ WITH
   accured_interest_data AS (
     SELECT * FROM f_i_get_accured_interests_for_portfolios ((SELECT ARRAY_AGG(instrument_list.secid) FROM instrument_list), p_report_date::date)
   ),
+  curerncies_list AS(
+	  SELECT DISTINCT accured_interest_data.faceunit::NUMERIC AS code FROM accured_interest_data
+	  UNION 
+	  SELECT DISTINCT full_portfolio.account_currency FROM full_portfolio WHERE  full_portfolio.position_type = 'MONEY'
+	  UNION 
+	  SELECT DISTINCT mtm_data.currency_code FROM mtm_data
+	  UNION 
+	  SELECT 810
+  ),
   cross_currency_quotes AS (
-    SELECT * FROM f_i_get_cross_rates (ARRAY[840, 978, 756, 826], p_report_date::date, p_report_currency)
+	SELECT * FROM curerncies_list as cl_main
+	  LEFT JOIN LATERAL (
+		SELECT * FROM f_i_get_cross_ratesfor_period_currencylist (
+			ARRAY(SELECT code::bigint FROM curerncies_list),
+			p_report_date::date, 
+			p_report_date::date, 
+			p_report_currency::numeric)
+		WHERE cl_main.code = f_i_get_cross_ratesfor_period_currencylist.base_code
+		ORDER BY rate_date DESC
+	    LIMIT 1
+	  ) AS cl_joined ON TRUE
   ),
   full_portfolio_with_mtm_data AS (
     SELECT

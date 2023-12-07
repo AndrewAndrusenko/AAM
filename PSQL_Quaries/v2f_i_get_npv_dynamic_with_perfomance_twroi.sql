@@ -111,17 +111,15 @@ WITH
     SELECT
       (cash_transactions_main."dataTime" - '1 day'::INTERVAL
       )::date AS correction_date,
-      cash_transactions_main.cash_flow,
--- 	  CASE 
--- 	  WHEN cash_transactions_main.account_currency!=p_report_currency 
--- 	  THEN 
--- 	  (select rate from f_i_get_cross_rate_for_trade(cash_transactions_main.account_currency,p_report_currency,cash_transactions_main."dataTime"::date,810::numeric)) 
--- 	  * cash_transactions_main.cash_flow
--- 	  ELSE cash_transactions_main.cash_flow
--- 	  END as cash_flow_converted,
+	  CASE 
+		  WHEN cash_transactions_main.account_currency!=p_report_currency 
+		  THEN 
+		  (select rate from f_i_get_cross_rate_for_trade(cash_transactions_main.account_currency,p_report_currency,cash_transactions_main."dataTime"::date,810::numeric)) 
+		  * cash_transactions_main.cash_flow
+		  ELSE cash_transactions_main.cash_flow
+	  END as cash_flow,
       cash_transactions_main.portfolioname,
-      COALESCE(nd1.pos_pv, 0) AS last_npv,
-      (COALESCE(nd1.pos_pv, 0) + cash_transactions_main.cash_flow) AS funds_invested
+      COALESCE(nd1.pos_pv, 0) AS last_npv
     FROM
       cash_transactions AS cash_transactions_main
       LEFT JOIN LATERAL (
@@ -148,8 +146,8 @@ WITH
   ),
   correction_rates_set AS (
     SELECT
-      ctr_joined.funds_invested AS base_to_correct,
-      ROUND(ctr_main.last_npv / ctr_joined.funds_invested, 4) AS correction_rate,
+      ctr_joined.last_npv+ctr_joined.cash_flow AS base_to_correct,
+      ROUND(ctr_main.last_npv / (ctr_joined.last_npv+ctr_joined.cash_flow), 4) AS correction_rate,
       ctr_main.cash_flow,
       ctr_main.last_npv,
       ctr_main.correction_date,
@@ -229,11 +227,18 @@ $BODY$;
 
 ALTER FUNCTION public.v2f_i_get_npv_dynamic_with_perfomance_twroi (text[], date,date,numeric)
     OWNER TO postgres;
-select 
-*
--- from v2f_i_get_npv_dynamic_with_perfomance_twroi( Array['ACM002'],'03/28/2023','03/31/2023',840)
-from v2f_i_get_npv_dynamic_with_perfomance_twroi(array(select portfolioname from dportfolios),'05/01/2023','11/28/2023',840)
-where portfolioname='ICM016'
-
-order by portfolioname, report_date
+select rates_set.cross_rate,
+v2f_i_get_npv_dynamic_with_perfomance_twroi.*
+-- from v2f_i_get_npv_dynamic_with_perfomance_twroi( Array['ACM002'],'10/20/2023','11/28/2023',840)
+from v2f_i_get_npv_dynamic_with_perfomance_twroi(array(select portfolioname from dportfolios),'05/01/2023','12/04/2023',978)
+-- where portfolioname='ICM016'
+left join lateral (
+	SELECT * from public.f_i_get_cross_ratesfor_period_currencylist(array[978,840,810],'02/20/2023','11/28/2023',810)
+	where 
+	f_i_get_cross_ratesfor_period_currencylist.rate_date<=v2f_i_get_npv_dynamic_with_perfomance_twroi.report_date
+	AND f_i_get_cross_ratesfor_period_currencylist.base_code=978
+	order by  rate_date desc
+	limit 1
+	) as rates_set on true
+order by portfolioname, report_date 
  

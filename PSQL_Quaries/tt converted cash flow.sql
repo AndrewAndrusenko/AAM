@@ -43,7 +43,7 @@ WITH
           ELSE '03/28/23'
         END,
         '11/28/23',
-        840
+        978
       )
     WHERE
       f_i_get_npv_dynamic."accountNo" ISNULL AND f_i_get_npv_dynamic.pos_pv notnull AND f_i_get_npv_dynamic.pos_pv!=0
@@ -84,14 +84,14 @@ WITH
     SELECT
       (cash_transactions_main."dataTime" - '1 day'::INTERVAL
       )::date AS correction_date,
-      cash_transactions_main.cash_flow,
+--       cash_transactions_main.cash_flow,
 	  CASE 
-	  WHEN cash_transactions_main.account_currency!=840 
+	  WHEN cash_transactions_main.account_currency!=978 
 	  THEN 
-	  (select rate from f_i_get_cross_rate_for_trade(cash_transactions_main.account_currency,840,cash_transactions_main."dataTime"::date,810::numeric)) 
+	  (select rate from f_i_get_cross_rate_for_trade(cash_transactions_main.account_currency,978,cash_transactions_main."dataTime"::date,810::numeric)) 
 	  * cash_transactions_main.cash_flow
 	  ELSE cash_transactions_main.cash_flow
-	  END as cash_flow_converted,
+	  END as cash_flow,
       cash_transactions_main.portfolioname,
       COALESCE(nd1.pos_pv, 0) AS last_npv,
       (
@@ -125,7 +125,7 @@ WITH
 --   correction_rates_set AS (
     SELECT
       ctr_joined.funds_invested AS base_to_correct,
-	  ctr_joined.cash_flow_converted,
+	  ctr_joined.*,
       ROUND(ctr_main.last_npv / ctr_joined.funds_invested, 4) AS correction_rate,
       ctr_main.cash_flow,
       ctr_main.last_npv,

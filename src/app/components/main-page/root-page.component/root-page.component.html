@@ -1,8 +1,8 @@
 <app-app-menu style="width: 100vw;"
-  [treeOpened] = "opened">
+  [treeOpened]="opened">
 </app-app-menu>
 <mat-drawer-container class="root-container" >
-  <mat-drawer #sidenav class="root-sidenav" mode="side" [(opened)]="opened">
+  <mat-drawer #sidenav class="root-sidenav" mode="side" [(opened)]="opened"  >
     <app-tree-menu></app-tree-menu>
   </mat-drawer>
   <div class="root-sidenav-content"
