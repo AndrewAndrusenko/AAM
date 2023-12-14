@@ -23,14 +23,6 @@
     Reload 
     <mat-icon matSuffix >refresh</mat-icon>
   </button>
-  <mat-checkbox title="Show zero portfolios" #notNull
-    (change)="showZeroPortfolios($event.checked)"
-    style="font-size:larger; margin-left: 2%;">
-    Zero Portfolio
-  </mat-checkbox> 
-  <h2 *ngIf="readOnly===true" style="margin-left: 1%;">
-     Current positions ({{report_date.value.toLocaleDateString()}}) in USD
-  </h2>
   <!-- complexSearch Form -->
 <form class="submit" *ngIf="readOnly!==true" [formGroup]="searchParametersFG" 
  style="font-size: 18px; margin-left: 0.5%; "> 
@@ -44,23 +36,28 @@
       </button>
       <button color = "accent" mat-raised-button 
         style="margin-top:4%;margin-left: 1%; font-size: 18px;"
-        (click)="searchParametersFG.reset();
-         instruments=['ClearAll'];
-         portfolios=['ClearAll']">
+        (click)="resetSearchForm()">
         ClearAll
       </button>
     </span>
-    <mat-form-field class="search-filed" title="Date to upload"> <!-- Report Date Filter -->
-      <input matInput formControlName = "report_date" [matDatepicker]="dateForMarketData" placeholder="Report Date">
-      <mat-datepicker-toggle matSuffix [for]="dateForMarketData"></mat-datepicker-toggle>
-      <mat-datepicker  #dateForMarketData></mat-datepicker>
-    </mat-form-field> 
+    <mat-form-field appearance="fill"  class="search-filed" title="Report period"><!-- Report Date Filter -->
+      <mat-label>Enter a date range</mat-label>
+      <mat-date-range-input [formGroup]="dataRange" [rangePicker]="picker" >
+        <input matStartDate  placeholder="Start date" formControlName="dateRangeStart">
+        <input matEndDate  placeholder="End date" formControlName="dateRangeEnd">
+      </mat-date-range-input>
+      <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-date-range-picker  #picker></mat-date-range-picker>
+      <mat-error *ngIf="dataRange.controls.dateRangeStart.hasError('matStartDateInvalid')">Invalid start date</mat-error>
+      <mat-error *ngIf="dataRange.controls.dateRangeEnd.hasError('matEndDateInvalid')">Invalid end date</mat-error>
+    </mat-form-field>
     <mat-form-field class="search-filed" title="Type to find(any filed). Click to select" > <!-- Report Currency Filter -->
       <input matInput [placeholder]="'Report Currency'" 
-      formControlName="report_id_currency" 
+      formControlName="p_report_currency" 
       [matAutocomplete]="autoSet" >
       <mat-autocomplete #autoSet="matAutocomplete" >
-        <mat-option *ngFor="let currency of filteredCurrenciesList | async" [value]="currency['CurrencyCodeNum']">
+        <mat-option  *ngFor="let currency of filteredCurrenciesList | async" [value]="currency['CurrencyCodeNum']">
           {{currency['CurrencyCodeNum']}} -  {{currency['CurrencyCode']}} -  {{currency['CurrencyName']}} 
         </mat-option>
       </mat-autocomplete>   
@@ -73,10 +70,11 @@
         formControlName="MP" 
         style="height: 150%;"
         (selectionChange)="setPortfoliosList($event)"  >
+        <mat-option [value]="'All'"> All codes </mat-option>
         <mat-option *ngFor="let mp of mp_strategies_list" [value]="mp['name']"> {{mp['name']}} </mat-option>
       </mat-select>
     </span>
-    <mat-form-field  appearance="fill" style="width: 60%; margin-bottom: 0.5%; " class="search-filed">
+    <mat-form-field  appearance="fill" style="width: 60%; margin-bottom: 0.5%; " class="search-filed"><!-- Chio Portfolio Filter -->
       <mat-chip-list #chipPortList   >
         <mat-chip *ngFor="let portfolio of portfolios" 
         (removed)="remove(portfolio,portfolios,idportfolios)"
@@ -89,75 +87,38 @@
         <input style="width: 45%;"
         matInput
         placeholder="Add portfolio or portfolio1,portfolio2.."
-        formControlName="idportfolios"
+        formControlName="p_portfolios_list"
         [matChipInputFor]="chipPortList"
         [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
         [matChipInputAddOnBlur]="true"
         (matChipInputTokenEnd)="portfolios = add($event,portfolios,idportfolios)"
         matTooltip="Type portfolio code or paste multiple codes separated by comma and press enter" >
-
       </mat-chip-list>
       <mat-hint style="color:rgb(104, 246, 246); font-style: italic;">
         Portfolios List
       </mat-hint>
     </mat-form-field>
-<!--     <mat-form-field  appearance="fill" style="width: 10%; color:black" class="search-filed">
-      <mat-chip-list #chipListSecid   >
-        <mat-chip *ngFor="let secid of instruments" 
-        (removed)="remove(secid,instruments,secidList)"
-        (click)=" instruments = clearAll($event,instruments,secidList);">
-          {{secid}}
-          <button matChipRemove *ngIf="portfolio!=='ClearAll'">
-            <mat-icon>cancel</mat-icon>
-          </button>
-        </mat-chip>
-        <input [disabled]="true"
-        [matAutocomplete]="auto"
-        matInput
-        placeholder="Add secid or secid,secid1,secid2.."
-        formControlName="secidList"
-        [matChipInputFor]="chipListSecid"
-        [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-        [matChipInputAddOnBlur]="true"
-        (matChipInputTokenEnd)="instruments = add($event,instruments,secidList)"
-        matTooltip="DISABLED! Type secid or paste multiple secid codes separated by comma and press enter" >
-      </mat-chip-list>
-      <mat-autocomplete #auto="matAutocomplete" (optionSelected)="changedValueofChip($event.option.value,instruments,secidList)">
-        <mat-option *ngFor="let secid of filterednstrumentsLists | async" [value]="secid.toString().split(',')[0]">
-          {{secid.toString().replaceAll(',',' - ')}}
-        </mat-option>
-      </mat-autocomplete>
-      <mat-hint style="color:rgb(104, 246, 246); font-style: italic;">
-        Instruments List
-      </mat-hint>
-    </mat-form-field> -->
 </span>
 </form>
   <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort
    class="mat-elevation-z8" 
-    class ="childTable" style="width: 150%;" >
+    class ="childTable" style="width: 100%;" >
     <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i=index" justify="right"  >
       <th mat-header-cell *matHeaderCellDef mat-sort-header> {{columnsHeaderToDisplay[i]}}</th>
-      <td mat-footer-cell *matFooterCellDef let> <h2 style="margin-top: 5%;">
-        <span [ngSwitch]="true==true">
-          <p *ngSwitchDefault></p>
-          <p *ngSwitchCase="['idportfolio'].includes(column)">{{'Totals'}} </p>
-          <p *ngSwitchCase="['mtm_positon','order_amount','weight','planned_position','total_pl','unrealizedpl','pl'].includes(column)">{{getTotals(column)| number }} </p>
-        </span></h2>
       <td 
         mat-cell *matCellDef="let element" [cdkContextMenuTriggerFor]="instrumentcontextmenu" >
         <span [ngSwitch]="true==true">
           <p *ngSwitchDefault>{{element[column]}}</p>
-          <p *ngSwitchCase="['order_amount','order_qty','mtm_dirty_price','cost_in_position','orders_unaccounted_qty','cost_full_position'].includes(column)">{{element[column]|currency :' '}} </p>
-          <p *ngSwitchCase="['current_balance','mtm_positon',
-          'planned_position','current_account_balance',
-          'pl','unrealizedpl','total_pl'].includes(column)">
-            <span [style.color]="element[column]==0? 'default' : element[column]<0?'indianred':'lightgreen'">{{element[column]|currency :' '}} </span>
+          <p *ngSwitchCase="['pos_pv','dirty_price'].includes(column)">{{element[column]|currency :currencySymbol+' '}} </p>
+          <p *ngSwitchCase="['balance'].includes(column)">{{element[column]|currency :' '}} </p>
+          <p *ngSwitchCase="['cash_flow'].includes(column)">
+            <span [style.color]="element[column]==0? 'default' : element[column]<0?'indianred':'lightgreen'">
+              {{element[column]|currency :currencySymbol+' '}} </span>
           </p>
-          <p *ngSwitchCase="['roi','fact_weight','weight'].includes(column)&&element[column]!==null">
+          <p *ngSwitchCase="['roi_current_period','time_wighted_roi'].includes(column)&&element[column]!==null">
             <span [style.color]="element[column]==0? 'default' : element[column]<0?'indianred':'lightgreen'">{{element[column]|currency :' '}}{{'%'}} </span>
           </p>
-          <p *ngSwitchCase="['mtm_date','rate_date'].includes(column)">{{element[column] | date}} </p>
+          <p *ngSwitchCase="['mtm_date','rate_date','report_date'].includes(column)">{{element[column] | date}} </p>
         </span>
         <ng-template  #instrumentcontextmenu>
           <div class="tree-menu-context" cdkMenu >
@@ -173,16 +134,8 @@
     </ng-container>
     <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
     <tr mat-row  *matRowDef="let element; columns: columnsToDisplay; let dataindex=dataIndex;"
-      tabindex=0
-   >
+      tabindex=0   >
     </tr>
-<!--       <tr mat-row  *matRowDef="let element; columns: columnsToDisplay; let dataindex=dataIndex;"
-      tabindex=0
-      [ngClass]="{'highlight':element && this.selectedRowID  == element.id}"
-      (keydown)="keyDownEvent($event)"
-      (click)="highlight(element)">
-    </tr> -->
-    <tr mat-footer-row *matFooterRowDef="columnsToDisplay; sticky: true"></tr>
   </table>
   <mat-paginator [pageSizeOptions]="[5, 15, 25, 100]" [pageSize]="rowsPerPages" aria-label="Select page of allocation"></mat-paginator>
 </ng-container>

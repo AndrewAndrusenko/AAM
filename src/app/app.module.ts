@@ -173,7 +173,8 @@ const appInitializerFn = (accessRestirictions:AuthService) => {
         AppInvGenerateOrdersTable,
         AppaInvPortfolioPositionTableComponent,
         AppaInvPortfolioNpvRoiPerformanceTableComponent,
-        AppPerformanceTWROiEchartComponentt
+        AppPerformanceTWROiEchartComponentt,
+        AppaInvPortfolioNPVDynamicComponent
 
      ],
     bootstrap: [AppComponent],
@@ -210,5 +211,6 @@ import { AppInvGenerateOrdersTable } from './components/tables/inv-generate-orde
 import { AppaInvPortfolioPositionTableComponent } from './components/tables/inv-portfolio-position-table.component/inv-portfolio-position-table.component';
 import { AppaInvPortfolioNpvRoiPerformanceTableComponent } from './components/tables/inv-portfolio-npv_roi_performance/inv-portfolio-npv_roi_performance';
 import { AppPerformanceTWROiEchartComponentt } from './components/charts/performance-twroi-chart.componentt/performance-twroi-chart.componentt';
+import { AppaInvPortfolioNPVDynamicComponent } from './components/tables/inv-portfolio-npv_dynamic/inv-portfolio-npv_dynamic';
 
 

@@ -1,17 +1,13 @@
 -- FUNCTION: public.f_i_get_npv_dynamic(text[], date, date, numeric)
 
-DROP FUNCTION IF EXISTS public.f_i_get_npv_dynamic(text[], date, date, numeric);
+-- DROP FUNCTION IF EXISTS public.f_i_get_npv_dynamic(text[], date, date, numeric);
 
 CREATE OR REPLACE FUNCTION public.f_i_get_npv_dynamic(
 	p_portfolios_list text[],
 	p_report_date_start date,
 	p_report_date_end date,
 	p_report_currency numeric)
-    RETURNS TABLE(report_date date, portfolioname character varying, "accountNo" text, 
-				  secid character varying, balance numeric, pos_pv numeric, mtm_rate numeric,
-				  mtm_date date, boardid character varying, percentprice boolean, couponrate numeric, 
-				  nominal_currency character varying, board_currency numeric, cross_rate numeric, accured numeric, 
-				  dirty_price numeric, rate_date date) 
+    RETURNS TABLE(report_date date, portfolioname character varying, "accountNo" text, secid character varying, balance numeric, pos_pv numeric, mtm_rate numeric, mtm_date date, boardid character varying, percentprice boolean, couponrate numeric, nominal_currency character varying, board_currency numeric, cross_rate numeric, accured numeric, dirty_price numeric, rate_date date) 
     LANGUAGE 'plpgsql'
     COST 100
     VOLATILE PARALLEL UNSAFE
@@ -109,8 +105,14 @@ coupon.currency AS nominal_currency,
 t_moex_boards.currency_code AS board_currency,
 cross_rates.cross_rate,
 ROUND(coupon.unredemeedvalue * coupon.couponrate / 100 * ("dataTime" - coupon.start_date) / 365, 2) AS accured,
-ROUND(CLOSE * unredemeedvalue / 100,2) + 
-ROUND( unredemeedvalue * coupon.couponrate / 100 * ("dataTime" - coupon.start_date) / 365,2) AS dirty_price,
+ CASE
+      WHEN t_moex_boards.percentprice = FALSE THEN COALESCE(CLOSE,1) * cross_rates.cross_rate
+      WHEN balances_per_dates.secid ISNULL THEN COALESCE("OutGoingBalance", 0) * cross_rates.cross_rate
+      ELSE (
+          ROUND(CLOSE * unredemeedvalue / 100,2) + 
+          ROUND(unredemeedvalue * coupon.couponrate / 100 * ("dataTime" - coupon.start_date) / 365,2)
+        )  * cross_rates.cross_rate
+    END AS dirty_price,
 cross_rates.rate_date::date
 FROM
   balances_per_dates
@@ -151,7 +153,6 @@ FROM
 		     SELECT DISTINCT coupon_schedule.currency::bigint AS code FROM coupon_schedule
 
 			 ),
-		  --         ARRAY[978, 840, 826, 756, 156, 810],
         p_report_date_start,
         p_report_date_end,
         p_report_currency

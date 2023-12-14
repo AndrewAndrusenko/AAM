@@ -483,3 +483,6 @@ export interface portfolioPositions{
 export interface PortfolioPerformnceData {
   portfolioname : string, report_date : Date, npv : number, roi_current_period : number, time_wighted_roi : number, last_npv : number, cash_flow : number, correction_rate : number, correction_rate_compound : number, period_start_date : Date
 }
+export interface NPVDynamicData {
+report_date :Date, portfolioname :string, accountNo :string, secid :string, balance :number, pos_pv :number, mtm_rate :number, mtm_date :Date, boardid :string, percentprice: boolean, couponrate :number, nominal_currency :string, board_currency :number, cross_rate :number, accured :number, dirty_price :number, rate_date :Date 
+}

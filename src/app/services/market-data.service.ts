@@ -21,7 +21,7 @@ export class AppMarketDataService {
       for (let j = 0; j < dayCount; j++) {
         sum += + data[i - j];
       }
-      result.push(sum / dayCount).toFixed(3);
+      result.push(Math.round(sum / dayCount*100)/100);
     }
     return result;
   }

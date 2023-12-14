@@ -1,7 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { AppMarketDataService } from 'src/app/services/market-data.service';
-import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
-import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
 import { PortfolioPerformnceData } from 'src/app/models/intefaces.model';
 @Component({
@@ -13,66 +11,90 @@ export class AppPerformanceTWROiEchartComponentt  {
   portfolios: string[];
   countryCasesChartOptions: any;
   dispatchAction: any;
+  seriesMarketPrice :number [] = []
+  @ViewChild('fontlarge') fontLarge : ElementRef;
   performanceData: PortfolioPerformnceData[] = [];
-  seriesCandle :number [][] = []
+  currencySymbol:string;
   constructor(
-    private InvestmentDataService:AppInvestmentDataServiceService, 
-    private MarketDataService: AppMarketDataService,
-    private CommonDialogsService:HadlingCommonDialogsService,
-    ) {
-      this.portfolios=['ACM002','ICM011']
-      this.InvestmentDataService.recievePerformnceData().subscribe(performanceData=>{
-        this.performanceData=performanceData;
-        this.portfolios = [...new Set(performanceData.map(el=>(el.portfolioname)))]
-      })
-    }
-  onChangeCountry(portfolioname:string) {
-    this.seriesCandle=[]
-    this.setOptions(portfolioname);
+  private InvestmentDataService:AppInvestmentDataServiceService, 
+  private MarketDataService: AppMarketDataService,
+  ) {
+    this.InvestmentDataService.recievePerformnceData().subscribe(data=>{
+      this.performanceData=data.data;
+      this.portfolios = [...new Set(data.data.map(el=>(el.portfolioname)))]
+      this.currencySymbol=data.currencySymbol;
+    })
   }
-  setOptions(portfolioname:string) {
-    const colors = ['#5470C6', '#91CC75', '#EE6666'];
-    const upColor = colors[1];
+  onChangeCountry(portfolio:string) {
+    this.setOptions(portfolio);
+  }
+  setOptions(portfolio:string) {
+    const colors = ['#5470C6', '#91CC75', 'black','#EE6666'];
+    const upColor = '#00da3c';
     const downColor = '#ec0000';
-    let seriesMarketPrice :number [] = []
-    let seriesLow :number [] = []
-    let seriesVolumes :number [][] = []
-    let seriesCashInOut :number [][] = []
-    let seriesHigh :number [] = []
+    this.seriesMarketPrice=[]
+    let seriesNPV :number [][] = []
+    let seriesCashIO :number [][] = []
     let seriesDate :string [] = []
+    let sizeLarge = parseFloat(window.getComputedStyle(this.fontLarge.nativeElement, null).getPropertyValue('font-size'));
+    let currencySymbol = this.currencySymbol
     this.performanceData.forEach((el,i)=>{
-      if (el.portfolioname===portfolioname) {
-        this.seriesCandle.push([el.time_wighted_roi-1,el.time_wighted_roi+1,el.time_wighted_roi-1.5,el.time_wighted_roi+1.5])
-        seriesMarketPrice.push(el.time_wighted_roi)
-        seriesLow.push(el.time_wighted_roi)
-        seriesHigh.push(el.time_wighted_roi)
-        seriesVolumes.push([seriesVolumes.length, el.npv,el.cash_flow, -1 ]);
-        // seriesCashInOut.push([seriesCashInOut.length, el.cash_flow, 1 ]);
-        // seriesVolumes.push([seriesVolumes.length, el.npv, el.close < el.open ? 1 : -1]);
+      if (el.portfolioname===portfolio) {
+        this.seriesMarketPrice.push(Number(el.time_wighted_roi))
+        seriesNPV.push([seriesNPV.length, Number(el.npv), el.npv > (el.last_npv+el.cash_flow)? 1:-1]);
+        seriesCashIO.push([seriesNPV.length, Math.abs(el.cash_flow), Number(el.cash_flow) > 0? 1:-1]);
         seriesDate.push(new Date(el.report_date).toLocaleDateString())
       }
     })
-    if (seriesDate.length !== new Set (seriesDate).size) {
-      this.CommonDialogsService.snackResultHandler({name:'error', detail:'There are multipule quotes for one date. Try to filter data by board or exchange'},'Chart','top')
-      this.seriesCandle=[]
-      return;
-    }
-    let minLow:number = Math.min(...seriesLow)*0.992
-    let maxHigh:number = Math.max(...seriesHigh)*1.008
-
     this.countryCasesChartOptions = {
-      title: {
-        text: portfolioname + ' TWR CHART',
-      },
+        backgroundColor: '#2c343c',
+/*       title: {
+        textAlign: "center",
+        left: "center",
+        top:'2%',
+        text: portfolio + ' TWR CHART',
+        textStyle: {
+          fontSize: 20,
+          color:'#d6d9db'
+        },
+      }, */
       legend: {
+        textStyle: {
+          fontSize: 22,
+          color:'white'
+        },
         bottom: 10,
         left: 'center',
-        data: [portfolioname + ' candles','TWR',  'MA10', ]
+        data: ['TWR', 'MA10','NPV','Cash D/W']
       },
       tooltip: {
-        trigger: 'axis',
-        axisPointer: {
-          type: 'cross'
+        formatter: 
+        function (params) {
+          let displayValue:string
+          // console.log(params.componentType,params)
+          if (params.componentType==='markPoint') {
+            params.seriesName = chartOptions.series[params.seriesIndex].name
+            params.name = chartOptions.xAxis[0].data[params.name]
+          }
+            switch (params.seriesName) {
+            case 'TWR':
+              displayValue = params.seriesName+': '+params.value + ' %'
+            break;
+            case 'NPV':
+              displayValue = params.seriesName+': '+currencySymbol+ params.value[1].toLocaleString(undefined, { maximumFractionDigits: 2 }) 
+            break;
+            case 'Cash D/W':
+              displayValue = params.value[2] === 1?  'Deposit ' +currencySymbol  :  'Withdrawal '+currencySymbol;
+              displayValue += params.value[1].toLocaleString(undefined, { maximumFractionDigits: 2 }) 
+            break;
+            default:
+              displayValue =params.seriesName+': '+ params.value
+            break;
+          }
+          return params.name +'<br />'+displayValue ;
+        },
+        textStyle: {
+          fontSize:sizeLarge
         }
       },
       axisPointer: {
@@ -85,15 +107,15 @@ export class AppPerformanceTWROiEchartComponentt  {
           backgroundColor: '#777'
         }
       },
-        toolbox: {
-          feature: {
-          saveAsImage: { show: true },
+      toolbox: {
+        feature: {
           dataZoom: {
             yAxisIndex: false
           },
           brush: {
             type: ['lineX', 'clear']
-          }
+          },
+          // magicType: { show: true, type: ['line', 'bar', 'stack'] }
         }
       },
       brush: {
@@ -105,30 +127,31 @@ export class AppPerformanceTWROiEchartComponentt  {
       },
       visualMap: {
         show: false,
-        seriesIndex: 5,
-        dimension: 2,
+        seriesIndex: 3,
+        // dimension: 1,
         pieces: [
           {
-            value: 1,
+            value: -1,
             color: downColor
           },
           {
-            value: -1,
+            value: 1,
             color: upColor
           }
         ]
       },
       grid: [
         {
-          left: '5%',
-          right: '8%',
-          height: '50%'
+          left: '2%',
+          right: '10%',
+          height: '73%',
+          top: '10%',
         },
         {
-          left: '5%',
-          right: '8%',
-          top: '63%',
-          height: '16%'
+          left: '2%',
+          right: '10%',
+          top: '70%',
+          height: '6%'
         }
       ],
       xAxis: [
@@ -138,36 +161,88 @@ export class AppPerformanceTWROiEchartComponentt  {
           boundaryGap: false,
           axisLine: { onZero: false },
           splitLine: { show: false },
-          min: 'dataMin',
-          max: 'dataMax',
           axisPointer: {
             z: 100
+          },
+
+          axisLabel: {
+            fontSize:16,
+            fontWeight: "bold",
+            color:'white'
           }
         },
         {
           type: 'category',
-          gridIndex: 1,
+           gridIndex: 1,
           data: seriesDate,
           boundaryGap: false,
           axisLine: { onZero: false },
           axisTick: { show: false },
           splitLine: { show: false },
-          axisLabel: { show: false },
-          min: 'dataMin',
-          max: 'dataMax'
+          axisLabel: { show:false}
         }
       ],
       yAxis: [
         {
+          type: 'value',
+          name: 'TWR',
+          nameTextStyle: {
+            color:'white',
+            fontSize: sizeLarge,
+            fontWeight: "bold",
+            align: "left",
+            padding: [0, 0, 3, 10]
+          },
+          fontsize:20,
+          position: 'right',
+          alignTicks: true,
+          offset:40,
+          axisLine: {
+            show: true,
+            lineStyle: {
+              color:'white'
+            }
+          },
           scale: true,
-          splitArea: {
-            show: true
+          axisLabel: {
+            formatter: '{value} %',
+            fontSize:20,
+            fontWeight: "bold"
+          }
+        },
+        {
+          type: 'value',
+          name: 'NPV',
+          nameTextStyle: {
+            color:colors[0],
+            fontSize: sizeLarge,
+            fontWeight: "bold",
+            align: "left",
+            padding: [0, 0, 3, 10]
+
+          },
+          position: 'right',
+          offset:140,
+          alignTicks: true,
+          axisLine: {
+            show: true,
+            lineStyle: {
+              color: colors[0],
+            }
+          },
+          scale: true,
+          axisLabel: {
+            formatter: function (value) {
+              return Math.round(value/1000000)<1? currencySymbol+ Math.round(value/1000) + ' k' : currencySymbol+Math.round(value/100000)/10 +' mln'
+            },
+            fontSize:20,
+            fontWeight: "bold"
           }
         },
         {
           scale: true,
           gridIndex: 1,
-          splitNumber: 1,
+          splitNumber: 2,
           axisLabel: { show: false },
           axisLine: { show: false },
           axisTick: { show: false },
@@ -182,56 +257,88 @@ export class AppPerformanceTWROiEchartComponentt  {
           end: 100
         },
         {
-          show: true,
           xAxisIndex: [0, 1],
           type: 'slider',
-          top: '85%',
+          top: '90%',
           start: 2,
           end: 100
         }
       ],
       series: [
-        { name: portfolioname + ' candles',
-          type: 'candlestick',
-          data: this.seriesCandle,
-          itemStyle: {
-            color: upColor,
-            color0: downColor,
-            borderColor: undefined,
-            borderColor0: undefined,
-            opacity: 0.2
-          },
-        },
         { name: 'TWR',
           type:'line',
           color:colors[2],
-          data:seriesMarketPrice
-        },
-         {
-          name: 'MA10',
-          type: 'line',
-          data:  this.MarketDataService.calculateMA(10, seriesMarketPrice),
-          smooth: true,
+
+          data:this.seriesMarketPrice,
           lineStyle: {
+            width: 4.5
+          },
+          emphasis: {
+            focus: 'series'
+          },
+          markPoint: {
+            data: [
+              {
+                type: "min"
+              },
+              {
+                type: "max"
+              },
+              {
+                name: 'coordinate',
+                coord: [seriesDate.length-1, this.seriesMarketPrice[this.seriesMarketPrice.length-1]]
+              },
+            ],
+            symbol: "pin",
+            symbolSize: 120,
+            label: {
+              fontSize: 18,
+              formatter: function (dataObj) {
+                // console.log('val',dataObj);
+                return  dataObj.data.name==='coordinate'? Math.round(dataObj.data.coord[1]*10)/10 + ' %' : Math.round(dataObj.value*10)/10 + ' %:\n' +dataObj.data.type
+              },
+            },
+          },
+        },
+        { name: 'MA10',
+          type: 'line',
+          data:  this.MarketDataService.calculateMA(10, this.seriesMarketPrice),
+          smooth: true,
+          color:colors[3],
+          lineStyle: {
+            opacity: 0.9
+        },
+        },
+        { name: 'NPV',
+          type: 'bar',
+          barGap: 0,
+          yAxisIndex: 1,
+          data: seriesNPV,
+          itemStyle: {
+            color: colors[0],
+            color0: colors[1],
+            borderColor: undefined,
+            borderColor0: undefined,
             opacity: 0.5
+          }
+        },
+        { name: 'Cash D/W',
+          type: 'bar',
+          yAxisIndex: 1,
+          // barWidth: 15,
+          data: seriesCashIO,
+          itemStyle: {
+              color: upColor,
+              color0: downColor,
+              borderColor: undefined,
+              borderColor0: undefined,
+              opacity: 0.35
+            } 
         }
-      },
-      {
-        name: 'NVP',
-        type: 'bar',
-        xAxisIndex: 1,
-        yAxisIndex: 1,
-        data: seriesVolumes,
-        itemStyle: {
-          color: upColor,
-          color0: downColor,
-          borderColor: undefined,
-          borderColor0: undefined,
-          opacity: 0.8
-        }
-      }
       ]
     };
+    let chartOptions = this.countryCasesChartOptions
   }
+
 }
 

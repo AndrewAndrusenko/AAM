@@ -1,5 +1,8 @@
-<mat-toolbar style="margin-left: 1%;" color="primary" >
-  {{action}} | Entry: {{setupDone&&d_transactionType.value=='LL'? ' Ledger - Ledger':' Account - Ledger'}}
+<mat-toolbar style="margin-left: 1%;" color="primary" 
+cdkDrag
+cdkDragRootElement=".cdk-overlay-pane" 
+cdkDragHandle>
+  {{action}} {{id.value}}| Entry: {{setupDone&&d_transactionType.value=='LL'? ' Ledger - Ledger':' Account - Ledger'}}
   | ID: {{setupDone? id.value:''}} 
   | Status: {{ entryModifyForm.status }}
 </mat-toolbar>

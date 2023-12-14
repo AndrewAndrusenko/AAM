@@ -245,6 +245,7 @@ export class AppTableAccEntriesComponent implements OnInit {
   }
   exportToExcel() {
     let data = this.dataSource.data.map( (row,ind) =>({
+      'ID': Number (row.t_id),
       'Date': new Date (row.t_dataTime),
       'Debit' : row.d_Debit,
       'Credit' : row.d_Credit,

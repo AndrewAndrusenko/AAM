@@ -1,8 +1,8 @@
 -- FUNCTION: public.f_fifo_get_cost_current_positions(date, bigint[])
 
-DROP FUNCTION IF EXISTS public.f_fifo_get_cost_current_positions(date, bigint[],numeric);
+-- DROP FUNCTION IF EXISTS public.v2f_fifo_get_cost_current_positions(date, bigint[],numeric);
 
-CREATE OR REPLACE FUNCTION public.f_fifo_get_cost_current_positions(
+CREATE OR REPLACE FUNCTION public.v2f_fifo_get_cost_current_positions(
 	p_report_date date,
 	p_idportfolios bigint[],
     p_report_currency numeric)
@@ -99,6 +99,7 @@ FROM
       )
     WHERE
       f_i_get_cross_ratesfor_period_currencylist.base_code = portfolios_currency."currencyCode"
+      AND f_i_get_cross_ratesfor_period_currencylist.quote_code = p_report_currency
     ORDER BY
       f_i_get_cross_ratesfor_period_currencylist.rate_date DESC
     LIMIT
@@ -107,6 +108,6 @@ FROM
 END
 $BODY$;
 
-ALTER FUNCTION public.f_fifo_get_cost_current_positions(date, bigint[], numeric)
+ALTER FUNCTION public.v2f_fifo_get_cost_current_positions(date, bigint[], numeric)
     OWNER TO postgres;
-SELECT * FROM f_fifo_get_cost_current_positions('11/14/23',	array[11],810);
+SELECT * FROM v2f_fifo_get_cost_current_positions('11/14/23',	array[11],826);

@@ -87,3 +87,21 @@ we get closest market price for every position
 6/12/23
 1|| UI Table to track portfolios npv dynamic perfomance, roi = > fully implemented with complex search, dynamic currency symbol change, excel export and formatted data
 2|| UI Chart Performance analysis => Time-Weighted Rate of Return => draft of the chart 
+--------------------------------------------------------------------------------------------
+
+7/12/23
+1|| UI Chart Performance analysis => Time-Weighted Rate of Return => draft of the chart 
+
+10-11/12/23
+1|| UI Chart Performance analysis implemented: 
+  Custom color model for cash outs/in, 
+  Dynamic labels and tooltips populating based type of data and type of transfer (deposit or withdrawal)
+  Custom/dynamic yAxises: design depends on data series and current scale
+  Added MarkPoints for TWR line to show max,min and the latest value of perfomance rate 
+2|| UI NPV Dynamic Table => create draft
+
+13/12/23
+1|| UI NPV Dynamic Table => Implemented table with complex search and design patterns 
+2|| DB & UI Profit and Loss calculation => 
+  Fixed costs calculation for local bonds 
+  Implemented costs and pl conversion according to the report currency value

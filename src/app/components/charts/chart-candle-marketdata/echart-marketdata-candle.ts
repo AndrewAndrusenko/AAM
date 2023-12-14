@@ -56,6 +56,7 @@ export class NgEchartMarketDataCandleComponent  {
         seriesDate.push(new Date(el.tradedate).toLocaleDateString())
       }
     })
+    console.log('seriesVolumes',seriesVolumes);
     if (seriesDate.length !== new Set (seriesDate).size) {
       this.CommonDialogsService.snackResultHandler({name:'error', detail:'There are multipule quotes for one date. Try to filter data by board or exchange'},'Chart','top')
       // this.CommonDialogsService.snackResultHandler({name:'success', detail:'Try to filter data by board or exchange'},'Chart','top')

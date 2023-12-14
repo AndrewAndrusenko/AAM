@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, Subject, map, tap } from 'rxjs';
-import { AccountsTableModel, accountTypes, ClientData, InstrumentData, PortfolioPerformnceData, portfolioPositions, StrategiesGlobalData, StrategyStructure } from '../models/intefaces.model';
+import { AccountsTableModel, accountTypes, ClientData, InstrumentData, NPVDynamicData, PortfolioPerformnceData, portfolioPositions, StrategiesGlobalData, StrategyStructure } from '../models/intefaces.model';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +15,7 @@ export class AppInvestmentDataServiceService {
   private subjectReloadPortfoliosData = new Subject<any>(); 
   private subjectReloadClientTable = new Subject<ClientData[]>(); 
   private subjectClientsPortfolios = new Subject<{id:number,code:string}[]>(); 
-  private subjectPerformanceData = new Subject<PortfolioPerformnceData[]>(); 
+  private subjectPerformanceData = new Subject<{data: PortfolioPerformnceData[],currencySymbol:string}>(); 
   
   getPortfoliosData (accountType:string, idportfolio: number, clientId: number, strategyMpName: string, action:string, accessToClientData:string='none'):Observable <AccountsTableModel[]> {
     const params = {
@@ -84,7 +84,6 @@ export class AppInvestmentDataServiceService {
     const params = {'Name' :Name, 'action':action }
     return this.http.get <string[][]> ('/api/AAM/GetStrategyStructure/',{ params: params } ).pipe(
       map(data=> data[0]['array_agg']),
-      tap (d=>console.log('new',d))
     )
   }
   getAccountTypesList (id:number, Name:string, action:string) : Observable <accountTypes[]>  {
@@ -138,28 +137,43 @@ export class AppInvestmentDataServiceService {
       p_report_date_end:string, 
       p_report_currency :number 
     } ):Observable<PortfolioPerformnceData[]> {
-      params_data = params_data? params_data : {
+      params_data = params_data?   params_data : {
         p_portfolios_list:['ACM002','ICM011','VPC005'],
         p_report_date_start:'11/05/23', 
         p_report_date_end: '12/05/23',
         p_report_currency:840
-    }
+    };
     return this.http.post <PortfolioPerformnceData[]> ('/api/AAM/GetPortfolioAnalytics/',
     {
-      params:params_data
-      /* {
+      params:params_data,
+      action:'getPortfolioPerformnceData',
+      order:' portfolioname, report_date'
+    })
+  }
+  getNPVDynamic (
+    params_data?: {
+      p_portfolios_list : string[], 
+      p_report_date_start: string, 
+      p_report_date_end:string, 
+      p_report_currency :number 
+    } ):Observable<NPVDynamicData[]> {
+      params_data = params_data?   params_data : {
         p_portfolios_list:['ACM002','ICM011','VPC005'],
-        p_report_date_start:'02/01/23', 
+        p_report_date_start:'11/05/23', 
         p_report_date_end: '12/05/23',
         p_report_currency:840
-      } */,
-      action:'getPortfolioPerformnceData',
-      order:' portfolioname, report_date'})
+    };
+    return this.http.post <NPVDynamicData[]> ('/api/AAM/GetPortfolioAnalytics/',
+    {
+      params:params_data,
+      action:'getNPVDynamic',
+      order:' portfolioname, report_date,secid'
+    })
   }
-  recievePerformnceData(): Observable<PortfolioPerformnceData[]> { 
+  recievePerformnceData(): Observable<{data: PortfolioPerformnceData[],currencySymbol:string}> { 
     return this.subjectPerformanceData.asObservable(); 
   }
-  sendPerformnceData (data: PortfolioPerformnceData[]) {
-    this.subjectPerformanceData.next(data);
+  sendPerformnceData (dataSet:{data: PortfolioPerformnceData[],currencySymbol:string}) {
+    this.subjectPerformanceData.next(dataSet);
   }
 }

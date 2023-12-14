@@ -3,7 +3,7 @@ import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {Observable, Subscription, distinctUntilChanged, filter, from, map, of, startWith, switchMap, tap } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
-import {PortfolioPerformnceData,tableHeaders } from 'src/app/models/intefaces.model';
+import {NPVDynamicData,tableHeaders } from 'src/app/models/intefaces.model';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
 import {AbstractControl, FormBuilder, Validators, FormGroup, FormControl } from '@angular/forms';
@@ -16,12 +16,12 @@ import {AppInvestmentDataServiceService } from 'src/app/services/investment-data
 import {indexDBService } from 'src/app/services/indexDB.service';
 import {MatCheckbox } from '@angular/material/checkbox';
 @Component({
-  selector: 'app-inv-portfolio-npv_roi_performance',
+  selector: 'app-inv-portfolio-npv_dynamic',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './inv-portfolio-npv_roi_performance.html',
-  styleUrls: ['./inv-portfolio-npv_roi_performance.scss'],
+  templateUrl: './inv-portfolio-npv_dynamic.html',
+  styleUrls: ['./inv-portfolio-npv_dynamic.scss'],
 })
-export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
+export class AppaInvPortfolioNPVDynamicComponent {
  
   accessState: string = 'none';
   disabledControlElements: boolean = false;
@@ -33,19 +33,21 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
   columnsWithHeaders: tableHeaders[] = [
     {fieldName:'portfolioname',displayName:'Code'},
     {fieldName:'report_date',displayName:'Date'},
-    {fieldName:'npv',displayName:'NPV'},
-    {fieldName:'roi_current_period',displayName:'ROI'},
-    {fieldName:'time_wighted_roi',displayName:'TW ROI'},
-    {fieldName:'last_npv',displayName:'Start NPV'},
-    {fieldName:'cash_flow',displayName:'Cash Flow'},
-    {fieldName:'correction_rate',displayName:'Correction'},
-    {fieldName:'correction_rate_compound',displayName:'TW Correction'},
-    {fieldName:'period_start_date',displayName:'Start_Date'}
+    {fieldName:'accountNo',displayName:'Account'},
+    {fieldName:'secid',displayName:'SecID'},
+    {fieldName:'balance',displayName:'Balance'},
+    {fieldName:'pos_pv',displayName:'Position_PV'},
+    {fieldName:'mtm_rate',displayName:'MTM Rate'},
+    {fieldName:'mtm_date',displayName:'MTM Date'},
+    {fieldName:'dirty_price',displayName:'Dirty Price'},
+    {fieldName:'cross_rate',displayName:'Cross'},
+    {fieldName:'rate_date',displayName:'Cross date'},
   ];
+
   columnsToDisplay: string [];
   columnsHeaderToDisplay: string [];
-  dataSource: MatTableDataSource<PortfolioPerformnceData>;
-  fullDataSource: PortfolioPerformnceData[];
+  dataSource: MatTableDataSource<NPVDynamicData>;
+  fullDataSource: NPVDynamicData[];
   @ViewChild('filterALL', { static: false }) filterALL: ElementRef;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
@@ -93,7 +95,6 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
       MP:null,
       p_report_date_start:null,
       p_report_date_end:null,
-      // dataRangeSF : [this.dataRange, { validators:  Validators.required, updateOn: 'blur' }],
       p_report_currency:['840', { validators:  Validators.required}],
     });
   }
@@ -104,7 +105,7 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
     this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios').then ((data)=>{
       this.mp_strategies_list = data['data']
     })
-    this.multiFilter = (data: PortfolioPerformnceData, filter: string) => {
+    this.multiFilter = (data: NPVDynamicData, filter: string) => {
       let filter_array = filter.split(',').map(el=>[el,1]);
       this.columnsToDisplay.forEach(col=>filter_array.forEach(fil=>{
         data[col]&&fil[0].toString().toUpperCase()===(data[col]).toString().toUpperCase()? fil[1]=0:null
@@ -112,7 +113,7 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
         );
       return !filter || filter_array.reduce((acc,val)=>acc+Number(val[1]),0)===0;
     };
-    this.InvestmentDataService.getPortfolioPerformnceData().subscribe (positionsData =>{
+    this.InvestmentDataService.getNPVDynamic().subscribe (positionsData =>{
       this.updateDataTable(positionsData);
     });  
     this.filters==undefined&&this.fullDataSource!==undefined? this.initialFilterOfDataSource(this.filters) : null;
@@ -135,7 +136,7 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
         map(value => this.AutoCompService.filterList(value || '','currency'))
       );
     }
-    this.multiFilter = (data: PortfolioPerformnceData, filter: string) => {
+    this.multiFilter = (data: NPVDynamicData, filter: string) => {
       let filter_array = filter.split(',').map(el=>[el,1]);
       this.columnsToDisplay.forEach(col=>filter_array.forEach(fil=>{
         data[col]&&fil[0].toString().toUpperCase()===(data[col]).toString().toUpperCase()? fil[1]=0:null
@@ -153,8 +154,6 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
     this.InvestmentDataService.getPortfoliosListForMP(e.value,'getPortfoliosByMP_StrtgyID').subscribe(data=>{
       this.portfolios=['ClearAll',...data[0]['array_agg']]
       this.filterALL.nativeElement.value = e.value;
-      // this.dataSource.filter = e.value.toLowerCase();
-      // (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
     })
   }
   initialFilterOfDataSource (filter:any) {
@@ -176,18 +175,13 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
       this.initialFilterOfDataSource (changes['filters'].currentValue);
     }
   }
-  updateDataTable (positionsData:PortfolioPerformnceData[]) {
+  updateDataTable (positionsData:NPVDynamicData[]) {
     this.AutoCompService.fullCurrenciesList.length? this.currencyChanged(this.report_id_currency.value):null;
     this.fullDataSource=positionsData;
     this.dataSource  = new MatTableDataSource(positionsData);
     this.dataSource.filterPredicate =this.multiFilter
-    // this.filterALL? this.filterALL.nativeElement.value=null : null;
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
-    this.InvestmentDataService.sendPerformnceData({data:positionsData,currencySymbol:this.currencySymbol})
-
-    // this.filters? this.initialFilterOfDataSource(this.filters) : null;
-    // this.notNullCB?.checked===false? this.showZeroPortfolios(false):null;
   }
   submitQuery (reset:boolean=false, showSnackResult:boolean=true) {
     let searchObj = reset?  {} : this.searchParametersFG.value;
@@ -197,7 +191,7 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
     of(this.portfolios.length).pipe(
       switchMap(portLength => portLength===1? this.InvestmentDataService.getPortfoliosListForMP('All','getPortfoliosByMP_StrtgyID'):from([[...this.portfolios]])),
       tap(ports=>searchObj.p_portfolios_list = ports.map(el=>el.toUpperCase())),
-      switchMap(ports=>this.InvestmentDataService.getPortfolioPerformnceData(searchObj))
+      switchMap(ports=>this.InvestmentDataService.getNPVDynamic(searchObj))
     ).subscribe(data => {
       this.updateDataTable(data)
       showSnackResult? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ') : null;
@@ -246,8 +240,8 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
   //   return (this.dataSource&&this.dataSource.data)?  this.dataSource.filteredData.map(el => el[col]).reduce((acc, value) => acc + Number(value), 0):0;
   // }
   exportToExcel() {
-    let numberFields=['npv','roi_current_period','time_wighted_roi','last_npv','cash_flow','correction_rate','correction_rate_compound'];
-    let dateFields=['report_date','period_start_date'];
+    let numberFields=['pos_pv','mtm_rate','balance','cross_rate','dirty_price'];
+    let dateFields=['report_date','mtm_date','rate_date'];
     let dataToExport =  this.dataSource.data.map(el=>{
       Object.keys(el).forEach(key=>{
         switch (true==true) {
@@ -258,7 +252,7 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
       })
       return el;
     });
-    this.HandlingCommonTasksS.exportToExcel (dataToExport,"performanceDataTWR");  
+    this.HandlingCommonTasksS.exportToExcel (dataToExport,"npvDynamic");  
   }
   get  idportfolios () {return this.searchParametersFG.get('p_portfolios_list') } 
   get  dateRangeStart () {return this.dataRange.get('dateRangeStart') } 

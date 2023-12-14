@@ -191,24 +191,26 @@ async function fGetPortfolioAnalytics (request,response) {
   let conditionsDic = {
     'secidList':' LOWER(secid) = ANY(${secidList}) ',
     'deviation':' ABS(order_amount/notnull_npv*100) > ${deviation}::numeric ',
-    // 'notnull':' npv !=0 ',
     }
   let conditions =' WHERE'
-  Object.entries(conditionsDic).forEach(([key]) => {
+/*   Object.entries(conditionsDic).forEach(([key]) => {
   if  (request.body.params.hasOwnProperty(key)&&request.body.params[key]) {
     conditions +=conditionsDic[key] + ' AND ';
     }
-  });
+  }); */
   let sql = '';
   switch (request.body.action) {
     case 'getPortfolioPerformnceData':
       sql= 'SELECT * FROM public.f_i_get_npv_dynamic_with_perfomance_twroi (${p_portfolios_list },${p_report_date_start}, ${p_report_date_end}, ${p_report_currency}) ' 
       sql += conditions.slice(0,-5) + request.body.order? 'ORDER BY' + request.body.order +';' :';'
     break;
+    case 'getNPVDynamic':
+      sql= 'SELECT * FROM public.f_i_get_npv_dynamic (${p_portfolios_list },${p_report_date_start}, ${p_report_date_end}, ${p_report_currency}) ' 
+      sql += conditions.slice(0,-5) + request.body.order? 'ORDER BY' + request.body.order +';' :';'
+    break;
   }
+  
   sql = pgp.as.format(sql,request.body.params);
-  console.log('',request.body.params);
-  console.log('',sql);
   db_common_api.queryExecute(sql,response,undefined,request.body.action);
 }
 module.exports = {

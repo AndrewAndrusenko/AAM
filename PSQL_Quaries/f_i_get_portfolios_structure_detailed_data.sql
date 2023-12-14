@@ -64,7 +64,7 @@ WITH
         AND current_position.instrument = COALESCE(modelportfolio_structure.instrument,modelportfolio_structure.total_type)
       )
 	  FULL OUTER JOIN (
-	  select * from f_fifo_get_pl_positions_by_portfolio(p_report_date,p_idportfolios)) AS pl_data ON (
+	  select * from f_fifo_get_pl_positions_by_portfolio(p_report_date,p_idportfolios,p_report_currency)) AS pl_data ON (
         pl_data.idportfolio = current_position.idportfolio
         AND current_position.instrument =pl_data.secid
       )
@@ -154,7 +154,7 @@ WITH
     FROM
       full_portfolio
       LEFT JOIN mtm_data ON mtm_data.secid = full_portfolio.secid
-	  LEFT JOIN (SELECT * FROM f_fifo_get_cost_current_positions(p_report_date,	p_idportfolios)) AS positions_cost 
+	  LEFT JOIN (SELECT * FROM f_fifo_get_cost_current_positions(p_report_date,	p_idportfolios,p_report_currency)) AS positions_cost 
 		 ON (positions_cost.secid= full_portfolio.secid and positions_cost.idportfolio= full_portfolio.idportfolio)
       LEFT JOIN accured_interest_data ON accured_interest_data.secid = full_portfolio.secid
 
@@ -175,14 +175,17 @@ SELECT
  full_portfolio_with_mtm_data.mp_id,
  npv_portfolios.npv as notnull_npv,
  full_portfolio_with_mtm_data.mtm_positon_base_cur,
- ROUND((full_portfolio_with_mtm_data.mtm_positon - full_portfolio_with_mtm_data.cost_in_position+full_portfolio_with_mtm_data.pl)
+ ROUND((full_portfolio_with_mtm_data.mtm_positon*full_portfolio_with_mtm_data.cross_rate - full_portfolio_with_mtm_data.cost_in_position+full_portfolio_with_mtm_data.pl)
 	   /ABS(full_portfolio_with_mtm_data.cost_full_position)*100,2) AS roi,
-  ROUND(full_portfolio_with_mtm_data.pl*full_portfolio_with_mtm_data.cross_rate,2) AS pl,
-  ROUND(full_portfolio_with_mtm_data.cost_in_position*full_portfolio_with_mtm_data.cross_rate,2) AS cost_in_position,
-  ROUND(full_portfolio_with_mtm_data.cost_full_position*full_portfolio_with_mtm_data.cross_rate,2) AS cost_full_position,
-  ROUND((full_portfolio_with_mtm_data.mtm_positon - full_portfolio_with_mtm_data.cost_in_position)*full_portfolio_with_mtm_data.cross_rate,2) 
+  full_portfolio_with_mtm_data.pl,
+  full_portfolio_with_mtm_data.cost_in_position,
+  full_portfolio_with_mtm_data.cost_full_position,
+  ROUND((full_portfolio_with_mtm_data.mtm_positon*full_portfolio_with_mtm_data.cross_rate - full_portfolio_with_mtm_data.cost_in_position),2) 
   AS unrealizedpl,
-  ROUND((full_portfolio_with_mtm_data.mtm_positon - full_portfolio_with_mtm_data.cost_in_position+full_portfolio_with_mtm_data.pl)*full_portfolio_with_mtm_data.cross_rate,2) 
+  ROUND(
+	  (full_portfolio_with_mtm_data.mtm_positon*full_portfolio_with_mtm_data.cross_rate - 
+		 full_portfolio_with_mtm_data.cost_in_position+full_portfolio_with_mtm_data.pl)
+	,2) 
   AS total_pl,
   full_portfolio_with_mtm_data.idportfolio,
   full_portfolio_with_mtm_data.portfolio_code,

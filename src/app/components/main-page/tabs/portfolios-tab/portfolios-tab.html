@@ -1,17 +1,17 @@
 <mat-tab-group mat-stretch-tabs>
   
+  <mat-tab label="NPV Dynamic Data">  
+    <app-inv-portfolio-npv_dynamic></app-inv-portfolio-npv_dynamic>  
+  </mat-tab>
   <mat-tab label="Performance Data">  
     <app-inv-portfolio-npv_roi_performance></app-inv-portfolio-npv_roi_performance>  
-  </mat-tab>
-  <mat-tab label="NPV Dynamic Data">  
-    <app-inv-portfolio-npv_roi_performance></app-inv-portfolio-npv_roi_performance>  
-  </mat-tab>
-  <mat-tab label="Portfolios Full List">  
-    <app-portfolio-tablee></app-portfolio-tablee>  
   </mat-tab>
   <mat-tab  label="Portfolios Positions " >
     <app-inv-portfolio-position-table
     [filters]="{rest:true}"> 
-    </app-inv-portfolio-position-table> 
-  </mat-tab>  
+  </app-inv-portfolio-position-table> 
+</mat-tab>  
+<mat-tab label="Portfolios Full List">  
+  <app-portfolio-tablee></app-portfolio-tablee>  
+</mat-tab>
 </mat-tab-group>
