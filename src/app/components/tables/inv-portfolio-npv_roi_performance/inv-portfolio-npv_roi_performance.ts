@@ -65,15 +65,6 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
   filteredCurrenciesList: Observable<string[]>;
   mp_strategies_list: string[]=[];
   currencySymbol: string = '$';
-/*   activeTab:string='';
-  tabsNames = ['Portfolio Positions']
-  @HostListener('document:keydown', ['$event'])
-  handleKeyboardEvent(event: KeyboardEvent) { 
-    if (this.tabsNames.includes(this.activeTab)){
-      event.altKey&&event.key==='r'? this.submitQuery(false,true):null;
-      event.altKey&&event.key==='w'? this.exportToExcel():null;
-    }
-  } */
   constructor(
     private AuthServiceS:AuthService,  
     private indexDBServiceS:indexDBService,
@@ -143,7 +134,6 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
         );
       return !filter || filter_array.reduce((acc,val)=>acc+Number(val[1]),0)===0;
     }
-    // this.subscriptions.add(this.TreeMenuSevice.getActiveTab().subscribe(tabName=>this.activeTab=tabName));
   }
   resetSearchForm () {
     this.searchParametersFG.reset();
@@ -153,8 +143,6 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
     this.InvestmentDataService.getPortfoliosListForMP(e.value,'getPortfoliosByMP_StrtgyID').subscribe(data=>{
       this.portfolios=['ClearAll',...data[0]['array_agg']]
       this.filterALL.nativeElement.value = e.value;
-      // this.dataSource.filter = e.value.toLowerCase();
-      // (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
     })
   }
   initialFilterOfDataSource (filter:any) {
@@ -181,13 +169,9 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
     this.fullDataSource=positionsData;
     this.dataSource  = new MatTableDataSource(positionsData);
     this.dataSource.filterPredicate =this.multiFilter
-    // this.filterALL? this.filterALL.nativeElement.value=null : null;
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
     this.InvestmentDataService.sendPerformnceData({data:positionsData,currencySymbol:this.currencySymbol})
-
-    // this.filters? this.initialFilterOfDataSource(this.filters) : null;
-    // this.notNullCB?.checked===false? this.showZeroPortfolios(false):null;
   }
   submitQuery (reset:boolean=false, showSnackResult:boolean=true) {
     let searchObj = reset?  {} : this.searchParametersFG.value;
@@ -242,9 +226,6 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
   currencyChanged(code:string) {
     this.currencySymbol = this.AutoCompService.fullCurrenciesList.filter(el=>el['CurrencyCodeNum']==code)[0]['symbol'];
   }
-  // getTotals (col:string) {
-  //   return (this.dataSource&&this.dataSource.data)?  this.dataSource.filteredData.map(el => el[col]).reduce((acc, value) => acc + Number(value), 0):0;
-  // }
   exportToExcel() {
     let numberFields=['npv','roi_current_period','time_wighted_roi','last_npv','cash_flow','correction_rate','correction_rate_compound'];
     let dateFields=['report_date','period_start_date'];

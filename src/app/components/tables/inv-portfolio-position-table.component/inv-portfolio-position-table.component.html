@@ -23,7 +23,7 @@
     Reload 
     <mat-icon matSuffix >refresh</mat-icon>
   </button>
-  <mat-checkbox title="Show zero portfolios" #notNull
+  <mat-checkbox  *ngIf="UI_portfolio_zero===true"  title="Show zero portfolios" #notNull
     (change)="showZeroPortfolios($event.checked)"
     style="font-size:larger; margin-left: 2%;">
     Zero Portfolio
@@ -68,74 +68,44 @@
         Inccorect Code! 
       </mat-error>
     </mat-form-field>
-    <span style="display:grid; width: 20%; margin-right: 1%;"> <!-- MP Filter -->
-      <mat-select placeholder="Model Portfolio" class="search-filed" 
-        formControlName="MP" 
-        style="height: 150%;"
-        (selectionChange)="setPortfoliosList($event)"  >
-        <mat-option *ngFor="let mp of mp_strategies_list" [value]="mp['name']"> {{mp['name']}} </mat-option>
-      </mat-select>
-    </span>
-    <mat-form-field  appearance="fill" style="width: 60%; margin-bottom: 0.5%; " class="search-filed">
-      <mat-chip-list #chipPortList   >
-        <mat-chip *ngFor="let portfolio of portfolios" 
-        (removed)="remove(portfolio,portfolios,idportfolios)"
-        (click)=" portfolios = clearAll($event,portfolios,idportfolios);">
-          {{portfolio}}
-          <button matChipRemove *ngIf="portfolio!=='ClearAll'">
-            <mat-icon>cancel</mat-icon>
-          </button>
-        </mat-chip>
-        <input style="width: 45%;"
-        matInput
-        placeholder="Add portfolio or portfolio1,portfolio2.."
-        formControlName="idportfolios"
-        [matChipInputFor]="chipPortList"
-        [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-        [matChipInputAddOnBlur]="true"
-        (matChipInputTokenEnd)="portfolios = add($event,portfolios,idportfolios)"
-        matTooltip="Type portfolio code or paste multiple codes separated by comma and press enter" >
+      <span *ngIf="UI_portfolio_selection===true" style="display:grid; width: 20%; margin-right: 1%;"> <!-- MP Filter -->
+        <mat-select placeholder="Model Portfolio" class="search-filed" 
+          formControlName="MP" 
+          style="height: 150%;"
+          (selectionChange)="setPortfoliosList($event)"  >
+          <mat-option *ngFor="let mp of mp_strategies_list" [value]="mp['name']"> {{mp['name']}} </mat-option>
+        </mat-select>
+      </span>
+      <mat-form-field *ngIf="UI_portfolio_selection===true"  appearance="fill" style="width: 60%; margin-bottom: 0.5%; " class="search-filed">
+        <mat-chip-list #chipPortList   >
+          <mat-chip *ngFor="let portfolio of portfolios" 
+          (removed)="remove(portfolio,portfolios,idportfolios)"
+          (click)=" portfolios = clearAll($event,portfolios,idportfolios);">
+            {{portfolio}}
+            <button matChipRemove *ngIf="portfolio!=='ClearAll'">
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </mat-chip>
+          <input style="width: 45%;"
+          matInput
+          placeholder="Add portfolio or portfolio1,portfolio2.."
+          formControlName="idportfolios"
+          [matChipInputFor]="chipPortList"
+          [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+          [matChipInputAddOnBlur]="true"
+          (matChipInputTokenEnd)="portfolios = add($event,portfolios,idportfolios)"
+          matTooltip="Type portfolio code or paste multiple codes separated by comma and press enter" >
 
-      </mat-chip-list>
-      <mat-hint style="color:rgb(104, 246, 246); font-style: italic;">
-        Portfolios List
-      </mat-hint>
-    </mat-form-field>
-<!--     <mat-form-field  appearance="fill" style="width: 10%; color:black" class="search-filed">
-      <mat-chip-list #chipListSecid   >
-        <mat-chip *ngFor="let secid of instruments" 
-        (removed)="remove(secid,instruments,secidList)"
-        (click)=" instruments = clearAll($event,instruments,secidList);">
-          {{secid}}
-          <button matChipRemove *ngIf="portfolio!=='ClearAll'">
-            <mat-icon>cancel</mat-icon>
-          </button>
-        </mat-chip>
-        <input [disabled]="true"
-        [matAutocomplete]="auto"
-        matInput
-        placeholder="Add secid or secid,secid1,secid2.."
-        formControlName="secidList"
-        [matChipInputFor]="chipListSecid"
-        [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-        [matChipInputAddOnBlur]="true"
-        (matChipInputTokenEnd)="instruments = add($event,instruments,secidList)"
-        matTooltip="DISABLED! Type secid or paste multiple secid codes separated by comma and press enter" >
-      </mat-chip-list>
-      <mat-autocomplete #auto="matAutocomplete" (optionSelected)="changedValueofChip($event.option.value,instruments,secidList)">
-        <mat-option *ngFor="let secid of filterednstrumentsLists | async" [value]="secid.toString().split(',')[0]">
-          {{secid.toString().replaceAll(',',' - ')}}
-        </mat-option>
-      </mat-autocomplete>
-      <mat-hint style="color:rgb(104, 246, 246); font-style: italic;">
-        Instruments List
-      </mat-hint>
-    </mat-form-field> -->
+        </mat-chip-list>
+        <mat-hint style="color:rgb(104, 246, 246); font-style: italic;">
+          Portfolios List
+        </mat-hint>
+      </mat-form-field>
 </span>
 </form>
   <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort
    class="mat-elevation-z8" 
-    class ="childTable" style="width: 150%;" >
+    class ="childTable" style="width: 150%; margin-top: 0.5%;" >
     <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i=index" justify="right"  >
       <th mat-header-cell *matHeaderCellDef mat-sort-header> {{columnsHeaderToDisplay[i]}}</th>
       <td mat-footer-cell *matFooterCellDef let> <h2 style="margin-top: 5%;">

@@ -11,7 +11,7 @@ import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
   styleUrls: ['./root-page.component.css']
 })
 export class DashboardComponent implements OnDestroy,OnInit {
-  opened: boolean = false;
+  opened: boolean = true;
   private subscriptionName: Subscription;
   color = 'accent';
   checked = false;

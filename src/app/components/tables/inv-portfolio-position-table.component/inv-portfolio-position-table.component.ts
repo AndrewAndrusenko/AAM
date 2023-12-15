@@ -3,7 +3,7 @@ import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {Observable, Subscription, distinctUntilChanged, filter, map, startWith, switchMap, tap } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
-import {portfolioPositions, trades } from 'src/app/models/intefaces.model';
+import {portfolioPositions } from 'src/app/models/intefaces.model';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
 import {AbstractControl, FormBuilder, Validators, FormGroup } from '@angular/forms';
@@ -31,6 +31,8 @@ export class AppaInvPortfolioPositionTableComponent {
   @Input() rowsPerPages:number = 15;
   @Input() filters:any;
   @Input() readOnly:boolean = false;
+  @Input() UI_portfolio_selection:boolean = true;
+  @Input() UI_portfolio_zero:boolean = true;
   columnsToDisplay = ['portfolio_code','secid','mp_name','fact_weight','current_balance','mtm_positon','weight','planned_position','deviation_percent','order_amount','mtm_rate','roi','total_pl','pl','unrealizedpl','cost_in_position','mtm_date','order_type','order_qty','orders_unaccounted_qty','mtm_dirty_price','cross_rate','strategy_name','cost_full_position','rate_date'];
   columnsHeaderToDisplay = ['Code','SecID','MP','Fact %','Balance','PositionMTM','MP %','MP_Position','DV%','Deviation','MTM_Rate','ROI','Total PL','FIFO PL','MTM PL','Position Cost','MTM_Date','TypeBS','Deviation Qty','Qty in Active Orders ','MTM_Dirty','CurRate','Strategy','Cost Full','CurDate']
   dataSource: MatTableDataSource<portfolioPositions>;
@@ -59,7 +61,6 @@ export class AppaInvPortfolioPositionTableComponent {
     }
   } */
   constructor(
-    private TreeMenuSevice: TreeMenuSevice,
     private AuthServiceS:AuthService,  
     private indexDBServiceS:indexDBService,
     private InvestmentDataService:AppInvestmentDataServiceService, 
@@ -71,7 +72,6 @@ export class AppaInvPortfolioPositionTableComponent {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.searchParametersFG = this.fb.group ({
-      secidList: [],
       idportfolios:  [],
       MP:null,
       notnull:true,
@@ -83,21 +83,8 @@ export class AppaInvPortfolioPositionTableComponent {
     this.subscriptions.unsubscribe();
   }
   ngOnInit(): void {
-    this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios').then ((data)=>{
-      this.mp_strategies_list = data['data']
-    })
-    this.multiFilter = (data: portfolioPositions, filter: string) => {
-      let filter_array = filter.split(',').map(el=>[el,1]);
-      this.columnsToDisplay.forEach(col=>filter_array.forEach(fil=>{
-        data[col]&&fil[0].toString().toUpperCase()===(data[col]).toString().toUpperCase()? fil[1]=0:null
-      })
-        );
-      return !filter || filter_array.reduce((acc,val)=>acc+Number(val[1]),0)===0;
-    };
-    this.InvestmentDataService.getPortfoliosPositions(this.searchParametersFG.value).subscribe (positionsData =>{
-      this.updatePositionsDataTable(positionsData);
-    });  
-    this.filters==undefined&&this.fullDataSource!==undefined? this.initialFilterOfDataSource(this.filters) : null;
+    this.filters? this.setFilters(this.filters):null;
+    this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios').then (data=>this.mp_strategies_list = data['data']);
     if (this.useGetClientsPortfolios===true) {
       this.subscriptions.add(this.InvestmentDataService.getClientsPortfolios().pipe(
         tap(() => this.dataSource? this.dataSource.data = null: null),
@@ -105,25 +92,16 @@ export class AppaInvPortfolioPositionTableComponent {
         filter(portfolios=>portfolios.length>0)
       ).subscribe(portfoliosData=> {
         this.filters = {portfolio_code: portfoliosData.map(el=>el.code)};
-        this.fullDataSource!==undefined? this.initialFilterOfDataSource(this.filters) : null;
-        this.notNullCB?.checked===false&&this.fullDataSource!==undefined? this.showZeroPortfolios(false):null;
+        this.setFilters (this.filters);
       }));
     }
-    if (this.readOnly===false) {
-      this.subscriptions.add(this.AutoCompService.recieveCurrencyListReady().subscribe(()=>this.report_id_currency.updateValueAndValidity()));
-      this.AutoCompService.getSecidLists();
-      this.AutoCompService.getCurrencyList();
-      this.filterednstrumentsLists = this.secidList.valueChanges.pipe(
-        startWith(''),
-        distinctUntilChanged(),
-        map(value => this.AutoCompService.filterList(value || '','secid'))
-      );
-      this.filteredCurrenciesList = this.report_id_currency.valueChanges.pipe (
-        startWith (''),
-        distinctUntilChanged(),
-        map(value => this.AutoCompService.filterList(value || '','currency'))
-      );
-    }
+    this.subscriptions.add(this.AutoCompService.recieveCurrencyListReady().subscribe(()=>this.report_id_currency.updateValueAndValidity()));
+    this.AutoCompService.getCurrencyList();
+    this.filteredCurrenciesList = this.report_id_currency.valueChanges.pipe (
+      startWith (''),
+      distinctUntilChanged(),
+      map(value => this.AutoCompService.filterList(value || '','currency'))
+    );
     this.multiFilter = (data: portfolioPositions, filter: string) => {
       let filter_array = filter.split(',').map(el=>[el,1]);
       this.columnsToDisplay.forEach(col=>filter_array.forEach(fil=>{
@@ -132,7 +110,6 @@ export class AppaInvPortfolioPositionTableComponent {
         );
       return !filter || filter_array.reduce((acc,val)=>acc+Number(val[1]),0)===0;
     }
-    // this.subscriptions.add(this.TreeMenuSevice.getActiveTab().subscribe(tabName=>this.activeTab=tabName));
   }
   setPortfoliosList(e:any) {
     this.InvestmentDataService.getPortfoliosListForMP(e.value,'getPortfoliosByMP_StrtgyID').subscribe(data=>{
@@ -144,7 +121,7 @@ export class AppaInvPortfolioPositionTableComponent {
   }
   showZeroPortfolios(event:boolean) {
     if (event) {
-      this.initialFilterOfDataSource(this.filters)
+      this.dataSource.data = this.fullDataSource;
     } else {
       this.dataSource.data = this.dataSource.filteredData.filter(el=>el['not_zero_npv']===true)
     }
@@ -164,26 +141,33 @@ export class AppaInvPortfolioPositionTableComponent {
     }
   }
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['filters']?.currentValue!==undefined&&this.fullDataSource!==undefined)  {
+    // console.log('changes.currentValue?',changes['filters']?.currentValue);
+    changes['filters']?.currentValue? this.setFilters(changes['filters']?.currentValue) : null;
+/*     if (changes['filters']?.currentValue?.portfolio_code) {
+      this.idportfolios.patchValue(['ClearAll',changes['filters'].currentValue.portfolio_code]);
+    } */
+/*     if (changes['filters']?.currentValue!==undefined&&this.fullDataSource!==undefined)  {
       this.initialFilterOfDataSource (changes['filters'].currentValue);
-    }
+    } */
     this.notNullCB?.checked===false? this.showZeroPortfolios(false):null;
   }
+  setFilters (filters:any) {
+    filters.portfolio_code? this.portfolios =['ClearAll',...filters.portfolio_code]:null;
+    this.submitQuery(false,false);
+  }
   updatePositionsDataTable (positionsData:portfolioPositions[]) {
-    this.fullDataSource=positionsData;
+    this.fullDataSource = positionsData;
     this.dataSource  = new MatTableDataSource(positionsData);
     this.dataSource.filterPredicate =this.multiFilter
     this.filterALL? this.filterALL.nativeElement.value=null : null;
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
-    this.filters? this.initialFilterOfDataSource(this.filters) : null;
     this.notNullCB?.checked===false? this.showZeroPortfolios(false):null;
   }
   submitQuery (reset:boolean=false, showSnackResult:boolean=true) {
     let searchObj = reset?  {} : this.searchParametersFG.value;
     this.dataSource?.data? this.dataSource.data = null : null;
     searchObj.report_date= new Date (searchObj.report_date).toLocaleDateString();
-    searchObj.secidList = [0,1].includes(this.instruments.length)&&this.instruments[0]==='ClearAll'? null : this.instruments.map(el=>el.toLocaleLowerCase())
     searchObj.idportfolios = [0,1].includes(this.portfolios.length)&&this.portfolios[0]==='ClearAll'? null : this.portfolios.map(el=>el.toLocaleLowerCase())
     this.InvestmentDataService.getPortfoliosPositions(searchObj).subscribe(data => {
       this.updatePositionsDataTable(data)
@@ -230,7 +214,7 @@ export class AppaInvPortfolioPositionTableComponent {
     return (this.dataSource&&this.dataSource.data)?  this.dataSource.filteredData.map(el => el[col]).reduce((acc, value) => acc + Number(value), 0):0;
   }
   exportToExcel() {
-    let numberFields=['total_pl','roi','pl','unrealizedpl','cost_in_position','idportfolio','fact_weight','current_balance','mtm_positon','weight','planned_position','order_amount','order_qty','mtm_rate','cross_rate','mtm_dirty_price','pl'];
+    let numberFields=['notnull_npv','mtm_positon_base_cur','npv','total_pl','roi','pl','unrealizedpl','cost_in_position','idportfolio','fact_weight','current_balance','mtm_positon','weight','planned_position','order_amount','order_qty','mtm_rate','cross_rate','mtm_dirty_price','pl'];
     let dateFields=['mtm_date','rate_date'];
     let dataToExport =  this.dataSource.data.map(el=>{
       Object.keys(el).forEach(key=>{
@@ -244,7 +228,6 @@ export class AppaInvPortfolioPositionTableComponent {
     });
     this.HandlingCommonTasksS.exportToExcel (dataToExport,"positionsData");  
   }
-  get  secidList () {return this.searchParametersFG.get('secidList') } 
   get  idportfolios () {return this.searchParametersFG.get('idportfolios') } 
   get  report_date () {return this.searchParametersFG.get('report_date') } 
   get  report_id_currency () {return this.searchParametersFG.get('report_id_currency') } 

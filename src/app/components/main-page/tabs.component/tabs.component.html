@@ -1,23 +1,23 @@
 <mat-tab-group  #tabGroup   *ngIf="messageReceived.text=='Portfolios'" 
   mat-stretch-tabs 
-  (selectedTabChange)="showTabName($event)"  >
-  <mat-tab [label]="'Orders ' + messageReceived.name" aria-label="Orders"
-  > 
-    <app-orders-table style="width: 150%;"
-    [tableMode]="['Parent','Per_Portfolio']" 
-    [filters]="{
-      idportfolio:[messageReceived.id],
-      only_clients:true,
-      filter_dataset:false
-    }"
-    ></app-orders-table>
-  </mat-tab>
+  (selectedTabChange)="showTabName($event.index)"  >
   <mat-tab label="Positions" aria-label="Positions"> 
     <app-inv-portfolio-position-table
     [rowsPerPages]="15"
-    [readOnly]="true"
+    [UI_portfolio_selection]="false"
+    [UI_portfolio_zero]="false"
     [filters]="{portfolio_code:[messageReceived.name]}">
     </app-inv-portfolio-position-table>
+  </mat-tab>
+  <mat-tab label="Performance" aria-label="Performance"> 
+    <app-inv-portfolio-npv_roi_performance></app-inv-portfolio-npv_roi_performance>  
+  </mat-tab>
+  <mat-tab label="Trades" aria-label="Trades"> 
+    <app-allocation-table
+    [rowsPerPages]="15"
+    [tableMode]="['Parent','Portfolio']"
+    [filters]="{portfolioname:[messageReceived.name]}" >
+    </app-allocation-table>
   </mat-tab>
   <mat-tab label="Transactions" aria-label="Transactions"> 
     <app-table-acc-entries
@@ -27,12 +27,15 @@
      >
     </app-table-acc-entries>
   </mat-tab>
-  <mat-tab label="Trades" aria-label="Trades"> 
-    <app-allocation-table
-    [rowsPerPages]="15"
-    [tableMode]="['Parent','Portfolio']"
-    [filters]="{portfolioname:[messageReceived.name]}" >
-    </app-allocation-table>
+  <mat-tab [label]="'Orders'" aria-label="Orders"> 
+    <app-orders-table style="width: 150%;"
+    [tableMode]="['Parent','Per_Portfolio']" 
+    [filters]="{
+      idportfolio:[messageReceived.id],
+      only_clients:true,
+      filter_dataset:false
+    }"
+    ></app-orders-table>
   </mat-tab>
   <mat-tab label="Portfolio Summary" aria-label="Portfolio Summary"> 
     <div class="instrument_form">
@@ -70,7 +73,7 @@
     <app-inv-portfolio-position-table
     [useGetClientsPortfolios]="true"
     [rowsPerPages]="15"
-    [readOnly]="true">
+    [UI_portfolio_selection]="false">
     </app-inv-portfolio-position-table>
   </mat-tab>
   <mat-tab label="Client Trades"> 
@@ -79,7 +82,6 @@
     [filters]="{disabled_controls:true}" >
     </app-allocation-table>
   </mat-tab>
-
 </mat-tab-group>
 <mat-tab-group *ngIf="messageReceived.text=='Strategies'" #StrategiesInfo mat-stretch-tabs>
   <mat-tab label="Orders by Strategy"> 
@@ -109,11 +111,12 @@
   <mat-tab label="Positions by Strategy"> 
     <app-inv-portfolio-position-table
       [rowsPerPages]="15"
-      [readOnly]="true"
-      [filters]="{
+      [useGetClientsPortfolios]="true"
+      >
+  <!--     [filters]="{
         mp_name:[messageReceived.name],
         strategy_name:[messageReceived.name]
-      }">
+      }" -->
     </app-inv-portfolio-position-table>
   </mat-tab>
   <mat-tab label="Trades by Strategy">
@@ -125,7 +128,6 @@
     }" >
     </app-allocation-table>
   </mat-tab>
-
 </mat-tab-group>
 <mat-tab-group *ngIf="messageReceived.text=='Instruments'" mat-stretch-tabs #InstrumentInfo>
   <mat-tab label="Instrment Details" >
