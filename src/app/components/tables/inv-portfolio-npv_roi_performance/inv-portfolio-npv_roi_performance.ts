@@ -22,14 +22,13 @@ import {MatCheckbox } from '@angular/material/checkbox';
   styleUrls: ['./inv-portfolio-npv_roi_performance.scss'],
 })
 export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
- 
   accessState: string = 'none';
   disabledControlElements: boolean = false;
   private subscriptions = new Subscription()
   @Input() useGetClientsPortfolios:boolean = false;
   @Input() rowsPerPages:number = 20;
   @Input() filters:any;
-  @Input() readOnly:boolean = false;
+  @Input() UI_portfolio_selection:boolean = true;
   columnsWithHeaders: tableHeaders[] = [
     {fieldName:'portfolioname',displayName:'Code'},
     {fieldName:'report_date',displayName:'Date'},
@@ -78,7 +77,7 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
     this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
-    this.dateRangeStart.value.setMonth(this.dateRangeStart.value.getMonth()-1);
+    this.dateRangeStart.value.setMonth(this.dateRangeStart.value.getMonth()-3);
     this.searchParametersFG = this.fb.group ({
       p_portfolios_list:  [],
       MP:null,
@@ -92,6 +91,8 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
     this.subscriptions.unsubscribe();
   }
   ngOnInit(): void {
+    console.log('per table init',);
+    this.filters? this.setFilters(this.filters):null;
     this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios').then ((data)=>{
       this.mp_strategies_list = data['data']
     })
@@ -103,9 +104,6 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
         );
       return !filter || filter_array.reduce((acc,val)=>acc+Number(val[1]),0)===0;
     };
-    this.InvestmentDataService.getPortfolioPerformnceData().subscribe (positionsData =>{
-      this.updateDataTable(positionsData);
-    });  
     this.filters==undefined&&this.fullDataSource!==undefined? this.initialFilterOfDataSource(this.filters) : null;
     if (this.useGetClientsPortfolios===true) {
       this.subscriptions.add(this.InvestmentDataService.getClientsPortfolios().pipe(
@@ -114,18 +112,16 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
         filter(portfolios=>portfolios.length>0)
       ).subscribe(portfoliosData=> {
         this.filters = {portfolio_code: portfoliosData.map(el=>el.code)};
-        this.fullDataSource!==undefined? this.initialFilterOfDataSource(this.filters) : null;
+        this.setFilters (this.filters);
       }));
     }
-    if (this.readOnly===false) {
-      this.subscriptions.add(this.AutoCompService.recieveCurrencyListReady().subscribe(()=>this.report_id_currency.updateValueAndValidity()));
-      this.AutoCompService.getCurrencyList();
-      this.filteredCurrenciesList = this.report_id_currency.valueChanges.pipe (
-        startWith (''),
-        distinctUntilChanged(),
-        map(value => this.AutoCompService.filterList(value || '','currency'))
-      );
-    }
+    this.subscriptions.add(this.AutoCompService.recieveCurrencyListReady().subscribe(()=>this.report_id_currency.updateValueAndValidity()));
+    this.AutoCompService.getCurrencyList();
+    this.filteredCurrenciesList = this.report_id_currency.valueChanges.pipe (
+      startWith (''),
+      distinctUntilChanged(),
+      map(value => this.AutoCompService.filterList(value || '','currency'))
+    );
     this.multiFilter = (data: PortfolioPerformnceData, filter: string) => {
       let filter_array = filter.split(',').map(el=>[el,1]);
       this.columnsToDisplay.forEach(col=>filter_array.forEach(fil=>{
@@ -134,6 +130,14 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
         );
       return !filter || filter_array.reduce((acc,val)=>acc+Number(val[1]),0)===0;
     }
+  }
+  setFilters (filters:any) {
+    if (filters.reset === true) {
+      return this.InvestmentDataService.sendPerformnceData({data:null,currencySymbol:'', showChart: false})
+
+    }
+    filters.portfolio_code? this.portfolios =['ClearAll',...filters.portfolio_code]:null;
+    this.submitQuery(false,false);
   }
   resetSearchForm () {
     this.searchParametersFG.reset();
@@ -160,9 +164,10 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
     }
   }
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['filters']?.currentValue!==undefined&&this.fullDataSource!==undefined)  {
-      this.initialFilterOfDataSource (changes['filters'].currentValue);
-    }
+
+    console.log('per table change',);
+
+    changes['filters']?.currentValue? this.setFilters(changes['filters']?.currentValue) : null;
   }
   updateDataTable (positionsData:PortfolioPerformnceData[]) {
     this.AutoCompService.fullCurrenciesList.length? this.currencyChanged(this.report_id_currency.value):null;
@@ -171,7 +176,7 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
     this.dataSource.filterPredicate =this.multiFilter
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
-    this.InvestmentDataService.sendPerformnceData({data:positionsData,currencySymbol:this.currencySymbol})
+    this.InvestmentDataService.sendPerformnceData({data:positionsData,currencySymbol:this.currencySymbol,showChart:true})
   }
   submitQuery (reset:boolean=false, showSnackResult:boolean=true) {
     let searchObj = reset?  {} : this.searchParametersFG.value;

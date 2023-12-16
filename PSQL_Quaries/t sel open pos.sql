@@ -1,1 +1,0 @@
-SELECT * from public.f_fifo_select_open_position(2,'GOOG-RM',10,1,1,1)

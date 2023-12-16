@@ -1,1 +1,0 @@
-select * from f_fifo_select_accounting_summary()

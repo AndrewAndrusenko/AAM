@@ -1,2 +1,0 @@
-SELECT "ledgerNoId", "dataTime", "XactTypeCode", "XactTypeCode_Ext", "accountId", id, "amountTransaction", "entryDetails", "extTransactionId",idtrade
-	FROM public."bAccountTransaction" order by id desc

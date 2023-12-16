@@ -141,14 +141,7 @@ export class AppaInvPortfolioPositionTableComponent {
     }
   }
   ngOnChanges(changes: SimpleChanges) {
-    // console.log('changes.currentValue?',changes['filters']?.currentValue);
     changes['filters']?.currentValue? this.setFilters(changes['filters']?.currentValue) : null;
-/*     if (changes['filters']?.currentValue?.portfolio_code) {
-      this.idportfolios.patchValue(['ClearAll',changes['filters'].currentValue.portfolio_code]);
-    } */
-/*     if (changes['filters']?.currentValue!==undefined&&this.fullDataSource!==undefined)  {
-      this.initialFilterOfDataSource (changes['filters'].currentValue);
-    } */
     this.notNullCB?.checked===false? this.showZeroPortfolios(false):null;
   }
   setFilters (filters:any) {

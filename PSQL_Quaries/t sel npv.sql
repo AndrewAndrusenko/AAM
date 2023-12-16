@@ -1,1 +1,0 @@
-SELECT * FROM f_i_portfolios_balances_by_account_for_idportfolios(ARRAY[2,7,25,29])

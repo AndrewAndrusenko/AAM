@@ -15,7 +15,7 @@ export class AppInvestmentDataServiceService {
   private subjectReloadPortfoliosData = new Subject<any>(); 
   private subjectReloadClientTable = new Subject<ClientData[]>(); 
   private subjectClientsPortfolios = new Subject<{id:number,code:string}[]>(); 
-  private subjectPerformanceData = new Subject<{data: PortfolioPerformnceData[],currencySymbol:string}>(); 
+  private subjectPerformanceData = new Subject<{data: PortfolioPerformnceData[],currencySymbol:string,showChart:boolean}>(); 
   
   getPortfoliosData (accountType:string, idportfolio: number, clientId: number, strategyMpName: string, action:string, accessToClientData:string='none'):Observable <AccountsTableModel[]> {
     const params = {
@@ -170,10 +170,10 @@ export class AppInvestmentDataServiceService {
       order:' portfolioname, report_date,secid'
     })
   }
-  recievePerformnceData(): Observable<{data: PortfolioPerformnceData[],currencySymbol:string}> { 
+  recievePerformnceData(): Observable<{data: PortfolioPerformnceData[],currencySymbol:string,showChart:boolean}> { 
     return this.subjectPerformanceData.asObservable(); 
   }
-  sendPerformnceData (dataSet:{data: PortfolioPerformnceData[],currencySymbol:string}) {
+  sendPerformnceData (dataSet:{data: PortfolioPerformnceData[],currencySymbol:string,showChart:boolean}) {
     this.subjectPerformanceData.next(dataSet);
   }
 }

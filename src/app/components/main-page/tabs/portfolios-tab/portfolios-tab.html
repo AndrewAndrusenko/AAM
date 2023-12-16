@@ -3,8 +3,11 @@
   <mat-tab label="NPV Dynamic Data">  
     <app-inv-portfolio-npv_dynamic></app-inv-portfolio-npv_dynamic>  
   </mat-tab>
-  <mat-tab label="Performance Data">  
-    <app-inv-portfolio-npv_roi_performance></app-inv-portfolio-npv_roi_performance>  
+  <mat-tab label="Performance Data"
+  onclick="">  
+    <app-inv-portfolio-npv_roi_performance
+    [filters]="{reset:true}"
+    ></app-inv-portfolio-npv_roi_performance>  
   </mat-tab>
   <mat-tab  label="Portfolios Positions " >
     <app-inv-portfolio-position-table> 

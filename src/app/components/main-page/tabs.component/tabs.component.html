@@ -1,6 +1,12 @@
 <mat-tab-group  #tabGroup   *ngIf="messageReceived.text=='Portfolios'" 
   mat-stretch-tabs 
   (selectedTabChange)="showTabName($event.index)"  >
+  <mat-tab label="Performance" aria-label="Performance"> 
+    <app-inv-portfolio-npv_roi_performance
+    [UI_portfolio_selection]="false"
+    [filters]="{portfolio_code:[messageReceived.name]}"
+    ></app-inv-portfolio-npv_roi_performance>  
+  </mat-tab>
   <mat-tab label="Positions" aria-label="Positions"> 
     <app-inv-portfolio-position-table
     [rowsPerPages]="15"
@@ -8,9 +14,6 @@
     [UI_portfolio_zero]="false"
     [filters]="{portfolio_code:[messageReceived.name]}">
     </app-inv-portfolio-position-table>
-  </mat-tab>
-  <mat-tab label="Performance" aria-label="Performance"> 
-    <app-inv-portfolio-npv_roi_performance></app-inv-portfolio-npv_roi_performance>  
   </mat-tab>
   <mat-tab label="Trades" aria-label="Trades"> 
     <app-allocation-table
@@ -23,8 +26,7 @@
     <app-table-acc-entries
     [paramRowData]="{portfolioCode:messageReceived.name}"
     [action]="'ViewEntriesByPortfolio'"   
-    [rowsPerPages]="15"
-     >
+    [rowsPerPages]="15">
     </app-table-acc-entries>
   </mat-tab>
   <mat-tab [label]="'Orders'" aria-label="Orders"> 
@@ -48,6 +50,19 @@
   </mat-tab>  
 </mat-tab-group  >
 <mat-tab-group  *ngIf="messageReceived.text=='Clients'" mat-stretch-tabs #ClientInfo>
+  <mat-tab label="Performance" aria-label="Performance"> 
+    <app-inv-portfolio-npv_roi_performance
+    [UI_portfolio_selection]="false"
+    [useGetClientsPortfolios]="true"
+    ></app-inv-portfolio-npv_roi_performance>  
+  </mat-tab>
+  <mat-tab label="Client Positions"> 
+    <app-inv-portfolio-position-table
+    [useGetClientsPortfolios]="true"
+    [rowsPerPages]="15"
+    [UI_portfolio_selection]="false">
+    </app-inv-portfolio-position-table>
+  </mat-tab>
   <mat-tab label="Client Transactions"> 
     <app-table-acc-entries
     [action]="'None'"    
@@ -69,13 +84,8 @@
       </app-app-client-form> 
     </div>
   </mat-tab>  
-  <mat-tab label="Client Positions"> 
-    <app-inv-portfolio-position-table
-    [useGetClientsPortfolios]="true"
-    [rowsPerPages]="15"
-    [UI_portfolio_selection]="false">
-    </app-inv-portfolio-position-table>
-  </mat-tab>
+
+
   <mat-tab label="Client Trades"> 
     <app-allocation-table
     [rowsPerPages]="15"
@@ -127,6 +137,10 @@
       disabled_controls:true
     }" >
     </app-allocation-table>
+  </mat-tab>
+  <mat-tab label="Performance" aria-label="Performance"> 
+    <app-inv-portfolio-npv_roi_performance
+    ></app-inv-portfolio-npv_roi_performance>  
   </mat-tab>
 </mat-tab-group>
 <mat-tab-group *ngIf="messageReceived.text=='Instruments'" mat-stretch-tabs #InstrumentInfo>

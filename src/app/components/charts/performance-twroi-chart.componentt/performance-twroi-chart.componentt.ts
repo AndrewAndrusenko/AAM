@@ -2,6 +2,7 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
 import { AppMarketDataService } from 'src/app/services/market-data.service';
 import { AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
 import { PortfolioPerformnceData } from 'src/app/models/intefaces.model';
+import { MatSelect } from '@angular/material/select';
 @Component({
   selector: 'app-performance-twroi-chart',
   templateUrl: './performance-twroi-chart.componentt.html',
@@ -13,6 +14,7 @@ export class AppPerformanceTWROiEchartComponentt  {
   dispatchAction: any;
   seriesMarketPrice :number [] = []
   @ViewChild('fontlarge') fontLarge : ElementRef;
+  @ViewChild('selectPortfolio') selectPortfolio: MatSelect;
   performanceData: PortfolioPerformnceData[] = [];
   currencySymbol:string;
   constructor(
@@ -20,9 +22,13 @@ export class AppPerformanceTWROiEchartComponentt  {
   private MarketDataService: AppMarketDataService,
   ) {
     this.InvestmentDataService.recievePerformnceData().subscribe(data=>{
+    console.log('per chart get data',);
+
       this.performanceData=data.data;
       this.portfolios = [...new Set(data.data.map(el=>(el.portfolioname)))]
       this.currencySymbol=data.currencySymbol;
+      this.setOptions(this.portfolios[0])
+      this.selectPortfolio.value=this.portfolios[0];
     })
   }
   onChangeCountry(portfolio:string) {
@@ -33,6 +39,7 @@ export class AppPerformanceTWROiEchartComponentt  {
     const upColor = '#00da3c';
     const downColor = '#ec0000';
     this.seriesMarketPrice=[]
+    let seriesROI :number [] = []
     let seriesNPV :number [][] = []
     let seriesCashIO :number [][] = []
     let seriesDate :string [] = []
@@ -41,6 +48,7 @@ export class AppPerformanceTWROiEchartComponentt  {
     this.performanceData.forEach((el,i)=>{
       if (el.portfolioname===portfolio) {
         this.seriesMarketPrice.push(Number(el.time_wighted_roi))
+        seriesROI.push(Number(el.roi_current_period))
         seriesNPV.push([seriesNPV.length, Number(el.npv), el.npv > (el.last_npv+el.cash_flow)? 1:-1]);
         seriesCashIO.push([seriesNPV.length, Math.abs(el.cash_flow), Number(el.cash_flow) > 0? 1:-1]);
         seriesDate.push(new Date(el.report_date).toLocaleDateString())
@@ -65,7 +73,7 @@ export class AppPerformanceTWROiEchartComponentt  {
         },
         bottom: 10,
         left: 'center',
-        data: ['TWR', 'MA10','NPV','Cash D/W']
+        data: ['TWR','ROI', 'MA10','NPV','Cash D/W']
       },
       tooltip: {
         formatter: 
@@ -127,7 +135,7 @@ export class AppPerformanceTWROiEchartComponentt  {
       },
       visualMap: {
         show: false,
-        seriesIndex: 3,
+        seriesIndex: 4,
         // dimension: 1,
         pieces: [
           {
@@ -300,6 +308,10 @@ export class AppPerformanceTWROiEchartComponentt  {
             },
           },
         },
+        { name: 'ROI',
+        type:'line',
+        data:seriesROI,
+      },
         { name: 'MA10',
           type: 'line',
           data:  this.MarketDataService.calculateMA(10, this.seriesMarketPrice),

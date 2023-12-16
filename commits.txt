@@ -109,10 +109,15 @@ we get closest market price for every position
 
 14/12/23
 1|| UI Portfolio position => User allowed to retrieve position data passing date and report currency as parameters. The algoritm has been changed by replacing pattern of storing the whole dataset and filtering it accordingly with quering only nessesary live data 
+--------------------------------------------------------------------------------------------
+ 15/12/23
+1|| UI Portfolio details Tab => Added performance chart rendering for chosen portfolio onChange
+2|| UI Clients details Tab => Added performance chart rendering for the first portfolio of the given client. User can chose other portfolios from the select list. Data for them has been preloaded
+3|| UI Strategy/Model Portfolio details Tab => Added performance chart without any preloaded data. The goal is to provide investment manager with all needed tools in one tabGroup
 
-
-?2|| UI Portfolio details tab => add performance chart rendering for chosen portfolio on initiliazation
 ?3|| DB&UI PL detail analysis => detailed data per investment has to add up to the portfolio RIO and TWR
+
+
 ?4|| UI Performance Chart => implement pl structure dynamic
 
 || Performance fee
@@ -122,3 +127,5 @@ we get closest market price for every position
 || Investment restrictions
 || Check UserAccess model for UI, espesically the latest components
 || DB access roles
+*Strategy tab component is not being reused and is rendered when reopened
+*Performance Chart shows graph from the last selected object if new object is reused and there's no need to reload it 
