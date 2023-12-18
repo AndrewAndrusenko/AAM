@@ -145,7 +145,7 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
   }
   setPortfoliosList(e:any) {
     this.InvestmentDataService.getPortfoliosListForMP(e.value,'getPortfoliosByMP_StrtgyID').subscribe(data=>{
-      this.portfolios=['ClearAll',...data[0]['array_agg']]
+      this.portfolios=['ClearAll',...data]
       this.filterALL.nativeElement.value = e.value;
     })
   }

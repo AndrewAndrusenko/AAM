@@ -113,10 +113,9 @@ export class AppaInvPortfolioPositionTableComponent {
   }
   setPortfoliosList(e:any) {
     this.InvestmentDataService.getPortfoliosListForMP(e.value,'getPortfoliosByMP_StrtgyID').subscribe(data=>{
-      this.portfolios=data[0]['array_agg']
+      this.portfolios=['ClearAll',...data]
       this.filterALL.nativeElement.value = e.value;
-      this.dataSource.filter = e.value.toLowerCase();
-      (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
+      (this.dataSource?.paginator)? this.dataSource.paginator.firstPage() : null;
     })
   }
   showZeroPortfolios(event:boolean) {

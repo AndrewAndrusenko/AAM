@@ -114,8 +114,10 @@ we get closest market price for every position
 1|| UI Portfolio details Tab => Added performance chart rendering for chosen portfolio onChange
 2|| UI Clients details Tab => Added performance chart rendering for the first portfolio of the given client. User can chose other portfolios from the select list. Data for them has been preloaded
 3|| UI Strategy/Model Portfolio details Tab => Added performance chart without any preloaded data. The goal is to provide investment manager with all needed tools in one tabGroup
+--------------------------------------------------------------------------------------------
 
-?3|| DB&UI PL detail analysis => detailed data per investment has to add up to the portfolio RIO and TWR
+16/12/23 - 18/12/23
+1|| DB&Model PL detail analysis => Created DB function f_i_get_pl_dynamic_with_npv.sql to provide data for detailed factor analysis of clients revenue. Function calculates realized profit and loss based on fifo data and unrealized profit/loss comparing current position evaluated by market price and costs of creating position retrieved from fifo data. An idea is to provide an UI to create chart showing the dynamic of portfolio revenue splitting it by separate instruments and graphicly demonstrating its contribution in final financial result of managment
 
 
 ?4|| UI Performance Chart => implement pl structure dynamic

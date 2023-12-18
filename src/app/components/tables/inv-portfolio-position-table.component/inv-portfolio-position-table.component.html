@@ -108,12 +108,12 @@
     class ="childTable" style="width: 150%; margin-top: 0.5%;" >
     <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i=index" justify="right"  >
       <th mat-header-cell *matHeaderCellDef mat-sort-header> {{columnsHeaderToDisplay[i]}}</th>
-      <td mat-footer-cell *matFooterCellDef let> <h2 style="margin-top: 5%;">
+      <td mat-footer-cell *matFooterCellDef let> <p style="margin-top: 5%; color: lightslategray; font-size: large;">
         <span [ngSwitch]="true==true">
           <p *ngSwitchDefault></p>
-          <p *ngSwitchCase="['idportfolio'].includes(column)">{{'Totals'}} </p>
+          <p *ngSwitchCase="['portfolio_code'].includes(column)">{{'Totals'}} </p>
           <p *ngSwitchCase="['mtm_positon','order_amount','weight','planned_position','total_pl','unrealizedpl','pl'].includes(column)">{{getTotals(column)| number }} </p>
-        </span></h2>
+        </span></p>
       <td 
         mat-cell *matCellDef="let element" [cdkContextMenuTriggerFor]="instrumentcontextmenu" >
         <span [ngSwitch]="true==true">

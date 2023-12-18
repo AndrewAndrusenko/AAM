@@ -151,13 +151,13 @@ export class AppPerformanceTWROiEchartComponentt  {
       grid: [
         {
           left: '2%',
-          right: '10%',
+          right: '12%',
           height: '73%',
           top: '10%',
         },
         {
           left: '2%',
-          right: '10%',
+          right: '12%',
           top: '70%',
           height: '6%'
         }

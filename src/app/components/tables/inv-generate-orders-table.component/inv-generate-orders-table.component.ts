@@ -113,7 +113,8 @@ export class AppInvGenerateOrdersTable{
   }
   setPortfoliosList(e:any) {
     this.InvestmentDataService.getPortfoliosListForMP(e.value,'getPortfoliosByMP_StrtgyID').subscribe(data=>{
-      this.portfolios=['ClearAll',...data[0]['array_agg']];
+      console.log('data',data);
+      this.portfolios=['ClearAll',...data];
       this.dataSource?.paginator? this.dataSource.paginator.firstPage() : null;
     })
   }
