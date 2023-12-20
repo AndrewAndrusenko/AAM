@@ -1,10 +1,13 @@
 <mat-tab-group mat-stretch-tabs>
-  
+  <mat-tab label="Revenue Factors" >  
+    <app-inv-portfolio-revenue-factor-analysis
+    [filters]="{reset:true}"
+    ></app-inv-portfolio-revenue-factor-analysis>  
+  </mat-tab>
   <mat-tab label="NPV Dynamic Data">  
     <app-inv-portfolio-npv_dynamic></app-inv-portfolio-npv_dynamic>  
   </mat-tab>
-  <mat-tab label="Performance Data"
-  onclick="">  
+  <mat-tab label="Performance Data" >  
     <app-inv-portfolio-npv_roi_performance
     [filters]="{reset:true}"
     ></app-inv-portfolio-npv_roi_performance>  

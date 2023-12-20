@@ -208,8 +208,11 @@ async function fGetPortfolioAnalytics (request,response) {
       sql= 'SELECT * FROM public.f_i_get_npv_dynamic (${p_portfolios_list },${p_report_date_start}, ${p_report_date_end}, ${p_report_currency}) ' 
       sql += conditions.slice(0,-5) + request.body.order? 'ORDER BY' + request.body.order +';' :';'
     break;
+    case 'getRevenueFactorData':
+      sql= 'SELECT * FROM public.f_i_get_pl_dynamic_with_npv (${p_report_date_start}, ${p_report_date_end},${p_portfolios_list}, ${p_report_currency}) ' 
+      sql += conditions.slice(0,-5) + request.body.order? 'ORDER BY' + request.body.order +';' :';'
+    break;
   }
-  
   sql = pgp.as.format(sql,request.body.params);
   db_common_api.queryExecute(sql,response,undefined,request.body.action);
 }

@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, Subject, map, tap } from 'rxjs';
-import { AccountsTableModel, accountTypes, ClientData, InstrumentData, NPVDynamicData, PortfolioPerformnceData, portfolioPositions, StrategiesGlobalData, StrategyStructure } from '../models/intefaces.model';
+import { AccountsTableModel, accountTypes, ClientData, InstrumentData, NPVDynamicData, PortfolioPerformnceData, portfolioPositions, RevenueFactorData, StrategiesGlobalData, StrategyStructure } from '../models/intefaces.model';
 
 @Injectable({
   providedIn: 'root'
@@ -16,6 +16,7 @@ export class AppInvestmentDataServiceService {
   private subjectReloadClientTable = new Subject<ClientData[]>(); 
   private subjectClientsPortfolios = new Subject<{id:number,code:string}[]>(); 
   private subjectPerformanceData = new Subject<{data: PortfolioPerformnceData[],currencySymbol:string,showChart:boolean}>(); 
+  private subjectRevenueFactorData = new Subject<{data: RevenueFactorData[],currencySymbol:string,showChart:boolean}>(); 
   
   getPortfoliosData (accountType:string, idportfolio: number, clientId: number, strategyMpName: string, action:string, accessToClientData:string='none'):Observable <AccountsTableModel[]> {
     const params = {
@@ -175,5 +176,31 @@ export class AppInvestmentDataServiceService {
   }
   sendPerformnceData (dataSet:{data: PortfolioPerformnceData[],currencySymbol:string,showChart:boolean}) {
     this.subjectPerformanceData.next(dataSet);
+  }
+  getRevenueFactorData (
+    params_data?: {
+      p_portfolios_list : string[], 
+      p_report_date_start: string, 
+      p_report_date_end:string, 
+      p_report_currency :number 
+    } ):Observable<RevenueFactorData[]> {
+      params_data = params_data?   params_data : {
+        p_portfolios_list:['ACM002','ICM011','VPC005'],
+        p_report_date_start:'11/05/23', 
+        p_report_date_end: '12/05/23',
+        p_report_currency:840
+    };
+    return this.http.post <RevenueFactorData[]> ('/api/AAM/GetPortfolioAnalytics/',
+    {
+      params:params_data,
+      action:'getRevenueFactorData',
+      order:' report_date, portfolioname, secid '
+    })
+  }
+  recieveRevenueFactorData(): Observable<{data: RevenueFactorData[],currencySymbol:string,showChart:boolean}> { 
+    return this.subjectRevenueFactorData.asObservable(); 
+  }
+  sendRevenueFactorData (dataSet:{data: RevenueFactorData[],currencySymbol:string,showChart:boolean}) {
+    this.subjectRevenueFactorData.next(dataSet);
   }
 }

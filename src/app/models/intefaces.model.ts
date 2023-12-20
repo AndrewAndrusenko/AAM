@@ -486,3 +486,22 @@ export interface PortfolioPerformnceData {
 export interface NPVDynamicData {
 report_date :Date, portfolioname :string, accountNo :string, secid :string, balance :number, pos_pv :number, mtm_rate :number, mtm_date :Date, boardid :string, percentprice: boolean, couponrate :number, nominal_currency :string, board_currency :number, cross_rate :number, accured :number, dirty_price :number, rate_date :Date 
 }
+export interface RevenueFactorData {
+  cross_rate :number,
+	rate_date :Date,
+	report_date :Date, 
+	portfolioname: string,  
+	secid: string, 
+	total_pl :number,
+	mtm_pl :number,
+	pl :number,
+	current_fifo_position_cost :number,
+	account_currency_code: number,
+	idportfolio :number,
+	balance :number, 
+	pos_pv :number, 
+	mtm_rate :number, 
+	mtm_date :Date,  
+	dirty_price :number,
+  mtm_cross_rate: number
+}
