@@ -130,9 +130,21 @@ we get closest market price for every position
   Realized complex filters data retrieve and export to excel for further manual analysis and etc  
 --------------------------------------------------------------------------------------------
 
+21/12/2023
+1|| UI Performance Chart Factor Revenue => 
+  Fixed aligning order of labels according to the logic of chart engine. Thus the chart is more readable. Labels take the place according to the time of appearing first income or loss and the final type of revenue: profit or loss as well
+  Made a custom tooltip with table splitting total pl by separate instrument contributions and added custom style 
+  Chart has been added to portfolio's tab group. By default it demonstrates revenue factor analysis for the last three months and could be customize by the user if it's nessesary 
+
+22/12/2023 - 24/12/2023
+1|| Managment Fees Backend: DB model and DB functions => 
+  Created db tables for fees calculation and processing
+  Created db functions to calculate managment fees and save calculation for futher processing
+2|| UI Managment Fees => Created base UI draft table 
+--------------------------------------------------------------------------------------------
+
 
 || Performance fee
-|| Managment fee
 || High-Water Mark perfomance fee
 || Accounting for fees deduction
 || Investment restrictions

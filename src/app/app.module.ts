@@ -176,7 +176,8 @@ const appInitializerFn = (accessRestirictions:AuthService) => {
         AppPerformanceTWROiEchartComponentt,
         AppaInvPortfolioNPVDynamicComponent,
         AppaInvPortfolioRevenueFactorAnalysisTableComponent,
-        AppPerformanceRevenueFactorChartComponentt
+        AppPerformanceRevenueFactorChartComponentt,
+        AppaIAccFeesManagementTableComponent
      ],
     bootstrap: [AppComponent],
     providers: [ 
@@ -215,5 +216,6 @@ import { AppPerformanceTWROiEchartComponentt } from './components/charts/perform
 import { AppaInvPortfolioNPVDynamicComponent } from './components/tables/inv-portfolio-npv_dynamic/inv-portfolio-npv_dynamic';
 import { AppaInvPortfolioRevenueFactorAnalysisTableComponent } from './components/tables/inv-portfolio-revenue-factor-analysis/inv-portfolio-revenue-factor-analysis';
 import { AppPerformanceRevenueFactorChartComponentt } from './components/charts/performance-revenue-factor-chart.component/performance-revenue-factor-chart.component';
+import { AppaIAccFeesManagementTableComponent } from './components/tables/acc-fees-management-table.component/acc-fees-management-table.component';
 
 

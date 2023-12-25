@@ -1,6 +1,12 @@
 <mat-tab-group  #tabGroup   *ngIf="messageReceived.text=='Portfolios'" 
   mat-stretch-tabs 
   (selectedTabChange)="showTabName($event.index)"  >
+  <mat-tab label="Revenue Factors" aria-label="Performance"> 
+    <app-inv-portfolio-revenue-factor-analysis
+    [UI_portfolio_selection]="false"
+    [filters]="{portfolio_code:[messageReceived.name]}"
+    ></app-inv-portfolio-revenue-factor-analysis>  
+  </mat-tab>
   <mat-tab label="Performance" aria-label="Performance"> 
     <app-inv-portfolio-npv_roi_performance
     [UI_portfolio_selection]="false"

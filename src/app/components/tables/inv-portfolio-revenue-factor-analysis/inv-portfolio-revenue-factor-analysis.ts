@@ -59,15 +59,12 @@ export class AppaInvPortfolioRevenueFactorAnalysisTableComponent {
     dateRangeStart: new FormControl<Date | null>(new Date()),
     dateRangeEnd: new FormControl<Date | null>(new Date()),
   });
-  instruments: string[] = ['ClearAll'];
   portfolios: Array<string> = ['ClearAll','VPC005','ACM002','ICM011'];
-  filterednstrumentsLists : Observable<string[]>;
   searchParametersFG: FormGroup;
-  defaultFilterPredicate?: (data: any, filter: string) => boolean;
-  multiFilter?: (data: any, filter: string) => boolean;
   filteredCurrenciesList: Observable<string[]>;
   mp_strategies_list: string[]=[];
   currencySymbol: string = '$';
+  multiFilter?: (data: any, filter: string) => boolean;
   constructor(
     private AuthServiceS:AuthService,  
     private indexDBServiceS:indexDBService,
@@ -81,7 +78,7 @@ export class AppaInvPortfolioRevenueFactorAnalysisTableComponent {
     this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
-    this.dateRangeStart.value.setMonth(this.dateRangeStart.value.getMonth()-1);
+    this.dateRangeStart.value.setMonth(this.dateRangeStart.value.getMonth()-2);
     this.searchParametersFG = this.fb.group ({
       p_portfolios_list:  [],
       MP:null,
@@ -98,14 +95,6 @@ export class AppaInvPortfolioRevenueFactorAnalysisTableComponent {
     this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios').then ((data)=>{
       this.mp_strategies_list = data['data']
     })
-    this.multiFilter = (data: RevenueFactorData, filter: string) => {
-      let filter_array = filter.split(',').map(el=>[el,1]);
-      this.columnsToDisplay.forEach(col=>filter_array.forEach(fil=>{
-        data[col]&&fil[0].toString().toUpperCase()===(data[col]).toString().toUpperCase()? fil[1]=0:null
-      })
-        );
-      return !filter || filter_array.reduce((acc,val)=>acc+Number(val[1]),0)===0;
-    };
     if (this.useGetClientsPortfolios===true) {
       this.subscriptions.add(this.InvestmentDataService.getClientsPortfolios().pipe(
         tap(() => this.dataSource? this.dataSource.data = null: null),
@@ -150,20 +139,6 @@ export class AppaInvPortfolioRevenueFactorAnalysisTableComponent {
       this.filterALL.nativeElement.value = e.value;
     })
   }
-/*   initialFilterOfDataSource (filter:any) {
-    if (filter?.rest===true) {
-      this.dataSource.data = this.fullDataSource;
-      return;
-    }
-    if (filter?.null_data===true) {
-      this.dataSource.data=null;
-    } else {
-    Object.keys(filter).every(key=>{
-      this.dataSource.data = this.fullDataSource.filter(el=>filter[key].includes(el[key]))
-      if (this.dataSource.data.length) {return false}  else return true;
-     })
-    }
-  } */
   ngOnChanges(changes: SimpleChanges) {
 
     console.log('per table change',);
@@ -187,7 +162,7 @@ export class AppaInvPortfolioRevenueFactorAnalysisTableComponent {
     of(this.portfolios.length).pipe(
       switchMap(portLength => portLength===1? this.InvestmentDataService.getPortfoliosListForMP('All','getPortfoliosByMP_StrtgyID'):from([[...this.portfolios]])),
       tap(ports=>searchObj.p_portfolios_list = ports.map(el=>el.toUpperCase())),
-      switchMap(ports=>this.InvestmentDataService.getRevenueFactorData(searchObj))
+      switchMap(()=>this.InvestmentDataService.getRevenueFactorData(searchObj))
     ).subscribe(data => {
       this.updateDataTable(data)
       showSnackResult? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ') : null;
@@ -213,7 +188,6 @@ export class AppaInvPortfolioRevenueFactorAnalysisTableComponent {
     };
     return chipArray;
   }
-  addChips (el: any, column: string) {(['secid'].includes(column))? this.instruments.push(el):null;}
   updateFilter (el: any) {
     this.filterALL.nativeElement.value = this.filterALL.nativeElement.value + el+',';
     this.dataSource.filter = this.filterALL.nativeElement.value.slice(0,-1).trim().toLowerCase();

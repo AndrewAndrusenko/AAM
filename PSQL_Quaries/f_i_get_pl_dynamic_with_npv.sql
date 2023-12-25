@@ -13,9 +13,9 @@ CREATE OR REPLACE FUNCTION public.f_i_get_pl_dynamic_with_npv(
 	report_date date, 
 	portfolioname character varying,  
 	secid character varying, 
-	total_pl money,
-	mtm_pl money,
-	pl money,
+	total_pl numeric,
+	mtm_pl numeric,
+	pl numeric,
 	current_fifo_position_cost numeric,
 	account_currency_code bigint,
 	idportfolio numeric,
@@ -23,7 +23,8 @@ CREATE OR REPLACE FUNCTION public.f_i_get_pl_dynamic_with_npv(
 	pos_pv numeric, 
 	mtm_rate numeric, 
 	mtm_date date,  
-	dirty_price numeric 
+	dirty_price numeric,
+	mtm_cross_rate numeric
 	) 
     LANGUAGE 'plpgsql'
     COST 100
@@ -58,15 +59,15 @@ SELECT
       ) * crossrates_dataset.cross_rate,
       2
     )
-  )::money AS total_pl,
-  f_i_get_npv_dynamic.pos_pv::money - ROUND(
+  ) AS total_pl,
+  f_i_get_npv_dynamic.pos_pv - ROUND(
     pl_costs_joined.current_fifo_position_cost * crossrates_dataset.cross_rate,
     2
-  )::money AS mtm_pl,
+  ) AS mtm_pl,
   ROUND(
     COALESCE(pl_costs_joined.profit_loss, 0) * crossrates_dataset.cross_rate,
     2
-  )::money AS pl,
+  ) AS pl,
   ROUND(
     pl_costs_joined.current_fifo_position_cost * crossrates_dataset.cross_rate,
     2
@@ -77,7 +78,9 @@ SELECT
   f_i_get_npv_dynamic.pos_pv,
   f_i_get_npv_dynamic.mtm_rate,
   f_i_get_npv_dynamic.mtm_date,
-  f_i_get_npv_dynamic.dirty_price
+  f_i_get_npv_dynamic.dirty_price,
+  f_i_get_npv_dynamic.cross_rate as mtm_cross_rate
+  
 FROM
   f_i_get_npv_dynamic (
     p_portfolios_list,

@@ -1,16 +1,18 @@
 
-<nav class="navbar navbar-expand-sm navbar-dark bg-secondary "  style="align-items: center; ">
+<nav class="navbar navbar-expand-sm navbar-dark bg-primary "  style="align-items: center; ">
   <mat-form-field 
-  style="margin-left: 1%;font-size: larger; background-color: rgb(72, 91, 113); text-align: center; width: 12%; border-radius: 12px;  "  >
+  style="margin-left: 1%;font-size: larger; background-color: rgb(46, 93, 147);; text-align: center; width: 12%; border-radius: 12px;  "  >
   <mat-label style="color: black;font-size:large;">Select Portfolio..</mat-label>
   <mat-select style="margin-left: 1%;font-size:larger;color: rgb(2, 14, 144);" #selectPortfolio>
     <mat-option *ngFor="let portfolio of portfolios" (click)="onChangeCountry(portfolio)"  [value]="portfolio">{{portfolio}}</mat-option>
   </mat-select>
 </mat-form-field>
-<a class=" navbar-brand mx-auto" style="align-items: center; font-size:x-large; color: rgb(31, 11, 161);">Revenue Factor Analysis</a> <label style="font-size: large;" #fontlarge > </label>
+<a class=" navbar-brand mx-auto" style="align-items: center; font-size:x-large; color: rgb(24, 24, 26);">
+<mat-icon style="transform: scale(2);margin-right: 5%;">monetization_on</mat-icon>
+  Revenue Factor Analysis</a> <label style="font-size: large;" #fontlarge > </label>
 </nav>
-<div *ngIf="series.length!==0" style="background-color: azure;">
-<div style="width: 100%; top: 1%;" >
+<div *ngIf="series.length!==0" style="background-color:azure;">
+<div style="width: 100%; top: 1%;">
   <div echarts [options]="countryCasesChartOptions" style="width: 100%; min-height: 70vh" class="demo-chart"></div>
 </div>
 </div> 

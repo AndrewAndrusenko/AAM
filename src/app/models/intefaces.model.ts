@@ -505,3 +505,18 @@ export interface RevenueFactorData {
 	dirty_price :number,
   mtm_cross_rate: number
 }
+export interface ManagementFeeCalcData {
+  report_date : Date,
+  id_portfolio : number,
+  portfolioname : string,
+  management_fee_amount : number,
+  npv : number,
+  fee_code : string,
+  calculation_start : Date,
+  calculation_end : Date,
+  period_start : Date,
+  period_end : Date,
+  schedule_range : number,
+  feevalue : number,
+  fee_type_value  :number
+}

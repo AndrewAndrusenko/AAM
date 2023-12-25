@@ -11,6 +11,7 @@ const uiAmmAccountingModule = require ('./aam_ui_accounting')
 const uiAmmMarketData = require ('./aam_ui_market_data_load')
 const uiAmmTradeData = require ('./aam_ui_trades')
 const uiAmmCurrencyData = require ('./aam_currenciesData')
+const uiAmmFeesData = require ('./aam_feesData')
 const RedisService = require ('./redis')
 const auth_module = require('./auth_module');
 const bcrypt = require('bcryptjs');
@@ -215,6 +216,9 @@ appServer.post('/AAM/MD/createOrderbyMP/',jsPassport.authenticate('session'), ui
 appServer.get('/AAM/getCurrencyData/',jsPassport.authenticate('session'), uiAmmCurrencyData.getCurrencyData)
 appServer.get('/AAM/getCbrRateDaily/',jsPassport.authenticate('session'), uiAmmCurrencyData.getCbrRateDaily)
 appServer.post('/AAM/modifyRatesData/',jsPassport.authenticate('session'), uiAmmCurrencyData.modifyRatesData)
+
+/*----------------------FeesData----------------------------------------------------*/
+appServer.get('/AAM/getFeesData/',jsPassport.authenticate('session'), uiAmmFeesData.geFeesData)
 
 
 // RedisService.TestRedis();

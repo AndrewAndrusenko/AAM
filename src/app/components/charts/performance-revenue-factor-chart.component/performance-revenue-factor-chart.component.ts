@@ -3,6 +3,7 @@ import { AppMarketDataService } from 'src/app/services/market-data.service';
 import { AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
 import { PortfolioPerformnceData, RevenueFactorData } from 'src/app/models/intefaces.model';
 import { MatSelect } from '@angular/material/select';
+import { number } from 'echarts';
 @Component({
   selector: 'app-performance-revenue-factor-chart',
   templateUrl: './performance-revenue-factor-chart.component.html',
@@ -32,12 +33,17 @@ export class AppPerformanceRevenueFactorChartComponentt  {
     this.setOptions(portfolio);
   }
   setOptions(portfolio:string) {
-    // const colors = ['red', 'green', 'grey','yellow','black','white','blue'];
-    // const upColor = '#00da3c';
-    // const downColor = '#ec0000';
     let instrumentsList: string[];
     this.series=[]
-    let seriesSet :{name:string,type:string,stack:string, areaStyle:{}, label:{},smooth:boolean,data:number[]} [] = []
+    let seriesSet :{
+      name:string,
+      markLine: {},
+      type:string,
+      stack:string, 
+      areaStyle:{}, 
+      label:{},
+      smooth:boolean,
+      data:number[]} [] = []
     let seriesDate :string [] = []
     let sizeLarge = parseFloat(window.getComputedStyle(this.fontLarge.nativeElement, null).getPropertyValue('font-size'));
     let currencySymbol = this.currencySymbol;
@@ -45,11 +51,14 @@ export class AppPerformanceRevenueFactorChartComponentt  {
     instrumentsList = [... new Set(dataSet.map(el=>el.secid))]
     seriesDate = [... new Set(dataSet.map(el=>new Date(el.report_date).toLocaleDateString()))]
     let tempDataSet:number[] = []
+    let legendSet : {name:string, data: number[]}[] = []
     instrumentsList.forEach(el=>{
-      tempDataSet = dataSet.filter(pl=>pl.secid===el).map(pl=>pl.total_pl);
+      tempDataSet = dataSet.filter(pl=>pl.secid===el).map(pl=>Math.round(pl.total_pl*100)/100);
+      legendSet.push({name:el,data:[seriesDate.length - tempDataSet.length,tempDataSet[0],tempDataSet[tempDataSet.length-1]]})
       tempDataSet = [...Array(seriesDate.length - tempDataSet.length).fill(0), ...tempDataSet]
         seriesSet.push({
           name:el,
+          markLine:{},
           type:'line',
           stack:'Total',
           areaStyle:{},
@@ -60,14 +69,20 @@ export class AppPerformanceRevenueFactorChartComponentt  {
           data:tempDataSet
         });
     this.series.push(seriesSet.length)
-        // seriesNPV.push([seriesNPV.length, Number(el.npv), el.npv > (el.last_npv+el.cash_flow)? 1:-1]);
-        // seriesCashIO.push([seriesNPV.length, Math.abs(el.cash_flow), Number(el.cash_flow) > 0? 1:-1]);
     })
-    let legendSet  =  seriesSet.map(el=> {return {name:el.name,pl:Number(el.data[el.data.length-1])}})
-    let a = legendSet.filter(el=>el.pl>0).map(el=>el.name).sort().reverse()
-    let b = legendSet.filter(el=>el.pl<0).map(el=>el.name).sort()
-    console.log('legendSet',b);
+    let profitLegend = legendSet.filter(el=>el.data[2]>0).sort((lg,lg1)=>lg.data[0]-lg1.data[0]).map(el=>el.name).reverse();
+    let lossLegend = legendSet.filter(el=>el.data[2]<0).map(el=>el.name).sort()
+     
     this.countryCasesChartOptions = {
+      title: {
+        text: "PnL: "+legendSet.map(el=>el.data[2]).reduce((acc,cur)=>acc+cur).toLocaleString(undefined,{maximumFractionDigits:2})+currencySymbol,
+        right: "15%",
+        top:'6%',
+        textStyle: {
+          fontSize: 22,
+          color:legendSet.map(el=>el.data[2]).reduce((acc,cur)=>acc+cur)>0?'green':'brown'
+        }
+      },
       backgroundColor: '#2c343c',
       legend: {
         icon: "roundRect",
@@ -77,50 +92,64 @@ export class AppPerformanceRevenueFactorChartComponentt  {
           color:'white'
         },
         top:'25%',
-        // bottom: 10,
         left: '90%',
-        data: [...a,...b]
+        data: [...profitLegend,...lossLegend],
+/*         formatter: function (name) {
+          return 'Legend ' + name;
+      } */
       },
       tooltip: {
         trigger: 'axis',
         axisPointer: {
-          type: 'cross',
-          label: {
-            backgroundColor: '#6a7985'
-          }
-        }
-      },
-/*       tooltip: {
-        
+          type: 'none',
+        },
+        backgroundColor:'#f4f2f2',
+        padding: [5, 30, 5, 10],
         formatter: 
         function (params) {
-          let displayValue:string
-          // console.log(params.componentType,params)
+          let totalRow:string
           if (params.componentType==='markPoint') {
             params.seriesName = chartOptions.series[params.seriesIndex].name
             params.name = chartOptions.xAxis[0].data[params.name]
           }
-            switch (params.seriesName) {
-            case 'TWR':
-              displayValue = params.seriesName+': '+params.value + ' %'
-            break;
-            case 'NPV':
-              displayValue = params.seriesName+': '+currencySymbol+ params.value[1].toLocaleString(undefined, { maximumFractionDigits: 2 }) 
-            break;
-            case 'Cash D/W':
-              displayValue = params.value[2] === 1?  'Deposit ' +currencySymbol  :  'Withdrawal '+currencySymbol;
-              displayValue += params.value[1].toLocaleString(undefined, { maximumFractionDigits: 2 }) 
-            break;
-            default:
-              displayValue =params.seriesName+': '+ params.value
-            break;
-          }
-          return params.name +'<br />'+displayValue ;
+          params.sort((s1,s2)=>s1.value-s2.value).reverse();
+          let total:number = 0;
+          let plDetails:string = '';
+          params.forEach(el=>total+=el.value)
+          totalRow =`
+          <tr style="border:1px solid black; "> 
+            <th> TOTAL PnL </th> 
+            <th style="color:black;">
+              ${currencySymbol}
+              ${(Math.round(total*100)/100).toLocaleString(undefined,{maximumFractionDigits:2})}
+            </th>
+          </tr>`
+          params.forEach(el=>{
+            let colorValue =  el.value<0? 'red':'green'
+            plDetails+=`
+            <tr style="border:1px solid black"> 
+              <th style="border:1px solid black;"> ${el.marker}${el.seriesName}</th> 
+              <th> 
+                <span style="margin-left: 3%; color:${colorValue}"> 
+                  ${el.value.toLocaleString(undefined,{maximumFractionDigits:2})}
+                </span>
+              </th>
+            <tr>`
+          })
+          return   `
+          ${params[0].axisValueLabel}
+          <table style="border:1px solid black; width:110%">  
+            <span style="font-weight:bold;">
+              ${totalRow} 
+            </span> 
+            ${plDetails} 
+          </table>`;
+
         },
         textStyle: {
           fontSize:sizeLarge
         }
-      }, */
+      },
       axisPointer: {
         link: [
           {
@@ -128,7 +157,10 @@ export class AppPerformanceRevenueFactorChartComponentt  {
           }
         ],
         label: {
-          backgroundColor: '#777'
+          fontSize:sizeLarge,
+          fontWeight: "bold",
+          backgroundColor: 'blue',
+          show:false
         }
       },
       toolbox: {
@@ -149,21 +181,6 @@ export class AppPerformanceRevenueFactorChartComponentt  {
           colorAlpha: 0.1
         }
       },
-/*       visualMap: {
-        show: false,
-        seriesIndex: 4,
-        // dimension: 1,
-        pieces: [
-          {
-            value: -1,
-            color: downColor
-          },
-          {
-            value: 1,
-            color: upColor
-          }
-        ]
-      }, */
       grid: [
         {
           left: '2%',
@@ -209,33 +226,6 @@ export class AppPerformanceRevenueFactorChartComponentt  {
         }
       ],
       yAxis: [
-/*         {
-          type: 'value',
-          name: 'TWR',
-          nameTextStyle: {
-            color:'white',
-            fontSize: sizeLarge,
-            fontWeight: "bold",
-            align: "left",
-            padding: [0, 0, 3, 10]
-          },
-          fontsize:20,
-          position: 'right',
-          alignTicks: true,
-          offset:40,
-          axisLine: {
-            show: true,
-            lineStyle: {
-              color:'white'
-            }
-          },
-          scale: true,
-          axisLabel: {
-            formatter: '{value} %',
-            fontSize:20,
-            fontWeight: "bold"
-          }
-        }, */
         {
           type: 'value',
           name: 'PnL',

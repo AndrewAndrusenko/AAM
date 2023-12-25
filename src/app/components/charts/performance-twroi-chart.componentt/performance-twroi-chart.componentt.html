@@ -2,12 +2,14 @@
 <nav class="navbar navbar-expand-sm navbar-dark bg-primary"  style="align-items: center;">
   <mat-form-field 
   style="margin-left: 1%;font-size: larger; background-color: rgb(46, 93, 147); text-align: center; width: 12%; border-radius: 12px;"  >
-  <mat-label style="color: black;font-size:large;">Select Portfolio..</mat-label>
+  <mat-label style="color: rgb(241, 235, 235);font-size:large;">Select Portfolio..</mat-label>
   <mat-select style="margin-left: 1%;font-size:larger;" #selectPortfolio>
     <mat-option *ngFor="let portfolio of portfolios" (click)="onChangeCountry(portfolio)"  [value]="portfolio">{{portfolio}}</mat-option>
   </mat-select>
 </mat-form-field>
-<a class=" navbar-brand mx-auto" style="align-items: center; font-size:x-large;">Time-Weighted Rate of Return - TWR</a> <label style="font-size: large;" #fontlarge > </label>
+<a class=" navbar-brand mx-auto" style="align-items: center; font-size:x-large;">
+  <mat-icon style="transform: scale(2);margin-right: 5%;">business_center</mat-icon>
+  Time-Weighted Rate of Return - TWR</a> <label style="font-size: large;" #fontlarge > </label>
 </nav>
 <div *ngIf="seriesMarketPrice.length!==0" style="background-color: azure;">
 <div style="width: 100%; top: 1%;" >
