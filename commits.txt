@@ -142,7 +142,17 @@ we get closest market price for every position
   Created db functions to calculate managment fees and save calculation for futher processing
 2|| UI Managment Fees => Created base UI draft table 
 --------------------------------------------------------------------------------------------
+25/12/2023 - 26/12/2023
+1|| UI Management Fees => 
+  UI splitted into two tables calculation and processing
+  Added default functionality: complex search and excel. excel export has been refactored
+  Created function to save prepared calculation in relevant table for further proccessing. User is able to see which calculations have been saved earilier and is notified only new calculation will be saved.
+  Created UI function to show detailed data of calculations or grouped by portfolio
+  Created delete stored calculations function for selected items. 
+  DB trigger on delete created to verify because user is only allowed to delete calculations without accounting
+--------------------------------------------------------------------------------------------
 
+1|| UI Confirm dialog has been refactored
 
 || Performance fee
 || High-Water Mark perfomance fee

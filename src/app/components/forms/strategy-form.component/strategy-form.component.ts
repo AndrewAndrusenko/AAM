@@ -55,7 +55,7 @@ export class AppStrategyFormComponent {
   }
   ngOnInit(): void {
 
-    // this.getStrategyData (this.strategyId);
+    this.getStrategyData (this.strategyId);
     this.action === 'View'||this.disabledControlElements? this.editStrategyForm.disable() : null;
   }
   getStrategyData (strategyId:number) {
@@ -99,7 +99,7 @@ export class AppStrategyFormComponent {
         this.InvestmentDataService.updateStrategy(this.editStrategyForm.value).subscribe(result => this.snacksBox(result,'Updated '))
       break;
       case 'Delete':
-        this.CommonDialogsService.confirmDialog('Delete strategy ' + this.name.value).pipe(
+        this.CommonDialogsService.confirmDialog('Delete strategy ' + this.name.value,'Delete').pipe(
           filter(isConfirmed => (isConfirmed.isConfirmed)),
           switchMap(data => this.InvestmentDataService.deleteStrategy(this.id.value))
         ).subscribe (result => this.snacksBox(result,'Deleted '))

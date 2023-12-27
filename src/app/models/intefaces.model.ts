@@ -1,4 +1,6 @@
 import { DBConfig } from "ngx-indexed-db";
+let ft: FeesTransactions['fee_date']
+
 interface errorsDescription {
   constraintCode: string,
   errorText: string
@@ -47,6 +49,10 @@ export const dbErrorsMap: errorsDescription[] = [
   {
     constraintCode: 'cFK_dportfolios_benckmarkPortfolio',
     errorText:'Attempt to delete benchmark account for existing strategy. cFK_dportfolios_benckmarkPortfolio blocked transaction'
+  },
+  {
+    constraintCode: 'constraint "i_dfee_transaction_pf_mf"',
+    errorText:'Attempt to create duplicate fee calculation. i_dfee_transaction_pf_mf blocked transaction'
   },
 
 ]
@@ -518,5 +524,23 @@ export interface ManagementFeeCalcData {
   period_end : Date,
   schedule_range : number,
   feevalue : number,
-  fee_type_value  :number
+  fee_type_value  :number,
+  id_fee_transaction: number
+}
+export type FeesTransactions = {
+  id :number,
+  id_object :number,
+  fee_object_type:number,
+  fee_amount:number, 
+  fee_date:Date, 
+  calculation_date :Date, 
+  b_transaction_date :Date, 
+  id_b_entry:number, 
+  fee_rate:number, 
+  calculation_base:number, 
+  id_fee_main:number, 
+  fee_type:number,
+  portfolioname: string,
+  fee_code:string,
+  id_fee_transaction:number
 }

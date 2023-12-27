@@ -1,6 +1,6 @@
 
-<h1 class="dialog-headline" *ngIf="dialogType==='confirmDialog'">
-  Please confirm your action: {{actionToConfim.action}} 
+<h1 class="dialog-headline" *ngIf="dialogType==='confirmDialog'"  style="white-space: pre-line">
+  Please confirm your action:<br> {{actionToConfim.action}} 
 </h1>
 <h1 class="dialog-headline" *ngIf="dialogType==='jsonData'">
   {{captionTitle}} 
@@ -11,12 +11,12 @@
   
   <button mat-raised-button color="success" type="submit" 
   (click)="submitAction()"
-  style="margin-top: 10px; width:max-content; font-size: 18px; float: inline-start">
-  {{actionToConfim.action}} 
+  style="margin-top: 10px;  font-size: 18px; min-width: 17wv; float: inline-start">
+  {{actionToConfim.buttonLabel}} 
 </button>
 <button mat-raised-button color="successd" 
 (click)="cancelAction()"
-style="margin-top: 10px; width: 200px; font-size: 18px; float: inline-end;">
+style="margin-top: 10px; width: 17wv; font-size: 18px; float: inline-end;">
 Cancel
 </button>
 </ng-container>

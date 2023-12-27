@@ -13,6 +13,7 @@ import { AccSWIFTTabComponent } from './components/main-page/tabs/SWIFT-tab.comp
 import { AppTableSWIFT950ItemsComponent } from './components/tables/swift-950-table.component/swift-items-table.component';
 import { OrdersTabComponent } from './components/main-page/tabs/trades-orders-tab/trades-orders-tab';
 import { AppTabsComponent } from './components/main-page/tabs.component/tabs.component';
+import { AccAccountsFeesTabComponent } from './components/main-page/tabs/accounting-fees-tab/accounting-fees-tab';
 export const routesTreeMenu =[
   {
     path: "Instruments",
@@ -34,6 +35,11 @@ export const routesTreeMenu =[
     path: "Accounts",
     data: { reuse: true },
     component: AccAccountsTabComponent
+  },
+  {
+    path: "Fees",
+    data: { reuse: true },
+    component: AccAccountsFeesTabComponent
   },
   {
     path: "Transactions",

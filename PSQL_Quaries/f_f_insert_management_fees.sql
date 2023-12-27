@@ -24,7 +24,8 @@ INSERT INTO
     fee_rate,
     calculation_base,
     id_fee_main,
-    fee_type
+    fee_type,
+	status
   )
 SELECT
   id_portfolio,
@@ -35,13 +36,15 @@ SELECT
   feevalue,
   npv,
   id_fee,
-  fee_type
+  fee_type,
+  0
 FROM
   f_f_calc_management_fees (
     p_portfolio_list,
     p_report_date_start,
     p_report_date_end
-  );
+  )
+WHERE f_f_calc_management_fees.id_fee_transaction ISNULL;
 GET DIAGNOSTICS o_inserted_qty = ROW_COUNT;
 RETURN o_inserted_qty;
 END

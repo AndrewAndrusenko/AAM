@@ -1,12 +1,12 @@
 import {Component, ViewChild, Input, ChangeDetectionStrategy, ElementRef} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
-import {Observable, Subscription, filter, from,  map,  of, switchMap, tap } from 'rxjs';
+import {Subscription, from,  of, switchMap, tap } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
-import {ManagementFeeCalcData,tableHeaders } from 'src/app/models/intefaces.model';
+import {FeesTransactions,tableHeaders } from 'src/app/models/intefaces.model';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
-import {AbstractControl, FormBuilder, Validators, FormGroup, FormControl } from '@angular/forms';
+import {AbstractControl, FormBuilder,  FormGroup, FormControl } from '@angular/forms';
 import {formatNumber } from '@angular/common';
 import {HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import {HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
@@ -14,32 +14,39 @@ import {AuthService } from 'src/app/services/auth.service';
 import {AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
 import {indexDBService } from 'src/app/services/indexDB.service';
 import { AppFeesHandlingService } from 'src/app/services/fees-handling.service';
+import { HandlingTableSelectionService } from 'src/app/services/handling-table-selection.service';
+import { SelectionModel } from '@angular/cdk/collections';
+import { number } from 'echarts';
 @Component({
-  selector: 'app-acc-fees-management-table',
+  selector: 'acc-fees-processing-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './acc-fees-management-table.component.html',
-  styleUrls: ['./acc-fees-management-table.component.scss'],
+  templateUrl: './acc-fees-processing-table.component.html',
+  styleUrls: ['./acc-fees-processing-table.component.scss'],
 })
-export class AppaIAccFeesManagementTableComponent {
+export class AppaIAccFeesProcessingTableComponent {
   accessState: string = 'none';
   disabledControlElements: boolean = false;
   private subscriptions = new Subscription()
   @Input() readOnly:boolean = false;
   columnsWithHeaders: tableHeaders[] = [
-    {fieldName:'report_date',displayName:'Date'},
+    {fieldName:'select',displayName:''},
+    {fieldName:'id',displayName:'ID'},
+    {fieldName:'fee_date',displayName:'Date'},
     {fieldName:'portfolioname',displayName:'Code'},
-    {fieldName:'management_fee_amount',displayName:'Fee'},
-    {fieldName:'npv',displayName:'NPV'},
-    {fieldName:'calculation_start',displayName:'Start'},
-    {fieldName:'calculation_end',displayName:'End'},
-    {fieldName:'schedule_range',displayName:'Range Fee'},
-    {fieldName:'feevalue',displayName:'Fee Rate'},
-    {fieldName:'id_fee_transaction',displayName:'ID Calc'},
+    {fieldName:'fee_amount',displayName:'Fee Amounnt'},
+    {fieldName:'fee_rate',displayName:'Rate'},
+    {fieldName:'calculation_base',displayName:'NPV'},
+    {fieldName:'calculation_date',displayName:'Generated'},
+    {fieldName:'b_transaction_date',displayName:'Entry Date'},
+    {fieldName:'id_b_entry',displayName:'ID Entry'},
+    {fieldName:'id_fee_main',displayName:'ID Fee'},
+    {fieldName:'fee_code',displayName:'Fee Type'},
   ];
   columnsToDisplay: string [];
   columnsHeaderToDisplay: string [];
-  dataSource: MatTableDataSource<ManagementFeeCalcData>;
-  fullDataSource: ManagementFeeCalcData[];
+  dataSource: MatTableDataSource<FeesTransactions>;
+  fullDataSource: FeesTransactions[];
+  selection  = new SelectionModel<FeesTransactions> (true,[])
   @ViewChild('filterALL', { static: false }) filterALL: ElementRef;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
@@ -54,6 +61,8 @@ export class AppaIAccFeesManagementTableComponent {
   portfolios: Array<string> = ['ClearAll'];
   currencySymbol: string = '$';
   detailedView:boolean = false;
+  selectedRowID: number;
+  selectedRowIndex: number;
   constructor(
     private AuthServiceS:AuthService,  
     private InvestmentDataService:AppInvestmentDataServiceService, 
@@ -61,6 +70,7 @@ export class AppaIAccFeesManagementTableComponent {
     private CommonDialogsService:HadlingCommonDialogsService,
     private AppFeesHandlingService:AppFeesHandlingService,
     private indexDBServiceS:indexDBService,
+    private SelectionService:HandlingTableSelectionService,
     private fb:FormBuilder, 
   ) {
     this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
@@ -82,8 +92,8 @@ export class AppaIAccFeesManagementTableComponent {
     this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios').then ((data)=>{
       this.mp_strategies_list = data['data']
     })
-    // this.submitQuery(false,false);  
-    this.multiFilter = (data: ManagementFeeCalcData, filter: string) => {
+    this.submitQuery(false,false);  
+    this.multiFilter = (data: FeesTransactions, filter: string) => {
       let filter_array = filter.split(',').map(el=>[el,1]);
       this.columnsToDisplay.forEach(col=>filter_array.forEach(fil=>{
         data[col]&&fil[0].toString().toUpperCase()===(data[col]).toString().toUpperCase()? fil[1]=0:null
@@ -102,7 +112,7 @@ export class AppaIAccFeesManagementTableComponent {
       this.filterALL.nativeElement.value = e.value;
     })
   }
-  updateDataTable (managementFeeData:ManagementFeeCalcData[]) {
+  updateDataTable (managementFeeData:FeesTransactions[]) {
     this.fullDataSource=managementFeeData;
     this.dataSource  = new MatTableDataSource(managementFeeData);
     this.dataSource.filterPredicate =this.multiFilter
@@ -115,13 +125,9 @@ export class AppaIAccFeesManagementTableComponent {
     searchObj.p_report_date_start = new Date (this.dateRangeStart.value).toLocaleDateString();
     searchObj.p_report_date_end = this.dateRangeEnd.value? new Date (this.dateRangeEnd.value).toLocaleDateString(): new Date().toLocaleDateString();
     of(this.portfolios.length).pipe(
-      switchMap(portLength => 
-        portLength===1? 
-          this.InvestmentDataService.getPortfoliosListForMP('All','getPortfoliosByMP_StrtgyID')
-          :from([[...this.portfolios]])
-      ),
+      switchMap(portLength => portLength===1? this.InvestmentDataService.getPortfoliosListForMP('All','getPortfoliosByMP_StrtgyID'):from([[...this.portfolios]])),
       tap(ports=>searchObj.p_portfolios_list = ports.map(el=>el.toUpperCase())),
-      switchMap(()=>this.AppFeesHandlingService.getManagementFeeCalcData(searchObj))
+      switchMap(()=>this.AppFeesHandlingService.getFeesTransactions(searchObj))
     ).subscribe(data => {
       this.updateDataTable(data)
       showSnackResult? this.CommonDialogsService.snackResultHandler({
@@ -130,36 +136,17 @@ export class AppaIAccFeesManagementTableComponent {
     });
   }
   showCalcDetails (details:boolean) {
-    this.dataSource.data = this.fullDataSource.filter(el=>details? el.npv === null:el.npv !== null)
+    this.dataSource.data = this.fullDataSource.filter(el=>details? el.calculation_base === null:el.calculation_base !== null)
   }
-  approveCalculation () {
-    let searchObj  = this.searchParametersFG.value;
-    searchObj.p_report_date_start = new Date (this.dateRangeStart.value).toLocaleDateString();
-    searchObj.p_report_date_end = this.dateRangeEnd.value? new Date (this.dateRangeEnd.value).toLocaleDateString(): new Date().toLocaleDateString();
-    let countSavedCalcs = this.dataSource.data.filter(el=>el.id_fee_transaction>0).length
-     if (countSavedCalcs===this.dataSource.data.filter(el=>el.npv>0).length) { 
-      return this.CommonDialogsService.snackResultHandler({name:'error',detail:'Nothing to save. All calculations have already been saved'})
-    }
-    of(this.portfolios.length).pipe(
-      switchMap(portLength => 
-        portLength===1? 
-        this.InvestmentDataService.getPortfoliosListForMP('All','getPortfoliosByMP_StrtgyID')
-        :from([[...this.portfolios]])
-      ),
-      tap(ports=>searchObj.p_portfolios_list = ports.map(el=>el.toUpperCase())),
-      switchMap(()=>
-        countSavedCalcs? 
-        this.CommonDialogsService.confirmDialog('There are already saved calculations in the current list.\n Create only new caluculations (without ID Calc)?','Create new')
-        :from([{isConfirmed:true}])
-      ),
-      filter(confirm=>confirm.isConfirmed),
-      switchMap(()=>this.AppFeesHandlingService.approvedManagementFeeCalc(searchObj))
-    ).subscribe(data => {
-      this.submitQuery(false,false);
-      this.CommonDialogsService.snackResultHandler({
-        name:data['name'],detail: data['name'] === 'error'? 
-        data['detail'] : formatNumber (data[0].f_f_insert_management_fees,'en-US') + ' rows'}, 'Inserted ');
-    });
+  deleteAccounting () {
+    
+  }
+  createAccounting () {
+
+  }
+  deleteCalculation () {
+    this.AppFeesHandlingService.deleteFeesCalculation(this.selection.selected.map(el=>Number(el.id))).subscribe(data=>console.log('data',data))
+    this.selection.clear();
 
   }
   changedValueofChip (value:string, chipArray:string[]) {
@@ -197,23 +184,56 @@ export class AppaIAccFeesManagementTableComponent {
     this.dataSource.filter = ''
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
   }
-
+  isAllSelected() { return this.SelectionService.isAllSelected(this.dataSource, this.selection)} 
+  toggleAllRows(forceSelectAll:boolean=false) { return this.SelectionService.toggleAllRows(this.dataSource, this.selection,forceSelectAll)} 
+  checkboxLabel(row?: FeesTransactions): string {
+    return this.SelectionService.checkboxLabel(this.dataSource, this.selection, row)
+  }
+  keyDownEvent(event:_KeyboardEvent) {
+    switch (event.code) {
+      case 'Space':
+        this.selectItem()
+      break;
+      case 'ArrowDown':
+        this.rowsMoveDown()
+      break;
+      case 'ArrowUp':
+        this.rowsMoveUp()
+      break;
+    }
+  }
+  highlight(row){
+    this.selectedRowIndex = this.dataSource.data.findIndex(el=>el.id===row.id);
+    this.selectedRowID = row.id;
+  }
+  selectItem (row?) {
+    this.selection.toggle(row? row: this.dataSource.data[this.selectedRowIndex])
+  }
+  rowsMoveDown() {
+    this.selectedRowIndex =this.selectedRowIndex+1
+    this.selectedRowID = this.dataSource.data[this.selectedRowIndex].id
+  }
+  rowsMoveUp () {
+    this.selectedRowIndex =this.selectedRowIndex-1
+    this.selectedRowID = this.dataSource.data[this.selectedRowIndex].id
+  }
   // getTotals (col:string) {
   //   return (this.dataSource&&this.dataSource.data)?  this.dataSource.filteredData.map(el => el[col]).reduce((acc, value) => acc + Number(value), 0):0;
   // }
   exportToExcel() {
     let dataTypes =  {
-      report_date : 'Date',
-      id_portfolio : 'number',
-      management_fee_amount : 'number',
-      npv : 'number',
-      calculation_start : 'Date',
-      calculation_end : 'Date',
-      period_start : 'Date',
-      period_end : 'Date',
-      feevalue : 'number',
-      fee_type_value  :'number',
-      id_fee_transaction:'number'
+      id :'number',
+      id_object :'number',
+      fee_object_type:'number',
+      fee_amount:'number', 
+      fee_date:'Date', 
+      calculation_date :'Date', 
+      b_transaction_date :'Date', 
+      id_b_entry:'number', 
+      fee_rate:'number', 
+      calculation_base:'number', 
+      id_fee_main:'number', 
+      fee_type:'number'
     }
     let dataToExport =  structuredClone(this.fullDataSource);
     dataToExport.map(el=>{
@@ -226,7 +246,7 @@ export class AppaIAccFeesManagementTableComponent {
       })
       return el;
     });
-    this.HandlingCommonTasksS.exportToExcel (dataToExport,"managementFeeData");  
+    this.HandlingCommonTasksS.exportToExcel (dataToExport,"processingFeeData");  
   }
    get  idportfolios () {return this.searchParametersFG.get('p_portfolios_list') } 
   get  dateRangeStart () {return this.dataRange.get('dateRangeStart') } 

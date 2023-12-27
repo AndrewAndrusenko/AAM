@@ -17,9 +17,14 @@ export class HadlingCommonDialogsService {
     private dialog: MatDialog, 
   ) {}
   dialogCloseAll () {this.dialog.closeAll()}
-  confirmDialog (actionToConfim:string):Observable<any> {
+  confirmDialog (actionToConfim:string, buttonToConfirm?:string):Observable<{action:string ,
+    isConfirmed: boolean, 
+    buttonLabel:string}> {
     this.dialogRefConfirm = this.dialog.open(AppConfimActionComponent, {panelClass: 'custom-modalbox',} );
-    this.dialogRefConfirm.componentInstance.actionToConfim = {'action':actionToConfim ,'isConfirmed': false}
+    this.dialogRefConfirm.componentInstance.actionToConfim = {
+      action:actionToConfim ,
+      isConfirmed: false, 
+      buttonLabel:buttonToConfirm||actionToConfim}
     return this.dialogRefConfirm.afterClosed()
   }
   jsonDataDialog (jsonData:any,captionTitle:string='') {

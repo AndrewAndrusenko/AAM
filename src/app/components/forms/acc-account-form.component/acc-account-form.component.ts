@@ -188,8 +188,8 @@ export class AppAccAccountModifyFormComponent implements OnInit {
       break;
       case 'Delete':
         this.CommonDialogsService.confirmDialog('Delete Account ' + this.accountNo.value).pipe(
-          filter (isConfirmed => isConfirmed),
-          switchMap(isConfirmed => this.AccountingDataService.updateAccountAccounting(this.accountModifyForm.value,'Delete'))
+          filter (confirm => confirm.isConfirmed),
+          switchMap(() => this.AccountingDataService.updateAccountAccounting(this.accountModifyForm.value,'Delete'))
         ).subscribe(result => this.snacksBox(result,'Deleted'))
       break;
     }
@@ -206,8 +206,8 @@ export class AppAccAccountModifyFormComponent implements OnInit {
       break;
       case 'Delete':
         this.CommonDialogsService.confirmDialog('Delete Account ' + this.ledgerNo.value).pipe(
-          filter (isConfirmed => isConfirmed),
-          switchMap(isConfirmed => this.AccountingDataService.updateLedgerAccountAccounting(this.accountLedgerModifyForm.value,'Delete'))
+          filter (confirm =>confirm.isConfirmed),
+          switchMap(() => this.AccountingDataService.updateLedgerAccountAccounting(this.accountLedgerModifyForm.value,'Delete'))
         ).subscribe(result => this.snacksBox(result,'Deleted'))
       break;
     }

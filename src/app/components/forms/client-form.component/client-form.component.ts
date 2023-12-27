@@ -88,7 +88,7 @@ export class AppClientFormComponent implements OnInit {
         this.InvestmentDataServiceService.updateClient (this.editClienttForm.value).subscribe (result => this.snacksBox(result,'Updated'))
       break;
       case 'Delete':
-        this.CommonDialogsService.confirmDialog('Delete ' + this.clientname.value).pipe(
+        this.CommonDialogsService.confirmDialog('Delete ' + this.clientname.value,'Delete').pipe(
           filter(isConfirmed => isConfirmed.isConfirmed),
           switchMap(data => this.InvestmentDataServiceService.deleteClient (this.clientId.value))
         ).subscribe (result => this.snacksBox(result,'Deleted'))

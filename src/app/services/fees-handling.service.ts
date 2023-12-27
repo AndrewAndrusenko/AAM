@@ -3,10 +3,10 @@ import { HadlingCommonDialogsService } from './hadling-common-dialogs.service';
 import { AppTradeService } from './trades-service.service';
 import { AppAccountingService } from './accounting.service';
 import { AppallocationTableComponent } from '../components/tables/allocation-table.component/allocation-table.component';
-import { Observable, filter, forkJoin, map,  switchMap, tap } from 'rxjs';
+import { Observable, Subject, filter, forkJoin, map,  switchMap, tap } from 'rxjs';
 import { AbstractControl } from '@angular/forms';
 import { AppOrderTableComponent } from '../components/tables/orders-table.component/orders-table.component';
-import { ManagementFeeCalcData, allocation } from '../models/intefaces.model';
+import { FeesTransactions, ManagementFeeCalcData, RevenueFactorData, allocation } from '../models/intefaces.model';
 import { AccountingTradesService } from './accounting-trades.service';
 import { HttpClient } from '@angular/common/http';
 
@@ -15,6 +15,7 @@ import { HttpClient } from '@angular/common/http';
 })
 export class AppFeesHandlingService {
   private tradeToConfirm:allocation[];
+  private subjectDeletedFeesTransactions = new Subject<FeesTransactions[]>
   constructor(
     private http :HttpClient,
     private CommonDialogsService:HadlingCommonDialogsService,
@@ -27,6 +28,18 @@ export class AppFeesHandlingService {
     searchObj.action='getManagementFeesCalcData';
     return this.http.get <ManagementFeeCalcData[]> ('/api/AAM/getFeesData/',{params:searchObj})
   }
+  approvedManagementFeeCalc (searchObj : {action:string,p_report_date_start:string,p_report_date_end:string, p_portfolios_list: string []}):Observable <{f_f_insert_management_fees:number}[]> {
+    searchObj.action='approvedManagementFeeCalc';
+    return this.http.get <{f_f_insert_management_fees:number}[]> ('api/AAM/getFeesData/',{params:searchObj})
+  }
+  getFeesTransactions (searchObj : {action:string,p_report_date_start:string,p_report_date_end:string, p_portfolios_list: string []}):Observable<FeesTransactions[]> {
+    searchObj.action='getFeesTransactions';
+    return this.http.get <FeesTransactions[]> ('api/AAM/getFeesData/', {params:searchObj})
+  }
+  deleteFeesCalculation(ids:number[]):Observable<number>{
+    console.log('ids',ids);
+    return this.http.post <number> ('api/AAM/updateFeesData/',{action:'Delete',data:{id:ids}})
+  } 
   createAccountingForManagementFees (allocationTable:AppallocationTableComponent) {
     this.tradeToConfirm = allocationTable.selection.selected;
     this.TradeService.getEntriesPerAllocatedTrade(this.tradeToConfirm.map(el=>Number(el.id))).pipe(

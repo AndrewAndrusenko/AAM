@@ -1,0 +1,9 @@
+<mat-tab-group  mat-stretch-tabs  #tabGroup
+(selectedTabChange)="showTabName($event)">
+  <mat-tab  label="Fees Processing" >
+      <acc-fees-processing-table></acc-fees-processing-table>  
+  </mat-tab>  
+  <mat-tab label="Fees Calculation"> 
+      <app-acc-fees-management-table></app-acc-fees-management-table>  
+  </mat-tab>
+</mat-tab-group>

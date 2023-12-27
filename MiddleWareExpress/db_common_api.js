@@ -37,7 +37,7 @@ async function fUpdateTableDB (table, fields,idfieldName, request, response,date
         sqlText = 'UPDATE public."'+ table +'" SET ' + updatePairs + ' WHERE "'+ idfieldName +'"=${'+ idfieldName +'} RETURNING *'
       break;
       case 'Delete':
-        sqlText = 'DELETE FROM public."'+ table +'" WHERE "'+ idfieldName +'"=${'+ idfieldName +'} RETURNING *;'
+        sqlText = 'DELETE FROM public."'+ table +'" WHERE "'+ idfieldName +'"=ANY(${'+ idfieldName +'}) RETURNING *;'
       break;
       }
       sql = pgp.as.format(sqlText,request.body.data);
