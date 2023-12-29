@@ -253,8 +253,11 @@ async function GetEntryScheme (request, response) {
       sql='SELECT "ledgerNoId" , "dataTime", "XactTypeCode", "XactTypeCode_Ext" , "accountId", "amountTransaction", "entryDetails", "extTransactionId",idtrade FROM public."bcSchemeAccountTransaction" ';
     break;
   }
+
   sql +=conditionsTrades.slice(0,-5);
   sql = pgp.as.format(sql,request.query)
+
+  console.log('sc sql',sql);
   pool.query (sql,  (err, res) => {if (err) {
       console.log (err.stack.split("\n", 1).join(""))
       err.detail = err.stack
@@ -285,6 +288,8 @@ async function GetEntryScheme (request, response) {
           
         }
         db_common_api.queryExecute(sql,response,null,'STP_Get Entry Scheme');
+      } else {
+        response.status(200).json([])
       }
     }
   })

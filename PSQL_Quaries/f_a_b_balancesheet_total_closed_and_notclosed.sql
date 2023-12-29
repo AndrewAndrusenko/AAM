@@ -4,11 +4,13 @@ DROP FUNCTION IF EXISTS public.f_a_b_balancesheet_total_closed_and_notclosed();
 
 CREATE OR REPLACE FUNCTION public.f_a_b_balancesheet_total_closed_and_notclosed(
 	)
-    RETURNS TABLE(portfolioname character varying, secid character varying, "accountNo" text, "accountId" numeric, "accountType" text,
-				  
-				  "datePreviousBalance" date, "dateBalance" timestamp without time zone, "openingBalance" numeric, "totalCredit" numeric,
-				  "totalDebit" numeric, "OutGoingBalance" numeric, "checkClosing" numeric, xacttypecode integer,
-				  currencycode numeric, "dateOpening" date) 
+    RETURNS TABLE(
+		portfolioname character varying, secid character varying, 
+		"accountNo" text, "accountId" numeric, "accountType" text, 
+		"datePreviousBalance" date, "dateBalance" timestamp without time zone, 
+		"openingBalance" numeric, "totalDebit" numeric, "totalCredit" numeric, "OutGoingBalance" numeric, 
+		"checkClosing" numeric, xacttypecode integer, currencycode numeric, "dateOpening" date
+	 ) 
     LANGUAGE 'plpgsql'
     COST 100
     VOLATILE PARALLEL UNSAFE

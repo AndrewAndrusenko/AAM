@@ -40,7 +40,11 @@ export class AppaIAccFeesProcessingTableComponent {
     {fieldName:'b_transaction_date',displayName:'Entry Date'},
     {fieldName:'id_b_entry',displayName:'ID Entry'},
     {fieldName:'id_fee_main',displayName:'ID Fee'},
-    {fieldName:'fee_code',displayName:'Fee Type'},
+    // {fieldName:'fee_code',displayName:'Fee Type'},
+    {fieldName:'accountId',displayName:'idAcc'},
+    {fieldName:'id_object',displayName:'idPort'},
+    {fieldName:'startPeriod',displayName:'Start'},
+    {fieldName:'endPeriod',displayName:'End'},
   ];
   columnsToDisplay: string [];
   columnsHeaderToDisplay: string [];
@@ -60,9 +64,12 @@ export class AppaIAccFeesProcessingTableComponent {
   mp_strategies_list: string[]=[];
   portfolios: Array<string> = ['ClearAll'];
   currencySymbol: string = '$';
+  profitTaxRate:number;
   detailedView:boolean = false;
   selectedRowID: number;
   selectedRowIndex: number;
+  statusDetails:{};
+  statusDetailsHeader:string='';
   constructor(
     private AuthServiceS:AuthService,  
     private InvestmentDataService:AppInvestmentDataServiceService, 
@@ -89,6 +96,7 @@ export class AppaIAccFeesProcessingTableComponent {
     this.subscriptions.unsubscribe();
   }
   ngOnInit(): void {
+    this.AppFeesHandlingService.getProfitTax(new Date().toDateString()).subscribe(data=>this.profitTaxRate=data[0].rate)
     this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios').then ((data)=>{
       this.mp_strategies_list = data['data']
     })
@@ -101,6 +109,10 @@ export class AppaIAccFeesProcessingTableComponent {
         );
       return !filter || filter_array.reduce((acc,val)=>acc+Number(val[1]),0)===0;
     };
+    this.subscriptions.add(this.AppFeesHandlingService.getCreatedAccounting().subscribe(createdTransaction=>{
+      this.statusDetailsHeader='Created Management Fees details'
+      this.statusDetails={...createdTransaction};
+    }))
   }
   resetSearchForm () {
     this.searchParametersFG.reset();
@@ -142,10 +154,27 @@ export class AppaIAccFeesProcessingTableComponent {
     
   }
   createAccounting () {
-
+    let feesToProcess = this.selection.selected
+    if (this.isAllSelected() === false) {
+      let portfolios = [...feesToProcess.map(el=>el.portfolioname)]
+      feesToProcess = [...feesToProcess,...this.dataSource.data.filter(el=>portfolios.includes(el.portfolioname)&&el.id>0)]
+    }  
+    this.AppFeesHandlingService.createAccountingForManagementFees(feesToProcess,this.profitTaxRate)
+    this.selection.clear();
   }
   deleteCalculation () {
-    this.AppFeesHandlingService.deleteFeesCalculation(this.selection.selected.map(el=>Number(el.id))).subscribe(data=>console.log('data',data))
+    let feesToProcess = this.selection.selected
+    if (this.isAllSelected() === false) {
+      let portfolios = [...feesToProcess.map(el=>el.portfolioname)]
+      feesToProcess = [...feesToProcess,...this.dataSource.data.filter(el=>portfolios.includes(el.portfolioname)&&el.id>0)]
+    } 
+    this.AppFeesHandlingService.deleteFeesCalculation(feesToProcess.map(el=>Number(el.id))).subscribe(data=>{
+      this.CommonDialogsService.snackResultHandler({
+        name:data['name'], 
+        detail:data['name'] === 'error'? data['detail'] :  formatNumber (data.length,'en-US') + ' rows'}, 'Deleted '
+      );
+      data['name'] !== 'error'? this.submitQuery(false,false):null;
+    })
     this.selection.clear();
 
   }
@@ -185,7 +214,9 @@ export class AppaIAccFeesProcessingTableComponent {
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
   }
   isAllSelected() { return this.SelectionService.isAllSelected(this.dataSource, this.selection)} 
-  toggleAllRows(forceSelectAll:boolean=false) { return this.SelectionService.toggleAllRows(this.dataSource, this.selection,forceSelectAll)} 
+  toggleAllRows(forceSelectAll:boolean=false) { 
+    return this.SelectionService.toggleAllRows(this.dataSource, this.selection,forceSelectAll)
+  } 
   checkboxLabel(row?: FeesTransactions): string {
     return this.SelectionService.checkboxLabel(this.dataSource, this.selection, row)
   }

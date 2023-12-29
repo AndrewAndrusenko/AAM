@@ -542,5 +542,8 @@ export type FeesTransactions = {
   fee_type:number,
   portfolioname: string,
   fee_code:string,
-  id_fee_transaction:number
+  id_fee_transaction:number,
+  accountId:number,
+  endPeriod:Date,
+  startPeriod:Date
 }

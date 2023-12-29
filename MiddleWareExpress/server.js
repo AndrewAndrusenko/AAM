@@ -220,7 +220,9 @@ appServer.post('/AAM/modifyRatesData/',jsPassport.authenticate('session'), uiAmm
 /*----------------------FeesData----------------------------------------------------*/
 appServer.get('/AAM/getFeesData/',jsPassport.authenticate('session'), uiAmmFeesData.geFeesData)
 appServer.post('/AAM/updateFeesData/',jsPassport.authenticate('session'), uiAmmFeesData.fUpdateOrderData)
+appServer.post('/AAM/updateFeesEntryInfo/',jsPassport.authenticate('session'), uiAmmFeesData.fupdateFeesEntryInfo)
 
+appServer.get('/AAM/getTaxesData/',jsPassport.authenticate('session'), uiAmmFeesData.fgetTaxes)
 
 // RedisService.TestRedis();
 // RedisService.redisSetInstrumentList();

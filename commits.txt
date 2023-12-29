@@ -151,8 +151,17 @@ we get closest market price for every position
   Created delete stored calculations function for selected items. 
   DB trigger on delete created to verify because user is only allowed to delete calculations without accounting
 --------------------------------------------------------------------------------------------
-
-1|| UI Confirm dialog has been refactored
+27/12/2023 - 28/12/2023..
+1|| UI&Backend Fees proccessing =>
+  Added accounting scheme to process fees accounting. 
+  Accounting scheme consists of three entries. A fee amount is  transferred to transit account and then distribute it between net profit and taxes due to be paid 
+  Implemented basic functionality to store profit tax rate and use it for taxes calculation
+  Developed function to create accounting related to the fees transaction using accounting schemes stored in DB and which could be customized if it is nessesary
+  Within accounting creation function reference created between fees transactions and entry corresponding to the client account 
+  Used forkjoin operator and other RxJS functions  
+2|| UI Confirm dialog has been refactored
+3|| Minor fixing
+--------------------------------------------------------------------------------------------
 
 || Performance fee
 || High-Water Mark perfomance fee

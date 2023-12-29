@@ -37,10 +37,13 @@ async function fUpdateTableDB (table, fields,idfieldName, request, response,date
         sqlText = 'UPDATE public."'+ table +'" SET ' + updatePairs + ' WHERE "'+ idfieldName +'"=${'+ idfieldName +'} RETURNING *'
       break;
       case 'Delete':
-        sqlText = 'DELETE FROM public."'+ table +'" WHERE "'+ idfieldName +'"=ANY(${'+ idfieldName +'}) RETURNING *;'
+        console.log(typeof(request.body.data[idfieldName]))
+        sqlText = 'DELETE FROM public."'+ table +'" WHERE "'+ idfieldName;
+        sqlText += typeof(request.body.data[idfieldName]) ==='object'? '"=ANY(${'+ idfieldName +'}) RETURNING *;' : '"=${'+ idfieldName +'} RETURNING *;' 
       break;
       }
       sql = pgp.as.format(sqlText,request.body.data);
+      console.log('sql',sql);
     resolve(queryExecute (sql, response,undefined,'fUpdateTableDB '+request.body.action+' ',table))
   })
 }
