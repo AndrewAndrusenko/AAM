@@ -1,22 +1,17 @@
 import { Injectable } from '@angular/core';
 import { HadlingCommonDialogsService } from './hadling-common-dialogs.service';
 import { AppAccountingService } from './accounting.service';
-import { AppallocationTableComponent } from '../components/tables/allocation-table.component/allocation-table.component';
 import { EMPTY, Observable, Subject, catchError, filter, forkJoin, map, switchMap, tap } from 'rxjs';
-import { AbstractControl } from '@angular/forms';
-import { AppOrderTableComponent } from '../components/tables/orders-table.component/orders-table.component';
 import { FeesTransactions, ManagementFeeCalcData, bAccountTransaction, bLedgerTransaction } from '../models/intefaces.model';
 import { AccountingTradesService } from './accounting-trades.service';
 import { HttpClient } from '@angular/common/http';
-
+import { formatNumber } from '@angular/common';
 @Injectable({
   providedIn: 'root'
 })
-
 export class AppFeesHandlingService {
   private feesToProcess:FeesTransactions[];
   private createdAccounting$ = new Subject <{}[]>
-
   constructor(
     private http :HttpClient,
     private CommonDialogsService:HadlingCommonDialogsService,
@@ -43,8 +38,8 @@ export class AppFeesHandlingService {
     }
     return this.http.get <{id:number}[]> ('api/AAM/getFeesData/',{params:params})
   }
-  updateFeesEntryInfo (ids:number[],entry_id:number): Observable<{qty:number}[]> {
-    console.log('ids and entry',ids,entry_id);
+  updateFeesEntryInfo (ids:number[],entry_id:number[]): Observable<{qty:number}[]> {
+    console.log('entry_id',entry_id);
     return this.http.post <{qty:number}[]> (
       'api/AAM/updateFeesEntryInfo/',
       {params: 
@@ -53,8 +48,24 @@ export class AppFeesHandlingService {
         entry_id:entry_id}
       })
   }
-  deleteFeesCalculation(ids:number[]):Observable<FeesTransactions[]>{
-    console.log('ids',ids);
+  deleteFeesCalculation (ids:number[]) {
+    this.CommonDialogsService.confirmDialog('Delete selected calculations','Delete').pipe(
+      filter(confirm=>confirm.isConfirmed),
+      switchMap(()=>this.deleteFeesCalculationExec(ids)),
+      catchError(err=>{
+        console.log('error',err);
+        this.CommonDialogsService.snackResultHandler(err.error);
+        return EMPTY;
+      })
+    ).subscribe(data=>{
+      this.CommonDialogsService.snackResultHandler({
+        name:data['name'], 
+        detail:data['name'] === 'error'? data['detail'] :  formatNumber (data.length,'en-US') + ' entries'}, 'Deleted '
+      );
+      data['name'] !== 'error'?  this.sendCreatedAccounting(data):null;
+    })
+  }
+  deleteFeesCalculationExec (ids:number[]):Observable<FeesTransactions[]>{
     return this.http.post <FeesTransactions[]> ('api/AAM/updateFeesData/',{action:'Delete',data:{id:ids}})
   } 
   getProfitTax (p_date:string):Observable<{rate:number}[]> {
@@ -83,7 +94,6 @@ export class AppFeesHandlingService {
       bcEntryParameters.endPeriod=new Date(feeTransaction.endPeriod).toLocaleDateString();
       bcEntryParameters.startPeriod=new Date(feeTransaction.startPeriod).toLocaleDateString();
       let cSchemeGroupId:string = '';
-      console.log('feeTr',feeTransaction);
       switch (feeTransaction.fee_type.toString()) {
         case '1':
           cSchemeGroupId='Managment_Fee'
@@ -107,74 +117,59 @@ export class AppFeesHandlingService {
      ]).pipe(
       switchMap(()=>forkJoin(accountingToCreate$)),
       tap(data=>createdAccountingTransactions.push(data)),
+      map(el=>el.flat().map(el=>Number(el.id))),
+      tap(el=>console.log('arr',el)),
       switchMap(data=>this.updateFeesEntryInfo(
         this.feesToProcess.filter(el=>el.id>0&&el.portfolioname===feeTransaction.portfolioname).map(el=>Number(el.id)),
-        data.filter(el=>Object.hasOwn(el[0],'accountId')==true)[0][0]['id'])),
+        ((data as unknown) as number[])
+        )),
       catchError((err) => {
         console.log('err',err);
         this.CommonDialogsService.snackResultHandler(err.error)
         return EMPTY
       })
-     ).subscribe(data=>{
+     )
+     .subscribe(data=>{
       let index = feesToProcessProcessStatus.findIndex(el=>el.id===feeTransaction.portfolioname);
       index!==-1? feesToProcessProcessStatus[index].accounting=0 : null;
       this.createMFAccountingStatus(feesToProcessProcessStatus,createdAccountingTransactions)
-
      });
       })
   } 
-
   createMFAccountingStatus (tradeToConfirmProcessStatus:{id:string,accounting:number}[],createdAccountingTransactions:any[]) {
-    console.log('tradeToConfirmProcessStatus',tradeToConfirmProcessStatus);
     if (tradeToConfirmProcessStatus.reduce((acc,val)=>acc+val.accounting,0)===0) {
       this.sendCreatedAccounting(createdAccountingTransactions)
-      this.CommonDialogsService.snackResultHandler({name:'success',detail:'Accounting has been created'},'Management Fees Accounting',undefined,false);
+      let entries = new Set (createdAccountingTransactions.flat().map(el=>el[0]['id']))
+      this.CommonDialogsService.snackResultHandler({name:'success',detail:''+entries.size + ' entries.'},'Accounting has been created ',undefined,false);
     }
   }
-
-    getCreatedAccounting ():Observable<{}[]>   {
-      return this.createdAccounting$.asObservable()
-    }
-    sendCreatedAccounting (createdTransactions:{}[]) {
-      this.createdAccounting$.next(createdTransactions);
-    }
-  deleteAccountingForAllocatedTrades (feesToProcessTable:AppallocationTableComponent){
-    let tradesToDelete = feesToProcessTable.selection.selected.map(trade=>Number(trade.id))
-    if (!tradesToDelete.length) {
-      return this.CommonDialogsService.snackResultHandler({name:'error',detail:'No trades are selected to be deleted'},'Delete Allocation Accounting')
-    }
-    this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').pipe(
-      tap (data =>{
-        if (feesToProcessTable.selection.selected.filter(el=>el.tdate<data[0].FirstOpenedDate).length) {
-          return this.CommonDialogsService.snackResultHandler({name:'error',detail:'Trades with entries in closed period have been selected. Entires in closed period can not been deleted'},'Delete Allocation Accounting',undefined,false);
-        }
-      }),
-      filter(data=>feesToProcessTable.selection.selected.filter(el=>el.tdate<data[0].FirstOpenedDate).length===0),
-      switchMap(()=>this.CommonDialogsService.confirmDialog('Delete accouting for allocated trades ')),
-      filter (isConfirmed => isConfirmed.isConfirmed),
-      switchMap(() => this.AccountingDataService.deleteAccountingAndFIFOtransactions (tradesToDelete))  
-    ).subscribe (deletedTrades=>{
-      feesToProcessTable.selection.clear();
-      let result = deletedTrades['name']==='error'? deletedTrades : {name:'success',detail:'Accounting and FIFO have been deleted'};
-      this.CommonDialogsService.snackResultHandler(result,'Delete accounting: ',undefined,false)
-      feesToProcessTable.submitQuery(true, false);
-    }) 
+  getCreatedAccounting ():Observable<{}[]>   {
+    return this.createdAccounting$.asObservable()
   }
-  deleteAllocatedTrades (feesToProcessTable:AppallocationTableComponent,idtrade:number=undefined,allocatedqty:AbstractControl=undefined,orderTable:AppOrderTableComponent=undefined){
-    let tradesToDelete=feesToProcessTable.selection.selected.filter(el=>!el.entries)
-    if (tradesToDelete.length!==feesToProcessTable.selection.selected.length) {
-      return this.CommonDialogsService.snackResultHandler({name:'error',detail:'Trades with entries have been selected. Accounted trades can not be deleted'},'Allocated trades delete',null,false);
-    }
-    if (!feesToProcessTable.selection.selected.length) {
-      return this.CommonDialogsService.snackResultHandler({name:'error',detail:'No trades are selected to be deleted'},'DeleteAllocation')
-    }
-    this.CommonDialogsService.confirmDialog('Delete allocated trades ').pipe(
+  sendCreatedAccounting (createdTransactions:{}[]) {
+    this.createdAccounting$.next(createdTransactions);
+  }
+  deleteEntriesForMFeesTransactions(entries_ids:number[]):Observable<{id:number}[]> {
+    return this.http.post <{id:number}[]> ('api/AAM/updateFeesEntryInfo/',{params:{action:'deleteMFAccounting',entries_ids:entries_ids}})
+  }
+  deleteMFAccounting (feesToProcessSet:FeesTransactions[]){
+    let a = feesToProcessSet.filter(el=>el.id_b_entry1!=null).map(el=>el.id_b_entry1).flat().map(el=>Number(el));
+    let entriesToDelete = [...new Set (a)]
+    if (entriesToDelete.length===0) {return this.CommonDialogsService.snackResultHandler({name:'error',detail:'There is no accounting to delete'})};
+    this.CommonDialogsService.confirmDialog('Delete accounting for the selected fees transactions ','Delete').pipe(
       filter (isConfirmed => isConfirmed.isConfirmed),
-      // switchMap(data => this.TradeService.deleteAllocatedTrades(feesToProcessTable.selection.selected.map(el=>Number(el.id))))
-    ).subscribe (deletedTrades=>{
-      feesToProcessTable.selection.clear();
-      // this.CommonDialogsService.snackResultHandler({name:'success',detail:deletedTrades.length+' have been deleted'},'Delete allocated trades: ',undefined,false)
-      
+      switchMap(()=>this.deleteEntriesForMFeesTransactions(entriesToDelete)),
+      catchError((err) => {
+        console.log('err',err);
+        this.CommonDialogsService.snackResultHandler(err.error)
+        return EMPTY
+      })
+    ).subscribe(data=>{
+      this.CommonDialogsService.snackResultHandler({
+        name:data['name'], 
+        detail:data['name'] === 'error'? data['detail'] :  formatNumber (data[0]['f_f_remove_accounting_ref_management_fees'].length,'en-US') + ' entries'}, 'Deleted '
+      );
+      this.sendCreatedAccounting(data)
     })
   }
 }

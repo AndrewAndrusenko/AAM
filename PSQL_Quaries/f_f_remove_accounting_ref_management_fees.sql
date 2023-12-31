@@ -1,54 +1,41 @@
--- FUNCTION: public.f_f_insert_management_fees(text[], date, date)
+-- FUNCTION: public.f_f_remove_accounting_ref_management_fees(numeric[])
 
 DROP FUNCTION IF EXISTS public.f_f_remove_accounting_ref_management_fees(numeric[]);
 
 CREATE OR REPLACE FUNCTION public.f_f_remove_accounting_ref_management_fees(
-	p_fees_id numeric[])
-    RETURNS numeric
+	p_entries_ids numeric[])
+    RETURNS numeric[]
     LANGUAGE 'plpgsql'
     COST 100
     VOLATILE PARALLEL UNSAFE
 AS $BODY$
 DECLARE 
 o_inserted_qty numeric;
+deleted_entries numeric[];
 BEGIN
-WITH
-  fees_set AS (
-    SELECT
-      id,
-      id_b_entry
-    FROM
-      public.dfees_transactions
-    WHERE
-      dfees_transactions.id = ANY (p_fees_id)
-      AND id_b_entry NOTNULL
-  ),
-  fees_with_empty_ref AS (
-    SELECT
-      *
-    FROM
-      fees_set
-      LEFT JOIN (
-        SELECT
-          id AS id_entry
-        FROM
-          "bAccountTransaction"
-        WHERE
-          id = ANY (SELECT id_b_entry FROM fees_set)
-      ) AS entries ON entries.id_entry = fees_set.id_b_entry
-    WHERE
-      id_entry ISNULL
-  )
+WITH 
+deleted_accounted_trans AS (
+	delete from "bAccountTransaction"
+	where id = ANY(p_entries_ids) and "dataTime">'09/22/2023' RETURNING id
+),
+deleted_ledger_trans AS (
+delete from "bLedgerTransactions"
+where id = ANY(p_entries_ids) and "dateTime">'09/22/2023' RETURNING id
+),
+deleted_entries AS (
+SELECT * FROM deleted_accounted_trans
+UNION
+SELECT * FROM deleted_ledger_trans
+)
 UPDATE dfees_transactions
 SET
-  id_b_entry = NULL
+  id_b_entry1 = NULL
 WHERE
-  id = ANY (SELECT id FROM fees_with_empty_ref);
+   ARRAY(SELECT id into deleted_entries FROM deleted_entries)::bigint[]@>id_b_entry1;
 GET DIAGNOSTICS o_inserted_qty = ROW_COUNT;
-RETURN o_inserted_qty;
+RETURN deleted_entries;
 END
 $BODY$;
 
 ALTER FUNCTION public.f_f_remove_accounting_ref_management_fees(numeric[])
     OWNER TO postgres;
-select * from f_f_remove_accounting_ref_management_fees(array[5823,5824,5825])

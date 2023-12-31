@@ -97,7 +97,8 @@ async function fGetAccountingData (request,response) {
     break;
     case 'GetAccountsEntriesListAccounting':
       query.text = 'SELECT * FROM f_a_b_get_all_entries_transactions (${dateRangeStart},${dateRangeEnd},${entryTypes:raw},${portfolioCodes},${noAccountLedger}, ${idtrade:raw});'
-      request.query.entryTypes = request.query.entryTypes.map(el=>Number(el))
+      console.log('request.query.entryTypes',request.query.entryTypes);
+      request.query.entryTypes = typeof(request.query.entryTypes)==='object'? request.query.entryTypes.map(el=>Number(el)) : [Number(request.query.entryTypes)]
 
     break;
     case 'GetbLastClosedAccountingDate':

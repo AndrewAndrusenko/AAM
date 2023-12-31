@@ -4,7 +4,7 @@ import {MatSort} from '@angular/material/sort';
 import {Subscription, from,  of, switchMap, tap } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {FeesTransactions,tableHeaders } from 'src/app/models/intefaces.model';
-import {COMMA, ENTER} from '@angular/cdk/keycodes';
+import {COMMA, ENTER, G} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
 import {AbstractControl, FormBuilder,  FormGroup, FormControl } from '@angular/forms';
 import {formatNumber } from '@angular/common';
@@ -24,6 +24,7 @@ import { number } from 'echarts';
   styleUrls: ['./acc-fees-processing-table.component.scss'],
 })
 export class AppaIAccFeesProcessingTableComponent {
+
   accessState: string = 'none';
   disabledControlElements: boolean = false;
   private subscriptions = new Subscription()
@@ -38,7 +39,7 @@ export class AppaIAccFeesProcessingTableComponent {
     {fieldName:'calculation_base',displayName:'NPV'},
     {fieldName:'calculation_date',displayName:'Generated'},
     {fieldName:'b_transaction_date',displayName:'Entry Date'},
-    {fieldName:'id_b_entry',displayName:'ID Entry'},
+    {fieldName:'id_b_entry1',displayName:'ID Entry'},
     {fieldName:'id_fee_main',displayName:'ID Fee'},
     // {fieldName:'fee_code',displayName:'Fee Type'},
     {fieldName:'accountId',displayName:'idAcc'},
@@ -56,8 +57,8 @@ export class AppaIAccFeesProcessingTableComponent {
   @ViewChild(MatSort) sort: MatSort;
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
   dataRange = new FormGroup ({
-    dateRangeStart: new FormControl<Date | null>(new Date()),
-    dateRangeEnd: new FormControl<Date | null>(new Date()),
+    dateRangeStart: new FormControl<Date | null>(new Date('11/19/2023')),
+    dateRangeEnd: new FormControl<Date | null>(new Date('11/25/2023')),
   });
   searchParametersFG: FormGroup;
   multiFilter?: (data: any, filter: string) => boolean;
@@ -84,7 +85,6 @@ export class AppaIAccFeesProcessingTableComponent {
     this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
-    this.dateRangeStart.value.setMonth(this.dateRangeStart.value.getMonth()-1);
     this.searchParametersFG = this.fb.group ({
       p_portfolios_list:  [],
       MP:null,
@@ -105,13 +105,13 @@ export class AppaIAccFeesProcessingTableComponent {
       let filter_array = filter.split(',').map(el=>[el,1]);
       this.columnsToDisplay.forEach(col=>filter_array.forEach(fil=>{
         data[col]&&fil[0].toString().toUpperCase()===(data[col]).toString().toUpperCase()? fil[1]=0:null
-      })
-        );
+      }));
       return !filter || filter_array.reduce((acc,val)=>acc+Number(val[1]),0)===0;
     };
     this.subscriptions.add(this.AppFeesHandlingService.getCreatedAccounting().subscribe(createdTransaction=>{
       this.statusDetailsHeader='Created Management Fees details'
       this.statusDetails={...createdTransaction};
+      this.submitQuery(false,false);  
     }))
   }
   resetSearchForm () {
@@ -150,33 +150,34 @@ export class AppaIAccFeesProcessingTableComponent {
   showCalcDetails (details:boolean) {
     this.dataSource.data = this.fullDataSource.filter(el=>details? el.calculation_base === null:el.calculation_base !== null)
   }
+  correctDataSet (dataSet:FeesTransactions[]):FeesTransactions[] {
+    if (dataSet.filter(el=>el.id>0).length===0) {
+      let portfolios = [...dataSet.map(el=>el.portfolioname)]
+      dataSet = [...dataSet,...this.fullDataSource.filter(el=>portfolios.includes(el.portfolioname)&&el.id>0)]
+    }  
+    if (dataSet.filter(el=>el.id===null).length===0) {
+      let portfolios = [... new Set (dataSet.map(el=>el.portfolioname))]
+      dataSet = [...dataSet,...this.fullDataSource.filter(el=>portfolios.includes(el.portfolioname)&&el.id===null)]
+    }  
+    return dataSet;
+  }
   deleteAccounting () {
-    
+    let feesToProcess = this.correctDataSet(this.selection.selected);
+    this.AppFeesHandlingService.deleteMFAccounting(feesToProcess)
+    this.selection.clear();
   }
   createAccounting () {
-    let feesToProcess = this.selection.selected
-    if (this.isAllSelected() === false) {
-      let portfolios = [...feesToProcess.map(el=>el.portfolioname)]
-      feesToProcess = [...feesToProcess,...this.dataSource.data.filter(el=>portfolios.includes(el.portfolioname)&&el.id>0)]
-    }  
+    let feesToProcess = this.correctDataSet(this.selection.selected);
     this.AppFeesHandlingService.createAccountingForManagementFees(feesToProcess,this.profitTaxRate)
     this.selection.clear();
   }
   deleteCalculation () {
-    let feesToProcess = this.selection.selected
-    if (this.isAllSelected() === false) {
-      let portfolios = [...feesToProcess.map(el=>el.portfolioname)]
-      feesToProcess = [...feesToProcess,...this.dataSource.data.filter(el=>portfolios.includes(el.portfolioname)&&el.id>0)]
-    } 
-    this.AppFeesHandlingService.deleteFeesCalculation(feesToProcess.map(el=>Number(el.id))).subscribe(data=>{
-      this.CommonDialogsService.snackResultHandler({
-        name:data['name'], 
-        detail:data['name'] === 'error'? data['detail'] :  formatNumber (data.length,'en-US') + ' rows'}, 'Deleted '
-      );
-      data['name'] !== 'error'? this.submitQuery(false,false):null;
-    })
+    let feesToProcess = this.correctDataSet(this.selection.selected);
+    this.AppFeesHandlingService.deleteFeesCalculation(feesToProcess.map(el=>Number(el.id)));
     this.selection.clear();
-
+  }
+  showEntries(entries: number[]) {
+    throw new Error('Method not implemented.');
   }
   changedValueofChip (value:string, chipArray:string[]) {
     chipArray[chipArray.length-1] === 'ClearAll'? chipArray.push(value) : chipArray[chipArray.length-1] = value

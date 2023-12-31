@@ -263,10 +263,10 @@ export interface bLedgerAccounts extends bLedger {
   action:string
 }
 export interface bAccountTransaction {
-  ledgerNoId: number, dataTime:Date, XactTypeCode: number, XactTypeCode_Ext: number, accountId: number,  amountTransaction: number, entryDetails: string, extTransactionId: number,idtrade: number
+  id:number,ledgerNoId: number, dataTime:Date, XactTypeCode: number, XactTypeCode_Ext: number, accountId: number,  amountTransaction: number, entryDetails: string, extTransactionId: number,idtrade: number
 }
 export interface bLedgerTransaction {
-  ledgerID_Debit: number, dateTime:Date,  XactTypeCode_Ext: number, ledgerID: number,  amount: number, entryDetails: string, extTransactionId: number,idtrade: number
+  id:number,ledgerID_Debit: number, dateTime:Date,  XactTypeCode_Ext: number, ledgerID: number,  amount: number, entryDetails: string, extTransactionId: number,idtrade: number
 }
 
 export interface bAccountsEntriesList {
@@ -535,7 +535,7 @@ export type FeesTransactions = {
   fee_date:Date, 
   calculation_date :Date, 
   b_transaction_date :Date, 
-  id_b_entry:number, 
+  id_b_entry1:number[], 
   fee_rate:number, 
   calculation_base:number, 
   id_fee_main:number, 

@@ -1,26 +1,23 @@
 const db_common_api = require('./db_common_api');
 var pgp = require ('pg-promise')({capSQL:true});
 const https = require('https');
-
-
 async function fUpdateOrderData (request, response) {
   let fields = ['status']
  db_common_api.fUpdateTableDB ('dfees_transactions',fields,'id',request, response)
 }
 async function fupdateFeesEntryInfo(request,response) {
   let sql = '';
-  console.log('query',request.body);
   switch (request.body.params.action) {
     case 'updateFeesEntryInfo':
       sql = 'SELECT f_f_update_accounted_management_fees as qty FROM f_f_update_accounted_management_fees(${ids},${entry_id});'
     break;
+    case 'deleteMFAccounting':
+      sql = 'SELECT * FROM f_f_remove_accounting_ref_management_fees(${entries_ids});'
+    break;
   }
   sql = pgp.as.format(sql,request.body.params);
-  console.log('sql',sql);
   db_common_api.queryExecute(sql,response,undefined,request.body.params.action);
-
 } 
-
 async function fgetTaxes (request,response) {
   let sql = "SELECT rate FROM public.a_taxes_rates WHERE code='profit_tax_rate' AND start_date<=${p_date};"
   sql = pgp.as.format(sql,request.query);
@@ -54,7 +51,7 @@ async function geFeesData (request,response) {
       SELECT 
         SUM (fee_amount) AS fee_amount, "accountId" ,id_object,
         MIN(fee_date) as "startPeriod", MAX(fee_date) as "endPeriod",
-        dfees_transactions.id, fee_object_type,  fee_date, calculation_date, b_transaction_date, id_b_entry, fee_rate, calculation_base, id_fee_main, fee_type,
+        dfees_transactions.id, fee_object_type,  fee_date, calculation_date, b_transaction_date, id_b_entry1, fee_rate, calculation_base, id_fee_main, fee_type,
         dportfolios.portfolioname,
         "dGeneralTypes"."typeDescription" AS fee_code
       FROM public.dfees_transactions
@@ -69,7 +66,7 @@ async function geFeesData (request,response) {
       GROUP BY
       GROUPING SETS (
         (
-          dfees_transactions.id, id_object, fee_object_type, fee_amount, fee_date, calculation_date, b_transaction_date, id_b_entry, fee_rate, calculation_base, id_fee_main, fee_type,
+          dfees_transactions.id, id_object, fee_object_type, fee_amount, fee_date, calculation_date, b_transaction_date, id_b_entry1, fee_rate, calculation_base, id_fee_main, fee_type,
           dportfolios.portfolioname,
           "dGeneralTypes"."typeDescription",
           "bAccounts"."accountId"
@@ -128,14 +125,13 @@ async function geFeesData (request,response) {
       sql ='SELECT * FROM f_f_insert_management_fees(${p_portfolios_list},${p_report_date_start},${p_report_date_end});'
     break;
     case 'checkFeesTransWithEntries':
-      sql ='SELECT id FROM public.dfees_transactions WHERE id = ANY(${ids_fees}) AND id_b_entry>0;'
-      request.query.ids_fees = request.query.ids_fees.map(el=>Number(el))
+      sql ='SELECT id FROM public.dfees_transactions WHERE id = ANY(${ids_fees}) AND id_b_entry1 notnull;'
+      request.query.ids_fees =typeof(request.query.ids_fees)==='string'? [Number(request.query.ids_fees)] : request.query.ids_fees.map(el=>Number(el))
     break;
   }
   sql = pgp.as.format(sql,request.query);
   db_common_api.queryExecute(sql,response,undefined,request.query.action);
 }
-
 module.exports = {
   geFeesData,
   fUpdateOrderData,

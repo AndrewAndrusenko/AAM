@@ -162,6 +162,13 @@ we get closest market price for every position
 2|| UI Confirm dialog has been refactored
 3|| Minor fixing
 --------------------------------------------------------------------------------------------
+29/12/2023 - 30/12/2023
+1|| UI&Backend Fees proccessing =>
+  Changed type of reference between accounting and fee calculation transaction. New reference contains array of entries assosiated with the calculation. 
+  Developed DB function to delete accounting linked to the calculations and updating corresponding fees calculations
+  Add UI to delete acconting for fees calculations and calculations
+2|| Minor fixing (entries list complex search by entry type fixed)
+--------------------------------------------------------------------------------------------
 
 || Performance fee
 || High-Water Mark perfomance fee

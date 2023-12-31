@@ -99,8 +99,7 @@
   <button title="Create Accounting"  
     color = "accent" mat-raised-button style=" margin-left:1%; font-size: 18px;"
     [disabled]="!selection.hasValue()"
-
-    (click)="  createAccounting()">
+    (click)="createAccounting()">
     Create Accounting
     <mat-icon matSuffix>account_balance</mat-icon>
   </button>
@@ -152,7 +151,13 @@
           <p *ngSwitchDefault>{{element[column]}}</p>
           <p *ngSwitchCase="['fee_amount','calculation_base'].includes(column)">{{element[column]|currency :currencySymbol+' '}} </p>
           <p *ngSwitchCase="['balance'].includes(column)">{{element[column]|currency :' '}} </p>
-          <p *ngSwitchCase="['fee_rate'].includes(column)&&element[column]!==null">{{element[column] + '%'}}  </p>
+          <p *ngSwitchCase="['id_b_entry1'].includes(column)">
+            <button mat-raised-button style="font-size:large;"
+              (click)="showEntries(element[column])">
+              {{element[column]?element[column].length:''}}
+            </button> 
+          </p>
+          <p *ngSwitchCase="['fee_rate'].includes(column)&&element[column]!==null">{{element[column] + '%'}}</p>
           <p *ngSwitchCase="['calculation_date','fee_date','endPeriod','startPeriod'].includes(column)">{{element[column] | date}} </p>
           <p *ngSwitchCase="['fee_date'].includes(column)&&!element[column]"><span style="color: grey; font-weight: bold;">Total Fee {{currencySymbol}} </span></p>
 
