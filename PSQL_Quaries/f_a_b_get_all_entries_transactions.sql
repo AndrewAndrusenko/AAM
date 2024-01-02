@@ -1,6 +1,6 @@
 -- FUNCTION: public.f_a_b_get_all_entries_transactions(date, date, numeric[], text[], text[], numeric)
 
-DROP FUNCTION IF EXISTS public.f_a_b_get_all_entries_transactions(date, date, numeric[], text[], text[], numeric);
+-- DROP FUNCTION IF EXISTS public.f_a_b_get_all_entries_transactions(date, date, numeric[], text[], text[], numeric,numeric[]);
 
 CREATE OR REPLACE FUNCTION public.f_a_b_get_all_entries_transactions(
 	p_start_date date,
@@ -8,7 +8,8 @@ CREATE OR REPLACE FUNCTION public.f_a_b_get_all_entries_transactions(
 	p_entry_types numeric[],
 	p_portfolio_code text[],
 	p_account text[],
-	p_idtrade numeric)
+	p_idtrade numeric,
+	entriesIds numeric[])
     RETURNS TABLE(d_portfolioname character varying, idportfolio bigint, "d_transactionType" text, t_id bigint, "t_entryDetails" character varying, "t_ledgerNoId" bigint, "t_accountId" bigint, "t_dataTime" timestamp without time zone, "t_extTransactionId" bigint, t_idtrade numeric, "t_amountTransaction" numeric, "t_XactTypeCode" bigint, "t_XactTypeCode_Ext" bigint, "d_entryDetails" text, "d_Debit" character varying, "d_Credit" character varying, "d_ledgerNo" character varying, "d_accountNo" character varying, "d_xActTypeCodeExtName" character) 
     LANGUAGE 'plpgsql'
     COST 100
@@ -53,6 +54,7 @@ WITH account_entries AS (
 		AND (p_end_date ISNULL OR  "dataTime"::date <= p_end_date::date)
 		AND (p_idtrade ISNULL OR  "bAccountTransaction".idtrade = p_idtrade)
 		AND (p_entry_types ISNULL OR  "bAccountTransaction"."XactTypeCode_Ext" =ANY(p_entry_types))
+		AND (entriesIds ISNULL OR  "bAccountTransaction"."id" =ANY(entriesIds))
 		AND (p_account ISNULL OR (
 			"bAccounts"."accountNo" = ANY(p_account) OR "bLedger"."ledgerNo" = ANY(p_account)
 		))
@@ -85,6 +87,7 @@ WITH account_entries AS (
 		AND (p_end_date ISNULL OR "dateTime"::date <= p_end_date::date)
 		AND (p_idtrade ISNULL OR "bLedgerTransactions".idtrade = p_idtrade)
 		AND (p_entry_types ISNULL OR  "bLedgerTransactions"."XactTypeCode_Ext" =ANY(p_entry_types))
+		AND (entriesIds ISNULL OR  "bLedgerTransactions"."id" =ANY(entriesIds))
 		AND (p_account ISNULL OR (
 			"bLedger"."ledgerNo" = ANY(p_account) OR "bLedgerDebit"."ledgerNo" = ANY(p_account)
 		))
@@ -120,5 +123,5 @@ ORDER BY entries."t_dataTime" DESC;
 END;
 $BODY$;
 
-ALTER FUNCTION public.f_a_b_get_all_entries_transactions(date, date, numeric[], text[], text[], numeric)
+ALTER FUNCTION public.f_a_b_get_all_entries_transactions(date, date, numeric[], text[], text[], numeric,numeric[])
     OWNER TO postgres;

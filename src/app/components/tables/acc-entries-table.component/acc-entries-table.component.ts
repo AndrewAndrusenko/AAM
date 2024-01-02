@@ -97,9 +97,10 @@ export class AppTableAccEntriesComponent implements OnInit {
       noAccountLedger: {value:['ClearAll'], disabled:false},
       portfolioCodes: {value:['ClearAll'], disabled:false},
       amount:{value:null, disabled:true},
-      entryTypes : {value:[0], disabled:false},
+      entryTypes : {value:null, disabled:false},
       ExtID:{value:null, disabled:false},
-      idtrade:{value:null, disabled:false}
+      idtrade:{value:null, disabled:false},
+      entriesIds:{value:null, disabled:false}
     })
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToEntriesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
@@ -145,6 +146,10 @@ export class AppTableAccEntriesComponent implements OnInit {
         this.idtrade.setValue(this.paramRowData.idtrade)
         this.submitQuery(false);
       break;
+      case 'ViewEntriesByEntriesIds':
+        this.entriesIds.setValue(this.paramRowData.entries)
+        this.submitQuery(false);
+      break;
       case 'ViewEntriesByExternalId':
         this.ExtId.setValue(this.externalId)
         this.submitQuery(false);
@@ -172,7 +177,7 @@ export class AppTableAccEntriesComponent implements OnInit {
       this.gRange.get('dateRangeStart').value===null? null:new Date (this.gRange.get('dateRangeStart').value).toLocaleDateString()});
     Object.assign (searchObj , {'dateRangeEnd': 
       this.gRange.get('dateRangeEnd').value===null? null : new Date (this.gRange.get('dateRangeEnd').value).toLocaleDateString()});
-    Object.assign (searchObj , {'entryTypes': [0,...this.entryTypes.value] });
+    // Object.assign (searchObj , {'entryTypes': [0,...this.entryTypes.value] });
     this.AccountingDataService.GetAccountsEntriesListAccounting(searchObj,null,null, null, 'GetAccountsEntriesListAccounting').subscribe (EntriesList  => {
       this.dataSource  = new MatTableDataSource(EntriesList);
       this.dataSource.paginator = this.paginator;
@@ -203,7 +208,7 @@ export class AppTableAccEntriesComponent implements OnInit {
       break;
     }
   }
-  selectAccounts (typeAccount: string) {
+  selectAccounts () {
     this.dialogChooseAccountsList = this.dialog.open(AppTableAccAccountsComponent ,{minHeight:'600px', minWidth:'1700px', autoFocus: false, maxHeight: '90vh'});
     this.dialogChooseAccountsList.componentInstance.action = "GetALLAccountsDataWholeList";
     this.dialogChooseAccountsList.componentInstance.readOnly = true;
@@ -267,4 +272,5 @@ export class AppTableAccEntriesComponent implements OnInit {
   get  idtrade () {return this.searchParametersFG.get('idtrade') } 
   get  noAccountLedger () {return this.searchParametersFG.get('noAccountLedger') } 
   get  portfolioCodes () {return this.searchParametersFG.get('portfolioCodes') } 
+  get  entriesIds () {return this.searchParametersFG.get('entriesIds') } 
 }

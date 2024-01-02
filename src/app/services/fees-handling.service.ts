@@ -38,14 +38,14 @@ export class AppFeesHandlingService {
     }
     return this.http.get <{id:number}[]> ('api/AAM/getFeesData/',{params:params})
   }
-  updateFeesEntryInfo (ids:number[],entry_id:number[]): Observable<{qty:number}[]> {
-    console.log('entry_id',entry_id);
+  updateFeesEntryInfo (ids:number[],entry_id:number[],accounting_date:string): Observable<{qty:number}[]> {
     return this.http.post <{qty:number}[]> (
       'api/AAM/updateFeesEntryInfo/',
       {params: 
         {action:'updateFeesEntryInfo',
         ids:ids,
-        entry_id:entry_id}
+        entry_id:entry_id,
+        accounting_date:accounting_date}
       })
   }
   deleteFeesCalculation (ids:number[]) {
@@ -71,21 +71,21 @@ export class AppFeesHandlingService {
   getProfitTax (p_date:string):Observable<{rate:number}[]> {
     return this.http.get <{rate:number}[]>('api/AAM/getTaxesData/',{params:{p_date:p_date}})
   }
-  createAccountingForManagementFees (feesToProcessSet:FeesTransactions[],profitTax:number) {
+  createAccountingForManagementFees (feesToProcessSet:FeesTransactions[],profitTax:number,accountingDate:Date) {
     this.feesToProcess = feesToProcessSet;
     this.checkFeesTransWithEntries (this.feesToProcess.filter(el=>el.id>0).map(el=>Number(el.id))).pipe(
       tap(feesWithEntries=>feesWithEntries.length?  
         this.CommonDialogsService.snackResultHandler({name:'error',detail:'There are created entries for the fee transactions: '+[...feesWithEntries.map(el=>el.id)]}) : null),
       filter(entriesData=>entriesData.length===0)
-    ).subscribe(()=>this.entriesCreationForManagementFees(profitTax))
+    ).subscribe(()=>this.entriesCreationForManagementFees(profitTax,accountingDate))
   }
-  entriesCreationForManagementFees (profitTaxRate:number) {
+  entriesCreationForManagementFees (profitTaxRate:number,accountingDate:Date) {
     let createdAccountingTransactions = [];
     let feesToProcessProcessStatus = this.feesToProcess.filter(el=>el.id===null).map(el=>{return {id:el.portfolioname,accounting:1}})
     this.feesToProcess.filter(el=>el.id===null).forEach(feeTransaction => {
       let bcEntryParameters = <any> {}
       bcEntryParameters.fee_code=feeTransaction.fee_code;
-      bcEntryParameters.pDate_T=new Date().toDateString();
+      bcEntryParameters.pDate_T=new Date(accountingDate).toDateString();
       bcEntryParameters.pAccountId=feeTransaction.accountId;
       bcEntryParameters.p_fee_amount=feeTransaction.fee_amount;
       bcEntryParameters.p_tax_amount=Math.round(feeTransaction.fee_amount*profitTaxRate)/100;
@@ -118,10 +118,10 @@ export class AppFeesHandlingService {
       switchMap(()=>forkJoin(accountingToCreate$)),
       tap(data=>createdAccountingTransactions.push(data)),
       map(el=>el.flat().map(el=>Number(el.id))),
-      tap(el=>console.log('arr',el)),
       switchMap(data=>this.updateFeesEntryInfo(
         this.feesToProcess.filter(el=>el.id>0&&el.portfolioname===feeTransaction.portfolioname).map(el=>Number(el.id)),
-        ((data as unknown) as number[])
+        ((data as unknown) as number[]),
+        new Date(accountingDate).toLocaleDateString()
         )),
       catchError((err) => {
         console.log('err',err);

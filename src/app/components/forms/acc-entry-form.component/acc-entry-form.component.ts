@@ -17,6 +17,9 @@ import { indexDBService } from 'src/app/services/indexDB.service';
   styleUrls: ['./acc-entry-form.component.scss'],
 })
 export class AppAccEntryModifyFormComponent {
+lg(arg0: string) {
+console.log(arg0);
+}
   TransactionTypes: bcTransactionType_Ext[] = [];
   panelOpenState = true;
   actionType : string;
@@ -104,7 +107,6 @@ export class AppAccEntryModifyFormComponent {
     }
   }
   formInitialSetup (overdraftOverride:boolean=false,updateValidators:boolean=false) {
-    console.log('entry data',this.data);
     this.entryModifyForm.patchValue(this.data);
     this.xActTypeCode_Ext.setValue(Number(this.data.t_XactTypeCode_Ext))
     this.xActTypeCode.setValue(Number(this.data.t_XactTypeCode))
@@ -239,11 +241,11 @@ export class AppAccEntryModifyFormComponent {
       }
     } else { 
       if (element === 'd_ledgerNo') {
-        this.ledgerNo.errors['accountIsNotExist']? delete this.ledgerNo.errors['overdraft'] : this.ledgerNo.setErrors(null);
+        this.ledgerNo.errors?.['accountIsNotExist']? delete this.ledgerNo.errors['overdraft'] : this.ledgerNo.setErrors(null);
         this.ledgerNo.removeAsyncValidators(this.validatorLedgerAccountOverdraft);
         this.ledgerNo.setAsyncValidators ([this.validatorCorrectLedgerAccountNo]);
       } else {
-        this.accountNo.errors['accountIsNotExist']? delete this.accountNo.errors['overdraft'] : this.accountNo.setErrors(null);
+        this.accountNo.errors?.['accountIsNotExist']? delete this.accountNo.errors['overdraft'] : this.accountNo.setErrors(null);
         if (this.d_transactionType.value === 'AL') { // Account - Ledger Transaction
           this.accountNo.removeAsyncValidators(this.validatorAccountOverdraft);
           this.accountNo.setAsyncValidators ([this.validatorCorrectAccountNo]);

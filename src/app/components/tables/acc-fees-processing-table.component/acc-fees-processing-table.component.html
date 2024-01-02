@@ -103,6 +103,15 @@
     Create Accounting
     <mat-icon matSuffix>account_balance</mat-icon>
   </button>
+  <mat-form-field class="search-filed" title="Date to upload" style="margin-top: -2%;margin-left: 2%;"> <!-- Report Date Filter -->
+    <input matInput 
+      [min]="firstForAccountingDate"
+      [formControl] = "accoutningDate" 
+      [matDatepicker]="AccountingDate" 
+      placeholder="Accounting Date">
+    <mat-datepicker-toggle  matSuffix [for]="AccountingDate"></mat-datepicker-toggle>
+    <mat-datepicker  #AccountingDate></mat-datepicker>
+  </mat-form-field> 
   <button title="Delete Calculation"  
     color = "warn" mat-raised-button style=" margin-left:1%; font-size: 18px;"
     [disabled]="!selection.hasValue()"
@@ -152,13 +161,13 @@
           <p *ngSwitchCase="['fee_amount','calculation_base'].includes(column)">{{element[column]|currency :currencySymbol+' '}} </p>
           <p *ngSwitchCase="['balance'].includes(column)">{{element[column]|currency :' '}} </p>
           <p *ngSwitchCase="['id_b_entry1'].includes(column)">
-            <button mat-raised-button style="font-size:large;"
+            <button mat-raised-button style="font-size:large;" [matTooltip]="'Entires List'"
               (click)="showEntries(element[column])">
               {{element[column]?element[column].length:''}}
             </button> 
           </p>
           <p *ngSwitchCase="['fee_rate'].includes(column)&&element[column]!==null">{{element[column] + '%'}}</p>
-          <p *ngSwitchCase="['calculation_date','fee_date','endPeriod','startPeriod'].includes(column)">{{element[column] | date}} </p>
+          <p *ngSwitchCase="['calculation_date','b_transaction_date','fee_date','endPeriod','startPeriod'].includes(column)">{{element[column] | date}} </p>
           <p *ngSwitchCase="['fee_date'].includes(column)&&!element[column]"><span style="color: grey; font-weight: bold;">Total Fee {{currencySymbol}} </span></p>
 
         </span>

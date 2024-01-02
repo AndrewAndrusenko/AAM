@@ -16,7 +16,9 @@ import {indexDBService } from 'src/app/services/indexDB.service';
 import { AppFeesHandlingService } from 'src/app/services/fees-handling.service';
 import { HandlingTableSelectionService } from 'src/app/services/handling-table-selection.service';
 import { SelectionModel } from '@angular/cdk/collections';
-import { number } from 'echarts';
+import { AppTableAccEntriesComponent } from '../acc-entries-table.component/acc-entries-table.component';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { AppAccountingService } from 'src/app/services/accounting.service';
 @Component({
   selector: 'acc-fees-processing-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -39,9 +41,9 @@ export class AppaIAccFeesProcessingTableComponent {
     {fieldName:'calculation_base',displayName:'NPV'},
     {fieldName:'calculation_date',displayName:'Generated'},
     {fieldName:'b_transaction_date',displayName:'Entry Date'},
-    {fieldName:'id_b_entry1',displayName:'ID Entry'},
+    {fieldName:'id_b_entry1',displayName:'Entries'},
     {fieldName:'id_fee_main',displayName:'ID Fee'},
-    // {fieldName:'fee_code',displayName:'Fee Type'},
+    {fieldName:'fee_code',displayName:'Fee Type'},
     {fieldName:'accountId',displayName:'idAcc'},
     {fieldName:'id_object',displayName:'idPort'},
     {fieldName:'startPeriod',displayName:'Start'},
@@ -60,6 +62,7 @@ export class AppaIAccFeesProcessingTableComponent {
     dateRangeStart: new FormControl<Date | null>(new Date('11/19/2023')),
     dateRangeEnd: new FormControl<Date | null>(new Date('11/25/2023')),
   });
+  accoutningDate = new FormControl<Date | null>(new Date());
   searchParametersFG: FormGroup;
   multiFilter?: (data: any, filter: string) => boolean;
   mp_strategies_list: string[]=[];
@@ -71,26 +74,33 @@ export class AppaIAccFeesProcessingTableComponent {
   selectedRowIndex: number;
   statusDetails:{};
   statusDetailsHeader:string='';
+  dialogShowEntriesList: MatDialogRef<AppTableAccEntriesComponent>;
+  firstForAccountingDate: Date;
+
   constructor(
     private AuthServiceS:AuthService,  
     private InvestmentDataService:AppInvestmentDataServiceService, 
+    private AccountingDataService:AppAccountingService, 
     private HandlingCommonTasksS:HandlingCommonTasksService,
     private CommonDialogsService:HadlingCommonDialogsService,
     private AppFeesHandlingService:AppFeesHandlingService,
     private indexDBServiceS:indexDBService,
     private SelectionService:HandlingTableSelectionService,
     private fb:FormBuilder, 
+    private dialog: MatDialog, 
+
   ) {
     this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
     this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.searchParametersFG = this.fb.group ({
-      p_portfolios_list:  [],
+      p_portfolios_list: [],
       MP:null,
       p_report_date_start:null,
       p_report_date_end:null,
     });
+    this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data => this.firstForAccountingDate = data[0].FirstOpenedDate);
   }
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
@@ -100,7 +110,7 @@ export class AppaIAccFeesProcessingTableComponent {
     this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios').then ((data)=>{
       this.mp_strategies_list = data['data']
     })
-    this.submitQuery(false,false);  
+    // this.submitQuery(false,false);  
     this.multiFilter = (data: FeesTransactions, filter: string) => {
       let filter_array = filter.split(',').map(el=>[el,1]);
       this.columnsToDisplay.forEach(col=>filter_array.forEach(fil=>{
@@ -130,6 +140,10 @@ export class AppaIAccFeesProcessingTableComponent {
     this.dataSource.filterPredicate =this.multiFilter
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
+    let dates = this.dataSource.data.map(el=>el.fee_date)
+    this.firstForAccountingDate = new Date (dates.sort(function(a,b){
+      return new Date(a).getTime() - new Date(b).getTime()
+     })[dates.length-1])
   }
   submitQuery ( reset:boolean=false, showSnackResult:boolean=true) {
     let searchObj = reset?  {} : this.searchParametersFG.value;
@@ -168,7 +182,7 @@ export class AppaIAccFeesProcessingTableComponent {
   }
   createAccounting () {
     let feesToProcess = this.correctDataSet(this.selection.selected);
-    this.AppFeesHandlingService.createAccountingForManagementFees(feesToProcess,this.profitTaxRate)
+    this.AppFeesHandlingService.createAccountingForManagementFees(feesToProcess,this.profitTaxRate,this.accoutningDate.value)
     this.selection.clear();
   }
   deleteCalculation () {
@@ -177,7 +191,10 @@ export class AppaIAccFeesProcessingTableComponent {
     this.selection.clear();
   }
   showEntries(entries: number[]) {
-    throw new Error('Method not implemented.');
+    this.dialogShowEntriesList = this.dialog.open(AppTableAccEntriesComponent ,{minHeight:'600px', minWidth:'1700px', autoFocus: false, maxHeight: '90vh'});
+    this.dialogShowEntriesList.componentInstance.paramRowData = {entries:entries}; 
+    this.dialogShowEntriesList.componentInstance.action = 'ViewEntriesByEntriesIds';
+    this.subscriptions.add(this.dialogShowEntriesList.componentInstance.modal_principal_parent.subscribe (()=>this.dialogShowEntriesList.close()));
   }
   changedValueofChip (value:string, chipArray:string[]) {
     chipArray[chipArray.length-1] === 'ClearAll'? chipArray.push(value) : chipArray[chipArray.length-1] = value

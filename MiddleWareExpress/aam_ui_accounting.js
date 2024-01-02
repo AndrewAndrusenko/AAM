@@ -96,10 +96,14 @@ async function fGetAccountingData (request,response) {
         'LEFT JOIN "bcAccountType_Ext" ON "bcAccountType_Ext"."accountType_Ext" = "bLedger"."accountTypeID" ;'
     break;
     case 'GetAccountsEntriesListAccounting':
-      query.text = 'SELECT * FROM f_a_b_get_all_entries_transactions (${dateRangeStart},${dateRangeEnd},${entryTypes:raw},${portfolioCodes},${noAccountLedger}, ${idtrade:raw});'
-      console.log('request.query.entryTypes',request.query.entryTypes);
-      request.query.entryTypes = typeof(request.query.entryTypes)==='object'? request.query.entryTypes.map(el=>Number(el)) : [Number(request.query.entryTypes)]
-
+      query.text = 'SELECT * FROM f_a_b_get_all_entries_transactions (${dateRangeStart},${dateRangeEnd},${entryTypes:raw},${portfolioCodes},${noAccountLedger}, ${idtrade:raw},${entriesIds:raw});';
+      ['entryTypes','entriesIds'].forEach(key=>{
+        if (typeof(request.query[key])==='object') {
+          request.query[key] = request.query[key].map(el=>Number(el))} 
+        else{
+          request.query[key] = request.query[key] !=='null'?  [Number(request.query[key])]:'null';
+        } 
+      })
     break;
     case 'GetbLastClosedAccountingDate':
       query.text ='SELECT "FirstOpenedDate"::date, "LastClosedDate"::date FROM "bLastClosedAccountingDate" ;'
@@ -155,13 +159,8 @@ async function fGetAccountingData (request,response) {
         'dateRangeEnd': {
           1: ' ("dateBalance"::date <= ${dateRangeEnd}::date) ',
         }
-        /* 'entryTypes' : {
-          1: ' ("XactTypeCode_Ext" = ANY(array[${entryTypes:raw}]))',
-        }
- */      }
-
+      }
       let conditionsBalance =' WHERE'
-
       Object.entries(conditions).forEach(([key,value]) => {
       if  (request.query.hasOwnProperty(key)) { conditionsBalance +=conditions[key][1] + ' AND '}
     });
@@ -254,11 +253,8 @@ async function GetEntryScheme (request, response) {
       sql='SELECT "ledgerNoId" , "dataTime", "XactTypeCode", "XactTypeCode_Ext" , "accountId", "amountTransaction", "entryDetails", "extTransactionId",idtrade FROM public."bcSchemeAccountTransaction" ';
     break;
   }
-
   sql +=conditionsTrades.slice(0,-5);
   sql = pgp.as.format(sql,request.query)
-
-  console.log('sc sql',sql);
   pool.query (sql,  (err, res) => {if (err) {
       console.log (err.stack.split("\n", 1).join(""))
       err.detail = err.stack
@@ -301,7 +297,6 @@ async function fCreateEntryAccountingInsertRow (request, response) {
     db_common_api.queryExecute(sqlText,response,'STP_f Create Entry Accounting InsertRow')
 }
 async function faccountingOverdraftAccountCheck (request, response) {
-  console.log('param',request.query);
   let sqlText = 'SELECT "accountId", "openingBalance", CAST ("closingBalance" AS NUMERIC) AS "closingBalance", "closingBalance" AS "EndBalance"'+
   'FROM f_checkoverdraftbyaccountandbydate'+
   '(${transactionDate}, ${accountId}, ${xactTypeCode}, ${transactionAmount}, ${id}, ${FirstOpenedAccountingDate}) ;';

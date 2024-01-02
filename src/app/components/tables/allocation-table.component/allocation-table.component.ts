@@ -109,7 +109,6 @@ export class AppallocationTableComponent  implements AfterViewInit {
     } 
     else {
       this.disabledControlElements = false
-
     };
     if (!this.tableMode.includes('Trade'))   {
       this.columnsToDisplay = ['select','id','portfolioname','trtype','qty', 'trade_amount','pl','id_order','id_bulk_order','entries','idtrade','secid','tdate','mp_name','price','id_price_currency'];

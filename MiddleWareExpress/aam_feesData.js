@@ -9,7 +9,7 @@ async function fupdateFeesEntryInfo(request,response) {
   let sql = '';
   switch (request.body.params.action) {
     case 'updateFeesEntryInfo':
-      sql = 'SELECT f_f_update_accounted_management_fees as qty FROM f_f_update_accounted_management_fees(${ids},${entry_id});'
+      sql = 'SELECT f_f_update_accounted_management_fees as qty FROM f_f_update_accounted_management_fees(${ids},${entry_id},${accounting_date});'
     break;
     case 'deleteMFAccounting':
       sql = 'SELECT * FROM f_f_remove_accounting_ref_management_fees(${entries_ids});'

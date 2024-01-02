@@ -169,10 +169,25 @@ we get closest market price for every position
   Add UI to delete acconting for fees calculations and calculations
 2|| Minor fixing (entries list complex search by entry type fixed)
 --------------------------------------------------------------------------------------------
+1/1/2024 - 3/12/024
+1|| UI Fees processing => Added function to show list of created entries linked to the saved fee calculation
+2|| UI entries list => Implemented option to retrieve list of entries based on array of entries ids passed as a parameter
+    DB function edited by adding new parameter and changing query conditions respectively
+    Node JS changed logic to treat array parameters
+3|| UI&Backend Fees proccessing => Implemented option to set acconting date for fee entry transactions
+    Added datepicker with minDate restriction as MIN(firstOpenedAccountingDate||MAX(saved fees calculations in the table)). Thus the accounting could be created not earilier than the last date in the calculation period
+    Accounting date information has been added in DB functions which are responsible for updating/removing reference between fee calculation row and entries generated 
+4|| UI entry form fixing => Fixed overdraft overriding status     
+--------------------------------------------------------------------------------------------
 
 || Performance fee
 || High-Water Mark perfomance fee
-|| Accounting for fees deduction
+|| UI Entries Table - Add function to delete group of entries at once
+|| FIFO detailed reporting
+|| UI to update/create accounting schemes
+|| FIFO Bug possible=> Case of simultaneously two trades which should be netted on FIFO are sent in FIFO function. 
+    Idea is to sort processing batch according to the FIFO guidelines and execute FIFO function synchronously 
+|| UI: Clients=>Client summary=> Add aggregated NVP data per portfolio and total assets evaluation
 || Investment restrictions
 || Check UserAccess model for UI, espesically the latest components
 || DB access roles

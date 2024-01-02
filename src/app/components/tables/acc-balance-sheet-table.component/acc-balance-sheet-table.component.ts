@@ -303,7 +303,7 @@ export class AppTableBalanceSheetComponent   {
     this.dataSource.filter = ''
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
   }
-  selectAccounts (typeAccount: string) {
+  selectAccounts () {
     this.dialogChooseAccountsList = this.dialog.open(AppTableAccAccountsComponent ,{minHeight:'600px', minWidth:'1700px', autoFocus: false, maxHeight: '90vh'});
     this.dialogChooseAccountsList.componentInstance.action = "GetALLAccountsDataWholeList";
     this.dialogChooseAccountsList.componentInstance.readOnly = true;

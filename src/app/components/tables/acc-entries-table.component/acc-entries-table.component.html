@@ -76,7 +76,7 @@
               [matChipInputAddOnBlur]="true"
               (matChipInputTokenEnd)="add($event)"
               matTooltip="Type account number or paste accounts list separated by comma and press enter" >
-            <button style="font-size: 16px;" mat-raised-button matSuffix (click)="selectAccounts('ledger')">
+            <button style="font-size: 16px;" mat-raised-button matSuffix (click)="selectAccounts()">
               <mat-icon *ngIf="action!=='View'" class = "icon_search">search</mat-icon> MultiSelect 
             </button>
           </mat-chip-list>
