@@ -96,10 +96,10 @@ export class AppaIAccFeesManagementTableComponent {
     this.searchParametersFG.reset();
     this.portfolios=['ClearAll'];
   }
-  setPortfoliosList(e:any) {
-    this.InvestmentDataService.getPortfoliosListForMP(e.value,'getPortfoliosByMP_StrtgyID').subscribe(data=>{
+  setPortfoliosList(mp:string) {
+    this.InvestmentDataService.getPortfoliosListForMP(mp,'getPortfoliosByMP_StrtgyID').subscribe(data=>{
       this.portfolios=['ClearAll',...data]
-      this.filterALL.nativeElement.value = e.value;
+      this.filterALL.nativeElement.value = mp;
     })
   }
   updateDataTable (managementFeeData:ManagementFeeCalcData[]) {
@@ -108,6 +108,8 @@ export class AppaIAccFeesManagementTableComponent {
     this.dataSource.filterPredicate =this.multiFilter
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
+    this.portfolios = ['ClearAll',...new Set(this.fullDataSource.map(el=>el.portfolioname))]
+
   }
   submitQuery ( reset:boolean=false, showSnackResult:boolean=true) {
     let searchObj = reset?  {} : this.searchParametersFG.value;

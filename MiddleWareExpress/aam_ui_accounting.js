@@ -1,4 +1,3 @@
-const { response } = require('express');
 const  db_common_api = require ('./db_common_api')
 const config = require ('./db_config');
 const Pool = require('pg').Pool;
@@ -43,8 +42,9 @@ async function fGetAccountingData (request,response) {
   let conditions = {}
   const query = {text: ''}
   switch (request.query.Action) {
+
     case 'bcTransactionType_Ext':
-      query.text = 'SELECT id, TRIM("xActTypeCode_Ext") as "xActTypeCode_Ext", description, code2 FROM public."bcTransactionType_Ext" ORDER BY "xActTypeCode_Ext"; '
+      query.text = 'SELECT id, TRIM("xActTypeCode_Ext") as "xActTypeCode_Ext", description, code2,manual_edit_forbidden FROM public."bcTransactionType_Ext" ORDER BY "xActTypeCode_Ext"; '
     break;
     case 'bcEnityType':
       query.text = 'SELECT "entityType", name, "entityTypeCode" FROM public."bcEnityType"; '
@@ -96,7 +96,7 @@ async function fGetAccountingData (request,response) {
         'LEFT JOIN "bcAccountType_Ext" ON "bcAccountType_Ext"."accountType_Ext" = "bLedger"."accountTypeID" ;'
     break;
     case 'GetAccountsEntriesListAccounting':
-      query.text = 'SELECT * FROM f_a_b_get_all_entries_transactions (${dateRangeStart},${dateRangeEnd},${entryTypes:raw},${portfolioCodes},${noAccountLedger}, ${idtrade:raw},${entriesIds:raw});';
+      query.text = 'SELECT *,0 as action FROM f_a_b_get_all_entries_transactions (${dateRangeStart},${dateRangeEnd},${entryTypes:raw},${portfolioCodes},${noAccountLedger}, ${idtrade:raw},${entriesIds:raw});';
       ['entryTypes','entriesIds'].forEach(key=>{
         if (typeof(request.query[key])==='object') {
           request.query[key] = request.query[key].map(el=>Number(el))} 
@@ -104,6 +104,9 @@ async function fGetAccountingData (request,response) {
           request.query[key] = request.query[key] !=='null'?  [Number(request.query[key])]:'null';
         } 
       })
+    break;
+    case 'GetBalanceDatePerPorfoliosOnData':
+      query.text = 'SELECT * FROM f_a_get_balances_for_date(${p_portfolio_list},${p_report_date})'
     break;
     case 'GetbLastClosedAccountingDate':
       query.text ='SELECT "FirstOpenedDate"::date, "LastClosedDate"::date FROM "bLastClosedAccountingDate" ;'

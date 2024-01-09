@@ -56,7 +56,7 @@
       <mat-select placeholder="Model Portfolio" class="search-filed" 
         formControlName="MP" 
         style="height: 150%;"
-        (selectionChange)="setPortfoliosList($event)"  >
+        (selectionChange)="setPortfoliosList($event.value)"  >
         <mat-option [value]="'All'"> All codes </mat-option>
         <mat-option *ngFor="let mp of mp_strategies_list" [value]="mp['name']"> {{mp['name']}} </mat-option>
       </mat-select>

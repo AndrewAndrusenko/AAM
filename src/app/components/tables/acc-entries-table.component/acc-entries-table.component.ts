@@ -5,7 +5,7 @@ import {Subscription, filter, tap } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { bAccountsEntriesList, bcTransactionType_Ext } from 'src/app/models/intefaces.model';
+import { bAccountsEntriesList, bcTransactionType_Ext, tableHeaders } from 'src/app/models/intefaces.model';
 import { AppAccountingService } from 'src/app/services/accounting.service';
 import { AppAccEntryModifyFormComponent } from '../../forms/acc-entry-form.component/acc-entry-form.component';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
@@ -21,7 +21,8 @@ import { AuthService } from 'src/app/services/auth.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
 import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
-
+import { HandlingTableSelectionService } from 'src/app/services/handling-table-selection.service';
+import { SelectionModel } from '@angular/cdk/collections';
 @Component({
   selector: 'app-table-acc-entries',
   templateUrl: './acc-entries-table.component.html',
@@ -35,11 +36,28 @@ import { AppInvestmentDataServiceService } from 'src/app/services/investment-dat
   ],
 })
 export class AppTableAccEntriesComponent implements OnInit {
+
   accessState: string = 'none';
   disabledControlElements: boolean = false;
-  columnsToDisplay = ['t_id','d_portfolioname','d_Debit','d_Credit','t_dataTime','d_xActTypeCodeExtName','t_XactTypeCode','t_amountTransaction','d_entryDetails', 't_idtrade','t_extTransactionId']
-  columnsHeaderToDisplay = ['ID','Code','Debit','Credit','Date', 'Code', 'Ledger',  'Amount', 'Details', 'Trade','ExtID', 'Action'];
-  columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
+  columnsWithHeaders: tableHeaders[] = [
+    {fieldName:'select',displayName:'1'},
+    {fieldName:'t_id',displayName:'ID'},
+    {fieldName:'d_portfolioname',displayName:'Code'},
+    {fieldName:'d_Debit',displayName:'Debit'},
+    {fieldName:'d_Credit',displayName:'Credit'},
+    {fieldName:'t_dataTime',displayName:'Date'},
+    {fieldName:'d_xActTypeCodeExtName',displayName:'Code'},
+    {fieldName:'t_XactTypeCode',displayName:'Ledger'},
+    {fieldName:'t_amountTransaction',displayName:'Amount'},
+    {fieldName:'d_entryDetails',displayName:'Details'},
+    {fieldName:'t_idtrade',displayName:'Trade'},
+    {fieldName:'t_extTransactionId',displayName:'ExtID'},
+    {fieldName:'action',displayName:'Action'}
+  ];
+  columnsToDisplay: string [];
+  columnsHeaderToDisplay: string [];
+  selection = new SelectionModel<bAccountsEntriesList>(true,[]);
+  selectedRowIndex: number;
   private subscriptions = new Subscription ();
   dataSource: MatTableDataSource<bAccountsEntriesList>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -90,8 +108,11 @@ export class AppTableAccEntriesComponent implements OnInit {
     private dialog: MatDialog,
     private fb:FormBuilder ,
     private indexDBServiceS:indexDBService,
-    private InvestmentDataService:AppInvestmentDataServiceService, 
+    private InvestmentDataService:AppInvestmentDataServiceService,
+    private SelectionService:HandlingTableSelectionService,
   ) {
+    this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
+    this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
     this.searchParametersFG = this.fb.group ({
       dataRange : this.dataRange,
       noAccountLedger: {value:['ClearAll'], disabled:false},
@@ -104,7 +125,6 @@ export class AppTableAccEntriesComponent implements OnInit {
     })
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToEntriesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
-    this.columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
     this.indexDBServiceS.getIndexDBStaticTables('bcTransactionType_Ext').then ( data => this.TransactionTypes = data['data']);
     this.AccountingDataService.getReloadEntryList().pipe(
       filter(id=> id==undefined||(id===this.externalId))
@@ -170,6 +190,7 @@ export class AppTableAccEntriesComponent implements OnInit {
     changes['paramRowData']?.currentValue!==undefined? this.initiateTable() : null;
   }
   submitQuery (notification:boolean=true, sendNewAllocatedSum:boolean=false) {
+    this.selection.clear();
     this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate);
     let searchObj = this.searchParametersFG.value;
     this.dataSource? this.dataSource.data = null: null;
@@ -177,7 +198,6 @@ export class AppTableAccEntriesComponent implements OnInit {
       this.gRange.get('dateRangeStart').value===null? null:new Date (this.gRange.get('dateRangeStart').value).toLocaleDateString()});
     Object.assign (searchObj , {'dateRangeEnd': 
       this.gRange.get('dateRangeEnd').value===null? null : new Date (this.gRange.get('dateRangeEnd').value).toLocaleDateString()});
-    // Object.assign (searchObj , {'entryTypes': [0,...this.entryTypes.value] });
     this.AccountingDataService.GetAccountsEntriesListAccounting(searchObj,null,null, null, 'GetAccountsEntriesListAccounting').subscribe (EntriesList  => {
       this.dataSource  = new MatTableDataSource(EntriesList);
       this.dataSource.paginator = this.paginator;
@@ -207,6 +227,26 @@ export class AppTableAccEntriesComponent implements OnInit {
       case 'View':
       break;
     }
+  }
+  deleteBulk() {
+    let EntriesToDeleteLL = this.selection.selected
+    .filter(el=>el.d_manual_edit_forbidden!==true&&el.t_dataTime>=this.FirstOpenedAccountingDate&&Number(el.t_XactTypeCode)===0)
+    .map(el=>Number(el.t_id));
+    let EntriesToDeleteAL = this.selection.selected
+    .filter(el=>el.d_manual_edit_forbidden!==true&&el.t_dataTime>=this.FirstOpenedAccountingDate&&Number(el.t_XactTypeCode)!==0)
+    .map(el=>Number(el.t_id));
+    this.AccountingDataService.deleteBulkEntries(EntriesToDeleteLL,EntriesToDeleteAL);
+    this.selection.clear();
+  }
+  isAllSelected() { return this.SelectionService.isAllSelected(this.dataSource, this.selection)} 
+  toggleAllRows(forceSelectAll:boolean=false) { 
+    return this.SelectionService.toggleAllRows(this.dataSource, this.selection,forceSelectAll)
+  } 
+  checkboxLabel(row?: bAccountsEntriesList): string {
+    return this.SelectionService.checkboxLabel(this.dataSource, this.selection, row)
+  }
+  selectItem (row?) {
+    this.selection.toggle(row? row: this.dataSource.data[this.selectedRowIndex])
   }
   selectAccounts () {
     this.dialogChooseAccountsList = this.dialog.open(AppTableAccAccountsComponent ,{minHeight:'600px', minWidth:'1700px', autoFocus: false, maxHeight: '90vh'});

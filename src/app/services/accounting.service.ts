@@ -1,18 +1,23 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, ReplaySubject, Subject, firstValueFrom, of} from 'rxjs';
+import { Observable, ReplaySubject, Subject, filter, firstValueFrom, forkJoin, map, of, switchMap} from 'rxjs';
 import { allocation_fifo, bAccounts, bAccountsEntriesList, bAccountTransaction, bBalanceData, bBalanceFullData, bcAccountType_Ext, bcEnityType, bcTransactionType_Ext, bLedger, bLedgerAccounts, bLedgerBalanceData, bLedgerTransaction, SWIFTSGlobalListmodel, SWIFTStatement950model } from '../models/intefaces.model';
+import { HadlingCommonDialogsService } from './hadling-common-dialogs.service';
+import { BalanceDataPerPortfoliosOnDate } from '../models/accountng-intefaces.model';
 @Injectable({
   providedIn: 'root'
 })
 export class AppAccountingService {
-  constructor(private http:HttpClient) { }
+  constructor(
+    private http:HttpClient,
+    private CommonDialogsService:HadlingCommonDialogsService,
+    ) { }
   private subjectReloadAccontList = new Subject<any>();
   private subjectReloadLedgerAccontList = new Subject<any>();
   private subjectFormState = new Subject<any>();
   private subjectEntryDraft = new Subject<any>();
   private subjectLoadedMT950Transactions = new Subject<any>();
-  private relplaySubject = new ReplaySubject(1)
+  private relplaySubject = new ReplaySubject(1);
   AccountsEntriesList = <bAccountsEntriesList> {
     'd_portfolioname' : null,
     'd_transactionType': null,
@@ -33,7 +38,8 @@ export class AppAccountingService {
     'd_xActTypeCode_ExtName' : null, 
     'd_entryDetails': null, 
     'd_closingBalance': null, 
-    'd_closingLedgerBalance': null 
+    'd_closingLedgerBalance': null,
+    'd_manual_edit_forbidden': null 
   }
 /* -----------------------Accountting ----------------------------------------------------- */
 
@@ -93,7 +99,7 @@ export class AppAccountingService {
     })
   }
   getEntryDraft (): Observable<any> {return this.subjectEntryDraft.asObservable(); }
-  sendFormState(formName: string, state: boolean) {this.subjectFormState.next({ formName: state })}
+  sendFormState(state: boolean) {this.subjectFormState.next({ formName: state })}
   getFormState(): Observable<any> {return this.subjectFormState.asObservable() }
   CreateEntryAccountingInsertRow (data:any) { return this.http.post ('/api/DEA/fCreateEntryAccountingInsertRow/',{'data': data})} 
   /*End------------------Create entry by scheme---------------------------------------------------------*/
@@ -150,11 +156,29 @@ export class AppAccountingService {
   updateLLEntryAccountAccounting (data:any, action:string):  Observable<bLedgerTransaction[]> { 
     return this.http.post <bLedgerTransaction[]> ('api/DEA/updateLLEntryAccountAccounting/',{data:data, action:action})
   }
+  deleteBulkEntries (idsLL:number[],idsAL:number[]){
+    this.CommonDialogsService.confirmDialog('Delete Entries','Delete').pipe(
+      filter(confirm=>confirm.isConfirmed===true),
+      switchMap(()=>{
+        return forkJoin([
+          this.updateEntryAccountAccounting({id:idsAL},'Delete'),
+          this.updateLLEntryAccountAccounting({id:idsLL},'Delete')
+        ])
+      })
+    ).subscribe(data=>{
+      data.forEach(el=>el['name']==='error'? this.CommonDialogsService.snackResultHandler(el):null);
+      if (data[0]['name']!=='error'&&data[1]['name']!=='error') {
+        this.CommonDialogsService.snackResultHandler({name:'success',detail:'Deleted '+data.flat().length+' rows'},'Accounting')
+      };
+      this.sendReloadEntryList(undefined)
+    })
+  }
   sendReloadEntryList ( id:any) {this.relplaySubject.next(id)}
   getReloadEntryList(): Observable<any> {return this.relplaySubject.asObservable()}
   createDepoSubAccounts (portfolioIds:number[],secid:string):Observable<bAccounts[]> {
     return this.http.post <bAccounts[]> ('api/DEA/createDepoSubAccounts/',{portfolioIds:portfolioIds,secid:secid})
   }
+/*----------------------FIFO----------------------------------------------------*/
   createFIFOtransactions (tradeType:number,idtrades:number[],idportfolio:number,secid:string,qty_to_sell:number,sell_price:number,id_sell_trade:number):Observable<allocation_fifo[]> {
     const params = {tr_type: tradeType,idtrades:idtrades,idportfolio:idportfolio,secid:secid,qty_to_sell:qty_to_sell,sell_price:sell_price, id_sell_trade:id_sell_trade}
     return this.http.post <allocation_fifo[]>('api/DEA/createFIFOtransactions/',{params:params})
@@ -162,6 +186,15 @@ export class AppAccountingService {
   deleteAccountingAndFIFOtransactions (idtrades:number[]):Observable<allocation_fifo[]> {
     const params = {idtrades:idtrades}
     return this.http.post <allocation_fifo[]>('api/DEA/deleteAccountingFIFOtransactions/',{params:params})
+  }
+/*----------------------BalanceData----------------------------------------------------*/
+  getBalanceDatePerPorfoliosOnData (portfoliosList:string[],balanceDate:Date): Observable <BalanceDataPerPortfoliosOnDate[]> {
+    let param = {
+      p_portfolio_list:portfoliosList,
+      p_report_date:new Date(balanceDate).toDateString(),
+      Action:'GetBalanceDatePerPorfoliosOnData'
+    }
+    return this.http.get <BalanceDataPerPortfoliosOnDate[]>('api/DEA/fGetAccountingData',{params:param})
   }
   getExpectedBalanceOverdraftCheck (accountId: number, transactionAmount:number, transactionDate: string, xactTypeCode: number, id: number, FirstOpenedAccountingDate: string, Action: string ):Observable <bBalanceData[]> {
     if (accountId&&transactionAmount&&transactionAmount) {

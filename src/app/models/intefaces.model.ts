@@ -192,6 +192,7 @@ export interface bcTransactionType_Ext {
   xActTypeCode_Ext: string, 
   description: string, 
   code2: number,
+  manual_edit_forbidden:boolean
 }
 export interface bcEnityType {
   entityType: number, 
@@ -288,6 +289,7 @@ export interface bAccountsEntriesList {
   d_accountNo: string,  
   d_xActTypeCode_ExtName : string, 
   d_entryDetails: string, 
+  d_manual_edit_forbidden: boolean
 }
 export interface bBalanceData {
   accountId: number,
@@ -545,5 +547,6 @@ export type FeesTransactions = {
   id_fee_transaction:number,
   accountId:number,
   endPeriod:Date,
-  startPeriod:Date
+  startPeriod:Date,
+  account_balance:number
 }

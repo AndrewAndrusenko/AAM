@@ -179,16 +179,25 @@ we get closest market price for every position
     Accounting date information has been added in DB functions which are responsible for updating/removing reference between fee calculation row and entries generated 
 4|| UI entry form fixing => Fixed overdraft overriding status     
 --------------------------------------------------------------------------------------------
+5/12/2024 - 8/1/2024
+1|| UI & DB Entries Table =>
+  Added function to delete bulk of entries
+  Refactored UI design and ts
+  Refactored logic of allowing manual editing of acconting entry => Each entry group has boolean switch (DB table) which can exclude auto-generated entries from manual corrections to ensure data consistency  
+2|| UI & DB Fees proccessing table => Current account balance and calculated balance after fees deduction have been added to the UI table
+  DB: new function is created to calculate current account balances based on portfolio codes and date as parameters.
+  UI has been updated. Account balances upload on two events: fees dataset has been reloaded or acccounting date has been changed
+--------------------------------------------------------------------------------------------
 
 || Performance fee
 || High-Water Mark perfomance fee
-|| UI Entries Table - Add function to delete group of entries at once
 || FIFO detailed reporting
 || UI to update/create accounting schemes
 || FIFO Bug possible=> Case of simultaneously two trades which should be netted on FIFO are sent in FIFO function. 
     Idea is to sort processing batch according to the FIFO guidelines and execute FIFO function synchronously 
 || UI: Clients=>Client summary=> Add aggregated NVP data per portfolio and total assets evaluation
 || Investment restrictions
+|| any
 || Check UserAccess model for UI, espesically the latest components
 || DB access roles
 *Strategy tab component is not being reused and is rendered when reopened

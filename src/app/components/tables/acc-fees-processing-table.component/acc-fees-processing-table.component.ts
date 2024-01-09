@@ -1,7 +1,7 @@
 import {Component, ViewChild, Input, ChangeDetectionStrategy, ElementRef} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
-import {Subscription, from,  of, switchMap, tap } from 'rxjs';
+import {Subscription,  distinctUntilChanged,  from,  of, switchMap, tap } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {FeesTransactions,tableHeaders } from 'src/app/models/intefaces.model';
 import {COMMA, ENTER, G} from '@angular/cdk/keycodes';
@@ -19,6 +19,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { AppTableAccEntriesComponent } from '../acc-entries-table.component/acc-entries-table.component';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { AppAccountingService } from 'src/app/services/accounting.service';
+import { BalanceDataPerPortfoliosOnDate } from 'src/app/models/accountng-intefaces.model';
 @Component({
   selector: 'acc-fees-processing-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -26,7 +27,6 @@ import { AppAccountingService } from 'src/app/services/accounting.service';
   styleUrls: ['./acc-fees-processing-table.component.scss'],
 })
 export class AppaIAccFeesProcessingTableComponent {
-
   accessState: string = 'none';
   disabledControlElements: boolean = false;
   private subscriptions = new Subscription()
@@ -38,7 +38,7 @@ export class AppaIAccFeesProcessingTableComponent {
     {fieldName:'portfolioname',displayName:'Code'},
     {fieldName:'fee_amount',displayName:'Fee Amounnt'},
     {fieldName:'fee_rate',displayName:'Rate'},
-    {fieldName:'calculation_base',displayName:'NPV'},
+    {fieldName:'calculation_base',displayName:'NPV/NewAccBalance'},
     {fieldName:'calculation_date',displayName:'Generated'},
     {fieldName:'b_transaction_date',displayName:'Entry Date'},
     {fieldName:'id_b_entry1',displayName:'Entries'},
@@ -48,6 +48,7 @@ export class AppaIAccFeesProcessingTableComponent {
     {fieldName:'id_object',displayName:'idPort'},
     {fieldName:'startPeriod',displayName:'Start'},
     {fieldName:'endPeriod',displayName:'End'},
+    {fieldName:'account_balance',displayName:'AccBalance'},
   ];
   columnsToDisplay: string [];
   columnsHeaderToDisplay: string [];
@@ -59,8 +60,8 @@ export class AppaIAccFeesProcessingTableComponent {
   @ViewChild(MatSort) sort: MatSort;
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
   dataRange = new FormGroup ({
-    dateRangeStart: new FormControl<Date | null>(new Date('11/19/2023')),
-    dateRangeEnd: new FormControl<Date | null>(new Date('11/25/2023')),
+    dateRangeStart: new FormControl<Date | null>(new Date('09/01/2023')),
+    dateRangeEnd: new FormControl<Date | null>(new Date('09/30/2023')),
   });
   accoutningDate = new FormControl<Date | null>(new Date());
   searchParametersFG: FormGroup;
@@ -122,16 +123,17 @@ export class AppaIAccFeesProcessingTableComponent {
       this.statusDetailsHeader='Created Management Fees details'
       this.statusDetails={...createdTransaction};
       this.submitQuery(false,false);  
-    }))
+    }));
+    this.subscriptions.add(this.accoutningDate.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>this.updateAccountsBalances()));
   }
   resetSearchForm () {
     this.searchParametersFG.reset();
     this.portfolios=['ClearAll'];
   }
-  setPortfoliosList(e:any) {
-    this.InvestmentDataService.getPortfoliosListForMP(e.value,'getPortfoliosByMP_StrtgyID').subscribe(data=>{
+  setPortfoliosList(mp:string) {
+    this.InvestmentDataService.getPortfoliosListForMP(mp,'getPortfoliosByMP_StrtgyID').subscribe(data=>{
       this.portfolios=['ClearAll',...data]
-      this.filterALL.nativeElement.value = e.value;
+      this.filterALL.nativeElement.value = mp;
     })
   }
   updateDataTable (managementFeeData:FeesTransactions[]) {
@@ -144,8 +146,11 @@ export class AppaIAccFeesProcessingTableComponent {
     this.firstForAccountingDate = new Date (dates.sort(function(a,b){
       return new Date(a).getTime() - new Date(b).getTime()
      })[dates.length-1])
+     this.portfolios = ['ClearAll',...new Set(this.fullDataSource.map(el=>el.portfolioname))]
+    this.updateAccountsBalances();
   }
   submitQuery ( reset:boolean=false, showSnackResult:boolean=true) {
+    this.selection.clear();
     let searchObj = reset?  {} : this.searchParametersFG.value;
     this.dataSource?.data? this.dataSource.data = null : null;
     searchObj.p_report_date_start = new Date (this.dateRangeStart.value).toLocaleDateString();
@@ -161,8 +166,21 @@ export class AppaIAccFeesProcessingTableComponent {
         detail:data['name'] === 'error'? data['detail'] :  formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ') : null;
     });
   }
+  updateAccountsBalances () {
+    if (this.portfolios.length>1) {
+      this.AccountingDataService.getBalanceDatePerPorfoliosOnData(this.portfolios,this.accoutningDate.value)
+      .subscribe(dataBalance=>{
+        this.dataSource.data.forEach(el=>{
+          if (el.id===null ){
+            el.account_balance = dataBalance.find(bd=>bd.account_id===el.accountId).current_balance;
+            el.calculation_base = el.account_balance - el.fee_amount;
+          }});
+        this.dataSource.sort=this.sort;
+      })
+    }
+  }
   showCalcDetails (details:boolean) {
-    this.dataSource.data = this.fullDataSource.filter(el=>details? el.calculation_base === null:el.calculation_base !== null)
+    this.dataSource.data = this.fullDataSource.filter(el=>details? el.id === null:el.id !== null)
   }
   correctDataSet (dataSet:FeesTransactions[]):FeesTransactions[] {
     if (dataSet.filter(el=>el.id>0).length===0) {
