@@ -27,12 +27,12 @@ select
 (COALESCE("closingBalance",0) + 
  COALESCE(turnovers_not_closed_accounting."totalCredit",0) - 
  COALESCE(turnovers_not_closed_accounting."totalDebit",0))
- ::money as current_balance,
- accounts_data.account_id,
- accounts_data.account_no,
- accounts_data.idportfolio,
-accounts_data.portfolioname,
-accounts_data.currency_code
+ ::money as current_balance,*
+--  accounts_data.account_id,
+--  accounts_data.account_no,
+--  accounts_data.idportfolio,
+-- accounts_data.portfolioname,
+-- accounts_data.currency_code
 from accounts_data
 left join turnovers_not_closed_accounting using(account_id)
 LEFT JOIN LATERAL 

@@ -60,8 +60,8 @@ export class AppaIAccFeesProcessingTableComponent {
   @ViewChild(MatSort) sort: MatSort;
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
   dataRange = new FormGroup ({
-    dateRangeStart: new FormControl<Date | null>(new Date('09/01/2023')),
-    dateRangeEnd: new FormControl<Date | null>(new Date('09/30/2023')),
+    dateRangeStart: new FormControl<Date | null>(new Date('10/01/2023')),
+    dateRangeEnd: new FormControl<Date | null>(new Date('10/31/2023')),
   });
   accoutningDate = new FormControl<Date | null>(new Date());
   searchParametersFG: FormGroup;
@@ -111,7 +111,6 @@ export class AppaIAccFeesProcessingTableComponent {
     this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios').then ((data)=>{
       this.mp_strategies_list = data['data']
     })
-    // this.submitQuery(false,false);  
     this.multiFilter = (data: FeesTransactions, filter: string) => {
       let filter_array = filter.split(',').map(el=>[el,1]);
       this.columnsToDisplay.forEach(col=>filter_array.forEach(fil=>{

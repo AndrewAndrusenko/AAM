@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HadlingCommonDialogsService } from './hadling-common-dialogs.service';
 import { AppAccountingService } from './accounting.service';
-import { EMPTY, Observable, Subject, catchError, filter, forkJoin, map, switchMap, tap } from 'rxjs';
+import { EMPTY, Observable, Subject, catchError, filter, forkJoin, from, map, switchMap, tap } from 'rxjs';
 import { FeesTransactions, ManagementFeeCalcData, bAccountTransaction, bLedgerTransaction } from '../models/intefaces.model';
 import { AccountingTradesService } from './accounting-trades.service';
 import { HttpClient } from '@angular/common/http';
@@ -73,11 +73,18 @@ export class AppFeesHandlingService {
   }
   createAccountingForManagementFees (feesToProcessSet:FeesTransactions[],profitTax:number,accountingDate:Date) {
     this.feesToProcess = feesToProcessSet;
+    let portfolioWithoutFunds = this.feesToProcess.filter(el=>el.id===null&&el.calculation_base<0).map(el=>el.portfolioname);
     this.checkFeesTransWithEntries (this.feesToProcess.filter(el=>el.id>0).map(el=>Number(el.id))).pipe(
       tap(feesWithEntries=>feesWithEntries.length?  
         this.CommonDialogsService.snackResultHandler({name:'error',detail:'There are created entries for the fee transactions: '+[...feesWithEntries.map(el=>el.id)]}) : null),
-      filter(entriesData=>entriesData.length===0)
-    ).subscribe(()=>this.entriesCreationForManagementFees(profitTax,accountingDate))
+      filter(entriesData=>entriesData.length===0),
+      switchMap(()=>
+      portfolioWithoutFunds.length>0? 
+        this.CommonDialogsService.confirmDialog('Portfolios '+[...portfolioWithoutFunds] +' do not have enough funds.\n Fees will be deducted in overdraft','Confirm')
+        : from ([{isConfirmed:true}])
+      ),
+      filter(confirm=>confirm.isConfirmed)
+    ).subscribe(()=>this.entriesCreationForManagementFees(profitTax,accountingDate));
   }
   entriesCreationForManagementFees (profitTaxRate:number,accountingDate:Date) {
     let createdAccountingTransactions = [];

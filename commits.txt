@@ -188,11 +188,26 @@ we get closest market price for every position
   DB: new function is created to calculate current account balances based on portfolio codes and date as parameters.
   UI has been updated. Account balances upload on two events: fees dataset has been reloaded or acccounting date has been changed
 --------------------------------------------------------------------------------------------
-
+9/1/2024 - 10/1/2024
+1|| UI Fees proccessing table => 
+  User notification about potential overdraft after fees deduction has been added to the accounting creation pipe. User is able to confirm overdrafts or cancel entries generation.
+2|| Performance Fees =>
+  Created calculation model in excel
+  DB functions created: 
+    f_f_calc_performance_fees - To calculate performance fees for given portfolios list and for given period
+    f_f_get_performance_fees_schedules - To get performance fees schedules, rates, hwm and other data needed for calculation
+    f_i_get_deposits_withdrawals_per_portfolios_on_date - Function to get all non trades related cash movements to compute PnL
+3|| Pnl Data reconcilation => 
+  corrected pnl data on 16 sep 2023. Incorrect data was left after fifo implementation
+  changed type of early testing transactions to deposit and withdrawals. transactions were left after swift stp implementation
+    
+|| Deducted fees has to be included in PnL and positions perfomance reports => fees transactions with type 4 are considered as cash outs in db function f_i_get_deposits_withdrawals_per_portfolios_on_date.Verify if such approach is correct
 || Performance fee
+|| Hurdle Performance fee
 || High-Water Mark perfomance fee
 || FIFO detailed reporting
 || UI to update/create accounting schemes
+|| UI editing fees data and link it portfolios
 || FIFO Bug possible=> Case of simultaneously two trades which should be netted on FIFO are sent in FIFO function. 
     Idea is to sort processing batch according to the FIFO guidelines and execute FIFO function synchronously 
 || UI: Clients=>Client summary=> Add aggregated NVP data per portfolio and total assets evaluation

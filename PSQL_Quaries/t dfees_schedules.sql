@@ -1,0 +1,2 @@
+SELECT idfee_scedule, fee_type_value, feevalue, calculation_period, deduction_period, schedule_range, range_parameter, below_ranges_calc_type, id_fee_main, pf_hurdle, highwatermark
+	FROM public.dfees_schedules;
