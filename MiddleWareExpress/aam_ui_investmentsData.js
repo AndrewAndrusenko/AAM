@@ -180,11 +180,31 @@ async function fGetPortfolioPositions (request,response) {
   let sql = '';
   switch (request.body.action) {
     case 'getPortfolioPositions':
+      sql= `
+        SELECT 1 as set_number, round(order_amount/notnull_npv*100,2) AS deviation_percent,(npv!=0) AS not_zero_npv, * 
+        FROM f_i_get_portfolios_structure_detailed_data`+'(${idportfolios},${report_date},${report_id_currency})'+` 
+        UNION
+        SELECT 2 as set_number, 
+        0,true,account_currency,NULL,NULL,NULL,NULL,0,NULL,NULL,NULL,
+        fee_amount AS total_pl,
+        idportfolio,
+        portfolioname,
+        CASE
+        WHEN transaction_type=14 THEN 'Management Fees'
+        ELSE 'Other Fees'
+        END
+        ,NULL,NULL,NULL,0,NULL,0,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,NULL
+        FROM f_i_get_deducted_fees_per_portfolios_on_date`+'(${idportfolios},${report_date})'+`
+        WHERE "accountNo" isnull AND transaction_type notnull
+        ORDER BY set_number,secid,portfolio_code`
+    break;
+    case 'getPortfolioMpDeviations':
       sql= 'select round(order_amount/notnull_npv*100,2) as deviation_percent,(npv!=0) as not_zero_npv, * from f_i_get_portfolios_structure_detailed_data(${idportfolios},${report_date},${report_id_currency}) '
       sql += conditions.slice(0,-5) +' ORDER BY secid,portfolio_code;'
     break;
   }
   sql = pgp.as.format(sql,request.body.params);
+  console.log(sql);
   db_common_api.queryExecute(sql,response,undefined,request.body.action);
 }
 async function fGetPortfolioAnalytics (request,response) {

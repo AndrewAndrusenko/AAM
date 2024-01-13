@@ -1,9 +1,24 @@
 <mat-tab-group  mat-stretch-tabs  #tabGroup
 (selectedTabChange)="showTabName($event)">
-  <mat-tab  label="Fees Processing" >
-      <acc-fees-processing-table></acc-fees-processing-table>  
-  </mat-tab>  
+<mat-tab  label="Fees Processing" >
+  <mat-tab-group mat-stretch-tabs style="margin-top: 1%;">
+    <mat-tab  label="Perfornamce" >
+      <acc-fees-performance-processing-table></acc-fees-performance-processing-table>  
+    </mat-tab> 
+    <mat-tab  label="Management" >
+      <acc-fees-management-processing-table></acc-fees-management-processing-table>  
+    </mat-tab>  
+  </mat-tab-group>
+</mat-tab>  
   <mat-tab label="Fees Calculation"> 
-      <app-acc-fees-management-table></app-acc-fees-management-table>  
+    <mat-tab-group mat-stretch-tabs style="margin-top: 1%;">
+      <mat-tab label="Perfornamce"> 
+        <app-acc-fees-performance-table></app-acc-fees-performance-table>  
+      </mat-tab>
+      <mat-tab label="Management"> 
+        <app-acc-fees-management-table></app-acc-fees-management-table>  
+      </mat-tab>
+    </mat-tab-group>
   </mat-tab>
+
 </mat-tab-group>

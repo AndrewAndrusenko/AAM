@@ -200,15 +200,30 @@ we get closest market price for every position
 3|| Pnl Data reconcilation => 
   corrected pnl data on 16 sep 2023. Incorrect data was left after fifo implementation
   changed type of early testing transactions to deposit and withdrawals. transactions were left after swift stp implementation
-    
-|| Deducted fees has to be included in PnL and positions perfomance reports => fees transactions with type 4 are considered as cash outs in db function f_i_get_deposits_withdrawals_per_portfolios_on_date.Verify if such approach is correct
-|| Performance fee
+--------------------------------------------------------------------------------------------
+11/1/2024 - 13/12/2024
+1|| DB&UI Deducted fees (management, performance) are included in UI portfolio positions detailed data table. 
+  Amount of fees is taken into account when PnL is calculated.
+  Created Db function f_i_get_deducted_fees_per_portfolios_on_date in order to obtain amounts of fees deducted. 
+  New function has been added to middleware layer of getting portfolios data to show client statament
+2|| High-Water Mark perfomance fee =>
+  High Water Mark(HWM) option has bee added to DB function f_f_calc_performance_fees, which calculates perfomance fee
+  HWM is saved for every calculation and it is changed when PnL reaches new max. New calculation gets the latest HWM and evaluates PnL above it as a subject to fee deduction 
+  HWM has been added to fee schedules function to calculate new fees based on the latest HWM
+3|| Performance Fee UI & DB =>
+  Created DB function to insert new calculations in the dfees_transactions table
+  Created separate table component to calculate perfomance fees 
+  Created separate table component to process perfomance fees
+4|| Performance Fees Accounting => Created accounting schemes to process perfomance fees
+5|| UI & ML Ledger Accounts Form => exposed dateOpening field for editing. All relevant validation has been applied 
+--------------------------------------------------------------------------------------------
+
 || Hurdle Performance fee
-|| High-Water Mark perfomance fee
 || FIFO detailed reporting
 || UI to update/create accounting schemes
 || UI editing fees data and link it portfolios
 || FIFO Bug possible=> Case of simultaneously two trades which should be netted on FIFO are sent in FIFO function. 
+|| Deducted fees has to be included in PnL and positions perfomance reports => fees transactions with type 4 are considered as cash outs in db function f_i_get_deposits_withdrawals_per_portfolios_on_date.Verify if such approach is correct
     Idea is to sort processing batch according to the FIFO guidelines and execute FIFO function synchronously 
 || UI: Clients=>Client summary=> Add aggregated NVP data per portfolio and total assets evaluation
 || Investment restrictions

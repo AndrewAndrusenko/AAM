@@ -23,6 +23,12 @@
     Reload 
     <mat-icon matSuffix >refresh</mat-icon>
   </button>
+  <button title="Approve Calculation"  
+  color = "accent" mat-raised-button style=" margin-left:1%; font-size: 18px;"
+  (click)="  approveCalculation()">
+  Create Calculation
+  <mat-icon matSuffix>save</mat-icon>
+</button>
   <!-- complexSearch Form -->
 <form class="submit" *ngIf="readOnly!==true" [formGroup]="searchParametersFG" 
  style="font-size: 18px; margin-left: 0.5%; "> 
@@ -39,20 +45,16 @@
         (click)="resetSearchForm()">
         ClearAll
       </button>
+
     </span>
     <mat-form-field appearance="fill"  class="search-filed" title="Report period"><!-- Report Date Filter -->
-      <mat-label>Enter a date range</mat-label>
-      <mat-date-range-input [formGroup]="dataRange" [rangePicker]="picker" >
-        <input matStartDate  placeholder="Start date" formControlName="dateRangeStart">
-        <input matEndDate  placeholder="End date" formControlName="dateRangeEnd">
-      </mat-date-range-input>
-      <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
+      <mat-label>Enter a date</mat-label>
+        <input matInput [matDatepicker]="picker"  placeholder="Calculation Date" formControlName="p_report_date">
+      <mat-hint>{{p_report_date.value|date}}</mat-hint>
       <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-      <mat-date-range-picker  #picker></mat-date-range-picker>
-      <mat-error *ngIf="dataRange.controls.dateRangeStart.hasError('matStartDateInvalid')">Invalid start date</mat-error>
-      <mat-error *ngIf="dataRange.controls.dateRangeEnd.hasError('matEndDateInvalid')">Invalid end date</mat-error>
+      <mat-datepicker  #picker></mat-datepicker>
     </mat-form-field>
-    <span style="display:grid; width: 20%; margin-right: 1%;"> <!-- MP Filter -->
+    <span style="display:grid; width: 20%; margin-right: 1%; margin-top: 1%;"> <!-- MP Filter -->
       <mat-select placeholder="Model Portfolio" class="search-filed" 
         formControlName="MP" 
         style="height: 150%;"
@@ -87,22 +89,7 @@
     </mat-form-field>
 </span>
 </form>
-<span style="display: flex;    align-items:flex-start;  margin-right: 1%;margin-top: 0.2%; margin-bottom: 0.5%;"> 
-  <button color = "accent" mat-raised-button title="Reload Table"
-    style=" margin-left:1%; font-size: 18px;"
-    (click)="
-      detailedView=!detailedView;
-      showCalcDetails(detailedView)">
-    {{detailedView? 'Hide':'Show'}} Calculation Details 
-    <mat-icon matSuffix >list</mat-icon>
-  </button>
-  <button title="Approve Calculation"  
-    color = "accent" mat-raised-button style=" margin-left:1%; font-size: 18px;"
-    (click)="  approveCalculation()">
-    Create Calculation
-    <mat-icon matSuffix>save</mat-icon>
-  </button>
-</span>
+
   <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort
    class="mat-elevation-z8" 
     class ="childTable" style="width: 100%;" >
@@ -112,12 +99,8 @@
         mat-cell *matCellDef="let element" [cdkContextMenuTriggerFor]="instrumentcontextmenu" >
         <span [ngSwitch]="true==true">
           <p *ngSwitchDefault>{{element[column]}}</p>
-          <p *ngSwitchCase="['npv','management_fee_amount'].includes(column)">{{element[column]|currency :currencySymbol+' '}} </p>
-          <p *ngSwitchCase="['balance'].includes(column)">{{element[column]|currency :' '}} </p>
-  
+          <p *ngSwitchCase="['pos_pv','fee_amount','cash_flow','pl','pl_above_hwm','hwm'].includes(column)">{{element[column]|currency :currencySymbol+' '}} </p>
           <p *ngSwitchCase="['feevalue'].includes(column)&&element[column]!==null">{{element[column] + '%'}}  </p>
-          <p *ngSwitchCase="['report_date','calculation_end','calculation_start'].includes(column)">{{element[column] | date}} </p>
-          <p *ngSwitchCase="['report_date'].includes(column)&&!element[column]"><span style="color: grey; font-weight: bold;">Total Fee {{currencySymbol}} </span></p>
         </span>
         <ng-template  #instrumentcontextmenu>
           <div class="tree-menu-context" cdkMenu >

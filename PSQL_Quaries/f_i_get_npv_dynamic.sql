@@ -1,13 +1,15 @@
 -- FUNCTION: public.f_i_get_npv_dynamic(text[], date, date, numeric)
 
--- DROP FUNCTION IF EXISTS public.f_i_get_npv_dynamic(text[], date, date, numeric);
+DROP FUNCTION IF EXISTS public.f_i_get_npv_dynamic(text[], date, date, numeric);
 
 CREATE OR REPLACE FUNCTION public.f_i_get_npv_dynamic(
 	p_portfolios_list text[],
 	p_report_date_start date,
 	p_report_date_end date,
 	p_report_currency numeric)
-    RETURNS TABLE(report_date date, portfolioname character varying, "accountNo" text, secid character varying, balance numeric, pos_pv numeric, mtm_rate numeric, mtm_date date, boardid character varying, percentprice boolean, couponrate numeric, nominal_currency character varying, board_currency numeric, cross_rate numeric, accured numeric, dirty_price numeric, rate_date date) 
+    RETURNS TABLE(report_date date, portfolioname character varying, "accountNo" text, secid character varying, balance numeric, pos_pv numeric,
+				  mtm_rate numeric, mtm_date date, boardid character varying, percentprice boolean, couponrate numeric, nominal_currency character varying,
+				  board_currency numeric, cross_rate numeric, accured numeric, dirty_price numeric, rate_date date,accountid numeric) 
     LANGUAGE 'plpgsql'
     COST 100
     VOLATILE PARALLEL UNSAFE
@@ -33,7 +35,8 @@ WITH
       cash_movements_dates."dataTime",
       temp_balance.secid,
       temp_balance.portfolioname,
-      temp_balance.currencycode
+      temp_balance.currencycode,
+	  temp_balance."accountId" as accountid
     FROM
       temp_balance
       FULL JOIN (
@@ -113,7 +116,8 @@ ROUND(coupon.unredemeedvalue * coupon.couponrate / 100 * ("dataTime" - coupon.st
           ROUND(unredemeedvalue * coupon.couponrate / 100 * ("dataTime" - coupon.start_date) / 365,2)
         )  * cross_rates.cross_rate
     END AS dirty_price,
-cross_rates.rate_date::date
+cross_rates.rate_date::date,
+balances_per_dates.accountid
 FROM
   balances_per_dates
   LEFT JOIN LATERAL (
@@ -186,7 +190,8 @@ GROUP BY
       coupon.currency,
       cross_rates.cross_rate,
       t_moex_boards.currency_code,
-		cross_rates.rate_date::date
+		cross_rates.rate_date::date,
+		balances_per_dates.accountid
     ),
     ("dataTime", balances_per_dates.portfolioname)
   )

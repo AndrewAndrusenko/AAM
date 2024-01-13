@@ -16,7 +16,6 @@ import { HandlingCommonTasksService } from 'src/app/services/handling-common-tas
 import { AuthService } from 'src/app/services/auth.service';
 import { investmentNodeColor } from 'src/app/models/constants.model';
 import { HandlingTableSelectionService } from 'src/app/services/handling-table-selection.service';
-import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-table-acc-accounts',

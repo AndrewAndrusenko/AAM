@@ -6,8 +6,7 @@ CREATE OR REPLACE FUNCTION public.f_f_get_performance_fees_schedules(
 	p_portfolio_list text[],
 	p_report_date_start date,
 	p_report_date_end date)
-    RETURNS TABLE(object_id bigint, portfolioname character varying, id_fee integer, fee_code character varying, fee_type numeric, calc_start date, calc_end date, period_start date, period_end date, fee_type_value smallint, feevalue numeric, 
-				  calculation_period numeric, schedule_range numrange, range_parameter character varying, below_ranges_calc_type smallint, hwm numeric ,hwm_date date) 
+    RETURNS TABLE(id_calc numeric, object_id bigint, portfolioname character varying, id_fee integer, fee_code character varying, fee_type numeric, calc_start date, calc_end date, period_start date, period_end date, fee_type_value smallint, feevalue numeric, calculation_period numeric, schedule_range numrange, range_parameter character varying, below_ranges_calc_type smallint, hwm numeric, hwm_date date) 
     LANGUAGE 'plpgsql'
     COST 100
     VOLATILE PARALLEL UNSAFE
@@ -17,6 +16,7 @@ AS $BODY$
 BEGIN
 RETURN query
 SELECT
+  hwm_data.id as id_calc,
   dfees_objects.object_id,
   dportfolios.portfolioname,
   dfees_main.id as id_fee,
@@ -39,18 +39,19 @@ SELECT
   dfees_schedules.range_parameter,
   dfees_schedules.below_ranges_calc_type,
   hwm_data.hwm,
-  hwm_data.hwm_date
+  hwm_data.fee_date
 FROM
   dfees_objects
   LEFT JOIN dfees_main ON dfees_objects.id_fee_main = dfees_main.id
   LEFT JOIN dfees_schedules ON dfees_schedules.id_fee_main = dfees_main.id
   LEFT JOIN dportfolios ON dfees_objects.object_id = dportfolios.idportfolio
   LEFT JOIN LATERAL (
-  SELECT dfees_performance_fees_high_watermarks.hwm,dfees_performance_fees_high_watermarks.hwm_date FROM dfees_performance_fees_high_watermarks
+  SELECT dfees_transactions.hwm,dfees_transactions.fee_date,dfees_transactions.id FROM dfees_transactions
 	WHERE 
-	dfees_performance_fees_high_watermarks.hwm_date<p_report_date_start AND
-	dfees_performance_fees_high_watermarks.id_portfolio=dfees_objects.object_id
-	ORDER BY dfees_performance_fees_high_watermarks.hwm_date DESC 
+	dfees_transactions.fee_date<='10/31/2023' AND
+	dfees_transactions.id_object=dfees_objects.object_id AND
+	dfees_transactions.fee_type=2
+	ORDER BY dfees_transactions.fee_date DESC 
 	LIMIT 1
 	) AS hwm_data ON TRUE
 WHERE
@@ -64,3 +65,4 @@ $BODY$;
 
 ALTER FUNCTION public.f_f_get_performance_fees_schedules(text[], date, date)
     OWNER TO postgres;
+select * from f_f_get_performance_fees_schedules(array['ICM011'],'02/01/2023','12/01/2023')

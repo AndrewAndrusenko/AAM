@@ -2,10 +2,11 @@ import { Injectable } from '@angular/core';
 import { HadlingCommonDialogsService } from './hadling-common-dialogs.service';
 import { AppAccountingService } from './accounting.service';
 import { EMPTY, Observable, Subject, catchError, filter, forkJoin, from, map, switchMap, tap } from 'rxjs';
-import { FeesTransactions, ManagementFeeCalcData, bAccountTransaction, bLedgerTransaction } from '../models/intefaces.model';
+import { bAccountTransaction, bLedgerTransaction } from '../models/intefaces.model';
 import { AccountingTradesService } from './accounting-trades.service';
 import { HttpClient } from '@angular/common/http';
 import { formatNumber } from '@angular/common';
+import { FeesTransactions, ManagementFeeCalcData, PerformanceFeeCalcData } from '../models/fees-intefaces.model';
 @Injectable({
   providedIn: 'root'
 })
@@ -18,17 +19,31 @@ export class AppFeesHandlingService {
     private AccountingDataService:AppAccountingService, 
     private accountingTradeService: AccountingTradesService,
   ) { }
+  
+  getPerformanceFeeCalcData (searchObj : {action:string,p_report_date_start:string,p_report_date_end:string, p_portfolios_list: string []})
+  :Observable<PerformanceFeeCalcData[]> {
+    searchObj.action='getPerformanceFeeCalcData';
+    return this.http.get <PerformanceFeeCalcData[]> ('/api/AAM/getFeesData/',{params:searchObj})
+  }
   getManagementFeeCalcData (searchObj : {action:string,p_report_date_start:string,p_report_date_end:string, p_portfolios_list: string []})
   :Observable<ManagementFeeCalcData[]> {
     searchObj.action='getManagementFeesCalcData';
     return this.http.get <ManagementFeeCalcData[]> ('/api/AAM/getFeesData/',{params:searchObj})
   }
+  approvedPerformanceFeeCalc (searchObj : {action:string,p_report_date:string, p_portfolios_list: string []}):Observable <{f_f_insert_performance_fees:number}[]> {
+    searchObj.action='approvedPerformanceFeeCalc';
+    return this.http.get <{f_f_insert_performance_fees:number}[]> ('api/AAM/getFeesData/',{params:searchObj})
+  }
   approvedManagementFeeCalc (searchObj : {action:string,p_report_date_start:string,p_report_date_end:string, p_portfolios_list: string []}):Observable <{f_f_insert_management_fees:number}[]> {
     searchObj.action='approvedManagementFeeCalc';
     return this.http.get <{f_f_insert_management_fees:number}[]> ('api/AAM/getFeesData/',{params:searchObj})
   }
-  getFeesTransactions (searchObj : {action:string,p_report_date_start:string,p_report_date_end:string, p_portfolios_list: string []}):Observable<FeesTransactions[]> {
-    searchObj.action='getFeesTransactions';
+  getFeesManagementTransactions (searchObj : {action:string,p_report_date_start:string,p_report_date_end:string, p_portfolios_list: string []}):Observable<FeesTransactions[]> {
+    searchObj.action='getFeesManagementTransactions';
+    return this.http.get <FeesTransactions[]> ('api/AAM/getFeesData/', {params:searchObj})
+  }
+  getFeesPerformanceTransactions (searchObj : {action:string,p_report_date_start:string,p_report_date_end:string, p_portfolios_list: string []}):Observable<FeesTransactions[]> {
+    searchObj.action='getFeesPerformanceTransactions';
     return this.http.get <FeesTransactions[]> ('api/AAM/getFeesData/', {params:searchObj})
   }
   checkFeesTransWithEntries (ids:number[]):Observable<{id:number}[]> {
@@ -73,7 +88,9 @@ export class AppFeesHandlingService {
   }
   createAccountingForManagementFees (feesToProcessSet:FeesTransactions[],profitTax:number,accountingDate:Date) {
     this.feesToProcess = feesToProcessSet;
-    let portfolioWithoutFunds = this.feesToProcess.filter(el=>el.id===null&&el.calculation_base<0).map(el=>el.portfolioname);
+    let portfolioWithoutFunds = this.feesToProcess
+    .filter(el=>el.fee_type===1? el.id===null&&el.account_balance<0:el.account_balance<0)
+    .map(el=>el.portfolioname);
     this.checkFeesTransWithEntries (this.feesToProcess.filter(el=>el.id>0).map(el=>Number(el.id))).pipe(
       tap(feesWithEntries=>feesWithEntries.length?  
         this.CommonDialogsService.snackResultHandler({name:'error',detail:'There are created entries for the fee transactions: '+[...feesWithEntries.map(el=>el.id)]}) : null),
@@ -87,9 +104,12 @@ export class AppFeesHandlingService {
     ).subscribe(()=>this.entriesCreationForManagementFees(profitTax,accountingDate));
   }
   entriesCreationForManagementFees (profitTaxRate:number,accountingDate:Date) {
+    console.log('entriesCreationForManagementFees',);
     let createdAccountingTransactions = [];
-    let feesToProcessProcessStatus = this.feesToProcess.filter(el=>el.id===null).map(el=>{return {id:el.portfolioname,accounting:1}})
-    this.feesToProcess.filter(el=>el.id===null).forEach(feeTransaction => {
+    let feesToProcessProcessStatus = this.feesToProcess.
+    filter(el=>el.fee_type===1? el.id===null: el.id>0)
+    .map(el=>{return {id:el.portfolioname,accounting:1}})
+    this.feesToProcess.filter(el=>el.fee_type===1? el.id===null: el.id>0).forEach(feeTransaction => {
       let bcEntryParameters = <any> {}
       bcEntryParameters.fee_code=feeTransaction.fee_code;
       bcEntryParameters.pDate_T=new Date(accountingDate).toDateString();
@@ -100,6 +120,7 @@ export class AppFeesHandlingService {
       bcEntryParameters.portfolioname=feeTransaction.portfolioname;
       bcEntryParameters.endPeriod=new Date(feeTransaction.endPeriod).toLocaleDateString();
       bcEntryParameters.startPeriod=new Date(feeTransaction.startPeriod).toLocaleDateString();
+      bcEntryParameters.fee_date=new Date(feeTransaction.fee_date).toLocaleDateString();
       let cSchemeGroupId:string = '';
       switch (feeTransaction.fee_type.toString()) {
         case '1':

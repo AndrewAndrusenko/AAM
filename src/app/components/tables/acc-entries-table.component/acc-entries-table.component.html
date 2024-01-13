@@ -69,8 +69,7 @@
         </mat-form-field>
         <mat-form-field class="example-chip-list" appearance="fill" style="width: 45%; ">
           <mat-chip-list #chipList aria-label="Fruit selection" 
-          formControlName="noAccountLedger" 
-          >
+          formControlName="noAccountLedger" >
             <mat-chip *ngFor="let account of noAccountLedger.value" (removed)="remove(account)" (click)=" clearAll($event);"> 
               {{account}}
               <button matChipRemove *ngIf="account!=='ClearAll'">

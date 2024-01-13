@@ -3,7 +3,7 @@ import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {Subscription,  distinctUntilChanged,  from,  of, switchMap, tap } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
-import {FeesTransactions,tableHeaders } from 'src/app/models/intefaces.model';
+import {tableHeaders } from 'src/app/models/intefaces.model';
 import {COMMA, ENTER, G} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
 import {AbstractControl, FormBuilder,  FormGroup, FormControl } from '@angular/forms';
@@ -20,11 +20,12 @@ import { AppTableAccEntriesComponent } from '../acc-entries-table.component/acc-
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { AppAccountingService } from 'src/app/services/accounting.service';
 import { BalanceDataPerPortfoliosOnDate } from 'src/app/models/accountng-intefaces.model';
+import { FeesTransactions } from 'src/app/models/fees-intefaces.model';
 @Component({
-  selector: 'acc-fees-processing-table',
+  selector: 'acc-fees-management-processing-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './acc-fees-processing-table.component.html',
-  styleUrls: ['./acc-fees-processing-table.component.scss'],
+  templateUrl: './acc-fees-management-processing-table.component.html',
+  styleUrls: ['./acc-fees-management-processing-table.component.scss'],
 })
 export class AppaIAccFeesProcessingTableComponent {
   accessState: string = 'none';
@@ -38,7 +39,7 @@ export class AppaIAccFeesProcessingTableComponent {
     {fieldName:'portfolioname',displayName:'Code'},
     {fieldName:'fee_amount',displayName:'Fee Amounnt'},
     {fieldName:'fee_rate',displayName:'Rate'},
-    {fieldName:'calculation_base',displayName:'NPV/NewAccBalance'},
+    {fieldName:'calculation_base',displayName:'NPV'},
     {fieldName:'calculation_date',displayName:'Generated'},
     {fieldName:'b_transaction_date',displayName:'Entry Date'},
     {fieldName:'id_b_entry1',displayName:'Entries'},
@@ -157,7 +158,7 @@ export class AppaIAccFeesProcessingTableComponent {
     of(this.portfolios.length).pipe(
       switchMap(portLength => portLength===1? this.InvestmentDataService.getPortfoliosListForMP('All','getPortfoliosByMP_StrtgyID'):from([[...this.portfolios]])),
       tap(ports=>searchObj.p_portfolios_list = ports.map(el=>el.toUpperCase())),
-      switchMap(()=>this.AppFeesHandlingService.getFeesTransactions(searchObj))
+      switchMap(()=>this.AppFeesHandlingService.getFeesManagementTransactions(searchObj))
     ).subscribe(data => {
       this.updateDataTable(data)
       showSnackResult? this.CommonDialogsService.snackResultHandler({
@@ -171,8 +172,7 @@ export class AppaIAccFeesProcessingTableComponent {
       .subscribe(dataBalance=>{
         this.dataSource.data.forEach(el=>{
           if (el.id===null ){
-            el.account_balance = dataBalance.find(bd=>bd.account_id===el.accountId).current_balance;
-            el.calculation_base = el.account_balance - el.fee_amount;
+            el.account_balance = dataBalance.find(bd=>bd.account_id===el.accountId).current_balance - el.fee_amount;;
           }});
         this.dataSource.sort=this.sort;
       })

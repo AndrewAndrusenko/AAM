@@ -12,7 +12,7 @@ async function fUpdateAccountAccounting (request, response) {
   db_common_api.fUpdateTableDB ('bAccounts',fields,'accountId',request, response,['dateOpening'])
 }
 async function fUpdateLedgerAccountAccounting (request, response) {
-  let fields =  ['accountTypeID', 'name', 'clientID', 'entityTypeCode', 'ledgerNo', 'currecyCode', 'ledgerNoCptyCode', 'ledgerNoTrade', 'externalAccountNo']
+  let fields =  ['accountTypeID', 'name', 'clientID', 'entityTypeCode', 'ledgerNo', 'currecyCode', 'ledgerNoCptyCode', 'ledgerNoTrade', 'externalAccountNo','dateOpening']
   db_common_api.fUpdateTableDB ('bLedger',fields,'ledgerNoId',request, response)
 }
 async function fCreateDepoSubAccounts (request,response) {
@@ -89,7 +89,7 @@ async function fGetAccountingData (request,response) {
         '"accountTypeID", name, "clientID", "entityTypeCode", "ledgerNo", "currecyCode", '+
         '"ledgerNoCptyCode", "ledgerNoTrade", "externalAccountNo", "ledgerNoId", '+
         '"bcAccountType_Ext"."actCodeShort" ||\': \' || "bcAccountType_Ext"."description" as "d_Account_Type", '+
-        '"dclients"."clientname" as "d_Client", '+ 
+        '"dclients"."clientname" as "d_Client", "dateOpening"::timestamp without time zone,'+ 
         ' "bcAccountType_Ext"."xActTypeCode"  as "d_APTypeCodeAccount", 0 as action '+
         'FROM public."bLedger" '+
         'LEFT JOIN "dclients" ON "bLedger"."clientID" = "dclients".idclient ' +

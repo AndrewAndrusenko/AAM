@@ -23,6 +23,27 @@
     Reload 
     <mat-icon matSuffix >refresh</mat-icon>
   </button>
+<button title="Create Accounting"  
+  color = "accent" mat-raised-button style=" margin-left:1%; font-size: 18px;"
+  [disabled]="!selection.hasValue()"
+  (click)="createAccounting()">
+  Create Accounting
+  <mat-icon matSuffix>account_balance</mat-icon>
+</button>
+  <button title="Delete Calculation"  
+  color = "warn" mat-raised-button style=" margin-left:1%; font-size: 18px;"
+  [disabled]="!selection.hasValue()"
+  (click)="deleteCalculation()">
+  Delete Calculation
+  <mat-icon matSuffix>delete</mat-icon>
+</button>
+<button title="Delete Accounting"  
+  color = "warn" mat-raised-button style=" margin-left:1%; font-size: 18px;"
+  [disabled]="!selection.hasValue()"
+  (click)="deleteAccounting()">
+  Delete Accounting
+  <mat-icon matSuffix>delete</mat-icon>
+</button>
   <!-- complexSearch Form -->
 <form class="submit" *ngIf="readOnly!==true" [formGroup]="searchParametersFG" 
  style="font-size: 18px; margin-left: 0.5%; "> 
@@ -55,11 +76,21 @@
     <span style="display:grid; width: 20%; margin-right: 1%;"> <!-- MP Filter -->
       <mat-select placeholder="Model Portfolio" class="search-filed" 
         formControlName="MP" 
-        style="height: 150%;"
+        style="height: 100%; margin-bottom: 4%;"
         (selectionChange)="setPortfoliosList($event.value)"  >
         <mat-option [value]="'All'"> All codes </mat-option>
         <mat-option *ngFor="let mp of mp_strategies_list" [value]="mp['name']"> {{mp['name']}} </mat-option>
       </mat-select>
+      
+  <mat-form-field class="search-filed" title="Accounting Date" style="margin-top: 2%;"> <!-- Report Date Filter -->
+    <input matInput 
+      [min]="firstForAccountingDate"
+      [formControl] = "accoutningDate" 
+      [matDatepicker]="AccountingDate" 
+      placeholder="Accounting Date">
+    <mat-datepicker-toggle   matSuffix [for]="AccountingDate"></mat-datepicker-toggle>
+    <mat-datepicker  #AccountingDate></mat-datepicker>
+  </mat-form-field> 
     </span>
     <mat-form-field  appearance="fill" style="width: 60%; margin-bottom: 0.5%; " class="search-filed"><!-- Chio Portfolio Filter -->
       <mat-chip-list #chipPortList   >
@@ -87,46 +118,6 @@
     </mat-form-field>
 </span>
 </form>
-<span style="display: flex;    align-items:flex-start;  margin-right: 1%;margin-top: 0.2%; margin-bottom: 0.5%;"> 
-  <button color = "accent" mat-raised-button title="Reload Table"
-    style=" margin-left:1%; font-size: 18px;"
-    (click)="
-      detailedView=!detailedView;
-      showCalcDetails(detailedView)">
-    {{detailedView? 'Hide':'Show'}} Calculation Details 
-    <mat-icon matSuffix >list</mat-icon>
-  </button>
-  <button title="Create Accounting"  
-    color = "accent" mat-raised-button style=" margin-left:1%; font-size: 18px;"
-    [disabled]="!selection.hasValue()"
-    (click)="createAccounting()">
-    Create Accounting
-    <mat-icon matSuffix>account_balance</mat-icon>
-  </button>
-  <mat-form-field class="search-filed" title="Date to upload" style="margin-top: -2%;margin-left: 2%;"> <!-- Report Date Filter -->
-    <input matInput 
-      [min]="firstForAccountingDate"
-      [formControl] = "accoutningDate" 
-      [matDatepicker]="AccountingDate" 
-      placeholder="Accounting Date">
-    <mat-datepicker-toggle   matSuffix [for]="AccountingDate"></mat-datepicker-toggle>
-    <mat-datepicker  #AccountingDate></mat-datepicker>
-  </mat-form-field> 
-  <button title="Delete Calculation"  
-    color = "warn" mat-raised-button style=" margin-left:1%; font-size: 18px;"
-    [disabled]="!selection.hasValue()"
-    (click)="deleteCalculation()">
-    Delete Calculation
-    <mat-icon matSuffix>delete</mat-icon>
-  </button>
-  <button title="Delete Accounting"  
-    color = "warn" mat-raised-button style=" margin-left:1%; font-size: 18px;"
-    [disabled]="!selection.hasValue()"
-    (click)="deleteAccounting()">
-    Delete Accounting
-    <mat-icon matSuffix>delete</mat-icon>
-  </button>
-</span>
 <details *ngIf="statusDetailsHeader">
   <summary style="font-size: 18px;padding: 1%;" >{{statusDetailsHeader}}</summary>
   <pre style="font-size: 18px;"> {{statusDetails|json }}</pre>
@@ -144,7 +135,7 @@
      ALL </mat-checkbox>
     </th>
     <td mat-cell *matCellDef="let row">
-      <mat-checkbox *ngIf="row.id===null"
+      <mat-checkbox 
                     (change)="selectItem(row);"
                     [checked]="(!this.dataSource)? false: selection.isSelected(row)"
                     [aria-label]="checkboxLabel(row)">
@@ -156,8 +147,7 @@
       <th mat-header-cell *matHeaderCellDef mat-sort-header> 
         <span [ngSwitch]="true==true">
           <p *ngSwitchDefault>{{columnsHeaderToDisplay[i+1]}}</p>
-          <p *ngSwitchCase="['calculation_base'].includes(column)" matTooltip="NVP or Account Balance after fee deduction"> {{columnsHeaderToDisplay[i+1]}}</p>
-          <p *ngSwitchCase="['account_balance'].includes(column)" matTooltip="Account balance on selected accounting date"> {{columnsHeaderToDisplay[i+1]}}</p>
+          <p *ngSwitchCase="['account_balance'].includes(column)" matTooltip="Account Balance - Fee Amount on selected accounting date "> {{columnsHeaderToDisplay[i+1]}}</p>
           <p *ngSwitchCase="['b_transaction_date'].includes(column)" matTooltip="Field is empty if there is no created accounting"> {{columnsHeaderToDisplay[i+1]}}</p>
         </span>
         </th>
@@ -165,7 +155,7 @@
         mat-cell *matCellDef="let element" [cdkContextMenuTriggerFor]="instrumentcontextmenu" >
         <span [ngSwitch]="true==true">
           <p *ngSwitchDefault>{{element[column]}}</p>
-          <p *ngSwitchCase="['fee_amount','calculation_base','account_balance'].includes(column)">{{element[column]|currency :currencySymbol+' '}} </p>
+          <p *ngSwitchCase="['fee_amount','calculation_base','account_balance','pl','hwm'].includes(column)">{{element[column]|currency :currencySymbol+' '}} </p>
           <p *ngSwitchCase="['balance'].includes(column)">{{element[column]|currency :' '}} </p>
           <p *ngSwitchCase="['id_b_entry1'].includes(column)">
             <button mat-raised-button style="font-size:large;" [matTooltip]="'Entires List'"
@@ -174,9 +164,7 @@
             </button> 
           </p>
           <p *ngSwitchCase="['fee_rate'].includes(column)&&element[column]!==null">{{element[column] + '%'}}</p>
-          <p *ngSwitchCase="['calculation_date','b_transaction_date','fee_date','endPeriod','startPeriod'].includes(column)">{{element[column] | date}} </p>
-          <p *ngSwitchCase="['fee_date'].includes(column)&&!element[column]"><span style="color: grey; font-weight: bold;">Total Fee {{currencySymbol}} </span></p>
-
+          <p *ngSwitchCase="['fee_date','calculation_date','b_transaction_date'].includes(column)">{{element[column] | date}} </p>
         </span>
         <ng-template  #instrumentcontextmenu>
           <div class="tree-menu-context" cdkMenu >

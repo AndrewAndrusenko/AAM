@@ -1,12 +1,12 @@
 import {Component, ViewChild, Input, ChangeDetectionStrategy, ElementRef} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
-import {Observable, Subscription, filter, from,  map,  of, switchMap, tap } from 'rxjs';
+import {Subscription, filter, from,  map,  of, switchMap, tap } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
-import {ManagementFeeCalcData,tableHeaders } from 'src/app/models/intefaces.model';
+import {tableHeaders } from 'src/app/models/intefaces.model';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
-import {AbstractControl, FormBuilder, Validators, FormGroup, FormControl } from '@angular/forms';
+import {AbstractControl, FormBuilder, FormGroup, FormControl } from '@angular/forms';
 import {formatNumber } from '@angular/common';
 import {HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import {HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
@@ -14,40 +14,37 @@ import {AuthService } from 'src/app/services/auth.service';
 import {AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
 import {indexDBService } from 'src/app/services/indexDB.service';
 import { AppFeesHandlingService } from 'src/app/services/fees-handling.service';
+import { PerformanceFeeCalcData } from 'src/app/models/fees-intefaces.model';
 @Component({
-  selector: 'app-acc-fees-management-table',
+  selector: 'app-acc-fees-performance-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './acc-fees-management-table.component.html',
-  styleUrls: ['./acc-fees-management-table.component.scss'],
+  templateUrl: './acc-fees-performance-calculation-table.component.html',
+  styleUrls: ['./acc-fees-performance-calculation-table.component.scss'],
 })
-export class AppaIAccFeesManagementTableComponent {
+export class AppaIAccFeesPerformanceTableComponent {
   accessState: string = 'none';
   disabledControlElements: boolean = false;
   private subscriptions = new Subscription()
   @Input() readOnly:boolean = false;
   columnsWithHeaders: tableHeaders[] = [
-    {fieldName:'report_date',displayName:'Date'},
     {fieldName:'portfolioname',displayName:'Code'},
-    {fieldName:'management_fee_amount',displayName:'Fee'},
-    {fieldName:'npv',displayName:'NPV'},
-    {fieldName:'calculation_start',displayName:'Start'},
-    {fieldName:'calculation_end',displayName:'End'},
-    {fieldName:'schedule_range',displayName:'Range Fee'},
+    {fieldName:'fee_amount',displayName:'Fee'},
+    {fieldName:'pos_pv',displayName:'NPV'},
+    {fieldName:'cash_flow',displayName:'Net cash flow'},
+    {fieldName:'pl',displayName:'PnL'},
+    {fieldName:'pl_above_hwm',displayName:'PnL over HWM'},
+    {fieldName:'hwm',displayName:'HWM'},
     {fieldName:'feevalue',displayName:'Fee Rate'},
-    {fieldName:'id_fee_transaction',displayName:'ID Calc'},
+    {fieldName:'id_calc',displayName:'ID Calc'},
   ];
   columnsToDisplay: string [];
   columnsHeaderToDisplay: string [];
-  dataSource: MatTableDataSource<ManagementFeeCalcData>;
-  fullDataSource: ManagementFeeCalcData[];
+  dataSource: MatTableDataSource<PerformanceFeeCalcData>;
+  fullDataSource: PerformanceFeeCalcData[];
   @ViewChild('filterALL', { static: false }) filterALL: ElementRef;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
-  dataRange = new FormGroup ({
-    dateRangeStart: new FormControl<Date | null>(new Date()),
-    dateRangeEnd: new FormControl<Date | null>(new Date()),
-  });
   searchParametersFG: FormGroup;
   multiFilter?: (data: any, filter: string) => boolean;
   mp_strategies_list: string[]=[];
@@ -67,12 +64,10 @@ export class AppaIAccFeesManagementTableComponent {
     this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
-    this.dateRangeStart.value.setMonth(this.dateRangeStart.value.getMonth()-1);
     this.searchParametersFG = this.fb.group ({
       p_portfolios_list:  [],
       MP:null,
-      p_report_date_start:null,
-      p_report_date_end:null,
+      p_report_date:new Date('09/30/2023'),
     });
   }
   ngOnDestroy(): void {
@@ -83,7 +78,7 @@ export class AppaIAccFeesManagementTableComponent {
       this.mp_strategies_list = data['data']
     })
     // this.submitQuery(false,false);  
-    this.multiFilter = (data: ManagementFeeCalcData, filter: string) => {
+    this.multiFilter = (data: PerformanceFeeCalcData, filter: string) => {
       let filter_array = filter.split(',').map(el=>[el,1]);
       this.columnsToDisplay.forEach(col=>filter_array.forEach(fil=>{
         data[col]&&fil[0].toString().toUpperCase()===(data[col]).toString().toUpperCase()? fil[1]=0:null
@@ -99,10 +94,9 @@ export class AppaIAccFeesManagementTableComponent {
   setPortfoliosList(mp:string) {
     this.InvestmentDataService.getPortfoliosListForMP(mp,'getPortfoliosByMP_StrtgyID').subscribe(data=>{
       this.portfolios=['ClearAll',...data]
-      this.filterALL.nativeElement.value = mp;
     })
   }
-  updateDataTable (managementFeeData:ManagementFeeCalcData[]) {
+  updateDataTable (managementFeeData:PerformanceFeeCalcData[]) {
     this.fullDataSource=managementFeeData;
     this.dataSource  = new MatTableDataSource(managementFeeData);
     this.dataSource.filterPredicate =this.multiFilter
@@ -114,8 +108,7 @@ export class AppaIAccFeesManagementTableComponent {
   submitQuery ( reset:boolean=false, showSnackResult:boolean=true) {
     let searchObj = reset?  {} : this.searchParametersFG.value;
     this.dataSource?.data? this.dataSource.data = null : null;
-    searchObj.p_report_date_start = new Date (this.dateRangeStart.value).toLocaleDateString();
-    searchObj.p_report_date_end = this.dateRangeEnd.value? new Date (this.dateRangeEnd.value).toLocaleDateString(): new Date().toLocaleDateString();
+    searchObj.p_report_date = new Date (this.p_report_date.value).toLocaleDateString();
     of(this.portfolios.length).pipe(
       switchMap(portLength => 
         portLength===1? 
@@ -123,7 +116,7 @@ export class AppaIAccFeesManagementTableComponent {
           :from([[...this.portfolios]])
       ),
       tap(ports=>searchObj.p_portfolios_list = ports.map(el=>el.toUpperCase())),
-      switchMap(()=>this.AppFeesHandlingService.getManagementFeeCalcData(searchObj))
+      switchMap(()=>this.AppFeesHandlingService.getPerformanceFeeCalcData(searchObj))
     ).subscribe(data => {
       this.updateDataTable(data)
       showSnackResult? this.CommonDialogsService.snackResultHandler({
@@ -131,17 +124,10 @@ export class AppaIAccFeesManagementTableComponent {
         detail:data['name'] === 'error'? data['detail'] :  formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ') : null;
     });
   }
-  showCalcDetails (details:boolean) {
-    this.dataSource.data = this.fullDataSource.filter(el=>details? el.npv === null:el.npv !== null)
-  }
   approveCalculation () {
     let searchObj  = this.searchParametersFG.value;
-    searchObj.p_report_date_start = new Date (this.dateRangeStart.value).toLocaleDateString();
-    searchObj.p_report_date_end = this.dateRangeEnd.value? new Date (this.dateRangeEnd.value).toLocaleDateString(): new Date().toLocaleDateString();
-    let countSavedCalcs = this.dataSource.data.filter(el=>el.id_fee_transaction>0).length
-     if (countSavedCalcs===this.dataSource.data.filter(el=>el.npv>0).length) { 
-      return this.CommonDialogsService.snackResultHandler({name:'error',detail:'Nothing to save. All calculations have already been saved'})
-    }
+    searchObj.report_date = new Date (this.p_report_date.value).toLocaleDateString();
+     let countSavedCalcs = this.dataSource.data.filter(el=>el.id_Calc>0).length
     of(this.portfolios.length).pipe(
       switchMap(portLength => 
         portLength===1? 
@@ -155,12 +141,12 @@ export class AppaIAccFeesManagementTableComponent {
         :from([{isConfirmed:true}])
       ),
       filter(confirm=>confirm.isConfirmed),
-      switchMap(()=>this.AppFeesHandlingService.approvedManagementFeeCalc(searchObj))
+      switchMap(()=>this.AppFeesHandlingService.approvedPerformanceFeeCalc(searchObj))
     ).subscribe(data => {
       this.submitQuery(false,false);
       this.CommonDialogsService.snackResultHandler({
         name:data['name'],detail: data['name'] === 'error'? 
-        data['detail'] : formatNumber (data[0].f_f_insert_management_fees,'en-US') + ' rows'}, 'Inserted ');
+        data['detail'] : formatNumber (data[0].f_f_insert_performance_fees,'en-US') + ' rows'}, 'Inserted ');
     });
 
   }
@@ -199,23 +185,16 @@ export class AppaIAccFeesManagementTableComponent {
     this.dataSource.filter = ''
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
   }
-
-  // getTotals (col:string) {
-  //   return (this.dataSource&&this.dataSource.data)?  this.dataSource.filteredData.map(el => el[col]).reduce((acc, value) => acc + Number(value), 0):0;
-  // }
   exportToExcel() {
     let dataTypes =  {
-      report_date : 'Date',
-      id_portfolio : 'number',
-      management_fee_amount : 'number',
-      npv : 'number',
-      calculation_start : 'Date',
-      calculation_end : 'Date',
-      period_start : 'Date',
-      period_end : 'Date',
+      portfolioname: 'string' , 
+      pos_pv : 'number',
+      cash_flow : 'number',
+      fee_amount : 'number' ,
+      pl : 'number',
+      pl_above_hwm : 'number',
       feevalue : 'number',
-      fee_type_value  :'number',
-      id_fee_transaction:'number'
+      hwm : 'number'
     }
     let dataToExport =  structuredClone(this.fullDataSource);
     dataToExport.map(el=>{
@@ -228,10 +207,8 @@ export class AppaIAccFeesManagementTableComponent {
       })
       return el;
     });
-    this.HandlingCommonTasksS.exportToExcel (dataToExport,"managementFeeData");  
+    this.HandlingCommonTasksS.exportToExcel (dataToExport,"performanceFeeData");  
   }
    get  idportfolios () {return this.searchParametersFG.get('p_portfolios_list') } 
-  get  dateRangeStart () {return this.dataRange.get('dateRangeStart') } 
-  get  dateRangeEnd () {return this.dataRange.get('dateRangeEnd') } 
-  get  dataRangeSF () {return this.searchParametersFG.get('dataRangeSF') } 
+  get  p_report_date () {return this.searchParametersFG.get('p_report_date') } 
 }

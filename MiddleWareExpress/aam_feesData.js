@@ -46,7 +46,42 @@ async function geFeesData (request,response) {
     }
   });
   switch (request.query.action) {
-    case 'getFeesTransactions':
+    case 'getPerformanceFeeCalcData':
+      sql=`
+      SELECT 
+      * 
+      FROM f_f_calc_performance_fees(`
+        +"${p_portfolios_list},'02/01/2023',${p_report_date}"+
+        `) 
+      WHERE pos_pv>0
+      ORDER BY portfolioname;`
+    break;
+    case 'getFeesPerformanceTransactions':
+      sql=`
+      SELECT 
+        fee_amount, "accountId" ,id_object,
+        ft_main.id, fee_object_type,  fee_date, calculation_date, b_transaction_date, id_b_entry1, fee_rate, calculation_base, id_fee_main, fee_type,
+        dportfolios.portfolioname,
+        "dGeneralTypes"."typeDescription" AS fee_code,pl, ft_hwm.hwm
+      FROM public.dfees_transactions AS ft_main
+      LEFT JOIN dportfolios ON 
+        dportfolios.idportfolio = ft_main.id_object
+      LEFT JOIN "bAccounts" ON
+        dportfolios.idportfolio = "bAccounts".idportfolio AND "bAccounts"."accountTypeExt"=8
+      LEFT JOIN public."dGeneralTypes" ON 
+        "dGeneralTypes"."typeValue"::numeric = ft_main.fee_type AND "dGeneralTypes"."typeCode"='fee_type'
+      LEFT JOIN LATERAL (
+        SELECT hwm FROM public.dfees_transactions
+        WHERE dfees_transactions.id_object=ft_main.id_object AND
+        dfees_transactions.fee_type=2 AND
+        dfees_transactions.fee_date<ft_main.fee_date
+        ORDER BY dfees_transactions.fee_date DESC
+        LIMIT 1
+      ) AS ft_hwm ON TRUE
+      WHERE ft_main.fee_type=2 `;
+      sql +=conditionsFeesTransactions.length? conditionsFeesTransactions.slice(0,-5).replace('WHERE','AND') :'';
+    break;
+    case 'getFeesManagementTransactions':
       sql=`
       SELECT 
         SUM (fee_amount) AS fee_amount, "accountId" ,id_object,
@@ -60,8 +95,9 @@ async function geFeesData (request,response) {
       LEFT JOIN "bAccounts" ON
         dportfolios.idportfolio = "bAccounts".idportfolio AND "bAccounts"."accountTypeExt"=8
       LEFT JOIN public."dGeneralTypes" ON 
-        "dGeneralTypes"."typeValue"::numeric = dfees_transactions.fee_type AND "dGeneralTypes"."typeCode"='fee_type'`;
-      sql +=conditionsFeesTransactions.length? conditionsFeesTransactions.slice(0,-5) : ''
+        "dGeneralTypes"."typeValue"::numeric = dfees_transactions.fee_type AND "dGeneralTypes"."typeCode"='fee_type'
+      WHERE dfees_transactions.fee_type=1 `;
+      sql +=conditionsFeesTransactions.length? conditionsFeesTransactions.slice(0,-5).replace('WHERE','AND') : ''
       sql+=` 
       GROUP BY
       GROUPING SETS (
@@ -124,6 +160,9 @@ async function geFeesData (request,response) {
     case 'approvedManagementFeeCalc' :
       sql ='SELECT * FROM f_f_insert_management_fees(${p_portfolios_list},${p_report_date_start},${p_report_date_end});'
     break;
+    case 'approvedPerformanceFeeCalc' :
+      sql ='SELECT * FROM f_f_insert_performance_fees(${p_portfolios_list},${p_report_date});'
+    break;
     case 'checkFeesTransWithEntries':
       sql ='SELECT id FROM public.dfees_transactions WHERE id = ANY(${ids_fees}) AND id_b_entry1 notnull;'
       request.query.ids_fees =typeof(request.query.ids_fees)==='string'? [Number(request.query.ids_fees)] : request.query.ids_fees.map(el=>Number(el))
@@ -131,6 +170,7 @@ async function geFeesData (request,response) {
   }
   sql = pgp.as.format(sql,request.query);
   db_common_api.queryExecute(sql,response,undefined,request.query.action);
+
 }
 module.exports = {
   geFeesData,

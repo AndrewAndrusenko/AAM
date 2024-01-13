@@ -22,15 +22,17 @@
   background: #2b2be3; /* green */
 }
 .mat-header-cell {
-  padding-left: 0.2%;
+  padding-left: 0.5%;
   font-size: 20px;
   background-color:#252525;
   text-align: center !important;
+
 }
 .mat-cell {
-  padding-left: 0.2%;
+  padding-left: 0.5%;
   border-right: 1px solid rgb(30, 30, 30);
   align-self: stretch;
+  // text-align: center !important;
 }
 .childTable {
   background-color:#0c1322;
@@ -54,6 +56,9 @@ tr.detail-row {
   overflow: hidden;
   display: flex;
 }
+/* .mat-column-secid, .mat-column-portfolioname {
+  color: var(--additionalLightBlue)
+} */
 .search-filed {
   font-size: 18px;
   border-radius: 9px;

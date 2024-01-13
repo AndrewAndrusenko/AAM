@@ -84,6 +84,7 @@ export class AppAccAccountModifyFormComponent implements OnInit {
       d_Client: {value:null, disabled: true},
       d_APTypeCodeAccount: {value:null, disabled: false},
       d_APType: {value:null, disabled: true},
+      dateOpening:[new Date(), [Validators.required]] 
     })
     this.subscriptions.add(this.AutoCompService.recieveCurrencyListReady().subscribe(()=>this.currencyCode.updateValueAndValidity()));
     this.subscriptions.add(this.AutoCompService.recieveSecIdListReady().subscribe(()=>this.secid.updateValueAndValidity()));
@@ -233,5 +234,5 @@ export class AppAccAccountModifyFormComponent implements OnInit {
   get  nameLedger () {return this.accountLedgerModifyForm.get('name')}​
   get  d_APTypeCodeAccount () {return this.accountLedgerModifyForm.get('d_APTypeCodeAccount')}
   get  d_APType () {return this.accountLedgerModifyForm.get('d_APType')}
-  ​
+  get  dateOpeningLedger ()   {return this.accountLedgerModifyForm.get('dateOpening') } 
 }
