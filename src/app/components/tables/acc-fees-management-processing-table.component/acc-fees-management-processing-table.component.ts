@@ -19,7 +19,6 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { AppTableAccEntriesComponent } from '../acc-entries-table.component/acc-entries-table.component';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { AppAccountingService } from 'src/app/services/accounting.service';
-import { BalanceDataPerPortfoliosOnDate } from 'src/app/models/accountng-intefaces.model';
 import { FeesTransactions } from 'src/app/models/fees-intefaces.model';
 @Component({
   selector: 'acc-fees-management-processing-table',
@@ -61,8 +60,8 @@ export class AppaIAccFeesProcessingTableComponent {
   @ViewChild(MatSort) sort: MatSort;
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
   dataRange = new FormGroup ({
-    dateRangeStart: new FormControl<Date | null>(new Date('10/01/2023')),
-    dateRangeEnd: new FormControl<Date | null>(new Date('10/31/2023')),
+    dateRangeStart: new FormControl<Date | null>(new Date()),
+    dateRangeEnd: new FormControl<Date | null>(new Date()),
   });
   accoutningDate = new FormControl<Date | null>(new Date());
   searchParametersFG: FormGroup;

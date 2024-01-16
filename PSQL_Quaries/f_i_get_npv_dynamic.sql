@@ -1,15 +1,13 @@
 -- FUNCTION: public.f_i_get_npv_dynamic(text[], date, date, numeric)
 
-DROP FUNCTION IF EXISTS public.f_i_get_npv_dynamic(text[], date, date, numeric);
+-- DROP FUNCTION IF EXISTS public.f_i_get_npv_dynamic(text[], date, date, numeric);
 
 CREATE OR REPLACE FUNCTION public.f_i_get_npv_dynamic(
 	p_portfolios_list text[],
 	p_report_date_start date,
 	p_report_date_end date,
 	p_report_currency numeric)
-    RETURNS TABLE(report_date date, portfolioname character varying, "accountNo" text, secid character varying, balance numeric, pos_pv numeric,
-				  mtm_rate numeric, mtm_date date, boardid character varying, percentprice boolean, couponrate numeric, nominal_currency character varying,
-				  board_currency numeric, cross_rate numeric, accured numeric, dirty_price numeric, rate_date date,accountid numeric) 
+    RETURNS TABLE(report_date date, portfolioname character varying, "accountNo" text, secid character varying, balance numeric, pos_pv numeric, mtm_rate numeric, mtm_date date, boardid character varying, percentprice boolean, couponrate numeric, nominal_currency character varying, board_currency numeric, cross_rate numeric, accured numeric, dirty_price numeric, rate_date date, accountid numeric) 
     LANGUAGE 'plpgsql'
     COST 100
     VOLATILE PARALLEL UNSAFE
@@ -63,7 +61,7 @@ WITH
           temp_balance
         WHERE
           temp_balance."accountNo" = dates_with_accounts."accountNo"
-          AND temp_balance."dateBalance" <= dates_with_accounts."dataTime"
+          AND temp_balance."dateBalance"::date <= dates_with_accounts."dataTime"::date
         ORDER BY
           temp_balance."dateBalance" DESC
         LIMIT 1
@@ -203,3 +201,7 @@ $BODY$;
 
 ALTER FUNCTION public.f_i_get_npv_dynamic(text[], date, date, numeric)
     OWNER TO postgres;
+SELECT * FROM public.f_i_get_npv_dynamic (
+array['ACM002','VPC004'],'01/15/2024','01/15/2024',
+	840
+)

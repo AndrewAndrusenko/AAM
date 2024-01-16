@@ -28,7 +28,7 @@ IF (p_quote_currency = 810) THEN
 		  dcurrencies_rates
 		WHERE
 		  dcurrencies_rates.rate_date <= p_date_end
-		  AND dcurrencies_rates.rate_date >= p_date_start - '30 day'::INTERVAL
+		  AND dcurrencies_rates.rate_date >= p_date_start - '60 day'::INTERVAL
 		  AND dcurrencies_rates.base_code = ANY (p_currencies)
 	  ),
 	  quote_set AS (
@@ -73,7 +73,7 @@ ELSE
 		  dcurrencies_rates
 		WHERE
 		  dcurrencies_rates.rate_date <= p_date_end
-		  AND dcurrencies_rates.rate_date >= p_date_start - '30 day'::INTERVAL
+		  AND dcurrencies_rates.rate_date >= p_date_start - '60 day'::INTERVAL
 		  AND dcurrencies_rates.base_code = p_quote_currency
 	  ),
 	  quote_currency AS (
@@ -120,3 +120,4 @@ $BODY$;
 
 ALTER FUNCTION public.f_i_get_cross_ratesfor_period_currencylist(bigint[], date, date, numeric)
     OWNER TO postgres;
+	select * from f_i_get_cross_ratesfor_period_currencylist(array[840,978],'01/15/2024','01/15/2024',840)

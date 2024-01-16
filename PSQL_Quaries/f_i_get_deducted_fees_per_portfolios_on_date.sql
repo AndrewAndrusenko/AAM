@@ -1,11 +1,11 @@
--- FUNCTION: public.f_i_get_deposits_withdrawals_per_portfolios_on_date(text[], date)
+-- FUNCTION: public.f_i_get_deducted_fees_per_portfolios_on_date(text[], date)
 
-DROP FUNCTION IF EXISTS public.f_i_get_deducted_fees_per_portfolios_on_date(text[], date);
+-- DROP FUNCTION IF EXISTS public.f_i_get_deducted_fees_per_portfolios_on_date(text[], date);
 
 CREATE OR REPLACE FUNCTION public.f_i_get_deducted_fees_per_portfolios_on_date(
 	p_portfolios_list text[],
 	p_report_date date)
-    RETURNS TABLE(idportfolio int,portfolioname character varying,transaction_type bigint, "dataTime" date, "accountNo" character varying, fee_amount numeric, account_currency numeric) 
+    RETURNS TABLE(idportfolio integer, portfolioname character varying, transaction_type bigint, "dataTime" date, "accountNo" character varying, fee_amount numeric, account_currency numeric) 
     LANGUAGE 'plpgsql'
     COST 100
     VOLATILE PARALLEL UNSAFE
@@ -23,6 +23,7 @@ RETURN QUERY
     SUM(
       CASE
         WHEN "XactTypeCode_Ext" = 14 THEN "amountTransaction" * -1
+        WHEN "XactTypeCode_Ext" = 16 THEN "amountTransaction" * -1
 		ELSE "amountTransaction"
       END
     ) AS fee_amount,
@@ -33,7 +34,7 @@ RETURN QUERY
     LEFT JOIN dportfolios ON "bAccounts".idportfolio = dportfolios.idportfolio
   WHERE
     LOWER(dportfolios.portfolioname) = ANY (p_portfolios_list)
-    AND "XactTypeCode_Ext" = ANY (ARRAY[14])
+    AND "XactTypeCode_Ext" = ANY (ARRAY[14,16])
     AND  "bAccountTransaction"."dataTime" <= p_report_date
   GROUP BY
     GROUPING SETS (
@@ -56,4 +57,3 @@ $BODY$;
 
 ALTER FUNCTION public.f_i_get_deducted_fees_per_portfolios_on_date(text[], date)
     OWNER TO postgres;
-select * from f_i_get_deducted_fees_per_portfolios_on_date(array['icm011','acm002'],'09/30/2023')

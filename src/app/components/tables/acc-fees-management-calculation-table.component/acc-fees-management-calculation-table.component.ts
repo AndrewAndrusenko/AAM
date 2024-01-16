@@ -13,8 +13,8 @@ import {HandlingCommonTasksService } from 'src/app/services/handling-common-task
 import {AuthService } from 'src/app/services/auth.service';
 import {AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
 import {indexDBService } from 'src/app/services/indexDB.service';
-import { AppFeesHandlingService } from 'src/app/services/fees-handling.service';
-import { ManagementFeeCalcData } from 'src/app/models/fees-intefaces.model';
+import {AppFeesHandlingService } from 'src/app/services/fees-handling.service';
+import {ManagementFeeCalcData } from 'src/app/models/fees-intefaces.model';
 @Component({
   selector: 'app-acc-fees-management-table',
   changeDetection: ChangeDetectionStrategy.OnPush,

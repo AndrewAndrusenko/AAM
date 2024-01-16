@@ -191,6 +191,7 @@ async function fGetPortfolioPositions (request,response) {
         portfolioname,
         CASE
         WHEN transaction_type=14 THEN 'Management Fees'
+        WHEN transaction_type=16 THEN 'Performance Fees'
         ELSE 'Other Fees'
         END
         ,NULL,NULL,NULL,0,NULL,0,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,NULL
@@ -204,7 +205,6 @@ async function fGetPortfolioPositions (request,response) {
     break;
   }
   sql = pgp.as.format(sql,request.body.params);
-  console.log(sql);
   db_common_api.queryExecute(sql,response,undefined,request.body.action);
 }
 async function fGetPortfolioAnalytics (request,response) {

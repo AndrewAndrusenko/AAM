@@ -51,7 +51,7 @@ async function geFeesData (request,response) {
       SELECT 
       * 
       FROM f_f_calc_performance_fees(`
-        +"${p_portfolios_list},'02/01/2023',${p_report_date}"+
+        +"${p_portfolios_list},${p_report_date_hurdle},${p_report_date}"+
         `) 
       WHERE pos_pv>0
       ORDER BY portfolioname;`

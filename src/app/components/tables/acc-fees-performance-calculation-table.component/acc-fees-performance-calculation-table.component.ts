@@ -67,7 +67,8 @@ export class AppaIAccFeesPerformanceTableComponent {
     this.searchParametersFG = this.fb.group ({
       p_portfolios_list:  [],
       MP:null,
-      p_report_date:new Date('09/30/2023'),
+      p_report_date:new Date(),
+      p_report_date_hurdle:new Date(),
     });
   }
   ngOnDestroy(): void {
@@ -109,6 +110,7 @@ export class AppaIAccFeesPerformanceTableComponent {
     let searchObj = reset?  {} : this.searchParametersFG.value;
     this.dataSource?.data? this.dataSource.data = null : null;
     searchObj.p_report_date = new Date (this.p_report_date.value).toLocaleDateString();
+    searchObj.p_report_date_hurdle = new Date (this.p_report_date_hurdle.value).toLocaleDateString();
     of(this.portfolios.length).pipe(
       switchMap(portLength => 
         portLength===1? 
@@ -211,4 +213,5 @@ export class AppaIAccFeesPerformanceTableComponent {
   }
    get  idportfolios () {return this.searchParametersFG.get('p_portfolios_list') } 
   get  p_report_date () {return this.searchParametersFG.get('p_report_date') } 
+  get  p_report_date_hurdle () {return this.searchParametersFG.get('p_report_date_hurdle') } 
 }

@@ -7,6 +7,7 @@ import { AccountingTradesService } from './accounting-trades.service';
 import { HttpClient } from '@angular/common/http';
 import { formatNumber } from '@angular/common';
 import { FeesTransactions, ManagementFeeCalcData, PerformanceFeeCalcData } from '../models/fees-intefaces.model';
+import { number } from 'echarts';
 @Injectable({
   providedIn: 'root'
 })
@@ -89,11 +90,12 @@ export class AppFeesHandlingService {
   createAccountingForManagementFees (feesToProcessSet:FeesTransactions[],profitTax:number,accountingDate:Date) {
     this.feesToProcess = feesToProcessSet;
     let portfolioWithoutFunds = this.feesToProcess
-    .filter(el=>el.fee_type===1? el.id===null&&el.account_balance<0:el.account_balance<0)
+    .filter(el=>Number(el.fee_type)===1? el.id===null&&el.account_balance<0:el.account_balance<0)
     .map(el=>el.portfolioname);
     this.checkFeesTransWithEntries (this.feesToProcess.filter(el=>el.id>0).map(el=>Number(el.id))).pipe(
       tap(feesWithEntries=>feesWithEntries.length?  
-        this.CommonDialogsService.snackResultHandler({name:'error',detail:'There are created entries for the fee transactions: '+[...feesWithEntries.map(el=>el.id)]}) : null),
+        this.CommonDialogsService.snackResultHandler({name:'error',detail:'There are created entries for the fee transactions: '+[...feesWithEntries.map(el=>el.id)]}) 
+        : null),
       filter(entriesData=>entriesData.length===0),
       switchMap(()=>
       portfolioWithoutFunds.length>0? 
@@ -104,12 +106,11 @@ export class AppFeesHandlingService {
     ).subscribe(()=>this.entriesCreationForManagementFees(profitTax,accountingDate));
   }
   entriesCreationForManagementFees (profitTaxRate:number,accountingDate:Date) {
-    console.log('entriesCreationForManagementFees',);
     let createdAccountingTransactions = [];
     let feesToProcessProcessStatus = this.feesToProcess.
-    filter(el=>el.fee_type===1? el.id===null: el.id>0)
+    filter(el=>Number(el.fee_type)===1? el.id===null: el.id>0)
     .map(el=>{return {id:el.portfolioname,accounting:1}})
-    this.feesToProcess.filter(el=>el.fee_type===1? el.id===null: el.id>0).forEach(feeTransaction => {
+    this.feesToProcess.filter(el=>Number(el.fee_type)===1? el.id===null: el.id>0).forEach(feeTransaction => {
       let bcEntryParameters = <any> {}
       bcEntryParameters.fee_code=feeTransaction.fee_code;
       bcEntryParameters.pDate_T=new Date(accountingDate).toDateString();

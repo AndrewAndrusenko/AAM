@@ -60,14 +60,14 @@ export class AppaIAccFeesPerformanceProcessingTableComponent {
   @ViewChild(MatSort) sort: MatSort;
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
   dataRange = new FormGroup ({
-    dateRangeStart: new FormControl<Date | null>(new Date('09/01/2023')),
-    dateRangeEnd: new FormControl<Date | null>(new Date('09/31/2023')),
+    dateRangeStart: new FormControl<Date | null>(new Date()),
+    dateRangeEnd: new FormControl<Date | null>(new Date()),
   });
   accoutningDate = new FormControl<Date | null>(new Date());
   searchParametersFG: FormGroup;
   multiFilter?: (data: any, filter: string) => boolean;
   mp_strategies_list: string[]=[];
-  portfolios: Array<string> = ['ClearAll','icm011','acm002'];
+  portfolios: Array<string> = ['ClearAll'];
   currencySymbol: string = '$';
   profitTaxRate:number;
   selectedRowID: number;
@@ -185,7 +185,9 @@ export class AppaIAccFeesPerformanceProcessingTableComponent {
   }
   createAccounting () {
     let feesToProcess = this.selection.selected.filter(el=>el.fee_amount>0);
-    this.AppFeesHandlingService.createAccountingForManagementFees(feesToProcess,this.profitTaxRate,this.accoutningDate.value)
+    feesToProcess.length>0?
+      this.AppFeesHandlingService.createAccountingForManagementFees(feesToProcess,this.profitTaxRate,this.accoutningDate.value)
+      :this.CommonDialogsService.snackResultHandler({name:'error',detail:'There are no transactions to process'});
     this.selection.clear();
   }
   deleteCalculation () {

@@ -217,9 +217,25 @@ we get closest market price for every position
 4|| Performance Fees Accounting => Created accounting schemes to process perfomance fees
 5|| UI & ML Ledger Accounts Form => exposed dateOpening field for editing. All relevant validation has been applied 
 --------------------------------------------------------------------------------------------
+14/12/2024 - 15/12/2024
+1|| Done: Check managemnt fee calculation when rate has been changed during period
+2|| * Fix - Null NPV for current date from f_npv_dynamic
+  Fixed - historical period for exchange rates has been increased upto 60 days
+  The better way is to upload exchange rate more frequently
+3|| Done: Check perfomance fee calculation when rate has been changed during period. 
+  Best and correct approach is to 'close' performance fee period by calculating an amount of fee on the last date of the period. Fee amount without hurdle rate doesn't depend on the period length  
+4|| Fixing => 
+  Performance and Management fee corrected removing saved calculations and while processing removing fees with accounting
+  Performance Fees based on entries type have been added to detailed position table 
+5|| DB creating performance fee transactions =>
+  Created trigger which prevent creating new calculation before the date of the last calculation
+6|| Hrudle rate implementation => Draft
+--------------------------------------------------------------------------------------------
 
-|| Hurdle Performance fee
+|| Hurdle Performance fee and Cash In/Outs -??? How to correct start and end NVP?
 || FIFO detailed reporting
+|| UI for Accounting Transaction Types and option to allow/block manual editing
+|| Revenue Factor Chart add info about management and perfomance fees deducted
 || UI to update/create accounting schemes
 || UI editing fees data and link it portfolios
 || FIFO Bug possible=> Case of simultaneously two trades which should be netted on FIFO are sent in FIFO function. 
