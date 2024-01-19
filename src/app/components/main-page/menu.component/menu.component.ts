@@ -43,4 +43,22 @@ constructor(
   nodecls (){
     this.authService.nodeTerminalClear().subscribe(data=>console.log('nodeTerminalClear',data))
   }
+  tools () {
+    let obj = `
+    idfee_scedule :number, 
+    fee_type_value :number,
+    feevalue :number,
+    calculation_period :number, 
+    deduction_period :number,
+    schedule_range: number[],
+    range_parameter:string, 
+    below_ranges_calc_type:number, 
+    id_fee_main:number, 
+    pf_hurdle:number,
+    highwatermark:boolean
+  `
+  let a = obj.split(',').map(el=> {return {fieldName:el.split(':')[0].trim(),displayName:el.split(':')[0].trim()}});
+  console.log('obj',a.flat());
+  }
 }
+

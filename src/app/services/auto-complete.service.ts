@@ -16,8 +16,10 @@ export class AtuoCompleteService {
   private subjectSecIDList = new Subject<string[]>();
   private subSecID = new Subject ();
   private subCurrencyList = new Subject ();
+  private subModelPortfoliosList = new Subject ();
   private subCurrencyListReady = new Subject<boolean> ();
   private subSecIdListReady = new Subject<boolean> ();
+  private subMPsListReady = new Subject<string[]> ();
   constructor(
     private indexDBServiceS: indexDBService
   ) { }
@@ -49,12 +51,23 @@ export class AtuoCompleteService {
       this.subCurrencyListReady.next(true)
     });
   }
+  createModelPortfoliospipe (){
+    this.subModelPortfoliosList.pipe (
+      exhaustMap(()=>this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios')),
+    ).subscribe((data) => this.subMPsListReady.next(data['data']));
+  }
+  getSecIdListReady(): Observable<string[]> {
+    return this.subMPsListReady.asObservable();
+  }
   getSecidLists() {
     this.subSecID.next(true);
     
   }
   getCounterpartyLists() {
     return this.indexDBServiceS.getIndexDBStaticTables('getCounterPartyList').then(data => this.fullCounterPatiesList = data['data']);
+  }
+  getModelPotfoliosList() {
+     this.subModelPortfoliosList.next(true);
   }
   getCurrencyList() {
      this.subCurrencyList.next(true);

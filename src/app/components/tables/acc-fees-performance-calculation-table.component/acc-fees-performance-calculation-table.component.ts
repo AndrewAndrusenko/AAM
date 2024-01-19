@@ -15,6 +15,7 @@ import {AppInvestmentDataServiceService } from 'src/app/services/investment-data
 import {indexDBService } from 'src/app/services/indexDB.service';
 import { AppFeesHandlingService } from 'src/app/services/fees-handling.service';
 import { PerformanceFeeCalcData } from 'src/app/models/fees-intefaces.model';
+import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 @Component({
   selector: 'app-acc-fees-performance-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -57,12 +58,12 @@ export class AppaIAccFeesPerformanceTableComponent {
     private HandlingCommonTasksS:HandlingCommonTasksService,
     private CommonDialogsService:HadlingCommonDialogsService,
     private AppFeesHandlingService:AppFeesHandlingService,
-    private indexDBServiceS:indexDBService,
+    private AutoCompleteService:AtuoCompleteService,
     private fb:FormBuilder, 
   ) {
     this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
     this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
-    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
+    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToFeesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.searchParametersFG = this.fb.group ({
       p_portfolios_list:  [],
@@ -75,9 +76,10 @@ export class AppaIAccFeesPerformanceTableComponent {
     this.subscriptions.unsubscribe();
   }
   ngOnInit(): void {
-    this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios').then ((data)=>{
-      this.mp_strategies_list = data['data']
-    })
+    this.AutoCompleteService.getModelPotfoliosList();
+    this.subscriptions.add(
+      this.AutoCompleteService.getSecIdListReady().subscribe(data=>this.mp_strategies_list=data)
+    )
     // this.submitQuery(false,false);  
     this.multiFilter = (data: PerformanceFeeCalcData, filter: string) => {
       let filter_array = filter.split(',').map(el=>[el,1]);

@@ -181,7 +181,11 @@ const appInitializerFn = (accessRestirictions:AuthService) => {
         AppaIAccFeesProcessingTableComponent,
         AccAccountsFeesTabComponent,
         AppaIAccFeesPerformanceTableComponent,
-        AppaIAccFeesPerformanceProcessingTableComponent
+        AppaIAccFeesPerformanceProcessingTableComponent,
+        AppAccFeesSchedulesTableComponent,
+        AppaIAccFeesSchedulesTable,
+        AppAccFeesMainFormComponent,
+        AppAccFeesScheduleFormComponent
      ],
     bootstrap: [AppComponent],
     providers: [ 
@@ -225,5 +229,9 @@ import { AccAccountsFeesTabComponent } from './components/main-page/tabs/account
 import { AppaIAccFeesProcessingTableComponent } from './components/tables/acc-fees-management-processing-table.component/acc-fees-management-processing-table.component';
 import { AppaIAccFeesPerformanceTableComponent } from './components/tables/acc-fees-performance-calculation-table.component/acc-fees-performance-calculation-table.component';
 import { AppaIAccFeesPerformanceProcessingTableComponent } from './components/tables/acc-fees-performance-processing-table.component/acc-fees-performance-processing-table.component';
+import { AppAccFeesSchedulesTableComponent } from './components/tables/acc-fees-main-table.component/acc-fees-main-table.component';
+import { AppaIAccFeesSchedulesTable } from './components/tables/acc-fees-schedules-table.component/acc-fees-schedules-table.component';
+import { AppAccFeesMainFormComponent } from './components/forms/acc-fees-main-form.component/acc-fees-main-form.component';
+import { AppAccFeesScheduleFormComponent } from './components/forms/acc-fees-schedule-form.component/acc-fees-schedule-form.component';
 
 

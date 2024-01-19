@@ -1,3 +1,29 @@
+import { number } from "echarts"
+
+export interface FeesMainData {
+  id :number,
+  fee_code:number,
+  fee_type_desc: string,
+  fee_object_desc: string,
+  fee_description: string,
+  period_desc: string,
+  fee_type:number,
+  fee_object_type :number,
+  id_fee_period :number
+}
+export interface FeesSchedulesData {
+  idfee_scedule :number, 
+  fee_type_value :number,
+  feevalue :number,
+  calculation_period :number, 
+  deduction_period :number,
+  schedule_range: number[],
+  range_parameter:string, 
+  below_ranges_calc_type:number, 
+  id_fee_main:number, 
+  pf_hurdle:number,
+  highwatermark:boolean
+}
 export interface ManagementFeeCalcData {
   report_date : Date,
   id_portfolio : number,

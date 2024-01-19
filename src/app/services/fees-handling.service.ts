@@ -6,21 +6,58 @@ import { bAccountTransaction, bLedgerTransaction } from '../models/intefaces.mod
 import { AccountingTradesService } from './accounting-trades.service';
 import { HttpClient } from '@angular/common/http';
 import { formatNumber } from '@angular/common';
-import { FeesTransactions, ManagementFeeCalcData, PerformanceFeeCalcData } from '../models/fees-intefaces.model';
-import { number } from 'echarts';
+import { FeesMainData, FeesSchedulesData, FeesTransactions, ManagementFeeCalcData, PerformanceFeeCalcData } from '../models/fees-intefaces.model';
 @Injectable({
   providedIn: 'root'
 })
 export class AppFeesHandlingService {
+
   private feesToProcess:FeesTransactions[];
   private createdAccounting$ = new Subject <{}[]>
+  private feesMainDataSub$ = new Subject<{data:FeesMainData[],action:string}>
+  private feesSchedulesDataSub$ = new Subject<{data:FeesSchedulesData[],action:string}>
+  private feeSheduleIsOpened$ = new Subject<number>
   constructor(
     private http :HttpClient,
     private CommonDialogsService:HadlingCommonDialogsService,
     private AccountingDataService:AppAccountingService, 
     private accountingTradeService: AccountingTradesService,
   ) { }
-  
+  sendFeeSheduleIsOpened(id_fee_main: number) {
+    this.feeSheduleIsOpened$.next(id_fee_main);
+  }
+  getFeeSheduleIsOpened():Observable<number> {
+    return this.feeSheduleIsOpened$.asObservable();
+  }
+  deleteFeesSchedulesCascade (id_fee_main:number):Observable<FeesSchedulesData> {
+    return this.http.post <FeesSchedulesData> ('/api/AAM/updateFeesScheduleData/',{data:{id_fee_main:id_fee_main}, action:'Delete_Cascade'})
+  }
+  updateFeesMainData (data:FeesMainData, action:string):Observable<FeesMainData> {
+    return this.http.post <FeesMainData> ('/api/AAM/updateFeesData/',{data:data, action:action})
+  }
+  updateFeesScheduleData (data:FeesSchedulesData, action:string):Observable<FeesSchedulesData[]> {
+    return this.http.post <FeesSchedulesData[]> ('/api/AAM/updateFeesScheduleData/',{data:data, action:action})
+  }
+  getFeesMainData ()
+  :Observable<FeesMainData[]> {
+    return this.http.get <FeesMainData[]> ('/api/AAM/getFeesData/',{params:{action:'getFeesMainData'}})
+  }
+  getFeesSchedulesData (id_fee:number)
+  :Observable<FeesSchedulesData[]> {
+    return this.http.get <FeesSchedulesData[]> ('/api/AAM/getFeesData/',{params:{id_fee:id_fee,action:'getFeesSchedulesData'}})
+  }
+  getFeeShedulessDataReload ():Observable<{data:FeesSchedulesData[],action:string}> {
+    return this.feesSchedulesDataSub$.asObservable();
+  }
+  sendFeeShedulessDataReload (data:FeesSchedulesData[],action:string) {
+    this.feesSchedulesDataSub$.next({data:data,action:action});
+  }
+  getFeesMainDataReload ():Observable<{data:FeesMainData[],action:string}> {
+    return this.feesMainDataSub$.asObservable();
+  }
+  sendFeesMainDataReload (data:FeesMainData[],action:string) {
+    this.feesMainDataSub$.next({data:data,action:action});
+  }
   getPerformanceFeeCalcData (searchObj : {action:string,p_report_date_start:string,p_report_date_end:string, p_portfolios_list: string []})
   :Observable<PerformanceFeeCalcData[]> {
     searchObj.action='getPerformanceFeeCalcData';

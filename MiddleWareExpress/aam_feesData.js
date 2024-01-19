@@ -1,9 +1,21 @@
 const db_common_api = require('./db_common_api');
 var pgp = require ('pg-promise')({capSQL:true});
 const https = require('https');
-async function fUpdateOrderData (request, response) {
-  let fields = ['status']
- db_common_api.fUpdateTableDB ('dfees_transactions',fields,'id',request, response)
+async function fupdateFeesData (request, response) {
+  let fields = ['fee_type', 'fee_code', 'fee_description', 'id_fee_period', 'fee_object_type']
+ db_common_api.fUpdateTableDB ('dfees_main',fields,'id',request, response)
+}
+async function fupdateFeesScheduleData (request, response) {
+  let fields = ['fee_type_value', 'feevalue', 'calculation_period', 'deduction_period', 'schedule_range', 'range_parameter', 'id_fee_main', 'pf_hurdle', 'highwatermark'  ]
+  switch (request.body.action) {
+    case 'Delete_Cascade':
+      request.body.action='Delete';
+      db_common_api.fUpdateTableDB ('dfees_schedules',fields,'id_fee_main',request, response);
+    break;
+    default:
+      db_common_api.fUpdateTableDB ('dfees_schedules',fields,'idfee_scedule',request, response)
+    break;
+  }
 }
 async function fupdateFeesEntryInfo(request,response) {
   let sql = '';
@@ -21,7 +33,7 @@ async function fupdateFeesEntryInfo(request,response) {
 async function fgetTaxes (request,response) {
   let sql = "SELECT rate FROM public.a_taxes_rates WHERE code='profit_tax_rate' AND start_date<=${p_date};"
   sql = pgp.as.format(sql,request.query);
-  db_common_api.queryExecute(sql,response,'fgetTaxes',request.query.action);
+  db_common_api.queryExecute(sql,response,'fgetTaxes','fgetTaxes');
 }
 async function geFeesData (request,response) {
   let sql='';
@@ -46,6 +58,12 @@ async function geFeesData (request,response) {
     }
   });
   switch (request.query.action) {
+    case 'getFeesMainData':
+      sql=`SELECT *,0 as action FROM v_f_dfees_main`
+    break;
+    case 'getFeesSchedulesData':
+      sql='SELECT *,0 as action FROM public.dfees_schedules WHERE id_fee_main = ${id_fee} ORDER BY idfee_scedule;'
+    break;
     case 'getPerformanceFeeCalcData':
       sql=`
       SELECT 
@@ -174,7 +192,8 @@ async function geFeesData (request,response) {
 }
 module.exports = {
   geFeesData,
-  fUpdateOrderData,
+  fupdateFeesData,
+  fupdateFeesScheduleData,
   fupdateFeesEntryInfo,
   fgetTaxes
 }

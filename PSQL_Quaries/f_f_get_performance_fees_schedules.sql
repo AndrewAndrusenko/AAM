@@ -53,7 +53,7 @@ FROM
   LEFT JOIN LATERAL (
   SELECT dfees_transactions.hwm,dfees_transactions.fee_date,dfees_transactions.id FROM dfees_transactions
 	WHERE 
-	dfees_transactions.fee_date<= p_report_date_end AND
+-- 	dfees_transactions.fee_date<= p_report_date_end AND
 	dfees_transactions.id_object=dfees_objects.object_id AND
 	dfees_transactions.fee_type=2
 	ORDER BY dfees_transactions.fee_date DESC 
@@ -63,12 +63,12 @@ WHERE
   dfees_objects.fee_object_type = 1
   AND dfees_main.fee_type = 2
   AND dportfolios.portfolioname = ANY (p_portfolio_list)
-  AND dfees_objects.period_end > p_report_date_start
-  AND dfees_objects.period_start < p_report_date_end;
+  AND dfees_objects.period_end >= p_report_date_end
+  AND dfees_objects.period_start <= p_report_date_end;
 END
 $BODY$;
 
 ALTER FUNCTION public.f_f_get_performance_fees_schedules(text[], date, date)
     OWNER TO postgres;
 select * from f_f_get_performance_fees_schedules(
-array['ACM002','VPC004'],'12/01/2023','12/30/2023')
+array['ACM002'],'12/01/2023','12/17/2023')

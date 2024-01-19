@@ -94,7 +94,7 @@ WITH
 SELECT
   start_period_npv.pos_pv AS start_npv,
   CASE
-    WHEN fees_dataset.hwm_date::date >= p_report_date_end THEN fees_dataset.id_calc
+    WHEN fees_dataset.hwm_date::date >= p_report_date_end::date THEN fees_dataset.id_calc
     ELSE null
   END AS id_calc,	
   fees_dataset.idportfolio,
@@ -108,7 +108,7 @@ SELECT
     )
 	WHEN fees_dataset.pl > 0  AND fees_dataset.highwatermark = false  AND (fees_dataset.pf_hurdle = 0 OR fees_dataset.pf_hurdle ISNULL) 
 		THEN ROUND(fees_dataset.pl * fees_dataset.feevalue / 100, 2 )
-	WHEN (fees_dataset.pf_hurdle > 0 ) AND (fees_dataset.pos_pv/ start_period_npv.pos_pv-fees_dataset.pf_hurdle>0) THEN ROUND(
+	WHEN (fees_dataset.pf_hurdle > 0 ) AND (fees_dataset.pos_pv/ start_period_npv.pos_pv-1-fees_dataset.pf_hurdle/100>0) THEN ROUND(
       (fees_dataset.pos_pv/ start_period_npv.pos_pv-1-fees_dataset.pf_hurdle/100) * start_period_npv.pos_pv * fees_dataset.feevalue / 100,
       2
     )
@@ -133,4 +133,4 @@ $BODY$;
 ALTER FUNCTION public.f_f_calc_performance_fees(text[], date, date)
     OWNER TO postgres;
 select * from f_f_calc_performance_fees(
-array['ACM002','VPC004'],'12/01/2023','12/30/2023')
+array['ACM002'],'05/01/2023','12/16/2023')

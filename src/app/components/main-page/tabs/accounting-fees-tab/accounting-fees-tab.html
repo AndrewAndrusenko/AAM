@@ -1,5 +1,8 @@
 <mat-tab-group  mat-stretch-tabs  #tabGroup
 (selectedTabChange)="showTabName($event)">
+<mat-tab  label="Fees Schedules" >
+  <acc-fees-main-table></acc-fees-main-table>  
+</mat-tab>
 <mat-tab  label="Fees Processing" >
   <mat-tab-group mat-stretch-tabs style="margin-top: 1%;">
     <mat-tab  label="Perfornamce" >

@@ -15,6 +15,7 @@ import {AppInvestmentDataServiceService } from 'src/app/services/investment-data
 import {indexDBService } from 'src/app/services/indexDB.service';
 import {AppFeesHandlingService } from 'src/app/services/fees-handling.service';
 import {ManagementFeeCalcData } from 'src/app/models/fees-intefaces.model';
+import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 @Component({
   selector: 'app-acc-fees-management-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -57,16 +58,16 @@ export class AppaIAccFeesManagementTableComponent {
   detailedView:boolean = false;
   constructor(
     private AuthServiceS:AuthService,  
+    private AutoCompleteService:AtuoCompleteService,
     private InvestmentDataService:AppInvestmentDataServiceService, 
     private HandlingCommonTasksS:HandlingCommonTasksService,
     private CommonDialogsService:HadlingCommonDialogsService,
     private AppFeesHandlingService:AppFeesHandlingService,
-    private indexDBServiceS:indexDBService,
     private fb:FormBuilder, 
   ) {
     this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
     this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
-    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
+    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToFeesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.dateRangeStart.value.setMonth(this.dateRangeStart.value.getMonth()-1);
     this.searchParametersFG = this.fb.group ({
@@ -80,10 +81,10 @@ export class AppaIAccFeesManagementTableComponent {
     this.subscriptions.unsubscribe();
   }
   ngOnInit(): void {
-    this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios').then ((data)=>{
-      this.mp_strategies_list = data['data']
-    })
-    // this.submitQuery(false,false);  
+    this.AutoCompleteService.getModelPotfoliosList();
+    this.subscriptions.add(
+      this.AutoCompleteService.getSecIdListReady().subscribe(data=>this.mp_strategies_list=data)
+    )
     this.multiFilter = (data: ManagementFeeCalcData, filter: string) => {
       let filter_array = filter.split(',').map(el=>[el,1]);
       this.columnsToDisplay.forEach(col=>filter_array.forEach(fil=>{

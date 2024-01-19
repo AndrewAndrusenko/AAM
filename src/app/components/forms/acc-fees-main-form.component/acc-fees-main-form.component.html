@@ -1,0 +1,129 @@
+<mat-toolbar color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4">
+  <span>{{action}} Fee Schedule ID {{id?.value}}</span>
+  <span class="example-spacer"></span>
+</mat-toolbar>
+<mat-checkbox style= "font-size: 14px; color:rgb(255, 255, 255); padding: 1%;" #submitbox checked="false" 
+(click)=" FeesMainForm.markAllAsTouched();
+FeesMainForm.markAllAsTouched();"
+>Submit Data
+</mat-checkbox>
+<button mat-raised-button color="primary" 
+[disabled]="!(FeesMainForm.valid && submitbox.checked)"
+(click)="updateInstrumentData(action)"
+style="margin-top: 1px; width: 20%; font-size: large; margin-left: 1%;">
+{{action}} Fee Schedule 
+</button>
+<form class="submit" [formGroup]="FeesMainForm">
+  <h3 style="color:rgb(177, 174, 174)" *ngIf="FeesMainForm.valid"> 
+    To save data please select 'Submit data' check and then press button 
+  </h3>
+<!--   <mat-form-field  style="width: 26%;" title="Action Type">
+    <mat-label>Action Type</mat-label>
+    <mat-select  #actionT formControlName="actiontype"  > 
+      <ng-container *ngFor="let caType of caTypes">
+      <mat-option  [value]="caType.id">
+          {{caType.name }} - {{caType.ratetype}}
+      </mat-option>
+      </ng-container>
+    </mat-select>
+    <mat-error  *ngIf="actiontype.errors?.['required']">
+      Required!    
+    </mat-error>
+  </mat-form-field> -->
+<!--   <mat-form-field class="example-full-width" style="width: 12%;" >
+    <input matInput [matDatepicker]="picker" placeholder="Action date"  formControlName="date" >
+    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-datepicker #picker></mat-datepicker>
+    <mat-error  *ngIf="date.errors?.['required']">
+      Required!    
+    </mat-error>
+</mat-form-field> -->
+<!--     id :number,
+  fee_code:number,
+  fee_type_desc: string,
+  fee_object_desc: string,
+  fee_description: string,
+  period_desc: string,
+  fee_type:number,
+  fee_object_type :number,
+  id_fee_period :number -->
+  <mat-form-field style="width: 30%;" title="Code">
+    <input matInput placeholder="Code" formControlName="fee_code"  >
+  </mat-form-field>
+  <mat-form-field  style="width: 26%;" title="Fee Type">
+    <mat-label>Fee Type</mat-label>
+    <mat-select  #actionT formControlName="fee_type"  > 
+      <mat-option  [value]="'1'">Management Fee</mat-option>
+      <mat-option  [value]="'2'">Performance Fee</mat-option>
+    </mat-select>
+    <mat-error  *ngIf="fee_type.errors?.['required']">
+      Required!    
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field  style="width: 16%;" title="Object Type">
+    <mat-label>Object Type</mat-label>
+    <mat-select   formControlName="fee_object_type"  > 
+      <mat-option  [value]="1">Portfolio</mat-option>
+      <mat-option  [value]="2">Account</mat-option>
+    </mat-select>
+    <mat-error  *ngIf="fee_object_type.errors?.['required']">
+      Required!    
+    </mat-error>
+  </mat-form-field>
+
+<!--   <mat-form-field style="width: 20%;" title="Type">
+    <input matInput placeholder="Type" formControlName="fee_type_desc"  >
+  </mat-form-field> -->
+
+  <mat-form-field style="width: 70%" title="Description">
+    <input matInput placeholder="Description" formControlName="fee_description"  >
+    <mat-error  *ngIf="fee_description.errors?.['required']">
+      Required!    
+    </mat-error>
+  </mat-form-field>
+  <br>
+  <!-- <mat-form-field style="width: 12%;" *ngIf="![5,7].includes(actiontype.value)"  >
+    <input matInput placeholder="Unredemeed" formControlName="unredemeedvalue" >
+    <mat-error  *ngIf="unredemeedvalue?.errors?.['pattern']">
+      Only numbers (0.00)   
+    </mat-error>
+    <mat-hint *ngIf="unredemeedvalue.valid">
+      {{unredemeedvalue.value | number}}
+    </mat-hint>
+  </mat-form-field>
+  <mat-form-field *ngIf="[1,2,3].includes(actiontype.value)" style="width: 15%;" >
+    <input matInput [placeholder]="templateStructureAT[actiontype.value].placeholders['couponrate']" formControlName="couponrate" >
+  </mat-form-field>
+    <mat-form-field style="width: 14%;" >
+      <input matInput [placeholder]="templateStructureAT[actiontype.value].placeholders['couponamount']" formControlName="couponamount"  >
+      <mat-error  *ngIf="couponamount.errors?.['required']">
+        Required!    
+      </mat-error>
+      <mat-error  *ngIf="couponamount?.errors?.['pattern']">
+        Only numbers (0.00)   
+      </mat-error>
+      <mat-hint *ngIf="couponamount.valid">
+        {{couponamount.value | number}}
+      </mat-hint>
+    </mat-form-field>
+
+  <mat-form-field style="width: 18%;" title="Type to find(any filed). Click to select">
+    <input matInput placeholder="Currency" formControlName="currency" [matAutocomplete]="auto" >
+    <mat-autocomplete #auto="matAutocomplete">
+      <mat-option *ngFor="let currency of filteredCurrenciesList | async" [value]="currency['CurrencyCodeNum']">
+        {{currency['CurrencyCodeNum']}} -  {{currency['CurrencyCode']}} -  {{currency['CurrencyName']}} 
+      </mat-option>
+    </mat-autocomplete>   
+    <mat-error  *ngIf="currency?.errors?.['required']">
+      Required!   
+    </mat-error>
+    <mat-error  *ngIf="currency?.errors?.['currencyCode']">
+      Inccorect Code! 
+    </mat-error>
+  </mat-form-field> -->
+  <div>
+  <acc-fees-schedules-table *ngIf="data?.id" [idFeeMain]="data?.id"></acc-fees-schedules-table>
+  </div>
+  <h3 style="color:rgb(252, 113, 113)" *ngIf="FeesMainForm.invalid"> Please check the form. Data is invalid</h3>
+</form>

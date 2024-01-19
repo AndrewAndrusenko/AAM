@@ -20,6 +20,7 @@ import { AppTableAccEntriesComponent } from '../acc-entries-table.component/acc-
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { AppAccountingService } from 'src/app/services/accounting.service';
 import { FeesTransactions } from 'src/app/models/fees-intefaces.model';
+import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 @Component({
   selector: 'acc-fees-performance-processing-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -76,7 +77,6 @@ export class AppaIAccFeesPerformanceProcessingTableComponent {
   statusDetailsHeader:string='';
   dialogShowEntriesList: MatDialogRef<AppTableAccEntriesComponent>;
   firstForAccountingDate: Date;
-
   constructor(
     private AuthServiceS:AuthService,  
     private InvestmentDataService:AppInvestmentDataServiceService, 
@@ -84,15 +84,14 @@ export class AppaIAccFeesPerformanceProcessingTableComponent {
     private HandlingCommonTasksS:HandlingCommonTasksService,
     private CommonDialogsService:HadlingCommonDialogsService,
     private AppFeesHandlingService:AppFeesHandlingService,
-    private indexDBServiceS:indexDBService,
+    private AutoCompleteService:AtuoCompleteService,
     private SelectionService:HandlingTableSelectionService,
     private fb:FormBuilder, 
     private dialog: MatDialog, 
-
   ) {
     this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
     this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
-    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
+    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToFeesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.searchParametersFG = this.fb.group ({
       p_portfolios_list: [],
@@ -107,9 +106,10 @@ export class AppaIAccFeesPerformanceProcessingTableComponent {
   }
   ngOnInit(): void {
     this.AppFeesHandlingService.getProfitTax(new Date().toDateString()).subscribe(data=>this.profitTaxRate=data[0].rate)
-    this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios').then ((data)=>{
-      this.mp_strategies_list = data['data']
-    })
+    this.AutoCompleteService.getModelPotfoliosList();
+    this.subscriptions.add(
+      this.AutoCompleteService.getSecIdListReady().subscribe(data=>this.mp_strategies_list=data)
+    )
     this.multiFilter = (data: FeesTransactions, filter: string) => {
       let filter_array = filter.split(',').map(el=>[el,1]);
       this.columnsToDisplay.forEach(col=>filter_array.forEach(fil=>{
@@ -159,7 +159,6 @@ export class AppaIAccFeesPerformanceProcessingTableComponent {
       tap(ports=>searchObj.p_portfolios_list = ports.map(el=>el.toUpperCase())),
       switchMap(()=>this.AppFeesHandlingService.getFeesPerformanceTransactions(searchObj))
     ).subscribe(data => {
-      console.log('data',data);
       this.updateDataTable(data)
       showSnackResult? this.CommonDialogsService.snackResultHandler({
         name:data['name'], 

@@ -1,0 +1,100 @@
+<ng-container *ngIf="accessState!=='none'" >
+  <mat-form-field style="width: 20%;"class = "filterField"  title="Filter All columns">
+    <mat-label class="whiteTextFilter">Search (all columns)...</mat-label>
+    <input 
+      (keyup)="applyFilter($event)"
+      matInput type="text" #filterALL
+      matTooltip="Use context menu to add filter"     >
+    <button matSuffix 
+      mat-icon-button aria-label="Clear" 
+      (click)="clearFilter(filterALL)">
+      <mat-icon>close</mat-icon>
+    </button>
+  </mat-form-field>
+  <button color = "accent" mat-raised-button title="Export To Excel"
+    style=" margin-left:1%; font-size: 18px;"
+    (click)="exportToExcel()">
+    Save as XLS 
+    <mat-icon matSuffix >save_alt</mat-icon>
+  </button>
+  <button color = "accent" mat-raised-button title="Reload Table"
+    style=" margin-left:1%; font-size: 18px;"
+    (click)="submitQuery()">
+    Reload 
+    <mat-icon matSuffix >refresh</mat-icon>
+  </button>
+  <button color = "accent" mat-raised-button [disabled]="disabledControlElements"
+    style=" margin-left:1%; font-size: 18px;"
+    matTooltip="Create Schedule"
+    (click)="openFeeModifyForm('Create',null)">
+    Create item 
+    <mat-icon matSuffix >add_circle</mat-icon>
+  </button>
+  <!-- complexSearch Form -->
+ <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort
+   class="mat-elevation-z8" 
+    class ="childTable" style="width: 100%;" >
+    <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i=index" justify="right"  >
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> {{columnsHeaderToDisplay[i]}}</th>
+      <td 
+        mat-cell *matCellDef="let element" [cdkContextMenuTriggerFor]="instrumentcontextmenu" >
+        <span [ngSwitch]="true==true">
+          <p *ngSwitchCase="['idfee_scedule'].includes(column)">
+            <button mat-stroked-button style=" font-size: 18px; margin-top: 5%;"  
+            class="navigate-button"  matTooltip="Edit Schedule"
+            (click)=" openFeeModifyForm (disabledControlElements? 'View': 'Edit',element)">
+              {{element[column] }}
+            </button> 
+          </p>
+          <p *ngSwitchDefault>{{element[column]!=='null'? element[column]:''}}</p>
+          <p *ngSwitchCase="['highwatermark'].includes(column)">
+          <mat-checkbox [checked]="(element['highwatermark'])" [disabled]="true">HWM </mat-checkbox>
+         </p>
+          <p *ngSwitchCase="['feevalue'].includes(column)&&element['column']!==null">
+            {{element['fee_type_value']===1? element[column] + '%':element[column] + ''}}  </p>
+          <p  *ngSwitchCase="['action'].includes(column) " >
+            <button  *ngIf="disabledControlElements" mat-icon-button color="accent"
+              matTooltip="View Schedule"
+              (click)="openFeeModifyForm('View', element)">
+              <mat-icon >pageview</mat-icon>
+            </button>
+            <ng-container  *ngIf="!disabledControlElements">
+              <button mat-icon-button color="accent"
+                matTooltip="Edit Schedule"
+                (click)="openFeeModifyForm('Edit',element)">
+                <mat-icon >edit</mat-icon>
+              </button>
+              <button mat-icon-button color="accent"
+                matTooltip="Copy Schedule"
+                (click)="openFeeModifyForm('Create_Example',element)">
+                <mat-icon >file_copy</mat-icon>
+              </button>
+              <button 
+                mat-icon-button 
+                color="accent" 
+                matTooltip="Delete Schedule"
+                (click)="openFeeModifyForm('Delete',element)">
+                <mat-icon >delete</mat-icon>
+              </button>
+            </ng-container>
+          </p>
+        </span>
+        <ng-template  #instrumentcontextmenu>
+          <div class="tree-menu-context" cdkMenu >
+            <button 
+            (click)="updateFilter(element[column])"
+            class="tree-menu-item" cdkMenuItem>
+            <mat-icon class="menu-icon" matPrefix>filter_list</mat-icon> 
+            Add to filter
+          </button> 
+          </div>
+        </ng-template>  
+      </td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+    <tr mat-row  *matRowDef="let element; columns: columnsToDisplay; let dataindex=dataIndex;"
+      tabindex=0   >
+    </tr>
+  </table>
+  <mat-paginator ></mat-paginator>
+</ng-container>

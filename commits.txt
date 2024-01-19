@@ -217,7 +217,7 @@ we get closest market price for every position
 4|| Performance Fees Accounting => Created accounting schemes to process perfomance fees
 5|| UI & ML Ledger Accounts Form => exposed dateOpening field for editing. All relevant validation has been applied 
 --------------------------------------------------------------------------------------------
-14/12/2024 - 15/12/2024
+14/1/2024 - 15/1/2024
 1|| Done: Check managemnt fee calculation when rate has been changed during period
 2|| * Fix - Null NPV for current date from f_npv_dynamic
   Fixed - historical period for exchange rates has been increased upto 60 days
@@ -231,6 +231,19 @@ we get closest market price for every position
   Created trigger which prevent creating new calculation before the date of the last calculation
 6|| Hrudle rate implementation => Draft
 --------------------------------------------------------------------------------------------
+16/01/2024 - 19/01/2024
+1|| UI & DB Fees Dictionary Table => 
+  Created table of fees with child tabele of schedules
+2|| Created service to notify child schedule table that it was opened and to retrieve data if its nessesary. Thus schedules are requested from DB only if user is interested in them and  DB workload has been Reduced
+3|| AutoCompleteService - ModelPortfolios Pipe => 
+  ModelPortfolios pipe with exhaustMap has been added in order to avoid multiple request to DB for the same ModelPortfolios autocomplete list
+  Service functions using subject-observable pattern have been created to provide subscribers with requested list when it is ready
+4|| UI & DB Forms for FeeMainData and FeeSchedulesData =>
+  Two forms have been created to provide UI for updating fees dictionary data (schedules and main data)
+  Middleware functions and services have been added to modify fees data
+  In order to avoid unnecessary workload to DB data returned modified data have been used to update Tables DataSource respectivly  
+5|| Fixing
+
 
 || Hurdle Performance fee and Cash In/Outs -??? How to correct start and end NVP?
 || FIFO detailed reporting

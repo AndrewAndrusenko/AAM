@@ -13,9 +13,7 @@ import {HandlingCommonTasksService } from 'src/app/services/handling-common-task
 import {AuthService } from 'src/app/services/auth.service';
 import {AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import {AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
-import {HostListener } from '@angular/core';
 import {indexDBService } from 'src/app/services/indexDB.service';
-import {TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import {MatCheckbox } from '@angular/material/checkbox';
 @Component({
   selector: 'app-inv-portfolio-position-table',
