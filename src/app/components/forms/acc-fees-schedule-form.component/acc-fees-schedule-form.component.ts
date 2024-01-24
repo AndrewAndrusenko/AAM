@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { filter, switchMap } from 'rxjs';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
-import { FeesSchedulesData } from 'src/app/models/fees-intefaces.model';
+import { FeesSchedulesData } from 'src/app/models/fees-interfaces.model';
 import { AppFeesHandlingService } from 'src/app/services/fees-handling.service';
 
 @Component({
@@ -68,6 +68,7 @@ export class AppAccFeesScheduleFormComponent {
     })
   }
   ngOnInit(): void {
+    this.action==='View'? this.FeesSchedulesForm.disable():null;
     this.FeesSchedulesForm.patchValue(this.data);
     if (this.action!=='Create') {
       this.schedule_range_min.patchValue(this.schedule_range.value.split(',')[0].slice(1) )

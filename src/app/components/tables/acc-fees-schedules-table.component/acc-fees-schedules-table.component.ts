@@ -1,15 +1,15 @@
 import {Component, ViewChild, Input, ChangeDetectionStrategy, ElementRef} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
-import {Subscription, filter,} from 'rxjs';
+import {Subscription, filter, tap,} from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
-import {tableHeaders } from 'src/app/models/intefaces.model';
+import {tableHeaders } from 'src/app/models/interfaces.model';
 import {formatNumber } from '@angular/common';
 import {HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import {HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import {AuthService } from 'src/app/services/auth.service';
 import {AppFeesHandlingService } from 'src/app/services/fees-handling.service';
-import {FeesSchedulesData } from 'src/app/models/fees-intefaces.model';
+import {FeesSchedulesData } from 'src/app/models/fees-interfaces.model';
 import {AppAccFeesScheduleFormComponent } from '../../forms/acc-fees-schedule-form.component/acc-fees-schedule-form.component';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 @Component({
@@ -19,7 +19,6 @@ import {MatDialog, MatDialogRef} from '@angular/material/dialog';
   styleUrls: ['./acc-fees-schedules-table.component.scss'],
 })
 export class AppaIAccFeesSchedulesTable {
-
   accessState: string = 'none';
   disabledControlElements: boolean = false;
   private subscriptions = new Subscription()
@@ -83,18 +82,16 @@ export class AppaIAccFeesSchedulesTable {
     private CommonDialogsService:HadlingCommonDialogsService,
     private AppFeesHandlingService:AppFeesHandlingService,
     private dialog: MatDialog,
-
   ) {
     this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
     this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToFeesData')[0].elementvalue;
-    this.disabledControlElements = this.accessState === 'full'? false : true;
   }
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }
   ngOnInit(): void {
-    // this.submitQuery(false,false);  
+    this.disabledControlElements = this.accessState === 'full'&&this.readOnly===false? false : true;
     this.multiFilter = (data: FeesSchedulesData, filter: string) => {
       let filter_array = filter.split(',').map(el=>[el,1]);
       this.columnsToDisplay.forEach(col=>filter_array.forEach(fil=>{
@@ -105,8 +102,8 @@ export class AppaIAccFeesSchedulesTable {
     };
     this.subscriptions.add(this.AppFeesHandlingService.getFeeShedulessDataReload().pipe(
       filter(data=>Number(data.data[0].id_fee_main)===this.idFeeMain)
-    ).subscribe((data)=>this.updateDataSource(data)));
-    this.subscriptions.add(this.AppFeesHandlingService.getFeeSheduleIsOpened().pipe(
+      ).subscribe((data)=>this.updateDataSource(data)));
+      this.subscriptions.add(this.AppFeesHandlingService.getFeeSheduleIsOpened().pipe(
       filter(id=>id===this.idFeeMain&&this.dataSource===undefined)
     ).subscribe(()=>this.submitQuery(false,false)));
   }
@@ -133,8 +130,8 @@ export class AppaIAccFeesSchedulesTable {
    this.dataSource.paginator = this.paginator;
    this.dataSource.sort = this.sort;
   }
-  submitQuery ( reset:boolean=false, showSnackResult:boolean=true) {
-    this.AppFeesHandlingService.getFeesSchedulesData(this.idFeeMain).subscribe(data => {
+  submitQuery (reset:boolean=false, showSnackResult:boolean=true) {
+    this.AppFeesHandlingService.getFeesSchedulesData(Number(this.idFeeMain)).subscribe(data => {
       this.updateDataTable(data)
       showSnackResult? this.CommonDialogsService.snackResultHandler({
         name:data['name'], 
@@ -166,23 +163,29 @@ export class AppaIAccFeesSchedulesTable {
     this.dataSource.filter = ''
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
   }
-
-  // getTotals (col:string) {
-  //   return (this.dataSource&&this.dataSource.data)?  this.dataSource.filteredData.map(el => el[col]).reduce((acc, value) => acc + Number(value), 0):0;
-  // }
   exportToExcel() {
     let dataTypes =  {
-      report_date : 'Date',
-      id_portfolio : 'number',
-      management_fee_amount : 'number',
-      npv : 'number',
-      calculation_start : 'Date',
-      calculation_end : 'Date',
-      period_start : 'Date',
-      period_end : 'Date',
-      feevalue : 'number',
-      fee_type_value  :'number',
-      id_fee_transaction:'number'
+      id :'number',
+      id_object :'number',
+      fee_object_type:'number',
+      fee_amount:'number', 
+      fee_date:'Date', 
+      calculation_date :'Date', 
+      b_transaction_date :'Date', 
+      id_b_entry:'number', 
+      fee_rate:'number', 
+      calculation_base:'number', 
+      id_fee_main:'number', 
+      fee_type:'number',
+      idfee_scedule :'number', 
+      fee_type_value :'number',
+      feevalue :'number',
+      calculation_period :'number', 
+      deduction_period :'number',
+      range_parameter:'string', 
+      below_ranges_calc_type:'number', 
+      pf_hurdle:'number',
+      highwatermark:'boolean'
     }
     let dataToExport =  structuredClone(this.fullDataSource);
     dataToExport.map(el=>{
@@ -195,6 +198,6 @@ export class AppaIAccFeesSchedulesTable {
       })
       return el;
     });
-    this.HandlingCommonTasksS.exportToExcel (dataToExport,"managementFeeData");  
+    this.HandlingCommonTasksS.exportToExcel (dataToExport,"FeeScheduleData");  
   }
 }

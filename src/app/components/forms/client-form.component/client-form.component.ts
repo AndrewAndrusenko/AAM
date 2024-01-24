@@ -7,7 +7,7 @@ import { customAsyncValidators } from 'src/app/services/customAsyncValidators.se
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
 import { AuthService } from 'src/app/services/auth.service';
-import { ClientData } from 'src/app/models/intefaces.model';
+import { ClientData } from 'src/app/models/interfaces.model';
 import { distinctUntilChanged, distinctUntilKeyChanged, filter, switchMap, tap } from 'rxjs';
 @Component({
   selector: 'app-app-client-form',

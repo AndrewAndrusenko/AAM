@@ -1,0 +1,97 @@
+<mat-toolbar color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4">
+  <span>{{action}} Fee Schedule ID {{id?.value}}</span>
+  <span class="example-spacer"></span>
+</mat-toolbar>
+<mat-checkbox style= "font-size: 14px; color:rgb(255, 255, 255); padding: 1%;" #submitbox checked="false" 
+  (click)=" FeesPortfolioForm.markAllAsTouched();
+  FeesPortfolioForm.markAllAsTouched();"
+  >Submit Data
+</mat-checkbox>
+<button mat-raised-button color="primary" 
+  [disabled]="!(FeesPortfolioForm.valid && submitbox.checked)"
+  (click)="updateInstrumentData(action)"
+  style="margin-top: 1px; width: 20%; font-size: large; margin-left: 1%;">
+  {{action}} Fee Schedule 
+</button>
+<form class="submit" [formGroup]="FeesPortfolioForm">
+  <h3 style="color:rgb(177, 174, 174)" *ngIf="FeesPortfolioForm.valid"> 
+    To save data please select 'Submit data' check and then press button 
+  </h3>
+  <mat-form-field style="width: 10%;" title="Portfolio">
+    <input matInput placeholder="Portfolio" formControlName="portfolioname" [readonly]="true" >
+  </mat-form-field>
+  <mat-form-field  style="width: 26%;" title="Fee Code">
+    <mat-label>Fee Code</mat-label>
+    <mat-select  #actionT formControlName="id_fee_main"  (valueChange)="idFeeMainChange($event)"> 
+      <ng-container *ngFor="let feeCode of feeCodes">
+      <mat-option  [value]="feeCode.value">{{feeCode.name}}</mat-option>
+    </ng-container>
+    </mat-select>
+    <mat-error  *ngIf="fee_code.errors?.['required']">
+      Required!    
+    </mat-error>
+  </mat-form-field>
+  <mat-form-field style="width: 15%;" title="Fee Type">
+    <input matInput 
+    placeholder="Fee Type"
+    formControlName="fee_type_desc"
+    [value]="feesTypesCodes[fee_type.value]" 
+    [readonly]="true" >
+  </mat-form-field>
+  <p>
+  <mat-form-field  style="width: 12%;" >
+    <input matInput  [matDatepicker]="pickerStart" placeholder="Start date"  formControlName="period_start"  >
+    <mat-datepicker-toggle matSuffix [for]="pickerStart"></mat-datepicker-toggle>
+    <mat-datepicker #pickerStart></mat-datepicker>
+    <mat-error *ngIf="period_start.errors?.['required']">
+      Required!
+    </mat-error>
+  </mat-form-field>
+  <mat-form-field  style="width: 12%;" >
+    <input matInput  [matDatepicker]="pickerEnd" placeholder="End a date"  formControlName="period_end"  >
+    <mat-datepicker-toggle matSuffix [for]="pickerEnd"></mat-datepicker-toggle>
+    <mat-datepicker #pickerEnd></mat-datepicker>
+    <mat-error *ngIf="period_start.errors?.['required']">
+      Required!
+    </mat-error>
+  </mat-form-field>
+  <mat-form-field style="width: 70%;" title="Fee Description">
+    <input matInput formControlName="fee_description"placeholder="Fee Description" [readonly]="true" >
+  </mat-form-field>
+</p>
+<div>
+  <acc-fees-schedules-table 
+    #schedulesPort *ngIf="id_fee_main.value"
+    [readOnly]="true"
+    [idFeeMain]="id_fee_main.value">
+  </acc-fees-schedules-table>
+</div>
+<!--   <mat-form-field  style="width: 17%;" >
+    <input matInput [min]="FirstOpenedAccountingDate" [matDatepicker]="picker" placeholder="Choose a date"  formControlName="t_dataTime" 
+    (dateChange)="showAValidator();">
+    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-datepicker #picker></mat-datepicker>
+    <mat-error *ngIf="setupDone&&ledgerNo?.errors?.['required']">
+      Required!
+    </mat-error>
+  </mat-form-field> -->
+<!--   <mat-form-field  style="width: 16%;" title="Object Type">
+    <mat-label>Object Type</mat-label>
+    <mat-select   formControlName="fee_object_type"  > 
+      <mat-option  [value]="1">Portfolio</mat-option>
+      <mat-option  [value]="2">Account</mat-option>
+    </mat-select>
+    <mat-error  *ngIf="fee_object_type.errors?.['required']">
+      Required!    
+    </mat-error>
+  </mat-form-field>
+  <mat-form-field style="width: 70%" title="Description">
+    <input matInput placeholder="Description" formControlName="fee_description"  >
+    <mat-error  *ngIf="fee_description.errors?.['required']">
+      Required!    
+    </mat-error>
+  </mat-form-field> -->
+  <br>
+
+  <h3 style="color:rgb(252, 113, 113)" *ngIf="FeesPortfolioForm.invalid"> Please check the form. Data is invalid</h3>
+</form>

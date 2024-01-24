@@ -8,74 +8,78 @@ import { HandlingCommonTasksService } from 'src/app/services/handling-common-tas
 import { formatNumber } from '@angular/common';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { AppFeesHandlingService } from 'src/app/services/fees-handling.service';
-import { FeesMainData } from 'src/app/models/fees-interfaces.model';
-import { AppAccountingService } from 'src/app/services/accounting.service';
-import { Subscription } from 'rxjs';
+import { FeesPortfoliosWithSchedulesData } from 'src/app/models/fees-interfaces.model';
+import { Subscription, filter } from 'rxjs';
 import { tableHeaders } from 'src/app/models/interfaces.model';
-import { AppAccFeesMainFormComponent } from '../../forms/acc-fees-main-form.component/acc-fees-main-form.component';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { AppAccFeesPortfolioScheduleFormComponent } from '../../forms/acc-fees-portfolio-schedule-form.component/acc-fees-portfolio-schedule-form.component';
 @Component({
-  selector: 'acc-fees-main-table',
-  templateUrl: './acc-fees-main-table.component.html',
-  styleUrls: ['./acc-fees-main-table.component.scss'],
+  selector: 'acc-fees-portfolios-with-schedules-table',
+  templateUrl: './acc-fees-portfolios-with-schedules-table.component.html',
+  styleUrls: ['./acc-fees-portfolios-with-schedules-table.component.scss'],
   animations: [
-    trigger('detailExpand',
-    [   state('collapsed, void', style({ height: '0px'})),
-        state('expanded', style({ height: '*' })),
-        transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
-        transition('expanded <=> void', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)'))
+    trigger('detailFeeExpand', [
+      state('collapsed', style({height: '0px', minHeight: '0'})),
+      state('expanded', style({height: '*'})),
+      transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
     ]),
   ],
 })
-export class AppAccFeesSchedulesTableComponent  {
+export class AppAccFeesPortfoliosWithSchedulesTableComponent  {
   accessState: string = 'none';
   disabledControlElements: boolean = false;
   private subscriptions = new Subscription()
   @Input() readOnly:boolean = false;
+  @Input() id_portfolio:number = null;
   columnsWithHeaders: tableHeaders[] = [
-      {
-        'fieldName': 'id',
-        'displayName': 'ID'
-      },
-      {
-        'fieldName': 'fee_code',
-        'displayName': 'Code_ID'
-      },
-      {
-        'fieldName': 'fee_type_desc',
-        'displayName': 'Type'
-      },
-      {
-        'fieldName': 'fee_object_desc',
-        'displayName': 'Fee_Object'
-      },
-      {
-        'fieldName': 'fee_description',
-        'displayName': 'Description'
-      },
-      {
-        'fieldName': 'fee_type',
-        'displayName': 'Type_ID'
-      },
-      {
-        'fieldName': 'action',
-        'displayName': 'Action'
-      }
-  ];
+    {
+      'fieldName': 'id',
+      'displayName': 'ID'
+    },
+    {
+      'fieldName': 'fee_code',
+      'displayName': 'Code_ID'
+    },
+    {
+      'fieldName': 'fee_type_desc',
+      'displayName': 'Type'
+    },
+    {
+      'fieldName': 'fee_object_desc',
+      'displayName': 'Fee_Object'
+    },
+    {
+      'fieldName': 'fee_description',
+      'displayName': 'Description'
+    },
+    {
+      'fieldName': 'period_start',
+      'displayName': 'Begins'
+    },
+    {
+      'fieldName': 'period_end',
+      'displayName': 'Ends'
+    },
+    {
+      'fieldName': 'action',
+      'displayName': 'Action'
+    },
+];
   columnsToDisplay: string [];
   columnsHeaderToDisplay: string [];
   columnsToDisplayWithExpand = [];
-  expandedElement: FeesMainData  | null;
+  expandedElement: FeesPortfoliosWithSchedulesData  | null;
   expandAllowed: boolean = true;
-  dataSource: MatTableDataSource<FeesMainData>;
-  fullDataSource: FeesMainData[];
+  dataSource: MatTableDataSource<FeesPortfoliosWithSchedulesData>;
+  fullDataSource: FeesPortfoliosWithSchedulesData[];
   @ViewChild('filterALL', { static: false }) filterALL: ElementRef;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
   multiFilter?: (data: any, filter: string) => boolean;
-  refFeeForm : MatDialogRef<AppAccFeesMainFormComponent>
-  feesCodes = ['','Management Fee', 'Performance Fee']
-  objectCodes = ['','Portfolio', 'Account']
+  refFeeForm : MatDialogRef<AppAccFeesPortfolioScheduleFormComponent>
+  feesCodes = this.AppFeesHandlingService.feesCodes;
+  objectCodes = this.AppFeesHandlingService.objectCodes;
+  feeMainCodes: {value:string,name:string, desc:string,feeType:string}[];
   constructor(
     private AuthServiceS:AuthService,  
     private HandlingCommonTasksS:HandlingCommonTasksService,
@@ -83,74 +87,62 @@ export class AppAccFeesSchedulesTableComponent  {
     private AppFeesHandlingService:AppFeesHandlingService,
     private dialog: MatDialog,
   ) 
-    {
-      this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
+    { this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
       this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
       this.columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
       this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToFeesData')[0].elementvalue;
       this.disabledControlElements = this.accessState === 'full'? false : true;
-      this.submitQuery(false,false)
     }
     ngOnDestroy(): void {
       this.subscriptions.unsubscribe();
     }
     ngOnInit(): void {
-      this.multiFilter = (data: FeesMainData, filter: string) => {
+      this.multiFilter = (data: FeesPortfoliosWithSchedulesData, filter: string) => {
         let filter_array = filter.split(',').map(el=>[el,1]);
         this.columnsToDisplay.forEach(col=>filter_array.forEach(fil=>{
           data[col]&&fil[0].toString().toUpperCase()===(data[col]).toString().toUpperCase()? fil[1]=0:null
         }));
         return !filter || filter_array.reduce((acc,val)=>acc+Number(val[1]),0)===0;
       };
-      this.subscriptions.add(this.AppFeesHandlingService.getFeesMainDataReload()
-      .subscribe((data)=>this.updateDataSource(data)));
+      this.subscriptions.add(this.AppFeesHandlingService.recieveFeesPortfoliosWithSchedulesIsOpened().pipe(
+        filter(id=>id===this.id_portfolio&&this.dataSource===undefined)
+      ).subscribe(()=>{
+        this.submitQuery(false,false);
+        this.AppFeesHandlingService.getFeesMainData().subscribe(data=>{
+          this.feeMainCodes = data.map(el=>{return {value:el.id.toString(),name:el.fee_code.toString(),desc: el.fee_description,feeType:el.fee_type_desc}})
+        })
+      }));
     }
-    updateDataSource (newData:{data:FeesMainData[],action:string}) {
-      newData.data[0].fee_type_desc = this.feesCodes[(newData.data[0].fee_type)]
-      newData.data[0].fee_object_desc = this.objectCodes[newData.data[0].fee_object_type]
-      let index =  this.dataSource.data.findIndex(elem=>elem.id===newData.data[0].id)
-      switch (newData.action) {
-        case 'Deleted':
-          this.dataSource.data.splice(index,1)
-        break;
-        case 'Created':
-          this.dataSource.data.unshift(newData.data[0])
-        break;
-        case 'Updated':
-          this.dataSource.data[index] = {...newData.data[0]}
-        break;
-      }
-     this.dataSource.paginator = this.paginator;
-     this.dataSource.sort = this.sort;
-    }
-    updateDataTable (managementFeeData:FeesMainData[]) {
+    updateDataTable (managementFeeData:FeesPortfoliosWithSchedulesData[]) {
       this.fullDataSource=managementFeeData;
       this.dataSource  = new MatTableDataSource(managementFeeData);
       this.dataSource.filterPredicate =this.multiFilter
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
     }
-    submitQuery ( reset:boolean=false, showSnackResult:boolean=true) {
-     this.AppFeesHandlingService.getFeesMainData().subscribe(data => {
+    submitQuery (reset:boolean=false, showSnackResult:boolean=true) {
+     this.AppFeesHandlingService.getFeesPortfoliosWithSchedulesData(this.id_portfolio).subscribe(data => {
         this.updateDataTable(data)
         showSnackResult? this.CommonDialogsService.snackResultHandler({
           name:data['name'], 
           detail:data['name'] === 'error'? data['detail'] :  formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ') : null;
       });
     }
-    openFeeModifyForm (action:string, element:FeesMainData) { 
+    openPortolioFeesModifyForm (action:string, element:FeesPortfoliosWithSchedulesData) { 
+      this.expandAllowed=false;
       action==='Create_Example'? element.id=null:null;
-      this.refFeeForm = this.dialog.open (AppAccFeesMainFormComponent,{minHeight:'30vh', width:'70vw', autoFocus: false, maxHeight: '90vh'})
+      this.refFeeForm = this.dialog.open (AppAccFeesPortfolioScheduleFormComponent,{minHeight:'30vh', width:'70vw', autoFocus: false, maxHeight: '90vh'})
       this.refFeeForm.componentInstance.action=action;
       this.refFeeForm.componentInstance.data=element;
+      this.refFeeForm.componentInstance.feeCodes=this.feeMainCodes;
       this.refFeeForm.componentInstance.modal_principal_parent.subscribe(success => {
         success? this.refFeeForm.close():null;
       })
     }
-    showSchedules(element:FeesMainData) {
+    showSchedules(element:FeesPortfoliosWithSchedulesData) {
       if (this.expandAllowed) {
         this.expandedElement = this.expandedElement === element ? null : element;
-        this.AppFeesHandlingService.sendFeeSheduleIsOpened(element.id)
+        this.AppFeesHandlingService.sendFeeSheduleIsOpened(element.id_fee)
       }
       else {this.expandAllowed=true}
     }

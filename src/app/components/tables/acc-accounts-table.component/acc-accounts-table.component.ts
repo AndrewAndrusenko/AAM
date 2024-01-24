@@ -4,7 +4,7 @@ import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { bAccounts } from 'src/app/models/intefaces.model';
+import { bAccounts } from 'src/app/models/interfaces.model';
 import { AppAccountingService } from 'src/app/services/accounting.service';
 import { AppAccAccountModifyFormComponent } from '../../forms/acc-account-form.component/acc-account-form.component';
 import { SelectionModel } from '@angular/cdk/collections';

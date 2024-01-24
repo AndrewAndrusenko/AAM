@@ -1,5 +1,25 @@
-import { number } from "echarts"
-
+export type FeesMainWithSchedules = FeesMainData|FeesSchedulesData
+export interface FeesPortfoliosWithSchedulesData extends FeesMainData {
+  id_fee:number,
+  main_fee_object_type :number,
+  object_id:number,
+  id_fee_main :number,
+  period_start:Date,
+  period_end:Date, 
+  created:Date, 
+  modified:Date,
+  action:number,
+  portfolioname:string
+}
+export interface dFeesObject {
+  id :number, 
+  object_id :number, 
+  id_fee_main :number, 
+  period_start :Date, 
+  period_end :Date, 
+  created :Date,
+  modified :Date
+}
 export interface FeesMainData {
   id :number,
   fee_code:number,

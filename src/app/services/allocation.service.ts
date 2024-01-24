@@ -6,7 +6,7 @@ import { AppallocationTableComponent } from '../components/tables/allocation-tab
 import { Observable, Subject,  filter, firstValueFrom, forkJoin, map,  switchMap, tap } from 'rxjs';
 import { AbstractControl } from '@angular/forms';
 import { AppOrderTableComponent } from '../components/tables/orders-table.component/orders-table.component';
-import { allocation } from '../models/intefaces.model';
+import { allocation } from '../models/interfaces.model';
 import { AccountingTradesService } from './accounting-trades.service';
 import { error } from 'jquery';
 

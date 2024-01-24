@@ -220,6 +220,7 @@ appServer.post('/AAM/modifyRatesData/',jsPassport.authenticate('session'), uiAmm
 /*----------------------FeesData----------------------------------------------------*/
 appServer.get('/AAM/getFeesData/',jsPassport.authenticate('session'), uiAmmFeesData.geFeesData)
 appServer.post('/AAM/updateFeesData/',jsPassport.authenticate('session'), uiAmmFeesData.fupdateFeesData)
+appServer.post('/AAM/updatePortfoliosFeesData/',jsPassport.authenticate('session'), uiAmmFeesData.fupdatePortfoliosFeesData)
 appServer.post('/AAM/updateFeesScheduleData/',jsPassport.authenticate('session'), uiAmmFeesData.fupdateFeesScheduleData)
 appServer.post('/AAM/updateFeesEntryInfo/',jsPassport.authenticate('session'), uiAmmFeesData.fupdateFeesEntryInfo)
 

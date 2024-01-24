@@ -1,7 +1,7 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { AppMarketDataService } from 'src/app/services/market-data.service';
 import { AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
-import { PortfolioPerformnceData, RevenueFactorData } from 'src/app/models/intefaces.model';
+import { PortfolioPerformnceData, RevenueFactorData } from 'src/app/models/interfaces.model';
 import { MatSelect } from '@angular/material/select';
 import { number } from 'echarts';
 @Component({

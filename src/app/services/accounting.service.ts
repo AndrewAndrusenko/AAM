@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, ReplaySubject, Subject, filter, firstValueFrom, forkJoin, map, of, switchMap} from 'rxjs';
-import { allocation_fifo, bAccounts, bAccountsEntriesList, bAccountTransaction, bBalanceData, bBalanceFullData, bcAccountType_Ext, bcEnityType, bcTransactionType_Ext, bLedger, bLedgerAccounts, bLedgerBalanceData, bLedgerTransaction, SWIFTSGlobalListmodel, SWIFTStatement950model } from '../models/intefaces.model';
+import { allocation_fifo, bAccounts, bAccountsEntriesList, bAccountTransaction, bBalanceData, bBalanceFullData, bcAccountType_Ext, bcEnityType, bcTransactionType_Ext, bLedger, bLedgerAccounts, bLedgerBalanceData, bLedgerTransaction, SWIFTSGlobalListmodel, SWIFTStatement950model } from '../models/interfaces.model';
 import { HadlingCommonDialogsService } from './hadling-common-dialogs.service';
 import { BalanceDataPerPortfoliosOnDate } from '../models/accountng-intefaces.model';
 @Injectable({

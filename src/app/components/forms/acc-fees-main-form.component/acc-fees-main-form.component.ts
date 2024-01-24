@@ -1,26 +1,25 @@
-import { Component,  EventEmitter,  Input, Output } from '@angular/core';
+import { Component,  EventEmitter,  Input, Output, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import {  filter, switchMap } from 'rxjs';
+import { filter, switchMap } from 'rxjs';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
-import { FeesMainData } from 'src/app/models/fees-intefaces.model';
+import { FeesMainData } from 'src/app/models/fees-interfaces.model';
 import { AppFeesHandlingService } from 'src/app/services/fees-handling.service';
-
+import { AppaIAccFeesSchedulesTable } from '../../tables/acc-fees-schedules-table.component/acc-fees-schedules-table.component';
 @Component({
   selector: 'acc-fees-main-form',
   templateUrl: './acc-fees-main-form.component.html',
   styleUrls: ['./acc-fees-main-form.component.scss'],
 })
 export class AppAccFeesMainFormComponent {
- 
   public FeesMainForm: FormGroup;
   @Input() action: string;
   @Input() data: FeesMainData;
+  @ViewChild('schedules') tableSchedules:AppaIAccFeesSchedulesTable
   @Output() public modal_principal_parent = new EventEmitter();
   constructor (
     private fb:FormBuilder, 
     private CommonDialogsService:HadlingCommonDialogsService,
-    // private indexDBServiceS: indexDBService,
     private AppFeesHandlingService:AppFeesHandlingService,
     private AtuoCompService:AtuoCompleteService,
   ) 
@@ -39,7 +38,12 @@ export class AppAccFeesMainFormComponent {
     })
   }
   ngOnInit(): void {
+    this.action==='View'? this.FeesMainForm.disable():null;
     this.FeesMainForm.patchValue(this.data);
+  }
+  ngAfterViewInit(): void {
+    this.tableSchedules.idFeeMain = this.id.value;
+    this.tableSchedules.submitQuery(false,false);
   }
   snacksBox(result:any, action?:string){
     if (result['name']=='error') {

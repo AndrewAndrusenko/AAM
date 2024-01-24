@@ -1,6 +1,6 @@
 import { Component,  EventEmitter,  Input, Output, SimpleChanges, ViewChild,  } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { instrumentDetails } from 'src/app/models/intefaces.model';
+import { instrumentDetails } from 'src/app/models/interfaces.model';
 import { Subscription, filter, switchMap } from 'rxjs';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AppMarketDataService } from 'src/app/services/market-data.service';

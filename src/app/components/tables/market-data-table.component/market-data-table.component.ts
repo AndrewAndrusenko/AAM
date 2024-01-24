@@ -3,7 +3,7 @@ import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {map, Observable, startWith } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
-import { marketData, marketDataSources, marketSourceSegements } from 'src/app/models/intefaces.model';
+import { marketData, marketDataSources, marketSourceSegements } from 'src/app/models/interfaces.model';
 import { AppAccountingService } from 'src/app/services/accounting.service';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';

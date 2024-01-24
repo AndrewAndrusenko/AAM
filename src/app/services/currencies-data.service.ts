@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { currencyRate, currencyRateList, marketSourceSegements } from '../models/intefaces.model';
+import { currencyRate, currencyRateList, marketSourceSegements } from '../models/interfaces.model';
 import { Observable, Subject } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 

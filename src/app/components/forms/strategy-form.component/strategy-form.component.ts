@@ -8,7 +8,7 @@ import { customAsyncValidators } from 'src/app/services/customAsyncValidators.se
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AppTableStrategyComponent } from '../../tables/strategy_structure-table.component/strategy_structure-table.component';
 import { AuthService } from 'src/app/services/auth.service';
-import { AccountsTableModel, portfolioTypes } from 'src/app/models/intefaces.model';
+import { AccountsTableModel, portfolioTypes } from 'src/app/models/interfaces.model';
 import { filter, switchMap, tap } from 'rxjs';
 
 @Component({

@@ -3,7 +3,7 @@ import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {Subscription,  distinctUntilChanged,  from,  of, switchMap, tap } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
-import {tableHeaders } from 'src/app/models/intefaces.model';
+import {tableHeaders } from 'src/app/models/interfaces.model';
 import {COMMA, ENTER, G} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
 import {AbstractControl, FormBuilder,  FormGroup, FormControl } from '@angular/forms';
@@ -19,7 +19,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { AppTableAccEntriesComponent } from '../acc-entries-table.component/acc-entries-table.component';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { AppAccountingService } from 'src/app/services/accounting.service';
-import { FeesTransactions } from 'src/app/models/fees-intefaces.model';
+import { FeesTransactions } from 'src/app/models/fees-interfaces.model';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 @Component({
   selector: 'acc-fees-performance-processing-table',

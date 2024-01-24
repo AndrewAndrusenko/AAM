@@ -2,7 +2,7 @@ import { Component,  EventEmitter,  Input, OnInit, Output, SimpleChanges} from '
 import { FormBuilder, FormControl, Validators } from '@angular/forms';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { AppConfimActionComponent } from '../../common-forms/app-confim-action/app-confim-action.component';
-import { StrategiesGlobalData } from 'src/app/models/intefaces.model';
+import { StrategiesGlobalData } from 'src/app/models/interfaces.model';
 import { distinctUntilChanged, filter, map, Observable, startWith, switchMap } from 'rxjs';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';

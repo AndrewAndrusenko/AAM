@@ -4,7 +4,7 @@ import {MatSort} from '@angular/material/sort';
 import {Subject, Subscription, takeUntil } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
-import { bAccountsEntriesList, cFormValidationLog, SWIFTSGlobalListmodel } from 'src/app/models/intefaces.model';
+import { bAccountsEntriesList, cFormValidationLog, SWIFTSGlobalListmodel } from 'src/app/models/interfaces.model';
 import { AppAccountingService } from 'src/app/services/accounting.service';
 import { SelectionModel } from '@angular/cdk/collections';
 import { HandlingTableSelectionService } from 'src/app/services/handling-table-selection.service';

@@ -2,8 +2,13 @@ const db_common_api = require('./db_common_api');
 var pgp = require ('pg-promise')({capSQL:true});
 const https = require('https');
 async function fupdateFeesData (request, response) {
+  console.log('fupdateFeesData',);
   let fields = ['fee_type', 'fee_code', 'fee_description', 'id_fee_period', 'fee_object_type']
  db_common_api.fUpdateTableDB ('dfees_main',fields,'id',request, response)
+}
+async function fupdatePortfoliosFeesData (request, response) {
+  let fields = [ 'object_id', 'id_fee_main', 'period_start', 'period_end']
+ db_common_api.fUpdateTableDB ('dfees_objects',fields,'id',request, response)
 }
 async function fupdateFeesScheduleData (request, response) {
   let fields = ['fee_type_value', 'feevalue', 'calculation_period', 'deduction_period', 'schedule_range', 'range_parameter', 'id_fee_main', 'pf_hurdle', 'highwatermark'  ]
@@ -58,11 +63,17 @@ async function geFeesData (request,response) {
     }
   });
   switch (request.query.action) {
+    case 'getFeesPortfoliosWithSchedulesData':
+      sql='SELECT *,0 as action FROM f_f_get_portfolios_with_schedules(${p_object_id})'
+    break;
     case 'getFeesMainData':
       sql=`SELECT *,0 as action FROM v_f_dfees_main`
     break;
+    case 'getFeesMainWithSchedulesData':
+      sql=`SELECT * FROM v_f_dfees_main_with_schedules`
+    break;
     case 'getFeesSchedulesData':
-      sql='SELECT *,0 as action FROM public.dfees_schedules WHERE id_fee_main = ${id_fee} ORDER BY idfee_scedule;'
+      sql='SELECT *,0 as action FROM public.dfees_schedules WHERE id_fee_main = ${id_fee:raw} ORDER BY idfee_scedule;'
     break;
     case 'getPerformanceFeeCalcData':
       sql=`
@@ -187,6 +198,7 @@ async function geFeesData (request,response) {
     break;
   }
   sql = pgp.as.format(sql,request.query);
+  sql = sql.replaceAll("'null'",null);
   db_common_api.queryExecute(sql,response,undefined,request.query.action);
 
 }
@@ -195,5 +207,6 @@ module.exports = {
   fupdateFeesData,
   fupdateFeesScheduleData,
   fupdateFeesEntryInfo,
+  fupdatePortfoliosFeesData,
   fgetTaxes
 }

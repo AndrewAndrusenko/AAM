@@ -185,7 +185,9 @@ const appInitializerFn = (accessRestirictions:AuthService) => {
         AppAccFeesSchedulesTableComponent,
         AppaIAccFeesSchedulesTable,
         AppAccFeesMainFormComponent,
-        AppAccFeesScheduleFormComponent
+        AppAccFeesScheduleFormComponent,
+        AppAccFeesPortfoliosWithSchedulesTableComponent,
+        AppAccFeesPortfolioScheduleFormComponent
      ],
     bootstrap: [AppComponent],
     providers: [ 
@@ -201,7 +203,7 @@ const appInitializerFn = (accessRestirictions:AuthService) => {
     ],
 
 })
-export class AppModule { }import { indexDbConfigAAM } from './models/intefaces.model';
+export class AppModule { }import { indexDbConfigAAM } from './models/interfaces.model';
 import { RouteReuseStrategy } from '@angular/router';
 import { MaltsevRouteReuseStrategy } from './services/reuse-strategy.service';
 import { InstrumentTabComponent } from './components/main-page/tabs/instrument-tab/instrument-tab.component';
@@ -233,5 +235,7 @@ import { AppAccFeesSchedulesTableComponent } from './components/tables/acc-fees-
 import { AppaIAccFeesSchedulesTable } from './components/tables/acc-fees-schedules-table.component/acc-fees-schedules-table.component';
 import { AppAccFeesMainFormComponent } from './components/forms/acc-fees-main-form.component/acc-fees-main-form.component';
 import { AppAccFeesScheduleFormComponent } from './components/forms/acc-fees-schedule-form.component/acc-fees-schedule-form.component';
+import { AppAccFeesPortfoliosWithSchedulesTableComponent } from './components/tables/acc-fees-portfolios-with-schedules-table.component/acc-fees-portfolios-with-schedules-table.component';
+import { AppAccFeesPortfolioScheduleFormComponent } from './components/forms/acc-fees-portfolio-schedule-form.component/acc-fees-portfolio-schedule-form.component';
 
 

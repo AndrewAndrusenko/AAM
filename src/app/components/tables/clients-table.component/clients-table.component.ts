@@ -3,7 +3,7 @@ import { MatDialog as MatDialog, MatDialogRef as MatDialogRef} from '@angular/ma
 import { AppClientFormComponent } from '../../forms/client-form.component/client-form.component';
 import { AppNewAccountComponent } from '../../forms/portfolio-form.component/portfolio-form.component';
 import { MatTableDataSource } from '@angular/material/table';
-import { ClientData } from 'src/app/models/intefaces.model';
+import { ClientData } from 'src/app/models/interfaces.model';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
@@ -21,11 +21,12 @@ import { routesTreeMenu } from 'src/app/app-routing.module';
   templateUrl: './clients-table.component.html',
   styleUrls: ['./clients-table.component.css'],
   animations: [
-    trigger('detailExpand', [
-      state('collapsed', style({height: '0px', minHeight: '0'})),
-      state('expanded', style({height: '*'})),
-      transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
-    ]),
+    trigger('detailExpand',
+    [   state('collapsed, void', style({ height: '0px'})),
+        state('expanded', style({ height: '*' })),
+        transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
+        transition('expanded <=> void', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)'))
+    ])
   ],
 })
 export class AppClientsTableComponent  {

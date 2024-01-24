@@ -1,6 +1,6 @@
 import { AfterContentInit, Component,  EventEmitter,  Input, Output, ViewChild} from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ClientData, Instruments, allocation, orders} from 'src/app/models/intefaces.model';
+import { ClientData, Instruments, allocation, orders} from 'src/app/models/interfaces.model';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { Observable, Subscription, debounceTime, distinctUntilChanged, filter, map, startWith, switchMap, tap } from 'rxjs';

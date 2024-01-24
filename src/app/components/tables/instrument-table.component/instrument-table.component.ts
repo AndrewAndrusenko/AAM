@@ -4,7 +4,7 @@ import {MatSort} from '@angular/material/sort';
 import {Observable, Subscription } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { Instruments, instrumentCorpActions, instrumentDetails, marketDataSources } from 'src/app/models/intefaces.model';
+import { Instruments, instrumentCorpActions, instrumentDetails, marketDataSources } from 'src/app/models/interfaces.model';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';

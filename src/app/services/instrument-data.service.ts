@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Observable, Subject, map, observable, of, tap } from 'rxjs';
-import { couponPeriodInfo } from '../models/intefaces.model';
+import { couponPeriodInfo } from '../models/interfaces.model';
 import { HttpClient } from '@angular/common/http';
-import { Instruments, instrumentCorpActions, instrumentDetails} from '../models/intefaces.model';
+import { Instruments, instrumentCorpActions, instrumentDetails} from '../models/interfaces.model';
 import { number } from 'echarts';
 
 interface InstrumentDataSet {

@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { allocation, orders, trades } from '../models/intefaces.model';
+import { allocation, orders, trades } from '../models/interfaces.model';
 interface tradesDataSet {
   data:trades[],
   action:string

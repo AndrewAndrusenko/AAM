@@ -5,7 +5,7 @@ import {Subscription, filter, tap } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { bAccountsEntriesList, bcTransactionType_Ext, tableHeaders } from 'src/app/models/intefaces.model';
+import { bAccountsEntriesList, bcTransactionType_Ext, tableHeaders } from 'src/app/models/interfaces.model';
 import { AppAccountingService } from 'src/app/services/accounting.service';
 import { AppAccEntryModifyFormComponent } from '../../forms/acc-entry-form.component/acc-entry-form.component';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';

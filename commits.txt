@@ -243,8 +243,16 @@ we get closest market price for every position
   Middleware functions and services have been added to modify fees data
   In order to avoid unnecessary workload to DB data returned modified data have been used to update Tables DataSource respectivly  
 5|| Fixing
+--------------------------------------------------------------------------------------------
+20/01/2024 - 23/01/2024
+1|| UI & DB Portfolios and linked fees schedules Table =>
+  Interface uses portfolio table and show as child table fees schedules linked to the selected portfolio. Child fees schedule table has its own child table which allows to get info about fee schedules ranges and etc
+2|| UI & DB Form to assign fees schedules to client portfolios and modify created data => 
+  Form allows to create/update/delete links between client portfolio and fee schedules. Form shows fee schedules ranges for the selected fee in readonly mode as reference info
+3|| Minor file names fixing
 
-
+2|| UI 
+  Created table of fees with child tabele of schedules
 || Hurdle Performance fee and Cash In/Outs -??? How to correct start and end NVP?
 || FIFO detailed reporting
 || UI for Accounting Transaction Types and option to allow/block manual editing

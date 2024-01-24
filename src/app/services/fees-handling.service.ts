@@ -2,21 +2,23 @@ import { Injectable } from '@angular/core';
 import { HadlingCommonDialogsService } from './hadling-common-dialogs.service';
 import { AppAccountingService } from './accounting.service';
 import { EMPTY, Observable, Subject, catchError, filter, forkJoin, from, map, switchMap, tap } from 'rxjs';
-import { bAccountTransaction, bLedgerTransaction } from '../models/intefaces.model';
+import { bAccountTransaction, bLedgerTransaction } from '../models/interfaces.model';
 import { AccountingTradesService } from './accounting-trades.service';
 import { HttpClient } from '@angular/common/http';
 import { formatNumber } from '@angular/common';
-import { FeesMainData, FeesSchedulesData, FeesTransactions, ManagementFeeCalcData, PerformanceFeeCalcData } from '../models/fees-intefaces.model';
+import { FeesMainData, FeesMainWithSchedules, FeesPortfoliosWithSchedulesData, FeesSchedulesData, FeesTransactions, ManagementFeeCalcData, PerformanceFeeCalcData, dFeesObject } from '../models/fees-interfaces.model';
 @Injectable({
   providedIn: 'root'
 })
 export class AppFeesHandlingService {
-
+  public feesCodes = ['','Management Fee', 'Performance Fee']
+  public objectCodes = ['','Portfolio', 'Account']
   private feesToProcess:FeesTransactions[];
   private createdAccounting$ = new Subject <{}[]>
   private feesMainDataSub$ = new Subject<{data:FeesMainData[],action:string}>
   private feesSchedulesDataSub$ = new Subject<{data:FeesSchedulesData[],action:string}>
   private feeSheduleIsOpened$ = new Subject<number>
+  private feePortfoliosWithSheduleIsOpened$ = new Subject<number>
   constructor(
     private http :HttpClient,
     private CommonDialogsService:HadlingCommonDialogsService,
@@ -24,6 +26,7 @@ export class AppFeesHandlingService {
     private accountingTradeService: AccountingTradesService,
   ) { }
   sendFeeSheduleIsOpened(id_fee_main: number) {
+    console.log('send',id_fee_main);
     this.feeSheduleIsOpened$.next(id_fee_main);
   }
   getFeeSheduleIsOpened():Observable<number> {
@@ -32,11 +35,28 @@ export class AppFeesHandlingService {
   deleteFeesSchedulesCascade (id_fee_main:number):Observable<FeesSchedulesData> {
     return this.http.post <FeesSchedulesData> ('/api/AAM/updateFeesScheduleData/',{data:{id_fee_main:id_fee_main}, action:'Delete_Cascade'})
   }
+  updatePortfoliosFeesData (data:FeesPortfoliosWithSchedulesData, action:string):Observable<dFeesObject> {
+    return this.http.post <dFeesObject> ('/api/AAM/updatePortfoliosFeesData/',{data:data, action:action})
+  }
   updateFeesMainData (data:FeesMainData, action:string):Observable<FeesMainData> {
     return this.http.post <FeesMainData> ('/api/AAM/updateFeesData/',{data:data, action:action})
   }
   updateFeesScheduleData (data:FeesSchedulesData, action:string):Observable<FeesSchedulesData[]> {
     return this.http.post <FeesSchedulesData[]> ('/api/AAM/updateFeesScheduleData/',{data:data, action:action})
+  }
+  recieveFeesPortfoliosWithSchedulesIsOpened():Observable<number>  {
+    return this.feePortfoliosWithSheduleIsOpened$.asObservable()
+  }
+  sendFeesPortfoliosWithSchedulesIsOpened(id_portfolio:number)  {
+    return this.feePortfoliosWithSheduleIsOpened$.next(id_portfolio);
+  }
+  getFeesPortfoliosWithSchedulesData (p_object_id:number)
+  :Observable<FeesPortfoliosWithSchedulesData[]> {
+    return this.http.get <FeesPortfoliosWithSchedulesData[]> ('/api/AAM/getFeesData/',{params:{p_object_id:p_object_id, action:'getFeesPortfoliosWithSchedulesData'}})
+  }
+  getFeesMainWithSchedulesData ()
+  :Observable<FeesMainWithSchedules[]> {
+    return this.http.get <FeesMainWithSchedules[]> ('/api/AAM/getFeesData/',{params:{action:'getFeesMainWithSchedulesData'}})
   }
   getFeesMainData ()
   :Observable<FeesMainData[]> {

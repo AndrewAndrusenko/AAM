@@ -1,5 +1,8 @@
 <mat-tab-group  mat-stretch-tabs  #tabGroup
 (selectedTabChange)="showTabName($event)">
+<mat-tab  label="Portfolios Fee Schedule" >
+  <app-portfolio-tablee [readOnly]="true"></app-portfolio-tablee>  
+</mat-tab>
 <mat-tab  label="Fees Schedules" >
   <acc-fees-main-table></acc-fees-main-table>  
 </mat-tab>
@@ -23,5 +26,4 @@
       </mat-tab>
     </mat-tab-group>
   </mat-tab>
-
 </mat-tab-group>

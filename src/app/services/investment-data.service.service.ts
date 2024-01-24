@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, Subject, map, tap } from 'rxjs';
-import { AccountsTableModel, accountTypes, ClientData, InstrumentData, NPVDynamicData, PortfolioPerformnceData, portfolioPositions, RevenueFactorData, StrategiesGlobalData, StrategyStructure } from '../models/intefaces.model';
+import { AccountsTableModel, accountTypes, ClientData, InstrumentData, NPVDynamicData, PortfolioPerformnceData, portfolioPositions, RevenueFactorData, StrategiesGlobalData, StrategyStructure } from '../models/interfaces.model';
 
 @Injectable({
   providedIn: 'root'

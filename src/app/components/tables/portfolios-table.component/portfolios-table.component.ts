@@ -3,7 +3,7 @@ import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
-import {AccountsTableModel } from 'src/app/models/intefaces.model';
+import {AccountsTableModel } from 'src/app/models/interfaces.model';
 import {MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import {AppNewAccountComponent } from '../../forms/portfolio-form.component/portfolio-form.component';
 import {AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
@@ -14,6 +14,7 @@ import { Router } from '@angular/router';
 import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { routesTreeMenu } from 'src/app/app-routing.module';
 import { Subscription } from 'rxjs';
+import { AppFeesHandlingService } from 'src/app/services/fees-handling.service';
 @Component({
   selector: 'app-portfolio-tablee',
   templateUrl: './portfolios-table.component.html',
@@ -38,16 +39,16 @@ export class TablePortfolios {
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
-  readOnly: boolean = true;
   dialogRef: MatDialogRef<AppNewAccountComponent>;
   @Input() sendClientsPortfolio: boolean=true;
+  @Input() readOnly: boolean=false;
   @Input() clientId: number;
   @Input() strategyMpName: string;
   @Input() actionOnAccountTable: string;
   @Input() action: string;
   @Input() row: any;
   @Output() public modal_principal_parent = new EventEmitter();
-  expandAllowed: boolean = false;
+  expandAllowed: boolean = true;
   routesPathsTreeMenu = routesTreeMenu.map (el=>el.path);
   arraySubscrition = new Subscription()
   constructor(
@@ -57,7 +58,8 @@ export class TablePortfolios {
     private InvestmentDataService:AppInvestmentDataServiceService, 
     private AuthServiceS:AuthService,  
     private CommonDialogsService:HadlingCommonDialogsService,
-    private HandlingCommonTasksS:HandlingCommonTasksService
+    private HandlingCommonTasksS:HandlingCommonTasksService,
+    private AppFeesHandlingService:AppFeesHandlingService,
   )   { }
   updatePortfolioData (portfolioid: number, clientid:number, strategyMpName:string, action: string, accessToClientData:string,snack:boolean=true ) {
     this.dataSource? this.dataSource.data=null : null;
@@ -74,7 +76,7 @@ export class TablePortfolios {
   ngOnInit(): void {
     this.accessToClientData = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToClientData')[0].elementvalue;
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToPortfolioData')[0].elementvalue;
-    this.disabledControlElements = this.accessState === 'full'? false : true;
+    this.disabledControlElements = this.accessState === 'full'&&!this.readOnly? false : true;
     if (!['Get_Portfolios_By_CientId','Get_Portfolios_By_StrategyId'].includes(this.actionOnAccountTable)||this.action==='Select') 
       {this.updatePortfolioData (undefined, this.clientId,this.strategyMpName,this.actionOnAccountTable,this.accessToClientData,false)
     };
@@ -115,6 +117,10 @@ export class TablePortfolios {
     this.HandlingCommonTasksS.exportToExcel (this.dataSource.data,"PortfolioData")
   }
   showClientData(element:any) {
-    this.expandAllowed? this.expandedElement = this.expandedElement === element ? null : element:this.expandAllowed=true;
+    if (this.expandAllowed) {
+      this.expandedElement = this.expandedElement === element ? null : element;
+      this.AppFeesHandlingService.sendFeesPortfoliosWithSchedulesIsOpened(element.idportfolio)
+    }
+    else {this.expandAllowed=true}
   }
 }
