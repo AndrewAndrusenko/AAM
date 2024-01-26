@@ -139,10 +139,12 @@ export class AppAccFeesSchedulesTableComponent  {
       });
     }
     openFeeModifyForm (action:string, element:FeesMainData) { 
-      action==='Create_Example'? element.id=null:null;
+      this.expandAllowed=false;
+      let dataToForm = structuredClone(element);
+      action==='Create_Example'? dataToForm.id=null:null;
       this.refFeeForm = this.dialog.open (AppAccFeesMainFormComponent,{minHeight:'30vh', width:'70vw', autoFocus: false, maxHeight: '90vh'})
       this.refFeeForm.componentInstance.action=action;
-      this.refFeeForm.componentInstance.data=element;
+      this.refFeeForm.componentInstance.data=dataToForm;
       this.refFeeForm.componentInstance.modal_principal_parent.subscribe(success => {
         success? this.refFeeForm.close():null;
       })

@@ -162,11 +162,12 @@ export class AppTradeTableComponent  {
     }));
   }
   openTradeModifyForm (action:string, element:any,tabIndex:number=0) {
-    action==='Create_Example'? element.allocatedqty=0:null;
+    let dataToForm = structuredClone(element);
+    action==='Create_Example'? dataToForm.allocatedqty=0:null;
     this.dialogTradeModify = this.dialog.open (AppTradeModifyFormComponent,{minHeight:'600px', minWidth:'60vw', maxWidth:'80vw', maxHeight: '90vh'})
     this.dialogTradeModify.componentInstance.action = action;
     this.dialogTradeModify.componentInstance.tabIndex=tabIndex;
-    this.dialogTradeModify.componentInstance.data = action ==='Create'? null :element;
+    this.dialogTradeModify.componentInstance.data = action ==='Create'? null :dataToForm;
   }
   updateTradesDataTable (tradesData:trades[]) {
     this.dataSource  = new MatTableDataSource(tradesData);

@@ -9,7 +9,7 @@ import { formatNumber } from '@angular/common';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { AppFeesHandlingService } from 'src/app/services/fees-handling.service';
 import { FeesPortfoliosWithSchedulesData } from 'src/app/models/fees-interfaces.model';
-import { Subscription, filter } from 'rxjs';
+import { Subscription, filter, tap } from 'rxjs';
 import { tableHeaders } from 'src/app/models/interfaces.model';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { AppAccFeesPortfolioScheduleFormComponent } from '../../forms/acc-fees-portfolio-schedule-form.component/acc-fees-portfolio-schedule-form.component';
@@ -30,6 +30,7 @@ export class AppAccFeesPortfoliosWithSchedulesTableComponent  {
   disabledControlElements: boolean = false;
   private subscriptions = new Subscription()
   @Input() readOnly:boolean = false;
+  @Input() portfolioname:string = null;
   @Input() id_portfolio:number = null;
   columnsWithHeaders: tableHeaders[] = [
     {
@@ -104,6 +105,11 @@ export class AppAccFeesPortfoliosWithSchedulesTableComponent  {
         }));
         return !filter || filter_array.reduce((acc,val)=>acc+Number(val[1]),0)===0;
       };
+      this.subscriptions.add(
+        this.AppFeesHandlingService.recieveFeesPortfoliosWithSchedulesReload().pipe(
+        filter(data=>Number(data.data[0].object_id)===this.id_portfolio)
+        ).subscribe(()=>this.submitQuery(false,false))
+      )
       this.subscriptions.add(this.AppFeesHandlingService.recieveFeesPortfoliosWithSchedulesIsOpened().pipe(
         filter(id=>id===this.id_portfolio&&this.dataSource===undefined)
       ).subscribe(()=>{
@@ -128,12 +134,13 @@ export class AppAccFeesPortfoliosWithSchedulesTableComponent  {
           detail:data['name'] === 'error'? data['detail'] :  formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ') : null;
       });
     }
-    openPortolioFeesModifyForm (action:string, element:FeesPortfoliosWithSchedulesData) { 
+    openPortolioFeesModifyForm (action:string, element:FeesPortfoliosWithSchedulesData|{id:number,object_id:number}) { 
       this.expandAllowed=false;
-      action==='Create_Example'? element.id=null:null;
-      this.refFeeForm = this.dialog.open (AppAccFeesPortfolioScheduleFormComponent,{minHeight:'30vh', width:'70vw', autoFocus: false, maxHeight: '90vh'})
+      let dataToForm = structuredClone(element);
+      action==='Create_Example'? dataToForm.id=null:null;
+       this.refFeeForm = this.dialog.open (AppAccFeesPortfolioScheduleFormComponent,{minHeight:'30vh', width:'70vw', autoFocus: false, maxHeight: '90vh'})
       this.refFeeForm.componentInstance.action=action;
-      this.refFeeForm.componentInstance.data=element;
+      this.refFeeForm.componentInstance.data=dataToForm;
       this.refFeeForm.componentInstance.feeCodes=this.feeMainCodes;
       this.refFeeForm.componentInstance.modal_principal_parent.subscribe(success => {
         success? this.refFeeForm.close():null;

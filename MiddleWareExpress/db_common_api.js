@@ -40,8 +40,8 @@ async function fUpdateTableDB (table, fields,idfieldName, request, response,date
       break;
       }
       sql = pgp.as.format(sqlText,request.body.data);
-      console.log('',sql);
-    resolve(queryExecute (sql, response,undefined,'fUpdateTableDB '+request.body.action+' ',table))
+      console.log(sql);
+    resolve(queryExecute (sql, response,undefined,'fUpdateTableDB '+request.body.action+' '+table,table))
   })
 }
 module.exports = {

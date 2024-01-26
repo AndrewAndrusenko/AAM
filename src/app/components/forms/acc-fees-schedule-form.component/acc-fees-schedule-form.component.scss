@@ -12,16 +12,11 @@
 .headers-align  .mat-expansion-panel-header {
   background-color: var(--faovritesDarkNodeColor);
 }
-
 .headers-align .mat-expansion-panel-header-description {
   justify-content: space-between;
   align-items: center;
-  // color: rgb(241, 136, 136);
   font-weight:lighter;
   font-size: 20px;
-  // margin-left: 1%;
-
-
 }
 .headers-align .mat-expansion-panel-header-title {
   justify-content: space-between;
@@ -37,7 +32,6 @@ input.ng-invalid.ng-touched {
 }
 .icon_search {
   color: blue;
-  // transform: scale (4);
 }
 .mat-error {
   color: rgb(158, 0, 0);
@@ -55,8 +49,6 @@ margin-bottom:10px;
  border-radius: 5px;
  color:#c1b9b9;
 }
-
-
 .mat-form-field {
 font-size: 20px;
 border-radius: 9px;
@@ -66,9 +58,6 @@ background-color: var(--formFieldLightGray);
 margin: 10px;
 padding:10px;
 }
-
-
-
 .dialog-headline{
 font-weight: 500;
 margin-top: -1em;
@@ -83,8 +72,6 @@ color:white;
 .mat-dialog-container {
 padding: 24px 0 0 0 !important;
 }
-
-
 .tab-content-height{
   height: 160px;
 }
@@ -94,7 +81,6 @@ padding: 24px 0 0 0 !important;
 .close-icon{
   cursor: pointer;
 }
-
 .mat-form-field-label {
   color:rgb(7, 7, 7) !important;
   transform: 1.2 !important;

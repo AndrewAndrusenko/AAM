@@ -33,7 +33,7 @@ export class TablePortfolios {
   disabledControlElements: boolean = false;
   accessToClientData: string = 'none';
   dataSource: MatTableDataSource<AccountsTableModel>;
-  expandedElement: AccountsTableModel  | null;
+  expandedElement: AccountsTableModel;
   columnsToDisplay : string[] = ['idportfolio', 'portfolioname','stategy_name', 'description', 'action'];
   columnsToHeaderDisplay : string[] = ['ID', 'Code','Stategy', 'Stategy Title', 'Action'];
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
@@ -46,7 +46,7 @@ export class TablePortfolios {
   @Input() strategyMpName: string;
   @Input() actionOnAccountTable: string;
   @Input() action: string;
-  @Input() row: any;
+  @Input() row: AccountsTableModel;
   @Output() public modal_principal_parent = new EventEmitter();
   expandAllowed: boolean = true;
   routesPathsTreeMenu = routesTreeMenu.map (el=>el.path);
@@ -93,6 +93,9 @@ export class TablePortfolios {
   chooseAccount (element) {
     this.modal_principal_parent.emit(element);
   }
+  assertItemType(item: AccountsTableModel): AccountsTableModel {
+    return item;
+  }
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
@@ -103,7 +106,7 @@ export class TablePortfolios {
     this.TreeMenuSeviceS.sendUpdate('Portfolios', row.portfolioname, +row.idportfolio,'View')
     this.expandAllowed = false;
   }
-  openAccountForm (actionType:string, row: any ) {
+  openAccountForm (actionType:string, row: AccountsTableModel ) {
     this.expandAllowed = false;
     this.dialogRef = this.dialog.open(AppNewAccountComponent ,{minHeight:'400px', maxWidth:'1000px' });
     this.dialogRef.componentInstance.action = actionType;
@@ -116,7 +119,7 @@ export class TablePortfolios {
   exportToExcel() {
     this.HandlingCommonTasksS.exportToExcel (this.dataSource.data,"PortfolioData")
   }
-  showClientData(element:any) {
+  showClientData(element:AccountsTableModel) {
     if (this.expandAllowed) {
       this.expandedElement = this.expandedElement === element ? null : element;
       this.AppFeesHandlingService.sendFeesPortfoliosWithSchedulesIsOpened(element.idportfolio)

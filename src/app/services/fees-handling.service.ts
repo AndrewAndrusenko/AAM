@@ -15,6 +15,7 @@ export class AppFeesHandlingService {
   public objectCodes = ['','Portfolio', 'Account']
   private feesToProcess:FeesTransactions[];
   private createdAccounting$ = new Subject <{}[]>
+  private feesPortfoliosScheduleDataSub$ = new Subject<{data:dFeesObject[],action:string}>
   private feesMainDataSub$ = new Subject<{data:FeesMainData[],action:string}>
   private feesSchedulesDataSub$ = new Subject<{data:FeesSchedulesData[],action:string}>
   private feeSheduleIsOpened$ = new Subject<number>
@@ -26,7 +27,6 @@ export class AppFeesHandlingService {
     private accountingTradeService: AccountingTradesService,
   ) { }
   sendFeeSheduleIsOpened(id_fee_main: number) {
-    console.log('send',id_fee_main);
     this.feeSheduleIsOpened$.next(id_fee_main);
   }
   getFeeSheduleIsOpened():Observable<number> {
@@ -49,6 +49,12 @@ export class AppFeesHandlingService {
   }
   sendFeesPortfoliosWithSchedulesIsOpened(id_portfolio:number)  {
     return this.feePortfoliosWithSheduleIsOpened$.next(id_portfolio);
+  }
+  recieveFeesPortfoliosWithSchedulesReload ():Observable<{data:dFeesObject[],action:string}> {
+    return this.feesPortfoliosScheduleDataSub$.asObservable();
+  }
+  sendFeesPortfoliosWithSchedulesReload (data:dFeesObject[],action:string) {
+    this.feesPortfoliosScheduleDataSub$.next({data:data,action:action});
   }
   getFeesPortfoliosWithSchedulesData (p_object_id:number)
   :Observable<FeesPortfoliosWithSchedulesData[]> {
@@ -139,7 +145,7 @@ export class AppFeesHandlingService {
     })
   }
   deleteFeesCalculationExec (ids:number[]):Observable<FeesTransactions[]>{
-    return this.http.post <FeesTransactions[]> ('api/AAM/updateFeesData/',{action:'Delete',data:{id:ids}})
+    return this.http.post <FeesTransactions[]> ('api/AAM/updateFeesTransactionsData/',{action:'Delete',data:{id:ids}})
   } 
   getProfitTax (p_date:string):Observable<{rate:number}[]> {
     return this.http.get <{rate:number}[]>('api/AAM/getTaxesData/',{params:{p_date:p_date}})

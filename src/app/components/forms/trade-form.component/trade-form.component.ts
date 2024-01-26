@@ -343,7 +343,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
       this.CommonDialogsService.snackResultHandler(result)
     } else {
       this.CommonDialogsService.dialogCloseAll();
-      this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' instrument'}, action)
+      this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' trade'}, action)
       this.TradeService.getTradeInformation({idtrade:result[0].idtrade}).subscribe(
         data=>this.TradeService.sendTradeDataToUpdateTableSource(action==='Deleted'? result:data,action)
       );

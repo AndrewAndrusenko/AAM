@@ -42,8 +42,10 @@ export class AppAccFeesMainFormComponent {
     this.FeesMainForm.patchValue(this.data);
   }
   ngAfterViewInit(): void {
-    this.tableSchedules.idFeeMain = this.id.value;
-    this.tableSchedules.submitQuery(false,false);
+    if (this.tableSchedules) {
+      this.tableSchedules.idFeeMain = this.id.value;
+      this.tableSchedules.submitQuery(false,false);
+    }
   }
   snacksBox(result:any, action?:string){
     if (result['name']=='error') {

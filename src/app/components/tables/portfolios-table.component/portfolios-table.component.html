@@ -84,7 +84,8 @@
               <span class="row_field_name">Proffesional: </span> {{element.isclientproffesional}}
             </div> -->
             <acc-fees-portfolios-with-schedules-table style="width: 100%;" 
-            [id_portfolio]="element.idportfolio">
+            [id_portfolio]="element['idportfolio']"
+            [portfolioname]="element['portfolioname']">
           </acc-fees-portfolios-with-schedules-table>
           </div>
         </td>

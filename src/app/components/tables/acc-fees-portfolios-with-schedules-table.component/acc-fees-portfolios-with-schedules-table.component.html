@@ -25,7 +25,7 @@
   </button>
   <button color = "accent" mat-raised-button [disabled]="disabledControlElements"
     style=" margin-left:1%; font-size: 18px;"
-    (click)="openPortolioFeesModifyForm('Create',null)">
+    (click)="openPortolioFeesModifyForm('Create',{id:null,object_id:id_portfolio,portfolioname:portfolioname})">
     Create item 
     <mat-icon matSuffix>add_circle</mat-icon>
   </button>
@@ -43,7 +43,6 @@
           <p *ngSwitchDefault>{{element[column]}}</p>
           <p *ngSwitchCase="['fee_code'].includes(column)">
             <button mat-stroked-button style=" font-size: 18px; margin-top: 5%;"  
-            
             (click)=" openPortolioFeesModifyForm ('View',element)">
               {{element[column] }}
             </button> 

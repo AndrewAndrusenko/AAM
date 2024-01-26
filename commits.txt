@@ -250,7 +250,21 @@ we get closest market price for every position
 2|| UI & DB Form to assign fees schedules to client portfolios and modify created data => 
   Form allows to create/update/delete links between client portfolio and fee schedules. Form shows fee schedules ranges for the selected fee in readonly mode as reference info
 3|| Minor file names fixing
+--------------------------------------------------------------------------------------------
+24/01/2024 - 25/01/2024
+1|| DB Validation Fees Schedules ranges insert|update=>
+  Created DB trigger to prevent schedules ranges overlapping existing ones
+2|| DB Validation linking between client portfolios and fees schedules insert|update=>
+  Created DB trigger to prevent links with overlapping applying periods for given portfolio and fee type (Performance/Managment)
+3|| DB Validation preventing fees main data modifying if there are created calculations based on it =>
+  Created DB trigger to prevent updating dfees_main if there are rows with fee's id in the dfees_transactions
+4|| DB Validation preventing fees schedules ranges data modifying if there are created calculations based on it =>
+  DB trigger on dfees_schedules has been updated to verify there are no rows with main fee's id in the dfees_transactions
+5|| Fee calculations deletion fixed
 
+ToDo
+Db trigger to verify there is no calculations when user is trying to modify fee schedule
+Db trigger for portfolio - fee link to verify there is no calculations when user is trying to delete link or edit fileds used in calculations
 2|| UI 
   Created table of fees with child tabele of schedules
 || Hurdle Performance fee and Cash In/Outs -??? How to correct start and end NVP?

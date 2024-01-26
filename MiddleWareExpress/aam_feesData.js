@@ -2,9 +2,12 @@ const db_common_api = require('./db_common_api');
 var pgp = require ('pg-promise')({capSQL:true});
 const https = require('https');
 async function fupdateFeesData (request, response) {
-  console.log('fupdateFeesData',);
   let fields = ['fee_type', 'fee_code', 'fee_description', 'id_fee_period', 'fee_object_type']
  db_common_api.fUpdateTableDB ('dfees_main',fields,'id',request, response)
+}
+async function fupdateFeesTransactionsData (request, response) {
+  let fields = ['fee_type', 'fee_code', 'fee_description', 'id_fee_period', 'id', 'fee_object_type']
+ db_common_api.fUpdateTableDB ('dfees_transactions',fields,'id',request, response)
 }
 async function fupdatePortfoliosFeesData (request, response) {
   let fields = [ 'object_id', 'id_fee_main', 'period_start', 'period_end']
@@ -208,5 +211,6 @@ module.exports = {
   fupdateFeesScheduleData,
   fupdateFeesEntryInfo,
   fupdatePortfoliosFeesData,
+  fupdateFeesTransactionsData,
   fgetTaxes
 }

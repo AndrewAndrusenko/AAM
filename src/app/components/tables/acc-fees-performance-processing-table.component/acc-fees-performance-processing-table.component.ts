@@ -176,7 +176,6 @@ export class AppaIAccFeesPerformanceProcessingTableComponent {
       })
     }
   }
-
   deleteAccounting () {
     let feesToProcess = this.selection.selected;
     this.AppFeesHandlingService.deleteMFAccounting(feesToProcess)
