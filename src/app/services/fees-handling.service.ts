@@ -56,9 +56,9 @@ export class AppFeesHandlingService {
   sendFeesPortfoliosWithSchedulesReload (data:dFeesObject[],action:string) {
     this.feesPortfoliosScheduleDataSub$.next({data:data,action:action});
   }
-  getFeesPortfoliosWithSchedulesData (p_object_id:number)
+  getFeesPortfoliosWithSchedulesData (p_object_id:number,p_id_fee_main:number)
   :Observable<FeesPortfoliosWithSchedulesData[]> {
-    return this.http.get <FeesPortfoliosWithSchedulesData[]> ('/api/AAM/getFeesData/',{params:{p_object_id:p_object_id, action:'getFeesPortfoliosWithSchedulesData'}})
+    return this.http.get <FeesPortfoliosWithSchedulesData[]> ('/api/AAM/getFeesData/',{params:{p_object_id:p_object_id,p_id_fee_main:p_id_fee_main, action:'getFeesPortfoliosWithSchedulesData'}})
   }
   getFeesMainWithSchedulesData ()
   :Observable<FeesMainWithSchedules[]> {

@@ -14,6 +14,7 @@ import { Subscription } from 'rxjs';
 import { tableHeaders } from 'src/app/models/interfaces.model';
 import { AppAccFeesMainFormComponent } from '../../forms/acc-fees-main-form.component/acc-fees-main-form.component';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { TablePortfolios } from '../portfolios-table.component/portfolios-table.component';
 @Component({
   selector: 'acc-fees-main-table',
   templateUrl: './acc-fees-main-table.component.html',
@@ -60,7 +61,11 @@ export class AppAccFeesSchedulesTableComponent  {
       {
         'fieldName': 'action',
         'displayName': 'Action'
-      }
+      },
+      {
+        'fieldName': 'portfolios',
+        'displayName': 'Portfolios'
+      },
   ];
   columnsToDisplay: string [];
   columnsHeaderToDisplay: string [];
@@ -76,6 +81,7 @@ export class AppAccFeesSchedulesTableComponent  {
   refFeeForm : MatDialogRef<AppAccFeesMainFormComponent>
   feesCodes = ['','Management Fee', 'Performance Fee']
   objectCodes = ['','Portfolio', 'Account']
+  portfoliosTable : MatDialogRef<TablePortfolios>
   constructor(
     private AuthServiceS:AuthService,  
     private HandlingCommonTasksS:HandlingCommonTasksService,
@@ -148,6 +154,13 @@ export class AppAccFeesSchedulesTableComponent  {
       this.refFeeForm.componentInstance.modal_principal_parent.subscribe(success => {
         success? this.refFeeForm.close():null;
       })
+    }
+    showPortfolios(element:FeesMainData) {
+      this.expandAllowed=false;
+      this.portfoliosTable = this.dialog.open(TablePortfolios,{minHeight:'600px', minWidth:'1700px', autoFocus: false, maxHeight: '90vh'});
+      this.portfoliosTable.componentInstance.readOnly = true;
+      this.portfoliosTable.componentInstance.idFeeMain = element.id;
+      this.portfoliosTable.componentInstance.actionOnAccountTable = 'Get_Portfolio_By_idFee';
     }
     showSchedules(element:FeesMainData) {
       if (this.expandAllowed) {

@@ -88,6 +88,10 @@ async function fGetportfolioTable (request,response) {
     " LEFT JOIN public.dstrategiesglobal ON dportfolios.idstategy = public.dstrategiesglobal.id " +
     " LEFT JOIN public.dclients ON dportfolios.idclient = public.dclients.idclient "
   switch (request.query.actionOnAccountTable) {
+    case 'Get_Portfolio_By_idFee':
+      query.text = 'SELECT * FROM f_f_get_portfolios_by_idfee($1);'
+      query.values = [Number(request.query.idFeeMain)]
+    break;
     case 'Get_Portfolios_By_CientId':
       query.text += ' WHERE (dportfolios.idclient = $1);'
       query.values = [request.query.clientId]
@@ -110,6 +114,7 @@ async function fGetportfolioTable (request,response) {
     break;
   }
   sql = pgp.as.format(query.text,query.values)
+  console.log(sql);
   db_common_api.queryExecute (sql, response,null,request.query.actionOnAccountTable);
 }
 async function fPutNewFavorite (request, response) {

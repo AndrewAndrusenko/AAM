@@ -29,7 +29,8 @@ export interface FeesMainData {
   period_desc: string,
   fee_type:number,
   fee_object_type :number,
-  id_fee_period :number
+  id_fee_period :number,
+  portfolios: string
 }
 export interface FeesSchedulesData {
   idfee_scedule :number, 

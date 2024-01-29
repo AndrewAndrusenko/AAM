@@ -115,7 +115,9 @@ export class AppAccFeesPortfoliosWithSchedulesTableComponent  {
       ).subscribe(()=>{
         this.submitQuery(false,false);
         this.AppFeesHandlingService.getFeesMainData().subscribe(data=>{
-          this.feeMainCodes = data.map(el=>{return {value:el.id.toString(),name:el.fee_code.toString(),desc: el.fee_description,feeType:el.fee_type_desc}})
+          this.feeMainCodes = data
+          .map(el=>{return {value:el.id.toString(),name:el.fee_code.toString(),desc: el.fee_description,feeType:el.fee_type_desc}})
+          .sort((el,el1)=>el.name>el1.name? 1: el.name<el1.name? -1 : 0)
         })
       }));
     }
@@ -127,7 +129,7 @@ export class AppAccFeesPortfoliosWithSchedulesTableComponent  {
       this.dataSource.sort = this.sort;
     }
     submitQuery (reset:boolean=false, showSnackResult:boolean=true) {
-     this.AppFeesHandlingService.getFeesPortfoliosWithSchedulesData(this.id_portfolio).subscribe(data => {
+     this.AppFeesHandlingService.getFeesPortfoliosWithSchedulesData(this.id_portfolio,null).subscribe(data => {
         this.updateDataTable(data)
         showSnackResult? this.CommonDialogsService.snackResultHandler({
           name:data['name'], 

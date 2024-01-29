@@ -44,6 +44,7 @@ export class TablePortfolios {
   @Input() readOnly: boolean=false;
   @Input() clientId: number;
   @Input() strategyMpName: string;
+  @Input() idFeeMain: number;
   @Input() actionOnAccountTable: string;
   @Input() action: string;
   @Input() row: AccountsTableModel;
@@ -63,7 +64,7 @@ export class TablePortfolios {
   )   { }
   updatePortfolioData (portfolioid: number, clientid:number, strategyMpName:string, action: string, accessToClientData:string,snack:boolean=true ) {
     this.dataSource? this.dataSource.data=null : null;
-    this.InvestmentDataService.getPortfoliosData('', portfolioid,clientid,strategyMpName,action,accessToClientData).subscribe (portfoliosData=>{
+    this.InvestmentDataService.getPortfoliosData('', portfolioid,clientid,strategyMpName,action,this.idFeeMain, accessToClientData).subscribe (portfoliosData=>{
       this.dataSource  = new MatTableDataSource(portfoliosData);
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
@@ -93,9 +94,6 @@ export class TablePortfolios {
   chooseAccount (element) {
     this.modal_principal_parent.emit(element);
   }
-  assertItemType(item: AccountsTableModel): AccountsTableModel {
-    return item;
-  }
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
@@ -112,7 +110,7 @@ export class TablePortfolios {
     this.dialogRef.componentInstance.action = actionType;
     this.dialogRef.componentInstance.portfolioCode = Number(row['idportfolio']);
   }
-  async submitQuery () {
+  submitQuery () {
     this.dataSource? this.dataSource.data = null : null;
     this.updatePortfolioData (undefined,this.clientId,this.strategyMpName,this.actionOnAccountTable,this.accessToClientData);
   }

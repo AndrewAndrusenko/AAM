@@ -261,13 +261,15 @@ we get closest market price for every position
 4|| DB Validation preventing fees schedules ranges data modifying if there are created calculations based on it =>
   DB trigger on dfees_schedules has been updated to verify there are no rows with main fee's id in the dfees_transactions
 5|| Fee calculations deletion fixed
+--------------------------------------------------------------------------------------------
+26/01/2024 - 28/01/2024
+1|| DB Validation preventing link portfolio <=> fees schedule modifying if there are calculations created based on it=>
+  DB trigger on the table dfees_objects has been updated to allow modify only period_end field and on condition old or new value not less than last calculation saved in table dfees_transactions 
+2|| UI Fee Dictonary Table => Added function to show a list of portfolios attached to the selected fee schedule
+3|| Performance Fee DB => Fixed multiple ranges calculations for performance fee => One range is taken based on amount of profit exeeding high water mark value
 
 ToDo
-Db trigger to verify there is no calculations when user is trying to modify fee schedule
-Db trigger for portfolio - fee link to verify there is no calculations when user is trying to delete link or edit fileds used in calculations
-2|| UI 
-  Created table of fees with child tabele of schedules
-|| Hurdle Performance fee and Cash In/Outs -??? How to correct start and end NVP?
+
 || FIFO detailed reporting
 || UI for Accounting Transaction Types and option to allow/block manual editing
 || Revenue Factor Chart add info about management and perfomance fees deducted
@@ -281,5 +283,6 @@ Db trigger for portfolio - fee link to verify there is no calculations when user
 || any
 || Check UserAccess model for UI, espesically the latest components
 || DB access roles
+|| Hurdle Performance fee and Cash In/Outs -??? How to correct start and end NVP?
 *Strategy tab component is not being reused and is rendered when reopened
 *Performance Chart shows graph from the last selected object if new object is reused and there's no need to reload it 

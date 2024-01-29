@@ -48,6 +48,13 @@
               {{element[column] }}
             </button> 
           </p>
+          <p *ngSwitchCase="['portfolios'].includes(column)">
+            <button mat-stroked-button style=" font-size: 18px; margin-top: 5%;"  
+            class="navigate-button"
+            (click)=" showPortfolios (element)">
+              {{element[column] }}
+            </button> 
+          </p>
           <p *ngSwitchCase="['action'].includes(column) " >
             <button  *ngIf="disabledControlElements" mat-icon-button color="accent"
               matTooltip="View Fee Schedule"

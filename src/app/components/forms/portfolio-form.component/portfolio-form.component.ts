@@ -53,7 +53,7 @@ export class AppNewAccountComponent {
   ngOnInit(): void {
     this.action === 'View'||this.disabledControlElements? this.newAccountForm.disable() : null;
     if (this.accessState !=='none'&&this.action!=='Create') {
-      this.InvestmentDataService.getPortfoliosData('',this.portfolioCode,0,undefined,'Get_Portfolio_By_idPortfolio', this.accessToClientData).subscribe (data => {
+      this.InvestmentDataService.getPortfoliosData('',this.portfolioCode,0,undefined,'Get_Portfolio_By_idPortfolio',null, this.accessToClientData).subscribe (data => {
         this.portfolioData=data[0];
         this.newAccountForm.patchValue(this.portfolioData);
         if (this.action === 'Create_Example') {
@@ -65,7 +65,7 @@ export class AppNewAccountComponent {
   }
   ngOnChanges (changes: SimpleChanges) {
     if (this.accessState !=='none') {
-      this.InvestmentDataService.getPortfoliosData('',changes['portfolioCode'].currentValue,0,undefined, 'Get_Portfolio_By_idPortfolio', this.accessToClientData).subscribe (portfoliosData => this.newAccountForm.patchValue(portfoliosData[0]))
+      this.InvestmentDataService.getPortfoliosData('',changes['portfolioCode'].currentValue,0,undefined, 'Get_Portfolio_By_idPortfolio', null,this.accessToClientData).subscribe (portfoliosData => this.newAccountForm.patchValue(portfoliosData[0]))
     }
   }
   snacksBox (result:any, action?:string) {
@@ -117,7 +117,7 @@ export class AppNewAccountComponent {
   calculateAccountCode () {
     let newNumberS : string;
     let accountType = this.newAccountForm.controls['account_type'].value
-    this.InvestmentDataService.getPortfoliosData (accountType, 0,0,undefined, 'calculateAccountCode',this.accessToClientData).subscribe(dataA => {
+    this.InvestmentDataService.getPortfoliosData (accountType, 0,0,undefined, 'calculateAccountCode',null,this.accessToClientData).subscribe(dataA => {
       if (dataA.length === 0) {newNumberS = "001"} else {
         let data = dataA[0]
         let newNumber = Number (data['portfolioname'].substr(accountType.length)) + 1

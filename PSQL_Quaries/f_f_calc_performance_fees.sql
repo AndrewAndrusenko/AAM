@@ -1,25 +1,12 @@
--- FUNCTION: public.f_f_calc_management_fees(text[], date, date)
+-- FUNCTION: public.f_f_calc_performance_fees(text[], date, date)
 
-DROP FUNCTION IF EXISTS public.f_f_calc_performance_fees(text[], date, date);
+-- DROP FUNCTION IF EXISTS public.f_f_calc_performance_fees(text[], date, date);
 
 CREATE OR REPLACE FUNCTION public.f_f_calc_performance_fees(
 	p_portfolio_list text[],
 	p_report_date_start date,
 	p_report_date_end date)
-    RETURNS TABLE(
-		start_npv numeric,
-		id_calc numeric,
-		idportfolio bigint,
-		portfolioname character varying,
-		pos_pv numeric,
-		cash_flow numeric,
-		fee_amount numeric,
-		pl numeric,
-		pl_above_hwm numeric,
-		feevalue numeric,
-		hwm numeric,
-	    id_fee int,
-        fee_type numeric, new_hwm numeric, hwm_date date,pf_hurdle numeric )
+    RETURNS TABLE(start_npv numeric, id_calc numeric, idportfolio bigint, portfolioname character varying, pos_pv numeric, cash_flow numeric, fee_amount numeric, pl numeric, pl_above_hwm numeric, feevalue numeric, hwm numeric, id_fee integer, fee_type numeric, new_hwm numeric, hwm_date date, pf_hurdle numeric) 
     LANGUAGE 'plpgsql'
     COST 100
     VOLATILE PARALLEL UNSAFE
@@ -45,7 +32,8 @@ WITH
 	  fees_schedules.fee_type,
 	  fees_schedules.id_calc,
 	  fees_schedules.pf_hurdle,
-	  fees_schedules.highwatermark
+	  fees_schedules.highwatermark,
+	  fees_schedules.schedule_range
     FROM
       public.f_i_get_npv_dynamic (p_portfolio_list, p_report_date_end, p_report_date_end, 840) AS end_npv
       LEFT JOIN LATERAL (
@@ -69,7 +57,8 @@ WITH
           f_f_get_performance_fees_schedules.hwm_date,
           calc_start,
           calc_end,
-		  f_f_get_performance_fees_schedules.id_calc
+		  f_f_get_performance_fees_schedules.id_calc,
+		  f_f_get_performance_fees_schedules.schedule_range
 		  
         FROM
           public.f_f_get_performance_fees_schedules (p_portfolio_list, p_report_date_start, p_report_date_end)
@@ -126,11 +115,11 @@ SELECT
   fees_dataset.pf_hurdle
 FROM
   fees_dataset
-LEFt JOIN start_period_npv ON fees_dataset.portfolioname=start_period_npv.portfolioname;
+LEFt JOIN start_period_npv ON fees_dataset.portfolioname=start_period_npv.portfolioname
+WHERE  fees_dataset.schedule_range@>fees_dataset.pl_above_hwm;
 END
 $BODY$;
 
 ALTER FUNCTION public.f_f_calc_performance_fees(text[], date, date)
     OWNER TO postgres;
-select * from f_f_calc_performance_fees(
-array['ACM002'],'05/01/2023','12/16/2023')
+select * from f_f_calc_performance_fees(array['ACM002'],now()::date,now()::date)

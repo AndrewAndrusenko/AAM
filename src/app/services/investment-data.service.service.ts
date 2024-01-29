@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, Subject, map, tap } from 'rxjs';
 import { AccountsTableModel, accountTypes, ClientData, InstrumentData, NPVDynamicData, PortfolioPerformnceData, portfolioPositions, RevenueFactorData, StrategiesGlobalData, StrategyStructure } from '../models/interfaces.model';
+import { number } from 'echarts';
 
 @Injectable({
   providedIn: 'root'
@@ -18,14 +19,15 @@ export class AppInvestmentDataServiceService {
   private subjectPerformanceData = new Subject<{data: PortfolioPerformnceData[],currencySymbol:string,showChart:boolean}>(); 
   private subjectRevenueFactorData = new Subject<{data: RevenueFactorData[],currencySymbol:string,showChart:boolean}>(); 
   
-  getPortfoliosData (accountType:string, idportfolio: number, clientId: number, strategyMpName: string, action:string, accessToClientData:string='none'):Observable <AccountsTableModel[]> {
+  getPortfoliosData (accountType:string, idportfolio: number, clientId: number, strategyMpName: string, action:string, idFeeMain:number,accessToClientData:string='none'):Observable <AccountsTableModel[]> {
     const params = {
       accountType: accountType,
       idportfolio: idportfolio,
       clientId: clientId, 
       strategyMpName :strategyMpName, 
       actionOnAccountTable: action,
-      accessToClientData:accessToClientData
+      accessToClientData:accessToClientData,
+      idFeeMain:idFeeMain
     }
     return this.http.get <AccountsTableModel []>('/api/AAM/portfolioTable/', { params: params })
   }

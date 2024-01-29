@@ -67,10 +67,10 @@ async function geFeesData (request,response) {
   });
   switch (request.query.action) {
     case 'getFeesPortfoliosWithSchedulesData':
-      sql='SELECT *,0 as action FROM f_f_get_portfolios_with_schedules(${p_object_id})'
+      sql='SELECT *,0 as action FROM f_f_get_portfolios_with_schedules(${p_object_id},${p_id_fee_main})'
     break;
     case 'getFeesMainData':
-      sql=`SELECT *,0 as action FROM v_f_dfees_main`
+      sql=`SELECT *,0 as action,'Portfolios' as portfolios FROM v_f_dfees_main`
     break;
     case 'getFeesMainWithSchedulesData':
       sql=`SELECT * FROM v_f_dfees_main_with_schedules`
