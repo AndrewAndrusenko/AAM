@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HadlingCommonDialogsService } from './hadling-common-dialogs.service';
 import { AppAccountingService } from './accounting.service';
-import { EMPTY, Observable, Subject, catchError, filter, forkJoin, from, map, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, EMPTY, Observable, ReplaySubject, Subject, catchError, filter, forkJoin, from, map, switchMap, tap } from 'rxjs';
 import { bAccountTransaction, bLedgerTransaction } from '../models/interfaces.model';
 import { AccountingTradesService } from './accounting-trades.service';
 import { HttpClient } from '@angular/common/http';
@@ -19,7 +19,7 @@ export class AppFeesHandlingService {
   private feesMainDataSub$ = new Subject<{data:FeesMainData[],action:string}>
   private feesSchedulesDataSub$ = new Subject<{data:FeesSchedulesData[],action:string}>
   private feeSheduleIsOpened$ = new Subject<number>
-  private feePortfoliosWithSheduleIsOpened$ = new Subject<number>
+  private feePortfoliosWithSheduleIsOpened$:BehaviorSubject<{id:number,rewriteDS:boolean}[]> = new BehaviorSubject([])
   constructor(
     private http :HttpClient,
     private CommonDialogsService:HadlingCommonDialogsService,
@@ -44,11 +44,13 @@ export class AppFeesHandlingService {
   updateFeesScheduleData (data:FeesSchedulesData, action:string):Observable<FeesSchedulesData[]> {
     return this.http.post <FeesSchedulesData[]> ('/api/AAM/updateFeesScheduleData/',{data:data, action:action})
   }
-  recieveFeesPortfoliosWithSchedulesIsOpened():Observable<number>  {
+  recieveFeesPortfoliosWithSchedulesIsOpened():Observable<{id:number,rewriteDS:boolean}[]>  {
     return this.feePortfoliosWithSheduleIsOpened$.asObservable()
   }
-  sendFeesPortfoliosWithSchedulesIsOpened(id_portfolio:number)  {
-    return this.feePortfoliosWithSheduleIsOpened$.next(id_portfolio);
+  sendFeesPortfoliosWithSchedulesIsOpened(id_portfolio:number,rewriteDS:boolean)  {
+    console.log('sent',id_portfolio);
+
+    return this.feePortfoliosWithSheduleIsOpened$.next([{id:id_portfolio,rewriteDS:rewriteDS}]);
   }
   recieveFeesPortfoliosWithSchedulesReload ():Observable<{data:dFeesObject[],action:string}> {
     return this.feesPortfoliosScheduleDataSub$.asObservable();

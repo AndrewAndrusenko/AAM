@@ -97,13 +97,7 @@ async function fGetAccountingData (request,response) {
     break;
     case 'GetAccountsEntriesListAccounting':
       query.text = 'SELECT *,0 as action FROM f_a_b_get_all_entries_transactions (${dateRangeStart},${dateRangeEnd},${entryTypes:raw},${portfolioCodes},${noAccountLedger}, ${idtrade:raw},${entriesIds:raw});';
-      ['entryTypes','entriesIds'].forEach(key=>{
-        if (typeof(request.query[key])==='object') {
-          request.query[key] = request.query[key].map(el=>Number(el))} 
-        else{
-          request.query[key] = request.query[key] !=='null'?  [Number(request.query[key])]:'null';
-        } 
-      })
+      request = db_common_api.getTransformArrayParam(request,['entryTypes','entriesIds']);
     break;
     case 'GetBalanceDatePerPorfoliosOnData':
       query.text = 'SELECT * FROM f_a_get_balances_for_date(${p_portfolio_list},${p_report_date})'

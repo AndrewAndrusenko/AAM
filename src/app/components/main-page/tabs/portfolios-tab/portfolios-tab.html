@@ -1,4 +1,11 @@
 <mat-tab-group mat-stretch-tabs>
+  <mat-tab label="Portfolios">  
+    <app-portfolio-tablee></app-portfolio-tablee>  
+  </mat-tab>
+  <mat-tab  label="Portfolios Positions " >
+    <app-inv-portfolio-position-table> 
+  </app-inv-portfolio-position-table> 
+  </mat-tab>  
   <mat-tab label="Revenue Factors" >  
     <app-inv-portfolio-revenue-factor-analysis
     [filters]="{reset:true}"
@@ -8,13 +15,6 @@
     <app-inv-portfolio-npv_roi_performance
     [filters]="{reset:true}"
     ></app-inv-portfolio-npv_roi_performance>  
-  </mat-tab>
-  <mat-tab  label="Portfolios Positions " >
-    <app-inv-portfolio-position-table> 
-  </app-inv-portfolio-position-table> 
-  </mat-tab>  
-  <mat-tab label="Portfolios Full List">  
-    <app-portfolio-tablee></app-portfolio-tablee>  
   </mat-tab>
   <mat-tab label="NPV Dynamic Data">  
     <app-inv-portfolio-npv_dynamic></app-inv-portfolio-npv_dynamic>  

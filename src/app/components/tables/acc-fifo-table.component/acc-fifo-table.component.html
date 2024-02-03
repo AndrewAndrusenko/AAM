@@ -1,0 +1,216 @@
+<ng-container *ngIf="accessState!=='none'" >
+  <mat-form-field style="width: 20%;"class = "filterField"  title="Filter All columns">
+    <mat-label class="whiteTextFilter">Search (all columns)...</mat-label>
+    <input 
+      (keyup)="applyFilter($event)"
+      matInput type="text" #filterALL
+      matTooltip="Use context menu to add filter"     >
+    <button matSuffix 
+      mat-icon-button aria-label="Clear" 
+      (click)="clearFilter(filterALL)">
+      <mat-icon>close</mat-icon>
+    </button>
+  </mat-form-field>
+  <button color = "accent" mat-raised-button title="Export To Excel"
+    style=" margin-left:1%; font-size: 18px;"
+    (click)="exportToExcel()">
+    Save as XLS 
+    <mat-icon matSuffix >save_alt</mat-icon>
+  </button>
+  <button color = "accent" mat-raised-button title="Reload Table"
+    style=" margin-left:1%; font-size: 18px;"
+    (click)="submitQuery()">
+    Reload 
+    <mat-icon matSuffix >refresh</mat-icon>
+  </button>
+
+  <mat-expansion-panel class="headers-align" 
+  (opened)="panelOpenState = true"
+  (closed)="panelOpenState = false" >
+  <mat-expansion-panel-header >
+    <mat-panel-title >
+      Complex search
+    </mat-panel-title>
+    <mat-panel-description>
+      Tap to {{panelOpenState? 'hide': 'open'}} additional parameters
+      <mat-icon color = 'accent'>filter_alt</mat-icon>
+    </mat-panel-description>
+  </mat-expansion-panel-header >
+  <form class="submit" [formGroup]="searchParametersFG"  style="font-size: 18px; margin-left: 0.5%; margin-top: 0.5%;"> <!-- complexSearch Form -->
+    <span style="display: flex;    align-items:flex-start;  margin-right: 1%;margin-top: 0.2%;"> 
+      <span style="display:grid; width: 11%; margin-right: 2%;"> <!-- submitQuery/CleaAll Buttons -->
+        <button color = "primary"  class= "button-color" mat-raised-button 
+          style="margin:1%; font-size: 18px;"
+          (click)="submitQuery()">
+          Submit
+        </button>
+        <button color = "accent" mat-raised-button 
+          style="margin-top:4%;margin-left: 1%; font-size: 18px;"
+          (click)="searchParametersFG.reset();
+           secidList.patchValue(['ClearAll']);
+           portfoliosList.patchValue(['ClearAll']);
+           tradesIDs.patchValue(['ClearAll'])">
+          ClearAll
+        </button>
+      </span>
+      <mat-form-field  class="search-filed"> <!-- Order Type Filter -->
+        <mat-select placeholder="Type" formControlName="type">
+          <mat-option [value]="null">ALL</mat-option>
+          <mat-option [value]="1">BUY</mat-option>
+          <mat-option [value]="-1">SELL</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="fill"  class="search-filed"> <!-- Date Filter -->
+        <mat-label >Enter a date range</mat-label>
+        <mat-date-range-input [formGroup]="dataRange" [rangePicker]="pickerTDate" >
+          <input matStartDate placeholder="Start date" formControlName="dateRangeStart" >
+          <input matEndDate placeholder="End date" formControlName="tdate" formControlName="dateRangeEnd">
+        </mat-date-range-input>
+        <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
+        <mat-datepicker-toggle matSuffix [for]="pickerTDate"></mat-datepicker-toggle>
+        <mat-date-range-picker  #pickerTDate></mat-date-range-picker>
+        <mat-error *ngIf="dataRange.controls.dateRangeStart.hasError('matStartDateInvalid')">Invalid start date</mat-error>
+        <mat-error *ngIf="dataRange.controls.dateRangeEnd.hasError('matEndDateInvalid')">Invalid end date</mat-error>
+      </mat-form-field>
+      <mat-form-field class="search-filed" style="width: 16%;"> <!-- Quantity Filter -->
+        <input matInput placeholder="Quantity OUT (Value or Min - Max)" formControlName="qty">
+        <mat-hint *ngIf="qty.valid">
+          Qty or QtyMin-QtyMax
+        </mat-hint>
+        <mat-error *ngIf="qty?.errors?.['incorrectRange']">
+          Incorrect Range
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field class="search-filed" style="width: 15%;"> <!-- Price Filter -->
+        <input matInput placeholder="Price OUT (Value or Min - Max)" formControlName="price">
+        <mat-hint *ngIf="price.valid">
+          Price or PriceMin-PriceMax
+        </mat-hint>
+        <mat-error *ngIf="price?.errors?.['incorrectRange']">
+          Incorrect Range
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field  appearance="fill" style="width: 40%; " class="search-filed">
+        <mat-chip-list #chipTradesList   >
+          <mat-chip *ngFor="let tradeID of tradesIDs.value" 
+          (removed)="removeNew(tradeID,tradesIDs)"
+          (click)=" clearAllNew($event,tradesIDs);">
+            {{tradeID}}
+            <button matChipRemove *ngIf="tradeID!=='ClearAll'">
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </mat-chip>
+          <input 
+          matInput
+          placeholder="Add tradeID or tradeID1,tradeID2.."
+          [matChipInputFor]="chipTradesList"
+          [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+          [matChipInputAddOnBlur]="true"
+          (matChipInputTokenEnd)="addNew($event,tradesIDs)"
+          matTooltip="Type TradeIDs or paste multiple codes separated by comma and press enter" >
+        </mat-chip-list>
+        <mat-hint style="color:rgb(104, 246, 246); font-style: italic;">
+          TradeIDs List
+        </mat-hint>
+      </mat-form-field>
+    </span>
+    <p style="margin-top: 1%;">
+      <mat-form-field  appearance="fill" style="width: 40%; " class="search-filed">
+        <mat-chip-list #chipList   >
+          <mat-chip *ngFor="let secid of secidList.value" 
+          (removed)="removeNew(secid,secidList)"
+          (click)=" clearAllNew($event,secidList);">
+            {{secid}}
+            <button matChipRemove *ngIf="secid!=='ClearAll'">
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </mat-chip>
+          <input 
+          [matAutocomplete]="auto"
+          matInput
+          placeholder="Add secid or secid,secid1,secid2.."
+          [matChipInputFor]="chipList"
+          [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+          [matChipInputAddOnBlur]="true"
+          (matChipInputTokenEnd)="addNew($event,secidList)"
+          matTooltip="Type secid or paste multiple secid codes separated by comma and press enter" >
+        </mat-chip-list>
+        <mat-autocomplete #auto="matAutocomplete" (optionSelected)="changedValueofChip($event.option.value,secidList)">
+          <mat-option *ngFor="let secid of filterednstrumentsLists | async" [value]="secid.toString().split(',')[0]">
+            {{secid.toString().replaceAll(',',' - ')}}
+          </mat-option>
+        </mat-autocomplete>
+        <mat-hint style="color:rgb(104, 246, 246); font-style: italic;">
+          Instruments List
+        </mat-hint>
+      </mat-form-field>
+      <mat-form-field  appearance="fill" style="width: 40%; " class="search-filed">
+        <mat-chip-list #chipPortList   >
+          <mat-chip *ngFor="let portfolio of portfoliosList.value" 
+          (removed)="removeNew(portfolio,portfoliosList)"
+          (click)=" clearAllNew($event,portfoliosList);">
+            {{portfolio}}
+            <button matChipRemove *ngIf="portfolio!=='ClearAll'">
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </mat-chip>
+          <input 
+          matInput
+          placeholder="Add portfolio or portfolio1,portfolio2.."
+          [matChipInputFor]="chipPortList"
+          [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+          [matChipInputAddOnBlur]="true"
+          (matChipInputTokenEnd)="addNew($event,portfoliosList)"
+          matTooltip="Type portfolio code or paste multiple codes separated by comma and press enter" >
+        </mat-chip-list>
+        <mat-hint style="color:rgb(104, 246, 246); font-style: italic;">
+          Portfolios List
+        </mat-hint>
+      </mat-form-field>
+    </p>
+  </form>
+</mat-expansion-panel>
+ <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort
+   class="mat-elevation-z8" 
+    class ="childTable" style="width: 100%;" >
+    <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i=index" justify="right"  >
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> {{columnsHeaderToDisplay[i]}}</th>
+      <td 
+        mat-cell *matCellDef="let element" [cdkContextMenuTriggerFor]="instrumentcontextmenu" >
+        <span [ngSwitch]="true==true">
+          <p *ngSwitchDefault>{{element[column]}}</p>
+
+          <p *ngSwitchCase="['out_date','trade_date','generated'].includes(column)">{{element[column] | date}} </p>
+          <p *ngSwitchCase="['price_in','price_out'].includes(column)">{{element[column]|currency}} </p>
+          <p *ngSwitchCase="['profit_loss'].includes(column)">
+            <span [style.color]="element[column]==0? 'default' : element[column]<0?'indianred':'lightgreen'">{{element[column]|currency}} </span>
+          </p>
+          <p *ngSwitchCase="['idtrade'].includes(column)">
+            <button mat-stroked-button style=" font-size: 18px; margin-top: 5%;"  
+            class="navigate-button"  matTooltip="Trade Details"
+            (click)=" showTradeDetails (element[column])">
+              {{element[column] }}
+            </button> 
+          </p>
+          <p *ngSwitchCase="['feevalue'].includes(column)&&element['column']!==null">
+            {{element['fee_type_value']===1? element[column] + '%':element[column] + ''}}  </p>
+        </span>
+        <ng-template  #instrumentcontextmenu>
+          <div class="tree-menu-context" cdkMenu >
+            <button 
+              (click)="updateFilter(element[column])"
+              class="tree-menu-item" cdkMenuItem>
+              <mat-icon class="menu-icon" matPrefix>filter_list</mat-icon> 
+              Add to filter
+            </button> 
+          </div>
+        </ng-template>  
+      </td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+    <tr mat-row [ngClass]="{'close-row':element.position_type==='Close'}" *matRowDef="let element; columns: columnsToDisplay; let dataindex=dataIndex;"
+      tabindex=0   >
+    </tr>
+  </table>
+  <mat-paginator ></mat-paginator>
+</ng-container>

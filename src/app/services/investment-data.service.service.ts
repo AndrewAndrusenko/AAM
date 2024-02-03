@@ -18,6 +18,7 @@ export class AppInvestmentDataServiceService {
   private subjectClientsPortfolios = new Subject<{id:number,code:string}[]>(); 
   private subjectPerformanceData = new Subject<{data: PortfolioPerformnceData[],currencySymbol:string,showChart:boolean}>(); 
   private subjectRevenueFactorData = new Subject<{data: RevenueFactorData[],currencySymbol:string,showChart:boolean}>(); 
+  private subjectSummaryPortfolioData = new Subject<{npv:number,managementFee:number,perfomanceFee:number,PnL:number}>(); 
   
   getPortfoliosData (accountType:string, idportfolio: number, clientId: number, strategyMpName: string, action:string, idFeeMain:number,accessToClientData:string='none'):Observable <AccountsTableModel[]> {
     const params = {
@@ -207,5 +208,11 @@ export class AppInvestmentDataServiceService {
   }
   sendRevenueFactorData (dataSet:{data: RevenueFactorData[],currencySymbol:string,showChart:boolean}) {
     this.subjectRevenueFactorData.next(dataSet);
+  }
+  recieveSummaryPortfolioData(): Observable<{npv:number,managementFee:number,perfomanceFee:number,PnL:number}> { 
+    return this.subjectSummaryPortfolioData.asObservable(); 
+  }
+  sendSummaryPortfolioData (dataSet:{npv:number,managementFee:number,perfomanceFee:number,PnL:number}) {
+    this.subjectSummaryPortfolioData.next(dataSet);
   }
 }

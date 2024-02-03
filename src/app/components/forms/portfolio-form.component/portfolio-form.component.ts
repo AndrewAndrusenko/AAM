@@ -7,7 +7,8 @@ import { AppTableStrategiesComponentComponent } from '../../tables/strategies-ta
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { AppClientsTableComponent } from '../../tables/clients-table.component/clients-table.component';
-import { filter, switchMap } from 'rxjs';
+import { Subscriber, Subscription, filter, switchMap } from 'rxjs';
+import { AppFeesHandlingService } from 'src/app/services/fees-handling.service';
 @Component({
   selector: 'app-app-portfolio',
   templateUrl: './portfolio-form.component.html',
@@ -19,18 +20,20 @@ export class AppNewAccountComponent {
   accessToClientData: string = 'none';
   portfolioData:AccountsTableModel;
   newAccountForm: FormGroup;
+  summaryData:{npv:number,managementFee:number,perfomanceFee:number,PnL:number}
   @Input() portfolioCode: number;
   @Input() ClientID: number;
   @Input() action: string;
+  @Input() summaryShow: boolean=false;
   dialogTableStrategiesRef: MatDialogRef<AppTableStrategiesComponentComponent>;
   dialogClientsTabletRef: MatDialogRef<AppClientsTableComponent>;
   accountTypes: accountTypes [] = [];
-
+  subscriptions = new Subscription()
   constructor (
-    private fb:FormBuilder, 
     private CommonDialogsService:HadlingCommonDialogsService,
     private InvestmentDataService : AppInvestmentDataServiceService,   
     private AuthServiceS:AuthService,  
+    private fb:FormBuilder, 
     private dialog: MatDialog, 
   ) 
   {
@@ -51,6 +54,10 @@ export class AppNewAccountComponent {
     this.disabledControlElements = this.accessState === 'full'? false : true;
   }
   ngOnInit(): void {
+    this.InvestmentDataService.recieveSummaryPortfolioData().subscribe(data=>{
+      this.summaryData=data;
+      this.summaryShow=true;
+    })
     this.action === 'View'||this.disabledControlElements? this.newAccountForm.disable() : null;
     if (this.accessState !=='none'&&this.action!=='Create') {
       this.InvestmentDataService.getPortfoliosData('',this.portfolioCode,0,undefined,'Get_Portfolio_By_idPortfolio',null, this.accessToClientData).subscribe (data => {
@@ -65,7 +72,11 @@ export class AppNewAccountComponent {
   }
   ngOnChanges (changes: SimpleChanges) {
     if (this.accessState !=='none') {
-      this.InvestmentDataService.getPortfoliosData('',changes['portfolioCode'].currentValue,0,undefined, 'Get_Portfolio_By_idPortfolio', null,this.accessToClientData).subscribe (portfoliosData => this.newAccountForm.patchValue(portfoliosData[0]))
+      this.InvestmentDataService.getPortfoliosData('',changes['portfolioCode'].currentValue,0,undefined, 'Get_Portfolio_By_idPortfolio', null,this.accessToClientData).subscribe (portfoliosData => {
+        this.newAccountForm.patchValue(portfoliosData[0]);
+        // this.AppFeesHandlingService.sendFeesPortfoliosWithSchedulesIsOpened(portfoliosData[0].idportfolio,true);
+      }
+        )
     }
   }
   snacksBox (result:any, action?:string) {

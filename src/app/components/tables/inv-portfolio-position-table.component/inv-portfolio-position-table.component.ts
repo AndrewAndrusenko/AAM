@@ -161,6 +161,13 @@ export class AppaInvPortfolioPositionTableComponent {
     searchObj.idportfolios = [0,1].includes(this.portfolios.length)&&this.portfolios[0]==='ClearAll'? null : this.portfolios.map(el=>el.toLocaleLowerCase())
     this.InvestmentDataService.getPortfoliosPositions(searchObj).subscribe(data => {
       this.updatePositionsDataTable(data)
+      let sum ={
+       npv:this.getTotals('mtm_positon'),
+       PnL:this.getTotals('total_pl'),
+       managementFee:data.find(el=>el.secid==='Management Fees')?.total_pl??0,
+       perfomanceFee:data.find(el=>el.secid==='Performance Fees')?.total_pl??0
+      }
+      this.InvestmentDataService.sendSummaryPortfolioData(sum)
       showSnackResult? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ') : null;
     });
   }

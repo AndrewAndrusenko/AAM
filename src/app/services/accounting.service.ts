@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, ReplaySubject, Subject, filter, firstValueFrom, forkJoin, map, of, switchMap} from 'rxjs';
-import { allocation_fifo, bAccounts, bAccountsEntriesList, bAccountTransaction, bBalanceData, bBalanceFullData, bcAccountType_Ext, bcEnityType, bcTransactionType_Ext, bLedger, bLedgerAccounts, bLedgerBalanceData, bLedgerTransaction, SWIFTSGlobalListmodel, SWIFTStatement950model } from '../models/interfaces.model';
+import { bAccounts, bAccountsEntriesList, bAccountTransaction, bBalanceData, bBalanceFullData, bcAccountType_Ext, bcEnityType, bcTransactionType_Ext, bLedger, bLedgerAccounts, bLedgerBalanceData, bLedgerTransaction, SWIFTSGlobalListmodel, SWIFTStatement950model } from '../models/interfaces.model';
 import { HadlingCommonDialogsService } from './hadling-common-dialogs.service';
 import { BalanceDataPerPortfoliosOnDate } from '../models/accountng-intefaces.model';
 @Injectable({
@@ -178,15 +178,7 @@ export class AppAccountingService {
   createDepoSubAccounts (portfolioIds:number[],secid:string):Observable<bAccounts[]> {
     return this.http.post <bAccounts[]> ('api/DEA/createDepoSubAccounts/',{portfolioIds:portfolioIds,secid:secid})
   }
-/*----------------------FIFO----------------------------------------------------*/
-  createFIFOtransactions (tradeType:number,idtrades:number[],idportfolio:number,secid:string,qty_to_sell:number,sell_price:number,id_sell_trade:number):Observable<allocation_fifo[]> {
-    const params = {tr_type: tradeType,idtrades:idtrades,idportfolio:idportfolio,secid:secid,qty_to_sell:qty_to_sell,sell_price:sell_price, id_sell_trade:id_sell_trade}
-    return this.http.post <allocation_fifo[]>('api/DEA/createFIFOtransactions/',{params:params})
-  }
-  deleteAccountingAndFIFOtransactions (idtrades:number[]):Observable<allocation_fifo[]> {
-    const params = {idtrades:idtrades}
-    return this.http.post <allocation_fifo[]>('api/DEA/deleteAccountingFIFOtransactions/',{params:params})
-  }
+
 /*----------------------BalanceData----------------------------------------------------*/
   getBalanceDatePerPorfoliosOnData (portfoliosList:string[],balanceDate:Date): Observable <BalanceDataPerPortfoliosOnDate[]> {
     let param = {

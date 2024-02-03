@@ -140,9 +140,6 @@ export class AppaInvPortfolioRevenueFactorAnalysisTableComponent {
     })
   }
   ngOnChanges(changes: SimpleChanges) {
-
-    console.log('per table change',);
-
     changes['filters']?.currentValue? this.setFilters(changes['filters']?.currentValue) : null;
   }
   updateDataTable (revenueData:RevenueFactorData[]) {

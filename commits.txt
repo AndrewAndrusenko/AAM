@@ -267,10 +267,26 @@ we get closest market price for every position
   DB trigger on the table dfees_objects has been updated to allow modify only period_end field and on condition old or new value not less than last calculation saved in table dfees_transactions 
 2|| UI Fee Dictonary Table => Added function to show a list of portfolios attached to the selected fee schedule
 3|| Performance Fee DB => Fixed multiple ranges calculations for performance fee => One range is taken based on amount of profit exeeding high water mark value
+--------------------------------------------------------------------------------------------
+29/01/2024 - 3/01/2024
+1|| UI&DB FIFO detailed reporting =>
+  Created DB function f_fifo_select_all_trades to select nessesary fifo transactions. The function accepts price range, qty range, date range, lists of portfolios, secids, trades ids as filter parameters. Used new pattern when filter is ignored when its value is null and are used ranges in where clause. Added index based on order by statament
+  Created UI table to show FIFO transactions with option to request data using complex search with the same parameters as in DB function. Used class condition on rows to apply different style to close and open transactions.
+  Refactored using of ranges as search parameters 
+  Refactored using of chiplists as search parameters. Got rid of additional array and reduce functions to the chiplists. HTML template were edited accordingly  
+2|| UI Portfolio Form =>
+  Added table with fees linked to the portfolio with option to edit them
+  Summary Tab received data regarding current PnL, NPV and Fees via service and displays it within the form when it's opened via menu tree
+3|| Common form to render JSON result of db request has been refactored => 
+  Used custom json transform procedure to populate form and added function to export result in excel format. Changed from style in HTML template
+4|| Middleware server logging => slightly changed logging data message
+5|| Middleware common functions => function to trasfrom arrays according to its type for get requests (when numbers arrives as strings) was moved to shared module
+--------------------------------------------------------------------------------------------
 
 ToDo
-
-|| FIFO detailed reporting
+|| Store histrory of a portfolio changing strategies
+|| Store histrory of a strategies changing structure
+|| 
 || UI for Accounting Transaction Types and option to allow/block manual editing
 || Revenue Factor Chart add info about management and perfomance fees deducted
 || UI to update/create accounting schemes

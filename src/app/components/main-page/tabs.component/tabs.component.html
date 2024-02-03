@@ -1,6 +1,15 @@
 <mat-tab-group  #tabGroup   *ngIf="messageReceived.text=='Portfolios'" 
   mat-stretch-tabs 
   (selectedTabChange)="showTabName($event.index)"  >
+  <mat-tab label="Portfolio Summary" aria-label="Portfolio Summary"> 
+    <div class="instrument_form">
+      <br>
+      <app-app-portfolio
+      [action]="'View'"
+      [portfolioCode]="messageReceived.id">
+      </app-app-portfolio> 
+    </div>
+  </mat-tab>  
   <mat-tab label="Revenue Factors" aria-label="Revenue Factors"> 
     <app-inv-portfolio-revenue-factor-analysis
     [UI_portfolio_selection]="false"
@@ -45,15 +54,7 @@
     }"
     ></app-orders-table>
   </mat-tab>
-  <mat-tab label="Portfolio Summary" aria-label="Portfolio Summary"> 
-    <div class="instrument_form">
-      <br>
-      <app-app-portfolio
-      [action]="'View'"
-      [portfolioCode]="messageReceived.id">
-      </app-app-portfolio> 
-    </div>
-  </mat-tab>  
+
 </mat-tab-group  >
 <mat-tab-group  *ngIf="messageReceived.text=='Clients'" mat-stretch-tabs #ClientInfo>
   <mat-tab label="Performance" aria-label="Performance"> 

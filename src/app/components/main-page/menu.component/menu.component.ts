@@ -45,17 +45,22 @@ constructor(
   }
   tools () {
     let obj = `
-    idfee_scedule :number, 
-    fee_type_value :number,
-    feevalue :number,
-    calculation_period :number, 
-    deduction_period :number,
-    schedule_range: number[],
-    range_parameter:string, 
-    below_ranges_calc_type:number, 
-    id_fee_main:number, 
-    pf_hurdle:number,
-    highwatermark:boolean
+    out_date:Date,
+    idtrade:number,
+    tr_type:number,
+    qty:number,
+    qty_out:number,
+    price_in:number,
+    price_out:number,
+    closed:boolean,
+    idportfolio:number,
+    trade_date:Date,
+    id:number,
+    generated:Date,
+    profit_loss:number,
+    id_sell_trade:number,
+    id_buy_trade:number,
+    secid:string,
   `
   let a = obj.split(',').map(el=> {return {fieldName:el.split(':')[0].trim(),displayName:el.split(':')[0].trim()}});
   console.log('obj',a.flat());

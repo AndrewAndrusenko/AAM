@@ -106,7 +106,7 @@ export class TablePortfolios {
   }
   openAccountForm (actionType:string, row: AccountsTableModel ) {
     this.expandAllowed = false;
-    this.dialogRef = this.dialog.open(AppNewAccountComponent ,{minHeight:'400px', maxWidth:'1000px' });
+    this.dialogRef = this.dialog.open(AppNewAccountComponent ,{minHeight:'400px', maxWidth:'130%' });
     this.dialogRef.componentInstance.action = actionType;
     this.dialogRef.componentInstance.portfolioCode = Number(row['idportfolio']);
   }
@@ -120,7 +120,7 @@ export class TablePortfolios {
   showClientData(element:AccountsTableModel) {
     if (this.expandAllowed) {
       this.expandedElement = this.expandedElement === element ? null : element;
-      this.AppFeesHandlingService.sendFeesPortfoliosWithSchedulesIsOpened(element.idportfolio)
+      this.AppFeesHandlingService.sendFeesPortfoliosWithSchedulesIsOpened(element.idportfolio,false)
     }
     else {this.expandAllowed=true}
   }

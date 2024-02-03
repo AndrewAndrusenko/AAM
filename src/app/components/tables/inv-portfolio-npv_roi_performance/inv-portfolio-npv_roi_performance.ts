@@ -91,7 +91,6 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
     this.subscriptions.unsubscribe();
   }
   ngOnInit(): void {
-    console.log('per table init',);
     this.filters? this.setFilters(this.filters):null;
     this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios').then ((data)=>{
       this.mp_strategies_list = data['data']
@@ -164,9 +163,6 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
     }
   }
   ngOnChanges(changes: SimpleChanges) {
-
-    console.log('per table change',);
-
     changes['filters']?.currentValue? this.setFilters(changes['filters']?.currentValue) : null;
   }
   updateDataTable (positionsData:PortfolioPerformnceData[]) {

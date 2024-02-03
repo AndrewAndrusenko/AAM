@@ -2,7 +2,7 @@
 
 -- DROP FUNCTION IF EXISTS public.trg_f_fees_dfees_main_update();
 
-CREATE OR REPLACE FUNCTION public.trg_f_fees_dfees_main_update()
+CREATE OR REPLACE FUNCTION public.trg_f_fees_dfees_sc_update()
     RETURNS trigger
     LANGUAGE 'plpgsql'
     COST 100
@@ -13,7 +13,7 @@ BEGIN
 		SELECT dfees_transactions.id_fee_main
 			FROM public.dfees_transactions
 			WHERE 
-		    dfees_transactions.id_fee_main=new.id_fee_main			
+		    dfees_transactions.id_fee_main=new.id			
 		   LIMIT 1
 	   )  THEN
       RAISE EXCEPTION USING MESSAGE = 'There are created fees calculations fee id '||NEW.id;

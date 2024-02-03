@@ -114,7 +114,6 @@ async function fGetportfolioTable (request,response) {
     break;
   }
   sql = pgp.as.format(query.text,query.values)
-  console.log(sql);
   db_common_api.queryExecute (sql, response,null,request.query.actionOnAccountTable);
 }
 async function fPutNewFavorite (request, response) {

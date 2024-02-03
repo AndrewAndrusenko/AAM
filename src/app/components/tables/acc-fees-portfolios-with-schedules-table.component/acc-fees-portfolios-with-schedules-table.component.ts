@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, SimpleChanges, ViewChild } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
@@ -9,7 +9,7 @@ import { formatNumber } from '@angular/common';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { AppFeesHandlingService } from 'src/app/services/fees-handling.service';
 import { FeesPortfoliosWithSchedulesData } from 'src/app/models/fees-interfaces.model';
-import { Subscription, filter, tap } from 'rxjs';
+import { Subscription, filter, skip, tap } from 'rxjs';
 import { tableHeaders } from 'src/app/models/interfaces.model';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { AppAccFeesPortfolioScheduleFormComponent } from '../../forms/acc-fees-portfolio-schedule-form.component/acc-fees-portfolio-schedule-form.component';
@@ -32,6 +32,7 @@ export class AppAccFeesPortfoliosWithSchedulesTableComponent  {
   @Input() readOnly:boolean = false;
   @Input() portfolioname:string = null;
   @Input() id_portfolio:number = null;
+  @Input() onChanges:boolean = false;
   columnsWithHeaders: tableHeaders[] = [
     {
       'fieldName': 'id',
@@ -110,9 +111,13 @@ export class AppAccFeesPortfoliosWithSchedulesTableComponent  {
         filter(data=>Number(data.data[0].object_id)===this.id_portfolio)
         ).subscribe(()=>this.submitQuery(false,false))
       )
+    }
+    ngAfterViewInit(): void {
       this.subscriptions.add(this.AppFeesHandlingService.recieveFeesPortfoliosWithSchedulesIsOpened().pipe(
-        filter(id=>id===this.id_portfolio&&this.dataSource===undefined)
+        skip(1),
+        filter(sub=>sub[0].id===this.id_portfolio&&(this.dataSource===undefined||sub[0].rewriteDS===true))
       ).subscribe(()=>{
+        console.log('get table',);
         this.submitQuery(false,false);
         this.AppFeesHandlingService.getFeesMainData().subscribe(data=>{
           this.feeMainCodes = data
@@ -120,6 +125,9 @@ export class AppAccFeesPortfoliosWithSchedulesTableComponent  {
           .sort((el,el1)=>el.name>el1.name? 1: el.name<el1.name? -1 : 0)
         })
       }));
+    }
+    ngOnChanges(changes: SimpleChanges): void {
+      this.onChanges? this.submitQuery(false,false):null;
     }
     updateDataTable (managementFeeData:FeesPortfoliosWithSchedulesData[]) {
       this.fullDataSource=managementFeeData;

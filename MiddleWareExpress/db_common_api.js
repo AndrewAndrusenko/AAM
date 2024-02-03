@@ -15,7 +15,7 @@ async function queryExecute (sql, response, responseType, sqlID) {
         let rows = [];
         res.length? res.map(el => rows.push(...el.rows) ): rows = res.rows;
         result = responseType === 'rowCount'?  res.rowCount : rows;
-        console.log('N:',new Date().getSeconds()+10, 'db_api; ', sqlID, ';  QTY rows ;', responseType === 'rowCount'?  res.rowCount :rows.length)
+        console.log(new Date().toLocaleTimeString().slice(0,-3) +':'+ new Date().getMilliseconds(), sqlID,'Rows:'+  responseType === 'rowCount'?  res.rowCount :rows.length)
         resolve (response? response.status(200).json(result):result)
       }
     })
@@ -44,7 +44,18 @@ async function fUpdateTableDB (table, fields,idfieldName, request, response,date
     resolve(queryExecute (sql, response,undefined,'fUpdateTableDB '+request.body.action+' '+table,table))
   })
 }
+function getTransformArrayParam(request,paramsList) {
+  paramsList.forEach(key=>{
+    if (typeof(request.query[key])==='object') {
+      request.query[key] = request.query[key].map(el=>Number(el))} 
+    else{
+      request.query[key] = request.query[key] !=='null'?  [Number(request.query[key])]:'null';
+    } 
+  })
+  return request
+}
 module.exports = {
   queryExecute,
   fUpdateTableDB,
+  getTransformArrayParam
 }

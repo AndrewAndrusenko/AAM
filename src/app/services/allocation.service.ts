@@ -57,7 +57,7 @@ export class AppAllocationService {
       bcEntryParameters.idtrade=clientTrade.idtrade;
       let cSchemeGroupId = clientTrade.trtype==='BUY'? 'Investment_Buy_Basic':'Investment_Sell_Basic';
       let accountingToCreate$= <any>[]
-      this.AccountingDataService.createFIFOtransactions(clientTrade.trtype==='BUY'? -1 : 1,null,clientTrade.idportfolio,clientTrade.secid,clientTrade.qty,clientTrade.trade_amount/clientTrade.qty, clientTrade.id).pipe (
+      this.accountingTradeService.createFIFOtransactions(clientTrade.trtype==='BUY'? -1 : 1,null,clientTrade.idportfolio,clientTrade.secid,clientTrade.qty,clientTrade.trade_amount/clientTrade.qty, clientTrade.id).pipe (
         tap(data=>data['name']==='error'? this.CommonDialogsService.snackResultHandler(data):createdAccountingTransactions.push(data)),
         filter(data=>data['name']!=='error'),
         switchMap(()=> 
@@ -125,7 +125,7 @@ export class AppAllocationService {
       filter(data=>allocationTable.selection.selected.filter(el=>el.tdate<data[0].FirstOpenedDate).length===0),
       switchMap(()=>this.CommonDialogsService.confirmDialog('Delete accouting for allocated trades ')),
       filter (isConfirmed => isConfirmed.isConfirmed),
-      switchMap(() => this.AccountingDataService.deleteAccountingAndFIFOtransactions (tradesToDelete))  
+      switchMap(() => this.accountingTradeService.deleteAccountingAndFIFOtransactions (tradesToDelete))  
     ).subscribe (deletedTrades=>{
       this.sendDeletedAccounting(deletedTrades);
       allocationTable.selection.clear();

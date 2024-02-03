@@ -27,6 +27,25 @@ export class HandlingCommonTasksService {
     console.log('obj',obj);
     return obj;
   }
+  toNumberRangeNew (value:string, control:AbstractControl,name:string):string|null {
+    let arrayRange = value.split('-')
+    if (arrayRange.length>2||!Number(arrayRange[0])||(arrayRange.length===2&&!Number(arrayRange[1]))) {
+      control.setErrors({incorrectRange:true})
+      return null;
+    } else { 
+      arrayRange.length===1? arrayRange.push(arrayRange[0]):null;
+      return '['+arrayRange.join()+']'
+    };
+  }
+  toDateRangeNew (control:AbstractControl,name:string):string|null {
+    if (!control.value['dateRangeStart']&&!control.value['dateRangeEnd']) {
+      return null
+    } else {
+      let start = control.value['dateRangeStart']? new Date(control.value['dateRangeStart']['_d']).toLocaleDateString() : '01/01/1970';
+      let end = control.value['dateRangeEnd']? new Date(control.value['dateRangeEnd']['_d']).toLocaleDateString() : '01/01/2050';
+      return '['+start+','+end+']'
+    }
+  }
   toDateRange (control:AbstractControl,name:string):any {
     let min = name + '_min';
     let max = name + '_max';

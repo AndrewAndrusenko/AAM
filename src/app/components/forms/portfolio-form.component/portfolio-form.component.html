@@ -1,7 +1,6 @@
-<mat-toolbar color="primary" style="margin-left: 1%;margin-bottom:10px; border-radius: 8px; width: 95%">
+<mat-toolbar color="primary" style="margin-bottom:1%; border-radius: 8px; width: 100%">
   {{action}} portfolio ID {{id.value}}
 </mat-toolbar>
-
 <form class="submit" [formGroup]="newAccountForm">
   <div>
     <button mat-flat-button color="primary" type="submit" 
@@ -68,4 +67,19 @@
   <mat-form-field>
     <input matInput placeholder="portleverage" formControlName="portleverage">
   </mat-form-field>
+  <div *ngIf="summaryShow" style="width: 150%;">
+    <h2 class="mat-form-field">Portfolio Value {{summaryData.npv|currency}}</h2>
+    <h2 class="mat-form-field">Result {{summaryData.PnL|currency}}</h2>
+    <h2 class="mat-form-field">Management Fee {{summaryData.managementFee|currency}}</h2>
+    <h2 class="mat-form-field">Perfomance Fee {{summaryData.perfomanceFee|currency}}</h2>
+  </div>
+  <div *ngIf="id.value!==undefined" style="width: 100%;">
+    <mat-toolbar color="accent" style="margin-bottom:1%; border-radius: 8px;">
+     Fees Schedules
+    </mat-toolbar>
+    <acc-fees-portfolios-with-schedules-table 
+    [id_portfolio]="id.value"
+    [onChanges]="true"
+    ></acc-fees-portfolios-with-schedules-table>
+  </div>
 </form>

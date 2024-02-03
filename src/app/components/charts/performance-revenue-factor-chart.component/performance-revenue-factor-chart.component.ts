@@ -4,6 +4,7 @@ import { AppInvestmentDataServiceService } from 'src/app/services/investment-dat
 import { PortfolioPerformnceData, RevenueFactorData } from 'src/app/models/interfaces.model';
 import { MatSelect } from '@angular/material/select';
 import { number } from 'echarts';
+import { filter } from 'rxjs';
 @Component({
   selector: 'app-performance-revenue-factor-chart',
   templateUrl: './performance-revenue-factor-chart.component.html',
@@ -21,7 +22,7 @@ export class AppPerformanceRevenueFactorChartComponentt  {
   constructor(
   private InvestmentDataService:AppInvestmentDataServiceService, 
   ) {
-    this.InvestmentDataService.recieveRevenueFactorData().subscribe(data=>{
+    this.InvestmentDataService.recieveRevenueFactorData().pipe(filter(data=>data.data.length>0)).subscribe(data=>{
       this.RevenueFactorData=data.data;
       this.portfolios = [...new Set(data.data.map(el=>(el.portfolioname)))]
       this.currencySymbol=data.currencySymbol;

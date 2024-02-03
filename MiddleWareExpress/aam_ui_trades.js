@@ -235,6 +235,17 @@ async function fAllocation(request,response) {
   sql = pgp.as.format(sql,request.body.data);
   db_common_api.queryExecute(sql,response,undefined,request.body.action);
 }
+async function getFIFOtransactions(request,response) {
+  let sql ='SELECT * FROM f_fifo_select_all_trades(${qty}::numrange,${price}::numrange,${tdate}::daterange,${type},${portfoliosList},${secidList},${tradesIDs})';
+  request = db_common_api.getTransformArrayParam(request,['tradesIDs']);
+  sql = pgp.as.format(sql,request.query);
+  sql = sql.replaceAll("'null'::numrange",null);
+  sql = sql.replaceAll("'null'::daterange",null);
+  sql = sql.replaceAll("'null'",null);
+
+  console.log(sql);
+  db_common_api.queryExecute(sql,response,undefined,'getFIFOtransactions');
+}
 module.exports = {
   fGetTradesData,
   fGetAccuredInterest,
@@ -243,5 +254,6 @@ module.exports = {
   fUpdateOrderData,
   fModifyBulkOrder,
   fAllocation,
-  fCreateOrderbyMP
+  fCreateOrderbyMP,
+  getFIFOtransactions
 }

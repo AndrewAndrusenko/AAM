@@ -1,12 +1,18 @@
 
-<h1 class="dialog-headline" *ngIf="dialogType==='confirmDialog'"  style="white-space: pre-line">
+<h1 class="dialog-headline" *ngIf="dialogType==='confirmDialog'"  style="white-space: pre-line"
+cdkDrag
+cdkDragRootElement=".cdk-overlay-pane" 
+cdkDragHandle>
   Please confirm your action:<br> {{actionToConfim.action}} 
 </h1>
-<h1 class="dialog-headline" *ngIf="dialogType==='jsonData'">
+<h1 class="dialog-headline" *ngIf="dialogType==='jsonData'"
+cdkDrag
+cdkDragRootElement=".cdk-overlay-pane" 
+cdkDragHandle>
   {{captionTitle}} 
 </h1>
 
-<div class="content-container"> 
+<div class="content-container" > 
   <ng-container *ngIf="dialogType==='confirmDialog'">
   
   <button mat-raised-button color="success" type="submit" 
@@ -21,7 +27,21 @@ Cancel
 </button>
 </ng-container>
 <ng-container *ngIf="dialogType==='jsonData'">
-  <pre *ngIf="jsonData" style="font-size: larger;"> {{jsonData|json }}</pre>
+  <button color = "accent" mat-raised-button title="Export To Excel"
+  style=" margin-left:1%; font-size: 18px;"
+  (click)="exportToExcel()">
+  Save as XLS 
+  <mat-icon matSuffix >save_alt</mat-icon>
+</button>
+<!--   <pre *ngIf="jsonData" style="font-size:x-large;line-height: 1.5;"> {{jsonData|json }}</pre>
+  <label>{{stringsJSON}}</label> -->
+  <mat-list style="width: 99%;">
+    <mat-list-item *ngFor="let item of stringsJSON">
+      <p style="font-size:larger;white-space:initial;">
+        <span style="color:darkcyan;">{{ item[0]+':' }} </span>  <span style="color: black;">{{item[1]}}</span>
+      </p>
+    </mat-list-item>
+  </mat-list>
   <button mat-raised-button color="success" type="submit" 
   (click)="submitAction()"
   style="margin-top: 10px; width:max-content; font-size: 18px; float: inline-start">

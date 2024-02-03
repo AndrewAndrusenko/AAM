@@ -187,7 +187,8 @@ const appInitializerFn = (accessRestirictions:AuthService) => {
         AppAccFeesMainFormComponent,
         AppAccFeesScheduleFormComponent,
         AppAccFeesPortfoliosWithSchedulesTableComponent,
-        AppAccFeesPortfolioScheduleFormComponent
+        AppAccFeesPortfolioScheduleFormComponent,
+        AppAccFifoTable
      ],
     bootstrap: [AppComponent],
     providers: [ 
@@ -237,5 +238,6 @@ import { AppAccFeesMainFormComponent } from './components/forms/acc-fees-main-fo
 import { AppAccFeesScheduleFormComponent } from './components/forms/acc-fees-schedule-form.component/acc-fees-schedule-form.component';
 import { AppAccFeesPortfoliosWithSchedulesTableComponent } from './components/tables/acc-fees-portfolios-with-schedules-table.component/acc-fees-portfolios-with-schedules-table.component';
 import { AppAccFeesPortfolioScheduleFormComponent } from './components/forms/acc-fees-portfolio-schedule-form.component/acc-fees-portfolio-schedule-form.component';
+import { AppAccFifoTable } from './components/tables/acc-fifo-table.component/acc-fifo-table.component';
 
 

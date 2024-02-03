@@ -22,8 +22,6 @@ export class AppPerformanceTWROiEchartComponentt  {
   private MarketDataService: AppMarketDataService,
   ) {
     this.InvestmentDataService.recievePerformnceData().subscribe(data=>{
-    console.log('per chart get data',);
-
       this.performanceData=data.data;
       this.portfolios = [...new Set(data.data.map(el=>(el.portfolioname)))]
       this.currencySymbol=data.currencySymbol;
