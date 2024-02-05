@@ -9,6 +9,7 @@ import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dia
 import { AppInstrumentTableComponent } from '../../tables/instrument-table.component/instrument-table.component';
 import { AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
+import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
   selector: 'app-structure-strategy-form',
@@ -17,18 +18,19 @@ import { indexDBService } from 'src/app/services/indexDB.service';
 })
 export class AppStructureStrategyFormComponent implements OnInit {
   public editStructureStrategyForm=this.fb.group ({
-    id: [null, {validators: [Validators.required]}],
-    weight_of_child: [null, {validators: [Validators.required,Validators.pattern('-?[0-9]*([0-9.]{0,6})?$')], updateOn: 'blur'} ],
-    sname: [null, { updateOn: 'blur'} ],
+    id: ['', {validators: [Validators.required]}],
+    weight_of_child: [0, {validators: [Validators.required,Validators.pattern('-?[0-9]*([0-9.]{0,6})?$')], updateOn: 'blur'} ],
+    sname: ['', { updateOn: 'blur'} ],
     description: {value:'', disabled: true}, 
-    id_item: {value:'', disabled: false},
-    id_strategy_parent : '',
-    id_strategy_child_integer: [0]
+    id_item: {value:0, disabled: false},
+    id_strategy_parent : 0,
+    id_strategy_child_integer: [0],
+    id_strategy_child:'',
+    user_id:[this.AuthService.userId]
   })
-  
   @Input() disabledControlElements: boolean ;
   @Input() action: string = 'Create'
-  @Input() strategyId: string;
+  @Input() strategyId: number;
   @Input() MP: number;
   dialogRefConfirm: MatDialogRef<AppConfimActionComponent>;
   dialogRef: MatDialogRef<AppInstrumentTableComponent>;
@@ -44,8 +46,11 @@ export class AppStructureStrategyFormComponent implements OnInit {
     private AtuoCompService:AtuoCompleteService,
     private CommonDialogsService:HadlingCommonDialogsService,
     private dialog: MatDialog, 
-    private indexDBServiceS:indexDBService,
-  ) {}
+    private indexDBService:indexDBService,
+    private AuthService:AuthService,  
+
+  ) {
+  }
   ngOnInit(): void {
     this.action !== "Create"? this.editStructureStrategyForm.patchValue(this.data) : null;
     this.action === "Create_Example"?  this.action = "Create" : null;
@@ -54,7 +59,7 @@ export class AppStructureStrategyFormComponent implements OnInit {
     this.disabledControlElements? this.editStructureStrategyForm.disable() : null;
     if (this.MP===2) {
       this.id. setValidators(null);
-      this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios').then (data => this.MPnames = data['data'].filter(el=>el.level===1))
+      this.indexDBService.getIndexDBStaticTables('getModelPortfolios').then (data => this.MPnames = data['data'].filter(el=>el.level===1))
     };
     if (this.MP===1) {
       this.AtuoCompService.getSecidLists();
@@ -77,11 +82,14 @@ export class AppStructureStrategyFormComponent implements OnInit {
     }
   }
   updateStrategyStructureData (action:string){
-       this.id_child_integer.patchValue(+(this.id.value||0))
+    this.fuserID.patchValue(this.AuthService.userId)
+    this.id_child_integer.patchValue(+(this.id.value||0))
+    let dataToUpload = structuredClone(this.editStructureStrategyForm.value);
+    dataToUpload.id_strategy_child=this.id.value;
+    dataToUpload.id_strategy_parent=this.strategyId;
     switch (action) {
       case 'Create':
-        this.editStructureStrategyForm.controls['id_strategy_parent'].setValue(this.strategyId)
-        this.InvestmentDataService.createStrategyStructure (this.editStructureStrategyForm.value).subscribe(result=>{
+        this.InvestmentDataService.updateStrategyStructure (dataToUpload,'Create').subscribe(result=>{
           this.snacksBox(result,'Created');
           this.editStructureStrategyForm.controls['id'].setValue(null);
           this.editStructureStrategyForm.controls['weight_of_child'].setValue(null);
@@ -90,13 +98,13 @@ export class AppStructureStrategyFormComponent implements OnInit {
         })
       break;
       case 'Edit':
-        this.editStructureStrategyForm.addControl('id_strategy_parent',new FormControl(this.strategyId, Validators.required))
-        this.InvestmentDataService.updateStrategyStructure (this.editStructureStrategyForm.value).subscribe(result=>this.snacksBox(result,'Updated'))
+        this.InvestmentDataService.updateStrategyStructure (dataToUpload,'Edit').subscribe(result=>this.snacksBox(result,'Updated'))
+        console.log('uplo',this.fuserID.value, dataToUpload);
       break;
       case 'Delete':
         this.CommonDialogsService.confirmDialog( this.MP!==1? 'Delete ' + this.sname.value : 'Delete ' + this.id.value).pipe(
           filter(isConfirmed => isConfirmed.isConfirmed===true),
-          switchMap(confirmed => this.InvestmentDataService.deleteStrategyStructure(this.id_item.value))
+          switchMap(confirmed => this.InvestmentDataService.updateStrategyStructure(dataToUpload,'Delete'))
         ).subscribe(result => this.snacksBox(result, 'Deleted'))
       break;
     }
@@ -111,6 +119,7 @@ export class AppStructureStrategyFormComponent implements OnInit {
   }
   get  id ()   {return this.editStructureStrategyForm.get('id') } 
   get  id_child_integer ()   {return this.editStructureStrategyForm.get('id_strategy_child_integer') } 
+  get  fuserID ()   {return this.editStructureStrategyForm.get('user_id') } 
   get  id_item ()   {return this.editStructureStrategyForm.get('id_item') } 
   get  sname ()   {return this.editStructureStrategyForm.get('sname') } 
   get  description ()   {return this.editStructureStrategyForm.get('description') } 

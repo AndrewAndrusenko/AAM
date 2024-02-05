@@ -202,6 +202,7 @@ async function geFeesData (request,response) {
   }
   sql = pgp.as.format(sql,request.query);
   sql = sql.replaceAll("'null'",null);
+  console.log(request.query)
   db_common_api.queryExecute(sql,response,undefined,request.query.action);
 
 }

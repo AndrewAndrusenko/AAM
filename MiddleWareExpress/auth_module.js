@@ -7,8 +7,10 @@ const pool = new Pool(config.dbConfig);
 var pgp = require('pg-promise')({
   capSQL: true // to capitalize all generated SQL
 });
+var loginUser;
 async function encryptPsw (accessRole, login , password, response) {
   var hashedPassword;
+  loginUser=login;
   bcrypt.genSalt(10, (err,Salt) => {
     bcrypt.hash(password, Salt, (err, hash) => {
       if (err) {return console.log ('Cannot encrypt');}

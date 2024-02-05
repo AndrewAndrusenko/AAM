@@ -9,99 +9,71 @@ import {HadlingCommonDialogsService } from 'src/app/services/hadling-common-dial
 import {HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import {AuthService } from 'src/app/services/auth.service';
 import {AppAccFeesScheduleFormComponent } from '../../forms/acc-fees-schedule-form.component/acc-fees-schedule-form.component';
-import { MatDialogRef} from '@angular/material/dialog';
-import { FifoTableData } from 'src/app/models/accountng-intefaces.model';
-import { AccountingTradesService } from 'src/app/services/accounting-trades.service';
-import { AppTradeService } from 'src/app/services/trades-service.service';
-import { AbstractControl, FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { COMMA, ENTER } from '@angular/cdk/keycodes';
-import { MatChipInputEvent } from '@angular/material/chips';
+import {MatDialogRef} from '@angular/material/dialog';
+import {AccountingTradesService } from 'src/app/services/accounting-trades.service';
+import {MatChipInputEvent } from '@angular/material/chips';
+import {AppTradeService } from 'src/app/services/trades-service.service';
+import {AbstractControl, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import {COMMA, ENTER } from '@angular/cdk/keycodes';
+import { FifoPositions } from 'src/app/models/accountng-intefaces.model';
 @Component({
-  selector: 'acc-fifo-table',
+  selector: 'acc-fifo-positions-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './acc-fifo-table.component.html',
-  styleUrls: ['./acc-fifo-table.component.scss'],
+  templateUrl: './acc-fifo-positions-table.component.html',
+  styleUrls: ['./acc-fifo-positions-table.component.scss'],
 })
-export class AppAccFifoTable {
+export class AppAccFifoPositionsTable {
   accessState: string = 'none';
   disabledControlElements: boolean = false;
   private subscriptions = new Subscription()
   @Input() readOnly:boolean = false;
   @Input() idFeeMain:number;
   columnsWithHeaders: tableHeaders[] = [  
-    {
-      "fieldName": "out_date",
-      "displayName": "Date"
-    },
-    {
-      "fieldName": "portfolioname",
-      "displayName": "Portfolio"
-    },
-    {
-      "fieldName": "position_type",
-      "displayName": "PosType"
-    },
-    {
-      "fieldName": "allocated_trade",
-      "displayName": "ClientTrade"
-    },
-    {
-      "fieldName": "idtrade",
-      "displayName": "Trade"
-    },
-    {
-      "fieldName": "secid",
-      "displayName": "SecID"
-    },
-    {
-      "fieldName": "tr_type",
-      "displayName": "Type"
-    },
-    {
-      "fieldName": "rest_qty",
-      "displayName": "Rest Qty"
-    },
-    {
-      "fieldName": "qty",
-      "displayName": "Qty"
-    },
-    {
-      "fieldName": "qty_out",
-      "displayName": "Qty Out"
-    },
-    {
-      "fieldName": "profit_loss",
-      "displayName": "PnL"
-    },
-    {
-      "fieldName": "price_in",
-      "displayName": "Price In"
-    },
-    {
-      "fieldName": "price_out",
-      "displayName": "Price Out"
-    },
-    {
-      "fieldName": "id_sell_trade",
-      "displayName": "Close Trade"
-    },
-    {
-      "fieldName": "id_buy_trade",
-      "displayName": "Open Trade"
-    },
-    {
-      "fieldName": "trade_date",
-      "displayName": "Trade Date"
-    },
-    {
-      "fieldName": "id",
-      "displayName": "ID"
-    },
+      {
+        "fieldName": "trade_date",
+        "displayName": "Drade Date"
+      },
+      {
+        "fieldName": "idtrade",
+        "displayName": "Client Trade"
+      },
+      {
+        "fieldName": "ext_trade",
+        "displayName": "Trade"
+      },
+       {
+        "fieldName": "portfolioname",
+        "displayName": "Code"
+      },
+      {
+        "fieldName": "secid",
+        "displayName": "SecID"
+      },
+      {
+        "fieldName": "fifo_rest",
+        "displayName": "Position qty"
+      },
+      {
+        "fieldName": "fifo_cost",
+        "displayName": "Cost $"
+      },
+      {
+        "fieldName": "price_in",
+        "displayName": "Price $"
+      },
+      {
+        "fieldName": "qty",
+        "displayName": "Quantity"
+      },
+      {
+        "fieldName": "qty_out",
+        "displayName": "Qty closed"
+      }
   ]
   columnsToDisplay: string [];
   columnsHeaderToDisplay: string [];
-  dataSource: MatTableDataSource<FifoTableData>;
-  fullDataSource: FifoTableData[];
+  dataSource: MatTableDataSource<FifoPositions>;
+  fullDataSource: FifoPositions[];
   @ViewChild('filterALL', { static: false }) filterALL: ElementRef;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
@@ -110,10 +82,6 @@ export class AppAccFifoTable {
   panelOpenState = false;
   filterednstrumentsLists : Observable<string[]>;
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
-  dataRange = new FormGroup ({
-    dateRangeStart: new FormControl<Date | null>(null),
-    dateRangeEnd: new FormControl<Date | null>(null),
-  });
   searchParametersFG: FormGroup;
   constructor(
     private AuthServiceS:AuthService,  
@@ -130,22 +98,18 @@ export class AppAccFifoTable {
       type:null,
       secidList: [],
       portfoliosList:  [],
-      tradesIDs:  [],
-      tdate : this.dataRange,
+      tdate : new Date(),
       id_bulk_order:null,
-      price:null,
-      qty:null,
     });
   }
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }
   ngOnInit(): void {
-   this.tradesIDs.patchValue(['ClearAll'])
    this.portfoliosList.patchValue(['ClearAll'])
    this.secidList.patchValue(['ClearAll'])
     this.disabledControlElements = this.accessState === 'full'&&this.readOnly===false? false : true;
-    this.multiFilter = (data: FifoTableData, filter: string) => {
+    this.multiFilter = (data: FifoPositions, filter: string) => {
       let filter_array = filter.split(',').map(el=>[el,1]);
       this.columnsToDisplay.forEach(col=>filter_array.forEach(fil=>{
         data[col]&&fil[0].toString().toUpperCase()===(data[col]).toString().toUpperCase()? fil[1]=0:null
@@ -155,24 +119,20 @@ export class AppAccFifoTable {
     };
     this.submitQuery(false,false)
   }
-  updateDataTable (managementFeeData:FifoTableData[]) {
-    this.fullDataSource=managementFeeData;
-    this.dataSource  = new MatTableDataSource(managementFeeData);
+  updateDataTable (fifoPositionsData:FifoPositions[]) {
+    this.fullDataSource=fifoPositionsData;
+    this.dataSource  = new MatTableDataSource(fifoPositionsData);
     this.dataSource.filterPredicate =this.multiFilter
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
   }
-  submitQuery (reset:boolean=false, showSnackResult:boolean=true) {
+ submitQuery (reset:boolean=false, showSnackResult:boolean=true) {
     let searchObj= reset?  {} : this.searchParametersFG.value;
     this.dataSource?.data? this.dataSource.data = null : null;
     searchObj.secidList = [0,1].includes(this.secidList.value.length)&&this.secidList.value[0]==='ClearAll'? null : this.secidList.value.map(el=>el.toUpperCase());
     searchObj.portfoliosList = [0,1].includes(this.portfoliosList.value.length)&&this.portfoliosList.value[0]==='ClearAll'? null : this.portfoliosList.value.map(el=>el.toUpperCase());
-    searchObj.tradesIDs = [0,1].includes(this.tradesIDs.value.length)&&this.tradesIDs.value[0]==='ClearAll'? null 
-    : this.tradesIDs.value.slice(1).map(el=>el.toUpperCase());
-    searchObj.qty = searchObj.qty? this.HandlingCommonTasksS.toNumberRangeNew(this.qty.value,this.qty,'qty'):null;
-    searchObj.price = searchObj.price? this.HandlingCommonTasksS.toNumberRangeNew(this.price.value,this.price,'price'):null;
     searchObj.tdate = this.tdate.value? this.HandlingCommonTasksS.toDateRangeNew(this.tdate, 'tdate') : null;
-    this.accountingTradeService.getFifoTableData(searchObj).subscribe(data => {
+    this.accountingTradeService.getFifoPositions(searchObj).subscribe(data => {
       this.updateDataTable(data)
       showSnackResult? this.CommonDialogsService.snackResultHandler({
         name:data['name'], 
@@ -199,20 +159,13 @@ export class AppAccFifoTable {
   }
   exportToExcel() {
     let dataTypes =  {
-      out_date:'Date',
-      idtrade:'number',
-      qty:'number',
-      qty_out:'number',
-      price_in:'number',
-      price_out:'number',
-      closed:'boolean',
-      idportfolio:'number',
-      trade_date:'Date',
-      id:'number',
-      generated:'Date',
-      profit_loss:'number',
-      id_sell_trade:'number',
-      id_buy_trade:'number',
+      trade_date: 'Date',
+      idtrade :'number',
+      idportfolio :'number' ,
+      fifo_rest :'number',
+      fifo_cost :'number',
+      qty :'number',
+      qty_out :'number'
     }
     let dataToExport =  structuredClone(this.fullDataSource);
     dataToExport.map(el=>{
@@ -225,7 +178,7 @@ export class AppAccFifoTable {
       })
       return el;
     });
-    this.HandlingCommonTasksS.exportToExcel (dataToExport,"FIFOData");  
+    this.HandlingCommonTasksS.exportToExcel (dataToExport,"FIFOPositions");  
   }
   changedValueofChip (value:string, control:AbstractControl)  {control.value.push(value);}
   addNew(event: MatChipInputEvent,control:AbstractControl) {
@@ -245,8 +198,5 @@ export class AppAccFifoTable {
   get  tdate () {return this.searchParametersFG.get('tdate') } 
   get  secidList () {return this.searchParametersFG.get('secidList') } 
   get  portfoliosList () {return this.searchParametersFG.get('portfoliosList') } 
-  get  tradesIDs () {return this.searchParametersFG.get('tradesIDs') } 
-  get  qty () {return this.searchParametersFG.get('qty') } 
-  get  price () {return this.searchParametersFG.get('price') } 
 }
 

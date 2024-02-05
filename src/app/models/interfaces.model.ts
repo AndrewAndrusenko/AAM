@@ -151,12 +151,27 @@ export interface StrategiesGlobalData {
   action:number
 }
 export interface StrategyStructure {
-  id_strategy_parent: number, 
-  id : number, 
-  sname : string,
-  description: string;
-  weight_of_child : number,
-  id_item:number,
+  id_strategy_parent?: number, 
+  id? : string, 
+  sname? : string,
+  isin?:string,
+  name?:string,
+  description?: string;
+  weight_of_child? : number,
+  id_item?:number,
+  id_strategy_child?:string,
+  id_strategy_child_integer?:number,
+  user_id?:number,
+  old_weight?:number
+}
+export interface StrategyStructureHistory extends StrategyStructure {
+  tr_date:Date,
+  type:number,
+  user:number,
+  user_login:string,
+  type_trans:string
+  isin: string, 
+  sec_name: string
 }
 export interface accountTypes {
   typeCode: string, 
