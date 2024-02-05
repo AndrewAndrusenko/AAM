@@ -1,10 +1,10 @@
 -- FUNCTION: public.f_i_model_portfolios_select_mp_structure_for_accounts(bigint[])
 
-DROP FUNCTION IF EXISTS public.f_i_model_portfolios_select_mp_structure_for_accounts(bigint[]);
+-- DROP FUNCTION IF EXISTS public.f_i_model_portfolios_select_mp_structure_for_accounts(bigint[]);
 
 CREATE OR REPLACE FUNCTION public.f_i_model_portfolios_select_mp_structure_for_accounts(
 	p_idportfolios bigint[])
-    RETURNS TABLE(mp_id int, id integer, code character varying, strategy_name character varying, mp_name character varying, mp_weight numeric, instrument character varying, instrument_weight numeric, instrument_corrected_weight numeric, total_type text, total_weight numeric) 
+    RETURNS TABLE(mp_id integer, id integer, code character varying, strategy_name character varying, mp_name character varying, mp_weight numeric, instrument character varying, instrument_weight numeric, instrument_corrected_weight numeric, total_type text, total_weight numeric) 
     LANGUAGE 'plpgsql'
     COST 100
     VOLATILE PARALLEL UNSAFE
@@ -35,7 +35,7 @@ FROM
   dportfolios
   LEFT JOIN dstrategiesglobal ON dstrategiesglobal.id = dportfolios.idstategy
   LEFT JOIN dstrategies_global_structure ON dstrategies_global_structure.id_strategy_parent = dstrategiesglobal.id
-  LEFT JOIN dstrategiesglobal modelportfolios ON dstrategies_global_structure.id_strategy_child::BIGINT = modelportfolios.id
+  LEFT JOIN dstrategiesglobal modelportfolios ON dstrategies_global_structure.id_strategy_child_integer = modelportfolios.id
   LEFT JOIN dstrategies_global_structure mp_structure ON mp_structure.id_strategy_parent = modelportfolios.id
 WHERE
   idportfolio = ANY(p_idportfolios)

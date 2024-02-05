@@ -12,6 +12,7 @@
       </mat-panel-title>
       <mat-panel-description  >
         {{panelOpenState ? 'Hide' : 'Show'}}
+
       </mat-panel-description>
     </mat-expansion-panel-header >
     <button mat-raised-button color="accent" 
@@ -23,15 +24,16 @@
     <mat-checkbox color="primary"  #submitbox checked="false" 
       (click)=" 
         editStrategyForm.markAllAsTouched();
-        editStrategyForm.controls['name'].updateValueAndValidity();"
+        editStrategyForm.controls['sname'].updateValueAndValidity();"
       >Submit Data
     </mat-checkbox>
+
     <form class="submit" [formGroup]="editStrategyForm">
       <mat-form-field style="width: 10%;">
         <input [value]="id"  matInput placeholder="id" formControlName="id" [readonly]="true">
       </mat-form-field>
       <mat-form-field style="width: 35%; font-size: 16px;" appearance="fill">
-        <mat-select  formControlName="level">
+        <mat-select  formControlName="s_level_id">
           <mat-option *ngFor="let level of portfolioTypes" [value]="level.value">
             {{level.viewValue}}
           </mat-option>
@@ -41,7 +43,7 @@
         </mat-error>
       </mat-form-field>
       <mat-form-field>
-        <input matInput placeholder="Name" formControlName="name">
+        <input matInput placeholder="Name" formControlName="sname">
         <mat-error  *ngIf="name?.errors?.['uniqueStrategyCode']">
           Not unique. Please choose another  
         </mat-error>
@@ -61,12 +63,13 @@
         Select Benchmark Account
       </button>
       <mat-form-field style="width: 95%;">
-        <input matInput placeholder="description" formControlName="description">
+        <input matInput placeholder="description" formControlName="s_description">
         <mat-error  *ngIf="Description?.errors?.['required']">
           Required!    
         </mat-error>
       </mat-form-field>
       <p color = 'red' *ngIf="editStrategyForm.invalid"> Please check the form. Data is invalid</p>
+
     </form>
   </mat-expansion-panel>
   <app-table-strategy_structure style="width:130%" #strategyStructureTable
@@ -74,4 +77,22 @@
     [parentStrategyId] = id.value
     >
   </app-table-strategy_structure>
+  <mat-expansion-panel style="margin-left: 1%; margin-top: 0.5%; " class="headers-align"
+  [expanded]="true"
+  (opened)="panelOpenState1 = true"  
+  (closed)="panelOpenState1 = false" >
+  <mat-expansion-panel-header>
+    <mat-panel-title >
+      Strategy Structure History
+    </mat-panel-title>
+    <mat-panel-description  >
+      {{panelOpenState1 ? 'Hide' : 'Show'}}
+    </mat-panel-description>
+  </mat-expansion-panel-header >
+  <app-strategy_structure-hist-table 
+  [ModelPortfolio] = Level.value 
+  [parentStrategyId] = id.value
+  ></app-strategy_structure-hist-table>
+</mat-expansion-panel>
+
 </ng-container>

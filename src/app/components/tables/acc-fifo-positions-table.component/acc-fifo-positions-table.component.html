@@ -49,69 +49,16 @@
           (click)="searchParametersFG.reset();
            secidList.patchValue(['ClearAll']);
            portfoliosList.patchValue(['ClearAll']);
-           tradesIDs.patchValue(['ClearAll'])">
+          ">
           ClearAll
         </button>
       </span>
-      <mat-form-field  class="search-filed"> <!-- Order Type Filter -->
-        <mat-select placeholder="Type" formControlName="type">
-          <mat-option [value]="null">ALL</mat-option>
-          <mat-option [value]="1">BUY</mat-option>
-          <mat-option [value]="-1">SELL</mat-option>
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field appearance="fill"  class="search-filed"> <!-- Date Filter -->
+     <mat-form-field appearance="fill"  class="search-filed"> <!-- Date Filter -->
         <mat-label >Enter a date range</mat-label>
-        <mat-date-range-input [formGroup]="dataRange" [rangePicker]="pickerTDate" >
-          <input matStartDate placeholder="Start date" formControlName="dateRangeStart" >
-          <input matEndDate placeholder="End date" formControlName="tdate" formControlName="dateRangeEnd">
-        </mat-date-range-input>
+          <input matInput placeholder="Report date" [matDatepicker]="pickerTDate" formControlName="tdate" >
         <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
         <mat-datepicker-toggle matSuffix [for]="pickerTDate"></mat-datepicker-toggle>
-        <mat-date-range-picker  #pickerTDate></mat-date-range-picker>
-        <mat-error *ngIf="dataRange.controls.dateRangeStart.hasError('matStartDateInvalid')">Invalid start date</mat-error>
-        <mat-error *ngIf="dataRange.controls.dateRangeEnd.hasError('matEndDateInvalid')">Invalid end date</mat-error>
-      </mat-form-field>
-      <mat-form-field class="search-filed" style="width: 16%;"> <!-- Quantity Filter -->
-        <input matInput placeholder="Quantity OUT (Value or Min - Max)" formControlName="qty">
-        <mat-hint *ngIf="qty.valid">
-          Qty or QtyMin-QtyMax
-        </mat-hint>
-        <mat-error *ngIf="qty?.errors?.['incorrectRange']">
-          Incorrect Range
-        </mat-error>
-      </mat-form-field>
-      <mat-form-field class="search-filed" style="width: 15%;"> <!-- Price Filter -->
-        <input matInput placeholder="Price OUT (Value or Min - Max)" formControlName="price">
-        <mat-hint *ngIf="price.valid">
-          Price or PriceMin-PriceMax
-        </mat-hint>
-        <mat-error *ngIf="price?.errors?.['incorrectRange']">
-          Incorrect Range
-        </mat-error>
-      </mat-form-field>
-      <mat-form-field  appearance="fill" style="width: 40%; " class="search-filed">
-        <mat-chip-list #chipTradesList   >
-          <mat-chip *ngFor="let tradeID of tradesIDs.value" 
-          (removed)="removeNew(tradeID,tradesIDs)"
-          (click)=" clearAllNew($event,tradesIDs);">
-            {{tradeID}}
-            <button matChipRemove *ngIf="tradeID!=='ClearAll'">
-              <mat-icon>cancel</mat-icon>
-            </button>
-          </mat-chip>
-          <input 
-          matInput
-          placeholder="Add tradeID or tradeID1,tradeID2.."
-          [matChipInputFor]="chipTradesList"
-          [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-          [matChipInputAddOnBlur]="true"
-          (matChipInputTokenEnd)="addNew($event,tradesIDs)"
-          matTooltip="Type TradeIDs or paste multiple codes separated by comma.IDs will be searched in three columns (Close Trade or Open Trade or Main Trade)" >
-        </mat-chip-list>
-        <mat-hint style="color:rgb(169, 244, 244);">
-          TradeIDs List (Close Trade or Open Trade or Main Trade)
-        </mat-hint>
+        <mat-datepicker  #pickerTDate></mat-datepicker>
       </mat-form-field>
     </span>
     <p style="margin-top: 1%;">
@@ -179,19 +126,18 @@
         mat-cell *matCellDef="let element" [cdkContextMenuTriggerFor]="instrumentcontextmenu" >
         <span [ngSwitch]="true==true">
           <p *ngSwitchDefault>{{element[column]}}</p>
-
-          <p *ngSwitchCase="['out_date','trade_date','generated'].includes(column)">{{element[column] | date}} </p>
-          <p *ngSwitchCase="['price_in','price_out'].includes(column)">{{element[column]|currency}} </p>
-          <p *ngSwitchCase="['profit_loss'].includes(column)">
-            <span [style.color]="element[column]==0? 'default' : element[column]<0?'indianred':'lightgreen'">{{element[column]|currency}} </span>
-          </p>
-          <p *ngSwitchCase="['idtrade'].includes(column)">
+          <p *ngSwitchCase="['trade_date'].includes(column)">{{element[column] | date}} </p>
+          <p *ngSwitchCase="['trade_date'].includes(column)&&element['idtrade']===null">{{'Position on:'}} </p>
+          <p *ngSwitchCase="['fifo_cost','price_in'].includes(column)">{{element[column]|currency}} </p>
+          <p *ngSwitchCase="['qty_out','qty','fifo_rest','rest'].includes(column)">{{element[column]|currency:' '}} </p>
+          <p *ngSwitchCase="['ext_trade'].includes(column)&&element['ext_trade']!==null">
             <button mat-stroked-button style=" font-size: 18px; margin-top: 5%;"  
             class="navigate-button"  matTooltip="Trade Details"
             (click)=" showTradeDetails (element[column])">
               {{element[column] }}
             </button> 
           </p>
+          <p *ngSwitchCase="['idtrade'].includes(column)&&element['idtrade']===null">{{tdate.value|date}}  </p>
           <p *ngSwitchCase="['feevalue'].includes(column)&&element['column']!==null">
             {{element['fee_type_value']===1? element[column] + '%':element[column] + ''}}  </p>
         </span>
@@ -208,7 +154,7 @@
       </td>
     </ng-container>
     <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
-    <tr mat-row [ngClass]="{'close-row':element.position_type==='Close'}" *matRowDef="let element; columns: columnsToDisplay; let dataindex=dataIndex;"
+    <tr mat-row [ngClass]="{'close-row':element.idtrade===null}" *matRowDef="let element; columns: columnsToDisplay; let dataindex=dataIndex;"
       tabindex=0   >
     </tr>
   </table>

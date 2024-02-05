@@ -21,8 +21,6 @@ import { HandlingTableSelectionService } from 'src/app/services/handling-table-s
 import { SelectionModel } from '@angular/cdk/collections';
 import { indexDBService } from 'src/app/services/indexDB.service';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
-import { number } from 'echarts';
 import { MatSelect } from '@angular/material/select';
 @Component({
   selector: 'app-orders-table',
@@ -259,7 +257,7 @@ export class AppOrderTableComponent {
     .filter(el=>el.ordertype==='Client')
     .map(el=> Number(el.id))
     if (clientOrdersIds.length>0) {
-      this.CommonDialogsService.confirmDialog('Delete Orders').pipe(
+      this.CommonDialogsService.confirmDialog('Delete Orders','Delete').pipe(
         filter(isConfirmed=>isConfirmed.isConfirmed),
         switchMap(()=>this.TradeService.deleteOrders(clientOrdersIds))
       ).subscribe(data => {
@@ -319,8 +317,6 @@ export class AppOrderTableComponent {
     }):this.CommonDialogsService.snackResultHandler({name:'error',detail:'Confirmed or created orders have not been selected'},'CreateBulkOrder');
   }
   openTradeForm (order:orders) {
-    console.log('order',order);
-    console.log('order',order.price_type.toString()==="2",order.price_type);
     let mappedData = [
       {trtype:order.type},
       {tidinstrument:order.secid},
@@ -330,7 +326,6 @@ export class AppOrderTableComponent {
     ];
     order.price_type.toString()==="2"? mappedData[4].secidAutocolmplete=true:null;
     Object.assign(order, ...mappedData);
-    console.log('',...mappedData);
     this.dialogTradeModify = this.dialog.open (AppTradeModifyFormComponent,{minHeight:'600px', minWidth:'60vw', maxWidth:'80vw', maxHeight: '90vh'})
     this.dialogTradeModify.componentInstance.action = 'Create_Example';
     this.dialogTradeModify.componentInstance.tabIndex=0;
@@ -341,7 +336,6 @@ export class AppOrderTableComponent {
   }
   filterByStatus (statuses:MatSelect) {
     let statusArray=statuses.value
-    console.log('',statusArray.length,this.orderStatuses.length,this.showClientOrdersCB.checked);
     statusArray.length===this.orderStatuses.length+1? this.dataSource.data = this.fullOrdersSet :  this.dataSource.data = this.fullOrdersSet.filter(el=>statusArray.includes(el.status))
     this.fullfilteredOrdersSet = this.dataSource.data;
     this.showClientOrdersCB.checked===false? this.dataSource.data = this.excludeOrdersWithParent():null;
@@ -356,12 +350,10 @@ export class AppOrderTableComponent {
     return childOrders;
   }
   excludeOrdersWithParent ():orders[] {
-    console.log('excludeOrdersWithParent',);
     this.fullfilteredOrdersSet = this.dataSource.data;
     return this.dataSource.data.filter(order=>!order.parent_order)
   }
   showClientOrders (show:boolean) {
-    console.log('showClientOrders',);
     this.disabledControlElements=show;
     this.dataSource.data = show? this.fullfilteredOrdersSet.filter(order=>order.ordertype==='Client') : this.fullfilteredOrdersSet.filter(order=>!order.parent_order)
   }

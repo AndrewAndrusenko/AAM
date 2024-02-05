@@ -36,10 +36,8 @@ appServer.use(session({
   saveUninitialized: false,
   cookie: { secure: true }
 }));
-
 appServer.use(jsPassport.initialize());
 appServer.use(jsPassport.session());
-
 jsPassport.serializeUser(function(user, cb) {
  // console.log('serializeUser')
   process.nextTick(function() {
@@ -58,8 +56,6 @@ jsPassport.deserializeUser(function(user, cb) {
     return cb(null, user);
   });
 });
-
-
 jsPassport.use(new LocalStrategy(function verify(username, password, cb) {
 //  console.log('Select')
   pool.query ("SELECT id, accessrole, login, hashed_password FROM public.dusers WHERE login = '" + username + "';", (err, row) => {
@@ -84,8 +80,6 @@ jsPassport.use(new LocalStrategy(function verify(username, password, cb) {
       })
   });
 }));
-
-
 appServer.post ('/auth/', function (req, res, next) { 
   jsPassport.authenticate('local', function(err, user, info)  { 
   console.log('err', err) 
@@ -115,40 +109,22 @@ appServer.get('/nodecls/', function (req, res){
 
 appServer.get ('/auth/userRoles/', auth_module.getUserRoles)
 appServer.get ('/auth/loginsArray/', auth_module.getLoginsArray)
-
 appServer.get ('/accessRestriction/', auth_module.getAccessRestriction)
-
 appServer.post ('/auth/newUser/',auth_module.addNewUser)
-
 appServer.post('/Favorites/newItem/',uiAmmModule.fPutNewFavorite)
-
 appServer.post('/Favorites/deleteItem/',uiAmmModule.fRemoveFavorite)
-
 // -------------Get Tree for Tree Menu UI----------------------
 appServer.get ('/AAM/treeMenu/',  jsPassport.authenticate('session') ,  uiAmmModule.FAmmGetTreeData)
-
 // -------------Get Tree for Tree Menu UI----------------------
 appServer.get ('/AAM/portfolioTable/',  jsPassport.authenticate('session') ,  uiAmmModule.fGetportfolioTable)
-
 appServer.get ('/AAM/ClientData/',  jsPassport.authenticate('session') ,  uiAmmModule.fGetClientData)
-
 appServer.post('/AAM/ClientDataEdit/',jsPassport.authenticate('session') , uiAmmModule.fEditClientData)
-
 appServer.post('/AAM/ClientDataDelete/',jsPassport.authenticate('session') , uiAmmModule.fClientDataDelete)
-
 appServer.post('/AAM/ClientDataCreate/',jsPassport.authenticate('session') , uiAmmModule.fCreateClientData)
-
 appServer.get('/AAM/GetStrategiesList/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fGetStrategiesList)
-
 appServer.get('/AAM/GetStrategyStructure/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fGetStrategyStructure)
-
-appServer.post('/AAM/StrategyGlobalDataCreate/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fStrategyGlobalDataCreate)
-appServer.post('/AAM/StrategyGlobalDataDelete/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fStrategyGlobalDataDelete)
-appServer.post('/AAM/StrategyDataEdit/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fEditStrategyData)
-
-appServer.post('/AAM/StrategyStructureCreate/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fStrategyStructureCreate)
-appServer.post('/AAM/StrategyStructureDelete/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fStrategyStructureDelete)
-appServer.post('/AAM/StrategyStructureEdit/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fStrategyStructureEdit)
+appServer.post('/AAM/StrategyDataUpdate/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fStrategyDataUpdate)
+appServer.post('/AAM/updateStrategyStructure/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fStrategyStructureUpdate)
 /*----------------------PortofoliosData----------------------------------------------------*/
 
 appServer.post('/AAM/AccountCreate/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fAccountCreate)
@@ -164,7 +140,8 @@ appServer.get('/DEA/GetEntryScheme/',jsPassport.authenticate('session') , uiAmmA
 appServer.post('/DEA/fCreateEntryAccountingInsertRow/',jsPassport.authenticate('session') , uiAmmAccountingModule.fCreateEntryAccountingInsertRow)
 
 /*----------------------FIFO---------------------------------------------------------*/
-appServer.get('/DEA/getFIFOtransactions/',jsPassport.authenticate('session') , uiAmmTradeData.getFIFOtransactions)
+appServer.get('/DEA/getFIFOtransactions/',jsPassport.authenticate('session') , uiAmmTradeData.fGetFIFOtransactions)
+appServer.get('/DEA/getFIFOPositions/',jsPassport.authenticate('session') , uiAmmTradeData.fGetFIFOPositions)
 /*----------------------AccountsUI---------------------------------------------------------*/
 appServer.post('/DEA/updateAccountAccounting/',jsPassport.authenticate('session') , uiAmmAccountingModule.fUpdateAccountAccounting)
 /*----------------------LedgerAccountsUI----------------------------------------------------*/

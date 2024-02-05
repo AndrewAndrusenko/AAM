@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, Subject, map, tap } from 'rxjs';
-import { AccountsTableModel, accountTypes, ClientData, InstrumentData, NPVDynamicData, PortfolioPerformnceData, portfolioPositions, RevenueFactorData, StrategiesGlobalData, StrategyStructure } from '../models/interfaces.model';
+import { AccountsTableModel, accountTypes, ClientData, InstrumentData, NPVDynamicData, PortfolioPerformnceData, portfolioPositions, RevenueFactorData, StrategiesGlobalData, StrategyStructure, StrategyStructureHistory } from '../models/interfaces.model';
 import { number } from 'echarts';
 
 @Injectable({
@@ -12,13 +12,14 @@ export class AppInvestmentDataServiceService {
   constructor(private http:HttpClient) { }
   
   private subjectName = new Subject<any>(); 
-  private subjectReloadStrategyStructure = new Subject<any>(); 
+  private subjectReloadStrategyStructure = new Subject<number>(); 
   private subjectReloadPortfoliosData = new Subject<any>(); 
   private subjectReloadClientTable = new Subject<ClientData[]>(); 
   private subjectClientsPortfolios = new Subject<{id:number,code:string}[]>(); 
   private subjectPerformanceData = new Subject<{data: PortfolioPerformnceData[],currencySymbol:string,showChart:boolean}>(); 
   private subjectRevenueFactorData = new Subject<{data: RevenueFactorData[],currencySymbol:string,showChart:boolean}>(); 
   private subjectSummaryPortfolioData = new Subject<{npv:number,managementFee:number,perfomanceFee:number,PnL:number}>(); 
+  private subjectHistoricalPortfolio = new Subject<Map <string,StrategyStructureHistory>>(); 
   
   getPortfoliosData (accountType:string, idportfolio: number, clientId: number, strategyMpName: string, action:string, idFeeMain:number,accessToClientData:string='none'):Observable <AccountsTableModel[]> {
     const params = {
@@ -103,24 +104,22 @@ export class AppInvestmentDataServiceService {
     const params = {'id': id, 'Name' :Name, 'action':action }
     return this.http.get <StrategyStructure[]> ('/api/AAM/GetStrategyStructure/', { params: params } )
   }
-  
-  createStrategy (data:any):Observable <StrategiesGlobalData[]> { 
-    return this.http.post <StrategiesGlobalData[]> ('/api/AAM/StrategyGlobalDataCreate/',{'data': data})
+  getStrategyStructureHistory (p_id_strategy_parent:number) : Observable <StrategyStructureHistory[]>  {
+    return this.http.get <StrategyStructureHistory[]> (
+      '/api/AAM/GetStrategyStructure/', 
+      {params:  {p_id_strategy_parent:p_id_strategy_parent, action:'getStrategyStructureHistory'}})
   }
-  deleteStrategy (id:string):Observable <StrategiesGlobalData[]> {
-    return this.http.post <StrategiesGlobalData[]> ('/api/AAM/StrategyGlobalDataDelete/',{'id': id})
+  sendStrategyStructureHistoryPortfolio (historicalPortfolio: Map <string,StrategyStructureHistory>) {
+    this.subjectHistoricalPortfolio.next(historicalPortfolio);
   }
-  updateStrategy (data:any):Observable <StrategiesGlobalData[]> { 
-    return this.http.post <StrategiesGlobalData[]> ('/api/AAM/StrategyDataEdit/',{'data': data})
+  receiveStrategyStructureHistoryPortfolio ():Observable<Map <string,StrategyStructureHistory>> {
+    return this.subjectHistoricalPortfolio.asObservable()
   }
-  createStrategyStructure (data:any):Observable <StrategyStructure[]> { 
-    return this.http.post <StrategyStructure[]> ('/api/AAM/StrategyStructureCreate/',{'data': data})
-  } 
-  deleteStrategyStructure (id:string):Observable <StrategyStructure[]> { 
-    return this.http.post <StrategyStructure[]> ('/api/AAM/StrategyStructureDelete/',{'id': id})
-  } 
-  updateStrategyStructure (data:any):Observable <StrategyStructure[]> { 
-    return this.http.post <StrategyStructure[]> ('/api/AAM/StrategyStructureEdit/',{'data': data})
+  updateStrategy (data:StrategiesGlobalData,action:string):Observable <StrategiesGlobalData[]> { 
+    return this.http.post <StrategiesGlobalData[]> ('/api/AAM/StrategyDataUpdate/',{data:data, action:action})
+  }
+  updateStrategyStructure (data:StrategyStructure,action:string):Observable <StrategyStructure[]> { 
+    return this.http.post <StrategyStructure[]> ('/api/AAM/updateStrategyStructure/',{data:data, action:action})
   }
   createAccount (data:any) { 
     return this.http.post <AccountsTableModel[]> ('/api/AAM/AccountCreate/',{'data': data})

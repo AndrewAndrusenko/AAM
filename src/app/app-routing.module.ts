@@ -15,7 +15,7 @@ import { OrdersTabComponent } from './components/main-page/tabs/trades-orders-ta
 import { AppTabsComponent } from './components/main-page/tabs.component/tabs.component';
 import { AccAccountsFeesTabComponent } from './components/main-page/tabs/accounting-fees-tab/accounting-fees-tab';
 import { AppaIAccFeesSchedulesTable } from './components/tables/acc-fees-schedules-table.component/acc-fees-schedules-table.component';
-import { AppAccFifoTable } from './components/tables/acc-fifo-table.component/acc-fifo-table.component';
+import { AccAccountsFIFOTabComponent } from './components/main-page/tabs/accounting-fifo-tab/accounting-fifo-tab';
 export const routesTreeMenu =[
   {
     path: "Instruments",
@@ -46,7 +46,7 @@ export const routesTreeMenu =[
   {
     path: "FIFO",
     data: { reuse: true },
-    component: AppAccFifoTable
+    component: AccAccountsFIFOTabComponent
   },
   {
     path: "Transactions",

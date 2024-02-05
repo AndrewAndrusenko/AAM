@@ -268,7 +268,7 @@ we get closest market price for every position
 2|| UI Fee Dictonary Table => Added function to show a list of portfolios attached to the selected fee schedule
 3|| Performance Fee DB => Fixed multiple ranges calculations for performance fee => One range is taken based on amount of profit exeeding high water mark value
 --------------------------------------------------------------------------------------------
-29/01/2024 - 3/01/2024
+29/01/2024 - 3/02/2024
 1|| UI&DB FIFO detailed reporting =>
   Created DB function f_fifo_select_all_trades to select nessesary fifo transactions. The function accepts price range, qty range, date range, lists of portfolios, secids, trades ids as filter parameters. Used new pattern when filter is ignored when its value is null and are used ranges in where clause. Added index based on order by statament
   Created UI table to show FIFO transactions with option to request data using complex search with the same parameters as in DB function. Used class condition on rows to apply different style to close and open transactions.
@@ -282,19 +282,31 @@ we get closest market price for every position
 4|| Middleware server logging => slightly changed logging data message
 5|| Middleware common functions => function to trasfrom arrays according to its type for get requests (when numbers arrives as strings) was moved to shared module
 --------------------------------------------------------------------------------------------
+4/02/2024 - 5/02/2024
+1|| FIFO positions (portfolios) on date reporting =>
+  Created DB function f_fifo_get_cost_pl_detailed and summary.sql to select nessesary fifo positions. The function accepts report date (if omitted by default current date is taken), list of portfolios, list of secids as filter parameters. The function provides with trades details remained in the fifo position on the requested date and demonstrates aggregated position data as well
+  Created UI table to show FIFO positions(aggregated position and trades included in it) with option to request data using complex search with the same parameters as in DB function. 
+--------------------------------------------------------------------------------------------
+6/02/2024-8/02/2024
+1|| Store histrory of a strategies changing structure DB =>
+  Created new DB table public.dstrategies_global_structure_history to store historical data of model portfolio structure changing. Table is a replica of the main table with additional fields to keep track of changing (user, time, type). 
+  Implemented new trigger trg_f_i_dstrategies_global_structure_history.sql to create historical transactions when data in the main table has been modified. Every update transaction creates to two transactions in the history table: one contains new data and the other old data (before update). Delete and Create make only one transaction with the respective type
+  Added new DB function f_i_model_portfolios_select_mp_structure_for_accounts.sql to retrieve historical data in order to be presented in th UI
+2|| UI Strategy changing history table =>  Created table component AppStrategyStructureHistTable to show historical data. Updated middleware layer and etc 
+3|| UI Strategy Form => Added strategy changing history table to the main strategy form. History is retrieved based on strategy id and updated onChange 
+4|| UI show snapshot of historical model portfolio on a given date => 
+  Using Main Strategy Form user is able to view historical model portfolio on the requested date and diffrence between weights on the requested date and current positons. 
+  Function has been created without requesting data from DB. All data is beeing exchanged between components using services, streams and observables. Nessesary historical data is beeing trasferred from history table to the strategy form where it is porcessed and child structure table is updated.
+  Current data is stored inside component and a user is able to restore it witout requesting DB
+
 
 ToDo
 || Store histrory of a portfolio changing strategies
-|| Store histrory of a strategies changing structure
-|| 
 || UI for Accounting Transaction Types and option to allow/block manual editing
 || Revenue Factor Chart add info about management and perfomance fees deducted
 || UI to update/create accounting schemes
-|| UI editing fees data and link it portfolios
 || FIFO Bug possible=> Case of simultaneously two trades which should be netted on FIFO are sent in FIFO function. 
-|| Deducted fees has to be included in PnL and positions perfomance reports => fees transactions with type 4 are considered as cash outs in db function f_i_get_deposits_withdrawals_per_portfolios_on_date.Verify if such approach is correct
     Idea is to sort processing batch according to the FIFO guidelines and execute FIFO function synchronously 
-|| UI: Clients=>Client summary=> Add aggregated NVP data per portfolio and total assets evaluation
 || Investment restrictions
 || any
 || Check UserAccess model for UI, espesically the latest components

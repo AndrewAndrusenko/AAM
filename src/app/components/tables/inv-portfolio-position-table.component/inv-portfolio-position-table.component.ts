@@ -31,8 +31,8 @@ export class AppaInvPortfolioPositionTableComponent {
   @Input() readOnly:boolean = false;
   @Input() UI_portfolio_selection:boolean = true;
   @Input() UI_portfolio_zero:boolean = true;
-  columnsToDisplay = ['portfolio_code','secid','mp_name','fact_weight','current_balance','mtm_positon','weight','planned_position','deviation_percent','order_amount','mtm_rate','roi','total_pl','pl','unrealizedpl','cost_in_position','mtm_date','order_type','order_qty','orders_unaccounted_qty','mtm_dirty_price','cross_rate','strategy_name','cost_full_position','rate_date'];
-  columnsHeaderToDisplay = ['Code','SecID','MP','Fact %','Balance','PositionMTM','MP %','MP_Position','DV%','Deviation','MTM_Rate','ROI','Total PL','FIFO PL','MTM PL','Position Cost','MTM_Date','TypeBS','Deviation Qty','Qty in Active Orders ','MTM_Dirty','CurRate','Strategy','Cost Full','CurDate']
+  columnsToDisplay = ['portfolio_code','secid','mp_name','fact_weight','current_balance','mtm_positon','weight','planned_position','deviation_percent','order_amount','mtm_rate','total_pl','pl','unrealizedpl','cost_in_position','mtm_date','order_type','order_qty','orders_unaccounted_qty','mtm_dirty_price','cross_rate','strategy_name','cost_full_position','rate_date'];
+  columnsHeaderToDisplay = ['Code','SecID','MP','Fact %','Balance','PositionMTM','MP %','MP_Position','DV%','Deviation','MTM_Rate','Total PL','FIFO PL','MTM PL','Position Cost','MTM_Date','TypeBS','Deviation Qty','Qty in Active Orders ','MTM_Dirty','CurRate','Strategy','Cost Full','CurDate']
   dataSource: MatTableDataSource<portfolioPositions>;
   fullDataSource: portfolioPositions[];
   @ViewChild('filterALL', { static: false }) filterALL: ElementRef;
@@ -59,15 +59,15 @@ export class AppaInvPortfolioPositionTableComponent {
     }
   } */
   constructor(
-    private AuthServiceS:AuthService,  
-    private indexDBServiceS:indexDBService,
+    private AuthService:AuthService,  
+    private indexDBService:indexDBService,
     private InvestmentDataService:AppInvestmentDataServiceService, 
     private HandlingCommonTasksS:HandlingCommonTasksService,
     private CommonDialogsService:HadlingCommonDialogsService,
     private AutoCompService:AtuoCompleteService,
     private fb:FormBuilder, 
   ) {
-    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
+    this.accessState = this.AuthService.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.searchParametersFG = this.fb.group ({
       idportfolios:  [],
@@ -82,7 +82,7 @@ export class AppaInvPortfolioPositionTableComponent {
   }
   ngOnInit(): void {
     this.filters? this.setFilters(this.filters):null;
-    this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios').then (data=>this.mp_strategies_list = data['data']);
+    this.indexDBService.getIndexDBStaticTables('getModelPortfolios').then (data=>this.mp_strategies_list = data['data']);
     if (this.useGetClientsPortfolios===true) {
       this.subscriptions.add(this.InvestmentDataService.getClientsPortfolios().pipe(
         tap(() => this.dataSource? this.dataSource.data = null: null),
@@ -91,7 +91,7 @@ export class AppaInvPortfolioPositionTableComponent {
       ).subscribe(portfoliosData=> {
         this.filters = {portfolio_code: portfoliosData.map(el=>el.code)};
         this.setFilters (this.filters);
-      }));
+              }));
     }
     this.subscriptions.add(this.AutoCompService.recieveCurrencyListReady().subscribe(()=>this.report_id_currency.updateValueAndValidity()));
     this.AutoCompService.getCurrencyList();

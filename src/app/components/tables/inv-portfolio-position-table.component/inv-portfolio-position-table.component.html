@@ -118,14 +118,14 @@
         mat-cell *matCellDef="let element" [cdkContextMenuTriggerFor]="instrumentcontextmenu" >
         <span [ngSwitch]="true==true">
           <p *ngSwitchDefault>{{element[column]}}</p>
-          <p *ngSwitchCase="['order_amount','order_qty','mtm_dirty_price','cost_in_position','orders_unaccounted_qty','cost_full_position'].includes(column)">{{element[column]|currency :' '}} </p>
           <p *ngSwitchCase="['current_balance','mtm_positon',
-          'planned_position','current_account_balance',
+          'planned_position','current_account_balance','order_amount','order_qty','mtm_dirty_price','cost_in_position','orders_unaccounted_qty','cost_full_position'].includes(column)">{{element[column]|currency :' '}} </p>
+          <p *ngSwitchCase="[
           'pl','unrealizedpl','total_pl'].includes(column)">
             <span [style.color]="element[column]==0? 'default' : element[column]<0?'indianred':'lightgreen'">{{element[column]|currency :' '}} </span>
           </p>
           <p *ngSwitchCase="['roi','fact_weight','weight'].includes(column)&&element[column]!==null">
-            <span [style.color]="element[column]==0? 'default' : element[column]<0?'indianred':'lightgreen'">{{element[column]|currency :' '}}{{'%'}} </span>
+            <span [style.color]="element[column]==0? 'default' : element[column]<0?'indianred':'white'">{{element[column]|currency :' '}}{{'%'}} </span>
           </p>
           <p *ngSwitchCase="['mtm_date','rate_date'].includes(column)">{{element[column] | date}} </p>
         </span>
