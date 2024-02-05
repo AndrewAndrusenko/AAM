@@ -2,8 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { allocation_fifo, bcTransactionType_Ext } from '../models/interfaces.model';
 import { Observable } from 'rxjs';
-import { FifoTableData } from '../models/accountng-intefaces.model';
-import { param } from 'jquery';
+import { FifoPositions, FifoTableData } from '../models/accountng-intefaces.model';
 @Injectable({
   providedIn: 'root'
 })
@@ -24,7 +23,9 @@ export class AccountingTradesService {
     return this.http.post <allocation_fifo[]>('api/DEA/deleteAccountingFIFOtransactions/',{params:params})
   }
   getFifoTableData (searchObj:any):Observable<FifoTableData[]> {
-    console.log('search',searchObj);
     return this.http.get <FifoTableData[]>('api/DEA/getFIFOtransactions/',{params:searchObj})
+  }
+  getFifoPositions (searchObj:any):Observable<FifoPositions[]> {
+    return this.http.get <FifoPositions[]> ('api/DEA/getFIFOPositions/',{params:searchObj})
   }
 }

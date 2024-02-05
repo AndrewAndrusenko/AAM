@@ -29,3 +29,16 @@ id_buy_trade:number,
 secid:string,
 position_type:string
 }
+export interface FifoPositions {
+  trade_date: Date,
+  idtrade :number,
+  idportfolio :number ,
+  portfolioname  :string,
+  secid :string,
+  fifo_rest :number,
+  fifo_cost :number,
+  price_in :number,
+  qty :number,
+  qty_out :number,
+  ext_trade:number
+}

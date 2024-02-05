@@ -1,0 +1,11 @@
+<mat-tab-group  mat-stretch-tabs  #tabGroup
+(selectedTabChange)="showTabName($event)">
+<mat-tab  label="FIFO Positions" >
+  <acc-fifo-positions-table></acc-fifo-positions-table>
+ </mat-tab>  
+<mat-tab label="FIFO Transactions"> 
+  <acc-fifo-table></acc-fifo-table>
+</mat-tab>
+
+
+</mat-tab-group>

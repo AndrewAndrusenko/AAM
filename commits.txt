@@ -268,7 +268,7 @@ we get closest market price for every position
 2|| UI Fee Dictonary Table => Added function to show a list of portfolios attached to the selected fee schedule
 3|| Performance Fee DB => Fixed multiple ranges calculations for performance fee => One range is taken based on amount of profit exeeding high water mark value
 --------------------------------------------------------------------------------------------
-29/01/2024 - 3/01/2024
+29/01/2024 - 3/02/2024
 1|| UI&DB FIFO detailed reporting =>
   Created DB function f_fifo_select_all_trades to select nessesary fifo transactions. The function accepts price range, qty range, date range, lists of portfolios, secids, trades ids as filter parameters. Used new pattern when filter is ignored when its value is null and are used ranges in where clause. Added index based on order by statament
   Created UI table to show FIFO transactions with option to request data using complex search with the same parameters as in DB function. Used class condition on rows to apply different style to close and open transactions.
@@ -282,11 +282,15 @@ we get closest market price for every position
 4|| Middleware server logging => slightly changed logging data message
 5|| Middleware common functions => function to trasfrom arrays according to its type for get requests (when numbers arrives as strings) was moved to shared module
 --------------------------------------------------------------------------------------------
+4/02/2024 - 5/02/2024
+1|| FIFO positions (portfolios) on date reporting =>
+  Created DB function f_fifo_get_cost_pl_detailed and summary.sql to select nessesary fifo positions. The function accepts report date (if omitted by default current date is taken), list of portfolios, list of secids as filter parameters. The function provides with trades details remained in the fifo position on the requested date and demonstrates aggregated position data as well
+  Created UI table to show FIFO positions(aggregated position and trades included in it) with option to request data using complex search with the same parameters as in DB function. 
+--------------------------------------------------------------------------------------------
 
 ToDo
 || Store histrory of a portfolio changing strategies
 || Store histrory of a strategies changing structure
-|| 
 || UI for Accounting Transaction Types and option to allow/block manual editing
 || Revenue Factor Chart add info about management and perfomance fees deducted
 || UI to update/create accounting schemes

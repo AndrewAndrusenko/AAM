@@ -164,7 +164,8 @@ appServer.get('/DEA/GetEntryScheme/',jsPassport.authenticate('session') , uiAmmA
 appServer.post('/DEA/fCreateEntryAccountingInsertRow/',jsPassport.authenticate('session') , uiAmmAccountingModule.fCreateEntryAccountingInsertRow)
 
 /*----------------------FIFO---------------------------------------------------------*/
-appServer.get('/DEA/getFIFOtransactions/',jsPassport.authenticate('session') , uiAmmTradeData.getFIFOtransactions)
+appServer.get('/DEA/getFIFOtransactions/',jsPassport.authenticate('session') , uiAmmTradeData.fGetFIFOtransactions)
+appServer.get('/DEA/getFIFOPositions/',jsPassport.authenticate('session') , uiAmmTradeData.fGetFIFOPositions)
 /*----------------------AccountsUI---------------------------------------------------------*/
 appServer.post('/DEA/updateAccountAccounting/',jsPassport.authenticate('session') , uiAmmAccountingModule.fUpdateAccountAccounting)
 /*----------------------LedgerAccountsUI----------------------------------------------------*/

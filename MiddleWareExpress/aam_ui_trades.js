@@ -68,7 +68,7 @@ async function fGetTradesData (request,response) {
       sql='SELECT * FROM f_a_b_get_qty_entries_per_allocated_trade(${p_trades_to_check});'
     break;
     case 'f_i_get_trade_details':
-      sql='SELECT * FROM f_i_get_trade_details(${idtrade});'
+      sql='SELECT * FROM f_i_get_trade_details(${idtrade:raw});'
     break;
     case 'getAllocationTrades':
       sql='SELECT dtrades_allocated.id, dtrades_allocated.qty, dtrades_allocated.idtrade, dtrades_allocated.idportfolio, id_order,dtrades_allocated.id_bulk_order, dportfolios.portfolioname, ROUND(dtrades.settlement_amount/dtrades.qty*dtrades_allocated.qty,2) as trade_amount, dtrades.accured_interest,id_settlement_currency, "bAccounts"."accountId","bAccountsDepo"."accountId" as "depoAccountId", "entriesForAllocation".count as "entries",dtrades.tidinstrument as secid,dtrades.tdate,dtrades.trtype,dtrades.price,dtrades.id_price_currency, pl_table.pl as pl, dstrategiesglobal.sname as mp_name ';
@@ -110,6 +110,7 @@ async function fGetTradesData (request,response) {
     break;
   }
   sql = pgp.as.format(sql,request.query);
+  console.log(sql);
   db_common_api.queryExecute(sql,response,undefined,request.query.action ||'GetTradesData');
 }
 async function fGetAccuredInterest (request,response) {
@@ -235,16 +236,22 @@ async function fAllocation(request,response) {
   sql = pgp.as.format(sql,request.body.data);
   db_common_api.queryExecute(sql,response,undefined,request.body.action);
 }
-async function getFIFOtransactions(request,response) {
+async function fGetFIFOtransactions(request,response) {
   let sql ='SELECT * FROM f_fifo_select_all_trades(${qty}::numrange,${price}::numrange,${tdate}::daterange,${type},${portfoliosList},${secidList},${tradesIDs})';
   request = db_common_api.getTransformArrayParam(request,['tradesIDs']);
   sql = pgp.as.format(sql,request.query);
   sql = sql.replaceAll("'null'::numrange",null);
   sql = sql.replaceAll("'null'::daterange",null);
   sql = sql.replaceAll("'null'",null);
-
-  console.log(sql);
   db_common_api.queryExecute(sql,response,undefined,'getFIFOtransactions');
+}
+async function fGetFIFOPositions(request,response) {
+  let sql ='SELECT * FROM f_fifo_get_cost_detailed_data (${tdate},${portfoliosList},${secidList})';
+  request = db_common_api.getTransformArrayParam(request,['tradesIDs']);
+  sql = pgp.as.format(sql,request.query);
+  sql = sql.replaceAll("'null'::numrange",null);
+  sql = sql.replaceAll("'null'",null);
+  db_common_api.queryExecute(sql,response,undefined,'fGetFIFOPositions');
 }
 module.exports = {
   fGetTradesData,
@@ -255,5 +262,6 @@ module.exports = {
   fModifyBulkOrder,
   fAllocation,
   fCreateOrderbyMP,
-  getFIFOtransactions
+  fGetFIFOtransactions,
+  fGetFIFOPositions
 }

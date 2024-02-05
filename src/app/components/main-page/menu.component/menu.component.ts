@@ -45,22 +45,16 @@ constructor(
   }
   tools () {
     let obj = `
-    out_date:Date,
-    idtrade:number,
-    tr_type:number,
-    qty:number,
-    qty_out:number,
-    price_in:number,
-    price_out:number,
-    closed:boolean,
-    idportfolio:number,
-    trade_date:Date,
-    id:number,
-    generated:Date,
-    profit_loss:number,
-    id_sell_trade:number,
-    id_buy_trade:number,
-    secid:string,
+    trade_date: Date,
+    idtrade :number,
+    idportfolio :number ,
+    portfolioname  :string,
+    secid :string,
+    fifo_rest :number,
+    fifo_cost :number,
+    rest :number,
+    qty :number,
+    qty_out :number
   `
   let a = obj.split(',').map(el=> {return {fieldName:el.split(':')[0].trim(),displayName:el.split(':')[0].trim()}});
   console.log('obj',a.flat());

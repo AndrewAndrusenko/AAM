@@ -188,7 +188,9 @@ const appInitializerFn = (accessRestirictions:AuthService) => {
         AppAccFeesScheduleFormComponent,
         AppAccFeesPortfoliosWithSchedulesTableComponent,
         AppAccFeesPortfolioScheduleFormComponent,
-        AppAccFifoTable
+        AppAccFifoTable,
+        AccAccountsFIFOTabComponent,
+        AppAccFifoPositionsTable
      ],
     bootstrap: [AppComponent],
     providers: [ 
@@ -239,5 +241,7 @@ import { AppAccFeesScheduleFormComponent } from './components/forms/acc-fees-sch
 import { AppAccFeesPortfoliosWithSchedulesTableComponent } from './components/tables/acc-fees-portfolios-with-schedules-table.component/acc-fees-portfolios-with-schedules-table.component';
 import { AppAccFeesPortfolioScheduleFormComponent } from './components/forms/acc-fees-portfolio-schedule-form.component/acc-fees-portfolio-schedule-form.component';
 import { AppAccFifoTable } from './components/tables/acc-fifo-table.component/acc-fifo-table.component';
+import { AccAccountsFIFOTabComponent } from './components/main-page/tabs/accounting-fifo-tab/accounting-fifo-tab';
+import { AppAccFifoPositionsTable } from './components/tables/acc-fifo-positions-table.component/acc-fifo-positions-table.component';
 
 
