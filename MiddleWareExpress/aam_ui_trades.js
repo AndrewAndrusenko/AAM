@@ -110,6 +110,7 @@ async function fGetTradesData (request,response) {
     break;
   }
   sql = pgp.as.format(sql,request.query);
+  console.log(sql);
   db_common_api.queryExecute(sql,response,undefined,request.query.action ||'GetTradesData');
 }
 async function fGetAccuredInterest (request,response) {
