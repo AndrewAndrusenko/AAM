@@ -45,6 +45,7 @@ constructor(
   }
   tools () {
     let obj = `
+<<<<<<< HEAD
     id_strategy_parent: number, 
     id : string, 
     sname : string,
@@ -59,6 +60,18 @@ constructor(
     user:number,
     user_login:string,
     type_trans:string
+=======
+    trade_date: Date,
+    idtrade :number,
+    idportfolio :number ,
+    portfolioname  :string,
+    secid :string,
+    fifo_rest :number,
+    fifo_cost :number,
+    rest :number,
+    qty :number,
+    qty_out :number
+>>>>>>> 146d22899a3d679e74c47fecc472184540ca2f1b
   `
   let a = obj.split(',').map(el=> {return {fieldName:el.split(':')[0].trim(),displayName:el.split(':')[0].trim()}});
   console.log('obj',a.flat());
