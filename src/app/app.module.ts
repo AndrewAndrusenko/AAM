@@ -190,8 +190,12 @@ const appInitializerFn = (accessRestirictions:AuthService) => {
         AppAccFeesPortfolioScheduleFormComponent,
         AppAccFifoTable,
         AccAccountsFIFOTabComponent,
+<<<<<<< HEAD
         AppAccFifoPositionsTable,
         AppStrategyStructureHistTable
+=======
+        AppAccFifoPositionsTable
+>>>>>>> 146d22899a3d679e74c47fecc472184540ca2f1b
      ],
     bootstrap: [AppComponent],
     providers: [ 
@@ -244,6 +248,9 @@ import { AppAccFeesPortfolioScheduleFormComponent } from './components/forms/acc
 import { AppAccFifoTable } from './components/tables/acc-fifo-table.component/acc-fifo-table.component';
 import { AccAccountsFIFOTabComponent } from './components/main-page/tabs/accounting-fifo-tab/accounting-fifo-tab';
 import { AppAccFifoPositionsTable } from './components/tables/acc-fifo-positions-table.component/acc-fifo-positions-table.component';
+<<<<<<< HEAD
 import { AppStrategyStructureHistTable } from './components/tables/strategy_structure-hist-table.component/strategy_structure-hist-table.component';
+=======
+>>>>>>> 146d22899a3d679e74c47fecc472184540ca2f1b
 
 

@@ -287,6 +287,7 @@ we get closest market price for every position
   Created DB function f_fifo_get_cost_pl_detailed and summary.sql to select nessesary fifo positions. The function accepts report date (if omitted by default current date is taken), list of portfolios, list of secids as filter parameters. The function provides with trades details remained in the fifo position on the requested date and demonstrates aggregated position data as well
   Created UI table to show FIFO positions(aggregated position and trades included in it) with option to request data using complex search with the same parameters as in DB function. 
 --------------------------------------------------------------------------------------------
+<<<<<<< HEAD
 6/02/2024-8/02/2024
 1|| Store histrory of a strategies changing structure DB =>
   Created new DB table public.dstrategies_global_structure_history to store historical data of model portfolio structure changing. Table is a replica of the main table with additional fields to keep track of changing (user, time, type). 
@@ -302,6 +303,12 @@ we get closest market price for every position
 
 ToDo
 || Store histrory of a portfolio changing strategies
+=======
+
+ToDo
+|| Store histrory of a portfolio changing strategies
+|| Store histrory of a strategies changing structure
+>>>>>>> 146d22899a3d679e74c47fecc472184540ca2f1b
 || UI for Accounting Transaction Types and option to allow/block manual editing
 || Revenue Factor Chart add info about management and perfomance fees deducted
 || UI to update/create accounting schemes
