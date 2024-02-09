@@ -269,6 +269,7 @@ we get closest market price for every position
 3|| Performance Fee DB => Fixed multiple ranges calculations for performance fee => One range is taken based on amount of profit exeeding high water mark value
 --------------------------------------------------------------------------------------------
 29/01/2024 - 3/02/2024
+29/01/2024 - 3/02/2024
 1|| UI&DB FIFO detailed reporting =>
   Created DB function f_fifo_select_all_trades to select nessesary fifo transactions. The function accepts price range, qty range, date range, lists of portfolios, secids, trades ids as filter parameters. Used new pattern when filter is ignored when its value is null and are used ranges in where clause. Added index based on order by statament
   Created UI table to show FIFO transactions with option to request data using complex search with the same parameters as in DB function. Used class condition on rows to apply different style to close and open transactions.
