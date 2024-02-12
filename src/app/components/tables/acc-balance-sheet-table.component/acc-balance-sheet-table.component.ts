@@ -1,15 +1,15 @@
 import { Component, ViewEncapsulation, EventEmitter, Output, ViewChild} from '@angular/core';
 import { MatPaginator as MatPaginator} from '@angular/material/paginator';
 import { MatSort} from '@angular/material/sort';
-import { Subscription, filter, firstValueFrom } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import { animate, state, style, transition, trigger} from '@angular/animations';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { bAccountsEntriesList, bBalanceFullData, bcTransactionType_Ext } from 'src/app/models/interfaces.model';
+import { bAccountsEntriesList, bBalanceFullData, bcTransactionType_Ext } from 'src/app/models/accountng-intefaces.model';
 import { AppAccountingService } from 'src/app/services/accounting.service';
 import { COMMA, ENTER} from '@angular/cdk/keycodes';
 import { MatChipInputEvent} from '@angular/material/chips';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { MatOption } from '@angular/material/core';
 import { AppTableAccAccountsComponent } from '../acc-accounts-table.component/acc-accounts-table.component';
 import { AppTableAccEntriesComponent } from '../acc-entries-table.component/acc-entries-table.component';
@@ -20,7 +20,6 @@ import { menuColorGl } from 'src/app/models/constants.model';
 import { formatNumber } from '@angular/common';
 import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import { AuthService } from 'src/app/services/auth.service';
-import { ReadableStreamDefaultReader } from 'stream/web';
 @Component({
   selector: 'app-table-balance-sheet',
   templateUrl: './acc-balance-sheet-table.component.html',

@@ -14,6 +14,7 @@ const uiAmmCurrencyData = require ('./aam_currenciesData')
 const uiAmmFeesData = require ('./aam_feesData')
 const RedisService = require ('./redis')
 const auth_module = require('./auth_module');
+const uiAmmAccoutingSchemes = require('./amm_accounting_schemes');
 const bcrypt = require('bcryptjs');
 const config = require('./db_config');
 const Pool = require('pg').Pool;
@@ -205,6 +206,10 @@ appServer.post('/AAM/updateFeesScheduleData/',jsPassport.authenticate('session')
 appServer.post('/AAM/updateFeesEntryInfo/',jsPassport.authenticate('session'), uiAmmFeesData.fupdateFeesEntryInfo)
 
 appServer.get('/AAM/getTaxesData/',jsPassport.authenticate('session'), uiAmmFeesData.fgetTaxes)
+/*----------------------AccountingSchemesData----------------------------------------------------*/
+appServer.get('/DEA/getAccountingSchemes/',jsPassport.authenticate('session'), uiAmmAccoutingSchemes.getAccountingSchemes)
+appServer.post('/DEA/updateTransactionTypes/',jsPassport.authenticate('session'), uiAmmAccoutingSchemes.updateTransactionTypes)
+
 
 // RedisService.TestRedis();
 // RedisService.redisSetInstrumentList();

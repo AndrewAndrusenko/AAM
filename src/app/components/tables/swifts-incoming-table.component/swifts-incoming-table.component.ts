@@ -4,7 +4,7 @@ import {MatSort} from '@angular/material/sort';
 import {Subject, Subscription, takeUntil } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
-import { bAccountsEntriesList, cFormValidationLog, SWIFTSGlobalListmodel } from 'src/app/models/interfaces.model';
+import { bAccountsEntriesList, SWIFTSGlobalListmodel } from 'src/app/models/accountng-intefaces.model';
 import { AppAccountingService } from 'src/app/services/accounting.service';
 import { SelectionModel } from '@angular/cdk/collections';
 import { HandlingTableSelectionService } from 'src/app/services/handling-table-selection.service';
@@ -17,6 +17,7 @@ import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dia
 import { formatDate, formatNumber } from '@angular/common';
 import { AuthService } from 'src/app/services/auth.service';
 import { MatCalendarCellClassFunction } from '@angular/material/datepicker';
+import { cFormValidationLog } from 'src/app/models/interfaces.model';
 @Component({
   selector: 'app-swifts-incoming-table',
   templateUrl: './swifts-incoming-table.component.html',

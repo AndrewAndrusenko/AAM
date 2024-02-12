@@ -15,7 +15,6 @@ interface cacheAAM {
 })
 export class indexDBService {
   constructor(
-    private MarketDataService: AppMarketDataService,
     private dbService: NgxIndexedDBService,
     private AccountingDataService:AppAccountingService, 
     private InvestmentDataService : AppInvestmentDataServiceService,   

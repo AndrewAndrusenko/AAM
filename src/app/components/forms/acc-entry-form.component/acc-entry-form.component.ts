@@ -3,7 +3,7 @@ import { AsyncValidatorFn, FormBuilder, FormGroup, NgForm, ValidationErrors, Val
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators.service';
 import { AppAccountingService } from 'src/app/services/accounting.service';
-import { bcTransactionType_Ext, cFormValidationLog } from 'src/app/models/interfaces.model';
+import { cFormValidationLog } from 'src/app/models/interfaces.model';
 import { AppTableAccLedgerAccountsComponent } from '../../tables/acc-accounts-ledger-table.component/acc-accounts-ledger-table.component';
 import { AppTableAccAccountsComponent } from '../../tables/acc-accounts-table.component/acc-accounts-table.component';
 import { COMMA, ENTER} from '@angular/cdk/keycodes';
@@ -11,6 +11,7 @@ import { distinctUntilChanged, filter, Subject, Subscription } from 'rxjs';
 import { LogProcessingService } from 'src/app/services/log-processing.service';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
+import { bcTransactionType_Ext } from 'src/app/models/accountng-intefaces.model';
 @Component({
   selector: 'app-acc-entry-modify-form',
   templateUrl: './acc-entry-form.component.html',

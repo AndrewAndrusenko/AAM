@@ -191,7 +191,10 @@ const appInitializerFn = (accessRestirictions:AuthService) => {
         AppAccFifoTable,
         AccAccountsFIFOTabComponent,
         AppAccFifoPositionsTable,
-        AppStrategyStructureHistTable
+        AppStrategyStructureHistTable,
+        AccAccountsSchemesTabComponent,
+        AppaIAccTransactionTypesTable,
+        AppAccTransactionTypesFormComponent
      ],
     bootstrap: [AppComponent],
     providers: [ 
@@ -245,5 +248,8 @@ import { AppAccFifoTable } from './components/tables/acc-fifo-table.component/ac
 import { AccAccountsFIFOTabComponent } from './components/main-page/tabs/accounting-fifo-tab/accounting-fifo-tab';
 import { AppAccFifoPositionsTable } from './components/tables/acc-fifo-positions-table.component/acc-fifo-positions-table.component';
 import { AppStrategyStructureHistTable } from './components/tables/strategy_structure-hist-table.component/strategy_structure-hist-table.component';
+import { AccAccountsSchemesTabComponent } from './components/main-page/tabs/accounting-schemes-tab/accounting-schemes-tab';
+import { AppaIAccTransactionTypesTable } from './components/tables/acc-transaction-types-table.component/acc-transaction-types-table.component';
+import { AppAccTransactionTypesFormComponent } from './components/forms/acc-transaction-types-form.component/acc-transaction-types-form.component';
 
 

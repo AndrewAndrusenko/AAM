@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
-import { bAccountsEntriesList, cFormValidationLog } from '../models/interfaces.model';
+import { bAccountsEntriesList } from '../models/accountng-intefaces.model';
+import { cFormValidationLog } from '../models/interfaces.model';
 
 @Injectable({
   providedIn: 'root'

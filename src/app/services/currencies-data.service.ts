@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { currencyRate, currencyRateList, marketSourceSegements } from '../models/interfaces.model';
-import { Observable, Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Injectable({

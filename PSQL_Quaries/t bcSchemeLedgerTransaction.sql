@@ -1,0 +1,2 @@
+SELECT "ledgerID", "dateTime", "ledgerID_Debit", id, amount, "accountNo", "entryDetails", "cSchemeGroupId", "cDate", "cxActTypeCode_Ext", "cxActTypeCode", "cLedgerType", "XactTypeCode", "XactTypeCode_Ext", "extTransactionId", idtrade
+	FROM public."bcSchemeLedgerTransaction";

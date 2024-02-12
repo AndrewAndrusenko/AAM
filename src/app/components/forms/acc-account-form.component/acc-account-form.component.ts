@@ -5,13 +5,14 @@ import { AppConfimActionComponent } from '../../common-forms/app-confim-action/a
 import { AppSnackMsgboxComponent } from '../../common-forms/app-snack-msgbox/app-snack-msgbox.component';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators.service';
 import { AppAccountingService } from 'src/app/services/accounting.service';
-import { ClientData, bcAccountType_Ext, bcEnityType } from 'src/app/models/interfaces.model';
+import { bcAccountType_Ext, bcEnityType } from 'src/app/models/accountng-intefaces.model';
 import { AppClientsTableComponent } from '../../tables/clients-table.component/clients-table.component';
 import { TablePortfolios } from '../../tables/portfolios-table.component/portfolios-table.component';
 import { Observable, Subscription, distinctUntilChanged, filter, map, startWith, switchMap, tap } from 'rxjs';
 import { MatTabGroup as MatTabGroup } from '@angular/material/tabs';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
+import { ClientData } from 'src/app/models/interfaces.model';
 
 @Component({
   selector: 'app-acc-account-modify-form',

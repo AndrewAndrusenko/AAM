@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { lastValueFrom, Observable } from 'rxjs';
-import { bcParametersSchemeAccTrans } from '../models/interfaces.model';
+import { lastValueFrom } from 'rxjs';
+import { bcParametersSchemeAccTrans } from '../models/accountng-intefaces.model';
 import { AppAccountingService } from './accounting.service';
 
 @Injectable({

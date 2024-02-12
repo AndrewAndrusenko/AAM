@@ -3,7 +3,7 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarVerticalPosition } from '@angular/material/snack-bar';
 import { AppConfimActionComponent } from '../components/common-forms/app-confim-action/app-confim-action.component';
 import { Observable } from 'rxjs/internal/Observable';
-import { dbErrorsMap } from '../models/interfaces.model';
+import { dbErrorsMap } from '../models/errorsDescriptions';
 
 @Injectable({
   providedIn: 'root'

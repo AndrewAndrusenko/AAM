@@ -1,6 +1,5 @@
 const db_common_api = require('./db_common_api');
 var pgp = require ('pg-promise')({capSQL:true});
-const https = require('https');
 async function fupdateFeesData (request, response) {
   let fields = ['fee_type', 'fee_code', 'fee_description', 'id_fee_period', 'fee_object_type']
  db_common_api.fUpdateTableDB ('dfees_main',fields,'id',request, response)

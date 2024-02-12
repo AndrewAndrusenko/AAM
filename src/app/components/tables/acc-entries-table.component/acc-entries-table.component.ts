@@ -5,7 +5,7 @@ import {Subscription, filter, tap } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { bAccountsEntriesList, bcTransactionType_Ext, tableHeaders } from 'src/app/models/interfaces.model';
+import { bAccountsEntriesList, bcTransactionType_Ext } from 'src/app/models/accountng-intefaces.model';
 import { AppAccountingService } from 'src/app/services/accounting.service';
 import { AppAccEntryModifyFormComponent } from '../../forms/acc-entry-form.component/acc-entry-form.component';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
@@ -23,6 +23,7 @@ import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
 import { HandlingTableSelectionService } from 'src/app/services/handling-table-selection.service';
 import { SelectionModel } from '@angular/cdk/collections';
+import { tableHeaders } from 'src/app/models/interfaces.model';
 @Component({
   selector: 'app-table-acc-entries',
   templateUrl: './acc-entries-table.component.html',

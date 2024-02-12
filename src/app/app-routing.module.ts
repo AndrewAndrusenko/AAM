@@ -16,6 +16,7 @@ import { AppTabsComponent } from './components/main-page/tabs.component/tabs.com
 import { AccAccountsFeesTabComponent } from './components/main-page/tabs/accounting-fees-tab/accounting-fees-tab';
 import { AppaIAccFeesSchedulesTable } from './components/tables/acc-fees-schedules-table.component/acc-fees-schedules-table.component';
 import { AccAccountsFIFOTabComponent } from './components/main-page/tabs/accounting-fifo-tab/accounting-fifo-tab';
+import { AccAccountsSchemesTabComponent } from './components/main-page/tabs/accounting-schemes-tab/accounting-schemes-tab';
 export const routesTreeMenu =[
   {
     path: "Instruments",
@@ -82,6 +83,11 @@ export const routesTreeMenu =[
     path: "Fees",
     data: { reuse: true },
     component: AppaIAccFeesSchedulesTable
+  },
+  {
+    path: "Schemes",
+    data: { reuse: true },
+    component: AccAccountsSchemesTabComponent
   },
   
 ]

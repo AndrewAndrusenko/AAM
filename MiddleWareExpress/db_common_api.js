@@ -22,6 +22,7 @@ async function queryExecute (sql, response, responseType, sqlID) {
   })
 } 
 async function fUpdateTableDB (table, fields,idfieldName, request, response,dates) {
+  console.log('',request.body);
   return new Promise ((resolve) => {
     dates = !dates? []:dates; 
     let fieldsWithQuetes =  fields.join('","')

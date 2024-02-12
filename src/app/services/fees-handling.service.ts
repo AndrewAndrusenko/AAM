@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HadlingCommonDialogsService } from './hadling-common-dialogs.service';
 import { AppAccountingService } from './accounting.service';
 import { BehaviorSubject, EMPTY, Observable, ReplaySubject, Subject, catchError, filter, forkJoin, from, map, switchMap, tap } from 'rxjs';
-import { bAccountTransaction, bLedgerTransaction } from '../models/interfaces.model';
+import { bAccountTransaction, bLedgerTransaction } from '../models/accountng-intefaces.model';
 import { AccountingTradesService } from './accounting-trades.service';
 import { HttpClient } from '@angular/common/http';
 import { formatNumber } from '@angular/common';

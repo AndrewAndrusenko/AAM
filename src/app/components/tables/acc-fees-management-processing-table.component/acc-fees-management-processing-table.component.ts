@@ -12,7 +12,6 @@ import {HadlingCommonDialogsService } from 'src/app/services/hadling-common-dial
 import {HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import {AuthService } from 'src/app/services/auth.service';
 import {AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
-import {indexDBService } from 'src/app/services/indexDB.service';
 import { AppFeesHandlingService } from 'src/app/services/fees-handling.service';
 import { HandlingTableSelectionService } from 'src/app/services/handling-table-selection.service';
 import { SelectionModel } from '@angular/cdk/collections';

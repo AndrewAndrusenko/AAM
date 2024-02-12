@@ -1,0 +1,52 @@
+<mat-toolbar color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4"
+cdkDrag
+cdkDragRootElement=".cdk-overlay-pane" 
+cdkDragHandle>
+  <span>{{action}} Transaction Type ID {{id?.value}}</span>
+  <span class="example-spacer"></span>
+</mat-toolbar>
+<mat-checkbox style= "font-size: 14px; color:rgb(255, 255, 255); padding: 1%;" #submitbox checked="false" 
+  (click)=" TransactionTypeForm.markAllAsTouched();
+  TransactionTypeForm.markAllAsTouched();"
+  >Submit Data
+</mat-checkbox>
+<button mat-raised-button color="primary" 
+  [disabled]="!(TransactionTypeForm.valid && submitbox.checked)"
+  (click)="updateInstrumentData(action)"
+  style="margin-top: 1px; width: 20%; font-size: large; margin-left: 1%;">
+  {{action}} Transaction Type 
+</button>
+<form class="submit" [formGroup]="TransactionTypeForm">
+  <h3 style="color:rgb(177, 174, 174)" *ngIf="TransactionTypeForm.valid"> 
+    To save data please select 'Submit data' check and then press button 
+  </h3>
+  <mat-form-field style="width: 10%;" title="Code">
+    <input matInput placeholder="Code" formControlName="xActTypeCode_Ext"  >
+    <mat-hint class='mat-error' *ngIf="xActTypeCode_Ext.errors?.['required']">
+      Required!
+    </mat-hint>
+  </mat-form-field>
+  <mat-form-field style="width: 25%;" title="Type">
+    <mat-select placeholder="Type" formControlName="code2">
+      <mat-option *ngFor="let type of TransactionTypes" [value]="type[0]">
+        {{type[1]}}
+      </mat-option>
+    </mat-select>
+    <mat-hint class='mat-error' *ngIf="code2.errors?.['required']">
+      Required!
+    </mat-hint>
+  </mat-form-field>
+  <mat-form-field style="width: 40%;" title="description">
+    <input matInput placeholder="description" formControlName="description"  >
+    <mat-hint class='mat-error' *ngIf="description.errors?.['required']">
+      Required!
+    </mat-hint>
+  </mat-form-field>
+  <mat-form-field style="width: 15%;" title="Manual Edit">
+    <mat-select placeholder="Manual Edit" formControlName="manual_edit_forbidden">
+      <mat-option  [value]="true">Forbidden</mat-option>
+      <mat-option  [value]="false">Allowed</mat-option>
+    </mat-select>
+  </mat-form-field>
+  <h3 style="color:rgb(252, 113, 113)" *ngIf="TransactionTypeForm.invalid"> Please check the form. Data is invalid</h3>
+</form>

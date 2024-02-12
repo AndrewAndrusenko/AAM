@@ -9,7 +9,6 @@ import { formatNumber } from '@angular/common';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { AppFeesHandlingService } from 'src/app/services/fees-handling.service';
 import { FeesMainData } from 'src/app/models/fees-interfaces.model';
-import { AppAccountingService } from 'src/app/services/accounting.service';
 import { Subscription } from 'rxjs';
 import { tableHeaders } from 'src/app/models/interfaces.model';
 import { AppAccFeesMainFormComponent } from '../../forms/acc-fees-main-form.component/acc-fees-main-form.component';

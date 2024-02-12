@@ -105,7 +105,7 @@ export class AppAccFifoTable {
   @ViewChild('filterALL', { static: false }) filterALL: ElementRef;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
-  multiFilter?: (data: any, filter: string) => boolean;
+  multiFilter?: (data: FifoTableData, filter: string) => boolean;
   refFeeForm : MatDialogRef<AppAccFeesScheduleFormComponent>
   panelOpenState = false;
   filterednstrumentsLists : Observable<string[]>;
@@ -163,7 +163,15 @@ export class AppAccFifoTable {
     this.dataSource.sort = this.sort;
   }
   submitQuery (reset:boolean=false, showSnackResult:boolean=true) {
-    let searchObj= reset?  {} : this.searchParametersFG.value;
+    let searchObj:{type:number,
+      secidList: string[],
+      portfoliosList:  string[],
+      tradesIDs:  number[],
+      tdate : string,
+      id_bulk_order:null,
+      price:string,
+      qty:string}
+    searchObj = reset?  {} : this.searchParametersFG.value;
     this.dataSource?.data? this.dataSource.data = null : null;
     searchObj.secidList = [0,1].includes(this.secidList.value.length)&&this.secidList.value[0]==='ClearAll'? null : this.secidList.value.map(el=>el.toUpperCase());
     searchObj.portfoliosList = [0,1].includes(this.portfoliosList.value.length)&&this.portfoliosList.value[0]==='ClearAll'? null : this.portfoliosList.value.map(el=>el.toUpperCase());
@@ -182,12 +190,12 @@ export class AppAccFifoTable {
   showTradeDetails (idtrade:number) {
     this.TradeService.getTradeDetails(idtrade).subscribe(data=>this.CommonDialogsService.jsonDataDialog(data[0],'Trade Details'))
   }
-  updateFilter (el: any) {
+  updateFilter (el: KeyboardEvent) {
     this.filterALL.nativeElement.value = this.filterALL.nativeElement.value + el+',';
     this.dataSource.filter = this.filterALL.nativeElement.value.slice(0,-1).trim().toLowerCase();
     (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
   }
-  applyFilter(event: any) {
+  applyFilter(event: KeyboardEvent) {
     const filterValue = (event.target as HTMLInputElement).value 
     this.dataSource.filter = filterValue.trim().toLowerCase();
     this.dataSource.paginator? this.dataSource.paginator.firstPage():null;

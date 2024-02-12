@@ -77,7 +77,7 @@ export class AppAccFifoPositionsTable {
   @ViewChild('filterALL', { static: false }) filterALL: ElementRef;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
-  multiFilter?: (data: any, filter: string) => boolean;
+  multiFilter?: (data: FifoPositions, filter: string) => boolean;
   refFeeForm : MatDialogRef<AppAccFeesScheduleFormComponent>
   panelOpenState = false;
   filterednstrumentsLists : Observable<string[]>;
@@ -95,11 +95,9 @@ export class AppAccFifoPositionsTable {
     this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.searchParametersFG = this.fb.group ({
-      type:null,
       secidList: [],
       portfoliosList:  [],
       tdate : new Date(),
-      id_bulk_order:null,
     });
   }
   ngOnDestroy(): void {
@@ -114,7 +112,7 @@ export class AppAccFifoPositionsTable {
       this.columnsToDisplay.forEach(col=>filter_array.forEach(fil=>{
         data[col]&&fil[0].toString().toUpperCase()===(data[col]).toString().toUpperCase()? fil[1]=0:null
       })
-        );
+    );
       return !filter || filter_array.reduce((acc,val)=>acc+Number(val[1]),0)===0;
     };
     this.submitQuery(false,false)
@@ -127,7 +125,12 @@ export class AppAccFifoPositionsTable {
     this.dataSource.sort = this.sort;
   }
  submitQuery (reset:boolean=false, showSnackResult:boolean=true) {
-    let searchObj= reset?  {} : this.searchParametersFG.value;
+    let searchObj:{
+      secidList: string[],
+      portfoliosList: string [],
+      tdate : string
+    }
+    searchObj = reset?  {} : this.searchParametersFG.value;
     this.dataSource?.data? this.dataSource.data = null : null;
     searchObj.secidList = [0,1].includes(this.secidList.value.length)&&this.secidList.value[0]==='ClearAll'? null : this.secidList.value.map(el=>el.toUpperCase());
     searchObj.portfoliosList = [0,1].includes(this.portfoliosList.value.length)&&this.portfoliosList.value[0]==='ClearAll'? null : this.portfoliosList.value.map(el=>el.toUpperCase());
@@ -142,12 +145,12 @@ export class AppAccFifoPositionsTable {
   showTradeDetails (idtrade:number) {
     this.TradeService.getTradeDetails(idtrade).subscribe(data=>this.CommonDialogsService.jsonDataDialog(data[0],'Trade Details'))
   }
-  updateFilter (el: any) {
+  updateFilter (el: KeyboardEvent) {
     this.filterALL.nativeElement.value = this.filterALL.nativeElement.value + el+',';
     this.dataSource.filter = this.filterALL.nativeElement.value.slice(0,-1).trim().toLowerCase();
     (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
   }
-  applyFilter(event: any) {
+  applyFilter(event: KeyboardEvent) {
     const filterValue = (event.target as HTMLInputElement).value 
     this.dataSource.filter = filterValue.trim().toLowerCase();
     this.dataSource.paginator? this.dataSource.paginator.firstPage():null;

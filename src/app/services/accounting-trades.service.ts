@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { allocation_fifo, bcTransactionType_Ext } from '../models/interfaces.model';
+import { allocation_fifo } from '../models/interfaces.model';
 import { Observable } from 'rxjs';
-import { FifoPositions, FifoTableData } from '../models/accountng-intefaces.model';
+import { FifoPositions, FifoTableData, bcTransactionType_Ext } from '../models/accountng-intefaces.model';
 @Injectable({
   providedIn: 'root'
 })
@@ -22,10 +22,21 @@ export class AccountingTradesService {
     const params = {idtrades:idtrades}
     return this.http.post <allocation_fifo[]>('api/DEA/deleteAccountingFIFOtransactions/',{params:params})
   }
-  getFifoTableData (searchObj:any):Observable<FifoTableData[]> {
+  getFifoTableData (searchObj:{type:number,
+    secidList: string[],
+    portfoliosList:  string[],
+    tradesIDs:  number[],
+    tdate : string,
+    id_bulk_order:null,
+    price:string,
+    qty:string}):Observable<FifoTableData[]> {
     return this.http.get <FifoTableData[]>('api/DEA/getFIFOtransactions/',{params:searchObj})
   }
-  getFifoPositions (searchObj:any):Observable<FifoPositions[]> {
+  getFifoPositions (searchObj:{
+    secidList: string[],
+    portfoliosList: string [],
+    tdate : string
+  }):Observable<FifoPositions[]> {
     return this.http.get <FifoPositions[]> ('api/DEA/getFIFOPositions/',{params:searchObj})
   }
 }

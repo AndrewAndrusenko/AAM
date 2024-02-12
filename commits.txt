@@ -299,7 +299,13 @@ we get closest market price for every position
   Using Main Strategy Form user is able to view historical model portfolio on the requested date and diffrence between weights on the requested date and current positons. 
   Function has been created without requesting data from DB. All data is beeing exchanged between components using services, streams and observables. Nessesary historical data is beeing trasferred from history table to the strategy form where it is porcessed and child structure table is updated.
   Current data is stored inside component and a user is able to restore it witout requesting DB
-
+--------------------------------------------------------------------------------------------
+09/02/2024- 11/02/2024
+1|| Transaction Types Dictionary UI&DB =>
+  Table component AppaIAccTransactionTypesTable has been created to retrieve/modify data regarding Transaction Types
+  Form component AppAccTransactionTypesFormComponent has been created to modify Transaction Type. Transaction Type must be unique by combination of type and code. User is able to block certain transaction type from manual editing. The option is introduced to protect integrity of data generated automatically and which is usually dependant on other axiuallary tables
+2|| Accounting related interfaces have been transferred to the separate file. All dependant components and services have been updated accordingly
+3|| Any type refactoring => Started getting rid of any type and replace it with correct types
 
 ToDo
 || Store histrory of a portfolio changing strategies
