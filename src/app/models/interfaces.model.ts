@@ -247,7 +247,7 @@ export interface orders {
   mp_name:string
 }
 export interface allocation {
-  id:number, qty:number, idtrade:number, idportfolio:number, id_order:number,id_bulk_order:number, portfolioname: string,trade_amount:number, accured_interest:number,id_settlement_currency:number, accountId:number,depoAccountId:number,entries:number,current_account_balance:number, depo_account_balance:number,  secid: string,tdate:Date,trtype:string,price:number,id_price_currency:number,fifo:number,pl:number, mp_name: string
+  id:number, qty:number, idtrade:number, idportfolio:number, id_order:number,id_bulk_order:number, portfolioname: string,trade_amount:number, accured_interest:number,id_settlement_currency:number, accountId:number,depoAccountId:number,entries:number,current_account_balance:number, depo_account_balance:number,  secid: string,tdate:Date,trtype:string,price:number,id_price_currency:number,fifo:number,pl:number, mp_name: string,cpty_code:string
 }
 export interface allocation_fifo {
   id: number,idtrade : number,tr_type : number,qty : number,qty_out : number,price_in : number,price_out : number,closed: boolean,idportfolio : number,trade_date: Date,secid: string,generated: Date,profit_loss : number,id_sell_trade : number,id_buy_trade 

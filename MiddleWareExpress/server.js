@@ -208,6 +208,7 @@ appServer.post('/AAM/updateFeesEntryInfo/',jsPassport.authenticate('session'), u
 appServer.get('/AAM/getTaxesData/',jsPassport.authenticate('session'), uiAmmFeesData.fgetTaxes)
 /*----------------------AccountingSchemesData----------------------------------------------------*/
 appServer.get('/DEA/getAccountingSchemes/',jsPassport.authenticate('session'), uiAmmAccoutingSchemes.getAccountingSchemes)
+appServer.post('/DEA/updateSchemeTransaction/',jsPassport.authenticate('session'), uiAmmAccoutingSchemes.updateSchemeTransaction)
 appServer.post('/DEA/updateTransactionTypes/',jsPassport.authenticate('session'), uiAmmAccoutingSchemes.updateTransactionTypes)
 
 

@@ -1,8 +1,17 @@
 <mat-tab-group  mat-stretch-tabs  #tabGroup
 (selectedTabChange)="showTabName($event)">
-<mat-tab  label="Transaction Types" >
-  <acc-transaction-types-table></acc-transaction-types-table>
-</mat-tab>  
-<mat-tab label="Account Schemes"> 
-</mat-tab>
+  <mat-tab label="Account Schemes"> 
+    <mat-tab-group  mat-stretch-tabs 
+    (selectedTabChange)="showTabName($event)">
+      <mat-tab label="AL Schemes"> 
+        <acc-schemes-AL-table></acc-schemes-AL-table>
+      </mat-tab>
+      <mat-tab label="LL Schemes"> 
+        <acc-schemes-LL-table></acc-schemes-LL-table>
+      </mat-tab>
+    </mat-tab-group>
+  </mat-tab>
+  <mat-tab  label="Transaction Types" >
+    <acc-transaction-types-table></acc-transaction-types-table>
+  </mat-tab>  
 </mat-tab-group>

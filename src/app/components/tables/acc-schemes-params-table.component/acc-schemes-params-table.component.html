@@ -1,0 +1,38 @@
+<ng-container *ngIf="accessState!=='none'" >
+  <button color = "accent" mat-raised-button title="Export To Excel"
+  style=" margin-left:1%; font-size: 18px;"
+  (click)="exportToExcel()">
+  
+  <mat-icon matSuffix >save_alt</mat-icon>
+</button>
+  <mat-select placeholder="Scheme Process" #schemeProcess 
+  (selectionChange)="changeParamsList($event.value)" 
+  class="mat-form-field"
+  style="margin-top: -6%; width: 40%;">
+    <mat-option *ngFor="let item of schemesProcess; 
+    " [value]="item.id">
+      Process Code: <span style="color: rgb(100, 172, 192);">{{item.process_code}}</span> - Scheme Code: <span style="color: rgb(100, 172, 192);">{{item.scheme_code}}</span>
+    </mat-option>
+  </mat-select>
+  <label *ngIf="processDesc" style="margin-top: -4%; width: 40%;" class="mat-form-field">{{processDesc}}</label>
+ <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort
+   class="mat-elevation-z8" 
+    class ="childTable" style="width: 90%;" >
+    <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i=index" justify="right"  >
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> {{columnsHeaderToDisplay[i]}}</th>
+      <td 
+        mat-cell *matCellDef="let element"  >
+        <span [ngSwitch]="true==true">
+          <p *ngSwitchCase="column==='param_code'"
+          (dblclick)="copyEl(element[column])"
+          >{{element[column]}}</p>
+          <p *ngSwitchDefault>{{element[column]!=='null'? element[column]:''}}</p>
+        </span>
+      </td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+    <tr mat-row  *matRowDef="let element; columns: columnsToDisplay; let dataindex=dataIndex;" tabindex=0   >
+    </tr>
+  </table>
+  <mat-paginator ></mat-paginator>
+</ng-container>

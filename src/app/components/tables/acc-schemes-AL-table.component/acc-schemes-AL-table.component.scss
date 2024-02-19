@@ -1,0 +1,40 @@
+.mat-select-panel {
+  max-height: 80vh !important;
+}
+.mat-header-cell {
+  padding-left: 0.5%;
+  font-size: 20px;
+  background-color:#252525;
+  text-align: center !important;
+}
+.mat-cell {
+  padding-left: 0.5%;
+  border-right: 1px solid rgb(30, 30, 30);
+  align-self: stretch;
+}
+.childTable {
+  background-color:#0c1322;
+  font-size: 26px;
+}
+.mat-column-entryDetails {
+  width: 15%;
+} 
+.mat-column-dataTime {
+  width: 6%;
+} 
+.mat-column-action {
+  width: 5%;
+} 
+.mat-column-id {
+  width: 3%;
+} 
+.mat-column-cSchemeGroupId {
+  width: 8%;
+} 
+.search-filed {
+  font-size: 18px;
+  border-radius: 9px;
+  background-color: rgb(40, 40, 40);
+  margin-right: 1%;
+  padding:0.5%;
+  }

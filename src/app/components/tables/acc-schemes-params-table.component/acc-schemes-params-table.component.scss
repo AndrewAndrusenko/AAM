@@ -1,0 +1,23 @@
+.mat-header-cell {
+  padding-left: 0.5%;
+  font-size: 20px;
+  background-color:#252525;
+  text-align: center !important;
+}
+.mat-cell {
+  padding-left: 0.5%;
+  border-right: 1px solid rgb(30, 30, 30);
+  align-self: stretch;
+}
+.childTable {
+  background-color:#0c1322;
+  font-size: 26px;
+}
+.mat-form-field {
+  font-size: 20px;
+  border-radius: 9px;
+  width: 400px;
+  background-color: var(--formFieldLightGray);
+  margin: 10px;
+  padding:10px;
+}

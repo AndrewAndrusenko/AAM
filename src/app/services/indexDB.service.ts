@@ -59,6 +59,8 @@ export class indexDBService {
           this.InstrumentDataS.getMoexInstruments(undefined,undefined,{Action:'getInstrumentAutoCompleteList'}).subscribe(data=>resolve(data))
         break;
         case 'bcTransactionType_Ext':
+          console.log('DB bcTransactionType_Ext');
+          
             this.AccountingDataService.GetTransactionType_Ext('',0,'','','bcTransactionType_Ext').subscribe(data=>resolve(data))
         break;
         case 'getCounterPartyList':
@@ -98,6 +100,14 @@ export class indexDBService {
     return new Promise (resolve => {
       this.dbService.deleteByKey('AAMCache',key).subscribe(res => console.log('deleted data for key:', key));
       this.fetchDataFromDb(key).then (data => {
+        this.indexidCacheData(key,data);
+        resolve({code:key,'data':data})
+      });
+    });
+  }
+  async rewrteIndexDBStaticTable(key:string,data:any) {
+    return new Promise (resolve => {
+      this.dbService.deleteByKey('AAMCache',key).subscribe(res =>{
         this.indexidCacheData(key,data);
         resolve({code:key,'data':data})
       });

@@ -3,12 +3,13 @@ import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
-import {bcParametersSchemeAccTrans, bcTransactionType_Ext, SWIFTStatement950model } from 'src/app/models/accountng-intefaces.model';
+import {bcTransactionType_Ext, SWIFTStatement950model } from 'src/app/models/accountng-intefaces.model';
 import {AppAccountingService } from 'src/app/services/accounting.service';
 import {AppAccEntryModifyFormComponent } from '../../forms/acc-entry-form.component/acc-entry-form.component';
 import {HandlingTableSelectionService } from 'src/app/services/handling-table-selection.service';
 import {SelectionModel } from '@angular/cdk/collections';
 import {AuthService } from 'src/app/services/auth.service';
+import { bcParametersSchemeAccTrans } from 'src/app/models/acc-schemes-interfaces';
 @Component({
   selector: 'app-table-swift-items',
   templateUrl: './swift-items-table.component.html',

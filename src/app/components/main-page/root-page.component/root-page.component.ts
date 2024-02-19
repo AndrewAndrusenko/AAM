@@ -5,6 +5,7 @@ import { AuthService } from 'src/app/services/auth.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
 import { MatDialog } from '@angular/material/dialog';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
+import { AccountingSchemesService } from 'src/app/services/accounting-schemes.service';
 @Component({
   selector: 'app-root-page',
   templateUrl: './root-page.component.html',
@@ -21,6 +22,7 @@ export class DashboardComponent implements OnDestroy,OnInit {
     private indexDBServiceS:indexDBService,
     public dialog: MatDialog,
     private AutoCompService:AtuoCompleteService,
+    private AccountingSchemesService:AccountingSchemesService,
 
     ) {
     this.subscriptionName= this.appMenuService.getToggleTree().subscribe (message => this.opened = message.text );
@@ -28,7 +30,7 @@ export class DashboardComponent implements OnDestroy,OnInit {
   async ngOnInit(): Promise<void> {
     this.indexDBServiceS.indexdbDeleteAllCache('AAMCache').subscribe(data => {
       console.log('Cache has been cleared', data)
-      this.indexDBServiceS.getIndexDBStaticTables('bcTransactionType_Ext').then ( (data) => console.log('Cache:', data['data'].length,' saved for bcTransactionType_Ext'));
+      this.AccountingSchemesService.subjectTransactionTypePipe.next(null);
       this.AuthServiceS.getObjectStatuses();
     })
     this.AutoCompService.createSecIDpipe();

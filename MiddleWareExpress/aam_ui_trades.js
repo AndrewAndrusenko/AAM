@@ -71,10 +71,11 @@ async function fGetTradesData (request,response) {
       sql='SELECT * FROM f_i_get_trade_details(${idtrade:raw});'
     break;
     case 'getAllocationTrades':
-      sql='SELECT dtrades_allocated.id, dtrades_allocated.qty, dtrades_allocated.idtrade, dtrades_allocated.idportfolio, id_order,dtrades_allocated.id_bulk_order, dportfolios.portfolioname, ROUND(dtrades.settlement_amount/dtrades.qty*dtrades_allocated.qty,2) as trade_amount, dtrades.accured_interest,id_settlement_currency, "bAccounts"."accountId","bAccountsDepo"."accountId" as "depoAccountId", "entriesForAllocation".count as "entries",dtrades.tidinstrument as secid,dtrades.tdate,dtrades.trtype,dtrades.price,dtrades.id_price_currency, pl_table.pl as pl, dstrategiesglobal.sname as mp_name ';
+      sql='SELECT dtrades_allocated.id, dtrades_allocated.qty, dtrades_allocated.idtrade, dtrades_allocated.idportfolio, id_order,dtrades_allocated.id_bulk_order, dportfolios.portfolioname, ROUND(dtrades.settlement_amount/dtrades.qty*dtrades_allocated.qty,2) as trade_amount, dtrades.accured_interest,id_settlement_currency, "bAccounts"."accountId","bAccountsDepo"."accountId" as "depoAccountId", "entriesForAllocation".count as "entries",dtrades.tidinstrument as secid,dtrades.tdate,dtrades.trtype,dtrades.price,dtrades.id_price_currency, pl_table.pl as pl, dstrategiesglobal.sname as mp_name, dclients.code as cpty_code ';
       request.query.balances==='true'?  sql+= ', b_accounts_balance."closingBalance" as current_account_balance,b_depo_accounts_balance."closingBalance" as depo_account_balance,f_fifo_select_current_positions_for_trade.position as fifo ' : null;
       sql+= ' FROM public.dtrades_allocated '+
       'LEFT JOIN dtrades ON dtrades_allocated.idtrade = dtrades.idtrade '+
+      'LEFT JOIN dclients ON dtrades.id_cpty = dclients.idclient '+
       'LEFT JOIN dportfolios ON dtrades_allocated.idportfolio = dportfolios.idportfolio '+
       'LEFT JOIN dstrategiesglobal ON dstrategiesglobal.id = dtrades_allocated.id_mp '+
       'LEFT JOIN (SELECT * FROM "bAccounts" WHERE "bAccounts"."accountTypeExt"=8) as "bAccounts"  ON dtrades_allocated.idportfolio = "bAccounts".idportfolio '+
@@ -110,7 +111,6 @@ async function fGetTradesData (request,response) {
     break;
   }
   sql = pgp.as.format(sql,request.query);
-  console.log(sql);
   db_common_api.queryExecute(sql,response,undefined,request.query.action ||'GetTradesData');
 }
 async function fGetAccuredInterest (request,response) {

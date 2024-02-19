@@ -1,4 +1,4 @@
-import { Component, EventEmitter,  Input, Output, ViewChild } from '@angular/core';
+import { Component, EventEmitter,  Input, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { filter, switchMap } from 'rxjs';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
@@ -38,12 +38,12 @@ export class AppAccTransactionTypesFormComponent {
     if (result['name']=='error') {
       this.CommonDialogsService.snackResultHandler(result)
     } else {
-      this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' fee schedules'}, action,undefined,false)
+      this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' transaction types'}, action,undefined,false)
       this.AccountingSchemesService.sendTransactionTypesReload();
       this.modal_principal_parent.emit(true)
     }
   }
-  updateInstrumentData(action:string){
+  updateTransactionTypeData(action:string){
     this.TransactionTypeForm.updateValueAndValidity();
     let dataToUpdate = structuredClone(this.TransactionTypeForm.value);
 
@@ -57,7 +57,7 @@ export class AppAccTransactionTypesFormComponent {
         this.AccountingSchemesService.updateTransactionTypes (dataToUpdate,'Edit').subscribe(result => this.snacksBox(result,'Updated'))
       break;
       case 'Delete':
-        this.CommonDialogsService.confirmDialog('Delete Action: Fee data and schedules','Delete').pipe(
+        this.CommonDialogsService.confirmDialog('Delete Action: Transaction Type ID: '+this.id.value,'Delete').pipe(
           filter (isConfirmed => (isConfirmed.isConfirmed)),
           switchMap(() => this.AccountingSchemesService.updateTransactionTypes(dataToUpdate,'Delete'))
         ).subscribe(result => this.snacksBox(result,'Deleted'))

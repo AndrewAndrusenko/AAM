@@ -37,7 +37,7 @@ export class AppTableAccAccountsComponent  implements OnInit {
   dataSource: MatTableDataSource<bAccounts>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
-  @Output() public modal_principal_parent = new EventEmitter();
+  @Output() public modal_principal_parent: EventEmitter <{id:string,accountNo:string}>;
   public readOnly: boolean = false; 
   public multiSelect: boolean = false; 
   public selectedRow: bAccounts  | null;
@@ -56,7 +56,8 @@ export class AppTableAccAccountsComponent  implements OnInit {
     private SelectionService:HandlingTableSelectionService,
     private dialog: MatDialog ,
     private HandlingCommonTasksS:HandlingCommonTasksService
-  ) {   
+  ) {  
+    this.modal_principal_parent = new EventEmitter();
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToBalanceData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true; 
     this.accessState !=='none'? this.AccountingDataService.getReloadAccontList().subscribe (id => this.updateAccountsData(this.action)):null;
@@ -95,10 +96,10 @@ export class AppTableAccAccountsComponent  implements OnInit {
   }
   chooseAccount (element) {
     this.selectedRow = element;
-    this.modal_principal_parent.emit('CLOSE_PARENT_MODAL');
+    this.modal_principal_parent.emit({id:element.accountId,accountNo:element.accountNo});
   }
    selectAccountsArray() {
-    this.modal_principal_parent.emit('CLOSE_PARENT_MODAL');
+    this.modal_principal_parent.emit({id:null,accountNo:''});
   }
   openAccountModifyForm (actionType:string, row: any ) {
     this.dialogRef = this.dialog.open(AppAccAccountModifyFormComponent ,{minHeight:'400px',minWidth:'40vw', maxWidth:'80vw', maxHeight: '90vh' });

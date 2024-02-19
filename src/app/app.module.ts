@@ -194,7 +194,13 @@ const appInitializerFn = (accessRestirictions:AuthService) => {
         AppStrategyStructureHistTable,
         AccAccountsSchemesTabComponent,
         AppaIAccTransactionTypesTable,
-        AppAccTransactionTypesFormComponent
+        AppAccTransactionTypesFormComponent,
+        AppAccSchemesAL_Table,
+        AppAccSchemesLL_Table,
+        AppAccSchemesLL_FormComponent,
+        AppAccSchemesParamsTable,
+        AppAccSchemesAL_FormComponent
+
      ],
     bootstrap: [AppComponent],
     providers: [ 
@@ -251,5 +257,10 @@ import { AppStrategyStructureHistTable } from './components/tables/strategy_stru
 import { AccAccountsSchemesTabComponent } from './components/main-page/tabs/accounting-schemes-tab/accounting-schemes-tab';
 import { AppaIAccTransactionTypesTable } from './components/tables/acc-transaction-types-table.component/acc-transaction-types-table.component';
 import { AppAccTransactionTypesFormComponent } from './components/forms/acc-transaction-types-form.component/acc-transaction-types-form.component';
+import { AppAccSchemesAL_Table } from './components/tables/acc-schemes-AL-table.component/acc-schemes-AL-table.component';
+import { AppAccSchemesLL_Table } from './components/tables/acc-schemes-LL-table.component/acc-schemes-LL-table.component';
+import { AppAccSchemesLL_FormComponent } from './components/forms/acc-schemes-ll-form.component/acc-schemes-ll-form.component';
+import { AppAccSchemesParamsTable } from './components/tables/acc-schemes-params-table.component/acc-schemes-params-table.component';
+import { AppAccSchemesAL_FormComponent } from './components/forms/acc-schemes-al-form.component/acc-schemes-al-form.component';
 
 

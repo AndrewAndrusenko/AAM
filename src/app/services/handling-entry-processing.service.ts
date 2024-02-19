@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { lastValueFrom } from 'rxjs';
-import { bcParametersSchemeAccTrans } from '../models/accountng-intefaces.model';
 import { AppAccountingService } from './accounting.service';
+import { bcParametersSchemeAccTrans } from '../models/acc-schemes-interfaces';
 
 @Injectable({
   providedIn: 'root'
@@ -29,11 +29,13 @@ export class HandlingEntryProcessingService {
           bcEntryParameters.pExtTransactionId = row.id;
           bcEntryParameters.pAmount = row.amountTransaction;
           bcEntryParameters.pDate_T = dateToProcess? new Date (dateToProcess).toDateString() : row.valueDate ;
+          bcEntryParameters.valueDate = row.valueDate ;
           bcEntryParameters.pSenderBIC = parentMsgRow.senderBIC;
           bcEntryParameters.pRef = row.refTransaction;
-          bcEntryParameters.cxActTypeCode = row.typeTransaction;
-          bcEntryParameters.cxActTypeCode_Ext = row.comment.split('/')[1];
-          bcEntryParameters.cLedgerType = 'NostroAccount';
+          bcEntryParameters.cSchemeGroupId = row.comment.split('/')[1]+'_'+row.typeTransaction+'_NOSTRO';
+/*           bcEntryParameters.cxActTypeCode = row.typeTransaction;
+          bcEntryParameters.cxActTypeCode_Ext = row.comment.split('/')[1]; */
+          // bcEntryParameters.cLedgerType = 'NostroAccount';
           this.AccountingDataService.GetEntryScheme (bcEntryParameters).subscribe (entryScheme => {
             this.AccountingDataService.sendEntryDraft({'entryDraft' : entryScheme[0], 'formStateisDisabled': false, 'refTransaction': row.refTransaction, 'autoProcessing':autoProcessing, 'overRideOverdraft' :overRideOverdraft});
           });

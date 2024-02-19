@@ -33,7 +33,7 @@ export class AppTableAccLedgerAccountsComponent {
   dataSource: MatTableDataSource<bLedgerAccounts>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
-  @Output() public modal_principal_parent = new EventEmitter();
+  @Output() public modal_principal_parent: EventEmitter <{id:number,accountNo:string}>;
   expandedElement: bLedgerAccounts  | null;
   public selectedRow : bLedgerAccounts  | null;
   accessToClientData: string = 'true';
@@ -48,6 +48,7 @@ export class AppTableAccLedgerAccountsComponent {
     private dialog: MatDialog ,
     private HandlingCommonTasksS:HandlingCommonTasksService 
   ) {
+    this.modal_principal_parent = new EventEmitter()
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToBalanceData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true; 
     this.accessState !=='none'? this.AccountingDataService.getReloadLedgerAccontList().subscribe (id => this.updateAccountsData(this.action)):null;
@@ -56,8 +57,6 @@ export class AppTableAccLedgerAccountsComponent {
     this.updateAccountsData(this.action)
   }
   async updateAccountsData (action: string) {
-    console.log('Reload Ledger');
-    
     return new Promise<number> (async (resolve) => {
       this.dataSource? this.dataSource.data=null : null;
       this.AccountingDataService.GetLedgerAccountsListAccounting (null,null,null,null,this.action).subscribe (AccountsList  => {
@@ -82,9 +81,9 @@ export class AppTableAccLedgerAccountsComponent {
     this.dataSource.filter = ''
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
   }
-  chooseAccount (element) {
+  chooseAccount (element:bLedgerAccounts) {
     this.selectedRow = element;
-    this.modal_principal_parent.emit('CLOSE_PARENT_MODAL');
+    this.modal_principal_parent.emit({id:Number(element.ledgerNoId),accountNo:element.ledgerNo});
   }
   openAccountModifyForm (actionType:string, row: any ) {
     this.dialogRef = this.dialog.open(AppAccAccountModifyFormComponent ,{minHeight:'400px', maxWidth:'1000px' });

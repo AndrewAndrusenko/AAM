@@ -94,7 +94,7 @@ export class AppTableBalanceSheetComponent   {
     private dialog: MatDialog,
     private fb:FormBuilder, 
   ) {
-    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
+    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToBalanceData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
 
     this.AccountingDataService.GetbbalacedDateWithEntries('GetbbalacedDateWithEntries').subscribe(data => this.balacedDateWithEntries = data[0]['datesarray']);

@@ -45,33 +45,22 @@ constructor(
   }
   tools () {
     let obj = `
-<<<<<<< HEAD
-    id_strategy_parent: number, 
-    id : string, 
-    sname : string,
-    description: string;
-    weight_of_child : number,
-    id_item:number,
-    id_strategy_child:string,
-    id_strategy_child_integer:number,
-    user_id:number,
-    tr_date:Date,
-    type:number,
-    user:number,
-    user_login:string,
-    type_trans:string
-=======
-    trade_date: Date,
-    idtrade :number,
-    idportfolio :number ,
-    portfolioname  :string,
-    secid :string,
-    fifo_rest :number,
-    fifo_cost :number,
-    rest :number,
-    qty :number,
-    qty_out :number
->>>>>>> 146d228 (FIFO positions UI&DB)
+    XactTypeCode_Ext:number,
+    id:number,
+    XactTypeCode:number,
+    amountTransaction:string,
+    accountNo:string,
+    entryDetails:string,
+    cSchemeGroupId:string,
+    cDate:string,
+    cxActTypeCode_Ext:string,
+    cxActTypeCode:string,
+    cLedgerType:string,
+    extTransactionId:string,
+    ledgerNoId:string,
+    idtrade:string,
+    dataTime:string,
+    accountId:string
   `
   let a = obj.split(',').map(el=> {return {fieldName:el.split(':')[0].trim(),displayName:el.split(':')[0].trim()}});
   console.log('obj',a.flat());

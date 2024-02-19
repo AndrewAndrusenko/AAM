@@ -120,6 +120,12 @@ async function fGetAccountingData (request,response) {
     case 'GetDeepBalanceCheck':
       query.text ='SELECT * FROM public.f_a_b_balancesheet_deep_check(${dateBalanceToCheck},${firstDayOfCalculation});'
     break;
+    case 'GetAccountNoById':
+      query.text ='SELECT "accountNo" FROM public."bAccounts" WHERE "accountId"=${accountId:raw};'
+    break;
+    case 'GetLedgerNoById':
+      query.text ='SELECT "ledgerNo" FROM public."bLedger" WHERE "ledgerNoId"=${ledgerId:raw};'
+    break;
     case 'GetALLAccountsDataWholeList' :
       query.text ='SELECT '+
       '"accountNo", "accountTypeExt", "Information", "clientId", "currencyCode","bAccounts"."entityTypeCode", "accountId", '+
@@ -281,6 +287,7 @@ async function GetEntryScheme (request, response) {
           break;
           
         }
+        console.log(sql);
         db_common_api.queryExecute(sql,response,null,'STP_Get Entry Scheme');
       } else {
         response.status(200).json([])

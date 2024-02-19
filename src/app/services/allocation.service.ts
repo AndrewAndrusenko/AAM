@@ -6,17 +6,18 @@ import { AppallocationTableComponent } from '../components/tables/allocation-tab
 import { Observable, Subject,  filter, firstValueFrom, forkJoin, map,  switchMap, tap } from 'rxjs';
 import { AbstractControl } from '@angular/forms';
 import { AppOrderTableComponent } from '../components/tables/orders-table.component/orders-table.component';
-import { allocation } from '../models/interfaces.model';
+import { allocation, allocation_fifo } from '../models/interfaces.model';
 import { AccountingTradesService } from './accounting-trades.service';
 import { error } from 'jquery';
+import { bAccountTransaction, bLedgerTransaction } from '../models/accountng-intefaces.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AppAllocationService {
   private tradeToConfirm:allocation[];
-  private deletedAccounting$ = new Subject <any[]>
-  private createdAccounting$ = new Subject <any[]>
+  private deletedAccounting$ = new Subject <allocation_fifo[]>
+  private createdAccounting$ = new Subject <bAccountTransaction[]|bLedgerTransaction[]>
   constructor(
     private CommonDialogsService:HadlingCommonDialogsService,
     private TradeService: AppTradeService,
@@ -46,7 +47,7 @@ export class AppAllocationService {
     this.tradeToConfirm.forEach(clientTrade => {
       let bcEntryParameters = <any> {}
       bcEntryParameters.id_settlement_currency=clientTrade.id_settlement_currency;
-      bcEntryParameters.cptyCode='CHASUS';
+      bcEntryParameters.cptyCode=clientTrade.cpty_code;
       bcEntryParameters.pDate_T=new Date(clientTrade.tdate).toDateString();
       bcEntryParameters.pAccountId=clientTrade.accountId;
       bcEntryParameters.pDepoAccountId=clientTrade.depoAccountId;
@@ -56,7 +57,8 @@ export class AppAllocationService {
       bcEntryParameters.allocated_trade_id=clientTrade.id;
       bcEntryParameters.idtrade=clientTrade.idtrade;
       let cSchemeGroupId = clientTrade.trtype==='BUY'? 'Investment_Buy_Basic':'Investment_Sell_Basic';
-      let accountingToCreate$= <any>[]
+      let accountingToCreate$ : Observable <bAccountTransaction[]|bLedgerTransaction[]>[];
+      accountingToCreate$ =[];
       this.accountingTradeService.createFIFOtransactions(clientTrade.trtype==='BUY'? -1 : 1,null,clientTrade.idportfolio,clientTrade.secid,clientTrade.qty,clientTrade.trade_amount/clientTrade.qty, clientTrade.id).pipe (
         tap(data=>data['name']==='error'? this.CommonDialogsService.snackResultHandler(data):createdAccountingTransactions.push(data)),
         filter(data=>data['name']!=='error'),
@@ -104,7 +106,7 @@ export class AppAllocationService {
       });
     }); 
   }
-  createAllocationAccountingStatus (allocationTable:AppallocationTableComponent,tradeToConfirmProcessStatus:{id:number,accounting:number}[],createdAccountingTransactions: any[]) {
+  createAllocationAccountingStatus (allocationTable:AppallocationTableComponent,tradeToConfirmProcessStatus:{id:number,accounting:number}[],createdAccountingTransactions: bAccountTransaction[]|bLedgerTransaction[]) {
     let status = tradeToConfirmProcessStatus.reduce((acc,val)=>acc+val.accounting,0)
     status===0? allocationTable.submitQuery(true,false).then(data=>{
       this.sendCreatedAccounting(createdAccountingTransactions)
@@ -158,16 +160,16 @@ export class AppAllocationService {
       orderTable!==undefined? orderTable.submitQuery(true, false): null;
     })
   }
-  getDeletedAccounting ():Observable<any[]>   {
+  getDeletedAccounting ():Observable<allocation_fifo[]>   {
     return this.deletedAccounting$.asObservable()
   }
-  sendDeletedAccounting (deletedTransactions:any[]) {
+  sendDeletedAccounting (deletedTransactions:allocation_fifo[]) {
     this.deletedAccounting$.next(deletedTransactions);
   }
-  getCreatedAccounting ():Observable<any[]>   {
+  getCreatedAccounting ():Observable<bAccountTransaction[]|bLedgerTransaction[]>   {
     return this.createdAccounting$.asObservable()
   }
-  sendCreatedAccounting (createdTransactions:any[]) {
+  sendCreatedAccounting (createdTransactions:bAccountTransaction[]|bLedgerTransaction[]) {
     this.createdAccounting$.next(createdTransactions);
   }
 }

@@ -52,7 +52,7 @@ export const dbErrorsMap: errorsDescription[] = [
     errorText:'Attempt to create duplicate fee calculation. i_dfee_transaction_pf_mf blocked transaction'
   },
   {
-    constraintCode: 'violates unique constraint "bcTransactionType_Ext_pkey"',
-    errorText:'Attempt to create duplicate transaction type. The record with such Code and Type already exists. bcTransactionType_Ext_pkey blocked transaction'
+    constraintCode: 'unique constraint "u_c_xActTypeCode_Ext"',
+    errorText:'Attempt to create duplicate transaction type. The record with such Code and Type already exists. u_c_xActTypeCode_Ext blocked transaction'
   },
 ]

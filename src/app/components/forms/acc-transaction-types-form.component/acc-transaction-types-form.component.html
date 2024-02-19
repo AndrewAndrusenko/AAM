@@ -12,7 +12,7 @@ cdkDragHandle>
 </mat-checkbox>
 <button mat-raised-button color="primary" 
   [disabled]="!(TransactionTypeForm.valid && submitbox.checked)"
-  (click)="updateInstrumentData(action)"
+  (click)="updateTransactionTypeData(action)"
   style="margin-top: 1px; width: 20%; font-size: large; margin-left: 1%;">
   {{action}} Transaction Type 
 </button>

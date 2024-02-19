@@ -42,7 +42,12 @@ export class AppAccountingService {
     'd_manual_edit_forbidden': null 
   }
 /* -----------------------Accountting ----------------------------------------------------- */
-
+  GetAccountNoById (id:number):Observable<bAccounts[]> {
+    return this.http.get <bAccounts[]>('/api/DEA/fGetAccountingData/',{params:{Action:'GetAccountNoById',accountId:id}})
+  }
+  GetLedgerNoById (id:number):Observable<bLedger[]> {
+    return this.http.get <bLedger[]>('/api/DEA/fGetAccountingData/',{params:{Action:'GetLedgerNoById',ledgerId:id}})
+  }
   GetSWIFTsList (dateMessage: string, id: number, MTType:string, Sender: string, Action: string):Observable <SWIFTSGlobalListmodel[]> {
     let params = {};
     let argName = null

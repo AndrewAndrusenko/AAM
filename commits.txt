@@ -307,11 +307,28 @@ we get closest market price for every position
 2|| Accounting related interfaces have been transferred to the separate file. All dependant components and services have been updated accordingly
 3|| Any type refactoring => Started getting rid of any type and replace it with correct types
 
+12/02/2024 - 17/02/2024
+1|| Accounting schemes  UI & DB =>
+  Created DB table bcSchemesParameters to store all parameters which could be used to create new accounting schemes. List of parameters is determined by function responsible for handling given buisness process. A parameter is similar to an api variable which is replaced by real value from business object when function is executed by the user
+  Introduced  new object - "Process" and created respective DB table bcSchemesProcesses. Process object is used to make a link between given buisness process (function/module responsible for it) and list of parameters availble for the process
+  Create new table component AppAccSchemesParamsTable to show all availble parameters for the given process. The component is availble in the form of modify acccounting scheme. User can copy parameter to the clipboard by making a double click on it.
+  Table component AppAccSchemesAL_Table has been introduced to retrieve/modify accounting account schemes data (entries stored bAccountTransaction and affect clients accounts)
+  Form component AppAccSchemesAL_FormComponent has been created to modify accounting account schemes. 
+  Table component AppAccSchemesLL_Table has been introduced to retrieve/modify accounting ledger schemes data (entries stored bLedgerTransactions and don't affect clients accounts)
+  Form component AppAccSchemesLL_FormComponent has been created to modify accounting ledger schemes.
+  Parameters are added to the scheme in the format of ${parameter_name:raw}. Parameters could be used to customize entries attributes such as entry's  details, entry amount, date and accounts corresponding.
+  There are two options to set the accounts corresponding in the accounting scheme. User can choose/set static account number from the existed accounts or insert a parameter linked to transaction's accounting objects. For example, client cash account is available through  ${pAccontId} parameter while clients trades are being processed
+  Every process id is linked to the scheme id. All transactions have to be generated during the function exuction of the given process must have the same scheme id inside accounts related schemes and inside ledger schemes as well. The function retrieves all accounting schemes with the process's scheme id from bLedgerTransactions and bAccountTransaction
+  Implemented UI to retrive account number by id inputed by a user. If account hasn't been found then text input stored since text pattern could be used as parameter in accounting scheme and be populated by respective module while entries are created 
+  New parameter counterparty code has been added to the api of SellTrade/BuyTrade acconting process 
+2|| Accounting schemes interfaces have been transferred to the separate file. All dependant components and services have been updated accordingly
+3|| Any type refactoring => Refactored any type in allocation.service.ts
+4|| Rewrite cached data when it has been changed => Introduced new function to the indexDB.service.ts to update cache data (replace cache with up to date snapshot). New function is used to update transactions types cached when user updates respective data
+
 ToDo
 || Store histrory of a portfolio changing strategies
-|| UI for Accounting Transaction Types and option to allow/block manual editing
+* Fix: Allocation acconting - FIFO/Accounting => Roll back FIFO/Accounting when other fails
 || Revenue Factor Chart add info about management and perfomance fees deducted
-|| UI to update/create accounting schemes
 || FIFO Bug possible=> Case of simultaneously two trades which should be netted on FIFO are sent in FIFO function. 
     Idea is to sort processing batch according to the FIFO guidelines and execute FIFO function synchronously 
 || Investment restrictions
