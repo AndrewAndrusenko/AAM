@@ -2,7 +2,8 @@ import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { lastValueFrom } from 'rxjs';
 import { AppAccountingService } from './accounting.service';
-import { bcParametersSchemeAccTrans } from '../models/acc-schemes-interfaces';
+import { bcEntryParameters } from '../models/acc-schemes-interfaces';
+import { SWIFTSGlobalListmodel, SWIFTStatement950model } from '../models/accountng-intefaces.model';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +14,7 @@ export class HandlingEntryProcessingService {
     public snack:MatSnackBar
 
   ) { }
-  async openEntry (row: any, parentMsgRow:any, autoProcessing?: boolean, dateToProcess?: Date, overRideOverdraft?:boolean ) {
+  async openEntry (row: SWIFTStatement950model, parentMsgRow:SWIFTSGlobalListmodel, autoProcessing?: boolean, dateToProcess?: Date, overRideOverdraft?:boolean ) {
     if (Number(row.entriesAmount) > Number(row.amountTransaction) && ['CR','DR'].includes(row.typeTransaction)) {
       let EmptyEntry = {'entryDraft' : {}, 'formStateisDisabled': true, 'overRideOverdraft' :overRideOverdraft}
       this.AccountingDataService.sendEntryDraft(EmptyEntry);
@@ -23,7 +24,7 @@ export class HandlingEntryProcessingService {
       await lastValueFrom (this.AccountingDataService.GetAccountData(0,0,0, accountNo,'GetAccountData','accountData'))
       .then ((accountData) => {
         if (accountData.length) {
-          let bcEntryParameters = <bcParametersSchemeAccTrans> {}
+          let bcEntryParameters = <bcEntryParameters> {}
           bcEntryParameters.pAccountId = Number(accountData[0].accountId);
           bcEntryParameters.pLedgerNoId = parentMsgRow.ledgerNoId;
           bcEntryParameters.pExtTransactionId = row.id;
@@ -33,10 +34,7 @@ export class HandlingEntryProcessingService {
           bcEntryParameters.pSenderBIC = parentMsgRow.senderBIC;
           bcEntryParameters.pRef = row.refTransaction;
           bcEntryParameters.cSchemeGroupId = row.comment.split('/')[1]+'_'+row.typeTransaction+'_NOSTRO';
-/*           bcEntryParameters.cxActTypeCode = row.typeTransaction;
-          bcEntryParameters.cxActTypeCode_Ext = row.comment.split('/')[1]; */
-          // bcEntryParameters.cLedgerType = 'NostroAccount';
-          this.AccountingDataService.GetEntryScheme (bcEntryParameters).subscribe (entryScheme => {
+          this.AccountingDataService.getAccountingScheme (bcEntryParameters, bcEntryParameters.cSchemeGroupId ).subscribe (entryScheme => {
             this.AccountingDataService.sendEntryDraft({'entryDraft' : entryScheme[0], 'formStateisDisabled': false, 'refTransaction': row.refTransaction, 'autoProcessing':autoProcessing, 'overRideOverdraft' :overRideOverdraft});
           });
         } else {

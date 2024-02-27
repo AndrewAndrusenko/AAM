@@ -1,5 +1,6 @@
 import { HttpClient, HttpParams  } from "@angular/common/http";
 import { Injectable } from "@angular/core";
+import { number } from "echarts";
 import { Observable, Subject } from 'rxjs';
 @Injectable ({
   providedIn:'root'
@@ -18,13 +19,13 @@ export class TreeMenuSevice {
   public removeItemFromFavorites (nodename:string, userId:number, idelement:string) {
     return this.http.post ('/api/Favorites/deleteItem/',{'nodename': nodename, 'userId' : userId, 'idelement':idelement}).toPromise()
   }
-  private subjectName = new Subject<any>(); 
+  private subjectName = new Subject<{text: string, name:string, id:number, action:string}>(); 
 
   sendUpdate(nodeRoot: string, item: string, id:number,action?:string) { 
     this.subjectName.next({ text: nodeRoot, name:item, id:+id, action:action }); 
   }
 
-  getUpdate(): Observable<any> { 
+  getUpdate(): Observable<{text: string, name:string, id:number, action:string}> { 
     return this.subjectName.asObservable(); 
   }
   private subjectTabName = new Subject <string>();

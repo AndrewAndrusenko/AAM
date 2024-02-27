@@ -22,6 +22,15 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { indexDBService } from 'src/app/services/indexDB.service';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatSelect } from '@angular/material/select';
+interface filtersForTable {
+  idportfolio?:number[],
+  only_clients?:boolean,
+  filter_dataset?:boolean
+  rest?:boolean
+  null_data?:boolean
+  mp_name?:string[],
+  strategy_name?:string[],
+}
 @Component({
   selector: 'app-orders-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -48,9 +57,9 @@ export class AppOrderTableComponent {
   @Input() dataToShow:orders[];
   @Input() bulkOrder:number;
   @Input() allocationFilters:{secid:string, type:string,bulkorders:string[]};
-  @Input() filters:any;
+  @Input() filters:filtersForTable;
   @Input() UI_min:boolean=true;
-  multiFilter?: (data: any, filter: string) => boolean;
+  multiFilter?: (data: orders, filter: string) => boolean;
   columnsToDisplay = ['select','id','ordertype','type','secid','security_group_name','mp_name','qty','price','amount','unexecuted','status','portfolioname','idcurrency','generated','action','parent_order','allocated'];
   columnsHeaderToDisplay = ['ID','Order','Type','SecID','Group','MP','Quantity','Price','Amount','Unexecuted','Status','Portfolio','Currency','Created','Action','BulkID','Allocated']
   expandedElement: orders  | null;
@@ -162,7 +171,7 @@ export class AppOrderTableComponent {
       break;
       case 'Parent,Per_Portfolio':
         this.TradeService.getOrderInformation({
-          idportfolio:this.filters.idportfolio}).subscribe (ordersData => this.updateordersDataTable(ordersData));
+          idportfolio:this.filters.idportfolio[0]}).subscribe (ordersData => this.updateordersDataTable(ordersData));
       break;
     }
     if (this.tableMode.includes('Child')) {
@@ -178,7 +187,7 @@ export class AppOrderTableComponent {
     switch (this.tableMode.join()) {
       case 'Parent,Per_Portfolio':
         this.TradeService.getOrderInformation({
-          idportfolio:this.filters.idportfolio}).subscribe (ordersData => this.updateordersDataTable(ordersData));
+          idportfolio:this.filters.idportfolio[0]}).subscribe (ordersData => this.updateordersDataTable(ordersData));
       break;
       default:
         if (changes['filters']?.currentValue!==undefined&&this.fullOrdersSet!==undefined)  {
@@ -233,7 +242,7 @@ export class AppOrderTableComponent {
       showSnackResult? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded '):null;
     });
   }
-  initialFilterOfDataSource (filter:any) {
+  initialFilterOfDataSource (filter:filtersForTable) {
     this.showClientOrdersCB.checked= false;
     if (filter?.rest===true) {
       this.dataSource.data = this.fullOrdersSet;
@@ -357,12 +366,12 @@ export class AppOrderTableComponent {
     this.disabledControlElements=show;
     this.dataSource.data = show? this.fullfilteredOrdersSet.filter(order=>order.ordertype==='Client') : this.fullfilteredOrdersSet.filter(order=>!order.parent_order)
   }
-  applyFilter(event: any, col?:string) {
+  applyFilter(event: KeyboardEvent, col?:string) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim();
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
-  updateFilter (el: any) {
+  updateFilter (el: string) {
     this.filterALL.nativeElement.value = this.filterALL.nativeElement.value + el+',';
     this.dataSource.filter = this.filterALL.nativeElement.value.slice(0,-1).trim();
     (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
@@ -375,7 +384,7 @@ export class AppOrderTableComponent {
   changedValueofChip (value:string, chipArray:string[],control:AbstractControl) {
     chipArray[chipArray.length-1] === 'ClearAll'? chipArray.push(value) : chipArray[chipArray.length-1] = value
   }
-  add(event: MatChipInputEvent,chipArray:string[],control:AbstractControl): any[] {
+  add(event: MatChipInputEvent,chipArray:string[],control:AbstractControl): string[] {
     const value = (event.value || '').trim();
     const valueArray = event.value.split(',');
     (value)? chipArray = [...chipArray,...valueArray] : null;
@@ -392,7 +401,6 @@ export class AppOrderTableComponent {
     };
     return chipArray;
   }
-  addChips (el: any, column: string) {(['secid'].includes(column))? this.instruments.push(el):null;}
   isAllSelected() { return this.SelectionService.isAllSelected(this.dataSource, this.selection)} 
   toggleAllRows(forceSelectAll:boolean=false) { return this.SelectionService.toggleAllRows(this.dataSource, this.selection,forceSelectAll)} 
   checkboxLabel(row?: orders): string {

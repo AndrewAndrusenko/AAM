@@ -23,13 +23,22 @@ import { AppAllocationService } from 'src/app/services/allocation.service';
 import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
+interface filtersForTable {
+  id_bulk_order?:number[],
+  disabled_controls?:boolean,
+  portfolioname?:string[],
+  mp_name?:string,
+  null_data?:boolean  
+}
 @Component({
   selector: 'app-allocation-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './allocation-table.component.html',
   styleUrls: ['./allocation-table.component.scss'],
 })
+
 export class AppallocationTableComponent  implements AfterViewInit {
+
   FirstOpenedAccountingDate: string=null;
   accessState: string = 'none';
   private subscriptions = new Subscription()
@@ -40,7 +49,7 @@ export class AppallocationTableComponent  implements AfterViewInit {
   @Input() dataToShow:allocation[];
   @Input() tradeData:trades;
   @Input() rowsPerPages:number = 20;
-  @Input() filters:any;
+  @Input() filters:filtersForTable;
   columnsToDisplay = ['select','id','portfolioname','qty', 'trade_amount', 'fifo','depo_account_balance', 'current_account_balance','id_order','id_bulk_order','entries','pl'];
   columnsHeaderToDisplay = ['ID', 'pCode','Quantity','Amount','FIFO','Depo','Balance', 'Order','Bulk','Entries','PL']
   dataSource: MatTableDataSource<allocation>;
@@ -62,7 +71,7 @@ export class AppallocationTableComponent  implements AfterViewInit {
     dateRangeEnd: new FormControl<Date | null>(null),
   });
   dialogShowEntriesList: MatDialogRef<AppTableAccEntriesComponent>;
-  multiFilter?: (data: any, filter: string) => boolean;
+  multiFilter?: (data: allocation, filter: string) => boolean;
   activeTab:string='';
   tabsNames = ['Trades by Account','Allocation']
 /*   @HostListener('document:keydown', ['$event'])
@@ -184,7 +193,7 @@ export class AppallocationTableComponent  implements AfterViewInit {
       return !filter || filter_array.reduce((acc,val)=>acc+Number(val[1]),0)===0;
     };
   }
-  async initialFilterOfDataSource (filter:any) {
+  async initialFilterOfDataSource (filter:filtersForTable) {
     this.filters?.disabled_controls? delete this.filters.disabled_controls : null;
     if (filter.mp_name) {
       let mpList = await this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios');
@@ -275,7 +284,7 @@ export class AppallocationTableComponent  implements AfterViewInit {
   changedValueofChip (value:string, chipArray:string[],control:AbstractControl) {
     chipArray[chipArray.length-1] === 'ClearAll'? chipArray.push(value) : chipArray[chipArray.length-1] = value
   }
-  add(event: MatChipInputEvent,chipArray:string[],control:AbstractControl): any[] {
+  add(event: MatChipInputEvent,chipArray:string[],control:AbstractControl): string[] {
     const value = (event.value || '').trim();
     const valueArray = event.value.split(',');
     (value)? chipArray = [...chipArray,...valueArray] : null;
@@ -292,13 +301,12 @@ export class AppallocationTableComponent  implements AfterViewInit {
     };
     return chipArray;
   }
-  addChips (el: any, column: string) {(['secid'].includes(column))? this.instruments.push(el):null;}
-  applyFilter(event: any) {
+  applyFilter(event: KeyboardEvent) {
     const filterValue = (event.target as HTMLInputElement).value 
     this.dataSource.filter = filterValue.trim().toLowerCase();
     this.dataSource.paginator? this.dataSource.paginator.firstPage():null;
   }
-  updateFilter (el: any) {
+  updateFilter (el: string) {
     this.filterALL.nativeElement.value = this.filterALL.nativeElement.value + el+',';
     this.dataSource.filter = this.filterALL.nativeElement.value.slice(0,-1).trim().toLowerCase();
     (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;

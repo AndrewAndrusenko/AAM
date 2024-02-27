@@ -7,7 +7,7 @@ import { MatTableDataSource } from '@angular/material/table';
 })
 export class HandlingTableSelectionService {
   public multiSelect: boolean = true; 
- 
+// Selection table module is applicable to any table component with diffrent data sources. That is why any type is appropritate in the current module
   constructor() { }
   isAllSelected(dataSource: MatTableDataSource<any>, selection : SelectionModel<any> ) {
     if (!dataSource) return false

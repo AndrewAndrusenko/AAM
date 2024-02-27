@@ -2,6 +2,17 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { allocation, orders, trades } from '../models/interfaces.model';
+interface SearchParameters{
+  type?:string,
+  secidList?: string[],
+  portfoliosList?: string[],
+  tdate? : string,
+  id_bulk_order?:number,
+  price?:number,
+  qty?:number
+  status?:string[],
+  idportfolio?:number
+}
 interface tradesDataSet {
   data:trades[],
   action:string
@@ -20,13 +31,14 @@ interface bulkModifedSet {
 })
 export class AppTradeService {
   constructor(private http:HttpClient) { }
-  private reloadTradeTable = new Subject <any> (); 
+  private reloadTradeTable = new Subject < {data: trades[], action:string}> (); 
+  private reloadOrdersTable = new Subject < {data: orders[], action:string}> (); 
   private reloadExecution = new Subject <{data:orders[],idtrade:number,ordersForExecution:number[]}> (); 
   private updateOrdersStatus = new Subject <{data:orders[],bulksForUpdate:number[]}>(); 
   private allocationDeleted = new Subject <allocation[]>(); 
   private sAllocatedQty = new Subject <{idtrade:number,allocatedqty:number}>(); 
   private sOrdersAllocated = new BehaviorSubject <number[]>([]); 
-  updateTrade(data:any, action:string):Observable <trades[]> {
+  updateTrade(data:trades, action:string):Observable <trades[]> {
     return this.http.post <trades[]> ('api/AAM/MD/UpdateTradeData/',{data:data,action:action})
   }
   sendTradeDataToUpdateTableSource ( data:trades[], action: string) {
@@ -39,7 +51,7 @@ export class AppTradeService {
   getTradeDataToUpdateTableSource(): Observable<tradesDataSet> { 
     return this.reloadTradeTable.asObservable(); 
   }
-  getTradeInformation(serachFilters:any):Observable<trades[]> {
+  getTradeInformation(serachFilters:{idtrade?:number}|null):Observable<trades[]> {
     let params = {...serachFilters,action:'getTradeInformation'}
     return this.http.get <trades[]> ('api/AAM/MD/getTradeData/',{params:params})
   }
@@ -51,12 +63,12 @@ export class AppTradeService {
       data: data,
       action:action
     }
-    this.reloadTradeTable.next(dataSet); 
+    this.reloadOrdersTable.next(dataSet); 
   }
   getOrderDataToUpdateTableSource(): Observable<ordersDataSet> { 
-    return this.reloadTradeTable.asObservable(); 
+    return this.reloadOrdersTable.asObservable(); 
   }
-  getOrderInformation(serachFilters:any):Observable<orders[]> {
+  getOrderInformation(serachFilters:SearchParameters):Observable<orders[]> {
     let params = {...serachFilters}
     return this.http.get <orders[]> ('api/AAM/MD/getOrderData/',{params:params})
   }
@@ -94,7 +106,7 @@ export class AppTradeService {
   getUpdateOrdersChangedStatus ():Observable<{data:orders[],bulksForUpdate:number[]}> {
     return this.updateOrdersStatus.asObservable();
   }
-  getAllocationInformation(serachFilters:any,FirstOpenedAccountingDate:string,balances:boolean=false,secid:string):Observable<allocation[]> {
+  getAllocationInformation(serachFilters:SearchParameters,FirstOpenedAccountingDate:string,balances:boolean=false,secid:string):Observable<allocation[]> {
     let params = {...serachFilters,
       action:'getAllocationTrades',
       secid:secid,
@@ -103,7 +115,6 @@ export class AppTradeService {
     return this.http.get <allocation[]> ('api/AAM/MD/getTradeData/',{params:params});    
   }
   getEntriesPerAllocatedTrade (p_trades_to_check:number[]):Observable<{idtrade: number,entries_qty: number}[]> {
-    console.log('p_trades_to_check',p_trades_to_check);
     let params = {
       action:'get_qty_entries_per_allocated_trade',
       p_trades_to_check:p_trades_to_check.length===1? [...p_trades_to_check,...p_trades_to_check] : p_trades_to_check

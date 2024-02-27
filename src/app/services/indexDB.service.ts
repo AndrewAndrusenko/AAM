@@ -6,6 +6,7 @@ import { catchError, of } from 'rxjs';
 import { AppInvestmentDataServiceService } from './investment-data.service.service';
 import { CurrenciesDataService } from './currencies-data.service';
 import { InstrumentDataService } from './instrument-data.service';
+import { corporateActionsTypes, moexSecurityGroup, moexSecurityType } from '../models/instruments.interfaces';
 interface cacheAAM {
   code:string,
   data:[]
@@ -41,13 +42,13 @@ export class indexDBService {
           this.InstrumentDataS.getInstrumentDataCorpActions().subscribe(data=>resolve(data))
         break;
         case 'getMoexSecurityGroups':
-          this.InstrumentDataS.getInstrumentDataGeneral('getMoexSecurityGroups').subscribe(data=>resolve(data))
+          this.InstrumentDataS.getInstrumentDataGeneral('getMoexSecurityGroups').subscribe(data=>resolve(data as moexSecurityGroup[]))
         break;
         case 'getMoexSecurityTypes':
-          this.InstrumentDataS.getInstrumentDataGeneral('getMoexSecurityTypes').subscribe(data=>resolve(data))
+          this.InstrumentDataS.getInstrumentDataGeneral('getMoexSecurityTypes').subscribe(data=>resolve(data as moexSecurityType[]))
         break;
         case 'getCorpActionTypes':
-          this.InstrumentDataS.getInstrumentDataGeneral('getCorpActionTypes').subscribe(data=>resolve(data))
+          this.InstrumentDataS.getInstrumentDataGeneral('getCorpActionTypes').subscribe(data=>resolve(data as corporateActionsTypes[]))
         break;
         case 'getCurrencyCodes':
           this.CurrenciesDataSrv.getCurrencyCodes().subscribe(data=>resolve(data))

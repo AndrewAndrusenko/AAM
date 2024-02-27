@@ -57,7 +57,7 @@
     </mat-form-field> 
     <mat-slide-toggle #deleteOldMarketData formControlName="overwritingCurrentData"
       style="font-size:100%; letter-spacing: .05rem; margin-left: 2%;"
-      [style.color]="deleteOldMarketData.checked ? 'red':'default' "
+      [style.color]="deleteOldMarketData.checked===true? 'darkred':'' "
       >Replace current market data <br>{{deleteOldMarketData.checked? 'allowed!':'forbidden'}}
     </mat-slide-toggle>
     <div *ngIf="loadingDataState.State==='Success'||loadingDataState.State==='terminated'" title="loadingDataState">

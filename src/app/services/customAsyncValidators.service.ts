@@ -20,7 +20,6 @@ export class customAsyncValidators {
   }
   static secidCustomAsyncValidator (userService: AppInvestmentDataServiceService, secid:string): AsyncValidatorFn {
     return (control: AbstractControl): Observable<ValidationErrors> => {
-      console.log('ID', secid , control.value, 'Check_secid');
       return userService
         .getInstrumentData(control.value)
         .pipe(
@@ -134,7 +133,7 @@ export class customAsyncValidators {
         return InstrumentDataS
           .getInstrumentDataGeneral('validateSecidForUnique', control.value.toUpperCase())
           .pipe(
-            map (secidIsTaken => secidIsTaken.length? {secidIsTaken: true} : null),
+            map (secidIsTaken => (secidIsTaken as {secid:string}[]).length? {secidIsTaken: true} : null),
             catchError(() => of(null))
           );
       } else {return of(errors)}
@@ -142,12 +141,11 @@ export class customAsyncValidators {
   }
   static MD_ISINuniqueAsyncValidator (InstrumentDataS: InstrumentDataService, isin:string, errors?:ValidationErrors): AsyncValidatorFn {
     return (control: AbstractControl): Observable<ValidationErrors | null> => {
-      console.log('isin errors', errors);
       if (control.value.toUpperCase() !== isin.toUpperCase() && (control.touched||control.dirty)) {
         return InstrumentDataS
           .getInstrumentDataGeneral('validateISINForUnique', control.value.toUpperCase())
           .pipe(
-            map (isinIsTaken => isinIsTaken.length? {isinIsTaken: true} : null),
+            map (isinIsTaken  => (isinIsTaken as {isin:string}[]).length? {isinIsTaken: true} : null),
             catchError(() => of(null)),
           );
       } else {return of(errors)}

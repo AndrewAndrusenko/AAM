@@ -4,6 +4,7 @@ import { Observable, ReplaySubject, Subject, filter, forkJoin, map, of, switchMa
 import { bAccounts, bAccountsEntriesList, bAccountTransaction, bBalanceData, bBalanceFullData, bcAccountType_Ext, bcEnityType, bcTransactionType_Ext, bLedger, bLedgerAccounts, bLedgerBalanceData, bLedgerTransaction, SWIFTSGlobalListmodel, SWIFTStatement950model } from '../models/accountng-intefaces.model';
 import { HadlingCommonDialogsService } from './hadling-common-dialogs.service';
 import { BalanceDataPerPortfoliosOnDate } from '../models/accountng-intefaces.model';
+import { bcEntryParameters } from '../models/acc-schemes-interfaces';
 @Injectable({
   providedIn: 'root'
 })
@@ -86,9 +87,10 @@ export class AppAccountingService {
     return this.http.get <bLedger []>('/api/DEA/fGetAccountingData/', { params: params })
   }
   /*----------------------Create entry by scheme---------------------------------------------------------*/
-  GetEntryScheme (bcEntryParameters:any) :Observable <bcTransactionType_Ext[]> { 
-    return this.http.get <bcTransactionType_Ext []>('/api/DEA/GetEntryScheme/', { params: bcEntryParameters })  
-  } 
+  getAccountingScheme(bcEntryParameters:bcEntryParameters,cSchemeGroupId:string, entryType:string='AL'):Observable<bcTransactionType_Ext[]> {
+    let params={...bcEntryParameters,entryType:entryType,cSchemeGroupId:cSchemeGroupId}
+    return this.http.get <bcTransactionType_Ext[]> ('/api/DEA/GetEntryScheme/',{params: params})
+  }
   sendEntryDraft (data: any) { 
     this.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe (OpenedDate => {
       let newEntryDraft = {}

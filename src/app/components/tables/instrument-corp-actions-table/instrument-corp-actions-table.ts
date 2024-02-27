@@ -4,9 +4,8 @@ import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { instrumentCorpActions } from 'src/app/models/interfaces.model';
+import { instrumentCorpActions } from 'src/app/models/instruments.interfaces';
 import { FormGroup} from '@angular/forms';
-import { AppMarketDataService } from 'src/app/services/market-data.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { formatNumber } from '@angular/common';
@@ -56,7 +55,6 @@ export class AppTableCorporateActionsComponent  implements AfterViewInit {
   }
   async ngAfterViewInit() {
     this.indexDBServiceS.getIndexDBStaticTables('getInstrumentDataCorpActions').then((data)=> this.updateCAdataTable(data['data']));
-    // this.MarketDataService.get
   }
   ngOnChanges(changes: SimpleChanges) {
     this.dataSource&&changes['instrument'].currentValue.secid? this.applyFilter(undefined, this.instrument.secid) : null;

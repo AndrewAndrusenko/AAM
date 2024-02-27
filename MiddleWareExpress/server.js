@@ -216,3 +216,4 @@ appServer.post('/DEA/updateTransactionTypes/',jsPassport.authenticate('session')
 // RedisService.redisSetInstrumentList();
 appServer.get('/AAM/Redis/getMoexInstrumentsList/',jsPassport.authenticate('session'), RedisService.redisGetInstrumentList)
 appServer.listen (port,'localhost', () => {console.log (`AAM Server is running on port ${port}`)})
+appServer.on('error', (e) =>  console.log('AAAAAAA in use, retrying...'))

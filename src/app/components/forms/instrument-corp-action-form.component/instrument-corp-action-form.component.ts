@@ -1,13 +1,11 @@
-import { Component,  EventEmitter,  Input, Output, SimpleChanges } from '@angular/core';
+import { Component,  EventEmitter,  Input, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { caTypes, instrumentDetails } from 'src/app/models/interfaces.model';
-import { Observable, Subscription, distinctUntilChanged, filter, map, startWith, switchMap } from 'rxjs';
+import { corporateActionsTypes, instrumentDetails } from 'src/app/models/instruments.interfaces';
+import { Observable, distinctUntilChanged, filter, map, startWith, switchMap } from 'rxjs';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
-import { AppMarketDataService } from 'src/app/services/market-data.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import { InstrumentDataService } from 'src/app/services/instrument-data.service';
-
 @Component({
   selector: 'instrument-corp-action-form',
   templateUrl: './instrument-corp-action-form.component.html',
@@ -22,8 +20,7 @@ export class AppInstrumentCorpActionFormComponent {
   @Output() public modal_principal_parent = new EventEmitter();
   public title: string;
   @Input() data: any;
-  private subscriptionName: Subscription
-  caTypes: caTypes[];
+  caTypes: corporateActionsTypes[];
   filteredCurrenciesList: Observable<string[]>;
   templateStructureAT = {
    1 : {

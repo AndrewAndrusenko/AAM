@@ -1,7 +1,6 @@
 const db_common_api = require('./db_common_api');
 var pgp = require ('pg-promise')({capSQL:true});
 const https = require('https');
-
 async function getCurrencyData (request,response) {
   let sql='';
   let conditions = {}
@@ -67,20 +66,22 @@ async function modifyRatesData (request,response) {
   sql = pgp.as.format(sql,request.body.params);
   db_common_api.queryExecute(sql,response,undefined,request.body.params.dataType);
 }
-
 async function getCbrRateDaily (request,response) {
+  db_common_api.checkInternetConnection().then(e=>console.log('intrnet connection - ', e))
   let dateToLoad=request.query.date.split('-')
   dateToLoad = dateToLoad[2] +'/'+dateToLoad[1]+'/'+dateToLoad[0]
-  let url='https://www.cbr.ru/scripts/XML_daily.asp?date_req='+dateToLoad
-    https.get(url, (resp) => {
+  let url = 'https://www.cbr.ru/scripts/XML_daily.asp?date_req='+dateToLoad
+  const options = {
+      timeout: 3000,
+  };
+  let cbrRequest = https.get(url,options, (resp) => {
       let data = '';
-      resp.on('error', (e) => console.log('err'));
+      resp.on('error', (e) => console.log('cbr.ru response error: ',e));
       resp.on('data', (chunk) => data += chunk);
       resp.on('end', () =>  {
         let ind=data.indexOf("Date=")
         let dateToCheck =data.substring(ind+6,ind+16).split('.')
         dateToCheck = dateToCheck[2]+'/'+dateToCheck[1]+'/'+dateToCheck[0]
-        console.log('date',data.substring(ind+6,ind+16))
         if (request.query.dataType==='getRatesDate') {
           return response.status(200).send({dateToCheck:dateToCheck})
         } 
@@ -96,6 +97,17 @@ async function getCbrRateDaily (request,response) {
         db_common_api.queryExecute(sql,response,undefined,'insertCbrRateFromXML');
       })
     })
+  cbrRequest.on('error',(e)=>{
+    console.log('HTTP cbr.ru rates error: ',e);
+    if (!response.headersSent) {return response.status(409).send({name:'error',...e})}
+  })
+  cbrRequest.on('timeout', () => {
+    console.log('timeout error');
+    cbrRequest.destroy();
+    if (!response.headersSent) {
+      return response.status(409).send({name:'error',detail:'There is no response from www.cbr.ru. Timeout of 3 sec is out'})
+    }
+  });
 }
 module.exports = {
   getCurrencyData,

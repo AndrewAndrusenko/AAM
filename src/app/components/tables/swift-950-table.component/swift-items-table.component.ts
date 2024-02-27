@@ -3,13 +3,13 @@ import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
-import {bcTransactionType_Ext, SWIFTStatement950model } from 'src/app/models/accountng-intefaces.model';
+import {bcTransactionType_Ext, SWIFTSGlobalListmodel, SWIFTStatement950model } from 'src/app/models/accountng-intefaces.model';
 import {AppAccountingService } from 'src/app/services/accounting.service';
 import {AppAccEntryModifyFormComponent } from '../../forms/acc-entry-form.component/acc-entry-form.component';
 import {HandlingTableSelectionService } from 'src/app/services/handling-table-selection.service';
 import {SelectionModel } from '@angular/cdk/collections';
 import {AuthService } from 'src/app/services/auth.service';
-import { bcParametersSchemeAccTrans } from 'src/app/models/acc-schemes-interfaces';
+import {bcEntryParameters} from 'src/app/models/acc-schemes-interfaces';
 @Component({
   selector: 'app-table-swift-items',
   templateUrl: './swift-items-table.component.html',
@@ -25,13 +25,13 @@ import { bcParametersSchemeAccTrans } from 'src/app/models/acc-schemes-interface
 export class AppTableSWIFT950ItemsComponent  implements  AfterViewInit {
   accessState: string = 'none';
   disabledControlElements: boolean = false;
-  bcEntryParameters = <bcParametersSchemeAccTrans> {}
+  bcEntryParameters = <bcEntryParameters> {}
   TransactionTypes: bcTransactionType_Ext[] = [];
   columnsToDisplay = ['select','id', 'amountTransaction',  'typeTransaction', 'valueDate', 'comment', 'refTransaction', 'entriesAmount' ];
   columnsHeaderToDisplay = ['Id', 'amount',  'type', 'value', 'comment','ref','allocated'];
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
   dataSource: MatTableDataSource<SWIFTStatement950model>;
-  @Input() parentMsgRow: any;
+  @Input() parentMsgRow: SWIFTSGlobalListmodel;
   @Input() FirstOpenedAccountingDate: Date;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;

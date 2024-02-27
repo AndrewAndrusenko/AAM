@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Observable, Subject, map } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
-import { Instruments, instrumentCorpActions, instrumentDetails} from '../models/interfaces.model';
+import { Instruments, instrumentCorpActions, instrumentDetails} from '../models/instruments.interfaces';
+import { corporateActionsTypes, moexBoard, moexSecurityGroup, moexSecurityType } from '../models/instruments.interfaces';
 interface InstrumentDataSet {
   data:Instruments[],
   action:string
@@ -53,10 +54,18 @@ export class InstrumentDataService {
     )
   }
 
-  getInstrumentDataGeneral (dataType:string, fieldtoCheck?:string): Observable <any[]> {
+  getInstrumentDataGeneral (dataType:string, fieldtoCheck?:string): 
+  Observable <
+    moexBoard[]|
+    moexSecurityType[]|
+    corporateActionsTypes[]|
+    moexSecurityGroup[]|
+    {secid:string}[]|{isin:string}[]
+  > {
     const params = {dataType:dataType}
     fieldtoCheck!==null? Object.assign(params,{fieldtoCheck:fieldtoCheck}) : null;
-    return this.http.get <any[]> ('/api/AAM/MD/getInstrumentDataGeneral/',{params:params})
+    return this.http.get <moexBoard[]|moexSecurityType[]|corporateActionsTypes[]|moexSecurityGroup[]|{secid:string}[]|{isin:string}[]>
+     ('/api/AAM/MD/getInstrumentDataGeneral/',{params:params})
   }
   getMoexInstruments (rowslimit:number=100000,sorting:string=' secid ASC', searchParameters?:any):Observable<Instruments[]> {
     let params = {};

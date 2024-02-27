@@ -306,7 +306,7 @@ we get closest market price for every position
   Form component AppAccTransactionTypesFormComponent has been created to modify Transaction Type. Transaction Type must be unique by combination of type and code. User is able to block certain transaction type from manual editing. The option is introduced to protect integrity of data generated automatically and which is usually dependant on other axiuallary tables
 2|| Accounting related interfaces have been transferred to the separate file. All dependant components and services have been updated accordingly
 3|| Any type refactoring => Started getting rid of any type and replace it with correct types
-
+--------------------------------------------------------------------------------------------
 12/02/2024 - 17/02/2024
 1|| Accounting schemes  UI & DB =>
   Created DB table bcSchemesParameters to store all parameters which could be used to create new accounting schemes. List of parameters is determined by function responsible for handling given buisness process. A parameter is similar to an api variable which is replaced by real value from business object when function is executed by the user
@@ -324,6 +324,28 @@ we get closest market price for every position
 2|| Accounting schemes interfaces have been transferred to the separate file. All dependant components and services have been updated accordingly
 3|| Any type refactoring => Refactored any type in allocation.service.ts
 4|| Rewrite cached data when it has been changed => Introduced new function to the indexDB.service.ts to update cache data (replace cache with up to date snapshot). New function is used to update transactions types cached when user updates respective data
+--------------------------------------------------------------------------------------------
+19/02/2024 - 26/02/2024
+1|| Refactored functionality to load currency rates from site of russian central bank:
+  The function has been moved from the component to the currency service
+  The function has been rewritten using RxJS library. All nested conditions have been replaced with RxJS operators inside the pipe
+  Timeout has been set for respective http get request and add hadler to process threpassing of the limit
+  In order to prevent a express server crash, when cbr site is unreacheable due to a bad or no connection, error hadler has been connected to the http get request. Error hadnler console log an error and send error to the client UI where is handled accordingly
+  Refactored UI to make it more intuitive  
+2|| Refactored any type to the secure ones in the following components:  
+  allocation-table.component.ts,
+  orders-table.component.ts, 
+  swift-items-table.component.ts, 
+  swifts-incoming-table.component.ts,
+  accounting-trades.service.ts,
+  allocation.service.ts,
+  handling-entry-processing.service.ts,
+  tree-menu.service.ts,
+  trades-service.service.ts,
+  trade-table.component.ts,
+  fees-handling.service.ts,
+  currencies-data.service.ts,
+  currencies-data-table.component.ts
 
 ToDo
 || Store histrory of a portfolio changing strategies

@@ -176,17 +176,17 @@ export class AppTableSWIFTsInListsComponent  implements OnInit,OnDestroy {
     this.dataSource.filter = '';
     this.dataSource.paginator? this.dataSource.paginator.firstPage() : null;
   }
-  toggleParentandChild (row:any, rowIndex: any) {
+  toggleParentandChild (row:SWIFTSGlobalListmodel, rowIndex: number) {
     this.selection.toggle(row);
-    let TableSwiftItem = this.TableSwiftItems.filter((element, index) => index === rowIndex);
+    let TableSwiftItem = this.TableSwiftItems.filter((e, index) => index === rowIndex);
     TableSwiftItem[0].toggleAllRows();
   }
-  isAllClidrenSelected(row:any, rowIndex: any) {
-    let TableSwiftItem = this.TableSwiftItems.filter((element, index) => index === rowIndex);
+  isAllClidrenSelected(rowIndex: number) {
+    let TableSwiftItem = this.TableSwiftItems.filter((e, index) => index === rowIndex);
     return TableSwiftItem.length?  TableSwiftItem[0].isAllSelected() : false;
   }
-  ChildhasValue (row:any, rowIndex: any) {
-    let TableSwiftItem = this.TableSwiftItems.filter((element, index) => index === rowIndex);
+  ChildhasValue (rowIndex: number) {
+    let TableSwiftItem = this.TableSwiftItems.filter((e, index) => index === rowIndex);
     return TableSwiftItem.length? TableSwiftItem[0].selection.hasValue() : false;
   }
   isAllSelected() {return this.SelectionService.isAllSelected(this.dataSource, this.selection)} 

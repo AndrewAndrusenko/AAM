@@ -1,10 +1,10 @@
-import { Component, EventEmitter, Output, ViewChild, Input, ChangeDetectionStrategy, ElementRef, TemplateRef} from '@angular/core';
+import { Component, EventEmitter, Output, ViewChild, Input, ChangeDetectionStrategy, ElementRef} from '@angular/core';
 import { MatPaginator as MatPaginator} from '@angular/material/paginator';
 import { MatSort} from '@angular/material/sort';
 import { Observable, Subscription, map, startWith } from 'rxjs';
 import { MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { Instruments, orders, trades } from 'src/app/models/interfaces.model';
+import { trades } from 'src/app/models/interfaces.model';
 import { COMMA, ENTER} from '@angular/cdk/keycodes';
 import { MatChipInputEvent} from '@angular/material/chips';
 import { AbstractControl, FormBuilder, FormControl, FormGroup } from '@angular/forms';
@@ -17,6 +17,7 @@ import { AppTradeModifyFormComponent } from '../../forms/trade-form.component/tr
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import { AppAccountingService } from 'src/app/services/accounting.service';
 import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
+import { Instruments } from 'src/app/models/instruments.interfaces';
 @Component({
   selector: 'app-trade-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -54,10 +55,10 @@ export class AppTradeTableComponent  {
     dateRangeEnd: new FormControl<Date | null>(null),
   });
   public dialogTradeModify: MatDialogRef<AppTradeModifyFormComponent>
-  multiFilter?: (data: any, filter: string) => boolean;
-  @ViewChild(TemplateRef) _dialogTemplate: TemplateRef<any>;
+  multiFilter?: (data: trades, filter: string) => boolean;
   activeTab:string=''
-/*   @HostListener('document:keydown', ['$event'])
+/*   
+  @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) { 
     if (this.activeTab==='Trades'){
       event.altKey&&event.key==='r'? this.submitQuery(false):null;
@@ -161,9 +162,9 @@ export class AppTradeTableComponent  {
       this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ');
     }));
   }
-  openTradeModifyForm (action:string, element:any,tabIndex:number=0) {
+  openTradeModifyForm (action:string, element:trades|{},tabIndex:number=0) {
     let dataToForm = structuredClone(element);
-    action==='Create_Example'? dataToForm.allocatedqty=0:null;
+    action==='Create_Example'? (dataToForm  as trades).allocatedqty=0:null;
     this.dialogTradeModify = this.dialog.open (AppTradeModifyFormComponent,{minHeight:'600px', minWidth:'60vw', maxWidth:'80vw', maxHeight: '90vh'})
     this.dialogTradeModify.componentInstance.action = action;
     this.dialogTradeModify.componentInstance.tabIndex=tabIndex;
@@ -175,12 +176,12 @@ export class AppTradeTableComponent  {
     this.dataSource.sort = this.sort;
     this.dataSource.filterPredicate=this.multiFilter;
   }
-  applyFilter(event: any) {
+  applyFilter(event: KeyboardEvent) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim() ;
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
-  updateFilter (el: any) {
+  updateFilter (el: string) {
     this.filterALL.nativeElement.value = this.filterALL.nativeElement.value + el+';';
     this.dataSource.filter = this.filterALL.nativeElement.value.slice(0,-1).trim();
     (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
@@ -193,7 +194,7 @@ export class AppTradeTableComponent  {
   changedValueofChip (value:string, chipArray:string[],control:AbstractControl) {
     chipArray[chipArray.length-1] === 'ClearAll'? chipArray.push(value) : chipArray[chipArray.length-1] = value
   }
-  add(event: MatChipInputEvent,chipArray:string[],control:AbstractControl): any[] {
+  add(event: MatChipInputEvent,chipArray:string[],control:AbstractControl): string[] {
     const value = (event.value || '').trim();
     const valueArray = event.value.split(',');
     (value)? chipArray = [...chipArray,...valueArray] : null;
@@ -210,7 +211,6 @@ export class AppTradeTableComponent  {
     };
     return chipArray;
   }
-  addChips (el: any, column: string) {(['secid'].includes(column))? this.instruments.push(el):null;}
   selectInstrument (element:Instruments) {this.modal_principal_parent.emit(element)}
   exportToExcel() {
   let numberFields=['idtrade','price','id_price_currency','qty','id_settlement_currency','tidorder','allocatedqty','fifo_qty'];

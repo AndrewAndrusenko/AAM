@@ -4,7 +4,7 @@ import {MatSort} from '@angular/material/sort';
 import {Observable, Subscription } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { Instruments, instrumentCorpActions, instrumentDetails, marketDataSources } from 'src/app/models/interfaces.model';
+import { Instruments, instrumentCorpActions, instrumentDetails } from 'src/app/models/instruments.interfaces';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
@@ -18,6 +18,7 @@ import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dia
 import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { InstrumentDataService } from 'src/app/services/instrument-data.service';
+import { marketDataSources } from 'src/app/models/interfaces.model';
 @Component({
   selector: 'app-app-instrument-table',
   
@@ -70,9 +71,7 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
   boardIDs =[]
   searchParametersFG: FormGroup;
   boardsOne = new FormControl('');
-
   dialogInstrumentModify: MatDialogRef<AppInvInstrumentModifyFormComponent>;
-
   defaultFilterPredicate?: (data: any, filter: string) => boolean;
   secidfilter?: (data: any, filter: string) => boolean;
   selectedRow: Instruments;

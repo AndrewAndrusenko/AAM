@@ -1,6 +1,6 @@
 import { Component,  EventEmitter,  Input, Output, SimpleChanges, ViewChild,  } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { instrumentDetails } from 'src/app/models/interfaces.model';
+import { instrumentDetails } from 'src/app/models/instruments.interfaces';
 import { Subscription, filter, switchMap } from 'rxjs';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AppMarketDataService } from 'src/app/services/market-data.service';
@@ -21,11 +21,9 @@ export class AppInvInstrumentDetailsFormComponent {
   @Output() public modal_principal_parent = new EventEmitter();
   public title: string;
   @Input() data: any;
-  private subscriptionName: Subscription
   constructor (
     private fb:FormBuilder, 
     private CommonDialogsService:HadlingCommonDialogsService,
-    private MarketDataService: AppMarketDataService,
     private InstrumentDataS:InstrumentDataService,
     private indexDBServiceS: indexDBService,
   ) 

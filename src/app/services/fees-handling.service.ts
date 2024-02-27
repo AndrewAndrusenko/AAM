@@ -2,11 +2,12 @@ import { Injectable } from '@angular/core';
 import { HadlingCommonDialogsService } from './hadling-common-dialogs.service';
 import { AppAccountingService } from './accounting.service';
 import { BehaviorSubject, EMPTY, Observable, ReplaySubject, Subject, catchError, filter, forkJoin, from, map, switchMap, tap } from 'rxjs';
-import { bAccountTransaction, bLedgerTransaction } from '../models/accountng-intefaces.model';
+import { bAccountTransaction, bAccountingTransactionAll, bLedgerTransaction } from '../models/accountng-intefaces.model';
 import { AccountingTradesService } from './accounting-trades.service';
 import { HttpClient } from '@angular/common/http';
 import { formatNumber } from '@angular/common';
 import { FeesMainData, FeesMainWithSchedules, FeesPortfoliosWithSchedulesData, FeesSchedulesData, FeesTransactions, ManagementFeeCalcData, PerformanceFeeCalcData, dFeesObject } from '../models/fees-interfaces.model';
+import { bcEntryParameters } from '../models/acc-schemes-interfaces';
 @Injectable({
   providedIn: 'root'
 })
@@ -24,7 +25,6 @@ export class AppFeesHandlingService {
     private http :HttpClient,
     private CommonDialogsService:HadlingCommonDialogsService,
     private AccountingDataService:AppAccountingService, 
-    private accountingTradeService: AccountingTradesService,
   ) { }
   sendFeeSheduleIsOpened(id_fee_main: number) {
     this.feeSheduleIsOpened$.next(id_fee_main);
@@ -171,12 +171,12 @@ export class AppFeesHandlingService {
     ).subscribe(()=>this.entriesCreationForManagementFees(profitTax,accountingDate));
   }
   entriesCreationForManagementFees (profitTaxRate:number,accountingDate:Date) {
-    let createdAccountingTransactions = [];
+    let createdAccountingTransactions: bAccountingTransactionAll[] =[]; 
     let feesToProcessProcessStatus = this.feesToProcess.
     filter(el=>Number(el.fee_type)===1? el.id===null: el.id>0)
     .map(el=>{return {id:el.portfolioname,accounting:1}})
     this.feesToProcess.filter(el=>Number(el.fee_type)===1? el.id===null: el.id>0).forEach(feeTransaction => {
-      let bcEntryParameters = <any> {}
+      let bcEntryParameters = <bcEntryParameters> {}
       bcEntryParameters.fee_code=feeTransaction.fee_code;
       bcEntryParameters.pDate_T=new Date(accountingDate).toDateString();
       bcEntryParameters.pAccountId=feeTransaction.accountId;
@@ -198,19 +198,19 @@ export class AppFeesHandlingService {
       };
      let accountingToCreate$: Observable<bAccountTransaction[]|bLedgerTransaction[]>[]=[];
      forkJoin([
-       this.accountingTradeService.getAccountingScheme(bcEntryParameters,cSchemeGroupId).pipe(
+       this.AccountingDataService.getAccountingScheme(bcEntryParameters,cSchemeGroupId).pipe(
          map(entryDrafts=>entryDrafts.forEach(draft=>
            accountingToCreate$.push(this.AccountingDataService.updateEntryAccountAccounting (draft,'Create'))
          )),
        ),
-       this.accountingTradeService.getAccountingScheme(bcEntryParameters,cSchemeGroupId,'LL').pipe(
+       this.AccountingDataService.getAccountingScheme(bcEntryParameters,cSchemeGroupId,'LL').pipe(
          map(entryDrafts=>entryDrafts.forEach(draft=>{
            accountingToCreate$.push(this.AccountingDataService.updateLLEntryAccountAccounting (draft,'Create'))
          }))
        )
      ]).pipe(
-      switchMap(()=>forkJoin(accountingToCreate$)),
-      tap(data=>createdAccountingTransactions.push(data)),
+      switchMap((dd)=>forkJoin(accountingToCreate$)),
+      tap(data=>createdAccountingTransactions.push(data as bAccountingTransactionAll )),
       map(el=>el.flat().map(el=>Number(el.id))),
       switchMap(data=>this.updateFeesEntryInfo(
         this.feesToProcess.filter(el=>el.id>0&&el.portfolioname===feeTransaction.portfolioname).map(el=>Number(el.id)),
@@ -230,7 +230,7 @@ export class AppFeesHandlingService {
      });
       })
   } 
-  createMFAccountingStatus (tradeToConfirmProcessStatus:{id:string,accounting:number}[],createdAccountingTransactions:any[]) {
+  createMFAccountingStatus (tradeToConfirmProcessStatus:{id:string,accounting:number}[],createdAccountingTransactions:bAccountingTransactionAll[]) {
     if (tradeToConfirmProcessStatus.reduce((acc,val)=>acc+val.accounting,0)===0) {
       this.sendCreatedAccounting(createdAccountingTransactions)
       let entries = new Set (createdAccountingTransactions.flat().map(el=>el[0]['id']))

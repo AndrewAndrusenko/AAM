@@ -100,8 +100,8 @@
           <mat-checkbox (click)="$event.stopPropagation()"
                         (change)="$event ? toggleParentandChild (row, i): null;"
                         
-                        [checked]="(!this.dataSource)? false : ChildhasValue(row, i) && isAllClidrenSelected(row,i)"
-                        [indeterminate]="ChildhasValue(row, i) && !isAllClidrenSelected(row,i)"
+                        [checked]="(!this.dataSource)? false : ChildhasValue(i) && isAllClidrenSelected(i)"
+                        [indeterminate]="ChildhasValue(i) && !isAllClidrenSelected(i)"
 
                         [aria-label]="checkboxLabel(row)"
                         [disabled]="!multiSelect">

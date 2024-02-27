@@ -10,6 +10,7 @@ import { allocation, allocation_fifo } from '../models/interfaces.model';
 import { AccountingTradesService } from './accounting-trades.service';
 import { error } from 'jquery';
 import { bAccountTransaction, bLedgerTransaction } from '../models/accountng-intefaces.model';
+import { bcEntryParameters } from '../models/acc-schemes-interfaces';
 
 @Injectable({
   providedIn: 'root'
@@ -30,7 +31,6 @@ export class AppAllocationService {
       tap(entriesData=>entriesData.length?  
         this.CommonDialogsService.snackResultHandler({name:'error',detail:'There are created entries for the trades: '+[...entriesData.map(el=>el.idtrade)]}) : null),
       filter(entriesData=>entriesData.length===0),
-      tap(()=>console.log('portfolioWitoutAccounts', this.tradeToConfirm.filter(trade=>!trade.accountId||!trade.depoAccountId).map(trade=>{return trade.portfolioname}))),
       switchMap(()=>this.createNewDepoAccounts(new Set(this.tradeToConfirm.filter(trade=>!trade.depoAccountId).map(el=>el.secid)))),
       tap(()=>{
         let portfolioWitoutAccounts = this.tradeToConfirm.filter(trade=>!trade.accountId||!trade.depoAccountId)
@@ -45,7 +45,7 @@ export class AppAllocationService {
     let createdAccountingTransactions = [];
     let tradeToConfirmProcessStatus = this.tradeToConfirm.map(el=>{return {id:el.id,accounting:1}})
     this.tradeToConfirm.forEach(clientTrade => {
-      let bcEntryParameters = <any> {}
+      let bcEntryParameters = <bcEntryParameters> {}
       bcEntryParameters.id_settlement_currency=clientTrade.id_settlement_currency;
       bcEntryParameters.cptyCode=clientTrade.cpty_code;
       bcEntryParameters.pDate_T=new Date(clientTrade.tdate).toDateString();
@@ -64,12 +64,12 @@ export class AppAllocationService {
         filter(data=>data['name']!=='error'),
         switchMap(()=> 
           forkJoin([
-            this.accountingTradeService.getAccountingScheme(bcEntryParameters,cSchemeGroupId).pipe(
+            this.AccountingDataService.getAccountingScheme(bcEntryParameters,cSchemeGroupId).pipe(
               map(entryDrafts=>entryDrafts.forEach(draft=>
                 accountingToCreate$.push(this.AccountingDataService.updateEntryAccountAccounting (draft,'Create'))
               )),
             ),
-            this.accountingTradeService.getAccountingScheme(bcEntryParameters,cSchemeGroupId,'LL').pipe(
+            this.AccountingDataService.getAccountingScheme(bcEntryParameters,cSchemeGroupId,'LL').pipe(
               map(entryDrafts=>entryDrafts.forEach(draft=>{
                 accountingToCreate$.push(this.AccountingDataService.updateLLEntryAccountAccounting (draft,'Create'))
               }))

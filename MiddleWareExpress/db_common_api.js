@@ -3,7 +3,10 @@ const Pool = require('pg').Pool;
 const pool = new Pool(config.dbConfig);
 var pgp = require ('pg-promise')({capSQL:true});
 const pg = require('pg');
-
+async function checkInternetConnection () {
+let isConnected = !!await require('dns').promises.resolve('google.com').catch(()=>{});
+return isConnected;
+}
 async function queryExecute (sql, response, responseType, sqlID) {
   return new Promise ((resolve) => {
     pool.query (sql,  (err, res) => {
@@ -56,5 +59,6 @@ function getTransformArrayParam(request,paramsList) {
 module.exports = {
   queryExecute,
   fUpdateTableDB,
-  getTransformArrayParam
+  getTransformArrayParam,
+  checkInternetConnection
 }

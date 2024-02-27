@@ -1,6 +1,6 @@
 import { AfterContentInit, Component,  EventEmitter,  Input, Output, ViewChild} from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ClientData, Instruments, allocation, orders} from 'src/app/models/interfaces.model';
+import { ClientData, allocation, orders} from 'src/app/models/interfaces.model';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { Observable, Subscription, debounceTime, distinctUntilChanged, filter, map, startWith, switchMap, tap } from 'rxjs';
@@ -18,11 +18,10 @@ import { AppallocationTableComponent } from '../../tables/allocation-table.compo
 import { MatTableDataSource } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
 import { AppAllocationService } from 'src/app/services/allocation.service';
-import { ViewportScroller } from '@angular/common';
 import { MatTabGroup } from '@angular/material/tabs';
-import { arrayBuffer } from 'stream/consumers';
 import { CurrenciesDataService } from 'src/app/services/currencies-data.service';
 import { AppMarketDataService } from 'src/app/services/market-data.service';
+import { Instruments } from 'src/app/models/instruments.interfaces';
 @Component({
   selector: 'app-trade-modify-form',
   templateUrl: './trade-form.component.html',

@@ -90,10 +90,32 @@ export interface bLedgerAccounts extends bLedger {
   action:string
 }
 export interface bAccountTransaction {
-  id:number,ledgerNoId: number, dataTime:Date, XactTypeCode: number, XactTypeCode_Ext: number, accountId: number,  amountTransaction: number, entryDetails: string, extTransactionId: number,idtrade: number
+  id:number,
+  ledgerNoId: number,
+  dataTime:Date, 
+  XactTypeCode: number,
+  XactTypeCode_Ext: number, 
+  accountId: number,  
+  amountTransaction: number, 
+  entryDetails: string, 
+  extTransactionId: number,
+  idtrade: number
 }
 export interface bLedgerTransaction {
-  id:number,ledgerID_Debit: number, dateTime:Date,  XactTypeCode_Ext: number, ledgerID: number,  amount: number, entryDetails: string, extTransactionId: number,idtrade: number
+  id:number,
+  ledgerID_Debit: number, 
+  dateTime:Date,
+  XactTypeCode_Ext: number, 
+  ledgerID: number,  
+  amount: number, 
+  entryDetails: string, 
+  extTransactionId: number,
+  idtrade: number
+}
+export interface bAccountingTransactionAll {
+  id?:number,ledgerNoId?: number, dataTime?:Date, XactTypeCode?: number, accountId?: number,  amountTransaction?: number, entryDetails?: string, 
+  ledgerID_Debit?: number, dateTime?:Date,  XactTypeCode_Ext?: number, ledgerID?: number,  amount?: number,
+  extTransactionId?: number,idtrade?: number
 }
 export interface bAccountsEntriesList {
   d_portfolioname: string;

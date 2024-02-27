@@ -194,42 +194,6 @@ export interface InstrumentsMapCodes {
   isin:string,
   mapcode:string
 }
-export interface Instruments  {
-  id :number,
-  groupid: number,
-  secid: string, 
-  security_type_title: string,
-  stock_type: number, 
-  security_type_name: string, 
-  shortname: string, 
-  primary_boardid: string, 
-  board_title: string, 
-  title: string,
-  category: string, 
-  name: string, 
-  isin: string, 
-  emitent_title: string, 
-  emitent_inn: string, 
-  type: string, 
-  group: string, 
-  marketprice_boardid: string,
-  group_title: string,
-  security_group_name: string,
-  action: string,
-  faceunit: string, 
-  facevalue: number, 
-  maturitydate: Date, 
-  regnumber: string 
-}
-export interface instrumentDetails {
-  secid: string, boardid: string, shortname: string, lotsize: number, facevalue: number, status: string, boardname: string, decimals: number, matdate: Date, secname: string, couponperiod: string, issuesize: number, remarks: string, marketcode: string, instrid: string, sectorid: string, minstep: number, faceunit: number, isin: string, latname: string, regnumber: string, currencyid: string, sectype: string, listlevel: number, issuesizeplaced: number, couponpercent: string, lotvalue: number, nextcoupon: string, issuevolume:number,id: number
-}
-export interface instrumentCorpActions {
-  id: number, isin: string, issuevolume: number, secname: string, notinal: number, notinalcurrency: string, unredemeedvalue: number, couponrate: number, couponamount: number, actiontype: string, couponamountrur: number, date: Date, action: string, actiontypename: string
-}
-export interface caTypes {
-  id: number, name: string, sectype: number[], ismandatory: boolean, ratetype: string, fixedrate: boolean
-}
 export interface trades {
   idtrade:number,qty:number,price:number,accured_interest:number,fee_trade:number,fee_settlement:number,fee_exchange:number,tdate:Date,vdate:Date,tidorder:number,allocatedqty:number,idportfolio:number,id_price_currency:number,id_settlement_currency:number,id_buyer_instructions:number,id_seller_instructions:number,id_cpty:string,tidinstrument:string,id_broker:string,trtype:string, action:number,price_type:number,details:string,cpty_name:string , security_group_name :string, secid_type:string,  secid_name:string, trade_amount:number,faceunit:number,facevalue:number,settlement_amount:number, settlement_rate:number,price_currency_name:string,balance_qty:number,fifo_qty:number
 }

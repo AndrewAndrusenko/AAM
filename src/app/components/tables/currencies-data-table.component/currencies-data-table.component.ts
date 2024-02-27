@@ -1,7 +1,7 @@
-import { Component, EventEmitter, Output, ViewChild, Input, AfterViewInit} from '@angular/core';
+import { Component, ViewChild, Input, AfterViewInit} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
-import {map, Observable, startWith, switchMap, tap } from 'rxjs';
+import {catchError, EMPTY, map, Observable, startWith, switchMap, tap } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import { currencyRateList,  marketDataSources, marketSourceSegements } from 'src/app/models/interfaces.model';
 import { AppAccountingService } from 'src/app/services/accounting.service';
@@ -9,10 +9,8 @@ import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatOption } from '@angular/material/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import * as moment from 'moment';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
-import { formatNumber, registerLocaleData } from '@angular/common';
+import { DatePipe, formatNumber, registerLocaleData } from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
@@ -25,7 +23,7 @@ registerLocaleData(localeFr, 'fr');
   templateUrl: './currencies-data-table.component.html',
   styleUrls: ['./currencies-data-table.component.scss'],
 })
-export class AppTableCurrenciesDataComponent  implements AfterViewInit {
+export class AppTableCurrenciesDataComponent {
   accessState: string = 'none';
   disabledControlElements: boolean = false;
   @Input() FormMode:string = 'Full'
@@ -36,30 +34,23 @@ export class AppTableCurrenciesDataComponent  implements AfterViewInit {
   dataSource: MatTableDataSource<currencyRateList>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
-  @Output() public modal_principal_parent = new EventEmitter();
   statusLogPanelOpenState:boolean=false;
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
-  
   @ViewChild('allSelected') private allSelected: MatOption;
   public readOnly: boolean = false; 
   panelOpenStateFirst = false;
   panelOpenStateSecond = true;
-  action ='';
   pairs: string[] = ['ClearAll'];
+  datePipe: DatePipe;
   filteredPairsLists : Observable<string[]>;
-  
-  dateOfOperaationsStart  = new Date ('2023-02-18')
   FirstOpenedAccountingDate : Date;
   filterDateFormated : string;
-  boardIDs = []
   searchParametersFG: FormGroup;
   filterlFormControl = new FormControl('');
-  closingDate = new FormControl<Date | null>(null)
   dataRange = new FormGroup ({
     dateRangeStart: new FormControl<Date | null>(null),
     dateRangeEnd: new FormControl<Date | null>(null),
   });
-  marketDataDeleted: Object;
   loadingDataState: {
     message: string,
     state:string, 
@@ -68,31 +59,31 @@ export class AppTableCurrenciesDataComponent  implements AfterViewInit {
   }
   constructor(
     private AccountingDataService:AppAccountingService, 
-    private CurrenciesDataSrv: CurrenciesDataService,
+    private currenciesDataService: CurrenciesDataService,
     private MarketDataService: AppMarketDataService,
     private AuthServiceS:AuthService,  
     private AutoCompService:AtuoCompleteService,
-    private HandlingCommonTasksS:HandlingCommonTasksService,
+    private handlingCommonTasksService:HandlingCommonTasksService,
     private CommonDialogsService:HadlingCommonDialogsService,
     private fb:FormBuilder, 
-    public snack:MatSnackBar
   ) {
+    this.datePipe = new DatePipe ('en-US')
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToInstrumentData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.MarketDataService.getMarketDataSources('currency').subscribe(marketSourcesData => this.marketSources = marketSourcesData);
     this.loadingDataState={message:'',state:'None',deletedCount:0,loadedCount:0}
-    this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data=>{
-      this.FirstOpenedAccountingDate = data[0].FirstOpenedDate;
-    });
     this.searchParametersFG = this.fb.group ({
       dataRange : this.dataRange,
       secidList: null,
-      amount:{value:null, disabled:true},
       marketSource : {value:null, disabled:false},
       boards : {value:null, disabled:false}
     });
+    this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data=>{
+      this.FirstOpenedAccountingDate = data[0].FirstOpenedDate;
+      this.dateForLoadingPrices.setValue(new Date(this.FirstOpenedAccountingDate));
+    });
     this.loadMarketData = this.fb.group ({
-      dateForLoadingPrices : [new Date('2022-01-25').toISOString(), Validators.required],
+      dateForLoadingPrices : [new Date(), Validators.required],
       sourceCode: [[],Validators.required],
       overwritingCurrentData : [false]
     });
@@ -102,15 +93,7 @@ export class AppTableCurrenciesDataComponent  implements AfterViewInit {
       startWith(''),
       map(value => this.AutoCompService.filterList(value || '','currencyPairs'))
     );
-  }
-  formatDate (dateToFormat:any):string {
-    let d = dateToFormat,
-    month = '' + (d._d.getMonth() + 1),
-    day = '' + d._d.getDate(),
-    year = d._d.getFullYear();
-    if (month.length < 2) month = '0' + month;
-    if (day.length < 2) day = '0' + day;
-    return [year, month, day].join('-');
+    this.currenciesDataService.getCurrencyRatesList().subscribe (currencyData => this.updateCurrencyDataTable(currencyData)) 
   }
   updateAllComplete(index:number) {
     this.marketSources[index].checkedAll = this.marketSources[index].segments != null && this.marketSources[index].segments.every(t => t.checked); 
@@ -134,69 +117,38 @@ export class AppTableCurrenciesDataComponent  implements AfterViewInit {
     this.showSelectedSources();
   }
   completeLoading (currencyData:currencyRateList[]){
-    this.updateCurrencyDataTable(currencyData);
-    this.loadingDataState.state = 'Success';
-    this.loadingDataState.message = 'Loading is complited';
-    this.loadingDataState.loadedCount = currencyData.length;
+    currencyData!==null? this.updateCurrencyDataTable(currencyData):null;
     this.loadMarketData.enable();
+    this.loadMarketData.reset();
+    this.dateForLoadingPrices.setValue(new Date(this.FirstOpenedAccountingDate));
+
     this.marketSources.forEach(el=>{
       el.checkedAll=false;
       el.segments.forEach(el=>el.checked=false)
     });
     this.overwritingCurrentData.patchValue(false)
   }
-  async getRatestData(){
-    let functionToLoadData:any;
-    let dateToLoad = this.formatDate(this.dateForLoadingPrices.value)
-    this.loadingDataState={message:'Loading',state:'Pending',deletedCount:0,loadedCount:0}
-    let sourcesData: marketSourceSegements[] = this.sourceCode.value
-    this.loadMarketData.disable();
-    let sourceCodesArray:string[] = sourcesData.map(el=>{return el.sourceCode})
-    switch (sourcesData[0].sourceGlobal) {
-      case 'cbr.ru':
-        functionToLoadData = this.CurrenciesDataSrv.getCbrRateDaily.bind(this.CurrenciesDataSrv)
-      break;
-    }
-    await functionToLoadData(sourcesData, dateToLoad,'getRatesDate').pipe(
-      tap(data=> console.log('date to check ',data)),
-      switchMap (ratesDate=>this.CurrenciesDataSrv.checkLoadedRatesData (sourceCodesArray,ratesDate['dateToCheck'].toString()))
-    ).subscribe(async data=>{
-      if (!data.length) {
-       await functionToLoadData(sourcesData, dateToLoad,undefined).subscribe(currencyData => this.completeLoading(currencyData))
-      }
-      else {
-        if (!this.overwritingCurrentData.value) { 
-          this.loadMarketData.enable();
-          this.loadingDataState = {message:'Loading terminated. Data have been already loaded!', state : 'terminated',deletedCount:0,loadedCount:0}
-        } else {
-          this.CommonDialogsService.confirmDialog('Delete all rates for the date '+ dateToLoad+ ' and codes ' + sourceCodesArray).subscribe(isConfirmed=>{
-            if (isConfirmed.isConfirmed){
-              this.CurrenciesDataSrv.deleteOldRateData(sourceCodesArray,dateToLoad).subscribe(async rowsDeleted => {
-                this.marketDataDeleted = rowsDeleted;
-                this.loadingDataState.deletedCount = rowsDeleted.length;
-                await functionToLoadData(sourcesData, dateToLoad,undefined).subscribe(currencyData => this.completeLoading(currencyData))
-                this.marketSources.forEach(el=>el.checkedAll=false)
-              })
-            } else {
-              this.loadMarketData.enable()
-              this.loadingDataState.message= 'Loading has been canceled.';
-              this.loadingDataState.state= 'terminated';
-            }
-          })
-        }
-      }
+  getRatestData(){
+    this.loadingDataState.state='Pending';
+    this.currenciesDataService.getRatestData( this.datePipe.transform(this.dateForLoadingPrices.value,'YYYY-MM-dd'),this.sourceCode.value,this.overwritingCurrentData.value).pipe (
+      catchError((err)=>{
+        console.log('CBR RatestData error',err);
+        this.loadingDataState.state='Error'
+        this.CommonDialogsService.snackResultHandler({name:'error',detail:'There is no access to www.cbr.ru'})
+        return EMPTY;
+      })
+    ).subscribe(loadingDataState=>{
+      console.log('sub ret',loadingDataState);
+      this.loadingDataState = loadingDataState;
+      this.completeLoading(loadingDataState.data)
     }) 
-  }
-  async ngAfterViewInit() {
-    const number = 123456.789;
-    this.CurrenciesDataSrv.getCurrencyRatesList().subscribe (currencyData => this.updateCurrencyDataTable(currencyData)) 
-    this.dateForLoadingPrices.setValue(moment(this.FirstOpenedAccountingDate))
-    // this.dateForLoadingPrices.setValue(moment(new Date('2023/07/26')))
   }
   updateCurrencyDataTable (currencyData:currencyRateList[]) {
     this.dataSource  = new MatTableDataSource(currencyData);
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
+    this.marketSources[0].checkedAll=true
+    this.setAll(0)
   }
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
@@ -214,12 +166,11 @@ export class AppTableCurrenciesDataComponent  implements AfterViewInit {
     const index = this.pairs.indexOf(account);
    (index >= 0)? this.pairs.splice(index, 1) : null
   }
-  clearAll(event) {
-    console.log('event', event.target.textContent);
-    event.target.textContent.trim() === 'ClearAll'? this.pairs = ['ClearAll']: null;
+  clearAll(event:MouseEvent) {
+    event.target['textContent'].trim() === 'ClearAll'? this.pairs = ['ClearAll']: null;
   }
-  addChips (el: any, column: string) {(['accountNo'].includes(column))? this.pairs.push(el):null;}
-  updateFilter (event:Event, el: any, column: string) {
+  addChips (el: string, column: string) {(['accountNo'].includes(column))? this.pairs.push(el):null;}
+  updateFilter (el: string, column: string) {
     this.filterlFormControl.patchValue(el);
     (column=='dateBalance')? this.filterDateFormated = new Date(el).toLocaleDateString() :null
     this.dataSource.filter = el.trim();
@@ -243,7 +194,7 @@ export class AppTableCurrenciesDataComponent  implements AfterViewInit {
     (this.gRange.get('dateRangeEnd').value)===null? null : Object.assign (searchObj , {
       'dateRangeEnd': new Date (this.gRange.get('dateRangeEnd').value).toDateString()});
     ( this.marketSource.value != null&&this.marketSource.value.length !=0)? Object.assign (searchObj , {'sourcecode': this.marketSource.value}): null;
-    this.CurrenciesDataSrv.getCurrencyRatesList(searchObj).subscribe (marketData  => {
+    this.currenciesDataService.getCurrencyRatesList(searchObj).subscribe (marketData  => {
       this.dataSource  = new MatTableDataSource(marketData);
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
@@ -254,36 +205,16 @@ export class AppTableCurrenciesDataComponent  implements AfterViewInit {
   })
   }
   toggleAllSelection(elem:string, allSelected: boolean) {
-    allSelected? this.searchParametersFG.get(elem).patchValue([...this.marketSources.map(item => item.segments.map(el => el.sourceCode)),0].flat()) : this.searchParametersFG.get(elem).patchValue([]);
+    allSelected? 
+    this.searchParametersFG.get(elem).patchValue(
+      [...this.marketSources.map(item => 
+        item.segments.map(el => el.sourceCode)),0].flat()
+    ) : this.searchParametersFG.get(elem).patchValue([]);
   }
-   
   exportToExcel() {
    const fileName = "marketData.xlsx";
    let data = this.dataSource.data
-/*    .map( (row,ind) =>({
-    globalsource: row.globalsource,
-    sourcecode: row. sourcecode,
-    boardid: row. boardid, 
-    secid: row. secid, 
-    numtrades: Number(row.numtrades), 
-    value: Number(row.value), 
-    open: Number(row.open), 
-    low: Number(row.low), 
-    high: Number(row.high), 
-    legalcloseprice: Number(row.legalcloseprice),
-    waprice: Number(row.waprice),
-    close: Number(row.close), 
-    volume: Number(row.volume),
-    marketprice2: Number(row.marketprice2),
-    marketprice3: Number(row.marketprice3), 
-    admittedquote: Number(row.admittedquote), 
-    mp2valtrd: Number(row.mp2valtrd),
-    admittedvalue: Number(row.admittedvalue),
-    waval: Number(row.waval), 
-    tradingsession: row. tradingsession,
-    tradedate: new Date(row.tradedate)
-  })) */
-  this.HandlingCommonTasksS.exportToExcel (data,"currencyData")
+   this.handlingCommonTasksService.exportToExcel (data,"currencyData")
  }
   get  gRange () {return this.searchParametersFG.get('dataRange') } 
   get  dateRangeStart() {return this.searchParametersFG.get('dateRangeStart') } 

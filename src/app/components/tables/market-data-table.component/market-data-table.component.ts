@@ -19,6 +19,7 @@ import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dia
 import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { InstrumentDataService } from 'src/app/services/instrument-data.service';
+import { moexBoard } from 'src/app/models/instruments.interfaces';
 registerLocaleData(localeFr, 'fr');
 /* 
 export class extends  */
@@ -84,7 +85,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
   ) {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToInstrumentData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
-    this.InstrumentDataS.getInstrumentDataGeneral('getBoardsDataFromInstruments').subscribe(boardsData => this.boardIDs=boardsData)
+    this.InstrumentDataS.getInstrumentDataGeneral('getBoardsDataFromInstruments').subscribe(boardsData => this.boardIDs=boardsData  as moexBoard[])
     this.MarketDataService.getMarketDataSources('stock').subscribe(marketSourcesData => this.marketSources = marketSourcesData);
     this.loadingDataState = {Message:'',State: 'None'};
     this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data=>{
