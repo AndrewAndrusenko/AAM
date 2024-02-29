@@ -85,7 +85,7 @@ console.log(arg0);
       d_closingLedgerBalance: {value:null, disabled: false},
       t_idtrade: {value:null, disabled: false} 
     })    
-    this.indexDBServiceS.getIndexDBStaticTables('bcTransactionType_Ext').then (data =>this.TransactionTypes = data['data']);
+    this.indexDBServiceS.getIndexDBStaticTables('bcTransactionType_Ext').subscribe (data =>this.TransactionTypes = (data.data as bcTransactionType_Ext[]));
   }
   async AddAsyncValidators (overdraftOverride:boolean, updateValidators:boolean=false) {
     if (this.FirstOpenedAccountingDate !=null) {

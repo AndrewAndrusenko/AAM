@@ -22,7 +22,7 @@ export class NgEchartMarketDataCandleComponent  {
     private CommonDialogsService:HadlingCommonDialogsService,
 
     ) {
-    this.AtuoCompService.recieveSecIdList().subscribe(secIDsList=>this.secIds=secIDsList)
+    this.AtuoCompService.recieveSecIdList().subscribe(secIDsList=>this.secIds=secIDsList.map(el=>el[0]))
     this.MarketDataService.getMarketDataForChart().subscribe(marketData=>{
       console.log('Chart getMarketDataForChart', Date.now());
 

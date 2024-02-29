@@ -3,7 +3,7 @@ import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {Observable, Subscription, distinctUntilChanged, map, startWith, switchMap, tap } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
-import {portfolioPositions, trades } from 'src/app/models/interfaces.model';
+import {StrategiesGlobalData, currencyCode, portfolioPositions, trades } from 'src/app/models/interfaces.model';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
 import {AbstractControl, FormBuilder, Validators, FormGroup } from '@angular/forms';
@@ -40,12 +40,12 @@ export class AppInvGenerateOrdersTable{
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
   instruments: string[] = ['ClearAll'];
   portfolios: string[] = ['ClearAll'];
-  filterednstrumentsLists : Observable<string[]>;
+  filterednstrumentsLists : Observable<string[][]>;
+  filteredCurrenciesList: Observable<currencyCode[]>;
   searchParametersFG: FormGroup;
   defaultFilterPredicate?: (data: any, filter: string) => boolean;
   multiFilter?: (data: any, filter: string) => boolean;
-  filteredCurrenciesList: Observable<string[]>;
-  mp_strategies_list: string[]=[];
+  mp_strategies_list: StrategiesGlobalData[]=[];
   activeTab:string='';
   tabsNames = ['Generate Orders']
 /*   @HostListener('document:keydown', ['$event'])
@@ -83,8 +83,8 @@ export class AppInvGenerateOrdersTable{
     this.subscriptions.unsubscribe();
   }
   ngOnInit(): void {
-    this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios').then ((data)=>{
-      this.mp_strategies_list = data['data']
+    this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios').subscribe ((data)=>{
+      this.mp_strategies_list = (data.data as StrategiesGlobalData[])
     })
     this.multiFilter = (data: portfolioPositions, filter: string) => {
       let filter_array = filter.split(',').map(el=>[el,1]);
@@ -101,12 +101,12 @@ export class AppInvGenerateOrdersTable{
     this.filterednstrumentsLists = this.secidList.valueChanges.pipe(
       startWith(''),
       distinctUntilChanged(),
-      map(value => this.AutoCompService.filterList(value || '','secid'))
+      map(value => this.AutoCompService.filterList(value || '','secid') as string[][])
     );
     this.filteredCurrenciesList = this.report_id_currency.valueChanges.pipe (
       startWith (''),
       distinctUntilChanged(),
-      map(value => this.AutoCompService.filterList(value || '','currency'))
+      map(value => this.AutoCompService.filterList(value || '','currency') as currencyCode[])
     );
     this.subscriptions.add(this.TreeMenuSevice.getActiveTab().subscribe(tabName=>this.activeTab=tabName));
 

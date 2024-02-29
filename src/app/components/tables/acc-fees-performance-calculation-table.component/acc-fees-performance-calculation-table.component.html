@@ -66,7 +66,7 @@
         style="height: 150%;"
         (selectionChange)="setPortfoliosList($event.value)"  >
         <mat-option [value]="'All'"> All codes </mat-option>
-        <mat-option *ngFor="let mp of mp_strategies_list" [value]="mp['name']"> {{mp['name']}} </mat-option>
+        <mat-option *ngFor="let mp of mp_strategies_list" [value]="mp.name"> {{mp.name}} </mat-option>
       </mat-select>
     <mat-form-field  appearance="fill" style="width: 100%; margin-bottom: 0.5%; " class="search-filed"><!-- Chio Portfolio Filter -->
       <mat-chip-list #chipPortList   >

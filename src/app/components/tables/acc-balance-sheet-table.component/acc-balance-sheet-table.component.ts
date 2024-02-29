@@ -258,11 +258,10 @@ export class AppTableBalanceSheetComponent   {
     } else {
       this.AccountingDataService.GetLedgerData(null,null,null, row.accountNo,'GetLedgerData').subscribe ((accountData) => {
         this.dialogShowAccountInfo = this.dialog.open(AppAccAccountModifyFormComponent ,{minHeight:'600px', minWidth:'900px', autoFocus: false, maxHeight: '90vh'});
-
         this.dialogShowAccountInfo.componentInstance.aType = 1;
         this.dialogShowAccountInfo.componentInstance.action = 'View';
         this.dialogShowAccountInfo.componentInstance.data = accountData[0]; 
-        this.dialogShowAccountInfo.componentInstance.modal_principal_parent.subscribe ((item)=>{
+        this.dialogShowAccountInfo.componentInstance.modal_principal_parent.subscribe (()=>{
           this.dialogChooseAccountsList.close(); 
         });
       })

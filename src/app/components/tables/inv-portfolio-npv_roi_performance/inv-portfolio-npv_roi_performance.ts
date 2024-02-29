@@ -3,7 +3,7 @@ import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {Observable, Subscription, distinctUntilChanged, filter, from, map, of, startWith, switchMap, tap } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
-import {PortfolioPerformnceData,tableHeaders } from 'src/app/models/interfaces.model';
+import {PortfolioPerformnceData,StrategiesGlobalData,currencyCode,tableHeaders } from 'src/app/models/interfaces.model';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
 import {AbstractControl, FormBuilder, Validators, FormGroup, FormControl } from '@angular/forms';
@@ -15,6 +15,7 @@ import {AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import {AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
 import {indexDBService } from 'src/app/services/indexDB.service';
 import {MatCheckbox } from '@angular/material/checkbox';
+import { number } from 'echarts';
 @Component({
   selector: 'app-inv-portfolio-npv_roi_performance',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -61,8 +62,8 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
   searchParametersFG: FormGroup;
   defaultFilterPredicate?: (data: any, filter: string) => boolean;
   multiFilter?: (data: any, filter: string) => boolean;
-  filteredCurrenciesList: Observable<string[]>;
-  mp_strategies_list: string[]=[];
+  filteredCurrenciesList: Observable<currencyCode[]>;
+  mp_strategies_list: StrategiesGlobalData[]=[];
   currencySymbol: string = '$';
   constructor(
     private AuthServiceS:AuthService,  
@@ -92,8 +93,8 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
   }
   ngOnInit(): void {
     this.filters? this.setFilters(this.filters):null;
-    this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios').then ((data)=>{
-      this.mp_strategies_list = data['data']
+    this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios').subscribe ((data)=>{
+      this.mp_strategies_list = data.data as StrategiesGlobalData[]
     })
     this.multiFilter = (data: PortfolioPerformnceData, filter: string) => {
       let filter_array = filter.split(',').map(el=>[el,1]);
@@ -119,7 +120,7 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
     this.filteredCurrenciesList = this.report_id_currency.valueChanges.pipe (
       startWith (''),
       distinctUntilChanged(),
-      map(value => this.AutoCompService.filterList(value || '','currency'))
+      map(value => this.AutoCompService.filterList(value || '','currency') as currencyCode[])
     );
     this.multiFilter = (data: PortfolioPerformnceData, filter: string) => {
       let filter_array = filter.split(',').map(el=>[el,1]);
@@ -225,7 +226,7 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
   }
   currencyChanged(code:string) {
-    this.currencySymbol = this.AutoCompService.fullCurrenciesList.filter(el=>el['CurrencyCodeNum']==code)[0]['symbol'];
+    this.currencySymbol = this.AutoCompService.fullCurrenciesList.filter(el=>el.CurrencyCodeNum==Number(code))[0]['symbol'];
   }
   exportToExcel() {
     let numberFields=['npv','roi_current_period','time_wighted_roi','last_npv','cash_flow','correction_rate','correction_rate_compound'];

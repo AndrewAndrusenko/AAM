@@ -1,6 +1,6 @@
 import { Component,  EventEmitter,  Input, Output, SimpleChanges, ViewChild,  } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { instrumentDetails } from 'src/app/models/instruments.interfaces';
+import { instrumentDetails, moexBoard } from 'src/app/models/instruments.interfaces';
 import { Subscription, filter, switchMap } from 'rxjs';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AppMarketDataService } from 'src/app/services/market-data.service';
@@ -15,7 +15,7 @@ import { InstrumentDataService } from 'src/app/services/instrument-data.service'
 export class AppInvInstrumentDetailsFormComponent {
   public instrumentDetailsForm: FormGroup;
   @Input() action: string;
-  @Input() moexBoards = []
+  @Input() moexBoards:moexBoard[] = []
   @Input() secidParam:string;
   instrumentDetails:instrumentDetails[] = [];
   @Output() public modal_principal_parent = new EventEmitter();
@@ -46,7 +46,7 @@ export class AppInvInstrumentDetailsFormComponent {
       secid: {value:null, disabled: false},
       id: {value:null, disabled: false}
     })
-    this.indexDBServiceS.getIndexDBStaticTables('getBoardsDataFromInstruments').then (data=>this.moexBoards=data['data'])
+    this.indexDBServiceS.getIndexDBStaticTables('getBoardsDataFromInstruments').subscribe (data=>this.moexBoards=(data.data as moexBoard[]))
   }
   ngAfterContentInit(): void {
     this.title = this.action;

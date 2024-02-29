@@ -4,7 +4,7 @@ import { MatSort} from '@angular/material/sort';
 import { Observable, Subscription, map, startWith } from 'rxjs';
 import { MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { trades } from 'src/app/models/interfaces.model';
+import { counterParty, trades } from 'src/app/models/interfaces.model';
 import { COMMA, ENTER} from '@angular/cdk/keycodes';
 import { MatChipInputEvent} from '@angular/material/chips';
 import { AbstractControl, FormBuilder, FormControl, FormGroup } from '@angular/forms';
@@ -43,8 +43,8 @@ export class AppTradeTableComponent  {
   accessToClientData: string = 'true';
   instruments: string[] = ['ClearAll'];
   counterparties: string[] = ['ClearAll'];
-  filterednstrumentsLists : Observable<string[]>;
-  filteredCptyLists : Observable<string[]>;
+  filterednstrumentsLists : Observable<string[][]>;
+  filteredCptyLists : Observable<counterParty[]>;
   searchParametersFG: FormGroup;
   dataRange = new FormGroup ({
     dateRangeStart: new FormControl<Date | null>(null),
@@ -124,14 +124,14 @@ export class AppTradeTableComponent  {
     this.arraySubscrition.add(this.TreeMenuSeviceS.getActiveTab().subscribe(tabName=>this.activeTab=tabName));
     this.TradeService.getTradeInformation(null).subscribe (tradesData => this.updateTradesDataTable(tradesData)); 
     this.AutoCompService.getSecidLists();
-    this.AutoCompService.getCounterpartyLists();
+    this.AutoCompService.getCounterpartyLists().subscribe();
     this.filterednstrumentsLists = this.secidList.valueChanges.pipe(
       startWith(''),
-      map(value => this.AutoCompService.filterList(value || '','secid'))
+      map(value => this.AutoCompService.filterList(value || '','secid') as string[][])
     );
     this.filteredCptyLists = this.cptyList.valueChanges.pipe(
       startWith(''),
-      map(value => this.AutoCompService.filterList(value || '','cpty'))
+      map(value => this.AutoCompService.filterList(value || '','cpty') as counterParty[])
   );
   }
   ngOnDestroy(): void {

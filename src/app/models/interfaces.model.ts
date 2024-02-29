@@ -80,6 +80,11 @@ export interface ClientData {
   code : string,
   action:number
 }
+export interface counterParty {
+  idclient:number, 
+  clientname:string,
+  code:string
+}
 interface portfolioType {
   value: number;
   viewValue: string;
@@ -200,11 +205,25 @@ export interface trades {
 export interface couponPeriodInfo {
   couponrate:number,actiontype:number,currency:number, coupon_date:Date
 }
+
 export interface currencyRate {
   rate_date:Date, baseCode:number, quoteCode:number, rate:number
 }
 export interface currencyRateList extends currencyRate {
   id:number, base_iso:string, quote_iso :string , rate_type:number, nominal:number, pair:string,sourcecode:string, inderect_rate: number
+}
+export interface currencyCode {
+  CurrencyCodeNum :number,
+  CurrencyCode:string,
+  CurrencyName:string, 
+  symbol:string 
+}
+export interface currencyPair {
+id: number, 
+pair:string, 
+base :number, 
+quote :number, 
+nominal:number
 }
 export interface orders {
   id:number, generated:Date, type:string, secid:string, qty:number, price:number, amount:number, qty_executed:number, status:string, parent_order:number, id_portfolio:number,portfolioname:string, ordertype:string, idcurrency:number,currencycode:string, security_group_name:string,secid_type:string,secid_name:string, price_type:number, action:string, allocated:number,unexecuted:number,

@@ -81,7 +81,7 @@ export class AppOrderTableComponent {
   panelOpenStateSecond = false;
   panelOpenStateFirst = false;
   instruments: string[] = ['ClearAll'];
-  filterednstrumentsLists : Observable<string[]>;
+  filterednstrumentsLists : Observable<string[][]>;
   searchParametersFG: FormGroup;
   dataRange = new FormGroup ({
     dateRangeStart: new FormControl<Date | null>(null),
@@ -149,7 +149,7 @@ export class AppOrderTableComponent {
         this.AutoCompService.getSecidLists();
         this.filterednstrumentsLists = this.secidList.valueChanges.pipe(
           startWith(''),
-          map(value => this.AutoCompService.filterList(value || '','secid'))
+          map(value => this.AutoCompService.filterList(value || '','secid') as string[][])
         );
       break;
       case 'Allocation,Child':

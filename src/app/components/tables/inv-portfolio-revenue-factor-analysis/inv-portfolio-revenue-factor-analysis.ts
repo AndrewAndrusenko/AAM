@@ -3,7 +3,7 @@ import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {Observable, Subscription, distinctUntilChanged, filter, from, map, of, startWith, switchMap, tap } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
-import {RevenueFactorData,tableHeaders } from 'src/app/models/interfaces.model';
+import {RevenueFactorData,StrategiesGlobalData,currencyCode,tableHeaders } from 'src/app/models/interfaces.model';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
 import {AbstractControl, FormBuilder, Validators, FormGroup, FormControl } from '@angular/forms';
@@ -61,8 +61,8 @@ export class AppaInvPortfolioRevenueFactorAnalysisTableComponent {
   });
   portfolios: Array<string> = ['ClearAll','VPC005','ACM002','ICM011'];
   searchParametersFG: FormGroup;
-  filteredCurrenciesList: Observable<string[]>;
-  mp_strategies_list: string[]=[];
+  filteredCurrenciesList: Observable<currencyCode[]>;
+  mp_strategies_list: StrategiesGlobalData[]=[];
   currencySymbol: string = '$';
   multiFilter?: (data: any, filter: string) => boolean;
   constructor(
@@ -92,8 +92,8 @@ export class AppaInvPortfolioRevenueFactorAnalysisTableComponent {
   }
   ngOnInit(): void {
     this.filters? this.setFilters(this.filters):null;
-    this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios').then ((data)=>{
-      this.mp_strategies_list = data['data']
+    this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios').subscribe ((data)=>{
+      this.mp_strategies_list = data.data as StrategiesGlobalData[]
     })
     if (this.useGetClientsPortfolios===true) {
       this.subscriptions.add(this.InvestmentDataService.getClientsPortfolios().pipe(
@@ -110,7 +110,7 @@ export class AppaInvPortfolioRevenueFactorAnalysisTableComponent {
     this.filteredCurrenciesList = this.report_id_currency.valueChanges.pipe (
       startWith (''),
       distinctUntilChanged(),
-      map(value => this.AutoCompService.filterList(value || '','currency'))
+      map(value => this.AutoCompService.filterList(value || '','currency')as currencyCode[])
     );
     this.multiFilter = (data: RevenueFactorData, filter: string) => {
       let filter_array = filter.split(',').map(el=>[el,1]);
@@ -201,7 +201,7 @@ export class AppaInvPortfolioRevenueFactorAnalysisTableComponent {
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
   }
   currencyChanged(code:string) {
-    this.currencySymbol = this.AutoCompService.fullCurrenciesList.filter(el=>el['CurrencyCodeNum']==code)[0]['symbol'];
+    this.currencySymbol = this.AutoCompService.fullCurrenciesList.filter(el=>el.CurrencyCodeNum==Number(code))[0]['symbol'];
   }
   exportToExcel() {
     let numberFields=['account_currency_code','idportfolio','cross_rate','dirty_price','mtm_rate','balance','current_fifo_position_cost','pos_pv','pl','mtm_pl','total_pl'];

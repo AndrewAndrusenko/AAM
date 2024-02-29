@@ -346,6 +346,13 @@ we get closest market price for every position
   fees-handling.service.ts,
   currencies-data.service.ts,
   currencies-data-table.component.ts
+--------------------------------------------------------------------------------------------
+27/02/2024 - 28/02/2024
+1|| Refactored service to cache data indexDB.service.ts
+  All promises patterns have been replaced by RxJS observables/pipes
+  All variables of any type have been refactored to the variables with specific type
+  All dependant components have been updated accordingly
+2|| Refactored any type to the secure ones   
 
 ToDo
 || Store histrory of a portfolio changing strategies

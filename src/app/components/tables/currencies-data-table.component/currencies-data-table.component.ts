@@ -3,7 +3,7 @@ import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {catchError, EMPTY, map, Observable, startWith, switchMap, tap } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
-import { currencyRateList,  marketDataSources, marketSourceSegements } from 'src/app/models/interfaces.model';
+import { currencyPair, currencyRateList,  marketDataSources, marketSourceSegements } from 'src/app/models/interfaces.model';
 import { AppAccountingService } from 'src/app/services/accounting.service';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
@@ -42,7 +42,7 @@ export class AppTableCurrenciesDataComponent {
   panelOpenStateSecond = true;
   pairs: string[] = ['ClearAll'];
   datePipe: DatePipe;
-  filteredPairsLists : Observable<string[]>;
+  filteredPairsLists : Observable<currencyPair[]>;
   FirstOpenedAccountingDate : Date;
   filterDateFormated : string;
   searchParametersFG: FormGroup;
@@ -87,11 +87,11 @@ export class AppTableCurrenciesDataComponent {
       sourceCode: [[],Validators.required],
       overwritingCurrentData : [false]
     });
-    this.AutoCompService.getCurrencyPairsList().then();
+    this.AutoCompService.getCurrencyPairsList();
     this.secidList.setValidators(this.AutoCompService.secidValirator())
     this.filteredPairsLists = this.secidList.valueChanges.pipe(
       startWith(''),
-      map(value => this.AutoCompService.filterList(value || '','currencyPairs'))
+      map(value => this.AutoCompService.filterList(value || '','currencyPairs') as currencyPair[])
     );
     this.currenciesDataService.getCurrencyRatesList().subscribe (currencyData => this.updateCurrencyDataTable(currencyData)) 
   }

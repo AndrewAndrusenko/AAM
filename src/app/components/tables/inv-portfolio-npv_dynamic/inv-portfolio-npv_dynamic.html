@@ -57,8 +57,8 @@
       formControlName="p_report_currency" 
       [matAutocomplete]="autoSet" >
       <mat-autocomplete #autoSet="matAutocomplete" >
-        <mat-option  *ngFor="let currency of filteredCurrenciesList | async" [value]="currency['CurrencyCodeNum']">
-          {{currency['CurrencyCodeNum']}} -  {{currency['CurrencyCode']}} -  {{currency['CurrencyName']}} 
+        <mat-option  *ngFor="let currency of filteredCurrenciesList | async" [value]="currency.CurrencyCodeNum">
+          {{currency.CurrencyCodeNum}} -  {{currency.CurrencyCode}} -  {{currency.CurrencyName}} 
         </mat-option>
       </mat-autocomplete>   
       <mat-error  *ngIf="report_id_currency?.errors?.['currencyCode']">
@@ -71,7 +71,7 @@
         style="height: 150%;"
         (selectionChange)="setPortfoliosList($event)"  >
         <mat-option [value]="'All'"> All codes </mat-option>
-        <mat-option *ngFor="let mp of mp_strategies_list" [value]="mp['name']"> {{mp['name']}} </mat-option>
+        <mat-option *ngFor="let mp of mp_strategies_list" [value]="mp.name"> {{mp.name}} </mat-option>
       </mat-select>
     </span>
     <mat-form-field  appearance="fill" style="width: 60%; margin-bottom: 0.5%; " class="search-filed"><!-- Chio Portfolio Filter -->

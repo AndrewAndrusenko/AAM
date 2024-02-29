@@ -101,7 +101,7 @@ export class AppTableAccAccountsComponent  implements OnInit {
    selectAccountsArray() {
     this.modal_principal_parent.emit({id:null,accountNo:''});
   }
-  openAccountModifyForm (actionType:string, row: any ) {
+  openAccountModifyForm (actionType:string, row: bAccounts ) {
     this.dialogRef = this.dialog.open(AppAccAccountModifyFormComponent ,{minHeight:'400px',minWidth:'40vw', maxWidth:'80vw', maxHeight: '90vh' });
     this.dialogRef.componentInstance.action = actionType;
     this.dialogRef.componentInstance.data = row;

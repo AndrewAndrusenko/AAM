@@ -5,14 +5,14 @@ import { AppConfimActionComponent } from '../../common-forms/app-confim-action/a
 import { AppSnackMsgboxComponent } from '../../common-forms/app-snack-msgbox/app-snack-msgbox.component';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators.service';
 import { AppAccountingService } from 'src/app/services/accounting.service';
-import { bcAccountType_Ext, bcEnityType } from 'src/app/models/accountng-intefaces.model';
+import { bAccounts, bLedger, bcAccountType_Ext, bcEnityType } from 'src/app/models/accountng-intefaces.model';
 import { AppClientsTableComponent } from '../../tables/clients-table.component/clients-table.component';
 import { TablePortfolios } from '../../tables/portfolios-table.component/portfolios-table.component';
 import { Observable, Subscription, distinctUntilChanged, filter, map, startWith, switchMap, tap } from 'rxjs';
 import { MatTabGroup as MatTabGroup } from '@angular/material/tabs';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
-import { ClientData } from 'src/app/models/interfaces.model';
+import { ClientData, currencyCode } from 'src/app/models/interfaces.model';
 
 @Component({
   selector: 'app-acc-account-modify-form',
@@ -34,15 +34,15 @@ export class AppAccAccountModifyFormComponent implements OnInit {
   public actionType : string;
   public actionToConfim = {'action':'delete_client' ,'isConfirmed': false}
   public AppSnackMsgbox : AppSnackMsgboxComponent
-  public data: any;
+  public data: bAccounts|bLedger;
   public FirstOpenedAccountingDate : Date
   @ViewChild(MatTabGroup) tabGroup: MatTabGroup;
   EnityTypes: bcEnityType[] = [];
   AccountTypes: bcAccountType_Ext[] = [];
   formDisabledFields: string[] = [];
   formLedgerDisabledFields: string[] = []; 
-  filteredCurrenciesList: Observable<string[]>;
-  filterednstrumentsLists : Observable<string[]>;
+  filteredCurrenciesList: Observable<currencyCode[]>;
+  filterednstrumentsLists : Observable<string[][]>;
 
   constructor (
     private fb:FormBuilder, 
@@ -98,13 +98,13 @@ export class AppAccAccountModifyFormComponent implements OnInit {
     this.filteredCurrenciesList = this.currencyCode.valueChanges.pipe (
       startWith (''),
       distinctUntilChanged(),
-      map(value => this.AutoCompService.filterList(value || '','currency'))
+      map(value => this.AutoCompService.filterList(value || '','currency') as currencyCode[] )
       );
     this.AutoCompService.getSecidLists();
     this.filterednstrumentsLists = this.secid.valueChanges.pipe(
         startWith(''),
         distinctUntilChanged(),
-        map((value: any) => this.AutoCompService.filterList(value || '','secid'))
+        map((value) => this.AutoCompService.filterList(value || '','secid') as string[][])
     );
   }
   ngAfterContentInit(): void {

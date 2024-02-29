@@ -38,8 +38,8 @@
         formControlName="report_id_currency" 
         [matAutocomplete]="autoSet" >
         <mat-autocomplete #autoSet="matAutocomplete" >
-          <mat-option *ngFor="let currency of filteredCurrenciesList | async" [value]="currency['CurrencyCodeNum']">
-            {{currency['CurrencyCodeNum']}} -  {{currency['CurrencyCode']}} -  {{currency['CurrencyName']}} 
+          <mat-option *ngFor="let currency of filteredCurrenciesList | async" [value]="currency.CurrencyCodeNum">
+            {{currency.CurrencyCodeNum}} -  {{currency.CurrencyCode}} -  {{currency.CurrencyName}} 
           </mat-option>
         </mat-autocomplete>   
         <mat-error  *ngIf="report_id_currency?.errors?.['currencyCode']">
@@ -58,7 +58,7 @@
         formControlName="MP" 
         style="padding: 3%;"
         (selectionChange)="setPortfoliosList($event)">
-        <mat-option *ngFor="let mp of mp_strategies_list" [value]="mp['name']"> {{mp['name']}} </mat-option>
+        <mat-option *ngFor="let mp of mp_strategies_list" [value]="mp.name"> {{mp.name}} </mat-option>
       </mat-select>
       <span style="margin-top: 4%; margin-left: 2%;">
         Date:  {{report_date.value | date}} 

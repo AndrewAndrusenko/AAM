@@ -1,7 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable, Subject, exhaustMap } from "rxjs";
-import { bcTransactionType_Ext } from "../models/accountng-intefaces.model";
+import { bcAccountType_Ext, bcTransactionType_Ext } from "../models/accountng-intefaces.model";
 import { indexDBService } from "./indexDB.service";
 import { bcSchemeAccountTransaction, bcSchemeLedgerTransaction, bcSchemesParameters, bcSchemesProcesses } from "../models/acc-schemes-interfaces";
 @Injectable ({
@@ -23,7 +23,7 @@ export class AccountingSchemesService {
     this.subjectTransactionTypePipe.pipe (
       exhaustMap(()=>this.indexDBService.getIndexDBStaticTables('bcTransactionType_Ext')),
     ).subscribe(data => {
-      this.sendTransactionTypesReady(data as {key:string, data:bcTransactionType_Ext[]});
+      this.sendTransactionTypesReady({key:data.code, data:(data.data as bcTransactionType_Ext[])});
     });
     this.TransactionTypes = new Map ([
       ['0','Ledger - Ledger'],
@@ -41,7 +41,7 @@ export class AccountingSchemesService {
     return this.http.get <bcTransactionType_Ext[]> ('api/DEA/getAccountingSchemes/',{params:{action:'getTransactionTypes'}})
   } 
   rewriteTransactionTypes (data:bcTransactionType_Ext[]) {
-    this.indexDBService.rewrteIndexDBStaticTable('bcTransactionType_Ext',data).then(()=>{
+    this.indexDBService.rewrteIndexDBStaticTable('bcTransactionType_Ext',data).subscribe(()=>{
       this.sendTransactionTypesReady({key:'bcTransactionType_Ext',data:data})
     })
   } 

@@ -1,6 +1,6 @@
 import { AfterContentInit, Component,  EventEmitter,  Input, Output, ViewChild} from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ClientData, allocation, orders} from 'src/app/models/interfaces.model';
+import { ClientData, allocation, allocation_fifo, counterParty, currencyCode, currencyPair, orders, trades} from 'src/app/models/interfaces.model';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { Observable, Subscription, debounceTime, distinctUntilChanged, filter, map, startWith, switchMap, tap } from 'rxjs';
@@ -21,7 +21,8 @@ import { AppAllocationService } from 'src/app/services/allocation.service';
 import { MatTabGroup } from '@angular/material/tabs';
 import { CurrenciesDataService } from 'src/app/services/currencies-data.service';
 import { AppMarketDataService } from 'src/app/services/market-data.service';
-import { Instruments } from 'src/app/models/instruments.interfaces';
+import { Instruments, moexSecurityType } from 'src/app/models/instruments.interfaces';
+import { bAccountTransaction, bLedgerTransaction } from 'src/app/models/accountng-intefaces.model';
 @Component({
   selector: 'app-trade-modify-form',
   templateUrl: './trade-form.component.html',
@@ -39,21 +40,20 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
   @ViewChild(MatTabGroup) tabs : MatTabGroup;
   public title: string;
   public actionType : string;
-  @Input() data: any;
+  @Input() data: trades|{};
   firstOpenedAccountingDate: Date;
   panelOpenStateFirst = false;
   panelOpenStateSecond = false;
   panellAlocationTable = true;
   panelOrdersAllocated = true;
-  filteredCurrenciesList: Observable<string[]>;
-  filteredSetCurrenciesList: Observable<string[]>;
-  filterednstrumentsLists : Observable<string[]>;
-  filteredCounterPartiesList : Observable<string[]>;
+  filteredCurrenciesList: Observable<currencyCode[]>;
+  filteredSetCurrenciesList: Observable<currencyCode[]>;
+  filterednstrumentsLists : Observable<string[][]>;
+  filteredCounterPartiesList : Observable<counterParty[]>;
   dialogClientsTabletRef: MatDialogRef<AppClientsTableComponent>;
   dialogInstrumentTabletRef: MatDialogRef<AppInstrumentTableComponent>;
-  securityTypes: any[];
-  formerrors: any;
-  statusDetails:any;
+  securityTypes: moexSecurityType[];
+  statusDetails:allocation_fifo[]|bAccountTransaction[]|bLedgerTransaction[];
   statusDetailsHeader:string='';
   private arraySubscrition = new Subscription ()
 
@@ -99,7 +99,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data => this.firstOpenedAccountingDate = data[0].FirstOpenedDate);
-    this.indexDBServiceS.getIndexDBStaticTables('getMoexSecurityTypes').then (data=>this.securityTypes = data['data']);
+    this.indexDBServiceS.getIndexDBStaticTables('getMoexSecurityTypes').subscribe (data=>this.securityTypes = (data.data as moexSecurityType[]));
     this.AutoCompService.getCurrencyList();
     this.id_price_currency.setValidators([this.AutoCompService.currencyValirator(),Validators.required]);
     this.id_settlement_currency.setValidators([this.AutoCompService.currencyValirator(),Validators.required]);
@@ -112,7 +112,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     this.faceunit.value? this.faceunit_name.patchValue(this.AutoCompService.getCurrecyData(this.faceunit.value)['CurrencyCode']):null;
     this.AutoCompService.getSecidLists();
     this.tidinstrument.setValidators(this.AutoCompService.secidValirator());
-    this.AutoCompService.getCounterpartyLists().then (()=>this.id_cpty.setValidators(this.AutoCompService.counterPartyalirator(this.cpty_name)));
+    this.AutoCompService.getCounterpartyLists().subscribe(()=>this.id_cpty.setValidators(this.AutoCompService.counterPartyalirator(this.cpty_name)));
   }
   ngOnDestroy(): void {
     this.arraySubscrition.unsubscribe()
@@ -120,7 +120,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
   ngAfterContentInit (): void {
     this.tradeModifyForm.patchValue(this.data);
     if (this.data?.['secidAutocolmplete']===true) { 
-      this.secidAutocolmplete(this.AutoCompService.fullInstrumentsLists.filter(el=>el[0]===this.data.secid)[0])
+      this.secidAutocolmplete(this.AutoCompService.fullInstrumentsLists.filter(el=>el[0]===(this.data as trades).tidinstrument)[0])
     };
     this.arraySubscrition.add(this.AllocationService.getDeletedAccounting().subscribe(deletedTransaction=>{
       this.statusDetailsHeader='Deleted Accounting details'
@@ -133,22 +133,22 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     this.filterednstrumentsLists = this.tidinstrument.valueChanges.pipe(
       startWith(''),
       distinctUntilChanged(),
-      map(value => this.AutoCompService.filterList(value || '','secid'))
+      map(value => this.AutoCompService.filterList(value || '','secid') as string[][])
     );
     this.filteredCurrenciesList = this.id_price_currency.valueChanges.pipe (
       startWith (''),
       distinctUntilChanged(),
-      map(value => this.AutoCompService.filterList(value || '','currency'))
+      map(value => this.AutoCompService.filterList(value || '','currency') as currencyCode[])
       );
     this.filteredSetCurrenciesList = this.id_settlement_currency.valueChanges.pipe (
       startWith (''),
       distinctUntilChanged(),
-      map(value => this.AutoCompService.filterList(value || '','currency'))
+      map(value => this.AutoCompService.filterList(value || '','currency') as currencyCode[])
       );
     this.filteredCounterPartiesList = this.cpty_name.valueChanges.pipe (
       startWith (''),
       distinctUntilChanged(),
-      map(value => this.AutoCompService.filterList(value || '','cpty'))
+      map(value => this.AutoCompService.filterList(value || '','cpty') as counterParty[])
     );
     this.price.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>this.fullAmountCalcualtion(false));
     this.qty.valueChanges.pipe(distinctUntilChanged()).subscribe(()=>this.fullAmountCalcualtion(true));
@@ -246,8 +246,8 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
   }
   getMarketPrice() {
     this.MarketDataService.getMarketQuote(this.tidinstrument.value,new Date(this.tdate.value).toLocaleDateString()).subscribe(data=>{
-      this.market_price.patchValue(data[0].close)
-      })
+      this.market_price.patchValue(data.length? data[0].close:null)
+    })
   }
   clearCurrencies(): any {
     ['code_price_currency', 'price_currency_name', 'code_settlement_currency','settlement_currency_name','settlement_rate'].forEach(key => this.tradeModifyForm.get(key).patchValue(null))

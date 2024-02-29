@@ -3,7 +3,7 @@ import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {Observable, Subscription, distinctUntilChanged, filter, map, startWith, switchMap, tap } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
-import {portfolioPositions } from 'src/app/models/interfaces.model';
+import {StrategiesGlobalData, currencyCode, portfolioPositions } from 'src/app/models/interfaces.model';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
 import {AbstractControl, FormBuilder, Validators, FormGroup } from '@angular/forms';
@@ -47,8 +47,8 @@ export class AppaInvPortfolioPositionTableComponent {
   searchParametersFG: FormGroup;
   defaultFilterPredicate?: (data: any, filter: string) => boolean;
   multiFilter?: (data: any, filter: string) => boolean;
-  filteredCurrenciesList: Observable<string[]>;
-  mp_strategies_list: string[]=[];
+  filteredCurrenciesList: Observable<currencyCode[]>;
+  mp_strategies_list: StrategiesGlobalData[]=[];
 /*   activeTab:string='';
   tabsNames = ['Portfolio Positions']
   @HostListener('document:keydown', ['$event'])
@@ -82,7 +82,7 @@ export class AppaInvPortfolioPositionTableComponent {
   }
   ngOnInit(): void {
     this.filters? this.setFilters(this.filters):null;
-    this.indexDBService.getIndexDBStaticTables('getModelPortfolios').then (data=>this.mp_strategies_list = data['data']);
+    this.indexDBService.getIndexDBStaticTables('getModelPortfolios').subscribe (data=>this.mp_strategies_list = data.data as StrategiesGlobalData[]);
     if (this.useGetClientsPortfolios===true) {
       this.subscriptions.add(this.InvestmentDataService.getClientsPortfolios().pipe(
         tap(() => this.dataSource? this.dataSource.data = null: null),
@@ -98,7 +98,7 @@ export class AppaInvPortfolioPositionTableComponent {
     this.filteredCurrenciesList = this.report_id_currency.valueChanges.pipe (
       startWith (''),
       distinctUntilChanged(),
-      map(value => this.AutoCompService.filterList(value || '','currency'))
+      map(value => this.AutoCompService.filterList(value || '','currency') as currencyCode[])
     );
     this.multiFilter = (data: portfolioPositions, filter: string) => {
       let filter_array = filter.split(',').map(el=>[el,1]);

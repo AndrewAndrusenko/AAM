@@ -64,7 +64,7 @@ export class AppallocationTableComponent  implements AfterViewInit {
   panelOpenStateSecond = false;
   instruments: string[] = ['ClearAll'];
   portfolios: string[] = ['ClearAll'];
-  filterednstrumentsLists : Observable<string[]>;
+  filterednstrumentsLists : Observable<string[][]>;
   searchParametersFG: FormGroup;
   dataRange = new FormGroup ({
     dateRangeStart: new FormControl<Date | null>(null),
@@ -162,7 +162,7 @@ export class AppallocationTableComponent  implements AfterViewInit {
     this.filters!==undefined&&this.fullDataSource!==undefined? this.initialFilterOfDataSource(this.filters) : null;
     this.filterednstrumentsLists = this.secidList.valueChanges.pipe(
       startWith(''),
-      map(value => this.AutoCompService.filterList(value || '','secid'))
+      map(value => this.AutoCompService.filterList(value || '','secid') as string[][])
     );
     this.subscriptions.add(this.TreeMenuSeviceS.getActiveTab().subscribe(tabName=>this.activeTab=tabName));
     this.subscriptions.add(

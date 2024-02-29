@@ -3,7 +3,7 @@ import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {Subscription, filter, from,  map,  of, switchMap, tap } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
-import {tableHeaders } from 'src/app/models/interfaces.model';
+import {StrategiesGlobalData, tableHeaders } from 'src/app/models/interfaces.model';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
 import {AbstractControl, FormBuilder, Validators, FormGroup, FormControl } from '@angular/forms';
@@ -51,7 +51,7 @@ export class AppaIAccFeesManagementTableComponent {
   });
   searchParametersFG: FormGroup;
   multiFilter?: (data: any, filter: string) => boolean;
-  mp_strategies_list: string[]=[];
+  mp_strategies_list: StrategiesGlobalData[]=[];
   portfolios: Array<string> = ['ClearAll'];
   currencySymbol: string = '$';
   detailedView:boolean = false;
@@ -82,7 +82,7 @@ export class AppaIAccFeesManagementTableComponent {
   ngOnInit(): void {
     this.AutoCompleteService.getModelPotfoliosList();
     this.subscriptions.add(
-      this.AutoCompleteService.getSecIdListReady().subscribe(data=>this.mp_strategies_list=data)
+      this.AutoCompleteService.getSMPsListReady().subscribe(data=>this.mp_strategies_list=data)
     )
     this.multiFilter = (data: ManagementFeeCalcData, filter: string) => {
       let filter_array = filter.split(',').map(el=>[el,1]);

@@ -123,8 +123,8 @@
   <mat-form-field style="width: 20%;" title="Type to find(any filed). Click to select">
     <input matInput [placeholder]="placeholders.get('faceunit')" formControlName="faceunit" [matAutocomplete]="auto">
     <mat-autocomplete #auto="matAutocomplete">
-      <mat-option *ngFor="let currency of filteredCurrenciesList | async" [value]="currency['CurrencyCodeNum']">
-        {{currency['CurrencyCodeNum']}} -  {{currency['CurrencyCode']}} -  {{currency['CurrencyName']}} 
+      <mat-option *ngFor="let currency of filteredCurrenciesList | async" [value]="currency.CurrencyCodeNum">
+        {{currency.CurrencyCodeNum}} -  {{currency.CurrencyCode}} -  {{currency.CurrencyName}} 
       </mat-option>
     </mat-autocomplete>   
     <mat-error  *ngIf="faceunit?.errors?.['required']">

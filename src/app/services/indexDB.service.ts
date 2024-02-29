@@ -1,16 +1,32 @@
 import { Injectable } from '@angular/core';
-import { AppMarketDataService } from './market-data.service';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { AppAccountingService } from './accounting.service';
-import { catchError, of } from 'rxjs';
+import { Observable, catchError, of, switchMap, tap } from 'rxjs';
 import { AppInvestmentDataServiceService } from './investment-data.service.service';
 import { CurrenciesDataService } from './currencies-data.service';
 import { InstrumentDataService } from './instrument-data.service';
-import { corporateActionsTypes, moexSecurityGroup, moexSecurityType } from '../models/instruments.interfaces';
-interface cacheAAM {
+import { corporateActionsTypes, instrumentCorpActions, instrumentDetails, moexBoard, moexSecurityGroup, moexSecurityType } from '../models/instruments.interfaces';
+import { ClientData, StrategiesGlobalData, counterParty, currencyCode, currencyPair, currencyRateList } from '../models/interfaces.model';
+import { bcTransactionType_Ext } from '../models/accountng-intefaces.model';
+export interface cacheAAM {
   code:string,
-  data:[]
+  data:cachedDataType
 }
+ type cachedDataType = corporateActionsTypes[]| 
+moexSecurityGroup[]| 
+moexSecurityType[]|
+moexBoard[]|
+currencyRateList[]|
+bcTransactionType_Ext[]|
+ClientData[]|
+StrategiesGlobalData[]|
+instrumentCorpActions[]|
+instrumentDetails[]|
+currencyCode[]|
+currencyPair[]|
+counterParty[]|
+string[][]|
+{secid:string}[]|{isin:string}[];
 @Injectable({
   providedIn: 'root'
 })
@@ -22,96 +38,72 @@ export class indexDBService {
     private CurrenciesDataSrv: CurrenciesDataService,
     private InstrumentDataS:InstrumentDataService,
   ) { }
-  indexDBcacheData (key:string,data:any) {
-    this.dbService
-    .add('AAMCache', {code:key, data:data})
-    .subscribe((result) => {
-      console.log('result: ', result);
-    });
-  }
-  async fetchDataFromDb (key:string) {
-    return new Promise ((resolve,reject)=> {
-      switch (key) {
-        case 'getBoardsDataFromInstruments':
-          this.InstrumentDataS.getInstrumentDataGeneral('getBoardsDataFromInstruments').subscribe(data=>resolve(data))
-        break;
-        case 'getInstrumentDataDetails':
-          this.InstrumentDataS.getInstrumentDataDetails().subscribe(data=>resolve(data))
-        break;
-        case 'getInstrumentDataCorpActions':
-          this.InstrumentDataS.getInstrumentDataCorpActions().subscribe(data=>resolve(data))
-        break;
-        case 'getMoexSecurityGroups':
-          this.InstrumentDataS.getInstrumentDataGeneral('getMoexSecurityGroups').subscribe(data=>resolve(data as moexSecurityGroup[]))
-        break;
-        case 'getMoexSecurityTypes':
-          this.InstrumentDataS.getInstrumentDataGeneral('getMoexSecurityTypes').subscribe(data=>resolve(data as moexSecurityType[]))
-        break;
-        case 'getCorpActionTypes':
-          this.InstrumentDataS.getInstrumentDataGeneral('getCorpActionTypes').subscribe(data=>resolve(data as corporateActionsTypes[]))
-        break;
-        case 'getCurrencyCodes':
-          this.CurrenciesDataSrv.getCurrencyCodes().subscribe(data=>resolve(data))
-        break;
-        case 'getCurrencyPairsList':
-          this.CurrenciesDataSrv.getCurrencyPairsList().subscribe(data=>resolve(data))
-        break;
-        case 'getInstrumentAutoCompleteList':
-          this.InstrumentDataS.getMoexInstruments(undefined,undefined,{Action:'getInstrumentAutoCompleteList'}).subscribe(data=>resolve(data))
-        break;
-        case 'bcTransactionType_Ext':
-          console.log('DB bcTransactionType_Ext');
-          
-            this.AccountingDataService.GetTransactionType_Ext('',0,'','','bcTransactionType_Ext').subscribe(data=>resolve(data))
-        break;
-        case 'getCounterPartyList':
-          this.InvestmentDataService.getClientData(undefined,undefined,'getCounterPartyList').subscribe(data => resolve(data))
-        break
-        case 'getModelPortfolios':
-          this.InvestmentDataService.getGlobalStategiesList(undefined,undefined,'getModelPortfolios').subscribe(data => resolve(data))
-        break
-
-      }
-    })
-  }
   getUserData () {
     let userData = JSON.parse(localStorage.getItem('userInfo'))
-  }
-  indexidCacheData (key:string, data:any) {
-    this.dbService.add('AAMCache', {code:key, data:data}).pipe(
-      catchError(() => of({data:[]}))
-    ).subscribe(result => {
-      result.data.length? console.log('saved for ',key,': ', result.data.length) : console.log('already saved ',key);
-    });
   }
   indexdbDeleteAllCache (key:string) {
     return this.dbService.clear(key)
   }
-  async getIndexDBStaticTables (key:string) {
-    return new Promise (resolve => {
-      this.dbService.getByIndex('AAMCache','code',key).subscribe(async data=>{
-        data? resolve(data) : this.fetchDataFromDb(key).then(data=>{
-            this.indexidCacheData(key,data);
-            resolve({code:key,'data':data})
-          })
-        })
-    })
+  indexidCacheData (key:string, data:cachedDataType):Observable<cacheAAM> {
+    return this.dbService.add('AAMCache', {code:key, data:data}).pipe(
+      catchError(() => of({code:'null',data:[]})),
+      tap(result=>result.data.length? console.log('saved for ',key,': ', result.data.length) : console.log('already saved ',key))
+    )
   }
-  async reloadIndexDBStaticTable(key:string) {
-    return new Promise (resolve => {
-      this.dbService.deleteByKey('AAMCache',key).subscribe(res => console.log('deleted data for key:', key));
-      this.fetchDataFromDb(key).then (data => {
-        this.indexidCacheData(key,data);
-        resolve({code:key,'data':data})
-      });
-    });
+  getIndexDBStaticTables (key:string):Observable<cacheAAM> {
+    return (this.dbService.getByIndex('AAMCache','code',key) as Observable<cacheAAM>).pipe (
+     switchMap(cachedData=> cachedData? of(cachedData) : this.fetchDataFromDb(key).pipe(switchMap(data=>this.indexidCacheData(key,data)))) 
+    )
   }
-  async rewrteIndexDBStaticTable(key:string,data:any) {
-    return new Promise (resolve => {
-      this.dbService.deleteByKey('AAMCache',key).subscribe(res =>{
-        this.indexidCacheData(key,data);
-        resolve({code:key,'data':data})
-      });
-    });
+  fetchDataFromDb (key:string): Observable<cachedDataType> {
+  let fetchServiceFunction = new Observable<cachedDataType> 
+      switch (key) {
+        case 'getBoardsDataFromInstruments':
+          fetchServiceFunction =  this.InstrumentDataS.getInstrumentDataGeneral('getBoardsDataFromInstruments')
+        break;
+        case 'getInstrumentDataDetails':
+           fetchServiceFunction = this.InstrumentDataS.getInstrumentDataDetails()
+        break;
+        case 'getInstrumentDataCorpActions':
+          fetchServiceFunction = this.InstrumentDataS.getInstrumentDataCorpActions()
+        break;
+        case 'getMoexSecurityGroups':
+          fetchServiceFunction = this.InstrumentDataS.getInstrumentDataGeneral('getMoexSecurityGroups')
+        break;
+        case 'getMoexSecurityTypes':
+          fetchServiceFunction = this.InstrumentDataS.getInstrumentDataGeneral('getMoexSecurityTypes')
+        break;
+        case 'getCorpActionTypes':
+          fetchServiceFunction = this.InstrumentDataS.getInstrumentDataGeneral('getCorpActionTypes')
+        break;
+        case 'getCurrencyCodes':
+         fetchServiceFunction =  this.CurrenciesDataSrv.getCurrencyCodes()
+        break;
+        case 'getCurrencyPairsList':
+         fetchServiceFunction =  this.CurrenciesDataSrv.getCurrencyPairsList()
+        break;
+        case 'getInstrumentAutoCompleteList':
+         fetchServiceFunction =  this.InstrumentDataS.getMoexInstruments(undefined,undefined,{Action:'getInstrumentAutoCompleteList'})
+        break;
+        case 'bcTransactionType_Ext':
+         fetchServiceFunction =  this.AccountingDataService.GetTransactionType_Ext('',0,'','','bcTransactionType_Ext')
+        break;
+        case 'getCounterPartyList':
+         fetchServiceFunction =  this.InvestmentDataService.getClientData(undefined,undefined,'getCounterPartyList')
+        break
+        case 'getModelPortfolios':
+         fetchServiceFunction =  this.InvestmentDataService.getGlobalStategiesList(undefined,undefined,'getModelPortfolios')
+        break
+      }
+      return fetchServiceFunction;
+  }
+  reloadIndexDBStaticTable(key:string): Observable<cachedDataType> {
+    return this.dbService.deleteByKey('AAMCache',key).pipe(
+        tap(()=>console.log('deleted data for key:', key)),
+        switchMap(()=>this.fetchDataFromDb(key))
+      )
+  }
+  rewrteIndexDBStaticTable(key:string,data:cachedDataType): Observable<cacheAAM> {
+    return  this.dbService.deleteByKey('AAMCache',key).pipe(switchMap(()=>this.indexidCacheData(key,data)))
   }
 }

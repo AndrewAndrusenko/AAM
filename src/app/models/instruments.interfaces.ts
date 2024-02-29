@@ -27,6 +27,12 @@ export interface instrumentDetails {
 export interface instrumentCorpActions {
   id: number, isin: string, issuevolume: number, secname: string, notinal: number, notinalcurrency: string, unredemeedvalue: number, couponrate: number, couponamount: number, actiontype: string, couponamountrur: number, date: Date, action: string, actiontypename: string
 }
+export interface instrumentShort {
+  secid:string,
+  group:string,
+  type:string,
+  groupid:number
+}
 export interface Instruments  {
   id :number,
   groupid: number,

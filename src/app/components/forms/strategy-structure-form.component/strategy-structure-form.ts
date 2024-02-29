@@ -36,7 +36,7 @@ export class AppStructureStrategyFormComponent implements OnInit {
   dialogRef: MatDialogRef<AppInstrumentTableComponent>;
   MPnames: StrategiesGlobalData [] = [];
   @Output() public modal_principal_parent = new EventEmitter();
-  public filterednstrumentsLists : Observable<string[]>;
+  public filterednstrumentsLists : Observable<string[][]>;
   public actionType : string;
   public showStrateryStructure: boolean;
   public data: any;
@@ -59,7 +59,7 @@ export class AppStructureStrategyFormComponent implements OnInit {
     this.disabledControlElements? this.editStructureStrategyForm.disable() : null;
     if (this.MP===2) {
       this.id. setValidators(null);
-      this.indexDBService.getIndexDBStaticTables('getModelPortfolios').then (data => this.MPnames = data['data'].filter(el=>el.level===1))
+      this.indexDBService.getIndexDBStaticTables('getModelPortfolios').subscribe (data => this.MPnames = (data.data as StrategiesGlobalData[]).filter(el=>el.Level===1))
     };
     if (this.MP===1) {
       this.AtuoCompService.getSecidLists();
@@ -67,7 +67,7 @@ export class AppStructureStrategyFormComponent implements OnInit {
       this.filterednstrumentsLists = this.id.valueChanges.pipe(
         startWith(''),
         distinctUntilChanged(),
-        map(value => this.AtuoCompService.filterList(value || '','secid'))
+        map(value => this.AtuoCompService.filterList(value || '','secid') as string[][])
       );
     };
     Object.hasOwn(changes,'parentStrategyId')? this.id_item.setValue(changes['strategyId'].currentValue): null;

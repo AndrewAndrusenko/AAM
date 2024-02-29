@@ -126,7 +126,7 @@ export class AppTableAccEntriesComponent implements OnInit {
     })
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToEntriesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
-    this.indexDBServiceS.getIndexDBStaticTables('bcTransactionType_Ext').then ( data => this.TransactionTypes = data['data']);
+    this.indexDBServiceS.getIndexDBStaticTables('bcTransactionType_Ext').subscribe ( data => this.TransactionTypes = (data.data as bcTransactionType_Ext[]));
     this.AccountingDataService.getReloadEntryList().pipe(
       filter(id=> id==undefined||(id===this.externalId))
     ).subscribe(id =>{

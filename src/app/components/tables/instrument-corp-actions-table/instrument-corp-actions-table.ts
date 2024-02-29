@@ -4,7 +4,7 @@ import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { instrumentCorpActions } from 'src/app/models/instruments.interfaces';
+import { instrumentCorpActions, instrumentShort } from 'src/app/models/instruments.interfaces';
 import { FormGroup} from '@angular/forms';
 import { indexDBService } from 'src/app/services/indexDB.service';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
@@ -40,7 +40,7 @@ export class AppTableCorporateActionsComponent  implements AfterViewInit {
   instruments: string[] = ['ClearAll'];
   searchParametersFG: FormGroup;
   @Input () coprData:instrumentCorpActions[] = [];
-  @Input () instrument:any;
+  @Input () instrument:instrumentShort;
   refCorpActionForm : MatDialogRef<AppInstrumentCorpActionFormComponent>
   constructor(
     private AuthServiceS:AuthService,  
@@ -54,7 +54,7 @@ export class AppTableCorporateActionsComponent  implements AfterViewInit {
     this.disabledControlElements = this.accessState === 'full'? false : true;
   }
   async ngAfterViewInit() {
-    this.indexDBServiceS.getIndexDBStaticTables('getInstrumentDataCorpActions').then((data)=> this.updateCAdataTable(data['data']));
+    this.indexDBServiceS.getIndexDBStaticTables('getInstrumentDataCorpActions').subscribe(data=> this.updateCAdataTable(data.data as instrumentCorpActions[]));
   }
   ngOnChanges(changes: SimpleChanges) {
     this.dataSource&&changes['instrument'].currentValue.secid? this.applyFilter(undefined, this.instrument.secid) : null;
@@ -66,7 +66,7 @@ export class AppTableCorporateActionsComponent  implements AfterViewInit {
     this.refCorpActionForm.componentInstance.instrument = this.instrument;
     this.refCorpActionForm.componentInstance.modal_principal_parent.subscribe(success => {
       success? this.refCorpActionForm.close():null;
-      this.indexDBServiceS.reloadIndexDBStaticTable('getInstrumentDataCorpActions').then(data => this.updateCAdataTable(data['data']))
+      this.indexDBServiceS.reloadIndexDBStaticTable('getInstrumentDataCorpActions').subscribe(data => this.updateCAdataTable(data as instrumentCorpActions[]))
     })
   }
   updateCAdataTable (corpActionData:instrumentCorpActions[]) {

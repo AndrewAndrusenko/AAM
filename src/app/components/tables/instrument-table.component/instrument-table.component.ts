@@ -4,7 +4,7 @@ import {MatSort} from '@angular/material/sort';
 import {Observable, Subscription } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { Instruments, instrumentCorpActions, instrumentDetails } from 'src/app/models/instruments.interfaces';
+import { Instruments, instrumentCorpActions, instrumentDetails, moexBoard } from 'src/app/models/instruments.interfaces';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
@@ -68,7 +68,7 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
   investmentNodeColor = investmentNodeColorChild;
   additionalLightGreen = additionalLightGreen;
   public filterednstrumentsLists : Observable<string[]>;
-  boardIDs =[]
+  boardIDs:moexBoard[] =[]
   searchParametersFG: FormGroup;
   boardsOne = new FormControl('');
   dialogInstrumentModify: MatDialogRef<AppInvInstrumentModifyFormComponent>;
@@ -95,7 +95,7 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
       marketSource : {value:null, disabled:false},
       boards : {value:null, disabled:false}
     });
-     this.indexDBServiceS.getIndexDBStaticTables('getBoardsDataFromInstruments').then ((data)=>this.boardIDs = data['data'])
+     this.indexDBServiceS.getIndexDBStaticTables('getBoardsDataFromInstruments').subscribe ((data)=>this.boardIDs = (data.data as moexBoard[]))
      this.MarketDataService.getMarketDataSources('stock').subscribe(marketSourcesData => this.marketSources = marketSourcesData);
      this.InstrumentDataS.getInstrumentDataToUpdateTableSource().subscribe(data =>{
       console.log('getInstrumentDataToUpdateTableSource',data);
@@ -134,7 +134,7 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
     } else {
       this.InstrumentDataS.getMoexInstruments().subscribe (instrumentData => this.updateInstrumentDataTable(instrumentData))  
     }
-    this.indexDBServiceS.getIndexDBStaticTables('getInstrumentDataDetails').then(data =>this.instrumentDetailsArr = data['data']);
+    this.indexDBServiceS.getIndexDBStaticTables('getInstrumentDataDetails').subscribe(data =>this.instrumentDetailsArr = (data.data as instrumentDetails[]));
   }
   handleNewFavoriteClick(elem:Instruments){
     let userData = JSON.parse(localStorage.getItem('userInfo'));

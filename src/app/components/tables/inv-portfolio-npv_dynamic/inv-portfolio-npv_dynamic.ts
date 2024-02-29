@@ -3,7 +3,7 @@ import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {Observable, Subscription, distinctUntilChanged, filter, from, map, of, startWith, switchMap, tap } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
-import {NPVDynamicData,tableHeaders } from 'src/app/models/interfaces.model';
+import {NPVDynamicData,StrategiesGlobalData,currencyCode,tableHeaders } from 'src/app/models/interfaces.model';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
 import {AbstractControl, FormBuilder, Validators, FormGroup, FormControl } from '@angular/forms';
@@ -63,8 +63,8 @@ export class AppaInvPortfolioNPVDynamicComponent {
   filterednstrumentsLists : Observable<string[]>;
   searchParametersFG: FormGroup;
   multiFilter?: (data: any, filter: string) => boolean;
-  filteredCurrenciesList: Observable<string[]>;
-  mp_strategies_list: string[]=[];
+  filteredCurrenciesList: Observable<currencyCode[]>;
+  mp_strategies_list: StrategiesGlobalData[]=[];
   currencySymbol: string = '$';
 /*   activeTab:string='';
   tabsNames = ['Portfolio Positions']
@@ -101,8 +101,8 @@ export class AppaInvPortfolioNPVDynamicComponent {
     this.subscriptions.unsubscribe();
   }
   ngOnInit(): void {
-    this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios').then ((data)=>{
-      this.mp_strategies_list = data['data']
+    this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios').subscribe ((data)=>{
+      this.mp_strategies_list = data.data as StrategiesGlobalData[]
     })
     this.multiFilter = (data: NPVDynamicData, filter: string) => {
       let filter_array = filter.split(',').map(el=>[el,1]);
@@ -132,7 +132,7 @@ export class AppaInvPortfolioNPVDynamicComponent {
       this.filteredCurrenciesList = this.report_id_currency.valueChanges.pipe (
         startWith (''),
         distinctUntilChanged(),
-        map(value => this.AutoCompService.filterList(value || '','currency'))
+        map(value => this.AutoCompService.filterList(value || '','currency') as currencyCode[])
       );
     }
     this.multiFilter = (data: NPVDynamicData, filter: string) => {
@@ -233,7 +233,7 @@ export class AppaInvPortfolioNPVDynamicComponent {
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
   }
   currencyChanged(code:string) {
-    this.currencySymbol = this.AutoCompService.fullCurrenciesList.filter(el=>el['CurrencyCodeNum']==code)[0]['symbol'];
+    this.currencySymbol = this.AutoCompService.fullCurrenciesList.filter(el=>el.CurrencyCodeNum==Number(code))[0]['symbol'];
   }
   // getTotals (col:string) {
   //   return (this.dataSource&&this.dataSource.data)?  this.dataSource.filteredData.map(el => el[col]).reduce((acc, value) => acc + Number(value), 0):0;

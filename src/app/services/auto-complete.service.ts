@@ -1,30 +1,30 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/internal/Observable';
-import { Subject, Subscription, exhaustMap, tap } from 'rxjs';
-import { indexDBService } from './indexDB.service';
+import { Subject, exhaustMap, tap } from 'rxjs';
+import { cacheAAM, indexDBService } from './indexDB.service';
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
-import { Stream } from 'stream';
+import { StrategiesGlobalData, counterParty, currencyCode, currencyPair, currencyRateList } from '../models/interfaces.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AtuoCompleteService {
-  fullInstrumentsLists: string[] = [];
-  fullCurrenciesList: string[] = [];
-  fullCounterPatiesList: string[] = [];
-  fullCurrencyPairsList: string[] = [];
-  private subjectSecIDList = new Subject<string[]>();
-  private subSecID = new Subject ();
-  private subCurrencyList = new Subject ();
-  private subModelPortfoliosList = new Subject ();
-  private subCurrencyListReady = new Subject<boolean> ();
-  private subSecIdListReady = new Subject<boolean> ();
-  private subMPsListReady = new Subject<string[]> ();
+  fullInstrumentsLists: string[][] = [];
+  fullCurrenciesList: currencyCode[] = [];
+  fullCounterPatiesList: counterParty[] = [];
+  fullCurrencyPairsList: currencyPair[] = [];
+  private subjectSecIDList = new Subject<string[][]>();
+  private subSecID = new Subject<boolean>();
+  private subCurrencyList = new Subject<boolean>();
+  private subModelPortfoliosList = new Subject<boolean>();
+  private subCurrencyListReady = new Subject<boolean>();
+  private subSecIdListReady = new Subject<boolean>();
+  private subMPsListReady = new Subject<StrategiesGlobalData[]>();
   constructor(
     private indexDBServiceS: indexDBService
   ) { }
 
-  filterList(value: string, type: string): string[] {
+  filterList(value: string, type: string):  string[][]|string[]|currencyCode[]|currencyRateList[]|currencyPair[]|counterParty[] {
     const filterValue = value.toString().toLowerCase();
     switch (type) {
       case 'secid': return this.fullInstrumentsLists.filter(option => option.toString().toLowerCase().includes(filterValue));
@@ -38,7 +38,7 @@ export class AtuoCompleteService {
     this.subSecID.pipe (
       exhaustMap(()=>this.indexDBServiceS.getIndexDBStaticTables('getInstrumentAutoCompleteList')),
     ).subscribe(data => {
-      this.fullInstrumentsLists = data['data'];
+      this.fullInstrumentsLists = (data.data as string[][]);
       this.sendSecIdList(this.fullInstrumentsLists);
       this.sendSecIdListReady(true);
     });
@@ -47,24 +47,25 @@ export class AtuoCompleteService {
     this.subCurrencyList.pipe (
       exhaustMap(()=>this.indexDBServiceS.getIndexDBStaticTables('getCurrencyCodes')),
     ).subscribe(data => {
-      this.fullCurrenciesList = data['data'];
+      this.fullCurrenciesList = (data.data as currencyCode[]);
       this.subCurrencyListReady.next(true)
     });
   }
   createModelPortfoliospipe (){
     this.subModelPortfoliosList.pipe (
       exhaustMap(()=>this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios')),
-    ).subscribe((data) => this.subMPsListReady.next(data['data']));
+    ).subscribe((data) => this.subMPsListReady.next(data.data as StrategiesGlobalData[]));
   }
-  getSecIdListReady(): Observable<string[]> {
+  getSMPsListReady(): Observable<StrategiesGlobalData[]> {
     return this.subMPsListReady.asObservable();
   }
   getSecidLists() {
     this.subSecID.next(true);
-    
   }
-  getCounterpartyLists() {
-    return this.indexDBServiceS.getIndexDBStaticTables('getCounterPartyList').then(data => this.fullCounterPatiesList = data['data']);
+  getCounterpartyLists():Observable<counterParty[]> {
+    return this.indexDBServiceS.getIndexDBStaticTables('getCounterPartyList').pipe(
+      tap(data => this.fullCounterPatiesList = (data as cacheAAM).data as counterParty[])
+    ) as Observable<counterParty[]>
   }
   getModelPotfoliosList() {
      this.subModelPortfoliosList.next(true);
@@ -73,8 +74,8 @@ export class AtuoCompleteService {
      this.subCurrencyList.next(true);
   }
   getCurrencyPairsList() {
-    return this.indexDBServiceS.getIndexDBStaticTables('getCurrencyPairsList').then(data => {
-      this.fullCurrencyPairsList = data['data'];
+    return this.indexDBServiceS.getIndexDBStaticTables('getCurrencyPairsList').subscribe(data => {
+      this.fullCurrencyPairsList = data.data as currencyPair[];
     });
   }
   currencyValirator(): ValidatorFn {
@@ -82,8 +83,8 @@ export class AtuoCompleteService {
       return (this.fullCurrenciesList.filter(el => el['CurrencyCodeNum'] === control.value).length ? null : { currencyCode: true });
     };
   }
-  getCurrecyData(codeNum: string): string {
-    return this.fullCurrenciesList.filter(el => el['CurrencyCodeNum'] === codeNum)[0];
+  getCurrecyData(codeNum: string): currencyCode {
+    return this.fullCurrenciesList.filter(el => el.CurrencyCodeNum.toString() === codeNum)[0];
   }
   secidValirator(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors => {
@@ -97,10 +98,10 @@ export class AtuoCompleteService {
       return (cpty.length ? null : { noCounterParty: true });
     };
   }
-  sendSecIdList(dataSet: string[]) {
+  sendSecIdList(dataSet: string[][]) {
     this.subjectSecIDList.next(dataSet);
   }
-  recieveSecIdList(): Observable<string[]> {
+  recieveSecIdList(): Observable<string[][]> {
     return this.subjectSecIDList.asObservable();
   }
   sendCurrencyListReady(ready:boolean) {

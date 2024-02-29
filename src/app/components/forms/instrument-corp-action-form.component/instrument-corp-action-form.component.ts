@@ -1,11 +1,12 @@
 import { Component,  EventEmitter,  Input, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { corporateActionsTypes, instrumentDetails } from 'src/app/models/instruments.interfaces';
+import { corporateActionsTypes, instrumentCorpActions, instrumentDetails, instrumentShort } from 'src/app/models/instruments.interfaces';
 import { Observable, distinctUntilChanged, filter, map, startWith, switchMap } from 'rxjs';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import { InstrumentDataService } from 'src/app/services/instrument-data.service';
+import { currencyCode } from 'src/app/models/interfaces.model';
 @Component({
   selector: 'instrument-corp-action-form',
   templateUrl: './instrument-corp-action-form.component.html',
@@ -15,13 +16,13 @@ export class AppInstrumentCorpActionFormComponent {
   public CorpActionsForm: FormGroup;
   @Input() action: string;
   @Input() moexBoards = []
-  @Input() instrument:any;
+  @Input() instrument:instrumentShort;
   instrumentDetails:instrumentDetails[] = [];
   @Output() public modal_principal_parent = new EventEmitter();
   public title: string;
-  @Input() data: any;
+  @Input() data: instrumentCorpActions;
   caTypes: corporateActionsTypes[];
-  filteredCurrenciesList: Observable<string[]>;
+  filteredCurrenciesList: Observable<currencyCode[]>;
   templateStructureAT = {
    1 : {
     placeholders: {couponamount:'Coupon Amount',couponrate: "Coupon Rate" },
@@ -79,7 +80,7 @@ export class AppInstrumentCorpActionFormComponent {
     this.filteredCurrenciesList = this.currency.valueChanges.pipe (
       startWith (''),
       distinctUntilChanged(),
-      map(value => this.AtuoCompService.filterList(value || '','currency'))
+      map(value => this.AtuoCompService.filterList(value || '','currency') as currencyCode[])
     )
     this.title = this.action;
     switch (this.action) {
@@ -94,7 +95,7 @@ export class AppInstrumentCorpActionFormComponent {
         this.CorpActionsForm.patchValue(this.data);
       break; 
     } 
-    this.indexDBServiceS.getIndexDBStaticTables('getCorpActionTypes').then(data =>this.caTypes=data['data'].filter(el=>el.sectype.includes(Number(this.instrument.groupid))))
+    this.indexDBServiceS.getIndexDBStaticTables('getCorpActionTypes').subscribe(data =>this.caTypes=(data.data as corporateActionsTypes[]).filter(el=>el.sectype.includes(Number(this.instrument.groupid))))
   }
   snacksBox(result:any, action?:string){
     if (result['name']=='error') {

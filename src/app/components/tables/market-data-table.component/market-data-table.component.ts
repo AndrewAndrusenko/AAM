@@ -53,7 +53,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
   instruments: string[] = ['ClearAll'];
   psearchParameters: any;
   
-  filterednstrumentsLists : Observable<string[]>;
+  filterednstrumentsLists : Observable<string[][]>;
   
   dateOfOperaationsStart  = new Date ('2023-02-18')
   balacedDateWithEntries : Date[]
@@ -107,7 +107,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
     this.secidList.setValidators(this.AutoCompService.secidValirator())
     this.filterednstrumentsLists = this.secidList.valueChanges.pipe(
       startWith(''),
-      map(value => this.AutoCompService.filterList(value || '','secid'))
+      map(value => this.AutoCompService.filterList(value || '','secid') as string[][])
     );
   }
   formatDate (dateToFormat:any):string {

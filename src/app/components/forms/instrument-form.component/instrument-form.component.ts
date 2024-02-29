@@ -1,6 +1,6 @@
 import { AfterContentInit, Component,  EventEmitter,  Input, Output, SimpleChanges, ViewChild} from '@angular/core';
 import { AsyncValidatorFn, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Instruments, instrumentCorpActions, instrumentDetails } from 'src/app/models/instruments.interfaces';
+import { Instruments, instrumentCorpActions, instrumentDetails, moexBoard, moexSecurityGroup, moexSecurityType } from 'src/app/models/instruments.interfaces';
 import { MatTabGroup as MatTabGroup } from '@angular/material/tabs';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { menuColorGl } from 'src/app/models/constants.model';
@@ -10,6 +10,7 @@ import { AuthService } from 'src/app/services/auth.service';
 import { Observable, distinctUntilChanged, filter, map, observable, startWith, switchMap } from 'rxjs';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import { InstrumentDataService } from 'src/app/services/instrument-data.service';
+import { currencyCode } from 'src/app/models/interfaces.model';
 @Component({
   selector: 'app-inv-instrument-modify-form',
   templateUrl: './instrument-form.component.html',
@@ -35,9 +36,9 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
   panelOpenStateFirst = false;
   panelOpenStateSecond = false;
   menuColorGl=menuColorGl
-  securityTypes: any[];
-  securityTypesFiltered: any[];
-  securityGroups: any;
+  securityTypes: moexSecurityType[];
+  securityTypesFiltered: moexSecurityType[];
+  securityGroups: moexSecurityGroup[];
   SecidUniqueAsyncValidator :AsyncValidatorFn;
   ISINuniqueAsyncValidator :AsyncValidatorFn;
   placeholders = new Map();
@@ -51,7 +52,7 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
     ['faceunit','Contract currency'],
     ['facevalue','Contract value'],
   ]
-  filteredCurrenciesList: Observable<string[]>;
+  filteredCurrenciesList: Observable<currencyCode[]>;
   constructor (
     private fb:FormBuilder, 
     private AuthServiceS:AuthService,  
@@ -89,9 +90,9 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToInstrumentData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.AtuoCompService.getCurrencyList();
-    this.indexDBServiceS.getIndexDBStaticTables('getMoexSecurityGroups').then ((data)=>this.securityGroups = data['data']);
-    this.indexDBServiceS.getIndexDBStaticTables('getMoexSecurityTypes').then ((data)=>{
-      this.securityTypes = data['data'];
+    this.indexDBServiceS.getIndexDBStaticTables('getMoexSecurityGroups').subscribe ((data)=>this.securityGroups = (data.data as moexSecurityGroup[]));
+    this.indexDBServiceS.getIndexDBStaticTables('getMoexSecurityTypes').subscribe ((data)=>{
+      this.securityTypes = (data.data as moexSecurityType[]);
       this.filtersecurityType(this.group.value);
     });
   }
@@ -100,10 +101,10 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
     this.filteredCurrenciesList = this.faceunit.valueChanges.pipe (
       startWith (''),
       distinctUntilChanged(),
-      map(value => this.AtuoCompService.filterList(value || '','currency'))
+      map(value => this.AtuoCompService.filterList(value || '','currency') as currencyCode[])
     )
-    this.moexBoards.length? null : this.indexDBServiceS.getIndexDBStaticTables('getBoardsDataFromInstruments').then (data=>this.moexBoards = data['data']);
-    if (this.data)  {
+    this.moexBoards.length? null : this.indexDBServiceS.getIndexDBStaticTables('getBoardsDataFromInstruments').subscribe (data=>this.moexBoards = (data.data as moexBoard[]));
+    if (this.data) {
       this.instrumentModifyForm.patchValue(this.data);
       this.addAsyncValidators(this.action); 
     };

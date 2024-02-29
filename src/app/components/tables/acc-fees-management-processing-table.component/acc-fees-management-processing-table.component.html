@@ -87,7 +87,7 @@
         style="height: 100%; margin-bottom: 4%;"
         (selectionChange)="setPortfoliosList($event.value)"  >
         <mat-option [value]="'All'"> All codes </mat-option>
-        <mat-option *ngFor="let mp of mp_strategies_list" [value]="mp['name']"> {{mp['name']}} </mat-option>
+        <mat-option *ngFor="let mp of mp_strategies_list" [value]="mp.name"> {{mp.name}} </mat-option>
       </mat-select>
       
   <mat-form-field class="search-filed" title="Accounting Date" style="margin-top: 2%;"> <!-- Report Date Filter -->

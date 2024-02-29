@@ -42,7 +42,7 @@ export class AppTableInstrumentDetailsComponent  implements AfterViewInit {
     this.disabledControlElements = this.accessState === 'full'? false : true;
   }
   async ngAfterViewInit() {
-    this.indexDBServiceS.getIndexDBStaticTables('getInstrumentDataDetails').then ((data)=>this.updateInstrumentDataTable (data['data']))
+    this.indexDBServiceS.getIndexDBStaticTables('getInstrumentDataDetails').subscribe ((data)=>this.updateInstrumentDataTable (data.data as instrumentDetails[]))
   }
   ngOnChanges(changes: SimpleChanges) {this.dataSource? this.applyFilter(undefined, this.secid) : null}
   applyFilter(event?: any, manualValue?:string) {
@@ -57,7 +57,7 @@ export class AppTableInstrumentDetailsComponent  implements AfterViewInit {
     this.dialogInstrumentDetails.componentInstance.secidParam = this.secid;
     this.dialogInstrumentDetails.componentInstance.modal_principal_parent.subscribe(success => {
       success? this.dialogInstrumentDetails.close():null;
-      this.indexDBServiceS.reloadIndexDBStaticTable('getInstrumentDataDetails').then(data => this.updateInstrumentDataTable(data['data']))
+      this.indexDBServiceS.reloadIndexDBStaticTable('getInstrumentDataDetails').subscribe(data => this.updateInstrumentDataTable(data as instrumentDetails[]))
     })
   }
   updateInstrumentDataTable (corpActionData:instrumentDetails[]) {

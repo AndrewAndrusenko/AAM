@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { currencyRate, currencyRateList, marketSourceSegements } from '../models/interfaces.model';
+import { currencyPair, currencyRate, currencyRateList, marketSourceSegements } from '../models/interfaces.model';
 import { EMPTY, Observable, catchError, filter, map, of, switchMap, tap } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { HadlingCommonDialogsService } from './hadling-common-dialogs.service';
@@ -31,9 +31,9 @@ export class CurrenciesDataService {
     (searchParameters !== null) ?  params = {...params,...searchParameters}: null;
      return this.http.get <currencyRateList[]> ('api/AAM/getCurrencyData/',{params:params})
    }
-   getCurrencyPairsList ():Observable<currencyRateList[]> {
+   getCurrencyPairsList ():Observable<currencyPair[]> {
     let params = {dataType:'getPairsList'};
-     return this.http.get <currencyRateList[]> ('api/AAM/getCurrencyData/',{params:params})
+     return this.http.get <currencyPair[]> ('api/AAM/getCurrencyData/',{params:params})
    }
    getCurrencyCodes (searchParameters?:CurrenciessearchParameters):Observable<currencyRateList[]> {
     let params = {dataType:'getCurrencyCodes'};
