@@ -8,7 +8,6 @@ import { AbstractControl } from '@angular/forms';
 import { AppOrderTableComponent } from '../components/tables/orders-table.component/orders-table.component';
 import { allocation, allocation_fifo } from '../models/interfaces.model';
 import { AccountingTradesService } from './accounting-trades.service';
-import { error } from 'jquery';
 import { bAccountTransaction, bLedgerTransaction } from '../models/accountng-intefaces.model';
 import { bcEntryParameters } from '../models/acc-schemes-interfaces';
 
@@ -94,7 +93,7 @@ export class AppAllocationService {
         await firstValueFrom (this.AccountingDataService.createDepoSubAccounts(portfoliosIDsToOpenDepo,secidItem)).then(newDepoAccounts=>{
           if (newDepoAccounts?.['name']) {
             this.CommonDialogsService.snackResultHandler(newDepoAccounts)
-            return reject(error)
+            return reject(newDepoAccounts)
           }
           newDepoAccounts.forEach (depoAccount=>{ 
             let i =this.tradeToConfirm.findIndex(el=>el.idportfolio==depoAccount.idportfolio&&el.secid===secidItem);

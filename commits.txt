@@ -353,9 +353,36 @@ we get closest market price for every position
   All variables of any type have been refactored to the variables with specific type
   All dependant components have been updated accordingly
 2|| Refactored any type to the secure ones   
+--------------------------------------------------------------------------------------------
+29/02/2024 - 04/03/2024
+1|| Refactored service market-data.service.ts importing market data from Moscow Stock Exchange and Marketstack.com 
+  All embedded subscriptions and promises patterns have been replaced by RxJS observables/pipes
+  All variables of any type have been refactored to the variables with specific type
+  All dependant components have been updated accordingly
+2|| Refactored market-data-table.component.ts according to new service's model of importing data and optimized UI 
+3|| Refactored accounting service - accounting.service.ts
+  All variables of any type have been refactored to the variables with specific type
+  All dependant components and services have been updated accordingly
+4|| Fixed acc-entries-table.component.ts. Refactored getting of transaction types. Insted of using cache service directly, request goes into exhaustMap pipe and component is beeing notified when data has been cached
+5|| Fixed DB and middleware layer to get list of entries based on externalId. ExteralId is used to link incoming swifts message with generated entries. Parameter of externalId has been added to pg sql function f_a_b_get_all_entries_transactions.sql and to sql request of middleware layer
+6|| Refactored any type to the secure ones in the following components:
+  market-data.service.ts
+  instrument-data.service.ts,
+  instrument-table.component.ts,
+  investment-data.service.service.ts,
+  log-processing.service.ts,
+7|| Refactored function of export to excel
+
+
 
 ToDo
+|| Local Tunel for Alya
+|| Architecture 
+|| indexDB fgetMarketDataSources
+||exhaustMap pipe for fgetInstrumentDataGeneral=>getBoardsDataFromInstruments 276
+
 || Store histrory of a portfolio changing strategies
+* Refactor getMarketData from market-data-table
 * Fix: Allocation acconting - FIFO/Accounting => Roll back FIFO/Accounting when other fails
 || Revenue Factor Chart add info about management and perfomance fees deducted
 || FIFO Bug possible=> Case of simultaneously two trades which should be netted on FIFO are sent in FIFO function. 
@@ -367,3 +394,4 @@ ToDo
 || Hurdle Performance fee and Cash In/Outs -??? How to correct start and end NVP?
 *Strategy tab component is not being reused and is rendered when reopened
 *Performance Chart shows graph from the last selected object if new object is reused and there's no need to reload it 
+Today I'm going. To refactor Um any type Then I'm going. I'm just. stop. 

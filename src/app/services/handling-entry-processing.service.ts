@@ -16,7 +16,7 @@ export class HandlingEntryProcessingService {
   ) { }
   async openEntry (row: SWIFTStatement950model, parentMsgRow:SWIFTSGlobalListmodel, autoProcessing?: boolean, dateToProcess?: Date, overRideOverdraft?:boolean ) {
     if (Number(row.entriesAmount) > Number(row.amountTransaction) && ['CR','DR'].includes(row.typeTransaction)) {
-      let EmptyEntry = {'entryDraft' : {}, 'formStateisDisabled': true, 'overRideOverdraft' :overRideOverdraft}
+      let EmptyEntry = {'entryDraft' : null, 'formStateisDisabled': true, 'overRideOverdraft' :overRideOverdraft}
       this.AccountingDataService.sendEntryDraft(EmptyEntry);
 
     } else {

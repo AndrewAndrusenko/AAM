@@ -10,9 +10,9 @@ export class AppInvestmentDataServiceService {
 
   constructor(private http:HttpClient) { }
   
-  private subjectName = new Subject<any>(); 
+  private subjectName = new Subject<number>(); 
   private subjectReloadStrategyStructure = new Subject<number>(); 
-  private subjectReloadPortfoliosData = new Subject<any>(); 
+  private subjectReloadPortfoliosData = new Subject<boolean>(); 
   private subjectReloadClientTable = new Subject<ClientData[]>(); 
   private subjectClientsPortfolios = new Subject<{id:number,code:string}[]>(); 
   private subjectPerformanceData = new Subject<{data: PortfolioPerformnceData[],currencySymbol:string,showChart:boolean}>(); 
@@ -32,10 +32,10 @@ export class AppInvestmentDataServiceService {
     }
     return this.http.get <AccountsTableModel []>('/api/AAM/portfolioTable/', { params: params })
   }
-  sendReloadPortfoliosData (data:any) { 
+  sendReloadPortfoliosData (data:boolean) { 
     this.subjectReloadPortfoliosData.next(data); 
   }
-  getReloadPortfoliosData(): Observable<any> { 
+  getReloadPortfoliosData(): Observable<boolean> { 
     return this.subjectReloadPortfoliosData.asObservable(); 
   }
   sendClientsPortfolios (portfolios: {id:number,code:string}[]) {
@@ -59,25 +59,25 @@ export class AppInvestmentDataServiceService {
   getReloadClientTable(): Observable<ClientData[]> { 
     return this.subjectReloadClientTable.asObservable(); 
   }
-  updateClient (data:any) :Observable<ClientData[]>  { 
+  updateClient (data:ClientData) :Observable<ClientData[]>  { 
     return this.http.post <ClientData[]> ('/api/AAM/ClientDataEdit/',{'data': data})
   }
   deleteClient (id:string): Observable<ClientData[]> {
     return this.http.post <ClientData[]> ('/api/AAM/ClientDataDelete/',{'idclient': id})
   }
-  createClient (data:any): Observable<ClientData[]>  { 
+  createClient (data:ClientData): Observable<ClientData[]>  { 
     return this.http.post <ClientData[]> ('/api/AAM/ClientDataCreate/',{'data': data})
   }
   sendReloadStrategyStructure ( id:number) { 
     this.subjectReloadStrategyStructure.next(id);
   }
-  getReloadStrategyStructure(): Observable<any> { 
+  getReloadStrategyStructure(): Observable<number> { 
     return this.subjectReloadStrategyStructure.asObservable(); 
   }
-  sendReloadStrategyList ( id:any) { 
+  sendReloadStrategyList ( id:number) { 
     this.subjectName.next(id);
   }
-  getReloadStrategyList(): Observable<any> {
+  getReloadStrategyList(): Observable<number> {
     return this.subjectName.asObservable(); 
   }
   getGlobalStategiesList (id:number, Name:string, action:string) : Observable <StrategiesGlobalData[]>  {
@@ -120,13 +120,13 @@ export class AppInvestmentDataServiceService {
   updateStrategyStructure (data:StrategyStructure,action:string):Observable <StrategyStructure[]> { 
     return this.http.post <StrategyStructure[]> ('/api/AAM/updateStrategyStructure/',{data:data, action:action})
   }
-  createAccount (data:any) { 
+  createAccount (data:ClientData) { 
     return this.http.post <AccountsTableModel[]> ('/api/AAM/AccountCreate/',{'data': data})
   } 
   deleteAccount (id:string) { 
     return this.http.post <AccountsTableModel[]> ('/api/AAM/AccountDelete/',{'id': id})
   } 
-  updateAccount (data:any) { 
+  updateAccount (data:ClientData) { 
     return this.http.post <AccountsTableModel[]> ('/api/AAM/AccountEdit/',{'data': data})
   }
   getPortfoliosPositions (params_data: {secidList:string[], idportfolios : number[], report_date: string, report_id_currency :number }):Observable<portfolioPositions[]> {

@@ -206,17 +206,7 @@ export class AppaInvPortfolioRevenueFactorAnalysisTableComponent {
   exportToExcel() {
     let numberFields=['account_currency_code','idportfolio','cross_rate','dirty_price','mtm_rate','balance','current_fifo_position_cost','pos_pv','pl','mtm_pl','total_pl'];
     let dateFields=['report_date','mtm_date','rate_date'];
-    let dataToExport =  this.dataSource.data.map(el=>{
-      Object.keys(el).forEach(key=>{
-        switch (true==true) {
-          case  numberFields.includes(key): return el[key]=Number(el[key]) ;
-          case dateFields.includes(key): return el[key]=new Date(el[key])
-          default: return el[key]=el[key]
-        }
-      })
-      return el;
-    });
-    this.HandlingCommonTasksS.exportToExcel (dataToExport,"RevenueFactorData");  
+    this.HandlingCommonTasksS.exportToExcel (this.dataSource.data,"RevenueFactorData",numberFields,dateFields);  
   }
   get  idportfolios () {return this.searchParametersFG.get('p_portfolios_list') } 
   get  dateRangeStart () {return this.dataRange.get('dateRangeStart') } 

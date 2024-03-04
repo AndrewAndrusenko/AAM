@@ -82,7 +82,7 @@ export class TablePortfolios {
       {this.updatePortfolioData (undefined, this.clientId,this.strategyMpName,this.actionOnAccountTable,this.accessToClientData,false)
     };
     this.arraySubscrition.add (
-      this.InvestmentDataService.getReloadPortfoliosData().subscribe(data => this.updatePortfolioData (undefined, this.clientId,this.strategyMpName,this.actionOnAccountTable,this.accessToClientData))
+      this.InvestmentDataService.getReloadPortfoliosData().subscribe(() => this.updatePortfolioData (undefined, this.clientId,this.strategyMpName,this.actionOnAccountTable,this.accessToClientData))
     )
   }
   ngOnDestroy(): void {

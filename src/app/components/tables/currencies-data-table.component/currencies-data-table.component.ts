@@ -1,4 +1,4 @@
-import { Component, ViewChild, Input, AfterViewInit} from '@angular/core';
+import { Component, ViewChild, Input, AfterViewInit, ChangeDetectionStrategy} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {catchError, EMPTY, map, Observable, startWith, switchMap, tap } from 'rxjs';
@@ -20,6 +20,7 @@ import { AppMarketDataService } from 'src/app/services/market-data.service';
 registerLocaleData(localeFr, 'fr');
 @Component({
   selector: 'app-table-currencies-data',
+  changeDetection:ChangeDetectionStrategy.OnPush,
   templateUrl: './currencies-data-table.component.html',
   styleUrls: ['./currencies-data-table.component.scss'],
 })
@@ -38,7 +39,7 @@ export class AppTableCurrenciesDataComponent {
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
   @ViewChild('allSelected') private allSelected: MatOption;
   public readOnly: boolean = false; 
-  panelOpenStateFirst = false;
+  panelOpenStateFirst = true;
   panelOpenStateSecond = true;
   pairs: string[] = ['ClearAll'];
   datePipe: DatePipe;
@@ -212,9 +213,9 @@ export class AppTableCurrenciesDataComponent {
     ) : this.searchParametersFG.get(elem).patchValue([]);
   }
   exportToExcel() {
-   const fileName = "marketData.xlsx";
-   let data = this.dataSource.data
-   this.handlingCommonTasksService.exportToExcel (data,"currencyData")
+   let numberFields=['base_code','quote_code','rate','inderect_rate','rate_type','nominal'];
+   let dateFields=['rate_date'];
+   this.handlingCommonTasksService.exportToExcel (this.dataSource.data,"currencyData",numberFields,dateFields);  
  }
   get  gRange () {return this.searchParametersFG.get('dataRange') } 
   get  dateRangeStart() {return this.searchParametersFG.get('dateRangeStart') } 

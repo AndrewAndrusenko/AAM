@@ -1,10 +1,57 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, ReplaySubject, Subject, filter, forkJoin, map, of, switchMap} from 'rxjs';
-import { bAccounts, bAccountsEntriesList, bAccountTransaction, bBalanceData, bBalanceFullData, bcAccountType_Ext, bcEnityType, bcTransactionType_Ext, bLedger, bLedgerAccounts, bLedgerBalanceData, bLedgerTransaction, SWIFTSGlobalListmodel, SWIFTStatement950model } from '../models/accountng-intefaces.model';
+import { Observable, ReplaySubject, Subject, filter, forkJoin, of, switchMap} from 'rxjs';
+import { bAccounts, bAccountsEntriesList, bAccountTransaction, bBalanceData, bBalanceFullData, bcAccountType_Ext, bcEnityType, bcTransactionType_Ext, bLedger, bLedgerAccounts, bLedgerBalanceData, bLedgerTransaction, bTransactionForm, SWIFTSGlobalListmodel, SWIFTStatement950model } from '../models/accountng-intefaces.model';
 import { HadlingCommonDialogsService } from './hadling-common-dialogs.service';
 import { BalanceDataPerPortfoliosOnDate } from '../models/accountng-intefaces.model';
 import { bcEntryParameters } from '../models/acc-schemes-interfaces';
+interface searchParametersEntiesTable {
+  dataRange? : { dateRangeStart: Date, dateRangeEnd:Date },
+  noAccountLedger: string[],
+  portfolioCodes:  string[],
+  amount:number|null,
+  entryTypes : {value:null, disabled:false},
+  ExtID:number|null,
+  idtrade:number|null,
+  entriesIds:number[]|null
+}
+interface searchParametersBalancesTable {
+  noAccountLedger?:string[]|null,
+  dateRangeStart?:string,
+  dateRangeEnd?:string,
+  entryTypes?:number[]|null
+}
+interface stpEntryData {
+  entryDraft : bAccountTransaction | bLedgerTransaction|null|bTransactionForm, 
+  formStateisDisabled: boolean, 
+  refTransaction?: string, 
+  autoProcessing?:boolean, 
+  overRideOverdraft :boolean
+}
+class bAccountTransactionC {
+  id:number|number[]=null;
+  ledgerNoId: number=null;
+  dataTime:Date =null;
+  XactTypeCode: number=null;
+  XactTypeCode_Ext: number =null;
+  accountId: number  =null;
+  amountTransaction: number =null;
+  entryDetails: string =null;
+  extTransactionId: number=null;
+  idtrade: number=null;
+}
+class bLedgerTransactionC {
+  id:number|number[]=null;
+  ledgerID_Debit: number =null;
+  dateTime:Date=null;
+  XactTypeCode_Ext: number =null;
+  ledgerID: number  =null;
+  amount: number =null;
+  entryDetails: string =null;
+  extTransactionId: number=null;
+  idtrade: number=null;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -13,12 +60,12 @@ export class AppAccountingService {
     private http:HttpClient,
     private CommonDialogsService:HadlingCommonDialogsService,
     ) { }
-  private subjectReloadAccontList = new Subject<any>();
-  private subjectReloadLedgerAccontList = new Subject<any>();
-  private subjectFormState = new Subject<any>();
-  private subjectEntryDraft = new Subject<any>();
-  private subjectLoadedMT950Transactions = new Subject<any>();
-  private relplaySubject = new ReplaySubject(1);
+  private subjectReloadAccontList = new Subject<number>();
+  private subjectReloadLedgerAccontList = new Subject<number>();
+  private subjectFormState = new Subject<{formName: boolean}>();
+  private subjectEntryDraft = new Subject<stpEntryData>();
+  private subjectLoadedMT950Transactions = new Subject<number[]>();
+  private relplaySubject = new ReplaySubject<number>(1);
   AccountsEntriesList = <bAccountsEntriesList> {
     'd_portfolioname' : null,
     'd_transactionType': null,
@@ -87,13 +134,13 @@ export class AppAccountingService {
     return this.http.get <bLedger []>('/api/DEA/fGetAccountingData/', { params: params })
   }
   /*----------------------Create entry by scheme---------------------------------------------------------*/
-  getAccountingScheme(bcEntryParameters:bcEntryParameters,cSchemeGroupId:string, entryType:string='AL'):Observable<bcTransactionType_Ext[]> {
+  getAccountingScheme(bcEntryParameters:bcEntryParameters,cSchemeGroupId:string, entryType:string='AL'):Observable<bAccountTransaction[]|bLedgerTransaction[]> {
     let params={...bcEntryParameters,entryType:entryType,cSchemeGroupId:cSchemeGroupId}
-    return this.http.get <bcTransactionType_Ext[]> ('/api/DEA/GetEntryScheme/',{params: params})
+    return this.http.get <bAccountTransaction[]|bLedgerTransaction[]> ('/api/DEA/GetEntryScheme/',{params: params})
   }
-  sendEntryDraft (data: any) { 
+  sendEntryDraft (data: stpEntryData) { 
     this.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe (OpenedDate => {
-      let newEntryDraft = {}
+      let newEntryDraft = new bTransactionForm ()
       newEntryDraft['FirstOpenedAccountingDate'] = OpenedDate[0].FirstOpenedDate;
       let entryFormFields = Object.keys (this.AccountsEntriesList)
       Object.entries(data.entryDraft).forEach ((value,key) => {
@@ -105,12 +152,12 @@ export class AppAccountingService {
       this.subjectEntryDraft.next(data)
     })
   }
-  getEntryDraft (): Observable<any> {return this.subjectEntryDraft.asObservable(); }
-  sendFormState(state: boolean) {this.subjectFormState.next({ formName: state })}
-  getFormState(): Observable<any> {return this.subjectFormState.asObservable() }
-  CreateEntryAccountingInsertRow (data:any) { return this.http.post ('/api/DEA/fCreateEntryAccountingInsertRow/',{'data': data})} 
+  getEntryDraft (): Observable<stpEntryData> {return this.subjectEntryDraft.asObservable(); }
+  sendFormState(state: boolean) {this.subjectFormState.next({formName: state})}
+  getFormState(): Observable<{formName: boolean}> {return this.subjectFormState.asObservable() }
+  // CreateEntryAccountingInsertRow (data:unknown) { return this.http.post ('/api/DEA/fCreateEntryAccountingInsertRow/',{'data': data})} 
   /*End------------------Create entry by scheme---------------------------------------------------------*/
-  GetAccountsEntriesListAccounting (searchParameters:any, id: number, MTType:string, Sender: string, Action: string):Observable <bAccountsEntriesList[]> {
+  GetAccountsEntriesListAccounting (searchParameters:searchParametersEntiesTable, id: number, MTType:string, Sender: string, Action: string):Observable <bAccountsEntriesList[]> {
     let params = {'id' :id, 'MTType': MTType,'Sender':Sender, 'Action': Action};
     (searchParameters !== null) ?  params = {...params,...searchParameters}: null
     return this.http.get <bAccountsEntriesList []>('/api/DEA/fGetAccountingData/', { params: params })
@@ -145,31 +192,35 @@ export class AppAccountingService {
     return this.http.get <number>('/api/DEA/fGetAccountingData/', { params: params })
   }
   /*----------------------AccountsUI---------------------------------------------------------*/
-  updateAccountAccounting (data:any, action:string):  Observable<bAccounts[]> { 
+  updateAccountAccounting (data:bAccounts, action:string):  Observable<bAccounts[]> { 
     return this.http.post <bAccounts[]> ('api/DEA/updateAccountAccounting/',{data:data, action:action})
   }
-  sendReloadAccontList ( id:any) {this.subjectReloadAccontList.next(id)}
-  getReloadAccontList(): Observable<any> {return this.subjectReloadAccontList.asObservable()}
+  sendReloadAccontList ( id:number) {this.subjectReloadAccontList.next(id)}
+  getReloadAccontList(): Observable<number> {return this.subjectReloadAccontList.asObservable()}
 /*----------------------LedgerAccountsUI----------------------------------------------------*/
-  updateLedgerAccountAccounting (data:any, action:string):Observable<bLedger[]> {
+  updateLedgerAccountAccounting (data:bLedger, action:string):Observable<bLedger[]> {
     return this.http.post <bLedger[]>('/api/DEA/updateLedgerAccountAccounting/',{data:data, action:action})
   }
-  sendReloadLedgerAccontList ( id:any) {this.subjectReloadLedgerAccontList.next(id)}
-  getReloadLedgerAccontList(): Observable<any> { return this.subjectReloadLedgerAccontList.asObservable()}
+  sendReloadLedgerAccontList ( id:number) {this.subjectReloadLedgerAccontList.next(id)}
+  getReloadLedgerAccontList(): Observable<number> { return this.subjectReloadLedgerAccontList.asObservable()}
 /*----------------------EntryUI----------------------------------------------------*/
-  updateEntryAccountAccounting (data:any, action:string):  Observable<bAccountTransaction[]> { 
-  return this.http.post <bAccountTransaction[]> ('api/DEA/updateEntryAccountAccounting/',{data:data, action:action})
+  updateEntryAccountAccounting (data:bAccountTransaction, action:string):  Observable<bAccountTransaction[]> { 
+    return this.http.post <bAccountTransaction[]> ('api/DEA/updateEntryAccountAccounting/',{data:data, action:action})
   }
-  updateLLEntryAccountAccounting (data:any, action:string):  Observable<bLedgerTransaction[]> { 
+  updateLLEntryAccountAccounting (data:bLedgerTransaction, action:string):  Observable<bLedgerTransaction[]> { 
     return this.http.post <bLedgerTransaction[]> ('api/DEA/updateLLEntryAccountAccounting/',{data:data, action:action})
   }
   deleteBulkEntries (idsLL:number[],idsAL:number[]){
+    let idsAccountTransactions = new bAccountTransactionC ();
+    let idsLedgerTransactions = new bLedgerTransactionC ();
+    idsAccountTransactions.id=idsAL;
+    idsLedgerTransactions.id=idsAL;
     this.CommonDialogsService.confirmDialog('Delete Entries','Delete').pipe(
       filter(confirm=>confirm.isConfirmed===true),
       switchMap(()=>{
         return forkJoin([
-          this.updateEntryAccountAccounting({id:idsAL},'Delete'),
-          this.updateLLEntryAccountAccounting({id:idsLL},'Delete')
+          this.updateEntryAccountAccounting(idsAccountTransactions,'Delete'),
+          this.updateLLEntryAccountAccounting(idsLedgerTransactions,'Delete')
         ])
       })
     ).subscribe(data=>{
@@ -180,12 +231,11 @@ export class AppAccountingService {
       this.sendReloadEntryList(undefined)
     })
   }
-  sendReloadEntryList ( id:any) {this.relplaySubject.next(id)}
-  getReloadEntryList(): Observable<any> {return this.relplaySubject.asObservable()}
+  sendReloadEntryList ( id:number) {this.relplaySubject.next(id)}
+  getReloadEntryList(): Observable<number> {return this.relplaySubject.asObservable()}
   createDepoSubAccounts (portfolioIds:number[],secid:string):Observable<bAccounts[]> {
     return this.http.post <bAccounts[]> ('api/DEA/createDepoSubAccounts/',{portfolioIds:portfolioIds,secid:secid})
   }
-
 /*----------------------BalanceData----------------------------------------------------*/
   getBalanceDatePerPorfoliosOnData (portfoliosList:string[],balanceDate:Date): Observable <BalanceDataPerPortfoliosOnDate[]> {
     let param = {
@@ -224,13 +274,13 @@ export class AppAccountingService {
     } else return of (null)
   }
   /*----------------------Balance Sheets----------------------------------------------------*/
-  GetALLClosedBalances (searchParameters:any, id: number, lastClosedDate:string, Sender: string, Action: string):Observable <bBalanceFullData[]> {
+  GetALLClosedBalances (searchParameters:searchParametersBalancesTable, id: number, lastClosedDate:string, Sender: string, Action: string):Observable <bBalanceFullData[]> {
     let params = {'id' :id, 'lastClosedDate': lastClosedDate,'Sender':Sender, 'Action': Action};
     (searchParameters !== null) ?  params = {...params,...searchParameters}: null
     return this.http.get <bBalanceFullData[]>('/api/DEA/fGetAccountingData/', {params:params })
   }
-  accountingBalanceCloseInsert (data:any) {return this.http.post <any[]> ('/api/DEA/accountingBalanceCloseInsert/',{'data': data})}
-  accountingBalanceDayOpen (data:any) {return this.http.post <any[]> ('/api/DEA/accountingBalanceDayOpen/',{'data': data})}
+  accountingBalanceCloseInsert (data:{closingDate : string}) {return this.http.post <{rows_affected: string}[]> ('/api/DEA/accountingBalanceCloseInsert/',{'data': data})}
+  accountingBalanceDayOpen (data:{dateToOpen : string}) {return this.http.post <{rows_affected: string}[]> ('/api/DEA/accountingBalanceDayOpen/',{'data': data})}
   GetDeepBalanceCheck (dateBalanceToCheck:string, firstDayOfCalculation: string, Action: string):Observable <bBalanceFullData[]> {
     let params = {'dateBalanceToCheck': dateBalanceToCheck,'firstDayOfCalculation':firstDayOfCalculation, 'Action': Action};
     return this.http.get <bBalanceFullData []>('/api/DEA/fGetAccountingData/', { params: params })

@@ -1,4 +1,4 @@
-import {Component, EventEmitter, OnDestroy, OnInit, Output, QueryList, ViewChild, ViewChildren} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, OnDestroy, OnInit, Output, QueryList, ViewChild, ViewChildren} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {Subject, Subscription, takeUntil } from 'rxjs';
@@ -22,6 +22,7 @@ import { cFormValidationLog } from 'src/app/models/interfaces.model';
   selector: 'app-swifts-incoming-table',
   templateUrl: './swifts-incoming-table.component.html',
   styleUrls: ['./swifts-incoming-table.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [
     trigger('detailExpand', [
       state('collapsed', style({height: '0px', minHeight: '0'})),
@@ -96,7 +97,6 @@ export class AppTableSWIFTsInListsComponent  implements OnInit,OnDestroy {
     this.closeLogSubscriptions();
   }
   ngOnInit(): void {
-    this.swiftProcessingFB.enable();
   }
   async updateSwiftsData (action: string, dateMessage?:string) {
     return new Promise<number> (async (resolve) => {

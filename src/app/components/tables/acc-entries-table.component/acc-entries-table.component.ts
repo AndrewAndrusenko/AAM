@@ -24,6 +24,7 @@ import { AppInvestmentDataServiceService } from 'src/app/services/investment-dat
 import { HandlingTableSelectionService } from 'src/app/services/handling-table-selection.service';
 import { SelectionModel } from '@angular/cdk/collections';
 import { tableHeaders } from 'src/app/models/interfaces.model';
+import { AccountingSchemesService } from 'src/app/services/accounting-schemes.service';
 @Component({
   selector: 'app-table-acc-entries',
   templateUrl: './acc-entries-table.component.html',
@@ -108,7 +109,7 @@ export class AppTableAccEntriesComponent implements OnInit {
     private HandlingCommonTasksS:HandlingCommonTasksService,
     private dialog: MatDialog,
     private fb:FormBuilder ,
-    private indexDBServiceS:indexDBService,
+    private AccountingSchemesService:AccountingSchemesService,
     private InvestmentDataService:AppInvestmentDataServiceService,
     private SelectionService:HandlingTableSelectionService,
   ) {
@@ -120,13 +121,14 @@ export class AppTableAccEntriesComponent implements OnInit {
       portfolioCodes: {value:['ClearAll'], disabled:false},
       amount:{value:null, disabled:true},
       entryTypes : {value:null, disabled:false},
-      ExtID:{value:null, disabled:false},
+      externalId:{value:null, disabled:false},
       idtrade:{value:null, disabled:false},
       entriesIds:{value:null, disabled:false}
     })
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToEntriesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
-    this.indexDBServiceS.getIndexDBStaticTables('bcTransactionType_Ext').subscribe ( data => this.TransactionTypes = (data.data as bcTransactionType_Ext[]));
+    this.AccountingSchemesService.subjectTransactionTypePipe.next(null);
+    this.subscriptions.add(this.AccountingSchemesService.receiveTransactionTypesReady().subscribe(data=>this.TransactionTypes=data.data))
     this.AccountingDataService.getReloadEntryList().pipe(
       filter(id=> id==undefined||(id===this.externalId))
     ).subscribe(id =>{
@@ -157,6 +159,7 @@ export class AppTableAccEntriesComponent implements OnInit {
   }
   initiateTable() {
     switch (this.action) {
+      
       case 'ShowEntriesForBalanceSheet':
         this.noAccountLedger.value.push(this.paramRowData.accountNo);
         this.dataRange.controls['dateRangeStart'].setValue(new Date (this.paramRowData.dateBalance))
@@ -309,7 +312,7 @@ export class AppTableAccEntriesComponent implements OnInit {
   get  dateRangeStart() {return this.searchParametersFG.get('dateRangeStart') } 
   get  dateRangeEnd() {return this.searchParametersFG.get('dateRangeEnd') } 
   get  entryTypes () {return this.searchParametersFG.get('entryTypes') } 
-  get  ExtId () {return this.searchParametersFG.get('ExtID') } 
+  get  ExtId () {return this.searchParametersFG.get('externalId') } 
   get  idtrade () {return this.searchParametersFG.get('idtrade') } 
   get  noAccountLedger () {return this.searchParametersFG.get('noAccountLedger') } 
   get  portfolioCodes () {return this.searchParametersFG.get('portfolioCodes') } 

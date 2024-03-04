@@ -167,7 +167,8 @@
               </button>
               <button  *ngIf="element.t_dataTime<FirstOpenedAccountingDate||disabledControlElements||element.d_manual_edit_forbidden===true" mat-icon-button 
                 color="accent"
-                matTooltip="View entry (day is closed)"
+                [matTooltip]="disabledControlElements? 'View entry (readonly)'
+                :(element.d_manual_edit_forbidden? 'View entry (manual_edit is forbidden)':'View entry (day is closed)')"
                 (click)="openEntryModifyForm('View', element)">
                 <mat-icon >pageview</mat-icon>
               </button>

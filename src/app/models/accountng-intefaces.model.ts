@@ -89,8 +89,24 @@ export interface bLedgerAccounts extends bLedger {
   d_APTypeCodeAccount: string,
   action:string
 }
+export class bTransactionForm {
+  t_id:number|number[]=null;
+  t_ledgerNoId: number=null;
+  t_dataTime:Date =null;
+  t_XactTypeCode: number=null;
+  t_XactTypeCode_Ext: number =null;
+  t_accountId: number  =null;
+  t_amountTransaction: number =null;
+  t_entryDetails: string =null;
+  t_extTransactionId: number=null;
+  t_idtrade: number=null;
+  t_ledgerID_Debit: number =null;
+  t_dateTime:Date=null;
+  t_ledgerID: number  =null;
+  t_amount: number =null;
+}
 export interface bAccountTransaction {
-  id:number,
+  id:number|number[],
   ledgerNoId: number,
   dataTime:Date, 
   XactTypeCode: number,
@@ -102,7 +118,7 @@ export interface bAccountTransaction {
   idtrade: number
 }
 export interface bLedgerTransaction {
-  id:number,
+  id:number|number[],
   ledgerID_Debit: number, 
   dateTime:Date,
   XactTypeCode_Ext: number, 

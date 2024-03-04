@@ -20,16 +20,12 @@ const config = require('./db_config');
 const Pool = require('pg').Pool;
 const pool = new Pool(config.dbConfig);
 const cors = require('cors');
+var session = require('express-session');
 
 appServer.use(cors());
 appServer.use (express.static('public'));
-appServer.use(bodyParser.json());
-appServer.use(
-  bodyParser.urlencoded({
-    extended: true,
-  })
-)
-var session = require('express-session');
+appServer.use(express.json({limit: '25mb'}));
+appServer.use(express.urlencoded({limit: '25mb', extended: true}));
 
 appServer.use(session({
   secret: 'keyboard cat',
@@ -138,7 +134,7 @@ appServer.post('/AAM/GetPortfolioAnalytics/',jsPassport.authenticate('session') 
 appServer.get('/DEA/fGetMT950Transactions/',jsPassport.authenticate('session') , uiAmmAccountingModule.fGetMT950Transactions)
 appServer.get('/DEA/fGetAccountingData/',jsPassport.authenticate('session') , uiAmmAccountingModule.fGetAccountingData)
 appServer.get('/DEA/GetEntryScheme/',jsPassport.authenticate('session') , uiAmmAccountingModule.GetEntryScheme)
-appServer.post('/DEA/fCreateEntryAccountingInsertRow/',jsPassport.authenticate('session') , uiAmmAccountingModule.fCreateEntryAccountingInsertRow)
+// appServer.post('/DEA/fCreateEntryAccountingInsertRow/',jsPassport.authenticate('session') , uiAmmAccountingModule.fCreateEntryAccountingInsertRow)
 
 /*----------------------FIFO---------------------------------------------------------*/
 appServer.get('/DEA/getFIFOtransactions/',jsPassport.authenticate('session') , uiAmmTradeData.fGetFIFOtransactions)

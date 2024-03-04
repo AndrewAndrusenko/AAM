@@ -1,7 +1,7 @@
-import {AfterViewInit, Component, ViewEncapsulation, EventEmitter, Output, ViewChild, Input, ChangeDetectionStrategy, ElementRef} from '@angular/core';
+import {AfterViewInit, Component, EventEmitter, Output, ViewChild, Input, ChangeDetectionStrategy, ElementRef} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
-import {Observable, Subscription } from 'rxjs';
+import {Observable } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { Instruments, instrumentCorpActions, instrumentDetails, moexBoard } from 'src/app/models/instruments.interfaces';
@@ -17,8 +17,9 @@ import { formatNumber } from '@angular/common';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import { AuthService } from 'src/app/services/auth.service';
-import { InstrumentDataService } from 'src/app/services/instrument-data.service';
+import { InstrumentDataService, instrumentsSearchParams } from 'src/app/services/instrument-data.service';
 import { marketDataSources } from 'src/app/models/interfaces.model';
+import { MatOptionSelectionChange } from '@angular/material/core';
 @Component({
   selector: 'app-app-instrument-table',
   
@@ -55,10 +56,8 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild('filterALL', { static: false }) filterALL: ElementRef;
-
   @Output() public modal_principal_parent = new EventEmitter();
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
-  
   ;
   panelOpenStateSecond = false;
   instrumentDetailsArr:instrumentDetails[] = [];
@@ -72,8 +71,8 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
   searchParametersFG: FormGroup;
   boardsOne = new FormControl('');
   dialogInstrumentModify: MatDialogRef<AppInvInstrumentModifyFormComponent>;
-  defaultFilterPredicate?: (data: any, filter: string) => boolean;
-  secidfilter?: (data: any, filter: string) => boolean;
+  defaultFilterPredicate?: (data: Instruments, filter: string) => boolean;
+  secidfilter?: (data: Instruments, filter: string) => boolean;
   selectedRow: Instruments;
   constructor(
     private MarketDataService: AppMarketDataService,
@@ -90,8 +89,6 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.searchParametersFG = this.fb.group ({
       secidList: null,
-      MP:null,
-      amount:{value:null, disabled:true},
       marketSource : {value:null, disabled:false},
       boards : {value:null, disabled:false}
     });
@@ -119,7 +116,7 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
      this.dataSource.sort = this.sort;
     })
   }
-  openInstrumentModifyForm (action:string, element:any) {
+  openInstrumentModifyForm (action:string, element:Instruments) {
     this.dialogInstrumentModify = this.dialog.open (AppInvInstrumentModifyFormComponent,{minHeight:'600px', minWidth:'800px', maxWidth:'60vw', autoFocus: false, maxHeight: '90vh'})
     this.dialogInstrumentModify.componentInstance.moexBoards = this.boardIDs;
     this.dialogInstrumentModify.componentInstance.action = action;
@@ -148,10 +145,10 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
     this.dataSource.filterPredicate = function(data, filter: string): boolean {return data.secid.toLowerCase().includes(filter)};
     this.secidfilter = this.dataSource.filterPredicate;
   }
-  applyFilter(event: any, col?:string) {
+  applyFilter(event: MatOptionSelectionChange|KeyboardEvent, col?:string) {
     this.dataSource.filterPredicate = col === undefined? this.defaultFilterPredicate : this.secidfilter
-    const filterValue = event.hasOwnProperty('isUserInput')?  event.source.value :  (event.target as HTMLInputElement).value 
-    !event.hasOwnProperty('isUserInput') || event.isUserInput ? this.dataSource.filter = filterValue.trim().toLowerCase() : null;
+    const filterValue = event.hasOwnProperty('isUserInput')?  (event as MatOptionSelectionChange).source.value :  ((event as KeyboardEvent).target as HTMLInputElement).value 
+    !event.hasOwnProperty('isUserInput') || (event as MatOptionSelectionChange).isUserInput ? this.dataSource.filter = filterValue.trim().toLowerCase() : null;
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
   changedValueofChip (value:string) {
@@ -167,8 +164,7 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
     (index >= 0)? this.instruments.splice(index, 1) : null;
   }
   clearAll(event) {event.target.textContent.trim() === 'ClearAll cancel'? this.instruments = ['ClearAll']: null}
-  addChips (el: any, column: string) {(['accountNo'].includes(column))? this.instruments.push(el):null;}
-  updateFilter (el: any) {
+  updateFilter (el: string) {
     this.filterALL.nativeElement.value = el;
     this.dataSource.filter = el.trim();
     (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
@@ -178,14 +174,13 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
     this.dataSource.filter = ''
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
   }
-  async submitQuery () {
-    return new Promise((resolve, reject) => {
+  submitQuery () {
       this.dataSource.data? this.dataSource.data = null : null;
-      let searchObj = {};
+      let searchObj = <instrumentsSearchParams>{};
       let instrumentsList = [];
       this.instruments.indexOf('ClearAll') !== -1? this.instruments.splice(this.instruments.indexOf('ClearAll'),1) : null;
       this.instruments.length===1? instrumentsList = [...this.instruments,...this.instruments]: instrumentsList = this.instruments;
-      this.instruments.length? Object.assign (searchObj , {'secid': instrumentsList}): null;
+      this.instruments.length? Object.assign (searchObj , {'secid': instrumentsList.map(el=>(el as string).toUpperCase()) }): null;
       this.marketSource.value != null&&this.marketSource.value.length !=0? Object.assign (searchObj , {'sourcecode': this.marketSource.value}): null;
       this.boards.value != null&&this.boards.value.length !=0? Object.assign (searchObj , {'boardid': this.boards.value}): null;
       this.InstrumentDataS.getMoexInstruments(undefined,this.FormMode==='ChartMode'? 'secid ASC':undefined,searchObj).subscribe(data => {
@@ -194,16 +189,13 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
         this.dataSource.sort = this.sort;
         this.instruments.unshift('ClearAll')
         this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ');
-        resolve(data) 
       });
-    });
   }
   toggleAllSelection(elem:string, allSelected: boolean) {
     allSelected? this.searchParametersFG.get(elem).patchValue(
       elem==='marketSource'? [...this.marketSources.map(item => item.segments.map(el => el.sourceCode)),0].flat() : [...this.boardIDs.map(item => item.boardid
     ), 0]) : this.searchParametersFG.get(elem).patchValue([]);
   }
-   
   selectInstrument (element:Instruments) {this.modal_principal_parent.emit(element)}
   exportToExcel() {this.HandlingCommonTasksS.exportToExcel (this.dataSource.data,"instrumentData")  }
   get  marketSource () {return this.searchParametersFG.get('marketSource') } 

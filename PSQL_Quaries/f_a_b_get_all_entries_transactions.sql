@@ -9,13 +9,9 @@ CREATE OR REPLACE FUNCTION public.f_a_b_get_all_entries_transactions(
 	p_portfolio_code text[],
 	p_account text[],
 	p_idtrade numeric,
-	entriesids numeric[])
-    RETURNS TABLE(d_portfolioname character varying, idportfolio bigint, "d_transactionType" text, t_id bigint, "t_entryDetails" character varying, "t_ledgerNoId" bigint, "t_accountId" bigint, "t_dataTime" timestamp without time zone, "t_extTransactionId" bigint,
-				  t_idtrade numeric, "t_amountTransaction" numeric, "t_XactTypeCode" bigint, "t_XactTypeCode_Ext" bigint,
-				  "d_entryDetails" text, "d_Debit" character varying, "d_Credit" character varying, "d_ledgerNo" character varying,
-				  "d_accountNo" character varying, "d_xActTypeCodeExtName" character,
-				 d_manual_edit_forbidden boolean
-				 ) 
+	entriesids numeric[],
+	p_external_id numeric)
+    RETURNS TABLE(d_portfolioname character varying, idportfolio bigint, "d_transactionType" text, t_id bigint, "t_entryDetails" character varying, "t_ledgerNoId" bigint, "t_accountId" bigint, "t_dataTime" timestamp without time zone, "t_extTransactionId" bigint, t_idtrade numeric, "t_amountTransaction" numeric, "t_XactTypeCode" bigint, "t_XactTypeCode_Ext" bigint, "d_entryDetails" text, "d_Debit" character varying, "d_Credit" character varying, "d_ledgerNo" character varying, "d_accountNo" character varying, "d_xActTypeCodeExtName" character, d_manual_edit_forbidden boolean) 
     LANGUAGE 'plpgsql'
     COST 100
     VOLATILE PARALLEL UNSAFE
@@ -59,6 +55,7 @@ WITH account_entries AS (
 	  WHERE (p_start_date ISNULL OR  "dataTime"::date >= p_start_date::date)
 		AND (p_end_date ISNULL OR  "dataTime"::date <= p_end_date::date)
 		AND (p_idtrade ISNULL OR  "bAccountTransaction".idtrade = p_idtrade)
+		AND (p_external_id ISNULL OR  "bAccountTransaction"."extTransactionId" = p_external_id)
 		AND (p_entry_types ISNULL OR  "bAccountTransaction"."XactTypeCode_Ext" =ANY(p_entry_types))
 		AND (entriesIds ISNULL OR  "bAccountTransaction"."id" =ANY(entriesIds))
 		AND (p_account ISNULL OR (
@@ -93,6 +90,7 @@ WITH account_entries AS (
 	  WHERE (p_start_date ISNULL OR  "dateTime"::date >= p_start_date::date)
 		AND (p_end_date ISNULL OR "dateTime"::date <= p_end_date::date)
 		AND (p_idtrade ISNULL OR "bLedgerTransactions".idtrade = p_idtrade)
+		AND (p_external_id ISNULL OR  "bLedgerTransactions"."extTransactionId" = p_external_id)
 		AND (p_entry_types ISNULL OR  "bLedgerTransactions"."XactTypeCode_Ext" =ANY(p_entry_types))
 		AND (entriesIds ISNULL OR  "bLedgerTransactions"."id" =ANY(entriesIds))
 		AND (p_account ISNULL OR (
@@ -131,5 +129,5 @@ ORDER BY entries."t_dataTime" DESC,entries."t_amountTransaction" DESC;
 END;
 $BODY$;
 
-ALTER FUNCTION public.f_a_b_get_all_entries_transactions(date, date, numeric[], text[], text[], numeric, numeric[])
+ALTER FUNCTION public.f_a_b_get_all_entries_transactions(date, date, numeric[], text[], text[], numeric, numeric[],numeric)
     OWNER TO postgres;

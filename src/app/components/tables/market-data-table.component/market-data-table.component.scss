@@ -1,30 +1,30 @@
 .example-section {
-  margin: 12px 1%;
+ margin-left:  1%;
 }
 .marketSource-margin {
-  margin: 0 12px;
+  margin-left: 0.4%;
+  color: black;
 }
 ul {
   list-style-type: none;
   margin-top: 4px;
 }
-.mat-flat-button {
-  font-size: 18px;
-}
-.icon_search {
-  color: rgb(143, 140, 239);
-  transform: scale(1.3) !important
-}
+.mat-form-field {
+  font-size: 20px;
+  border-radius: 9px;
+  width: 400px;
+  background-color: var(--formFieldLightGray);
+  margin: 10px;
+  padding:10px;
+  }
+
 .first-expansion .mat-expansion-panel-header-description {
   justify-content: space-between;
   align-items: center;
-  // color:rgb(19, 55, 132);
   font-size: 18px;
 }
 .first-expansion {
-  // background-color:  #807f7f;
   color: rgb(166, 163, 163);
-
 }
 .first-expansion  .mat-expansion-panel-header-title {
   justify-content: space-between;
@@ -33,7 +33,7 @@ ul {
   font-size: 20px;
 }
 .headers-align  .mat-expansion-panel-header {
-  background-color: #504f4f;
+  background-color: #282828;
 }
 .headers-align .mat-expansion-panel-header-description {
   justify-content: space-between;

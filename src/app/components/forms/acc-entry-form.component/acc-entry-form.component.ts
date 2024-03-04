@@ -7,20 +7,17 @@ import { cFormValidationLog } from 'src/app/models/interfaces.model';
 import { AppTableAccLedgerAccountsComponent } from '../../tables/acc-accounts-ledger-table.component/acc-accounts-ledger-table.component';
 import { AppTableAccAccountsComponent } from '../../tables/acc-accounts-table.component/acc-accounts-table.component';
 import { COMMA, ENTER} from '@angular/cdk/keycodes';
-import { distinctUntilChanged, filter, Subject, Subscription } from 'rxjs';
+import { distinctUntilChanged, filter, Subscription } from 'rxjs';
 import { LogProcessingService } from 'src/app/services/log-processing.service';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
-import { indexDBService } from 'src/app/services/indexDB.service';
-import { bcTransactionType_Ext } from 'src/app/models/accountng-intefaces.model';
+import { bAccountTransaction, bLedgerTransaction, bcTransactionType_Ext } from 'src/app/models/accountng-intefaces.model';
+import { AccountingSchemesService } from 'src/app/services/accounting-schemes.service';
 @Component({
   selector: 'app-acc-entry-modify-form',
   templateUrl: './acc-entry-form.component.html',
   styleUrls: ['./acc-entry-form.component.scss'],
 })
 export class AppAccEntryModifyFormComponent {
-lg(arg0: string) {
-console.log(arg0);
-}
   TransactionTypes: bcTransactionType_Ext[] = [];
   panelOpenState = true;
   actionType : string;
@@ -39,7 +36,6 @@ console.log(arg0);
   validatorAccountOverdraft :AsyncValidatorFn;
   validatorCorrectLedgerLLAccountNo: AsyncValidatorFn;
   validationsToSkip: string[] = [];
-  
   validatorsLogDescription = {
     'd_accountNo':'Account Number',
     'd_ledgerNo':'Ledger Number'
@@ -49,11 +45,10 @@ console.log(arg0);
   pendingStatusAP: boolean = false
   statusArray: string[] =[]
   
-  private sbSTPCreateEntry$: Subscription;
   private formStatusChange$: Subscription;
   private accountIDchanges$ :Subscription; 
   private ledgerIDchanges$ :Subscription; 
-  private expectedBalance$: Subscription;
+  private subscriptions = new Subscription ();
   setupDone: boolean = false;
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
   constructor (
@@ -62,7 +57,8 @@ console.log(arg0);
     private LogService:LogProcessingService,
     private CommonDialogsService:HadlingCommonDialogsService,
     private dialog: MatDialog, 
-    private indexDBServiceS:indexDBService,    
+    private AccountingSchemesService:AccountingSchemesService,
+   
   ) 
   {
     this.entryModifyForm = this.fb.group ({
@@ -85,7 +81,8 @@ console.log(arg0);
       d_closingLedgerBalance: {value:null, disabled: false},
       t_idtrade: {value:null, disabled: false} 
     })    
-    this.indexDBServiceS.getIndexDBStaticTables('bcTransactionType_Ext').subscribe (data =>this.TransactionTypes = (data.data as bcTransactionType_Ext[]));
+    this.AccountingSchemesService.subjectTransactionTypePipe.next(null);
+    this.subscriptions.add(this.AccountingSchemesService.receiveTransactionTypesReady().subscribe(data=>this.TransactionTypes=data.data))
   }
   async AddAsyncValidators (overdraftOverride:boolean, updateValidators:boolean=false) {
     if (this.FirstOpenedAccountingDate !=null) {
@@ -126,36 +123,36 @@ console.log(arg0);
     this.accountNo.updateValueAndValidity()
   }
   ngOnInit(): void {
-    this.Ref? console.log('ngOnInit',this.Ref): null;
-    this.sbSTPCreateEntry$ = this.AccountingDataService.getEntryDraft().pipe(filter(entryData => entryData.refTransaction === this.Ref)).subscribe (entryData=> {
-      this.setupDone=true;
-      this.pendingStatusAP=false;
-      this.errorLogAutoProcessing=[];
-      this.statusArray=[];
-      this.action='Create';
-      this.accountIDchanges$? this.accountIDchanges$.unsubscribe() :null;
-      this.ledgerIDchanges$? this.ledgerIDchanges$.unsubscribe() : null;
-      this.clearAsyncValidators();
-      let updateValidators = this.data? true : false;
-      this.entryModifyForm.reset();
-      this.entryModifyForm.markAsPending();
-      this.data = entryData.entryDraft;
-      this.data['t_id'] = 0;
-      if (entryData.autoProcessing === true) {
-        this.autoProcessingState = true;
-        this.formStatusChange$=this.entryModifyForm.statusChanges.pipe(distinctUntilChanged()).subscribe(result=>{
-          if (result==='PENDING') {
-            this.pendingStatusAP = true;
-            setTimeout (()=> (<EventEmitter<any>> this.entryModifyForm.statusChanges).emit(this.entryModifyForm.status),500);
-          }
-          result==='VALID' && this.pendingStatusAP?  this.updateEntryData('Create', false) : null;   
-          result==='INVALID' && this.statusArray.length>0 ? this.getFormValidationErrors('full', this.Ref) : null; 
-          this.statusArray.push(result);
-        })
-      };
-      this.formInitialSetup(entryData.overRideOverdraft, updateValidators);
-
-    }) 
+    this.subscriptions.add (
+      this.AccountingDataService.getEntryDraft().pipe(filter(entryData => entryData.refTransaction === this.Ref)).subscribe (entryData=> {
+        this.setupDone=true;
+        this.pendingStatusAP=false;
+        this.errorLogAutoProcessing=[];
+        this.statusArray=[];
+        this.action='Create';
+        this.accountIDchanges$? this.accountIDchanges$.unsubscribe() :null;
+        this.ledgerIDchanges$? this.ledgerIDchanges$.unsubscribe() : null;
+        this.clearAsyncValidators();
+        let updateValidators = this.data? true : false;
+        this.entryModifyForm.reset();
+        this.entryModifyForm.markAsPending();
+        this.data = entryData.entryDraft;
+        this.data['t_id'] = 0;
+        if (entryData.autoProcessing === true) {
+          this.autoProcessingState = true;
+          this.formStatusChange$=this.entryModifyForm.statusChanges.pipe(distinctUntilChanged()).subscribe(result=>{
+            if (result==='PENDING') {
+              this.pendingStatusAP = true;
+              setTimeout (()=> (<EventEmitter<any>> this.entryModifyForm.statusChanges).emit(this.entryModifyForm.status),500);
+            }
+            result==='VALID' && this.pendingStatusAP?  this.updateEntryData('Create', false) : null;   
+            result==='INVALID' && this.statusArray.length>0 ? this.getFormValidationErrors('full', this.Ref) : null; 
+            this.statusArray.push(result);
+          })
+        };
+        this.formInitialSetup(entryData.overRideOverdraft, updateValidators);
+      }) 
+    )
   }
   ngAfterViewInit(): void {
     this.data? this.formInitialSetup() :null;
@@ -165,12 +162,9 @@ console.log(arg0);
     }; 
   }
   ngOnDestroy(): void {
-    this.Ref? console.log('ngOnDestroy',this.Ref): null;
     this.accountIDchanges$? this.accountIDchanges$.unsubscribe() :null;
     this.ledgerIDchanges$? this.ledgerIDchanges$.unsubscribe() : null;
     this.formStatusChange$? this.formStatusChange$.unsubscribe() : null;
-    this.sbSTPCreateEntry$? this.sbSTPCreateEntry$.unsubscribe() : null;
-    this.expectedBalance$? this.expectedBalance$.unsubscribe() : null;
   }
   updateExpectedBalance (accountTypeEntryType:string) {
     switch (accountTypeEntryType) {
@@ -301,7 +295,7 @@ console.log(arg0);
   }
   updateEntryData (action:string, reloadEntryList:boolean=true){
     let newDate = new Date(this.dataTime.value);
-    let dataForUpdate = {};
+    let dataForUpdate:unknown= {};
     let renameFieldsForLL = [['ledgerNoId','ledgerID_Debit'],['dataTime','dateTime'],['accountId','ledgerID'],['amountTransaction','amount']];
     Object.entries(this.entryModifyForm.value).forEach(([key, value])=>Object.assign(dataForUpdate,{[key.substring(2)]: value}));
     dataForUpdate['dataTime'] = newDate.toLocaleDateString();
@@ -311,25 +305,25 @@ console.log(arg0);
       case 'Create_Example':
       case 'Create':
         if (this.d_transactionType.value === 'AL') { 
-         this.AccountingDataService.updateEntryAccountAccounting (dataForUpdate,'Create',).subscribe (result => this.updateResultHandler(result,'Created',this.entryModifyForm.value, reloadEntryList))
+         this.AccountingDataService.updateEntryAccountAccounting (dataForUpdate as bAccountTransaction,'Create',).subscribe (result => this.updateResultHandler(result,'Created',this.entryModifyForm.value, reloadEntryList))
         } else {
-         this.AccountingDataService.updateLLEntryAccountAccounting (dataForUpdate,'Create').subscribe (result => this.updateResultHandler(result, 'Created',this.entryModifyForm.value,reloadEntryList))
+         this.AccountingDataService.updateLLEntryAccountAccounting (dataForUpdate as bLedgerTransaction,'Create').subscribe (result => this.updateResultHandler(result, 'Created',this.entryModifyForm.value,reloadEntryList))
         }
       break;
       case 'Edit':
         if (this.d_transactionType.value === 'AL') { 
-          this.AccountingDataService.updateEntryAccountAccounting (dataForUpdate,'Edit').subscribe (result => this.updateResultHandler(result,'Updated'))
+          this.AccountingDataService.updateEntryAccountAccounting (dataForUpdate as bAccountTransaction,'Edit').subscribe (result => this.updateResultHandler(result,'Updated'))
          } else {
-          this.AccountingDataService.updateLLEntryAccountAccounting (dataForUpdate,'Edit').subscribe (result => this.updateResultHandler(result,'Updated'))
+          this.AccountingDataService.updateLLEntryAccountAccounting (dataForUpdate as bLedgerTransaction,'Edit').subscribe (result => this.updateResultHandler(result,'Updated'))
          }
       break;
       case 'Delete':
         this.CommonDialogsService.confirmDialog('Delete Entry '+ this.id.value).subscribe(action => {
           if (action.isConfirmed===true) {
             if (this.d_transactionType.value === 'AL') { 
-              this.AccountingDataService.updateEntryAccountAccounting (dataForUpdate,'Delete').subscribe ((result) => this.updateResultHandler(result,'Deleted'))
+              this.AccountingDataService.updateEntryAccountAccounting (dataForUpdate as bAccountTransaction,'Delete').subscribe ((result) => this.updateResultHandler(result,'Deleted'))
             } else {
-              this.AccountingDataService.updateLLEntryAccountAccounting (dataForUpdate,'Delete').subscribe ((result) => this.updateResultHandler(result,'Deleted'))
+              this.AccountingDataService.updateLLEntryAccountAccounting (dataForUpdate as bLedgerTransaction,'Delete').subscribe ((result) => this.updateResultHandler(result,'Deleted'))
             }
           }
         })

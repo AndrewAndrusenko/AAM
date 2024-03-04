@@ -96,7 +96,7 @@ async function fGetAccountingData (request,response) {
         'LEFT JOIN "bcAccountType_Ext" ON "bcAccountType_Ext"."accountType_Ext" = "bLedger"."accountTypeID" ;'
     break;
     case 'GetAccountsEntriesListAccounting':
-      query.text = 'SELECT *,0 as action FROM f_a_b_get_all_entries_transactions (${dateRangeStart},${dateRangeEnd},${entryTypes:raw},${portfolioCodes},${noAccountLedger}, ${idtrade:raw},${entriesIds:raw});';
+      query.text = 'SELECT *,0 as action FROM f_a_b_get_all_entries_transactions (${dateRangeStart},${dateRangeEnd},${entryTypes:raw},${portfolioCodes},${noAccountLedger}, ${idtrade:raw},${entriesIds:raw},${externalId:raw});';
       request = db_common_api.getTransformArrayParam(request,['entryTypes','entriesIds']);
     break;
     case 'GetBalanceDatePerPorfoliosOnData':
@@ -287,7 +287,6 @@ async function GetEntryScheme (request, response) {
           break;
           
         }
-        console.log(sql);
         db_common_api.queryExecute(sql,response,null,'STP_Get Entry Scheme');
       } else {
         response.status(200).json([])
@@ -295,11 +294,11 @@ async function GetEntryScheme (request, response) {
     }
   })
 }
-async function fCreateEntryAccountingInsertRow (request, response) {
+/* async function fCreateEntryAccountingInsertRow (request, response) {
     fields = Object.keys(request.body.data).map(filed => `"${filed}"`).join()
     let sqlText = 'INSERT INTO public."bAccountTransaction" '+'('+fields+')'+' VALUES ('+Object.values(request.body.data).map(value =>`'${value}'`).join() + ');';
     db_common_api.queryExecute(sqlText,response,'STP_f Create Entry Accounting InsertRow')
-}
+} */
 async function faccountingOverdraftAccountCheck (request, response) {
   let sqlText = 'SELECT "accountId", "openingBalance", CAST ("closingBalance" AS NUMERIC) AS "closingBalance", "closingBalance" AS "EndBalance"'+
   'FROM f_checkoverdraftbyaccountandbydate'+
@@ -327,7 +326,7 @@ module.exports = {
   fGetMT950Transactions,
   fGetAccountingData,
   GetEntryScheme,
-  fCreateEntryAccountingInsertRow,
+  // fCreateEntryAccountingInsertRow,
   fUpdateAccountAccounting,
   fUpdateLedgerAccountAccounting,
   fUpdateLLEntryAccounting,

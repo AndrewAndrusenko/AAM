@@ -18,9 +18,7 @@ export class AccountingSchemesService {
     private http:HttpClient,
     private indexDBService: indexDBService
   ) 
-  {
-
-    this.subjectTransactionTypePipe.pipe (
+  { this.subjectTransactionTypePipe.pipe (
       exhaustMap(()=>this.indexDBService.getIndexDBStaticTables('bcTransactionType_Ext')),
     ).subscribe(data => {
       this.sendTransactionTypesReady({key:data.code, data:(data.data as bcTransactionType_Ext[])});

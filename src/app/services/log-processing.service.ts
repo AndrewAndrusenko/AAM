@@ -7,8 +7,8 @@ import { cFormValidationLog } from '../models/interfaces.model';
   providedIn: 'root'
 })
 export class LogProcessingService {
-  private subjectErrorLogObject= new Subject<any>();
-  private subjectCreatedtLogObject = new Subject<any>();
+  private subjectErrorLogObject= new Subject<cFormValidationLog[]>();
+  private subjectCreatedtLogObject = new Subject<bAccountsEntriesList>();
 
   constructor() { }
 

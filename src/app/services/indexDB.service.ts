@@ -52,7 +52,7 @@ export class indexDBService {
   }
   getIndexDBStaticTables (key:string):Observable<cacheAAM> {
     return (this.dbService.getByIndex('AAMCache','code',key) as Observable<cacheAAM>).pipe (
-     switchMap(cachedData=> cachedData? of(cachedData) : this.fetchDataFromDb(key).pipe(switchMap(data=>this.indexidCacheData(key,data)))) 
+      switchMap(cachedData=> cachedData? of(cachedData) : this.fetchDataFromDb(key).pipe(switchMap(data=>this.indexidCacheData(key,data))))
     )
   }
   fetchDataFromDb (key:string): Observable<cachedDataType> {

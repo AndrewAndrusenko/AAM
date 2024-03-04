@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
+    "local_tunnel":"ng serve --open --host localhost --port 4200 --disable-host-check",
     "start": "ng serve",
     "server": "node server",
     "build": "ng build",

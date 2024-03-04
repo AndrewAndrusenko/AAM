@@ -213,17 +213,7 @@ export class AppaInvPortfolioPositionTableComponent {
   exportToExcel() {
     let numberFields=['notnull_npv','mtm_positon_base_cur','npv','total_pl','roi','pl','unrealizedpl','cost_in_position','idportfolio','fact_weight','current_balance','mtm_positon','weight','planned_position','order_amount','order_qty','mtm_rate','cross_rate','mtm_dirty_price','pl'];
     let dateFields=['mtm_date','rate_date'];
-    let dataToExport =  this.dataSource.data.map(el=>{
-      Object.keys(el).forEach(key=>{
-        switch (true==true) {
-          case  numberFields.includes(key): return el[key]=Number(el[key]) ;
-          case dateFields.includes(key): return el[key]=new Date(el[key])
-          default: return el[key]=el[key]
-        }
-      })
-      return el;
-    });
-    this.HandlingCommonTasksS.exportToExcel (dataToExport,"positionsData");  
+    this.HandlingCommonTasksS.exportToExcel (this.dataSource.data,"positionsData",numberFields,dateFields);  
   }
   get  idportfolios () {return this.searchParametersFG.get('idportfolios') } 
   get  report_date () {return this.searchParametersFG.get('report_date') } 

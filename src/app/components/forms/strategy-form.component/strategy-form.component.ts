@@ -86,7 +86,7 @@ export class AppStrategyFormComponent {
       this.CommonDialogsService.snackResultHandler(result)
     } else {
       this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' strategy'}, action)
-      this.InvestmentDataService.sendReloadStrategyList (this.editStrategyForm.controls['id']);
+      this.InvestmentDataService.sendReloadStrategyList (this.id.value );
     }
     ['Edit','Delete'].includes(this.action)? this.dialog.closeAll() : null;
   }

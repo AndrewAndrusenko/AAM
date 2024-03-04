@@ -182,7 +182,10 @@ export interface marketSourceSegements {
     'history.colums': string,
     'iss.json':string,
     'iss.meta':string,
-    start: number
+    start: number,
+    date_from?: string,
+    date_to?:string,
+    symbols?:string
   }
 }
 export interface marketDataSources {

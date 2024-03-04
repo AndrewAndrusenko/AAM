@@ -1,15 +1,91 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, forkJoin, map, of, switchMap, tap } from 'rxjs';
 import { InstrumentsMapCodes, marketData, marketDataSources, marketSourceSegements } from '../models/interfaces.model';
+import { HadlingCommonDialogsService } from './hadling-common-dialogs.service';
+interface marketDataCheck {
+  sourcecode :string,
+  count:number
+}
+export interface marketDateLoaded {
+  'Source':string,
+  'Total rows loaded - ' : number,
+  'Total rows fetched from source - ': number,
+  'Date': string
+}
+export interface logLoadingState {
+  Message:string,
+  State:string
+}
+interface moexIssDataObject {
+  history: moexIssDataHistory[],
+  'history.cursor':{ 
+    INDEX: number, 
+    TOTAL: number, 
+    PAGESIZE: number
+  }[]
+}
+interface moexIssDataHistory {
+  ADMITTEDQUOTE: number,
+  ADMITTEDVALUE: number,
+  BOARDID: string,
+  CLOSE: number,
+  HIGH: number,
+  LEGALCLOSEPRICE: number,
+  LOW: number,
+  MARKETPRICE2: number,
+  MARKETPRICE3: number,
+  MARKETPRICE3TRADESVALUE: number,
+  MP2VALTRD: number,
+  NUMTRADES: number,
+  OPEN: number,
+  SECID: string,
+  TRADEDATE: string,
+  TRADINGSESSION: number,
+  VALUE: number,
+  VOLUME: number,
+  WAPRICE: number,
+  WAVAL: number
+}
+interface MarketStackObject {
+  data: MarketStackData[],
+  pagination: {
+  limit: number,
+  offset: number,
+  count: number,
+  total: number
+}
+}
+interface MarketStackData {
+    open: number,
+    high: number,
+    low: number,
+    close: number,
+    volume: number,
+    adj_high: number,
+    adj_low: number,
+    adj_close: number,
+    adj_open: number,
+    adj_volume: number,
+    split_factor: number,
+    dividend: number,
+    symbol: string,
+    exchange: string,
+    date: string
+}
+type uploadMarketDataFunc = (ourceCodes:marketSourceSegements[],dateToLoad: string) => Observable<
+{dataLoaded: marketDateLoaded[],deletedRows:number,state:logLoadingState}>;
 @Injectable({
   providedIn: 'root'
 })
 export class AppMarketDataService {
   private subjectMarketData = new Subject<marketData[]> ()
   private subjectCharMarketData = new Subject<marketData[]> ()
-
-  constructor(private http:HttpClient) { }
+  private deletedMarketDataRows:number;
+  constructor(
+    private http:HttpClient,
+    private CommonDialogsService:HadlingCommonDialogsService,
+    ) { }
   calculateMA(dayCount:number, data:number[]) {
     let result = [];
     for (let i = 0, len = data.length; i < len; i++) {
@@ -25,90 +101,90 @@ export class AppMarketDataService {
     }
     return result;
   }
-  checkLoadedMarketData (sourceCodes:string[],dateToLoad: string):Observable<any[]> {
-   const params = {'sourcecodes':sourceCodes,'dateToLoad':dateToLoad,'Action':'checkLoadedMarketData' }
-   return this.http.get <any[]>('/api/AAM/MD/getMarketData/', { params: params} )
-  }
-  deleteOldMarketData (sourceCodes:string[],dateToLoad: string) { 
-   const params = {'sourcecodes':sourceCodes,'dateToLoad':dateToLoad }
-    return this.http.post ('/api/AAM/MD/deleteMarketData/',{ params: params} ).toPromise()
-  }
-  async loadMarketDataMOEXiss (sourceCodes:marketSourceSegements[],dateToLoad: string)  {
-    let logMarketDateLoading = []
+  uploadMarketData( dateToLoad: string, sourcesData:marketSourceSegements[], replaceCurrentData:boolean) :
+  Observable<{dataLoaded: marketDateLoaded[],deletedRows:number,state:logLoadingState}>{
+    let functionToLoadData:uploadMarketDataFunc
+    switch (sourcesData[0].sourceGlobal) {
+      case 'marketstack.com':
+        functionToLoadData = this.loadMarketDataMarketStack.bind(this)
+      break;
+      case 'iss.moex.com':
+        functionToLoadData = this.loadMarketDataMOEXiss.bind(this)
+      break;
+    }
+    let loadingDataState:logLoadingState = {Message : 'Loading', State: 'Pending'}
+    let sourceCodesArray:string[] = sourcesData.map(el=>{return el.sourceCode})
+    return this.checkLoadedMarketData (sourceCodesArray,dateToLoad).pipe(
+      tap(checkData=>replaceCurrentData===false&&checkData.length>0? loadingDataState = {Message:'Loading terminated. Data have been already loaded!', State : 'terminated'}:null),
+      switchMap(checkData=>replaceCurrentData&&checkData.length>0?  this.CommonDialogsService.confirmDialog('Delete all data for codes: ' + sourceCodesArray):of({action: null,isConfirmed: null, buttonLabel: null})),
+      tap(confirm=>confirm.isConfirmed===false? loadingDataState = {Message: 'Loading has been canceled.', State: 'terminated'}:null),
+      switchMap(confirm=>confirm.isConfirmed===true? this.deleteOldMarketData(sourceCodesArray, dateToLoad):of({deletedRows:0})),
+      tap(deletedRows=>this.deletedMarketDataRows =deletedRows.deletedRows),
+      switchMap(()=>loadingDataState.State==='Pending'? functionToLoadData(sourcesData, dateToLoad)
+          :of({ dataLoaded: [], deletedRows: 0,state:loadingDataState}))
+    )
+  } 
+  loadMarketDataMOEXiss (sourceCodes:marketSourceSegements[],dateToLoad: string):Observable<{dataLoaded: marketDateLoaded[],deletedRows:number,state:logLoadingState}>  {
+    let uploadStreams :Observable<marketDateLoaded>[]=[];
     sourceCodes.forEach(source => {
-      let currentPosition = 0;
       let totalRows = 0;
-      let pageSize = 100;  
+      let getIssMoexStreams :Observable<moexIssDataObject[]>[]=[];
       let params = source.params;
-      params['date'] = dateToLoad;
-      params['start'] = 0;
-      let totalLoad = 0;
-      Object.assign(params, {'iss.only':'history.cursor'})
-      delete params['iss.only']
-      return this.http.get (source.sourceURL, {params:params} ).subscribe (marketData => {
-        currentPosition = marketData[1]['history.cursor'][0]['INDEX'];
-        pageSize = marketData[1]['history.cursor'][0]['PAGESIZE'];
-        totalRows = marketData[1]['history.cursor'][0]['TOTAL'];
-        for (let index = 0; index <= totalRows; index=index + pageSize) {
-          params['start'] = index;
-          this.http.get (source.sourceURL, {params:params} ).subscribe (marketData => {
-          return this.insertMarketData (marketData[1]['history'],source.sourceCode,'MOEXiss').subscribe((rowLoaded) =>{
-            totalLoad=totalLoad + rowLoaded
-            if (totalLoad>=totalRows) {
-              source.checked = false;
-              logMarketDateLoading.push ({
-              'Source':'MOEXiss - '+ source.sourceCode,
-              'Total rows loaded - ' : totalLoad,
-              'Total rows fetched from source - ': totalRows,
-              'Date': dateToLoad});
-              let updone = sourceCodes.reduce((acc,val)=>+val.checked+acc,0)
-              updone? null: this.getMarketData().subscribe (marketData => {
-                this.sendReloadMarketData (marketData)});
-              
-            }
-            return logMarketDateLoading
-          })
-          })
-        }
-      })
-    });
-    return logMarketDateLoading;
+      params.date = dateToLoad;
+      params.start = 0;
+      uploadStreams.push(
+      this.http.get <moexIssDataObject[]> (source.sourceURL, {params:params}).pipe(
+        tap (marketData=>{
+          totalRows = marketData[1]['history.cursor'][0].TOTAL;
+          for (let index = 0; index <= totalRows; index=index + marketData[1]['history.cursor'][0].PAGESIZE) {
+            params.start = index;
+            getIssMoexStreams.push(this.http.get <moexIssDataObject[]>(source.sourceURL, {params:params}))
+          }
+        }),
+        switchMap(()=>forkJoin(getIssMoexStreams)),
+        map(dataIssMoex=>dataIssMoex.map(el=>{return el[1].history.flat()}).flat()),
+        switchMap(dataIssMoex=> this.insertMarketData (dataIssMoex,source.sourceCode,'MOEXiss')),
+        switchMap(inserted=>of({'Source':'MOEXiss - '+ source.sourceCode,'Total rows loaded - ' : inserted,'Total rows fetched from source - ': totalRows,'Date': dateToLoad}))
+      ))
+     })
+    return forkJoin(uploadStreams).pipe(
+      map(data=>({
+          dataLoaded:data, 
+          deletedRows: this.deletedMarketDataRows,
+          state:{Message:'Loaded',State:'Success'}
+        })));
   }
-  loadMarketDataMarketStack (sourceCodes:marketSourceSegements[],dateToLoad: string): any[]  {
-    let logMarketDateLoading = []
+  loadMarketDataMarketStack (sourceCodes:marketSourceSegements[],dateToLoad: string):Observable<{dataLoaded: marketDateLoaded[],deletedRows:number,state:logLoadingState}>  {
+    let uploadStreams :Observable<marketDateLoaded>[]=[];
     sourceCodes.forEach(source => {
-      this.getInstrumentsCodes('msFS',true).subscribe(codesList => {
-        let List = codesList[0].code
-        let firstPosition=0;
-        let index = 0;
-        let slicedCodesList = []
-        do {
-          let params = source.params;
-          params['date_from'] = dateToLoad;
-          params['date_to'] = dateToLoad;
-          firstPosition=index;
-          index = index+99 > List.length? List.length: index+99
-          slicedCodesList.push(List.slice(firstPosition,index).join())
-          params['symbols'] = slicedCodesList[slicedCodesList.length-1];
-          this.http.get <any[]> (source.sourceURL, {params:params} ).subscribe (marketData => {
-            return this.insertMarketData (marketData['data'],source.sourceCode,'MScom').subscribe((rowLoaded) =>{
-              source.checked = false;
-              logMarketDateLoading.push ({
-                'Source':'Marketstack - '+ source.sourceCode,
-                'Total rows loaded - ' : rowLoaded,
-                'Total rows fetched from source - ': marketData.length,
-                'Date': dateToLoad
-              });
-              this.getMarketData().subscribe (marketData => this.sendReloadMarketData (marketData)); 
-              return logMarketDateLoading = marketData
-            })
-          }) 
-        } while (index < List.length);
-      })
+      let totalRows = 0;
+      let params = source.params;
+      params.date_from = dateToLoad;
+      params.date_to = dateToLoad;
+      uploadStreams.push(
+      this.getInstrumentsCodes('msFS',true).pipe(
+        tap(codes=>params.symbols=codes[0].code.join()),
+        switchMap(()=> this.http.get <MarketStackObject> (source.sourceURL, {params:params})),
+        tap(data=>totalRows=data.data.length),
+        switchMap(marketData=> this.insertMarketData (marketData.data,source.sourceCode,'MScom')),
+        switchMap(inserted=>of({'Source':'Marketstack - '+ source.sourceCode,'Total rows loaded - ' : inserted,'Total rows fetched from source - ': totalRows,'Date': dateToLoad}))
+      ))
     })
-    return logMarketDateLoading;
+    return forkJoin(uploadStreams).pipe(
+      map(data=>({
+          dataLoaded:data, 
+          deletedRows: this.deletedMarketDataRows,
+          state:{Message:'Loaded',State:'Success'}
+        })));
   }
-
+  checkLoadedMarketData (sourceCodes:string[],dateToLoad: string):Observable<marketDataCheck[]> {
+    const params = {'sourcecodes':sourceCodes,'dateToLoad':dateToLoad,'Action':'checkLoadedMarketData' }
+    return this.http.get <marketDataCheck[]>('/api/AAM/MD/getMarketData/', { params: params} )
+  }
+  deleteOldMarketData (sourceCodes:string[],dateToLoad: string):Observable<{deletedRows:number}> { 
+     const params = {'sourcecodes':sourceCodes,'dateToLoad':dateToLoad }
+     return this.http.post <{deletedRows:number}> ('/api/AAM/MD/deleteMarketData/',{ params: params})
+  }
   getInstrumentsCodes (mapcode:string, resasarray?:boolean, secid?:string):Observable<InstrumentsMapCodes[]> {
     const params = {mapcode:mapcode,secid:secid, resasarray:resasarray}
     return this.http.get <InstrumentsMapCodes[]> ('/api/AAM/MD/getInstrumentsCodes/',{params:params})
@@ -122,8 +198,7 @@ export class AppMarketDataService {
   }
   moveMarketStackToMainTable (dateToMove:string) :Observable<{o_rows_moved:number}[]> {
     return this.http.post <{o_rows_moved:number}[]> ('/api/AAM/MD/importData/',{date_to_move:dateToMove,gloabalSource:'MScomMoveToMainTable'})
-  }
-  
+  }  
   getMarketQuote (secid:string,trade_date:string):Observable<marketData[]> {
     const params = {secid:secid,trade_date:trade_date,Action:'getMarketQuote',}
     return this.http.get <marketData[]> ('/api/AAM/MD/getMarketData/', { params: params } )
@@ -138,8 +213,7 @@ export class AppMarketDataService {
   getMarketDataSources (sourceType:string):Observable<marketDataSources[]> {
     let params = {sourceType:sourceType};
     return this.http.get <marketDataSources[]> ('/api/AAM/MD/getMarketDataSources/', { params: params })
-  }
-  
+  }  
   sendReloadMarketData ( dataSet:marketData[]) {
     this.subjectMarketData.next(dataSet); 
   }

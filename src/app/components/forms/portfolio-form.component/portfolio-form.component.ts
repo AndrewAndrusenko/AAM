@@ -72,11 +72,7 @@ export class AppNewAccountComponent {
   }
   ngOnChanges (changes: SimpleChanges) {
     if (this.accessState !=='none') {
-      this.InvestmentDataService.getPortfoliosData('',changes['portfolioCode'].currentValue,0,undefined, 'Get_Portfolio_By_idPortfolio', null,this.accessToClientData).subscribe (portfoliosData => {
-        this.newAccountForm.patchValue(portfoliosData[0]);
-        // this.AppFeesHandlingService.sendFeesPortfoliosWithSchedulesIsOpened(portfoliosData[0].idportfolio,true);
-      }
-        )
+      this.InvestmentDataService.getPortfoliosData('',changes['portfolioCode'].currentValue,0,undefined, 'Get_Portfolio_By_idPortfolio', null,this.accessToClientData).subscribe (portfoliosData => this.newAccountForm.patchValue(portfoliosData[0]));
     }
   }
   snacksBox (result:any, action?:string) {
@@ -84,7 +80,7 @@ export class AppNewAccountComponent {
       this.CommonDialogsService.snackResultHandler(result)
     } else {
       this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' portfolio'}, action)
-      this.InvestmentDataService.sendReloadPortfoliosData (Number(this.newAccountForm.controls['idportfolio']));
+      this.InvestmentDataService.sendReloadPortfoliosData (true);
     }
   }
   updatePortfolioData (action:string){

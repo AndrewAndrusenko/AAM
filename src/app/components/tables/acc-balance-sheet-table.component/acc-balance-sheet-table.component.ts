@@ -117,7 +117,7 @@ export class AppTableBalanceSheetComponent   {
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
   }
-  async updateResultHandler (result :any, action: string, showSnackMsg:boolean=true,duration?:number, checkBalance=false,refreshData=false) {
+  updateResultHandler (result :any, action: string, showSnackMsg:boolean=true,duration?:number, checkBalance=false,refreshData=false) {
     this.CommonDialogsService.snackResultHandler(result, action,undefined,undefined,duration)
     if (result['name']!=='error') {
       // await this.submitQuery(showSnackMsg);
@@ -135,7 +135,7 @@ export class AppTableBalanceSheetComponent   {
       })
     }
   }
-  async submitQuery (showSnackMsg:boolean=true) {
+  submitQuery (showSnackMsg:boolean=true) {
     this.AccountingDataService.GetbAccountingDateToClose('GetbAccountingDateToClose').subscribe(data =>this.firstClosingDate= new Date(data[0].accountingDateToClose));
     return new Promise((resolve, reject) => {
     this.dataSource.data=null;
@@ -188,13 +188,12 @@ export class AppTableBalanceSheetComponent   {
     })
   } 
   executeClosingBalance () {
-    this.AccountingDataService.accountingBalanceCloseInsert ({'closingDate' : new Date(this.firstClosingDate).toDateString()}).subscribe ((result) =>{ 
-      result['name']!=='error'? result['detail']=result[0]['rows_affected']:null;
+    this.AccountingDataService.accountingBalanceCloseInsert ({closingDate : new Date(this.firstClosingDate).toDateString()}).subscribe ((result) =>{ 
+      result['name']!=='error'? result['detail']=result[0].rows_affected:null;
       this.updateResultHandler(result,'Balance was closed for '+ new Date(this.firstClosingDate).toDateString()+ '. Created rows',false, 7000,true)
     })
   }
   async checkBalance (dateBalance: string,showSnackMsg=true) {
-
     this.searchParametersFG.reset();
     this.accounts=[];
     this.gRange.get('dateRangeStart').setValue(new Date(dateBalance));  
@@ -217,9 +216,9 @@ export class AppTableBalanceSheetComponent   {
   openBalance () {
     this.CommonDialogsService.confirmDialog('Open date: ' + new Date(this.LastClosedDate).toLocaleDateString() ).subscribe(action => {
       if (action.isConfirmed===true) {
-        this.AccountingDataService.accountingBalanceDayOpen({'dateToOpen' : new Date(this.LastClosedDate).toLocaleDateString()}).subscribe(
+        this.AccountingDataService.accountingBalanceDayOpen({dateToOpen : new Date(this.LastClosedDate).toLocaleDateString()}).subscribe(
           result => {
-          result['name']!=='error'? result['detail']=result[0]['rows_affected']:null;
+          result['name']!=='error'? result['detail']=result[0].rows_affected:null;
           this.updateResultHandler(result, 'Operational day ' + new Date(this.LastClosedDate).toLocaleDateString()+ ' has been opened. Deleted rows ', false, 7000,false,true)
         })
       }

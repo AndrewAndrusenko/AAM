@@ -1,4 +1,3 @@
-const { async } = require('rxjs');
 const db_common_api = require('./db_common_api');
 const https = require('https');
 const config = require ('./db_config');
@@ -22,7 +21,7 @@ async function fdeleteMarketData (request,response) {//Delete market data if a u
     err.detail = err.stack
     return response.send(err)
     } else {
-      return response.status(200).json(res[0].rowCount + res[1].rowCount )
+      return response.status(200).json({deletedRows: res[0].rowCount + res[1].rowCount})
     }
   })  
 }
@@ -138,7 +137,6 @@ async function fgetMarketData (request,response){//Get market data such as marke
     break;
   }
   sql = pgp.as.format(query.text,request.query);
-  console.log('',sql);
   db_common_api.queryExecute(sql,response,undefined,'fgetMarketData')
 }
 async function fgetMarketDataSources (request,response) {//Get market sources. Needs to be moved to General data function
@@ -157,7 +155,6 @@ async function fgetInstrumentsCodes (request,response) {//Get additional instrum
 }
 async function fgetMoexIssSecuritiesList (start) {//Get instrument dictionary from moex iss
   let url='https://iss.moex.com/iss/securities.json?iss.json=extended&limit=100&lang=en&iss.meta=off&is_trading=true&start='+start.toString()
-  console.log('url',url,start);
   return new Promise ((resolve) => {
     https.get(url, (resp) => {
       let data = '';
@@ -208,8 +205,6 @@ function fGetMoexInstruments(request,response) { //Get general instruments list
       }
     });
     switch (request.query.Action) {
-      case 'checkLoadedMarketData':
-      break;
       case 'getInstrumentAutoCompleteList' :
         query.text = "SELECT secid, name, security_type_name,faceunit,facevalue FROM public.mmoexsecurities " +
         "LEFT JOIN mmoexsecuritytypes ON mmoexsecurities.type=mmoexsecuritytypes.security_type_name " +

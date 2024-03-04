@@ -215,17 +215,8 @@ export class AppTradeTableComponent  {
   exportToExcel() {
   let numberFields=['idtrade','price','id_price_currency','qty','id_settlement_currency','tidorder','allocatedqty','fifo_qty'];
   let dateFields=['tdate','vdate'];
-  let dataToExport =  this.dataSource.data.map(el=>{
-    Object.keys(el).forEach(key=>{
-      switch (true==true) {
-        case  numberFields.includes(key): return el[key]=Number(el[key]) ;
-        case dateFields.includes(key): return el[key]=new Date(el[key])
-        default: return el[key]=el[key]
-      }
-    })
-    return el;
-  });
-  this.HandlingCommonTasksS.exportToExcel (dataToExport,"tradesData");  
+  this.HandlingCommonTasksS.exportToExcel (this.dataSource.data,"tradesData",numberFields,dateFields);  
+
   }
   get  type () {return this.searchParametersFG.get('type') } 
   get  tdate () {return this.searchParametersFG.get('tdate') } 

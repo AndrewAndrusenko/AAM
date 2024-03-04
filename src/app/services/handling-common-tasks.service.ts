@@ -1,16 +1,26 @@
 import { Injectable } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 import * as XLSX from 'xlsx'
-
 @Injectable({
   providedIn: 'root'
 })
 export class HandlingCommonTasksService {
-
   constructor() { }
-  exportToExcel (data:any, name:string)  {
+  exportToExcel (data:any, name:string,numberFields?:string[],dateFields?:string[])  {
+    let dataToExport=data;
+    if (numberFields!==undefined) {
+    dataToExport = data.map(el=>{
+      Object.keys(el).forEach(key=>{
+        switch (true==true) {
+          case  numberFields.includes(key): return el[key]=Number(el[key]) ;
+          case dateFields.includes(key): return el[key]=new Date(el[key])
+          default: return el[key]=el[key]
+        }
+      })
+      return el;
+    })}
     const fileName = name + ".xlsx";
-    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(data);
+    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(dataToExport);
     const wb: XLSX.WorkBook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, name);
     XLSX.writeFile(wb, fileName);

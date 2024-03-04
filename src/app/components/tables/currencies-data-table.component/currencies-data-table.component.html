@@ -26,8 +26,11 @@
     <mat-icon matSuffix >refresh</mat-icon>
   </button>
 </span>
-<mat-expansion-panel *ngIf="FormMode==='QuotesMode'&&!disabledControlElements" 
-class="headers-align" 
+
+<mat-expansion-panel 
+  *ngIf="FormMode==='QuotesMode'&&!disabledControlElements" 
+  class="headers-align" 
+  [expanded]="1"
   (opened)="panelOpenStateFirst = true"
   (closed)="panelOpenStateFirst = false" 
   style="width: 100%;">
@@ -37,29 +40,27 @@ class="headers-align"
     </mat-panel-title>
     <mat-panel-description>
       Tap to {{panelOpenStateFirst? 'hide': 'open'}} control elements
-      <mat-icon  style = "color : rgb(44, 43, 43);"
-      >cloud_download</mat-icon>
+      <mat-icon  style = "color : rgb(44, 43, 43);">cloud_download</mat-icon>
     </mat-panel-description>
   </mat-expansion-panel-header >
   <h2 style="  text-align: center;" *ngIf="loadingDataState.state==='Pending'">Loading market data...</h2>
-
   <form class="submit"   [formGroup]="loadMarketData" style="font-size: 18px;   margin-top: 0.5%;">
     <div style="text-align: center;">
-     <span *ngIf="!['None','Pending'].includes(loadingDataState.state)" title="loadingDataState">
-      <span style="font-size: larger;" [style.color]="loadingDataState.state=='terminated'? 'black': 'rgb(168, 162, 162)'">
-        Status: {{loadingDataState.message}} 
-        <span *ngIf="loadingDataState.loadedCount" [style.color]="'white'">Uploaded: {{loadingDataState.loadedCount}} rows </span>
-        <span *ngIf="loadingDataState.deletedCount" [style.color]="'black'"> ||  Deleted: {{loadingDataState.deletedCount}} rows</span> 
+      <span *ngIf="!['None','Pending'].includes(loadingDataState.state)" title="loadingDataState">
+        <span style="font-size: larger;" [style.color]="loadingDataState.state=='terminated'? 'black': 'rgb(168, 162, 162)'">
+          Status: {{loadingDataState.message}} 
+          <span *ngIf="loadingDataState.loadedCount" [style.color]="'white'">Uploaded: {{loadingDataState.loadedCount}} rows </span>
+          <span *ngIf="loadingDataState.deletedCount" [style.color]="'black'"> ||  Deleted: {{loadingDataState.deletedCount}} rows</span> 
+        </span>
       </span>
-    </span>
-  </div>
-      <button color = "accent" #getRatesb mat-raised-button title="getMarketData"
+    </div>
+    <button color = "accent" #getRatesb mat-raised-button title="getMarketData"
       [matTooltip]="getRatesb.disabled? 'Select sources to upload':'Click to start loading'"
-        style=" margin-left:1%; font-size: larger; margin-right: 1%; margin-top: 1%; padding: 1%; width: 30%;"
-        [disabled]="loadingDataState.state==='Pending' || loadMarketData.invalid"
-        (click)="getRatestData()">
-        Get currencies rates data 
-      </button>
+      style=" margin-left:1%; font-size: larger; margin-right: 1%; margin-top: 1%; padding: 1%; width: 30%;"
+      [disabled]="loadingDataState.state==='Pending' || loadMarketData.invalid"
+      (click)="getRatestData()">
+      Get currencies rates data 
+    </button>
     <mat-form-field style="margin-right: 2%; width: 12%; " title="Date to upload">
       <input matInput formControlName = "dateForLoadingPrices" [matDatepicker]="dateForMarketData" placeholder="Date to upload">
       <mat-datepicker-toggle matSuffix [for]="dateForMarketData"></mat-datepicker-toggle>
@@ -67,38 +68,38 @@ class="headers-align"
     </mat-form-field> 
     <mat-slide-toggle #deleteOldMarketData formControlName="overwritingCurrentData"
       style="font-size:larger; letter-spacing: .05rem; margin-left: 1%; margin-right: 1%;"
-      [style.color]="deleteOldMarketData.checked===true? 'darkred':'' "
+      [style.color]="deleteOldMarketData.checked===true? 'rgb(255, 57, 57)':'white'  "
       >Replace current rates data <br>{{deleteOldMarketData.checked? 'allowed!':'forbidden'}}
     </mat-slide-toggle>
-      <span style=" display:inline-block;"
-        *ngFor="let marketSource of marketSources;let i=index" >
-        <span class="example-list-section" style="margin-left: 3%; font-size:larger;" >
-          <mat-checkbox  class="marketSource-margin"
-          [indeterminate]="marketSource.indeterminate"
-          (change)="marketSource.checkedAll=!marketSource.checkedAll;
-          setAll(i)"
-          [checked]="marketSource.checkedAll"
-          [disabled]="marketSource.disabled">
-            {{marketSource.sourceName}}
-          </mat-checkbox>
-        </span>
-        <span class="example-list-section" style="font-size:larger;">
-          <ul>
-            <li *ngFor="let segment of marketSource.segments; let z=index">
-              <mat-checkbox [disabled]="marketSource.disabled"
-                            [checked]="segment.checked"
-                            (change)="segment.checked=!segment.checked;
-                                      updateAllComplete(i)">
-                {{segment.description}}
-              </mat-checkbox>
-            </li>
-          </ul>
-        </span> 
-  </span>
-
+    <span style=" display:inline-block;"
+      *ngFor="let marketSource of marketSources;let i=index" >
+      <span class="example-list-section" style="margin-left: 3%; font-size:larger;" >
+        <mat-checkbox  class="marketSource-margin"
+                      [indeterminate]="marketSource.indeterminate"
+                      (change)="marketSource.checkedAll=!marketSource.checkedAll;
+                      setAll(i)"
+                      [checked]="marketSource.checkedAll"
+                      [disabled]="marketSource.disabled">
+                      {{marketSource.sourceName}}
+        </mat-checkbox>
+      </span>
+      <span class="example-list-section" style="font-size:larger;">
+        <ul>
+          <li *ngFor="let segment of marketSource.segments; let z=index">
+            <mat-checkbox [disabled]="marketSource.disabled"
+                          [checked]="segment.checked"
+                          (change)="segment.checked=!segment.checked;
+                                    updateAllComplete(i)">
+              {{segment.description}}
+            </mat-checkbox>
+          </li>
+        </ul>
+      </span> 
+    </span>
   </form>
   <mat-progress-bar *ngIf="loadMarketData.disabled" color="primary" mode="query"></mat-progress-bar>
 </mat-expansion-panel>
+
 <mat-expansion-panel class="headers-align" 
   (opened)="panelOpenStateSecond = true"
   (closed)="panelOpenStateSecond = false" >

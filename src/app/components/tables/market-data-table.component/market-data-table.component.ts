@@ -1,93 +1,132 @@
-import {Component, EventEmitter, Output, ViewChild, Input, AfterViewInit} from '@angular/core';
+import {Component,ViewChild, Input} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
-import {map, Observable, startWith } from 'rxjs';
+import {map, Observable, startWith, Subscription } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
-import { marketData, marketDataSources, marketSourceSegements } from 'src/app/models/interfaces.model';
-import { AppAccountingService } from 'src/app/services/accounting.service';
+import {marketData, marketDataSources, marketSourceSegements, tableHeaders } from 'src/app/models/interfaces.model';
+import {AppAccountingService } from 'src/app/services/accounting.service';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { MatOption } from '@angular/material/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { AppMarketDataService } from 'src/app/services/market-data.service';
-import * as moment from 'moment';
-import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
-import { formatNumber, registerLocaleData } from '@angular/common';
-import localeFr from '@angular/common/locales/fr';
-import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
-import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
-import { AuthService } from 'src/app/services/auth.service';
-import { InstrumentDataService } from 'src/app/services/instrument-data.service';
-import { moexBoard } from 'src/app/models/instruments.interfaces';
-registerLocaleData(localeFr, 'fr');
-/* 
-export class extends  */
+import {FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import {MatSnackBar } from '@angular/material/snack-bar';
+import {AppMarketDataService, logLoadingState, marketDateLoaded } from 'src/app/services/market-data.service';
+import {AtuoCompleteService } from 'src/app/services/auto-complete.service';
+import {DatePipe, formatNumber } from '@angular/common';
+import {HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
+import {HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
+import {AuthService } from 'src/app/services/auth.service';
+import {InstrumentDataService } from 'src/app/services/instrument-data.service';
+import {moexBoard } from 'src/app/models/instruments.interfaces';
 @Component({
   selector: 'app-table-market-data',
   templateUrl: './market-data-table.component.html',
   styleUrls: ['./market-data-table.component.scss'],
 })
-export class AppTableMarketDataComponent  implements AfterViewInit {
+export class AppTableMarketDataComponent {
+  datePipe: DatePipe;
   accessState: string = 'none';
   disabledControlElements: boolean = false;
-  @Input() FormMode:string = 'Full'
-  loadMarketData: FormGroup;
   marketSources:marketDataSources[] =  [];
-  loadedMarketData: any []= []; 
-  marketDataToLoad: any;
-  columnsToDisplay = ['globalsource','sourcecode','boardid','tradedate','secid', 'open', 'low', 'high', 'close','value','volume','marketprice2',  'admittedquote', 'numtrades' ];
-  columnsHeaderToDisplay = ['Source','code','boardid','tradedate','secid', 'open', 'low', 'high', 'close', 'value','volume','market P2', 'admitted P', 'Qty Tr' ];
+  columnsWithHeaders: tableHeaders[] = [
+    {
+      "fieldName": "globalsource",
+      "displayName": "Source"
+    },
+    {
+      "fieldName": "sourcecode",
+      "displayName": "code"
+    },
+    {
+      "fieldName": "boardid",
+      "displayName": "boardid"
+    },
+    {
+      "fieldName": "tradedate",
+      "displayName": "tradedate"
+    },
+    {
+      "fieldName": "secid",
+      "displayName": "secid"
+    },
+    {
+      "fieldName": "open",
+      "displayName": "open"
+    },
+    {
+      "fieldName": "low",
+      "displayName": "low"
+    },
+    {
+      "fieldName": "high",
+      "displayName": "high"
+    },
+    {
+      "fieldName": "close",
+      "displayName": "close"
+    },
+    {
+      "fieldName": "value",
+      "displayName": "value"
+    },
+    {
+      "fieldName": "volume",
+      "displayName": "volume"
+    },
+    {
+      "fieldName": "marketprice2",
+      "displayName": "market P2"
+    },
+    {
+      "fieldName": "admittedquote",
+      "displayName": "admitted P"
+    },
+    {
+      "fieldName": "numtrades",
+      "displayName": "Qty Tr"
+    }
+  ]
+  columnsToDisplay:string[]=[];
+  columnsHeaderToDisplay:string[]=[];
   dataSource: MatTableDataSource<marketData>;
+  @Input() FormMode:string = 'Full'
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
-  @Output() public modal_principal_parent = new EventEmitter();
-  logLoadingData=[];
-  statusLogPanelOpenState:boolean=false;
-  readonly separatorKeysCodes = [ENTER, COMMA] as const;
-  
-  @ViewChild('allSelected') private allSelected: MatOption;
-  readOnly: boolean = false; 
-  panelOpenStateFirst = false;
+  loadMarketData: FormGroup;
+  loadingDataLog:{dataLoaded: marketDateLoaded[],deletedRows:number, state:logLoadingState}={
+    dataLoaded:[], deletedRows:0,state: {Message:'',State:''}
+  }
+  panelOpenStateFirst = true; 
   panelOpenStateSecond = true;
+  statusLogPanelOpenState = true;
   instruments: string[] = ['ClearAll'];
-  psearchParameters: any;
-  
   filterednstrumentsLists : Observable<string[][]>;
   
-  dateOfOperaationsStart  = new Date ('2023-02-18')
-  balacedDateWithEntries : Date[]
   FirstOpenedAccountingDate : Date;
-  filterDateFormated : string;
-  boardIDs = []
   searchParametersFG: FormGroup;
-  filterlFormControl = new FormControl('');
-  closingDate = new FormControl<Date | null>(null)
+  boardIDs:moexBoard[] = []
+  readonly separatorKeysCodes = [ENTER, COMMA] as const;
+  filterlFormControl = new FormControl<string|null>('');
   dataRange = new FormGroup ({
     dateRangeStart: new FormControl<Date | null>(null),
     dateRangeEnd: new FormControl<Date | null>(null),
   });
-  marketDataDeleted: Object;
-  loadingDataState: {
-    Message: string,
-    State:string 
-  }
+  private subscriptions = new Subscription () 
   constructor(
     private AccountingDataService:AppAccountingService, 
     private MarketDataService: AppMarketDataService,
     private AuthServiceS:AuthService,  
     private AutoCompService:AtuoCompleteService,
-    private HandlingCommonTasksS:HandlingCommonTasksService,
-    private InstrumentDataS:InstrumentDataService,
+    private HandlingCommonTasks:HandlingCommonTasksService,
+    private InstrumentData:InstrumentDataService,
     private CommonDialogsService:HadlingCommonDialogsService,
     private fb:FormBuilder, 
     public snack:MatSnackBar
   ) {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToInstrumentData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
-    this.InstrumentDataS.getInstrumentDataGeneral('getBoardsDataFromInstruments').subscribe(boardsData => this.boardIDs=boardsData  as moexBoard[])
+    this.InstrumentData.getInstrumentDataGeneral('getBoardsDataFromInstruments').subscribe(boardsData => this.boardIDs=boardsData  as moexBoard[])
     this.MarketDataService.getMarketDataSources('stock').subscribe(marketSourcesData => this.marketSources = marketSourcesData);
-    this.loadingDataState = {Message:'',State: 'None'};
+    this.loadingDataLog.state = {Message:'',State: 'None'};
     this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data=>{
       this.FirstOpenedAccountingDate = data[0].FirstOpenedDate;
     });
@@ -99,7 +138,7 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
       boards : {value:null, disabled:false}
     });
     this.loadMarketData = this.fb.group ({
-      dateForLoadingPrices : [new Date('2022-01-25').toISOString(), Validators.required],
+      dateForLoadingPrices : [new Date().toISOString(), Validators.required],
       sourceCode: [[],Validators.required],
       overwritingCurrentData : [false]
     });
@@ -109,16 +148,12 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
       startWith(''),
       map(value => this.AutoCompService.filterList(value || '','secid') as string[][])
     );
+    this.datePipe = new DatePipe ('en-US')
+    this.subscriptions.add(this.MarketDataService.getReloadMarketData().subscribe(marketData => this.updateMarketDataTable(marketData)));
+    this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
+    this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
   }
-  formatDate (dateToFormat:any):string {
-    let d = dateToFormat,
-    month = '' + (d._d.getMonth() + 1),
-    day = '' + d._d.getDate(),
-    year = d._d.getFullYear();
-    if (month.length < 2) month = '0' + month;
-    if (day.length < 2) day = '0' + day;
-    return [year, month, day].join('-');
-  }
+  ngOnDestroy(): void {this.subscriptions.unsubscribe()}
   updateAllComplete(index:number) {
     this.marketSources[index].checkedAll = this.marketSources[index].segments != null && this.marketSources[index].segments.every(t => t.checked); 
     this.marketSources[index].indeterminate = this.marketSources[index].segments.filter(t => t.checked).length > 0 && !this.marketSources[index].checkedAll; 
@@ -140,64 +175,19 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
     this.disableAllexceptOne(index);
     this.showSelectedSources();
   }
-  async getMarketData(){
-    let functionToLoadData:any;
-    let dateToLoad = this.formatDate(this.dateForLoadingPrices.value)
-    this.loadingDataState = {Message : 'Loading', State: 'Pending'}
-    this.loadedMarketData=null;
-    let sourcesData: marketSourceSegements[] = this.sourceCode.value
+  getMarketData () {
+    this.loadingDataLog.state = {Message : 'Loading', State: 'Pending'}
+    let dateToLoad = this.datePipe.transform(this.dateForLoadingPrices.value,'YYYY-MM-dd')
     this.loadMarketData.disable();
-    let sourceCodesArray:string[] = sourcesData.map(el=>{return el.sourceCode})
-    console.log('sb',sourcesData[0].sourceGlobal);
-    switch (sourcesData[0].sourceGlobal) {
-      case 'marketstack.com':
-        functionToLoadData = this.MarketDataService.loadMarketDataMarketStack.bind(this.MarketDataService)
-      break;
-      case 'iss.moex.com':
-        functionToLoadData = this.MarketDataService.loadMarketDataMOEXiss.bind(this.MarketDataService)
-      break;
-    }
-    this.MarketDataService.checkLoadedMarketData (sourceCodesArray,dateToLoad).subscribe(async data=>{
-      this.loadedMarketData = data;
-      if (!data.length) {
-        this.logLoadingData = await functionToLoadData(sourcesData, dateToLoad);
-        this.loadingDataState = {Message:'Loading is complited.', State:'Success'};
-        this.marketSources.forEach(el=>el.checkedAll=false);
-
-      }
-      else {
-        if (!this.overwritingCurrentData.value) { 
-          this.loadMarketData.enable();
-          this.loadingDataState = {Message:'Loading terminated. Data have been already loaded!', State : 'terminated'}
-        } else {
-          this.CommonDialogsService.confirmDialog('Delete all data for codes: ' + sourceCodesArray).subscribe(isConfirmed=>{
-            if (isConfirmed.isConfirmed){
-              this.MarketDataService.deleteOldMarketData(sourceCodesArray,dateToLoad).then(async rowsDeleted => {
-                this.marketDataDeleted = rowsDeleted;
-                this.logLoadingData = await functionToLoadData(sourcesData, dateToLoad);
-                this.loadingDataState = {Message:'Have been deleted '+rowsDeleted+' of old data', State : 'Success'}
-                this.marketSources.forEach(el=>el.checkedAll=false)
-              })
-            } else {
-              this.loadMarketData.enable()
-              this.loadingDataState = {Message: 'Loading has been canceled.', State: 'terminated'}
-            }
-          })
-        }
-      }
-    })
-  }
-  async ngAfterViewInit() {
-    const number = 123456.789;
-    if (this.FormMode==='QuotesMode') {
-      // this.MarketDataService.getMarketData().subscribe (marketData => this.updateMarketDataTable(marketData)) 
-    } 
-    this.MarketDataService.getReloadMarketData().subscribe(marketData => {
-      this.updateMarketDataTable(marketData);
-      this.loadingDataState = {State:'Success', Message:'Loading is complited'};
+    this.MarketDataService.uploadMarketData(dateToLoad, this.sourceCode.value,this.overwritingCurrentData.value).subscribe(data=>{
+      this.loadingDataLog=data;
+      data.dataLoaded.length>0? this.loadingDataLog.state = {Message:'Loading is complited.', State:'Success'} : null;
+      this.marketSources.forEach(el=>{
+        el.checkedAll=false;
+        el.segments.forEach(el=>el.checked=false)
+      });
       this.loadMarketData.enable();
-    });
-    this.dateForLoadingPrices.setValue(moment(this.FirstOpenedAccountingDate))
+    })
   }
   updateMarketDataTable (marketData:marketData[]) {
     this.dataSource  = new MatTableDataSource(marketData);
@@ -225,10 +215,9 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
     console.log('event', event.target.textContent);
     event.target.textContent.trim() === 'ClearAll'? this.instruments = ['ClearAll']: null;
   }
-  addChips (el: any, column: string) {(['accountNo'].includes(column))? this.instruments.push(el):null;}
-  updateFilter (event:Event, el: any, column: string) {
+  addChips (el: string, column: string) {(['accountNo'].includes(column))? this.instruments.push(el):null;}
+  updateFilter (el: string) {
     this.filterlFormControl.patchValue(el);
-    (column=='dateBalance')? this.filterDateFormated = new Date(el).toLocaleDateString() :null
     this.dataSource.filter = el.trim();
     (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
   }
@@ -266,52 +255,39 @@ export class AppTableMarketDataComponent  implements AfterViewInit {
     allSelected? this.searchParametersFG.get(elem).patchValue(
       elem==='marketSource'? [...this.marketSources.map(item => item.segments.map(el => el.sourceCode)),0].flat() : [...this.boardIDs.map(item => item.boardid
     ), 0]) : this.searchParametersFG.get(elem).patchValue([]);
-  }
-   
+  }   
   exportToExcel() {
-   const fileName = "marketData.xlsx";
-   let data = this.dataSource.data.map( (row,ind) =>({
-    globalsource: row.globalsource,
-    sourcecode: row. sourcecode,
-    boardid: row. boardid, 
-    secid: row. secid, 
-    numtrades: Number(row.numtrades), 
-    value: Number(row.value), 
-    open: Number(row.open), 
-    low: Number(row.low), 
-    high: Number(row.high), 
-    legalcloseprice: Number(row.legalcloseprice),
-    waprice: Number(row.waprice),
-    close: Number(row.close), 
-    volume: Number(row.volume),
-    marketprice2: Number(row.marketprice2),
-    marketprice3: Number(row.marketprice3), 
-    admittedquote: Number(row.admittedquote), 
-    mp2valtrd: Number(row.mp2valtrd),
-    admittedvalue: Number(row.admittedvalue),
-    waval: Number(row.waval), 
-    tradingsession: row. tradingsession,
-    tradedate: new Date(row.tradedate)
-  }))
-  this.HandlingCommonTasksS.exportToExcel (data,"marketData")
- }
+    let numberFields:string[] = [
+      "open",
+      "low",
+      "high",
+      "close",
+      "value",
+      "volume",
+      "marketprice2",
+      "admittedquote",
+      "numtrades"
+    ]
+    let dateFields:string[]=['tradedate']
+    this.HandlingCommonTasks.exportToExcel (this.dataSource.data,"marketData",numberFields,dateFields);  
+
+  }
   getMoexSecurities (){
     this.MarketDataService.getMoexInstrumentsList().subscribe(data=>console.log('inserted - ',data))
   }
   msQuoteToMT (){
-    let dateToLoad = this.formatDate(this.dateForLoadingPrices.value)
+    let dateToLoad = this.datePipe.transform(this.dateForLoadingPrices.value,'YYYY-MM-dd')
     this.MarketDataService.moveMarketStackToMainTable(dateToLoad).subscribe(data=> {
       console.log('row',data)
       this.CommonDialogsService.snackResultHandler({name:'success',detail: data[0].o_rows_moved + ' rows'},'Copied ')
     })  
   }
-  get  gRange () {return this.searchParametersFG.get('dataRange') } 
-  get  dateRangeStart() {return this.searchParametersFG.get('dateRangeStart') } 
-  get  dateRangeEnd() {return this.searchParametersFG.get('dateRangeEnd') } 
-  get  marketSource () {return this.searchParametersFG.get('marketSource') } 
-  get  boards () {return this.searchParametersFG.get('boards') } 
-  get  secidList () {return this.searchParametersFG.get('secidList') } 
-  
+  get gRange () {return this.searchParametersFG.get('dataRange') } 
+  get dateRangeStart() {return this.searchParametersFG.get('dateRangeStart') } 
+  get dateRangeEnd() {return this.searchParametersFG.get('dateRangeEnd') } 
+  get marketSource () {return this.searchParametersFG.get('marketSource') } 
+  get boards () {return this.searchParametersFG.get('boards') } 
+  get secidList () {return this.searchParametersFG.get('secidList') } 
   get dateForLoadingPrices() {return this.loadMarketData.get('dateForLoadingPrices')}
   get sourceCode() {return this.loadMarketData.get('sourceCode')}
   get overwritingCurrentData() {return this.loadMarketData.get('overwritingCurrentData')}

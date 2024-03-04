@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, EventEmitter, Output, ViewChild, Input, ChangeDetectionStrategy, ElementRef, HostListener, SimpleChanges} from '@angular/core';
+import {Component, EventEmitter, Output, ViewChild, Input, ChangeDetectionStrategy, ElementRef, SimpleChanges} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {Observable, Subscription, filter, map, startWith, switchMap, tap } from 'rxjs';
@@ -180,8 +180,6 @@ export class AppOrderTableComponent {
         data.bulksForUpdate.includes(this.bulkOrder)? this.updateSatus(data.data) : null;
       })
     }
-    // this.subscriptions.add(this.TreeMenuSevice.getActiveTab().subscribe(tabName=>this.activeTab=tabName));
-
   }
   ngOnChanges(changes: SimpleChanges): void {
     switch (this.tableMode.join()) {
@@ -442,17 +440,7 @@ export class AppOrderTableComponent {
   exportToExcel() {   
     let numberFields=['id','qty', 'amount','id_order','id_bulk_order','entries','idtrade','price','unexecuted','parent_order','allocated','idcurrency'];
     let dateFields=['generated'];
-    let dataToExport =  this.dataSource.data.map(el=>{
-      Object.keys(el).forEach(key=>{
-        switch (true==true) {
-          case  numberFields.includes(key): return el[key]=Number(el[key]) ;
-          case dateFields.includes(key): return el[key]=new Date(el[key])
-          default: return el[key]=el[key]
-        }
-      })
-      return el;
-    });
-    this.HandlingCommonTasksS.exportToExcel (dataToExport,"ordersData");   
+    this.HandlingCommonTasksS.exportToExcel (this.dataSource.data,"ordersData",numberFields,dateFields);  
   }
   get  type () {return this.searchParametersFG.get('type') } 
   get  tdate () {return this.searchParametersFG.get('tdate') } 

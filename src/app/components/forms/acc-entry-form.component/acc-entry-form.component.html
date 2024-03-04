@@ -71,7 +71,7 @@ cdkDragHandle>
         style="font-size:85%; letter-spacing: .05rem;"
         [checked]="!ledgerNo.hasAsyncValidator(validatorLedgerAccountOverdraft)"
         [style.color]="ledgerNo.hasAsyncValidator(validatorLedgerAccountOverdraft)? 'rgb(43, 43, 245)' : 'brown'"
-        (toggleChange)="toggleOverdraftValidator(overdraft,'d_ledgerNo');lg('72')"
+        (toggleChange)="toggleOverdraftValidator(overdraft,'d_ledgerNo');"
         >Overdraft {{overdraft.checked? 'allowed!':'forbidden'}}
       </mat-slide-toggle>
       <input matInput placeholder="Debit" formControlName="d_ledgerNo">   
@@ -98,7 +98,7 @@ cdkDragHandle>
         style="font-size:85%; letter-spacing: .05rem;"
         [checked]="!accountNo.hasAsyncValidator(validatorAccountOverdraft)"
         [style.color]="accountNo.hasAsyncValidator(validatorAccountOverdraft) ? 'rgb(43, 43, 245)' : 'brown'"
-        (toggleChange)="toggleOverdraftValidator(overdraft,'d_accountNo');lg('103')"
+        (toggleChange)="toggleOverdraftValidator(overdraft,'d_accountNo');"
         >Overdraft {{overdraft.checked? 'allowed!':'forbidden'}}
       </mat-slide-toggle>
       <input matInput placeholder="Credit" formControlName="d_accountNo">
@@ -126,7 +126,7 @@ cdkDragHandle>
         style="font-size:85%; letter-spacing: .05rem;"
         [checked]="!accountNo.hasAsyncValidator(validatorAccountOverdraft)"
         [style.color]="accountNo.hasAsyncValidator(validatorAccountOverdraft) ? 'rgb(43, 43, 245)' : 'brown'"
-        (toggleChange)="toggleOverdraftValidator( overdraft,'d_accountNo' );lg('131')"
+        (toggleChange)="toggleOverdraftValidator( overdraft,'d_accountNo' );"
         >Overdraft {{overdraft.checked? 'allowed!':'forbidden'}}
       </mat-slide-toggle>
       <input matInput placeholder="Debit" formControlName="d_accountNo" >   
@@ -154,7 +154,7 @@ cdkDragHandle>
         style="font-size:85%; letter-spacing: .05rem;"
         [checked]="!ledgerNo.hasAsyncValidator(validatorLedgerAccountOverdraft)"
         [style.color]="ledgerNo.hasAsyncValidator(validatorLedgerAccountOverdraft)? 'rgb(43, 43, 245)' : 'brown'"
-        (toggleChange)="toggleOverdraftValidator(overdraft,'d_ledgerNo');lg('159')"
+        (toggleChange)="toggleOverdraftValidator(overdraft,'d_ledgerNo');"
         >Overdraft {{overdraft.checked? 'allowed!':'forbidden'}}
       </mat-slide-toggle>
       <input matInput placeholder="Credit" formControlName="d_ledgerNo">
@@ -183,7 +183,7 @@ cdkDragHandle>
         style="font-size:85%; letter-spacing: .05rem;"
         [checked]="!ledgerNo.hasAsyncValidator(validatorLedgerAccountOverdraft)"
         [style.color]="!overdraft.checked ? 'rgb(43, 43, 245)' : 'brown'"
-        (toggleChange)="toggleOverdraftValidator(overdraft,'d_ledgerNo');lg('188')"
+        (toggleChange)="toggleOverdraftValidator(overdraft,'d_ledgerNo');"
         >Overdraft {{overdraft.checked? 'allowed!':'forbidden'}}
       </mat-slide-toggle>
       <input matInput placeholder="Debit" formControlName="d_ledgerNo" >   
@@ -212,7 +212,7 @@ cdkDragHandle>
         style="font-size:85%; letter-spacing: .05rem;"
         [checked]="!accountNo.hasAsyncValidator(validatorLedgerLL2Overdraft)"
         [style.color]="!overdraft.checked ? 'rgb(43, 43, 245)' : 'brown'"
-        (toggleChange)="toggleOverdraftValidator(overdraft,'d_accountNo');lg('217')"
+        (toggleChange)="toggleOverdraftValidator(overdraft,'d_accountNo');"
         >Overdraft {{overdraft.checked? 'allowed!':'forbidden'}}
       </mat-slide-toggle>
       <input matInput placeholder="Credit" formControlName="d_accountNo">
