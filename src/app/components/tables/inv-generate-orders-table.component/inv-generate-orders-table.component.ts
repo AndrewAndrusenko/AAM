@@ -13,10 +13,17 @@ import {HandlingCommonTasksService } from 'src/app/services/handling-common-task
 import {AuthService } from 'src/app/services/auth.service';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import {AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
-import { HostListener } from '@angular/core';
 import { indexDBService } from 'src/app/services/indexDB.service';
 import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { AppTradeService } from 'src/app/services/trades-service.service';
+import { MatSelectChange } from '@angular/material/select';
+
+interface localFilters {
+  reset?:boolean,
+  portfolio_code?:string[],
+  null_data?:boolean,
+  rest?:boolean
+}
 @Component({
   selector: 'app-inv-generate-orders-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -28,7 +35,7 @@ export class AppInvGenerateOrdersTable{
   private subscriptions = new Subscription()
   disabledControlElements: boolean = false;
   @Input() rowsPerPages:number = 15;
-  @Input() filters:any;
+  @Input() filters:localFilters;
   columnsToDisplay = ['portfolio_code','secid','fact_weight','weight','deviation_percent','order_amount','mtm_positon','planned_position','mtm_rate','mtm_date','orders_unaccounted','mp_name','strategy_name','order_qty','orders_unaccounted_qty','current_balance','order_type','mtm_dirty_price','cross_rate','rate_date'];
   columnsHeaderToDisplay = ['Code','SecID','Fact %','MP %','DV%','Deviation','CurrentMTM','Targeted_MP','MTM_Rate','MTM_Date','Active Orders','MP','Strategy','Deviation Qty','Orders Qty','Balance','TypeBS','MTM_Dirty','CurRate','CurDate']
   dataSource: MatTableDataSource<portfolioPositions>;
@@ -43,19 +50,11 @@ export class AppInvGenerateOrdersTable{
   filterednstrumentsLists : Observable<string[][]>;
   filteredCurrenciesList: Observable<currencyCode[]>;
   searchParametersFG: FormGroup;
-  defaultFilterPredicate?: (data: any, filter: string) => boolean;
-  multiFilter?: (data: any, filter: string) => boolean;
+  defaultFilterPredicate?: (data: portfolioPositions, filter: string) => boolean;
+  multiFilter?: (data: portfolioPositions, filter: string) => boolean;
   mp_strategies_list: StrategiesGlobalData[]=[];
   activeTab:string='';
   tabsNames = ['Generate Orders']
-/*   @HostListener('document:keydown', ['$event'])
-  handleKeyboardEvent(event: KeyboardEvent) { 
-    console.log('activeTab',this.activeTab);
-    if (this.tabsNames.includes(this.activeTab)){
-      event.altKey&&event.key==='r'? this.submitQuery(false,true):null;
-      event.altKey&&event.key==='w'? this.exportToExcel():null;
-    }
-  } */
   constructor(
     private TreeMenuSevice: TreeMenuSevice,
     private TradeService: AppTradeService,
@@ -111,14 +110,13 @@ export class AppInvGenerateOrdersTable{
     this.subscriptions.add(this.TreeMenuSevice.getActiveTab().subscribe(tabName=>this.activeTab=tabName));
 
   }
-  setPortfoliosList(e:any) {
+  setPortfoliosList(e:MatSelectChange) {
     this.InvestmentDataService.getPortfoliosListForMP(e.value,'getPortfoliosByMP_StrtgyID').subscribe(data=>{
-      console.log('data',data);
       this.portfolios=['ClearAll',...data];
       this.dataSource?.paginator? this.dataSource.paginator.firstPage() : null;
     })
   }
-  initialFilterOfDataSource (filter:any) {
+  initialFilterOfDataSource (filter:localFilters) {
    Object.keys(filter).every(key=>{
     this.dataSource.data = this.fullDataSource.filter(el=>el[key]===filter[key])
     if (this.dataSource.data.length) {return false}  else return true;
@@ -136,10 +134,10 @@ export class AppInvGenerateOrdersTable{
       this.CommonDialogsService.snackResultHandler(data, 'Created ' + formatNumber (data.length,'en-US') + ' orders' )
     })
   }
-  applyFilter(event: any, col?:string) {
+  applyFilter(event: KeyboardEvent, col?:string) {
     this.dataSource.filterPredicate = col === undefined? this.defaultFilterPredicate : this.multiFilter
-    const filterValue = event.hasOwnProperty('isUserInput')?  event.source.value :  (event.target as HTMLInputElement).value 
-    !event.hasOwnProperty('isUserInput') || event.isUserInput ? this.dataSource.filter = filterValue.trim().toLowerCase() : null;
+    const filterValue = (event.target as HTMLInputElement).value 
+    this.dataSource.filter = filterValue.trim().toLowerCase();
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
   updatePositionsDataTable (positionsData:portfolioPositions[]) {
@@ -168,7 +166,7 @@ export class AppInvGenerateOrdersTable{
   changedValueofChip (value:string, chipArray:string[],control:AbstractControl) {
     chipArray[chipArray.length-1] === 'ClearAll'? chipArray.push(value) : chipArray[chipArray.length-1] = value
   }
-  add(event: MatChipInputEvent,chipArray:string[],control:AbstractControl): any[] {
+  add(event: MatChipInputEvent,chipArray:string[],control:AbstractControl): string[] {
     const value = (event.value || '').trim();
     const valueArray = event.value.split(',');
     (value)? chipArray = [...chipArray,...valueArray] : null;
@@ -189,8 +187,7 @@ export class AppInvGenerateOrdersTable{
     this.portfolios=['ClearAll'];
     this.report_date.patchValue(new Date());
   }
-  addChips (el: any, column: string) {(['secid'].includes(column))? this.instruments.push(el):null;}
-  updateFilter (el: any) {
+  updateFilter (el: string) {
     this.filterALL.nativeElement.value = this.filterALL.nativeElement.value + el+',';
     this.dataSource.filter = this.filterALL.nativeElement.value.slice(0,-1).trim().toLowerCase();
     (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
@@ -206,17 +203,7 @@ export class AppInvGenerateOrdersTable{
   exportToExcel() {
     let numberFields=['total_pl','roi','pl','unrealizedpl','cost_in_position','idportfolio','fact_weight','current_balance','mtm_positon','weight','planned_position','order_amount','order_qty','mtm_rate','cross_rate','mtm_dirty_price','pl'];
     let dateFields=['mtm_date','rate_date'];
-    let dataToExport =  this.dataSource.data.map(el=>{
-      Object.keys(el).forEach(key=>{
-        switch (true==true) {
-          case  numberFields.includes(key): return el[key]=Number(el[key]) ;
-          case dateFields.includes(key): return el[key]=new Date(el[key])
-          default: return el[key]=el[key]
-        }
-      })
-      return el;
-    });
-    this.HandlingCommonTasksS.exportToExcel (dataToExport,"generateOrdersData");  
+    this.HandlingCommonTasksS.exportToExcel (this.dataSource.data,"generateOrdersData",numberFields,dateFields);  
   }
   get  secidList () {return this.searchParametersFG.get('secidList') } 
   get  idportfolios () {return this.searchParametersFG.get('idportfolios') } 

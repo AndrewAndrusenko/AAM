@@ -1,7 +1,7 @@
 import {Component, ViewChild, Input, ChangeDetectionStrategy, ElementRef} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
-import {Subscription, } from 'rxjs';
+import {Subscription} from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {bcTransactionType_Ext } from 'src/app/models/accountng-intefaces.model';
 import {formatNumber } from '@angular/common';
@@ -9,9 +9,9 @@ import {HadlingCommonDialogsService } from 'src/app/services/hadling-common-dial
 import {HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import {AuthService } from 'src/app/services/auth.service';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
-import { AccountingSchemesService } from 'src/app/services/accounting-schemes.service';
-import { AppAccTransactionTypesFormComponent } from '../../forms/acc-transaction-types-form.component/acc-transaction-types-form.component';
-import { tableHeaders } from 'src/app/models/interfaces.model';
+import {AccountingSchemesService } from 'src/app/services/accounting-schemes.service';
+import {AppAccTransactionTypesFormComponent } from '../../forms/acc-transaction-types-form.component/acc-transaction-types-form.component';
+import {tableHeaders } from 'src/app/models/interfaces.model';
 @Component({
   selector: 'acc-transaction-types-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -62,7 +62,7 @@ export class AppaIAccTransactionTypesTable {
   @ViewChild('filterALL', { static: false }) filterALL: ElementRef;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
-  multiFilter?: (data: any, filter: string) => boolean;
+  multiFilter?: (data: bcTransactionType_Ext, filter: string) => boolean;
   refFeeForm : MatDialogRef<AppAccTransactionTypesFormComponent>
   constructor(
     private AuthServiceS:AuthService,  
@@ -119,12 +119,12 @@ export class AppaIAccTransactionTypesTable {
       success? this.refFeeForm.close():null;
     })
   }
-  updateFilter (el: any) {
+  updateFilter (el: string) {
     this.filterALL.nativeElement.value = this.filterALL.nativeElement.value + el+',';
     this.dataSource.filter = this.filterALL.nativeElement.value.slice(0,-1).trim().toLowerCase();
     (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
   }
-  applyFilter(event: any) {
+  applyFilter(event: KeyboardEvent) {
     const filterValue = (event.target as HTMLInputElement).value 
     this.dataSource.filter = filterValue.trim().toLowerCase();
     this.dataSource.paginator? this.dataSource.paginator.firstPage():null;
@@ -135,20 +135,6 @@ export class AppaIAccTransactionTypesTable {
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
   }
   exportToExcel() {
-    let dataTypes =  {
-      id:'number',
-    }
-    let dataToExport =  structuredClone(this.dataSource.data);
-    dataToExport.map(el=>{
-      Object.keys(el).forEach(key=>{
-        switch (true==true) {
-          case el[key]&&dataTypes[key]==='number': return el[key]=Number(el[key])
-          case el[key]&&dataTypes[key]==='Date': return el[key]=new Date(el[key])
-          default: return el[key]=el[key]
-        }
-      })
-      return el;
-    });
-    this.HandlingCommonTasksS.exportToExcel (dataToExport,"TransactionTypesData");  
+    this.HandlingCommonTasksS.exportToExcel (this.dataSource.data,"TransactionTypesData", ['id'],[]);  
   }
 }

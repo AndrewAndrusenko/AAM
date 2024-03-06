@@ -15,27 +15,12 @@
   color: rgb(143, 140, 239);
   transform: scale(1.3) !important
 }
-.first-expansion .mat-expansion-panel-header-description {
-  justify-content: space-between;
-  align-items: center;
-  color:rgb(198, 255, 215);
-  font-size: 18px;
-}
 button.date-highlighted {
   background:rgb(107, 56, 62);
   border-radius: 100%;
 }
-.first-expansion  .mat-expansion-panel-header-title {
-  justify-content: space-between;
-  align-items: center;
-  color: rgb(48, 48, 48);
-  font-size: 20px;
-}
-.first-expansion  .mat-expansion-panel-header {
-  background-color: #807f7f;
-}
 .headers-align  .mat-expansion-panel-header {
-  background-color: #302f2f;
+  background-color: #282828;
 }
 .headers-align .mat-expansion-panel-header-description {
   justify-content: space-between;
@@ -45,9 +30,17 @@ button.date-highlighted {
 .headers-align .mat-expansion-panel-header-title {
   justify-content: space-between;
   align-items: center;
-  color: rgb(46, 45, 45);
+  color: rgb(210, 205, 205);
   font-size: 20px;
 }
+.mat-form-field {
+  font-size: 20px;
+  border-radius: 9px;
+  width: 400px;
+  background-color: var(--formFieldLightGray);
+  margin: 10px;
+  padding:10px;
+  }
 .mat-table {
   background-color:#4f4e4e;
   width: 100%;

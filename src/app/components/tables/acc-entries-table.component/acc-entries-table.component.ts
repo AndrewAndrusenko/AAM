@@ -1,30 +1,29 @@
-import {Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, SimpleChanges, ViewChild} from '@angular/core';
+import {Component, ElementRef, EventEmitter, Input, OnInit, Output, SimpleChanges, ViewChild} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {Subscription, filter, tap } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
-import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { bAccountsEntriesList, bcTransactionType_Ext } from 'src/app/models/accountng-intefaces.model';
-import { AppAccountingService } from 'src/app/services/accounting.service';
-import { AppAccEntryModifyFormComponent } from '../../forms/acc-entry-form.component/acc-entry-form.component';
+import {MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
+import {bAccountsEntriesList, bcTransactionType_Ext } from 'src/app/models/accountng-intefaces.model';
+import {AppAccountingService } from 'src/app/services/accounting.service';
+import {AppAccEntryModifyFormComponent } from '../../forms/acc-entry-form.component/acc-entry-form.component';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { AppTableAccAccountsComponent } from '../acc-accounts-table.component/acc-accounts-table.component';
-import { MatOption } from '@angular/material/core';
-import { investmentNodeColor, menuColorGl } from 'src/app/models/constants.model';
-import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
-import { formatNumber } from '@angular/common';
-import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
-import { AuthService } from 'src/app/services/auth.service';
-import { indexDBService } from 'src/app/services/indexDB.service';
-import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
-import { AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
-import { HandlingTableSelectionService } from 'src/app/services/handling-table-selection.service';
-import { SelectionModel } from '@angular/cdk/collections';
-import { tableHeaders } from 'src/app/models/interfaces.model';
-import { AccountingSchemesService } from 'src/app/services/accounting-schemes.service';
+import {FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import {AppTableAccAccountsComponent } from '../acc-accounts-table.component/acc-accounts-table.component';
+import {MatOption } from '@angular/material/core';
+import {investmentNodeColor, menuColorGl } from 'src/app/models/constants.model';
+import {HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
+import {formatNumber } from '@angular/common';
+import {HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
+import {AuthService } from 'src/app/services/auth.service';
+import {TreeMenuSevice } from 'src/app/services/tree-menu.service';
+import {AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
+import {HandlingTableSelectionService } from 'src/app/services/handling-table-selection.service';
+import {SelectionModel } from '@angular/cdk/collections';
+import {tableHeaders } from 'src/app/models/interfaces.model';
+import {AccountingSchemesService } from 'src/app/services/accounting-schemes.service';
 @Component({
   selector: 'app-table-acc-entries',
   templateUrl: './acc-entries-table.component.html',
@@ -38,7 +37,6 @@ import { AccountingSchemesService } from 'src/app/services/accounting-schemes.se
   ],
 })
 export class AppTableAccEntriesComponent implements OnInit {
-
   accessState: string = 'none';
   disabledControlElements: boolean = false;
   columnsWithHeaders: tableHeaders[] = [
@@ -76,15 +74,20 @@ export class AppTableAccEntriesComponent implements OnInit {
   @Input() FirstOpenedAccountingDate: Date;
   @Input() swiftID: number;
   @Input() swiftItemID: number;
-  @Input() paramRowData : any = null;
+  @Input() paramRowData : {
+    portfolioCode?:string,
+    entries?:number[],
+    idtrade?:number,
+    accountNo?:string,
+    dateBalance?:Date
+  } ;
   dialogRef: MatDialogRef<AppAccEntryModifyFormComponent>;
   filterlFormControl = new FormControl('');
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
   dataRange = new FormGroup ({
     dateRangeStart: new FormControl<Date | null>(null),
     dateRangeEnd: new FormControl<Date | null>(null),
-  });
-  
+  });  
   panelOpenState = false;
   searchParametersFG: FormGroup;
   dialogChooseAccountsList: MatDialogRef<AppTableAccAccountsComponent>;
@@ -93,14 +96,7 @@ export class AppTableAccEntriesComponent implements OnInit {
   investmentNodeColor=investmentNodeColor;
   activeTab:string='';
   tabsNames = ['Transactions List']
-  multiFilter?: (data: any, filter: string) => boolean;
-
-/*   handleKeyboardEvent(event: KeyboardEvent) { 
-    if (this.tabsNames.includes(this.activeTab)){
-      event.altKey&&event.key==='r'? this.submitQuery(false,true):null;
-      event.altKey&&event.key==='w'? this.exportToExcel():null;
-    }
-  } */
+  multiFilter?: (data: bAccountsEntriesList, filter: string) => boolean;
   constructor(
     private TreeMenuSevice: TreeMenuSevice,
     private AccountingDataService:AppAccountingService, 
@@ -159,7 +155,6 @@ export class AppTableAccEntriesComponent implements OnInit {
   }
   initiateTable() {
     switch (this.action) {
-      
       case 'ShowEntriesForBalanceSheet':
         this.noAccountLedger.value.push(this.paramRowData.accountNo);
         this.dataRange.controls['dateRangeStart'].setValue(new Date (this.paramRowData.dateBalance))
@@ -211,7 +206,7 @@ export class AppTableAccEntriesComponent implements OnInit {
       this.externalId&&sendNewAllocatedSum? this.newAllocatedSum.emit({swift_item_id:this.externalId, allocated_sum: this.dataSource.data.reduce((acc,value)=>acc+value.t_amountTransaction,0)}) : null;
     })
   }
-  openEntryModifyForm (actionType:string, row: any ) {
+  openEntryModifyForm (actionType:string, row: bAccountsEntriesList ) {
     this.dialogRef = this.dialog.open(AppAccEntryModifyFormComponent ,{minHeight:'400px', maxWidth:'1000px',data:{data:row} });
     this.dialogRef.componentInstance.action = actionType;
     this.dialogRef.componentInstance.swiftID=this.swiftID;
@@ -276,8 +271,8 @@ export class AppTableAccEntriesComponent implements OnInit {
    (index >= 0)? this.noAccountLedger.value.splice(index, 1) : null
   }
   clearAll(event) { event.target.textContent.trim() === 'ClearAll'? this.noAccountLedger.patchValue(['ClearAll']) : null};
-  addChips (el: any, column: string) {(['d_Debit', 'd_Credit'].includes(column))? this.noAccountLedger.value.push(el) : null}
-  updateFilter ( el: any) {
+  addChips (el: string, column: string) {(['d_Debit', 'd_Credit'].includes(column))? this.noAccountLedger.value.push(el) : null}
+  updateFilter ( el: string) {
     this.filter.nativeElement.value = this.filter.nativeElement.value + el+',';
     this.dataSource.filter = this.filter.nativeElement.value.slice(0,-1).trim();
     (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;

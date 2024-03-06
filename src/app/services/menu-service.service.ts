@@ -7,12 +7,12 @@ import { Observable, Subject } from 'rxjs';
 export class AppMenuServiceService {
 
   constructor() { }
-  private subjectName = new Subject <any> (); 
+  private subjectName = new Subject <{ text: boolean }> (); 
 
   sendToggleTree (treeState: boolean) { 
-    this.subjectName.next({ text: treeState }); //next() will feed the value in Subject
+    this.subjectName.next({ text: treeState }); 
   }
-  getToggleTree(): Observable<any> { 
+  getToggleTree(): Observable<{ text: boolean }> { 
     return this.subjectName.asObservable(); 
   }
 }

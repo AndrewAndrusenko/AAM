@@ -95,20 +95,15 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
      this.indexDBServiceS.getIndexDBStaticTables('getBoardsDataFromInstruments').subscribe ((data)=>this.boardIDs = (data.data as moexBoard[]))
      this.MarketDataService.getMarketDataSources('stock').subscribe(marketSourcesData => this.marketSources = marketSourcesData);
      this.InstrumentDataS.getInstrumentDataToUpdateTableSource().subscribe(data =>{
-      console.log('getInstrumentDataToUpdateTableSource',data);
      let index =  this.dataSource.data.findIndex(elem=>elem.id===data.data[0].id)
       switch (data.action) {
         case 'Deleted':
           this.dataSource.data.splice(index,1)
-          console.log('Deleted');
         break;
         case 'Created':
           this.dataSource.data.unshift(data.data[0])
-          console.log('Created');
         break;
         case 'Updated':
-          console.log('Updated',index,data.data[0].id);
-          
           this.dataSource.data[index] = {...data.data[0]}
         break;
       }

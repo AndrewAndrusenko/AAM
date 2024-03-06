@@ -20,7 +20,7 @@ export class HadlingCommonDialogsService {
   confirmDialog (actionToConfim:string, buttonToConfirm?:string):Observable<{action:string ,
     isConfirmed: boolean, 
     buttonLabel:string}> {
-    this.dialogRefConfirm = this.dialog.open(AppConfimActionComponent, {panelClass: 'custom-modalbox',} );
+    this.dialogRefConfirm = this.dialog.open(AppConfimActionComponent, {panelClass: 'custom-modalbox',minHeight:'10vh', maxHeight: '70vh', minWidth:'40wv',maxWidth:'70wv', } );
     this.dialogRefConfirm.componentInstance.actionToConfim = {
       action:actionToConfim ,
       isConfirmed: false, 
@@ -35,7 +35,7 @@ export class HadlingCommonDialogsService {
     this.dialogRefConfirm.componentInstance.jsonData = jsonData;
     this.dialogRefConfirm.componentInstance.captionTitle = captionTitle;
   }
-  snackResultHandler (result :any, action?: string, postion:any = 'top', closeAll:boolean=true, duration:number=3000) {
+  snackResultHandler (result :any, action?: string, postion:MatSnackBarVerticalPosition = 'top', closeAll:boolean=true, duration:number=3000) {
     this.verticalPosition=postion;
     if (result['name']=='error') { 
       this.dbErrorsMap.forEach (el => result['detail'].includes(el.constraintCode)? result['detail'] = el.errorText : null);

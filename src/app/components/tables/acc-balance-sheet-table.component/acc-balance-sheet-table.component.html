@@ -27,12 +27,12 @@
       <mat-icon matSuffix >refresh</mat-icon>
     </button>
   </span>
-
-  <mat-expansion-panel class="first-expansion" label="Balance closing panel" [disabled]="disabledControlElements"
+  <mat-expansion-panel class="headers-align"  label="Balance closing panel" [disabled]="disabledControlElements"
+    [expanded]="1"
     (opened)="panelOpenStateFirst = true"
     (closed)="panelOpenStateFirst = false" >
     <mat-expansion-panel-header>
-      <mat-panel-title [style.color]="menuColorGl">
+      <mat-panel-title >
         Balance closing procedure
       </mat-panel-title>
       <mat-panel-description>
@@ -42,95 +42,78 @@
     </mat-expansion-panel-header >
     <form class="submit"   style="font-size: 18px;   margin-top: 0.5%;">
       <span style="display: flex;  justify-content: space-between;   align-items: center;">
-      <span style="display: flex;  justify-content: space-between;   align-items: center; width:25%;margin-left: 1%;">
-        <button color = "primary" mat-raised-button 
-        style=" margin-left:1%; font-size: 18px;"
-        (click)="accountingBalanceClose(overdraftClosingBalance.checked)">
-        Close Balance
-      </button>
-      <mat-form-field  >
-        <input style="text-align: center;"matInput [min]="FirstOpenedAccountingDate" [matDatepicker]="closedate" placeholder="Operating day to close" 
-        [value]="firstClosingDate" [disabled]="true" >
-        <mat-datepicker-toggle matSuffix [for]="closedate"></mat-datepicker-toggle>
-        <mat-datepicker  #closedate></mat-datepicker>
-      </mat-form-field>
-      
-    </span>
-    <mat-slide-toggle #overdraftClosingBalance 
-    style="font-size:100%; letter-spacing: .05rem; margin-left: 2%;"
-    [style.color]="overdraftClosingBalance.checked ? 'red':'green' "
-    >Overdraft <br>{{overdraftClosingBalance.checked? 'allowed!':'forbidden'}}
-  </mat-slide-toggle>
-    <span style="display: flex;  justify-content: space-between;   align-items: center; width:50%; margin-left: 2%;"> 
-        <button color = "accent" mat-raised-button 
-          style="  font-size: 18px;"
-          (click)="checkBalance(iBalanceDate.value)">
-          Check Balance
-        </button>
-        <mat-form-field style=" margin-left: 2%;" >
-          <input #iBalanceDate 
-          style="text-align: center;"
-          matInput  [matDatepicker]="balancedate" 
-          [min]="dateOfOperaationsStart" 
-          placeholder="Date to veirfy balance" 
-          [value]="LastClosedDate">
-          <mat-datepicker-toggle matSuffix [for]="balancedate"></mat-datepicker-toggle>
-          <mat-datepicker [dateClass]="dateClass" #balancedate></mat-datepicker>
-        </mat-form-field>
-
-
-      <div  style="margin-left:1%; width:50%; color:  rgb(191, 188, 188);;">
-        <p class="mat-form-field" style = "margin-left:1%; color:rgb(198, 255, 215);">
-          <span style="color:  rgb(191, 188, 188); font-weight: bold;"
-          [style.color]=" (totalActive - totalPassive) ==0 ? 'green' : 'rgb(114, 0, 0)'" >
-            {{
-              (totalActive - totalPassive) ==0? 'Active = Passive : '+ (totalActive | number):
-            'Balance incorrect!! Difference is' + ((totalActive - totalPassive) )}}
+        <span style="display: flex;  justify-content: space-between;   align-items: center; width:25%;margin-left: 1%;">
+          <span style="display:grid; width: 50%;">
+            <button color = "primary" mat-raised-button 
+              style=" margin-left:1%; font-size: 18px;margin-top: 2%;"
+              (click)="accountingBalanceClose(overdraftClosingBalance.checked)">
+              Close Balance
+            </button>
+            <mat-slide-toggle #overdraftClosingBalance 
+              style="font-size:100%; letter-spacing: .05rem; margin-left: 4%;margin-top: 4%;"
+              [style.color]="overdraftClosingBalance.checked ? 'rgb(255, 57, 57)':'white'  "
+              >Overdraft {{overdraftClosingBalance.checked? 'allowed!':'forbidden'}}
+            </mat-slide-toggle>
           </span>
-        </p>
-        <p  *ngIf="(entriesTotal!=0)" class="mat-form-field" style = "margin-left:1%; color:rgb(198, 255, 215);"> 
-          <span style="color:  rgb(191, 188, 188); font-weight: bold;"
-          [style.color]=" (totalDebit - entriesTotal) ==0 ? 'green' : 'red'" >
-            {{
-              (totalDebit - entriesTotal) == 0? 'Debit = Entries : '+ (entriesTotal | number):
-            'Balance incorrect!! Difference is ' + ((totalDebit - entriesTotal) | number )}}
-          </span>
-        </p>
-      </div>
-
-    </span>
-  <span style="display: flex;  justify-content: space-between;   align-items: center; width:25%; margin-right: 2%; " > 
-        <mat-form-field  >
-          <input #iBalanceDateToOpen 
-          style="text-align: center;"
-          matInput  [matDatepicker]="openBalanceDatePicker" 
-          placeholder="Operating day to open" 
-          [value]="LastClosedDate" disabled="true">
-          <mat-datepicker-toggle matSuffix [for]="openBalanceDatePicker"></mat-datepicker-toggle>
-          <mat-datepicker [dateClass]="dateClass" #openBalanceDatePicker></mat-datepicker>
-        </mat-form-field>
-        <button color = "warn" mat-raised-button 
-        style="  font-size: 18px;"
-        (click)="openBalance()">
-        Open Balance
-      </button>
-    </span>
-    </span>
-
-
+          <mat-form-field style="width: 45%;" >
+            <input style="text-align: center"matInput [min]="FirstOpenedAccountingDate" [matDatepicker]="closedate" placeholder="Operating day to close" 
+            [value]="firstClosingDate" [disabled]="true" >
+            <mat-datepicker-toggle matSuffix [for]="closedate"></mat-datepicker-toggle>
+            <mat-datepicker  #closedate></mat-datepicker>
+          </mat-form-field>
+        </span>
+        <span style="display: flex;  justify-content: space-between;   align-items: center; width:44%; margin-left: 2%;"> 
+          <button color = "accent" mat-raised-button 
+            style="  font-size: 18px;width: 25%;"
+            (click)="checkBalance(iBalanceDate.value)">
+            Check Balance
+          </button>
+          <mat-form-field style=" margin-left: 2%; width: 25%;">
+            <input #iBalanceDate 
+            style="text-align: center;"
+            matInput  [matDatepicker]="balancedate" 
+            [min]="dateOfOperaationsStart" 
+            placeholder="Date to veirfy balance" 
+            [value]="LastClosedDate">
+            <mat-datepicker-toggle matSuffix [for]="balancedate"></mat-datepicker-toggle>
+            <mat-datepicker [dateClass]="dateClass" #balancedate></mat-datepicker>
+          </mat-form-field>
+          <div style="margin-left:1%; width:50%; color:  rgb(191, 188, 188);;">
+            <p class="mat-form-field" style = "margin-left:1%; color:rgb(198, 255, 215);">
+              <span style="color:rgb(191, 188, 188); font-weight: bold;"[style.color]=" (balanceCheckData.totalActive - balanceCheckData.totalPassive) ==0 ? 'green' : 'rgb(114, 0, 0)'" >
+                {{(balanceCheckData.totalActive - balanceCheckData.totalPassive) ==0? 'Active = Passive : '+ (balanceCheckData.totalActive | number):
+                'Balance incorrect!! Difference is' + ((balanceCheckData.totalActive - balanceCheckData.totalPassive) )}}
+              </span>
+            </p>
+            <p  *ngIf="(balanceCheckData.entriesTotal!=0)" class="mat-form-field" style = "margin-left:1%; color:rgb(198, 255, 215);"> 
+              <span style="color:rgb(191, 188, 188); font-weight: bold;" [style.color]=" (balanceCheckData.totalDebit - balanceCheckData.entriesTotal) ==0 ? 'green' : 'red'" >
+                {{(balanceCheckData.totalDebit - balanceCheckData.entriesTotal) == 0? 'Debit = Entries : '+ (balanceCheckData.entriesTotal | number):
+                'Balance incorrect!! Difference is ' + ((balanceCheckData.totalDebit - balanceCheckData.entriesTotal) | number )}}
+              </span>
+            </p>
+          </div>
+        </span>
+        <span style="display: flex;  justify-content: space-between;   align-items: center;  margin-right: 2%; " > 
+          <mat-form-field  style=" width:50%;">
+            <input #iBalanceDateToOpen 
+            style="text-align: center;" 
+            matInput  [matDatepicker]="openBalanceDatePicker" 
+            placeholder="Operating day to open" 
+            [value]="LastClosedDate" disabled="true">
+            <mat-datepicker-toggle matSuffix [for]="openBalanceDatePicker"></mat-datepicker-toggle>
+            <mat-datepicker [dateClass]="dateClass" #openBalanceDatePicker></mat-datepicker>
+          </mat-form-field>
+          <button color = "warn" mat-raised-button style="  font-size: 18px;width: 45%;" (click)="openBalance()"> Open Balance</button>
+        </span>
+      </span>
       <mat-divider style="margin-bottom: 1%;"></mat-divider>
-
-
     </form>
   </mat-expansion-panel>
-  <mat-expansion-panel class="headers-align" 
+  <mat-expansion-panel class="headers-align" title="ComplexSearch"
     (opened)="panelOpenStateSecond = true"
     (closed)="panelOpenStateSecond = false" >
     <mat-expansion-panel-header >
-      <mat-panel-title  
-      [style.color]="menuColorGl">
-        Complex search
-      </mat-panel-title>
+      <mat-panel-title>Complex search</mat-panel-title>
       <mat-panel-description>
         Tap to {{panelOpenStateSecond? 'hide': 'open'}} additional parameters
         <mat-icon color = 'accent'>filter_alt</mat-icon>
@@ -139,75 +122,63 @@
     <form class="submit" [formGroup]="searchParametersFG"  style="font-size: 18px; ">
       <span style="display: flex;  justify-content: space-between;   align-items:flex-start;  margin-right: 1%;margin-top: 0.2%;">
         <span style="display:grid; width: 15%;">
-      <button color = "primary"  class= "button-color" mat-raised-button 
-        style="margin:1%; font-size: 18px;"
-        (click)="submitQuery()">
-        Submit
-      </button>
-      <button color = "accent" mat-raised-button 
-      style="margin:1%; font-size: 18px;"
-      (click)="searchParametersFG.reset();
-      this.accounts=['ClearAll']">
-      ClearAll
-    </button>
-    </span>
-  
-      <mat-form-field appearance="fill">
-        <mat-label>Enter a date range</mat-label>
-        <mat-date-range-input [formGroup]="dataRange" [min]="dateOfOperaationsStart" [rangePicker]="picker" >
-          <input matStartDate  placeholder="Start date" formControlName="dateRangeStart">
-          <input matEndDate  placeholder="End date" formControlName="dateRangeEnd">
-        </mat-date-range-input>
-        <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
-        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-        <mat-date-range-picker [dateClass]="dateClass" #picker></mat-date-range-picker>
-        <mat-error *ngIf="dataRange.controls.dateRangeStart.hasError('matStartDateInvalid')">Invalid start date</mat-error>
-        <mat-error *ngIf="dataRange.controls.dateRangeEnd.hasError('matEndDateInvalid')">Invalid end date</mat-error>
-      </mat-form-field>
-
-      <mat-form-field class="example-chip-list" appearance="fill" style="width: 40%; ">
-        <mat-chip-list #chipList aria-label="Fruit selection"  >
-          <mat-chip *ngFor="let account of accounts" 
-          (removed)="remove(account)"
-          (click)=" clearAll($event);"
-          >
-            {{account}}
-            <button matChipRemove *ngIf="account!=='ClearAll'">
-              <mat-icon>cancel</mat-icon>
-            </button>
-          </mat-chip>
-          <input 
-          placeholder="Add account or account,account1,account2.."
-          formControlName="noAccountLedger"
-          [matChipInputFor]="chipList"
-          [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-          [matChipInputAddOnBlur]="true"
-          (matChipInputTokenEnd)="add($event)"
-          matTooltip="Type account number or paste accounts list separated by comma and press enter" >
-          <button style="font-size: 16px;" mat-raised-button matSuffix (click)="selectAccounts()">
-            <mat-icon *ngIf="action!=='View'" class = "icon_search">search</mat-icon> MultiSelect </button>
-        </mat-chip-list>
-      </mat-form-field>
-      <button color = "accent"  class= "button-color" mat-raised-button 
-        style="margin:1%; font-size: 18px;"
-        (click)="balanceDeepCheck(dataRange.controls.dateRangeEnd.value,dataRange.controls.dateRangeStart.value) ">
-        Balance Deep Check
-      </button>
-      <p  class="mat-form-field" style = " color:rgb(198, 255, 215);"> 
-        <span style="color:  rgb(191, 188, 188);white-space: pre-line;"
-        [style.color]=" (totalDebit - entriesTotal) ==0 ? 'green' : 'red'" >
-          {{
-            (totalDebit - entriesTotal) == 0? 'Balance = Entries : '+ (entriesTotal | number):
-          'Balance incorrect!!\n Difference is ' + ((totalDebit - entriesTotal) | number )}}
+          <button color = "primary"  class= "button-color" mat-raised-button 
+            style="margin:1%; font-size: 18px;"
+            (click)="submitQuery()">
+            Submit
+          </button>
+          <button color = "accent" mat-raised-button style="margin:1%; font-size: 18px;" (click)="searchParametersFG.reset();   this.accounts=['ClearAll']">ClearAll</button>
         </span>
-      </p>
-    </span>
-      <p>
-
-      </p>
+        <mat-form-field appearance="fill">
+          <mat-label>Enter a date range</mat-label>
+          <mat-date-range-input [formGroup]="dataRange" [min]="dateOfOperaationsStart" [rangePicker]="picker" >
+            <input matStartDate  placeholder="Start date" formControlName="dateRangeStart">
+            <input matEndDate  placeholder="End date" formControlName="dateRangeEnd">
+          </mat-date-range-input>
+          <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-date-range-picker [dateClass]="dateClass" #picker></mat-date-range-picker>
+          <mat-error *ngIf="dataRange.controls.dateRangeStart.hasError('matStartDateInvalid')">Invalid start date</mat-error>
+          <mat-error *ngIf="dataRange.controls.dateRangeEnd.hasError('matEndDateInvalid')">Invalid end date</mat-error>
+        </mat-form-field>
+        <mat-form-field class="example-chip-list" appearance="fill" style="width: 40%; ">
+          <mat-chip-list #chipList aria-label="Fruit selection"  >
+            <mat-chip *ngFor="let account of accounts" 
+            (removed)="remove(account)"
+            (click)=" clearAll($event);"
+            >
+              {{account}}
+              <button matChipRemove *ngIf="account!=='ClearAll'">
+                <mat-icon>cancel</mat-icon>
+              </button>
+            </mat-chip>
+            <input 
+            placeholder="Add account or account,account1,account2.."
+            formControlName="noAccountLedger"
+            [matChipInputFor]="chipList"
+            [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+            [matChipInputAddOnBlur]="true"
+            (matChipInputTokenEnd)="add($event)"
+            matTooltip="Type account number or paste accounts list separated by comma and press enter" >
+            <button style="font-size: 16px;" mat-raised-button matSuffix (click)="selectAccounts()">
+              <mat-icon *ngIf="action!=='View'" class = "icon_search">search</mat-icon> MultiSelect </button>
+          </mat-chip-list>
+        </mat-form-field>
+        <button color = "accent"  class= "button-color" mat-raised-button [disabled]="this.gRange.get('dateRangeEnd').value>LastClosedDate||!gRange.get('dateRangeEnd').value"
+          style="margin:1%; font-size: 18px;"
+          (click)="balanceDeepCheck(dataRange.controls.dateRangeEnd.value,dataRange.controls.dateRangeStart.value) ">
+          <button mat-icon-button (click)="showTip('balanceDeepCheck')"><mat-icon matSuffix>help</mat-icon></button>
+          Balance Deep Check
+        </button>
+        <p class="mat-form-field" style = " color:rgb(198, 255, 215);"> 
+          <span style="color:rgb(191, 188, 188);white-space: pre-line;" [style.color]=" (balanceCheckData.totalDebit - balanceCheckData.entriesTotal) ==0 ? 'green' : 'red'" >
+            {{(balanceCheckData.totalDebit - balanceCheckData.entriesTotal) == 0? 'Balance = Entries : '+ (balanceCheckData.entriesTotal | number):
+            'Balance incorrect!!\n Difference is ' + ((balanceCheckData.totalDebit - balanceCheckData.entriesTotal) | number )}}
+          </span>
+        </p>
+      </span>
     </form>
   </mat-expansion-panel>
-
   <div class="mat-elevation-z8">
     <table  #strategyTable mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class="mat-elevation-z8">
       <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i=index">
@@ -235,8 +206,7 @@
                 (click)="showAccounInfo(element)">
                 {{element[column] }}
               </button> 
-            </p>
-            
+            </p>            
             <p *ngSwitchDefault>
               {{element[column]}}  
             </p>
@@ -245,7 +215,7 @@
             <div class="tree-menu-context" *ngIf="!readOnly" cdkMenu >
               <button 
                 (click)="
-                  updateFilter($event, element[column],column);
+                  updateFilter(element[column],column);
                   iBalanceDate.value = filterDateFormated;"
                 class="tree-menu-item" cdkMenuItem>
                 <mat-icon class="menu-icon" matPrefix>filter_list</mat-icon> 
@@ -259,18 +229,15 @@
               </button> 
             </div>
           </ng-template>   
-      
         </td>
       </ng-container>
       <ng-container matColumnDef="expand">
         <th mat-header-cell *matHeaderCellDef aria-label="row actions">&nbsp;</th>
         <td mat-cell *matCellDef="let element"></td>
       </ng-container>
-      
       <ng-container matColumnDef="expandedDetail" >
         <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplayWithExpand.length"></td>
       </ng-container>
-
       <tr mat-header-row *matHeaderRowDef="columnsToDisplayWithExpand"></tr>
       <tr mat-row  *matRowDef="let element; columns: columnsToDisplayWithExpand;"
         class="element-row"
@@ -278,6 +245,6 @@
         (click)="expandedElement = expandedElement === element ? null : element">
       </tr>
     </table>
-    <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" [pageSize]="20" aria-label="Select page of users"></mat-paginator>
+    <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" [pageSize]="20" aria-label="Select page"></mat-paginator>
   </div>
 </ng-container>

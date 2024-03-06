@@ -15,7 +15,13 @@ import {AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import {AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
 import {indexDBService } from 'src/app/services/indexDB.service';
 import {MatCheckbox } from '@angular/material/checkbox';
-import { number } from 'echarts';
+import { MatSelectChange } from '@angular/material/select';
+interface localFilters {
+  reset?:boolean,
+  portfolio_code?:string[],
+  null_data?:boolean,
+  rest?:boolean
+}
 @Component({
   selector: 'app-inv-portfolio-npv_roi_performance',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -28,7 +34,7 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
   private subscriptions = new Subscription()
   @Input() useGetClientsPortfolios:boolean = false;
   @Input() rowsPerPages:number = 20;
-  @Input() filters:any;
+  @Input() filters:localFilters;
   @Input() UI_portfolio_selection:boolean = true;
   columnsWithHeaders: tableHeaders[] = [
     {fieldName:'portfolioname',displayName:'Code'},
@@ -60,8 +66,8 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
   portfolios: Array<string> = ['ClearAll'];
   filterednstrumentsLists : Observable<string[]>;
   searchParametersFG: FormGroup;
-  defaultFilterPredicate?: (data: any, filter: string) => boolean;
-  multiFilter?: (data: any, filter: string) => boolean;
+  defaultFilterPredicate?: (data: PortfolioPerformnceData, filter: string) => boolean;
+  multiFilter?: (data: PortfolioPerformnceData, filter: string) => boolean;
   filteredCurrenciesList: Observable<currencyCode[]>;
   mp_strategies_list: StrategiesGlobalData[]=[];
   currencySymbol: string = '$';
@@ -131,7 +137,7 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
       return !filter || filter_array.reduce((acc,val)=>acc+Number(val[1]),0)===0;
     }
   }
-  setFilters (filters:any) {
+  setFilters (filters:localFilters) {
     if (filters.reset === true) {
       return this.InvestmentDataService.sendPerformnceData({data:null,currencySymbol:'', showChart: false})
 
@@ -143,13 +149,13 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
     this.searchParametersFG.reset();
     this.portfolios=['ClearAll'];
   }
-  setPortfoliosList(e:any) {
+  setPortfoliosList(e:MatSelectChange) {
     this.InvestmentDataService.getPortfoliosListForMP(e.value,'getPortfoliosByMP_StrtgyID').subscribe(data=>{
       this.portfolios=['ClearAll',...data]
       this.filterALL.nativeElement.value = e.value;
     })
   }
-  initialFilterOfDataSource (filter:any) {
+  initialFilterOfDataSource (filter:localFilters) {
     if (filter?.rest===true) {
       this.dataSource.data = this.fullDataSource;
       return;
@@ -192,7 +198,7 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
   changedValueofChip (value:string, chipArray:string[],control:AbstractControl) {
     chipArray[chipArray.length-1] === 'ClearAll'? chipArray.push(value) : chipArray[chipArray.length-1] = value
   }
-  add(event: MatChipInputEvent,chipArray:string[],control:AbstractControl): any[] {
+  add(event: MatChipInputEvent,chipArray:string[],control:AbstractControl): string[] {
     const value = (event.value || '').trim();
     const valueArray = event.value.split(',');
     (value)? chipArray = [...chipArray,...valueArray] : null;
@@ -209,13 +215,12 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
     };
     return chipArray;
   }
-  addChips (el: any, column: string) {(['secid'].includes(column))? this.instruments.push(el):null;}
-  updateFilter (el: any) {
+  updateFilter (el: string) {
     this.filterALL.nativeElement.value = this.filterALL.nativeElement.value + el+',';
     this.dataSource.filter = this.filterALL.nativeElement.value.slice(0,-1).trim().toLowerCase();
     (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
   }
-  applyFilter(event: any) {
+  applyFilter(event: KeyboardEvent) {
     const filterValue = (event.target as HTMLInputElement).value 
     this.dataSource.filter = filterValue.trim().toLowerCase();
     this.dataSource.paginator? this.dataSource.paginator.firstPage():null;

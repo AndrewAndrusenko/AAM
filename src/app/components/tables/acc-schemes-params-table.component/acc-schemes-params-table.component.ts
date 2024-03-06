@@ -84,20 +84,6 @@ export class AppAccSchemesParamsTable {
     this.CommonDialogsService.snackResultHandler({name:'success',detail: el +' has been copied'},'Clipboard',null,null,500)
   }
   exportToExcel() {
-    let dataTypes =  {
-      id:'number',
-    }
-    let dataToExport =  structuredClone(this.dataSource.data);
-    dataToExport.map(el=>{
-      Object.keys(el).forEach(key=>{
-        switch (true==true) {
-          case el[key]&&dataTypes[key]==='number': return el[key]=Number(el[key])
-          case el[key]&&dataTypes[key]==='Date': return el[key]=new Date(el[key])
-          default: return el[key]=el[key]
-        }
-      })
-      return el;
-    });
-    this.HandlingCommonTasksS.exportToExcel (dataToExport,"SchemesParameterData");  
+     this.HandlingCommonTasksS.exportToExcel (this.dataSource.data,"SchemesParameterData",['id'],[]);  
   }
 }

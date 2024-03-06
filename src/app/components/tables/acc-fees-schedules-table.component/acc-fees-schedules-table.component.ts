@@ -73,7 +73,7 @@ export class AppaIAccFeesSchedulesTable {
   @ViewChild('filterALL', { static: false }) filterALL: ElementRef;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
-  multiFilter?: (data: any, filter: string) => boolean;
+  multiFilter?: (data: FeesSchedulesData, filter: string) => boolean;
   refFeeForm : MatDialogRef<AppAccFeesScheduleFormComponent>
 
   constructor(
@@ -149,12 +149,12 @@ export class AppaIAccFeesSchedulesTable {
       success? this.refFeeForm.close():null;
     })
   }
-  updateFilter (el: any) {
+  updateFilter (el: string) {
     this.filterALL.nativeElement.value = this.filterALL.nativeElement.value + el+',';
     this.dataSource.filter = this.filterALL.nativeElement.value.slice(0,-1).trim().toLowerCase();
     (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
   }
-  applyFilter(event: any) {
+  applyFilter(event: KeyboardEvent) {
     const filterValue = (event.target as HTMLInputElement).value 
     this.dataSource.filter = filterValue.trim().toLowerCase();
     this.dataSource.paginator? this.dataSource.paginator.firstPage():null;

@@ -1,19 +1,19 @@
-import { Component, ElementRef, Input, ViewChild } from '@angular/core';
-import { MatTableDataSource } from '@angular/material/table';
-import { MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
-import { AuthService } from 'src/app/services/auth.service';
-import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
-import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
-import { formatNumber } from '@angular/common';
-import { animate, state, style, transition, trigger } from '@angular/animations';
-import { AppFeesHandlingService } from 'src/app/services/fees-handling.service';
-import { FeesMainData } from 'src/app/models/fees-interfaces.model';
-import { Subscription } from 'rxjs';
-import { tableHeaders } from 'src/app/models/interfaces.model';
-import { AppAccFeesMainFormComponent } from '../../forms/acc-fees-main-form.component/acc-fees-main-form.component';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { TablePortfolios } from '../portfolios-table.component/portfolios-table.component';
+import {Component, ElementRef, Input, ViewChild } from '@angular/core';
+import {MatTableDataSource } from '@angular/material/table';
+import {MatPaginator } from '@angular/material/paginator';
+import {MatSort } from '@angular/material/sort';
+import {AuthService } from 'src/app/services/auth.service';
+import {HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
+import {HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
+import {formatNumber } from '@angular/common';
+import {animate, state, style, transition, trigger } from '@angular/animations';
+import {AppFeesHandlingService } from 'src/app/services/fees-handling.service';
+import {FeesMainData } from 'src/app/models/fees-interfaces.model';
+import {Subscription } from 'rxjs';
+import {tableHeaders } from 'src/app/models/interfaces.model';
+import {AppAccFeesMainFormComponent } from '../../forms/acc-fees-main-form.component/acc-fees-main-form.component';
+import {MatDialog, MatDialogRef } from '@angular/material/dialog';
+import {TablePortfolios } from '../portfolios-table.component/portfolios-table.component';
 @Component({
   selector: 'acc-fees-main-table',
   templateUrl: './acc-fees-main-table.component.html',
@@ -76,7 +76,7 @@ export class AppAccFeesSchedulesTableComponent  {
   @ViewChild('filterALL', { static: false }) filterALL: ElementRef;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
-  multiFilter?: (data: any, filter: string) => boolean;
+  multiFilter?: (data: FeesMainData, filter: string) => boolean;
   refFeeForm : MatDialogRef<AppAccFeesMainFormComponent>
   feesCodes = ['','Management Fee', 'Performance Fee']
   objectCodes = ['','Portfolio', 'Account']
@@ -168,12 +168,12 @@ export class AppAccFeesSchedulesTableComponent  {
       }
       else {this.expandAllowed=true}
     }
-    updateFilter (el: any) {
+    updateFilter (el: string) {
       this.filterALL.nativeElement.value = this.filterALL.nativeElement.value + el+',';
       this.dataSource.filter = this.filterALL.nativeElement.value.slice(0,-1).trim().toLowerCase();
       (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
     }
-    applyFilter(event: any) {
+    applyFilter(event: KeyboardEvent) {
       const filterValue = (event.target as HTMLInputElement).value 
       this.dataSource.filter = filterValue.trim().toLowerCase();
       this.dataSource.paginator? this.dataSource.paginator.firstPage():null;

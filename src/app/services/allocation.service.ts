@@ -107,10 +107,11 @@ export class AppAllocationService {
   }
   createAllocationAccountingStatus (allocationTable:AppallocationTableComponent,tradeToConfirmProcessStatus:{id:number,accounting:number}[],createdAccountingTransactions: bAccountTransaction[]|bLedgerTransaction[]) {
     let status = tradeToConfirmProcessStatus.reduce((acc,val)=>acc+val.accounting,0)
-    status===0? allocationTable.submitQuery(true,false).then(data=>{
-      this.sendCreatedAccounting(createdAccountingTransactions)
+    if (status===0) {
+      allocationTable.submitQuery(true,false);
+      this.sendCreatedAccounting(createdAccountingTransactions);
       this.CommonDialogsService.snackResultHandler({name:'success',detail:'Accounting has been created'},'Allocation Accounting',undefined,false);
-    }):null;
+    }
   }
   deleteAccountingForAllocatedTrades (allocationTable:AppallocationTableComponent){
     let tradesToDelete = allocationTable.selection.selected.map(trade=>Number(trade.id))

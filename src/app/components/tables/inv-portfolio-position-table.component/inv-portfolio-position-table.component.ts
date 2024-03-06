@@ -15,6 +15,13 @@ import {AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import {AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
 import {indexDBService } from 'src/app/services/indexDB.service';
 import {MatCheckbox } from '@angular/material/checkbox';
+import { MatSelectChange } from '@angular/material/select';
+interface localFilters {
+  reset?:boolean,
+  portfolio_code?:string[],
+  null_data?:boolean,
+  rest?:boolean
+}
 @Component({
   selector: 'app-inv-portfolio-position-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -27,7 +34,7 @@ export class AppaInvPortfolioPositionTableComponent {
   private subscriptions = new Subscription()
   @Input() useGetClientsPortfolios:boolean = false;
   @Input() rowsPerPages:number = 15;
-  @Input() filters:any;
+  @Input() filters:localFilters;
   @Input() readOnly:boolean = false;
   @Input() UI_portfolio_selection:boolean = true;
   @Input() UI_portfolio_zero:boolean = true;
@@ -45,19 +52,10 @@ export class AppaInvPortfolioPositionTableComponent {
   portfolios: string[] = ['ClearAll'];
   filterednstrumentsLists : Observable<string[]>;
   searchParametersFG: FormGroup;
-  defaultFilterPredicate?: (data: any, filter: string) => boolean;
-  multiFilter?: (data: any, filter: string) => boolean;
+  defaultFilterPredicate?: (data: portfolioPositions, filter: string) => boolean;
+  multiFilter?: (data: portfolioPositions, filter: string) => boolean;
   filteredCurrenciesList: Observable<currencyCode[]>;
   mp_strategies_list: StrategiesGlobalData[]=[];
-/*   activeTab:string='';
-  tabsNames = ['Portfolio Positions']
-  @HostListener('document:keydown', ['$event'])
-  handleKeyboardEvent(event: KeyboardEvent) { 
-    if (this.tabsNames.includes(this.activeTab)){
-      event.altKey&&event.key==='r'? this.submitQuery(false,true):null;
-      event.altKey&&event.key==='w'? this.exportToExcel():null;
-    }
-  } */
   constructor(
     private AuthService:AuthService,  
     private indexDBService:indexDBService,
@@ -109,7 +107,7 @@ export class AppaInvPortfolioPositionTableComponent {
       return !filter || filter_array.reduce((acc,val)=>acc+Number(val[1]),0)===0;
     }
   }
-  setPortfoliosList(e:any) {
+  setPortfoliosList(e:MatSelectChange) {
     this.InvestmentDataService.getPortfoliosListForMP(e.value,'getPortfoliosByMP_StrtgyID').subscribe(data=>{
       this.portfolios=['ClearAll',...data]
       this.filterALL.nativeElement.value = e.value;
@@ -123,7 +121,7 @@ export class AppaInvPortfolioPositionTableComponent {
       this.dataSource.data = this.dataSource.filteredData.filter(el=>el['not_zero_npv']===true)
     }
   }
-  initialFilterOfDataSource (filter:any) {
+  initialFilterOfDataSource (filter:localFilters) {
     if (filter?.rest===true) {
       this.dataSource.data = this.fullDataSource;
       return;
@@ -141,7 +139,7 @@ export class AppaInvPortfolioPositionTableComponent {
     changes['filters']?.currentValue? this.setFilters(changes['filters']?.currentValue) : null;
     this.notNullCB?.checked===false? this.showZeroPortfolios(false):null;
   }
-  setFilters (filters:any) {
+  setFilters (filters:localFilters) {
     filters.portfolio_code? this.portfolios =['ClearAll',...filters.portfolio_code]:null;
     this.submitQuery(false,false);
   }
@@ -174,7 +172,7 @@ export class AppaInvPortfolioPositionTableComponent {
   changedValueofChip (value:string, chipArray:string[],control:AbstractControl) {
     chipArray[chipArray.length-1] === 'ClearAll'? chipArray.push(value) : chipArray[chipArray.length-1] = value
   }
-  add(event: MatChipInputEvent,chipArray:string[],control:AbstractControl): any[] {
+  add(event: MatChipInputEvent,chipArray:string[],control:AbstractControl): string[] {
     const value = (event.value || '').trim();
     const valueArray = event.value.split(',');
     (value)? chipArray = [...chipArray,...valueArray] : null;
@@ -191,13 +189,12 @@ export class AppaInvPortfolioPositionTableComponent {
     };
     return chipArray;
   }
-  addChips (el: any, column: string) {(['secid'].includes(column))? this.instruments.push(el):null;}
-  updateFilter (el: any) {
+  updateFilter (el: string) {
     this.filterALL.nativeElement.value = this.filterALL.nativeElement.value + el+',';
     this.dataSource.filter = this.filterALL.nativeElement.value.slice(0,-1).trim().toLowerCase();
     (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
   }
-  applyFilter(event: any) {
+  applyFilter(event: KeyboardEvent) {
     const filterValue = (event.target as HTMLInputElement).value 
     this.dataSource.filter = filterValue.trim().toLowerCase();
     this.dataSource.paginator? this.dataSource.paginator.firstPage():null;

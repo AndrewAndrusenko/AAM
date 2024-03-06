@@ -366,13 +366,42 @@ we get closest market price for every position
 4|| Fixed acc-entries-table.component.ts. Refactored getting of transaction types. Insted of using cache service directly, request goes into exhaustMap pipe and component is beeing notified when data has been cached
 5|| Fixed DB and middleware layer to get list of entries based on externalId. ExteralId is used to link incoming swifts message with generated entries. Parameter of externalId has been added to pg sql function f_a_b_get_all_entries_transactions.sql and to sql request of middleware layer
 6|| Refactored any type to the secure ones in the following components:
-  market-data.service.ts
+  market-data.service.ts,
   instrument-data.service.ts,
   instrument-table.component.ts,
   investment-data.service.service.ts,
   log-processing.service.ts,
 7|| Refactored function of export to excel
-
+--------------------------------------------------------------------------------------------
+05/03/2024 - 06/03/2024
+1|| Refactored acc-balance-sheet-table.component.ts
+  Functions to close, open and check the balance have been isolated in new service accounting-balances.service.ts
+  All embedded subscriptions and promises patterns have been replaced by RxJS observables/pipes
+  All variables of any type have been refactored to the variables with specific type
+  All dependant components have been updated accordingly
+2|| Refactored market-data-table.component.ts according to new ccounting-balances.service.ts and optimized UI 
+3|| Refactored any type to the secure ones in the following components:
+src/app/services/tree-menu.service.ts,
+src/app/components/tables/strategy_structure-hist-table.component/strategy_structure-hist-table.component.ts
+src/app/components/tables/strategy_structure-table.component/strategy_structure-table.component.ts
+src\app\components\tables\strategies-table.component\strategies-table.component.ts
+src\app\components\tables\inv-portfolio-revenue-factor-analysis\inv-portfolio-revenue-factor-analysis.ts,
+src\app\components\tables\inv-portfolio-position-table.component\inv-portfolio-position-table.component.ts,
+src\app\components\tables\inv-portfolio-npv_roi_performance\inv-portfolio-npv_roi_performance.ts
+src\app\components\tables\inv-portfolio-npv_dynamic\inv-portfolio-npv_dynamic.ts
+src\app\components\tables\inv-generate-orders-table.component\inv-generate-orders-table.component.ts
+src\app\components\tables\acc-transaction-types-table.component\acc-transaction-types-table.component.ts
+src\app\components\tables\acc-schemes-LL-table.component\acc-schemes-LL-table.component.ts
+src\app\components\tables\acc-schemes-AL-table.component\acc-schemes-AL-table.component.ts
+src\app\components\tables\acc-fees-schedules-table.component\acc-fees-schedules-table.component.ts
+src\app\components\tables\acc-fees-portfolios-with-schedules-table.component\acc-fees-portfolios-with-schedules-table.component.ts
+src/app/components/tables/acc-fees-performance-processing-table.component/acc-fees-performance-processing-table.component.ts
+src\app\components\tables\acc-fees-performance-calculation-table.component\acc-fees-performance-calculation-table.component.ts
+src\app\components\tables\acc-fees-management-processing-table.component\acc-fees-management-processing-table.component.ts
+src\app\components\tables\acc-fees-management-calculation-table.component\acc-fees-management-calculation-table.component.ts
+src\app\components\tables\acc-fees-main-table.component\acc-fees-main-table.component.ts
+src\app\components\tables\acc-entries-table.component\acc-entries-table.component.ts
+src/app/components/tables/acc-balance-sheet-table.component/acc-balance-sheet-table.component.ts
 
 
 ToDo

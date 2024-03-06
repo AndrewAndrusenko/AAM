@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Output, ViewChild } from '@angular/core';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef} from '@angular/material/dialog';
 import { AppClientFormComponent } from '../../forms/client-form.component/client-form.component';
 import { AppNewAccountComponent } from '../../forms/portfolio-form.component/portfolio-form.component';
@@ -43,7 +43,7 @@ export class AppClientsTableComponent  {
   @ViewChild(MatSort) sort: MatSort;
   dialogRef: MatDialogRef<AppClientFormComponent>;
   dialogAccountRef: MatDialogRef<AppNewAccountComponent>
-  dialogNewAccountRef: MatDialogRef<AppNewAccountComponent, any>;
+  dialogNewAccountRef: MatDialogRef<AppNewAccountComponent>;
   @Output() public modal_principal_parent = new EventEmitter();
   action ='';
   investmentNodeColor=investmentNodeColor

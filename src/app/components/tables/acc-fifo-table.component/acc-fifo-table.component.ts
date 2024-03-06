@@ -9,13 +9,13 @@ import {HadlingCommonDialogsService } from 'src/app/services/hadling-common-dial
 import {HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import {AuthService } from 'src/app/services/auth.service';
 import {AppAccFeesScheduleFormComponent } from '../../forms/acc-fees-schedule-form.component/acc-fees-schedule-form.component';
-import { MatDialogRef} from '@angular/material/dialog';
-import { FifoTableData } from 'src/app/models/accountng-intefaces.model';
-import { AccountingTradesService } from 'src/app/services/accounting-trades.service';
-import { AppTradeService } from 'src/app/services/trades-service.service';
-import { AbstractControl, FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { COMMA, ENTER } from '@angular/cdk/keycodes';
-import { MatChipInputEvent } from '@angular/material/chips';
+import {MatDialogRef} from '@angular/material/dialog';
+import {FifoTableData } from 'src/app/models/accountng-intefaces.model';
+import {AccountingTradesService } from 'src/app/services/accounting-trades.service';
+import {AppTradeService } from 'src/app/services/trades-service.service';
+import {AbstractControl, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import {COMMA, ENTER } from '@angular/cdk/keycodes';
+import {MatChipInputEvent } from '@angular/material/chips';
 @Component({
   selector: 'acc-fifo-table',
   changeDetection: ChangeDetectionStrategy.OnPush,

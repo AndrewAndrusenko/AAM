@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, ReplaySubject, Subject, filter, forkJoin, of, switchMap} from 'rxjs';
+import { Observable, ReplaySubject, Subject, filter, forkJoin, map, of, switchMap} from 'rxjs';
 import { bAccounts, bAccountsEntriesList, bAccountTransaction, bBalanceData, bBalanceFullData, bcAccountType_Ext, bcEnityType, bcTransactionType_Ext, bLedger, bLedgerAccounts, bLedgerBalanceData, bLedgerTransaction, bTransactionForm, SWIFTSGlobalListmodel, SWIFTStatement950model } from '../models/accountng-intefaces.model';
 import { HadlingCommonDialogsService } from './hadling-common-dialogs.service';
 import { BalanceDataPerPortfoliosOnDate } from '../models/accountng-intefaces.model';
@@ -187,9 +187,9 @@ export class AppAccountingService {
     const params = {'Action': Action}
     return this.http.get <Date>('/api/DEA/fGetAccountingData/', { params: params })
   }
-  GetbAccountingSumTransactionPerDate (balanceDate:string, Action: string):Observable <number> {
+  GetbAccountingSumTransactionPerDate (balanceDate:string, Action: string):Observable <{amountTransaction:number}[]> {
     const params = {'balanceDate': balanceDate,'Action': Action}
-    return this.http.get <number>('/api/DEA/fGetAccountingData/', { params: params })
+    return this.http.get <{amountTransaction:number}[]>('/api/DEA/fGetAccountingData/', { params: params })
   }
   /*----------------------AccountsUI---------------------------------------------------------*/
   updateAccountAccounting (data:bAccounts, action:string):  Observable<bAccounts[]> { 
@@ -279,7 +279,13 @@ export class AppAccountingService {
     (searchParameters !== null) ?  params = {...params,...searchParameters}: null
     return this.http.get <bBalanceFullData[]>('/api/DEA/fGetAccountingData/', {params:params })
   }
-  accountingBalanceCloseInsert (data:{closingDate : string}) {return this.http.post <{rows_affected: string}[]> ('/api/DEA/accountingBalanceCloseInsert/',{'data': data})}
+  accountingBalanceCloseInsert (data:{closingDate : string}):Observable<{message:string,state:string}> {
+    return this.http.post <{rows_affected: string}[]> ('/api/DEA/accountingBalanceCloseInsert/',{'data': data}).pipe(
+      map(rows=>{return {
+        message:'Balance has been closed for '+ data.closingDate +'.\n'+ rows[0].rows_affected + ' rows has been inserted',
+        state:'closed'}})
+    )
+  }
   accountingBalanceDayOpen (data:{dateToOpen : string}) {return this.http.post <{rows_affected: string}[]> ('/api/DEA/accountingBalanceDayOpen/',{'data': data})}
   GetDeepBalanceCheck (dateBalanceToCheck:string, firstDayOfCalculation: string, Action: string):Observable <bBalanceFullData[]> {
     let params = {'dateBalanceToCheck': dateBalanceToCheck,'firstDayOfCalculation':firstDayOfCalculation, 'Action': Action};

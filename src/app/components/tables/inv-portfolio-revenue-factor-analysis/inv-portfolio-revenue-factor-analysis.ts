@@ -14,7 +14,12 @@ import {AuthService } from 'src/app/services/auth.service';
 import {AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import {AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
 import {indexDBService } from 'src/app/services/indexDB.service';
-import {MatCheckbox } from '@angular/material/checkbox';
+import { MatSelectChange } from '@angular/material/select';
+interface localFilters {
+  reset?:boolean,
+  portfolio_code?:string[],
+  null_data?:boolean
+}
 @Component({
   selector: 'app-inv-portfolio-revenue-factor-analysis',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -27,7 +32,7 @@ export class AppaInvPortfolioRevenueFactorAnalysisTableComponent {
   private subscriptions = new Subscription()
   @Input() useGetClientsPortfolios:boolean = false;
   @Input() rowsPerPages:number = 20;
-  @Input() filters:any;
+  @Input() filters: localFilters;
   @Input() UI_portfolio_selection:boolean = true;
   columnsWithHeaders: tableHeaders[] = [
     {fieldName:'report_date',displayName:'Date'},
@@ -64,7 +69,7 @@ export class AppaInvPortfolioRevenueFactorAnalysisTableComponent {
   filteredCurrenciesList: Observable<currencyCode[]>;
   mp_strategies_list: StrategiesGlobalData[]=[];
   currencySymbol: string = '$';
-  multiFilter?: (data: any, filter: string) => boolean;
+  multiFilter?: (data: RevenueFactorData, filter: string) => boolean;
   constructor(
     private AuthServiceS:AuthService,  
     private indexDBServiceS:indexDBService,
@@ -121,7 +126,7 @@ export class AppaInvPortfolioRevenueFactorAnalysisTableComponent {
       return !filter || filter_array.reduce((acc,val)=>acc+Number(val[1]),0)===0;
     }
   }
-  setFilters (filters:any) {
+  setFilters (filters:localFilters) {
     if (filters.reset === true) {
       return this.InvestmentDataService.sendPerformnceData({data:null,currencySymbol:'', showChart: false})
 
@@ -133,7 +138,7 @@ export class AppaInvPortfolioRevenueFactorAnalysisTableComponent {
     this.searchParametersFG.reset();
     this.portfolios=['ClearAll'];
   }
-  setPortfoliosList(e:any) {
+  setPortfoliosList(e:MatSelectChange) {
     this.InvestmentDataService.getPortfoliosListForMP(e.value,'getPortfoliosByMP_StrtgyID').subscribe(data=>{
       this.portfolios=['ClearAll',...data]
       this.filterALL.nativeElement.value = e.value;
@@ -168,7 +173,7 @@ export class AppaInvPortfolioRevenueFactorAnalysisTableComponent {
   changedValueofChip (value:string, chipArray:string[],control:AbstractControl) {
     chipArray[chipArray.length-1] === 'ClearAll'? chipArray.push(value) : chipArray[chipArray.length-1] = value
   }
-  add(event: MatChipInputEvent,chipArray:string[],control:AbstractControl): any[] {
+  add(event: MatChipInputEvent,chipArray:string[],control:AbstractControl): string[] {
     const value = (event.value || '').trim();
     const valueArray = event.value.split(',');
     (value)? chipArray = [...chipArray,...valueArray] : null;
@@ -185,12 +190,12 @@ export class AppaInvPortfolioRevenueFactorAnalysisTableComponent {
     };
     return chipArray;
   }
-  updateFilter (el: any) {
+  updateFilter (el: string) {
     this.filterALL.nativeElement.value = this.filterALL.nativeElement.value + el+',';
     this.dataSource.filter = this.filterALL.nativeElement.value.slice(0,-1).trim().toLowerCase();
     (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
   }
-  applyFilter(event: any) {
+  applyFilter(event: KeyboardEvent) {
     const filterValue = (event.target as HTMLInputElement).value 
     this.dataSource.filter = filterValue.trim().toLowerCase();
     this.dataSource.paginator? this.dataSource.paginator.firstPage():null;

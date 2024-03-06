@@ -12,9 +12,9 @@ import {HadlingCommonDialogsService } from 'src/app/services/hadling-common-dial
 import {HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import {AuthService } from 'src/app/services/auth.service';
 import {AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
-import { AppFeesHandlingService } from 'src/app/services/fees-handling.service';
-import { PerformanceFeeCalcData } from 'src/app/models/fees-interfaces.model';
-import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
+import {AppFeesHandlingService } from 'src/app/services/fees-handling.service';
+import {PerformanceFeeCalcData } from 'src/app/models/fees-interfaces.model';
+import {AtuoCompleteService } from 'src/app/services/auto-complete.service';
 @Component({
   selector: 'app-acc-fees-performance-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -46,7 +46,7 @@ export class AppaIAccFeesPerformanceTableComponent {
   @ViewChild(MatSort) sort: MatSort;
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
   searchParametersFG: FormGroup;
-  multiFilter?: (data: any, filter: string) => boolean;
+  multiFilter?: (data: PerformanceFeeCalcData, filter: string) => boolean;
   mp_strategies_list: StrategiesGlobalData[]=[];
   portfolios: Array<string> = ['ClearAll'];
   currencySymbol: string = '$';
@@ -156,7 +156,7 @@ export class AppaIAccFeesPerformanceTableComponent {
   changedValueofChip (value:string, chipArray:string[]) {
     chipArray[chipArray.length-1] === 'ClearAll'? chipArray.push(value) : chipArray[chipArray.length-1] = value
   }
-  add(event: MatChipInputEvent,chipArray:string[]): any[] {
+  add(event: MatChipInputEvent,chipArray:string[]): string[] {
     const value = (event.value || '').trim();
     const valueArray = event.value.split(',');
     (value)? chipArray = [...chipArray,...valueArray] : null;
@@ -173,12 +173,12 @@ export class AppaIAccFeesPerformanceTableComponent {
     };
     return chipArray;
   }
-  updateFilter (el: any) {
+  updateFilter (el: string) {
     this.filterALL.nativeElement.value = this.filterALL.nativeElement.value + el+',';
     this.dataSource.filter = this.filterALL.nativeElement.value.slice(0,-1).trim().toLowerCase();
     (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
   }
-  applyFilter(event: any) {
+  applyFilter(event: KeyboardEvent) {
     const filterValue = (event.target as HTMLInputElement).value 
     this.dataSource.filter = filterValue.trim().toLowerCase();
     this.dataSource.paginator? this.dataSource.paginator.firstPage():null;

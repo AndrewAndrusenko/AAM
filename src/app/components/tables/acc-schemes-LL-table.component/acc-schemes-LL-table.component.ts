@@ -11,7 +11,7 @@ import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {AccountingSchemesService } from 'src/app/services/accounting-schemes.service';
 import {tableHeaders } from 'src/app/models/interfaces.model';
 import {AppAccSchemesLL_FormComponent } from '../../forms/acc-schemes-ll-form.component/acc-schemes-ll-form.component';
-import { bcSchemeLedgerTransaction, bcSchemesProcesses } from 'src/app/models/acc-schemes-interfaces';
+import {bcSchemeLedgerTransaction, bcSchemesProcesses } from 'src/app/models/acc-schemes-interfaces';
 @Component({
   selector: 'acc-schemes-LL-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -72,18 +72,6 @@ export class AppAccSchemesLL_Table {
       "fieldName": "accountNo",
       "displayName": "AccountNo"
     },
-/*     {
-      "fieldName": "cDate",
-      "displayName": "cDate"
-    },
-    {
-      "fieldName": "cxActTypeCode_Ext",
-      "displayName": "cxActTypeCode_Ext"
-    },
-    {
-      "fieldName": "cxActTypeCode",
-      "displayName": "cxActTypeCode"
-    }, */
     {
       "fieldName": "cLedgerType",
       "displayName": "cLedgerType"
@@ -102,7 +90,7 @@ export class AppAccSchemesLL_Table {
   @ViewChild('filterALL', { static: false }) filterALL: ElementRef;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
-  multiFilter?: (data: any, filter: string) => boolean;
+  multiFilter?: (data: bcSchemeLedgerTransaction, filter: string) => boolean;
   refFeeForm : MatDialogRef<AppAccSchemesLL_FormComponent>
   constructor(
     private AuthServiceS:AuthService,  
@@ -170,12 +158,12 @@ export class AppAccSchemesLL_Table {
       success? this.refFeeForm.close():null;
     })
   }
-  updateFilter (el: any) {
+  updateFilter (el: string) {
     this.filterALL.nativeElement.value = this.filterALL.nativeElement.value + el+',';
     this.dataSource.filter = this.filterALL.nativeElement.value.slice(0,-1).trim().toLowerCase();
     (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
   }
-  applyFilter(event: any) {
+  applyFilter(event: KeyboardEvent) {
     const filterValue = (event.target as HTMLInputElement).value 
     this.dataSource.filter = filterValue.trim().toLowerCase();
     this.dataSource.paginator? this.dataSource.paginator.firstPage():null;
@@ -186,20 +174,6 @@ export class AppAccSchemesLL_Table {
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
   }
   exportToExcel() {
-    let dataTypes =  {
-      id:'number',
-    }
-    let dataToExport =  structuredClone(this.dataSource.data);
-    dataToExport.map(el=>{
-      Object.keys(el).forEach(key=>{
-        switch (true==true) {
-          case el[key]&&dataTypes[key]==='number': return el[key]=Number(el[key])
-          case el[key]&&dataTypes[key]==='Date': return el[key]=new Date(el[key])
-          default: return el[key]=el[key]
-        }
-      })
-      return el;
-    });
-    this.HandlingCommonTasksS.exportToExcel (dataToExport,"LLSchemesData");  
+    this.HandlingCommonTasksS.exportToExcel (this.dataSource.data,"LLSchemesData",['id'],[]);  
   }
 }

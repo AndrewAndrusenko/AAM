@@ -75,8 +75,7 @@ export class AppTableCorporateActionsComponent  implements AfterViewInit {
     this.dataSource.sort = this.sort;
     this.instrument?.secid? this.applyFilter(undefined,this.instrument.secid) : null;
   }
-  applyFilter(event?: any, manualValue?:string) {
-    console.log('manual',manualValue);
+  applyFilter(event?: KeyboardEvent, manualValue?:string) {
     const filterValue =  manualValue || (event.target as HTMLInputElement).value;
     this.dataSource? this.dataSource.filter = filterValue.trim().toLowerCase():null
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}

@@ -58,7 +58,7 @@ export class AppTableStrategiesComponentComponent  implements AfterViewInit {
     readOnly: null
   };
   investmentNodeColor=investmentNodeColor
-  expandAllowed: any;
+  expandAllowed: boolean;
 
   constructor(
     private dialog: MatDialog,

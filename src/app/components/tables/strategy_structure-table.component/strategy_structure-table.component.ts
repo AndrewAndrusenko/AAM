@@ -8,7 +8,6 @@ import { MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { AppStructureStrategyFormComponent } from '../../forms/strategy-structure-form.component/strategy-structure-form';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 @Component({
   selector: 'app-table-strategy_structure',
   templateUrl: './strategy_structure-table.component.html',
@@ -29,7 +28,7 @@ export class AppTableStrategyComponent   {
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild(AppStructureStrategyFormComponent) newItemForm:AppStructureStrategyFormComponent;
   @Input() action:string ='';
-  @Input() parentStrategyId: any;
+  @Input() parentStrategyId: number;
   @Input() ModelPortfolio: number;
   @Input() accessState: string = 'none';
   @Input() disabledControlElements: boolean = false;
@@ -142,7 +141,7 @@ export class AppTableStrategyComponent   {
       })
     }
   }
-  openStrategyStructureForm (actionType:string, row: any ) {
+  openStrategyStructureForm (actionType:string, row: StrategyStructure ) {
     this.panelOpenState=true
     this.newItemForm.action=actionType
     this.newItemForm.editStructureStrategyForm.patchValue(row);

@@ -15,7 +15,7 @@ import {MatChipInputEvent } from '@angular/material/chips';
 import {AppTradeService } from 'src/app/services/trades-service.service';
 import {AbstractControl, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import {COMMA, ENTER } from '@angular/cdk/keycodes';
-import { FifoPositions } from 'src/app/models/accountng-intefaces.model';
+import {FifoPositions } from 'src/app/models/accountng-intefaces.model';
 @Component({
   selector: 'acc-fifo-positions-table',
   changeDetection: ChangeDetectionStrategy.OnPush,

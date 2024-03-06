@@ -191,7 +191,11 @@ export interface bBalanceFullData {
   totalCredit : number, 
   totalDebit : number, 
   OutGoingBalance : number,
-   checkClosing : number 
+  checkClosing : number 
+  currencycode: string,
+  dateOpening: Date,
+  secid:string,
+  xacttypecode: number
 } 
 export interface SWIFTStatement950model {
   id:number,

@@ -124,6 +124,7 @@ color: green;
 .snackbar-success {
   background-color: rgb(80, 156, 109);
   color: rgb(62, 61, 61);
+  white-space: pre-wrap;
 }
 .snackbar-error, .mat-simple-snack-bar-content {
   font-size: 20px !important;

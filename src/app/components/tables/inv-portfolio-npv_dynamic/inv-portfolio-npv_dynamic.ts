@@ -15,6 +15,13 @@ import {AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import {AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
 import {indexDBService } from 'src/app/services/indexDB.service';
 import {MatCheckbox } from '@angular/material/checkbox';
+import { MatSelectChange } from '@angular/material/select';
+interface localFilters {
+  reset?:boolean,
+  portfolio_code?:string[],
+  null_data?:boolean,
+  rest?:boolean
+}
 @Component({
   selector: 'app-inv-portfolio-npv_dynamic',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -28,7 +35,7 @@ export class AppaInvPortfolioNPVDynamicComponent {
   private subscriptions = new Subscription()
   @Input() useGetClientsPortfolios:boolean = false;
   @Input() rowsPerPages:number = 20;
-  @Input() filters:any;
+  @Input() filters:localFilters;
   @Input() readOnly:boolean = false;
   columnsWithHeaders: tableHeaders[] = [
     {fieldName:'portfolioname',displayName:'Code'},
@@ -62,19 +69,10 @@ export class AppaInvPortfolioNPVDynamicComponent {
   portfolios: Array<string> = ['ClearAll'];
   filterednstrumentsLists : Observable<string[]>;
   searchParametersFG: FormGroup;
-  multiFilter?: (data: any, filter: string) => boolean;
+  multiFilter?: (data: NPVDynamicData, filter: string) => boolean;
   filteredCurrenciesList: Observable<currencyCode[]>;
   mp_strategies_list: StrategiesGlobalData[]=[];
   currencySymbol: string = '$';
-/*   activeTab:string='';
-  tabsNames = ['Portfolio Positions']
-  @HostListener('document:keydown', ['$event'])
-  handleKeyboardEvent(event: KeyboardEvent) { 
-    if (this.tabsNames.includes(this.activeTab)){
-      event.altKey&&event.key==='r'? this.submitQuery(false,true):null;
-      event.altKey&&event.key==='w'? this.exportToExcel():null;
-    }
-  } */
   constructor(
     private AuthServiceS:AuthService,  
     private indexDBServiceS:indexDBService,
@@ -149,13 +147,13 @@ export class AppaInvPortfolioNPVDynamicComponent {
     this.searchParametersFG.reset();
     this.portfolios=['ClearAll'];
   }
-  setPortfoliosList(e:any) {
+  setPortfoliosList(e:MatSelectChange) {
     this.InvestmentDataService.getPortfoliosListForMP(e.value,'getPortfoliosByMP_StrtgyID').subscribe(data=>{
       this.portfolios=['ClearAll',...data]
       this.filterALL.nativeElement.value = e.value;
     })
   }
-  initialFilterOfDataSource (filter:any) {
+  initialFilterOfDataSource (filter:localFilters) {
     if (filter?.rest===true) {
       this.dataSource.data = this.fullDataSource;
       return;
@@ -199,7 +197,7 @@ export class AppaInvPortfolioNPVDynamicComponent {
   changedValueofChip (value:string, chipArray:string[],control:AbstractControl) {
     chipArray[chipArray.length-1] === 'ClearAll'? chipArray.push(value) : chipArray[chipArray.length-1] = value
   }
-  add(event: MatChipInputEvent,chipArray:string[],control:AbstractControl): any[] {
+  add(event: MatChipInputEvent,chipArray:string[],control:AbstractControl): string[] {
     const value = (event.value || '').trim();
     const valueArray = event.value.split(',');
     (value)? chipArray = [...chipArray,...valueArray] : null;
@@ -216,13 +214,12 @@ export class AppaInvPortfolioNPVDynamicComponent {
     };
     return chipArray;
   }
-  addChips (el: any, column: string) {(['secid'].includes(column))? this.instruments.push(el):null;}
-  updateFilter (el: any) {
+  updateFilter (el: string) {
     this.filterALL.nativeElement.value = this.filterALL.nativeElement.value + el+',';
     this.dataSource.filter = this.filterALL.nativeElement.value.slice(0,-1).trim().toLowerCase();
     (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
   }
-  applyFilter(event: any) {
+  applyFilter(event: KeyboardEvent) {
     const filterValue = (event.target as HTMLInputElement).value 
     this.dataSource.filter = filterValue.trim().toLowerCase();
     this.dataSource.paginator? this.dataSource.paginator.firstPage():null;

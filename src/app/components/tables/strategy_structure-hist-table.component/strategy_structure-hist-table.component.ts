@@ -1,14 +1,14 @@
 import {Component, ViewChild, Input, ChangeDetectionStrategy, ElementRef, SimpleChanges} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
-import {MatSort, MatSortable} from '@angular/material/sort';
-import {Subscription, } from 'rxjs';
+import {MatSort} from '@angular/material/sort';
+import {Subscription} from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {StrategyStructureHistory, tableHeaders } from 'src/app/models/interfaces.model';
 import {formatNumber } from '@angular/common';
 import {HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import {HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
-import {AuthService } from 'src/app/services/auth.service';
-import {AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
+import {AuthService} from 'src/app/services/auth.service';
+import {AppInvestmentDataServiceService} from 'src/app/services/investment-data.service.service';
 @Component({
   selector: 'app-strategy_structure-hist-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -63,7 +63,7 @@ export class AppStrategyStructureHistTable {
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
   rDate: Date;
-  multiFilter?: (data: any, filter: string) => boolean;
+  multiFilter?: (data: StrategyStructureHistory, filter: string) => boolean;
   showFilter = false;
   constructor(
     private AuthServiceS:AuthService,  
@@ -122,12 +122,12 @@ export class AppStrategyStructureHistTable {
   this.InvestmentDataService.sendStrategyStructureHistoryPortfolio(portfolioChanges)
 
   }
-  updateFilter (el: any) {
+  updateFilter (el: string) {
     this.filterALL.nativeElement.value = this.filterALL.nativeElement.value + el+',';
     this.dataSource.filter = this.filterALL.nativeElement.value.slice(0,-1).trim().toLowerCase();
     (this.dataSource.paginator)? this.dataSource.paginator.firstPage() : null;
   }
-  applyFilter(event: any) {
+  applyFilter(event: KeyboardEvent) {
     this.showFilter=true;
     const filterValue = (event.target as HTMLInputElement).value 
     this.dataSource.filter = filterValue.trim().toLowerCase();
