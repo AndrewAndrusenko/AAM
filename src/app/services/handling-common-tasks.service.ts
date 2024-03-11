@@ -6,7 +6,7 @@ import * as XLSX from 'xlsx'
 })
 export class HandlingCommonTasksService {
   constructor() { }
-  exportToExcel (data:any, name:string,numberFields?:string[],dateFields?:string[])  {
+  exportToExcel (data:Array<{}>, name:string,numberFields?:string[],dateFields?:string[])  {
     let dataToExport=data;
     if (numberFields!==undefined) {
     dataToExport = data.map(el=>{
@@ -25,11 +25,9 @@ export class HandlingCommonTasksService {
     XLSX.utils.book_append_sheet(wb, ws, name);
     XLSX.writeFile(wb, fileName);
   }
-  toNumberRange (value:string, control:AbstractControl,name:string):any {
-    let min = name + '_min';
-    let max = name + '_max';
+  toNumberRange (value:string, control:AbstractControl,name:string):{min?:string|null,max?:string|null} {
     let arrayRange = value.split('-')
-    let obj =  {[min]:arrayRange[0], [max]:  arrayRange[arrayRange.length===1? 0: 1]};
+    let obj =  {[name + '_min']:arrayRange[0], [name + '_max']:  arrayRange[arrayRange.length===1? 0: 1]};
     if (arrayRange.length>2||!Number(arrayRange[0])||(arrayRange.length===2&&!Number(arrayRange[1]))) {
       obj = null;
       control.setErrors({incorrectRange:true})
@@ -37,7 +35,7 @@ export class HandlingCommonTasksService {
     console.log('obj',obj);
     return obj;
   }
-  toNumberRangeNew (value:string, control:AbstractControl,name:string):string|null {
+  toNumberRangeNew (value:string, control:AbstractControl):string|null {
     let arrayRange = value.split('-')
     if (arrayRange.length>2||!Number(arrayRange[0])||(arrayRange.length===2&&!Number(arrayRange[1]))) {
       control.setErrors({incorrectRange:true})
@@ -47,7 +45,7 @@ export class HandlingCommonTasksService {
       return '['+arrayRange.join()+']'
     };
   }
-  toDateRangeNew (control:AbstractControl,name:string):string|null {
+  toDateRangeNew (control:AbstractControl):string|null {
     if (!control.value['dateRangeStart']&&!control.value['dateRangeEnd']) {
       return null
     } else {
@@ -56,12 +54,10 @@ export class HandlingCommonTasksService {
       return '['+start+','+end+']'
     }
   }
-  toDateRange (control:AbstractControl,name:string):any {
-    let min = name + '_min';
-    let max = name + '_max';
-    let obj =  {[min]:null,[max]:null}
-    obj[min] = control.value['dateRangeStart']? new Date(control.value['dateRangeStart']['_d']).toDateString() : null;
-    obj[max] = control.value['dateRangeEnd']? new Date(control.value['dateRangeEnd']['_d']).toDateString() : null;
+  toDateRange (control:AbstractControl,name:string):{min?:string|null,max?:string|null} {
+    let obj =  {[name + '_min']:null,[name + '_max']:null}
+    obj[name + '_min'] = control.value['dateRangeStart']? new Date(control.value['dateRangeStart']['_d']).toDateString() : null;
+    obj[name + '_max'] = control.value['dateRangeEnd']? new Date(control.value['dateRangeEnd']['_d']).toDateString() : null;
     return obj;
   }
 }

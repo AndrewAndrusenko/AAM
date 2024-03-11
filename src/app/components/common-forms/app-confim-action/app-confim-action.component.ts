@@ -13,8 +13,8 @@ export class AppConfimActionComponent {
     public dialogRefConfirm: MatDialogRef<AppConfimActionComponent>,
     private HandlingCommonTasks:HandlingCommonTasksService) {
   }
-  public actionToConfim : {'action':string ,'isConfirmed': boolean, data?:any,buttonLabel?:string}
-  @Input () jsonData:any;
+  public actionToConfim : {'action':string ,'isConfirmed': boolean, data?:string,buttonLabel?:string} 
+  @Input () jsonData:{};//JSON objects of different structure
   @Input () captionTitle:string;
   public stringsJSON : string[][] = []
   private jsonFieldsNameDic = jsonFieldsNames
@@ -31,7 +31,7 @@ export class AppConfimActionComponent {
     })
     this.HandlingCommonTasks.exportToExcel ([jsonDatatoExcel],"jsonData");
   }
-  jsonTransform(jsonData:any) {
+  jsonTransform(jsonData:{} ) {//JSON objects of different structure
     Object.entries(jsonData).forEach((el)=>{
       let nameIndex = this.jsonFieldsNameDic.findIndex(name=>name[0]===el[0])
       el[0] = nameIndex>-1? this.jsonFieldsNameDic[nameIndex][1]:el[0];

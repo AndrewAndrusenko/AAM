@@ -1,10 +1,10 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
-import { AppMarketDataService } from 'src/app/services/market-data.service';
 import { AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
-import { PortfolioPerformnceData, RevenueFactorData } from 'src/app/models/interfaces.model';
+import { RevenueFactorData } from 'src/app/models/interfaces.model';
 import { MatSelect } from '@angular/material/select';
-import { number } from 'echarts';
 import { filter } from 'rxjs';
+type EChartsOption = echarts.EChartsOption;
+type EChartsOptionSeries = echarts.LineSeriesOption
 @Component({
   selector: 'app-performance-revenue-factor-chart',
   templateUrl: './performance-revenue-factor-chart.component.html',
@@ -12,8 +12,7 @@ import { filter } from 'rxjs';
 })
 export class AppPerformanceRevenueFactorChartComponentt  {
   portfolios: string[];
-  countryCasesChartOptions: any;
-  dispatchAction: any;
+  countryCasesChartOptions: EChartsOption;
   series :number [] = []
   @ViewChild('fontlarge') fontLarge : ElementRef;
   @ViewChild('selectPortfolio') selectPortfolio: MatSelect;
@@ -36,15 +35,7 @@ export class AppPerformanceRevenueFactorChartComponentt  {
   setOptions(portfolio:string) {
     let instrumentsList: string[];
     this.series=[]
-    let seriesSet :{
-      name:string,
-      markLine: {},
-      type:string,
-      stack:string, 
-      areaStyle:{}, 
-      label:{},
-      smooth:boolean,
-      data:number[]} [] = []
+    let seriesSet :EChartsOptionSeries[]=[];
     let seriesDate :string [] = []
     let sizeLarge = parseFloat(window.getComputedStyle(this.fontLarge.nativeElement, null).getPropertyValue('font-size'));
     let currencySymbol = this.currencySymbol;
@@ -95,9 +86,6 @@ export class AppPerformanceRevenueFactorChartComponentt  {
         top:'25%',
         left: '90%',
         data: [...profitLegend,...lossLegend],
-/*         formatter: function (name) {
-          return 'Legend ' + name;
-      } */
       },
       tooltip: {
         trigger: 'axis',
@@ -172,7 +160,6 @@ export class AppPerformanceRevenueFactorChartComponentt  {
           brush: {
             type: ['lineX', 'clear']
           },
-          // magicType: { show: true, type: ['line', 'bar', 'stack'] }
         }
       },
       brush: {
@@ -282,84 +269,7 @@ export class AppPerformanceRevenueFactorChartComponentt  {
         }
       ],
       series: [...seriesSet
-/*         { name: 'TWR',
-          type:'line',
-          stack: 'Total',
-          areaStyle: {},
-          color:colors[2],
 
-          data:this.seriesMarketPrice,
-          lineStyle: {
-            width: 4.5
-          },
-          emphasis: {
-            focus: 'series'
-          },
-          markPoint: {
-            data: [
-              {
-                type: "min"
-              },
-              {
-                type: "max"
-              },
-              {
-                name: 'coordinate',
-                coord: [seriesDate.length-1, this.seriesMarketPrice[this.seriesMarketPrice.length-1]]
-              },
-            ],
-            symbol: "pin",
-            symbolSize: 120,
-            label: {
-              fontSize: 18,
-              formatter: function (dataObj) {
-                // console.log('val',dataObj);
-                return  dataObj.data.name==='coordinate'? Math.round(dataObj.data.coord[1]*10)/10 + ' %' : Math.round(dataObj.value*10)/10 + ' %:\n' +dataObj.data.type
-              },
-            },
-          },
-        },
-        { name: 'ROI',
-        type:'line',
-        data:seriesROI,
-        stack: 'Total',
-        areaStyle: {},
-      }, */
-/*         { name: 'MA10',
-          type: 'line',
-          data:  this.MarketDataService.calculateMA(10, this.seriesMarketPrice),
-          smooth: true,
-          color:colors[3],
-          lineStyle: {
-            opacity: 0.9
-        },
-        },
-        { name: 'NPV',
-          type: 'bar',
-          barGap: 0,
-          yAxisIndex: 1,
-          data: seriesNPV,
-          itemStyle: {
-            color: colors[0],
-            color0: colors[1],
-            borderColor: undefined,
-            borderColor0: undefined,
-            opacity: 0.5
-          }
-        },
-        { name: 'Cash D/W',
-          type: 'bar',
-          yAxisIndex: 1,
-          // barWidth: 15,
-          data: seriesCashIO,
-          itemStyle: {
-              color: upColor,
-              color0: downColor,
-              borderColor: undefined,
-              borderColor0: undefined,
-              opacity: 0.35
-            } 
-        } */
       ]
     };
     let chartOptions = this.countryCasesChartOptions

@@ -4,7 +4,7 @@ import { MatSort} from '@angular/material/sort';
 import { Observable, Subscription, empty, filter, from, map, of, startWith, switchMap, take, tap } from 'rxjs';
 import { MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { allocation, orders, trades } from 'src/app/models/interfaces.model';
+import { StrategiesGlobalData, allocation, orders, trades } from 'src/app/models/interfaces.model';
 import { COMMA, ENTER} from '@angular/cdk/keycodes';
 import { MatChipInputEvent} from '@angular/material/chips';
 import { AbstractControl, FormBuilder, FormControl, FormGroup } from '@angular/forms';
@@ -193,11 +193,10 @@ export class AppallocationTableComponent  implements AfterViewInit {
       return !filter || filter_array.reduce((acc,val)=>acc+Number(val[1]),0)===0;
     };
   }
-  async initialFilterOfDataSource (filter:filtersForTable) {
+  initialFilterOfDataSource (filter:filtersForTable) {
     this.filters?.disabled_controls? delete this.filters.disabled_controls : null;
     if (filter.mp_name) {
-      let mpList = await this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios');
-      mpList['data'].filter(el=>el.level===1).map(el=>el.name).includes(filter.mp_name)? null: delete filter.mp_name;
+     this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios').subscribe(data=> (data as {  code:'string', data:StrategiesGlobalData[]}).data.filter(el=>el.Level===1).map(el=>el.name).includes(filter.mp_name)? null: delete filter.mp_name)
     }
     if (filter?.null_data===true) {
       this.dataSource.data=null;

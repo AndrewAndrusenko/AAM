@@ -73,6 +73,16 @@ interface MarketStackData {
     exchange: string,
     date: string
 }
+interface marketDataSearchParams {
+  dataRange? : {},
+  secidList?: string[],
+  amount?:number
+  marketSource? : string[],
+  boards? : string[],
+  secid?:  string[],
+  dateRangeStart?:string,
+  dateRangeEnd?:string
+}
 type uploadMarketDataFunc = (ourceCodes:marketSourceSegements[],dateToLoad: string) => Observable<
 {dataLoaded: marketDateLoaded[],deletedRows:number,state:logLoadingState}>;
 @Injectable({
@@ -189,10 +199,10 @@ export class AppMarketDataService {
     const params = {mapcode:mapcode,secid:secid, resasarray:resasarray}
     return this.http.get <InstrumentsMapCodes[]> ('/api/AAM/MD/getInstrumentsCodes/',{params:params})
   }
-  getMoexInstrumentsList ():Observable<any[]> {
-    return this.http.get <any[]> ('/api/AAM/MD/getMoexInstrumentsList/')
+  getMoexInstrumentsList ():Observable<number[]> {
+    return this.http.get <number[]> ('/api/AAM/MD/getMoexInstrumentsList/')
   }
-  insertMarketData (dataToInsert:any,sourceCode:string, gloabalSource:string): Observable<number> {
+  insertMarketData (dataToInsert:MarketStackData[]|moexIssDataHistory[],sourceCode:string, gloabalSource:string): Observable<number> {
     return  this.http.post <number> ('/api/AAM/MD/importData/',
     {'dataToInsert': dataToInsert,'sourceCode':sourceCode, 'gloabalSource':gloabalSource})
   }
@@ -203,7 +213,7 @@ export class AppMarketDataService {
     const params = {secid:secid,trade_date:trade_date,Action:'getMarketQuote',}
     return this.http.get <marketData[]> ('/api/AAM/MD/getMarketData/', { params: params } )
   }
-  getMarketData (rowslimit:number=1000000,sorting:string=null, searchParameters?:any):Observable<marketData[]> {
+  getMarketData (rowslimit:number=1000000,sorting:string=null, searchParameters?:marketDataSearchParams):Observable<marketData[]> {
     let params = {};
     (searchParameters !== null) ?  params = {...params,...searchParameters}: null;
     (rowslimit !== null) ?  Object.assign(params,{'rowslimit':rowslimit}): null;

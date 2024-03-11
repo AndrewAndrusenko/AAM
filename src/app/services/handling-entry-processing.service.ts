@@ -14,15 +14,14 @@ export class HandlingEntryProcessingService {
     public snack:MatSnackBar
 
   ) { }
-  async openEntry (row: SWIFTStatement950model, parentMsgRow:SWIFTSGlobalListmodel, autoProcessing?: boolean, dateToProcess?: Date, overRideOverdraft?:boolean ) {
+  openEntry (row: SWIFTStatement950model, parentMsgRow:SWIFTSGlobalListmodel, autoProcessing?: boolean, dateToProcess?: Date, overRideOverdraft?:boolean ) {
     if (Number(row.entriesAmount) > Number(row.amountTransaction) && ['CR','DR'].includes(row.typeTransaction)) {
       let EmptyEntry = {'entryDraft' : null, 'formStateisDisabled': true, 'overRideOverdraft' :overRideOverdraft}
       this.AccountingDataService.sendEntryDraft(EmptyEntry);
 
     } else {
       let accountNo = row.comment.split('/')[3];
-      await lastValueFrom (this.AccountingDataService.GetAccountData(0,0,0, accountNo,'GetAccountData','accountData'))
-      .then ((accountData) => {
+      this.AccountingDataService.GetAccountData(0,0,0, accountNo,'GetAccountData','accountData').subscribe ((accountData) => {
         if (accountData.length) {
           let bcEntryParameters = <bcEntryParameters> {}
           bcEntryParameters.pAccountId = Number(accountData[0].accountId);

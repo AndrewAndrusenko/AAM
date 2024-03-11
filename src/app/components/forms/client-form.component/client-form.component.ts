@@ -8,7 +8,7 @@ import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dia
 import { AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { ClientData } from 'src/app/models/interfaces.model';
-import { distinctUntilChanged, distinctUntilKeyChanged, filter, switchMap, tap } from 'rxjs';
+import { filter, switchMap } from 'rxjs';
 @Component({
   selector: 'app-app-client-form',
   templateUrl: './client-form.component.html',
@@ -35,9 +35,6 @@ export class AppClientFormComponent implements OnInit {
     this.accessToPortfolioData = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToPortfolioData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
   }
-  showErrors () {
-    Object.entries(this.editClienttForm.controls).forEach(el=>el[1].errors? console.log(el[0],el[1].errors):null)
-   }
   ngOnInit(): void {
     this.editClienttForm=this.fb.group ({
       idclient: {value: 0, disabled: false}, 

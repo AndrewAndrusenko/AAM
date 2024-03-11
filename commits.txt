@@ -402,7 +402,28 @@ src\app\components\tables\acc-fees-management-calculation-table.component\acc-fe
 src\app\components\tables\acc-fees-main-table.component\acc-fees-main-table.component.ts
 src\app\components\tables\acc-entries-table.component\acc-entries-table.component.ts
 src/app/components/tables/acc-balance-sheet-table.component/acc-balance-sheet-table.component.ts
-
+--------------------------------------------------------------------------------------------
+07/03/2024 - 09/03/2024
+1|| Refactored any type to the secure ones and removed promises in the following components:
+src\app\components\tables\acc-accounts-ledger-table.component\acc-accounts-ledger-table.component.ts
+src\app\components\tables\acc-accounts-table.component\acc-accounts-table.component.ts
+src\app\components\forms\trade-form.component\trade-form.component.ts
+src\app\components\forms\strategy-structure-form.component\strategy-structure-form.ts
+src\app\components\forms\strategy-form.component\strategy-form.component.ts
+src\app\components\forms\portfolio-form.component\portfolio-form.component.ts
+src\app\components\forms\instrument-form.component\instrument-form.component.ts
+src\app\components\forms\instrument-details-form.component\instrument-details-form.component.ts
+src\app\components\forms\instrument-corp-action-form.component\instrument-corp-action-form.component.ts
+src\app\components\forms\acc-schemes-ll-form.component\acc-schemes-ll-form.component.ts
+src\app\components\forms\acc-schemes-al-form.component\acc-schemes-al-form.component.ts
+src\app\components\forms\acc-fees-portfolio-schedule-form.component\acc-fees-portfolio-schedule-form.component.ts
+src\app\components\forms\acc-fees-main-form.component\acc-fees-main-form.component.ts
+src\app\components\forms\acc-entry-form.component\acc-entry-form.component.ts
+src\app\components\forms\acc-account-form.component\acc-account-form.component.ts
+src\app\components\charts\performance-twroi-chart.componentt\performance-twroi-chart.componentt.ts
+src/app/components/charts/chart-candle-marketdata/echart-marketdata-candle.ts
+src\app\components\charts\performance-revenue-factor-chart.component\performance-revenue-factor-chart.component.ts
+2|| Refactored function creating new depo accounts if they are required to generate trading accounting. Refactored to RxJS pipes  
 
 ToDo
 || Local Tunel for Alya
@@ -411,16 +432,13 @@ ToDo
 ||exhaustMap pipe for fgetInstrumentDataGeneral=>getBoardsDataFromInstruments 276
 
 || Store histrory of a portfolio changing strategies
-* Refactor getMarketData from market-data-table
 * Fix: Allocation acconting - FIFO/Accounting => Roll back FIFO/Accounting when other fails
 || Revenue Factor Chart add info about management and perfomance fees deducted
 || FIFO Bug possible=> Case of simultaneously two trades which should be netted on FIFO are sent in FIFO function. 
     Idea is to sort processing batch according to the FIFO guidelines and execute FIFO function synchronously 
 || Investment restrictions
-|| any
 || Check UserAccess model for UI, espesically the latest components
 || DB access roles
 || Hurdle Performance fee and Cash In/Outs -??? How to correct start and end NVP?
-*Strategy tab component is not being reused and is rendered when reopened
 *Performance Chart shows graph from the last selected object if new object is reused and there's no need to reload it 
 Today I'm going. To refactor Um any type Then I'm going. I'm just. stop. 

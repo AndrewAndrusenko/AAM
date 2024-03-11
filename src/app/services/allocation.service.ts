@@ -3,12 +3,12 @@ import { HadlingCommonDialogsService } from './hadling-common-dialogs.service';
 import { AppTradeService } from './trades-service.service';
 import { AppAccountingService } from './accounting.service';
 import { AppallocationTableComponent } from '../components/tables/allocation-table.component/allocation-table.component';
-import { Observable, Subject,  filter, firstValueFrom, forkJoin, map,  switchMap, tap } from 'rxjs';
+import { Observable, Subject,  filter, forkJoin, map,  of, switchMap, tap } from 'rxjs';
 import { AbstractControl } from '@angular/forms';
 import { AppOrderTableComponent } from '../components/tables/orders-table.component/orders-table.component';
 import { allocation, allocation_fifo } from '../models/interfaces.model';
 import { AccountingTradesService } from './accounting-trades.service';
-import { bAccountTransaction, bLedgerTransaction } from '../models/accountng-intefaces.model';
+import { bAccountTransaction, bAccounts, bLedgerTransaction } from '../models/accountng-intefaces.model';
 import { bcEntryParameters } from '../models/acc-schemes-interfaces';
 
 @Injectable({
@@ -30,7 +30,8 @@ export class AppAllocationService {
       tap(entriesData=>entriesData.length?  
         this.CommonDialogsService.snackResultHandler({name:'error',detail:'There are created entries for the trades: '+[...entriesData.map(el=>el.idtrade)]}) : null),
       filter(entriesData=>entriesData.length===0),
-      switchMap(()=>this.createNewDepoAccounts(new Set(this.tradeToConfirm.filter(trade=>!trade.depoAccountId).map(el=>el.secid)))),
+      map(()=>new Set(this.tradeToConfirm.filter(trade=>!trade.depoAccountId).map(el=>el.secid))),
+      switchMap((secidWithoutDepo)=>secidWithoutDepo.size>0? this.createNewDepoAccounts(secidWithoutDepo):of(secidWithoutDepo)),
       tap(()=>{
         let portfolioWitoutAccounts = this.tradeToConfirm.filter(trade=>!trade.accountId||!trade.depoAccountId)
         console.log('portfolioWitoutAccounts',portfolioWitoutAccounts);
@@ -44,17 +45,18 @@ export class AppAllocationService {
     let createdAccountingTransactions = [];
     let tradeToConfirmProcessStatus = this.tradeToConfirm.map(el=>{return {id:el.id,accounting:1}})
     this.tradeToConfirm.forEach(clientTrade => {
-      let bcEntryParameters = <bcEntryParameters> {}
-      bcEntryParameters.id_settlement_currency=clientTrade.id_settlement_currency;
-      bcEntryParameters.cptyCode=clientTrade.cpty_code;
-      bcEntryParameters.pDate_T=new Date(clientTrade.tdate).toDateString();
-      bcEntryParameters.pAccountId=clientTrade.accountId;
-      bcEntryParameters.pDepoAccountId=clientTrade.depoAccountId;
-      bcEntryParameters.pQty=clientTrade.qty;
-      bcEntryParameters.pSettlementAmount=clientTrade.trade_amount;
-      bcEntryParameters.secid=clientTrade.secid;
-      bcEntryParameters.allocated_trade_id=clientTrade.id;
-      bcEntryParameters.idtrade=clientTrade.idtrade;
+      let bcEntryParameters: bcEntryParameters = {
+        id_settlement_currency:clientTrade.id_settlement_currency,
+        cptyCode:clientTrade.cpty_code,
+        pDate_T:new Date(clientTrade.tdate).toDateString(),
+        pAccountId:clientTrade.accountId,
+        pDepoAccountId:clientTrade.depoAccountId,
+        pQty:clientTrade.qty,
+        pSettlementAmount:clientTrade.trade_amount,
+        secid:clientTrade.secid,
+        allocated_trade_id:clientTrade.id,
+        idtrade:clientTrade.idtrade,
+      }
       let cSchemeGroupId = clientTrade.trtype==='BUY'? 'Investment_Buy_Basic':'Investment_Sell_Basic';
       let accountingToCreate$ : Observable <bAccountTransaction[]|bLedgerTransaction[]>[];
       accountingToCreate$ =[];
@@ -84,26 +86,25 @@ export class AppAllocationService {
       })
     })
   }
-  async createNewDepoAccounts (secidSet:Set<string>,) {
-    return new Promise <true>  ((resolve, reject) =>{
-      if (secidSet.size===0) {resolve(true)} 
-      let index = 0
-      secidSet.forEach(async secidItem=>{
-        let portfoliosIDsToOpenDepo = this.tradeToConfirm.filter(trade=>trade.secid===secidItem&&!trade.depoAccountId).map(trade=>Number(trade.idportfolio));
-        await firstValueFrom (this.AccountingDataService.createDepoSubAccounts(portfoliosIDsToOpenDepo,secidItem)).then(newDepoAccounts=>{
-          if (newDepoAccounts?.['name']) {
-            this.CommonDialogsService.snackResultHandler(newDepoAccounts)
-            return reject(newDepoAccounts)
-          }
-          newDepoAccounts.forEach (depoAccount=>{ 
-            let i =this.tradeToConfirm.findIndex(el=>el.idportfolio==depoAccount.idportfolio&&el.secid===secidItem);
-            i!==-1? this.tradeToConfirm[i].depoAccountId=depoAccount.accountId:null;
-          });
-          index +=1;
-          secidSet.size===index? resolve(true):null
-        });
-      });
-    }); 
+  createNewDepoAccounts (secidSet:Set<string>):Observable<{secid?:bAccounts[]}> {
+    let createDepoAccountSt:{secid?:Observable<bAccounts[]>}={}
+    secidSet.forEach(secidItem=>{
+      let portfoliosIDsToOpenDepo = this.tradeToConfirm.filter(trade=>trade.secid===secidItem&&!trade.depoAccountId).map(trade=>Number(trade.idportfolio));
+      Object.assign(createDepoAccountSt,{
+        [secidItem]: this.AccountingDataService.createDepoSubAccounts(portfoliosIDsToOpenDepo,secidItem).pipe (
+          tap(newDepoAccounts=>newDepoAccounts?.['name']? this.CommonDialogsService.snackResultHandler(newDepoAccounts):null)
+        )}
+      )
+    })
+    return forkJoin(createDepoAccountSt).pipe(
+      tap(newAccounts=>
+        Object.entries(newAccounts).forEach(depoAccounts=>{
+          depoAccounts[1].forEach(account=>{
+            let i = this.tradeToConfirm.findIndex(el=>el.idportfolio==account.idportfolio&&el.secid===depoAccounts[0])
+            i!==-1? this.tradeToConfirm[i].depoAccountId=account.accountId:null;
+          })
+        }))
+      )
   }
   createAllocationAccountingStatus (allocationTable:AppallocationTableComponent,tradeToConfirmProcessStatus:{id:number,accounting:number}[],createdAccountingTransactions: bAccountTransaction[]|bLedgerTransaction[]) {
     let status = tradeToConfirmProcessStatus.reduce((acc,val)=>acc+val.accounting,0)

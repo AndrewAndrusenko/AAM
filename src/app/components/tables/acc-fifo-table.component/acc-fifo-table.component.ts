@@ -177,9 +177,9 @@ export class AppAccFifoTable {
     searchObj.portfoliosList = [0,1].includes(this.portfoliosList.value.length)&&this.portfoliosList.value[0]==='ClearAll'? null : this.portfoliosList.value.map(el=>el.toUpperCase());
     searchObj.tradesIDs = [0,1].includes(this.tradesIDs.value.length)&&this.tradesIDs.value[0]==='ClearAll'? null 
     : this.tradesIDs.value.slice(1).map(el=>el.toUpperCase());
-    searchObj.qty = searchObj.qty? this.HandlingCommonTasksS.toNumberRangeNew(this.qty.value,this.qty,'qty'):null;
-    searchObj.price = searchObj.price? this.HandlingCommonTasksS.toNumberRangeNew(this.price.value,this.price,'price'):null;
-    searchObj.tdate = this.tdate.value? this.HandlingCommonTasksS.toDateRangeNew(this.tdate, 'tdate') : null;
+    searchObj.qty = searchObj.qty? this.HandlingCommonTasksS.toNumberRangeNew(this.qty.value,this.qty):null;
+    searchObj.price = searchObj.price? this.HandlingCommonTasksS.toNumberRangeNew(this.price.value,this.price):null;
+    searchObj.tdate = this.tdate.value? this.HandlingCommonTasksS.toDateRangeNew(this.tdate) : null;
     this.accountingTradeService.getFifoTableData(searchObj).subscribe(data => {
       this.updateDataTable(data)
       showSnackResult? this.CommonDialogsService.snackResultHandler({

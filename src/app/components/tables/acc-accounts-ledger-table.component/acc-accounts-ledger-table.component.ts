@@ -2,28 +2,20 @@ import { Component, EventEmitter, Output, ViewChild} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
-import {animate, state, style, transition, trigger} from '@angular/animations';
-import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { bLedgerAccounts } from 'src/app/models/accountng-intefaces.model';
-import { AppAccountingService } from 'src/app/services/accounting.service';
-import { AppAccAccountModifyFormComponent } from '../../forms/acc-account-form.component/acc-account-form.component';
-import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
-import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
-import { formatNumber } from '@angular/common';
-import { AuthService } from 'src/app/services/auth.service';
-import { investmentNodeColor } from 'src/app/models/constants.model';
+import {MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
+import {bLedger, bLedgerAccounts } from 'src/app/models/accountng-intefaces.model';
+import {AppAccountingService } from 'src/app/services/accounting.service';
+import {AppAccAccountModifyFormComponent } from '../../forms/acc-account-form.component/acc-account-form.component';
+import {HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
+import {HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
+import {formatNumber } from '@angular/common';
+import {AuthService } from 'src/app/services/auth.service';
+import {investmentNodeColor } from 'src/app/models/constants.model';
 
 @Component({
   selector: 'app-table-acc-ledger-accounts',
   templateUrl: './acc-accounts-ledger-table.component.html',
   styleUrls: ['./acc-accounts-ledger-table.component.scss'],
-  animations: [
-    trigger('detailExpand', [
-      state('collapsed', style({height: '0px', minHeight: '0'})),
-      state('expanded', style({height: '*'})),
-      transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
-    ]),
-  ],
 })
 export class AppTableAccLedgerAccountsComponent {
   accessState: string = 'none';
@@ -52,26 +44,19 @@ export class AppTableAccLedgerAccountsComponent {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToBalanceData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true; 
     this.accessState !=='none'? this.AccountingDataService.getReloadLedgerAccontList().subscribe (id => this.updateAccountsData(this.action)):null;
-  }
-  ngOnInit(): void {
     this.updateAccountsData(this.action)
+
   }
-  async updateAccountsData (action: string) {
-    return new Promise<number> (async (resolve) => {
-      this.dataSource? this.dataSource.data=null : null;
-      this.AccountingDataService.GetLedgerAccountsListAccounting (null,null,null,null,this.action).subscribe (AccountsList  => {
-        this.dataSource  = new MatTableDataSource(AccountsList);
-        this.dataSource.paginator = this.paginator;
-        this.dataSource.sort = this.sort;
-        resolve (AccountsList.length)
-      })
+  updateAccountsData (action: string,snak:boolean=false) {
+    this.dataSource? this.dataSource.data=null : null;
+    this.AccountingDataService.GetLedgerAccountsListAccounting (null,null,null,null,action).subscribe (AccountsList  => {
+      this.dataSource  = new MatTableDataSource(AccountsList);
+      this.dataSource.paginator = this.paginator;
+      this.dataSource.sort = this.sort;
+      snak? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (AccountsList.length,'en-US') + ' rows'}, ' Loaded'):null;
     })
   }
-  async submitQuery () {
-    this.dataSource.data = null;
-    await this.updateAccountsData(this.action).then (rowsCount =>this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (rowsCount,'en-US') + ' rows'}, ' Loaded'))
-  }
-  applyFilter(event: Event) {
+  applyFilter(event: KeyboardEvent) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
@@ -85,7 +70,7 @@ export class AppTableAccLedgerAccountsComponent {
     this.selectedRow = element;
     this.modal_principal_parent.emit({id:Number(element.ledgerNoId),accountNo:element.ledgerNo});
   }
-  openAccountModifyForm (actionType:string, row: any ) {
+  openAccountModifyForm (actionType:string, row: bLedger ) {
     this.dialogRef = this.dialog.open(AppAccAccountModifyFormComponent ,{minHeight:'400px', maxWidth:'1000px' });
     this.dialogRef.componentInstance.action = actionType;
     this.dialogRef.componentInstance.data = row;

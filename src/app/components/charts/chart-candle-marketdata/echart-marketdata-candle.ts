@@ -3,6 +3,7 @@ import { marketData } from 'src/app/models/interfaces.model';
 import { AppMarketDataService } from 'src/app/services/market-data.service';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
+type EChartsOption = echarts.EChartsOption;
 @Component({
   selector: 'app-echart-marketdata-candle',
   templateUrl: './echart-marketdata-candle.html',
@@ -10,12 +11,9 @@ import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dia
 })
 export class NgEchartMarketDataCandleComponent  {
   secIds: string[];
-  countryCasesChartOptions: any;
-  dispatchAction: any;
+  countryCasesChartOptions: EChartsOption;
   marketData: marketData[] = [];
   seriesCandle :number [][] = []
-
-
   constructor(
     private MarketDataService: AppMarketDataService,
     private AtuoCompService:AtuoCompleteService,
@@ -24,18 +22,13 @@ export class NgEchartMarketDataCandleComponent  {
     ) {
     this.AtuoCompService.recieveSecIdList().subscribe(secIDsList=>this.secIds=secIDsList.map(el=>el[0]))
     this.MarketDataService.getMarketDataForChart().subscribe(marketData=>{
-      console.log('Chart getMarketDataForChart', Date.now());
-
       this.marketData=marketData;
       this.secIds = [...new Set(marketData.map(el=>(el.secid)))]
-      console.log('secIds',this.secIds);
-
     })
   }
   onChangeCountry(secid:string) {
     this.seriesCandle=[]
     this.setOptions(secid);
-    console.log('mdata',this.marketData.length);
   }
   setOptions(secid:string) {
     const upColor = '#00da3c';
@@ -52,14 +45,11 @@ export class NgEchartMarketDataCandleComponent  {
         seriesLow.push(el.low)
         seriesHigh.push(el.high)
         seriesVolumes.push([seriesVolumes.length, el.volume, el.close < el.open ? 1 : -1]);
-        // seriesVolumes.push(el.volume)
         seriesDate.push(new Date(el.tradedate).toLocaleDateString())
       }
     })
-    console.log('seriesVolumes',seriesVolumes);
     if (seriesDate.length !== new Set (seriesDate).size) {
       this.CommonDialogsService.snackResultHandler({name:'error', detail:'There are multipule quotes for one date. Try to filter data by board or exchange'},'Chart','top')
-      // this.CommonDialogsService.snackResultHandler({name:'success', detail:'Try to filter data by board or exchange'},'Chart','top')
       this.seriesCandle=[]
       return;
     }
@@ -242,9 +232,7 @@ export class NgEchartMarketDataCandleComponent  {
           data: seriesVolumes,
           itemStyle: {
             color: upColor,
-            color0: downColor,
             borderColor: undefined,
-            borderColor0: undefined,
             opacity: 0.2
           }
         }

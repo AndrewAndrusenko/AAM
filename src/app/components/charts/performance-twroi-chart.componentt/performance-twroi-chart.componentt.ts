@@ -3,6 +3,7 @@ import { AppMarketDataService } from 'src/app/services/market-data.service';
 import { AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
 import { PortfolioPerformnceData } from 'src/app/models/interfaces.model';
 import { MatSelect } from '@angular/material/select';
+type EChartsOption = echarts.EChartsOption;
 @Component({
   selector: 'app-performance-twroi-chart',
   templateUrl: './performance-twroi-chart.componentt.html',
@@ -10,8 +11,7 @@ import { MatSelect } from '@angular/material/select';
 })
 export class AppPerformanceTWROiEchartComponentt  {
   portfolios: string[];
-  countryCasesChartOptions: any;
-  dispatchAction: any;
+  countryCasesChartOptions: EChartsOption;
   seriesMarketPrice :number [] = []
   @ViewChild('fontlarge') fontLarge : ElementRef;
   @ViewChild('selectPortfolio') selectPortfolio: MatSelect;
@@ -54,16 +54,6 @@ export class AppPerformanceTWROiEchartComponentt  {
     })
     this.countryCasesChartOptions = {
         backgroundColor: '#2c343c',
-/*       title: {
-        textAlign: "center",
-        left: "center",
-        top:'2%',
-        text: portfolio + ' TWR CHART',
-        textStyle: {
-          fontSize: 20,
-          color:'#d6d9db'
-        },
-      }, */
       legend: {
         textStyle: {
           fontSize: 22,
@@ -77,7 +67,6 @@ export class AppPerformanceTWROiEchartComponentt  {
         formatter: 
         function (params) {
           let displayValue:string
-          // console.log(params.componentType,params)
           if (params.componentType==='markPoint') {
             params.seriesName = chartOptions.series[params.seriesIndex].name
             params.name = chartOptions.xAxis[0].data[params.name]
@@ -121,7 +110,6 @@ export class AppPerformanceTWROiEchartComponentt  {
           brush: {
             type: ['lineX', 'clear']
           },
-          // magicType: { show: true, type: ['line', 'bar', 'stack'] }
         }
       },
       brush: {
@@ -199,7 +187,6 @@ export class AppPerformanceTWROiEchartComponentt  {
             align: "left",
             padding: [0, 0, 3, 10]
           },
-          fontsize:20,
           position: 'right',
           alignTicks: true,
           offset:40,
@@ -285,10 +272,12 @@ export class AppPerformanceTWROiEchartComponentt  {
           markPoint: {
             data: [
               {
-                type: "min"
+                type: "min",
+                name:'Min'
               },
               {
-                type: "max"
+                type: "max",
+                name:'Max'
               },
               {
                 name: 'coordinate',
@@ -300,8 +289,7 @@ export class AppPerformanceTWROiEchartComponentt  {
             label: {
               fontSize: 18,
               formatter: function (dataObj) {
-                // console.log('val',dataObj);
-                return  dataObj.data.name==='coordinate'? Math.round(dataObj.data.coord[1]*10)/10 + ' %' : Math.round(dataObj.value*10)/10 + ' %:\n' +dataObj.data.type
+                return  dataObj.data['name']==='coordinate'? Math.round(dataObj.data['coord'][1]*10)/10 + ' %' : Math.round(dataObj.data['value']*10)/10 + ' %:\n' +dataObj.data['type']
               },
             },
           },
@@ -326,9 +314,7 @@ export class AppPerformanceTWROiEchartComponentt  {
           data: seriesNPV,
           itemStyle: {
             color: colors[0],
-            color0: colors[1],
             borderColor: undefined,
-            borderColor0: undefined,
             opacity: 0.5
           }
         },
@@ -339,9 +325,7 @@ export class AppPerformanceTWROiEchartComponentt  {
           data: seriesCashIO,
           itemStyle: {
               color: upColor,
-              color0: downColor,
               borderColor: undefined,
-              borderColor0: undefined,
               opacity: 0.35
             } 
         }

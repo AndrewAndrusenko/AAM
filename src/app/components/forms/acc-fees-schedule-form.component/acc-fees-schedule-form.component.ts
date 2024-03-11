@@ -2,7 +2,6 @@ import { Component,  EventEmitter,  Input, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { filter, switchMap } from 'rxjs';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
-import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import { FeesSchedulesData } from 'src/app/models/fees-interfaces.model';
 import { AppFeesHandlingService } from 'src/app/services/fees-handling.service';
 

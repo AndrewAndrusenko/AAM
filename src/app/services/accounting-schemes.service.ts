@@ -49,8 +49,8 @@ export class AccountingSchemesService {
   getSchemeAccountTransaction ():Observable<bcSchemeAccountTransaction[]> {
     return this.http.get <bcSchemeAccountTransaction[]> ('api/DEA/getAccountingSchemes/',{params:{action:'getSchemeAccountTransaction'}})
   } 
-  updateSchemeLedgerTransaction (data:bcSchemeAccountTransaction|bcSchemeLedgerTransaction,action:string,table:string):Observable<bcSchemeAccountTransaction|bcSchemeLedgerTransaction[]> {
-    return this.http.post <bcSchemeAccountTransaction|bcSchemeLedgerTransaction[]> ('api/DEA/updateSchemeTransaction/',{data:data,action:action,table:table})
+  updateSchemeLedgerTransaction (data:bcSchemeAccountTransaction|bcSchemeLedgerTransaction,action:string,table:string):Observable<bcSchemeAccountTransaction[]|bcSchemeLedgerTransaction[]> {
+    return this.http.post <bcSchemeAccountTransaction[]|bcSchemeLedgerTransaction[]> ('api/DEA/updateSchemeTransaction/',{data:data,action:action,table:table})
   }
   updateTransactionTypes (data:bcTransactionType_Ext,action:string):Observable<bcTransactionType_Ext[]> {
     return this.http.post <bcTransactionType_Ext[]> ('api/DEA/updateTransactionTypes/',{data:data,action:action})

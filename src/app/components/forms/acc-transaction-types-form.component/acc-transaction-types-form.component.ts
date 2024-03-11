@@ -34,11 +34,11 @@ export class AppAccTransactionTypesFormComponent {
     this.action==='View'? this.TransactionTypeForm.disable():null;
     this.TransactionTypeForm.patchValue(this.data);
   }
-   snacksBox(result:any, action?:string){
+   snacksBox(result:{name:string,detail:string}|bcTransactionType_Ext[], action?:string){
     if (result['name']=='error') {
       this.CommonDialogsService.snackResultHandler(result)
     } else {
-      this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' transaction types'}, action,undefined,false)
+      this.CommonDialogsService.snackResultHandler({name:'success', detail: (result as bcTransactionType_Ext[]).length + ' transaction types'}, action,undefined,false)
       this.AccountingSchemesService.sendTransactionTypesReload();
       this.modal_principal_parent.emit(true)
     }

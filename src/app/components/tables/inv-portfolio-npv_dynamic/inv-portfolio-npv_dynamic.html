@@ -52,7 +52,7 @@
       <mat-error *ngIf="dataRange.controls.dateRangeStart.hasError('matStartDateInvalid')">Invalid start date</mat-error>
       <mat-error *ngIf="dataRange.controls.dateRangeEnd.hasError('matEndDateInvalid')">Invalid end date</mat-error>
     </mat-form-field>
-    <mat-form-field class="search-filed" title="Type to find(any filed). Click to select" > <!-- Report Currency Filter -->
+    <mat-form-field class="search-filed" title="Type to filter data. Click to select" > <!-- Report Currency Filter -->
       <input matInput [placeholder]="'Report Currency'" 
       formControlName="p_report_currency" 
       [matAutocomplete]="autoSet" >

@@ -118,7 +118,7 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
 })
 export class TreeComponent {
   routesPathsTreeMenu = routesTreeMenu.map (el=>el.path)
-  dataChange: any;
+  dataChange: BehaviorSubject<DynamicFlatNode[]>;
   constructor(
     database: DynamicDatabase, 
     private TreeMenuSevice:TreeMenuSevice, 
@@ -148,7 +148,7 @@ export class TreeComponent {
     this.routesPathsTreeMenu.includes(node.item)? this.router.navigate(['tree/'+node.item]) : this.router.navigate(['tree/']) ;
     this.TreeMenuSevice.sendUpdate(node.nodeRoot, node.item, +node.id)
   }
-  async initialData() {
+  initialData() {
     let nodeColor:string
     let userData = JSON.parse(localStorage.getItem('userInfo'));
     this.rootLevelNodes = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='rootLevelNodes')[0].elementvalue.split('_');
@@ -210,23 +210,19 @@ export class TreeComponent {
     }, 100); 
   }
   // ------------------------SearchByTreeComponent-----------------------------------
-  handleNewFavoriteClick(target){
+  handleNewFavoriteClick(){
     let userData = JSON.parse(localStorage.getItem('userInfo'))
-    this.TreeMenuSevice.addItemToFavorites (this.activeNode.item , this.activeNode.nodeRoot, userData.user.id, this.activeNode.id)
-    .then((response) => { console.log('Added to Favorites')})
-    this.handleAddFavUpdate()
+    this.TreeMenuSevice.addItemToFavorites (this.activeNode.item , this.activeNode.nodeRoot, userData.user.id, this.activeNode.id).subscribe(()=>this.handleAddFavUpdate())
   }
   handleDeleteFavoriteClick(){
     let userData = JSON.parse(localStorage.getItem('userInfo'))
-    this.TreeMenuSevice.removeItemFromFavorites (this.activeNode.item , userData.user.id, this.activeNode.id)
-    .then((response) => {console.log('Deleted from Favorites')})
-    this.handleDeleteFavUpdate (this.activeNode.nodeRoot)
+    this.TreeMenuSevice.removeItemFromFavorites (this.activeNode.item , userData.user.id, this.activeNode.id).subscribe(() => this.handleDeleteFavUpdate (this.activeNode.nodeRoot))
   }
-  handleDeleteFavUpdate (Root) {
-    let favarr = this.dataSource._database.dataMap.get('Favorites'+'_'+ Root)
+  handleDeleteFavUpdate (root:string) {
+    let favarr = this.dataSource._database.dataMap.get('Favorites'+'_'+ root)
     let ind = favarr.findIndex( element => element.includes(this.activeNode.item))
     favarr.splice(ind,1)
-    this.dataSource._database.dataMap.set('Favorites'+'_' + Root, favarr)
+    this.dataSource._database.dataMap.set('Favorites'+'_' + root, favarr)
     let favnode = this.treeControl.dataNodes.find(node=>node.item == 'Favorites') 
     setTimeout(() => {
       this.treeControl.collapse (favnode)

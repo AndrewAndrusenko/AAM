@@ -47,12 +47,12 @@ export class AppAccFeesMainFormComponent {
       this.tableSchedules.submitQuery(false,false);
     }
   }
-  snacksBox(result:any, action?:string){
+  snacksBox(result:{name:string,detail:string}|FeesMainData[], action?:string){
     if (result['name']=='error') {
       this.CommonDialogsService.snackResultHandler(result)
     } else {
-      this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' fee schedules'}, action,undefined,false)
-      this.AppFeesHandlingService.sendFeesMainDataReload(result,action);
+      this.CommonDialogsService.snackResultHandler({name:'success', detail: (result as FeesMainData[]).length + ' fee schedules'}, action,undefined,false)
+      this.AppFeesHandlingService.sendFeesMainDataReload(result as FeesMainData[],action);
       this.modal_principal_parent.emit(true)
     }
   }

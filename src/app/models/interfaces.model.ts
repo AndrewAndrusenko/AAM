@@ -26,9 +26,9 @@ export interface formInitParams {
   action:string
   filterData: {
     field:string
-    value:any
-  }
-  readOnly: boolean
+    value:string|number
+  },
+  readOnly:boolean|null
 }
 export interface AccountsTableModel {
  idportfolio:number;

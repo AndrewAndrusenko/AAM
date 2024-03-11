@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, ValidatorFn, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { EMPTY, catchError } from 'rxjs';
 import { AuthService } from 'src/app/services/auth.service';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 
@@ -11,7 +12,6 @@ interface userRoles {
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css'],
-/*   encapsulation: ViewEncapsulation.None */
 })
 export class LoginComponent  {  
   addNewUserForm = this.fb.group ({
@@ -22,7 +22,15 @@ export class LoginComponent  {
   signInForm = this.fb.group ({
     login: [null, {validators: [Validators.required]}],
     password: [null, {validators: [Validators.required]}],
-  })
+  }
+  
+  )
+  ngOnInit(): void {
+    //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
+    //Add 'implements OnInit' to the class.
+ document.body.style['zoom'] = "80%";
+    
+  }
   ISINuniqueAsyncValidator :ValidatorFn;
 
   hide : boolean = true;
@@ -50,21 +58,23 @@ export class LoginComponent  {
     }
   }
   handleLoginClick(){
-    this.authService.validate(this.login.value, this.password.value)
-    .then(response => {
-      console.log('resp',response);
-      this.authService.setUserInfo({'user' : response ['username']});
+    this.authService.validate(this.login.value, this.password.value).pipe(
+      catchError(err => {
+        this.CommonDialogsService.snackResultHandler({name:'error', detail:err.error.text});
+        return EMPTY
+      })).subscribe(response => {
+      this.authService.setUserInfo({'user' : response.username});
       this.router.navigate(['tree']);    
     })
-    .catch (error => this.CommonDialogsService.snackResultHandler({name:'error', detail: error.error.text}));
   }
   handleNewUserClick(){
-    this.authService.createNewUser (this.userroleCreate.value, this.loginCreate.value, this.passwordCreate.value)
-      .then(response => this.CommonDialogsService.snackResultHandler({name:'success', detail: response['login'] + '  with ID ' + response['id']}, 'Created user login: ', undefined,undefined, 6000))
-      .catch(err => this.CommonDialogsService.snackResultHandler({name:'error', detail:err.error.split("\n", 1).join("")}));
-  }
-  showErrors (){
-    console.log('error', this.addNewUserForm.invalid,this.loginCreate.errors,this.passwordCreate.errors, this.userroleCreate.errors);
+    this.authService.createNewUser (this.userroleCreate.value, this.loginCreate.value, this.passwordCreate.value).pipe(
+      catchError(err => {
+        console.log(err);
+        this.CommonDialogsService.snackResultHandler({name:'error', detail:err.error.split("\n", 1).join("")});
+        return EMPTY
+      })
+    ).subscribe(response => this.CommonDialogsService.snackResultHandler({name:'success', detail: response['login'] + '  with ID ' + response['id']}, 'Created user login: ', undefined,undefined, 6000))
   }
   get  userroleCreate ()   {return this.addNewUserForm.get('userroleValue') } 
   get  loginCreate ()   {return this.addNewUserForm.get('login') } 

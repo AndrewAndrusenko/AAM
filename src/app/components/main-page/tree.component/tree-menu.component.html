@@ -3,7 +3,7 @@
   <div class="tree-menu-context" cdkMenu *ngIf="activeNode.nodeRoot !==''">
     <!-- -----------toggle favorite button of context menu. more readable version it semms------ -->
     <button *ngIf="activeNode.favoriteRoot !=='Favorites'"
-      (click)="handleNewFavoriteClick($event.target)" 
+      (click)="handleNewFavoriteClick()" 
       class="tree-menu-item" cdkMenuItem>
       <mat-icon class="menu-icon" matPrefix>favorite</mat-icon> 
        Add to favorites
@@ -40,16 +40,7 @@ matInput type="text" #SearchTree  name="SearchTree">
 </button>
 
 </mat-form-field>
-<button mat-flat-button 
-    disableRipple    
-    matTooltip="{{isExpanded? 'Collapse Tree':'Expand Tree'}}"
-    style ="font-size: 18px;"
-    aria-label="TreeExpandCollapse"
-    (click)="isExpanded=!isExpanded;
-    ToggleTree();">
-    {{isExpanded? 'Tree':'Tree'}}
-    <mat-icon>{{isExpanded? 'unfold_less':'unfold_more'}}</mat-icon>
-</button>
+
 <!-- ---Search Tree input------- -->
 
 <!-- ---Expand All / Collapse Tree menu button------- -->

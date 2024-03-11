@@ -17,10 +17,10 @@ export class AppInstrumentCorpActionFormComponent {
   @Input() action: string;
   @Input() moexBoards = []
   @Input() instrument:instrumentShort;
-  instrumentDetails:instrumentDetails[] = [];
-  @Output() public modal_principal_parent = new EventEmitter();
-  public title: string;
   @Input() data: instrumentCorpActions;
+  @Output() public modal_principal_parent = new EventEmitter();
+  instrumentDetails:instrumentDetails[] = [];
+  public title: string;
   caTypes: corporateActionsTypes[];
   filteredCurrenciesList: Observable<currencyCode[]>;
   templateStructureAT = {
@@ -97,17 +97,16 @@ export class AppInstrumentCorpActionFormComponent {
     } 
     this.indexDBServiceS.getIndexDBStaticTables('getCorpActionTypes').subscribe(data =>this.caTypes=(data.data as corporateActionsTypes[]).filter(el=>el.sectype.includes(Number(this.instrument.groupid))))
   }
-  snacksBox(result:any, action?:string){
+  snacksBox(result:{name:string,detail:string}|instrumentCorpActions[], action?:string){
     if (result['name']=='error') {
       this.CommonDialogsService.snackResultHandler(result)
     } else {
-      this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' instrument details'}, action,undefined,false)
-      this.InstrumentDataS.sendReloadDataCorpActions(result)
+      this.CommonDialogsService.snackResultHandler({name:'success', detail: (result as instrumentCorpActions[]).length + ' instrument details'}, action,undefined,false)
+      this.InstrumentDataS.sendReloadDataCorpActions(result as instrumentCorpActions[])
       this.modal_principal_parent.emit(true)
     }
   }
   updateInstrumentData(action:string){
-    console.log('form data', this.CorpActionsForm.value,this.actiontype.value);
     this.CorpActionsForm.updateValueAndValidity();
     if (this.CorpActionsForm.invalid) {return}
     switch (action) {

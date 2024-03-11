@@ -21,7 +21,18 @@ const Pool = require('pg').Pool;
 const pool = new Pool(config.dbConfig);
 const cors = require('cors');
 var session = require('express-session');
+const localtunnel = require('/Users/aandr/AppData/Roaming/npm/node_modules/localtunnel');
 
+(async () => {
+  const tunnel = await localtunnel({ port: 4200,subdomain: 'strong-lies-leave' });
+  console.log('local tunnel url: ', tunnel.url);
+  tunnel.on('close', () => {
+    console.log('the local tunnel is closed')
+  });
+  tunnel.on('error', (err) => {
+    console.log('the local tunnel: error',err)
+  });
+})();
 appServer.use(cors());
 appServer.use (express.static('public'));
 appServer.use(express.json({limit: '25mb'}));
@@ -91,8 +102,7 @@ function NodeCls () {
   process.stdout.write('\x1b')
   console.log('AA');
 }
-appServer.post ('/logout/', function (req, res){
- // console.log('req', req.session)
+appServer.post ('/logout/', function (req){
   req.session.destroy();
 });
 appServer.get('/nodecls/', function (req, res){

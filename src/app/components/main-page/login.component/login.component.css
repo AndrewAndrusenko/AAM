@@ -1,7 +1,11 @@
 
 .form-signin {
   height: 100vh;
+  width: 100vw;
   padding: 15px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
 } 
 .AccessForm {
   max-width: 23vw;
@@ -15,6 +19,7 @@
   color: #000;
   width: 80%;
   min-height: 7.8vh;
+  font-size: large;
   border-radius: 15px;
   border-color: black;
   border-style: groove;

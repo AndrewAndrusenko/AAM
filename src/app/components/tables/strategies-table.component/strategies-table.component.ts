@@ -75,7 +75,7 @@ export class AppTableStrategiesComponentComponent  implements AfterViewInit {
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.InvestmentDataService.getReloadStrategyList().subscribe (data => this.updateStrategyData(this.strategyTableInitParams.action))
   }
-  async ngAfterViewInit() {
+  ngAfterViewInit() {
     this.updateStrategyData(this.strategyTableInitParams.action)
   }
   clearFilter (input:HTMLInputElement) {
@@ -101,13 +101,13 @@ export class AppTableStrategiesComponentComponent  implements AfterViewInit {
     this.StrategyForm.componentInstance.action = actionType;
     actionType !=='Create'? this.StrategyForm.componentInstance.strategyId = row['id'] : null;
   }
-  async updateStrategyData (action: string = '') {
+  updateStrategyData (action: string = '',snack:boolean=false) {
     let field = 'level';
     let value = 2
-    return new Promise<number> (async (resolve,reject) => {
       this.dataSource? this.dataSource.data=null : null;
       this.accessState ==='none'? null : 
       this.InvestmentDataService.getGlobalStategiesList(0,'0', action).subscribe (strategyData => {
+      snack? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (strategyData.length,'en-US') + ' rows'},'Loaded '):null;
         this.dataSource  = new MatTableDataSource(strategyData);
         if (this.strategyTableInitParams.filterData) {
           let filter = this.strategyTableInitParams.filterData
@@ -115,14 +115,7 @@ export class AppTableStrategiesComponentComponent  implements AfterViewInit {
         }
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
-        resolve (strategyData.length)
       })
-    })
-  }
-  async submitQuery () {
-    await this.updateStrategyData(this.strategyTableInitParams.action).then ((rowsCount) => {
-      this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (rowsCount,'en-US') + ' rows'},'Loaded ')
-    })
   }
   exportToExcel() {
     this.HandlingCommonTasksS.exportToExcel (this.dataSource.data,"StrategyData")

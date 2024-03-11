@@ -13,7 +13,7 @@ import {MatDialogRef} from '@angular/material/dialog';
 import {AccountingTradesService } from 'src/app/services/accounting-trades.service';
 import {MatChipInputEvent } from '@angular/material/chips';
 import {AppTradeService } from 'src/app/services/trades-service.service';
-import {AbstractControl, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import {AbstractControl, FormBuilder, FormGroup } from '@angular/forms';
 import {COMMA, ENTER } from '@angular/cdk/keycodes';
 import {FifoPositions } from 'src/app/models/accountng-intefaces.model';
 @Component({
@@ -134,7 +134,7 @@ export class AppAccFifoPositionsTable {
     this.dataSource?.data? this.dataSource.data = null : null;
     searchObj.secidList = [0,1].includes(this.secidList.value.length)&&this.secidList.value[0]==='ClearAll'? null : this.secidList.value.map(el=>el.toUpperCase());
     searchObj.portfoliosList = [0,1].includes(this.portfoliosList.value.length)&&this.portfoliosList.value[0]==='ClearAll'? null : this.portfoliosList.value.map(el=>el.toUpperCase());
-    searchObj.tdate = this.tdate.value? this.HandlingCommonTasksS.toDateRangeNew(this.tdate, 'tdate') : null;
+    searchObj.tdate = this.tdate.value? this.HandlingCommonTasksS.toDateRangeNew(this.tdate) : null;
     this.accountingTradeService.getFifoPositions(searchObj).subscribe(data => {
       this.updateDataTable(data)
       showSnackResult? this.CommonDialogsService.snackResultHandler({

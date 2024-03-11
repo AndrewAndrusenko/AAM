@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output, SimpleChanges, ViewChild} from '@angular/core';
+import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
@@ -62,13 +62,13 @@ export class TablePortfolios {
     private HandlingCommonTasksS:HandlingCommonTasksService,
     private AppFeesHandlingService:AppFeesHandlingService,
   )   { }
-  updatePortfolioData (portfolioid: number, clientid:number, strategyMpName:string, action: string, accessToClientData:string,snack:boolean=true ) {
+  updatePortfolioData (portfolioid: number, clientid:number, strategyMpName:string, action: string, accessToClientData:string,snack:boolean=false ) {
     this.dataSource? this.dataSource.data=null : null;
     this.InvestmentDataService.getPortfoliosData('', portfolioid,clientid,strategyMpName,action,this.idFeeMain, accessToClientData).subscribe (portfoliosData=>{
       this.dataSource  = new MatTableDataSource(portfoliosData);
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
-      snack? this.CommonDialogsService.snackResultHandler(Object.hasOwn(portfoliosData,'name')? portfoliosData : {name:'success', detail: portfoliosData.length},'Loaded '):null;
+      snack? this.CommonDialogsService.snackResultHandler(Object.hasOwn(portfoliosData,'name')? portfoliosData : {name:'success', detail: portfoliosData.length.toString()},'Loaded '):null;
       if (['Get_Portfolios_By_CientId','Get_Portfolios_By_StrategyId'].includes(action)&&this.sendClientsPortfolio) {
         this.InvestmentDataService.sendClientsPortfolios(portfoliosData.map(el=> {return {id:el.idportfolio,code:el.portfolioname}}))
       }
@@ -88,10 +88,10 @@ export class TablePortfolios {
   ngOnDestroy(): void {
     this.arraySubscrition.unsubscribe();
   }
-  ngOnChanges(changes: SimpleChanges) {
+  ngOnChanges() {
     this.updatePortfolioData (undefined, this.clientId,this.strategyMpName,this.actionOnAccountTable,this.accessToClientData,false);
   }
-  chooseAccount (element) {
+  chooseAccount (element:AccountsTableModel) {
     this.modal_principal_parent.emit(element);
   }
   applyFilter(event: Event) {
@@ -112,7 +112,7 @@ export class TablePortfolios {
   }
   submitQuery () {
     this.dataSource? this.dataSource.data = null : null;
-    this.updatePortfolioData (undefined,this.clientId,this.strategyMpName,this.actionOnAccountTable,this.accessToClientData);
+    this.updatePortfolioData (undefined,this.clientId,this.strategyMpName,this.actionOnAccountTable,this.accessToClientData,true);
   }
   exportToExcel() {
     this.HandlingCommonTasksS.exportToExcel (this.dataSource.data,"PortfolioData")

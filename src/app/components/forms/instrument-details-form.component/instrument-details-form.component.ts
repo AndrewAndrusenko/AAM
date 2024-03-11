@@ -1,9 +1,8 @@
-import { Component,  EventEmitter,  Input, Output, SimpleChanges, ViewChild,  } from '@angular/core';
+import { Component,  EventEmitter,  Input, Output, SimpleChanges} from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { instrumentDetails, moexBoard } from 'src/app/models/instruments.interfaces';
-import { Subscription, filter, switchMap } from 'rxjs';
+import { filter, switchMap } from 'rxjs';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
-import { AppMarketDataService } from 'src/app/services/market-data.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
 import { InstrumentDataService } from 'src/app/services/instrument-data.service';
 
@@ -20,7 +19,7 @@ export class AppInvInstrumentDetailsFormComponent {
   instrumentDetails:instrumentDetails[] = [];
   @Output() public modal_principal_parent = new EventEmitter();
   public title: string;
-  @Input() data: any;
+  @Input() data: instrumentDetails;
   constructor (
     private fb:FormBuilder, 
     private CommonDialogsService:HadlingCommonDialogsService,
@@ -72,12 +71,12 @@ export class AppInvInstrumentDetailsFormComponent {
     });  
     this.InstrumentDataS.getInstrumentDataDetails(changes['secidParam'].currentValue).subscribe(instrumentDetails => this.instrumentDetailsForm.patchValue(instrumentDetails[0]));
   }
-  snacksBox(result:any, action?:string){
+  snacksBox(result:{name:string,detail:string}|instrumentDetails[], action?:string){
     if (result['name']=='error') {
       this.CommonDialogsService.snackResultHandler(result)
     } else {
-      this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' instrument details'}, action,undefined,false)
-      this.InstrumentDataS.sendReloadInstrumentDetails(result)
+      this.CommonDialogsService.snackResultHandler({name:'success', detail: (result as instrumentDetails[]).length + ' instrument details'}, action,undefined,false)
+      this.InstrumentDataS.sendReloadInstrumentDetails(result as instrumentDetails[])
       this.modal_principal_parent.emit(true)
     }
   }

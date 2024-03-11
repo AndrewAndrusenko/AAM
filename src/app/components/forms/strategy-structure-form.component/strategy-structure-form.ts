@@ -1,8 +1,8 @@
 import { Component,  EventEmitter,  Input, OnInit, Output, SimpleChanges} from '@angular/core';
-import { FormBuilder, FormControl, Validators } from '@angular/forms';
+import { FormBuilder, Validators } from '@angular/forms';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { AppConfimActionComponent } from '../../common-forms/app-confim-action/app-confim-action.component';
-import { StrategiesGlobalData } from 'src/app/models/interfaces.model';
+import { StrategiesGlobalData, StrategyStructure } from 'src/app/models/interfaces.model';
 import { distinctUntilChanged, filter, map, Observable, startWith, switchMap } from 'rxjs';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
@@ -39,7 +39,7 @@ export class AppStructureStrategyFormComponent implements OnInit {
   public filterednstrumentsLists : Observable<string[][]>;
   public actionType : string;
   public showStrateryStructure: boolean;
-  public data: any;
+  public data: StrategyStructure;
   constructor (
     private fb:FormBuilder, 
     private InvestmentDataService: AppInvestmentDataServiceService,
@@ -72,12 +72,12 @@ export class AppStructureStrategyFormComponent implements OnInit {
     };
     Object.hasOwn(changes,'parentStrategyId')? this.id_item.setValue(changes['strategyId'].currentValue): null;
   }
-  snacksBox(result:any, action?:string){
+  snacksBox(result:{name:string,detail:string}|StrategyStructure[], action?:string){
     ['Edit','Delete'].includes(this.action)? this.modal_principal_parent.emit(result) : null;
     if (result['name']=='error') {
       this.CommonDialogsService.snackResultHandler(result)
     } else {
-      this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' item'}, action, undefined, false);
+      this.CommonDialogsService.snackResultHandler({name:'success', detail: (result as StrategyStructure[]).length + ' item'}, action, undefined, false);
       this.InvestmentDataService.sendReloadStrategyStructure(Number(this.strategyId));
     }
   }
@@ -99,7 +99,6 @@ export class AppStructureStrategyFormComponent implements OnInit {
       break;
       case 'Edit':
         this.InvestmentDataService.updateStrategyStructure (dataToUpload,'Edit').subscribe(result=>this.snacksBox(result,'Updated'))
-        console.log('uplo',this.fuserID.value, dataToUpload);
       break;
       case 'Delete':
         this.CommonDialogsService.confirmDialog( this.MP!==1? 'Delete ' + this.sname.value : 'Delete ' + this.id.value).pipe(

@@ -27,7 +27,7 @@ export class HadlingCommonDialogsService {
       buttonLabel:buttonToConfirm||actionToConfim}
     return this.dialogRefConfirm.afterClosed()
   }
-  jsonDataDialog (jsonData:any,captionTitle:string='') {
+  jsonDataDialog (jsonData:{},captionTitle:string='') {
     this.dialogRefConfirm = this.dialog.open(AppConfimActionComponent, {panelClass: 'custom-modalbox',} );
     this.dialogRefConfirm.componentInstance.actionToConfim = {'action':'' ,'isConfirmed': false}
     
@@ -35,7 +35,7 @@ export class HadlingCommonDialogsService {
     this.dialogRefConfirm.componentInstance.jsonData = jsonData;
     this.dialogRefConfirm.componentInstance.captionTitle = captionTitle;
   }
-  snackResultHandler (result :any, action?: string, postion:MatSnackBarVerticalPosition = 'top', closeAll:boolean=true, duration:number=3000) {
+  snackResultHandler (result :{name:string,detail:string}|Array<{}>|number, action?: string, postion:MatSnackBarVerticalPosition = 'top', closeAll:boolean=true, duration:number=3000) {
     this.verticalPosition=postion;
     if (result['name']=='error') { 
       this.dbErrorsMap.forEach (el => result['detail'].includes(el.constraintCode)? result['detail'] = el.errorText : null);

@@ -65,18 +65,16 @@ export class AppClientsTableComponent  {
     this.updateClientData(null,null,null);
     this.InvestmentDataService.getReloadClientTable().subscribe(data => this.updateClientData (null, null, null));
   }
-  async updateClientData (client: number, clientname: string, action: string) {
-    return new Promise<number> (async (resolve) => {
-      if (this.accessState !=='none') {
-        this.dataSource? this.dataSource.data=null : null;
-        this.InvestmentDataService.getClientData(client,clientname,action).subscribe (data => {
-          this.dataSource  = new MatTableDataSource(data);
-          this.dataSource.paginator = this.paginator;
-          this.dataSource.sort = this.sort;
-          resolve (data.length);
-        })
-      } 
-    })
+  updateClientData (client: number, clientname: string, action: string,snack:boolean=false) {
+    if (this.accessState !=='none') {
+      this.dataSource? this.dataSource.data=null : null;
+      this.InvestmentDataService.getClientData(client,clientname,action).subscribe (data => {
+        snack? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'},'Loaded '):null;
+        this.dataSource  = new MatTableDataSource(data);
+        this.dataSource.paginator = this.paginator;
+        this.dataSource.sort = this.sort;
+      })
+    } 
   }
   chooseClient (element:ClientData) {
     this.modal_principal_parent.emit(element);
@@ -104,9 +102,6 @@ export class AppClientsTableComponent  {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
-  }
-  submitQuery () {
-    this.updateClientData (null,null,null).then (rowsCount => this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (rowsCount,'en-US') + ' rows'},'Loaded ')); 
   }
   exportToExcel() {
     this.HandlingCommonTasksS.exportToExcel (this.dataSource.data,"ClientData")

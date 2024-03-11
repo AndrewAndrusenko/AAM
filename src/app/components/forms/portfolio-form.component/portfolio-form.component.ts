@@ -7,8 +7,7 @@ import { AppTableStrategiesComponentComponent } from '../../tables/strategies-ta
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { AppClientsTableComponent } from '../../tables/clients-table.component/clients-table.component';
-import { Subscriber, Subscription, filter, switchMap } from 'rxjs';
-import { AppFeesHandlingService } from 'src/app/services/fees-handling.service';
+import { Subscription, filter, switchMap } from 'rxjs';
 @Component({
   selector: 'app-app-portfolio',
   templateUrl: './portfolio-form.component.html',
@@ -75,11 +74,11 @@ export class AppNewAccountComponent {
       this.InvestmentDataService.getPortfoliosData('',changes['portfolioCode'].currentValue,0,undefined, 'Get_Portfolio_By_idPortfolio', null,this.accessToClientData).subscribe (portfoliosData => this.newAccountForm.patchValue(portfoliosData[0]));
     }
   }
-  snacksBox (result:any, action?:string) {
+  snacksBox (result:{name:string,detail:string}|AccountsTableModel[], action?:string) {
     if (result['name']=='error') {
       this.CommonDialogsService.snackResultHandler(result)
     } else {
-      this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' portfolio'}, action)
+      this.CommonDialogsService.snackResultHandler({name:'success', detail: (result as AccountsTableModel[]).length + ' portfolio'}, action)
       this.InvestmentDataService.sendReloadPortfoliosData (true);
     }
   }
@@ -87,10 +86,10 @@ export class AppNewAccountComponent {
     switch (action) {
       case 'Create':
       case 'Create_Example':
-          this.InvestmentDataService.createAccount (this.newAccountForm.value).subscribe (result => this.snacksBox(result.length,'Created'))
+          this.InvestmentDataService.createAccount (this.newAccountForm.value).subscribe (result => this.snacksBox(result,'Created'))
       break;
       case 'Edit':
-        this.InvestmentDataService.updateAccount (this.newAccountForm.value).subscribe (result => this.snacksBox(result.length,'Updated'))
+        this.InvestmentDataService.updateAccount (this.newAccountForm.value).subscribe (result => this.snacksBox(result,'Updated'))
       break;
       case 'Delete':
         this.CommonDialogsService.confirmDialog('Delete Portfolio ' + this.portfolioname.value).pipe (

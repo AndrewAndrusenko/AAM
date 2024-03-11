@@ -1,6 +1,6 @@
-<div class="form-signin" style=" background-image: url('assets/investments.jpg'); color: black;">
-  <h1 class="font-bold  to-black tx" style="color: black; text-align: center; margin-top: 5vh;">  
-    Model Portfolio Investment Management System by Andrey Andrusenko
+<div class="form-signin" style=" background-image: url('assets/AdobeStock.webp'); color: black;">
+  <h1 class="font-bold  to-black tx" style="color: black; margin-top: 5vh;margin-left: 2%;">  
+    MP Investment Management System by Andrey Andrusenko
   </h1>
   <mat-tab-group  style="padding-left: 50px;" #AccountInfo>
     <mat-tab label="Sign In to System" style="padding: 20px;">
@@ -100,7 +100,7 @@
           <button class="submit"
             mat-flat-button 
             [ngClass]="addNewUserForm.valid? 'activeB' : 'disabledButton'" class="buttons-signin"
-            (click)="addNewUserForm.valid? handleNewUserClick() : showErrors()"
+            (click)="addNewUserForm.valid? handleNewUserClick() : null"
             >Create New User
           </button>
       </form>

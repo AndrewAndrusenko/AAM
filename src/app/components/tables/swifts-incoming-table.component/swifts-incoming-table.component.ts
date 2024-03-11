@@ -96,18 +96,15 @@ export class AppTableSWIFTsInListsComponent  implements OnInit,OnDestroy {
   ngOnDestroy(): void {
     this.closeLogSubscriptions();
   }
-  ngOnInit(): void {
-  }
-  async updateSwiftsData (action: string, dateMessage?:string) {
-    return new Promise<number> (async (resolve) => {
-      this.accessState === 'none'? null : this.AccountingDataService.GetSWIFTsList (dateMessage,null,null,null,action).pipe(takeUntil(this.destroy$)).subscribe (SWIFTsList  => {
-        this.dataSource? this.dataSource.data = null : null;
-        this.dataSource  = new MatTableDataSource(SWIFTsList);
-        this.dataSource.paginator = this.paginator;
-        this.dataSource.sort = this.sort;
-        resolve(SWIFTsList.length);
+  ngOnInit(): void { }
+  updateSwiftsData (action: string, dateMessage?:string,snack:boolean=false) {
+    this.accessState === 'none'? null : this.AccountingDataService.GetSWIFTsList (dateMessage,null,null,null,action).pipe(takeUntil(this.destroy$)).subscribe (SWIFTsList  => {
+      snack? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (SWIFTsList.length,'en-US') + ' rows'},'Loaded '):null;
+      this.dataSource? this.dataSource.data = null : null;
+      this.dataSource  = new MatTableDataSource(SWIFTsList);
+      this.dataSource.paginator = this.paginator;
+      this.dataSource.sort = this.sort;
     })
-  })
   }
   clearLogs () {
     this.errorLogAutoProcessingALL = [];
@@ -136,7 +133,7 @@ export class AppTableSWIFTsInListsComponent  implements OnInit,OnDestroy {
       this.isProcessingComplete();
     })
   }
-  async ProcessSwiftStatemts (overdraftOverride:boolean, autoProcessing:boolean) {
+  ProcessSwiftStatemts (overdraftOverride:boolean, autoProcessing:boolean) {
     autoProcessing? this.swiftProcessingFB.disable() : null;
     this.clearLogs();
     this.openLogSubscritions();
@@ -202,12 +199,10 @@ export class AppTableSWIFTsInListsComponent  implements OnInit,OnDestroy {
       this.clearLogs ();
     }
   }
-  async submitQuery () {
+  submitQuery () {
     this.cDateAccounting.patchValue(null);
     this.cDateToProcessSwift.patchValue(null);
-    this.updateSwiftsData('GetSWIFTsList').then (rowsCount => {
-      this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (rowsCount,'en-US') + ' rows'},'Loaded ')
-    })
+    this.updateSwiftsData('GetSWIFTsList',undefined,true)
   }
   dateClass: MatCalendarCellClassFunction<Date> = (cellDate, view) => {
     const index = this.dateWithSWIFTs.findIndex(x => new Date(x).toLocaleDateString() == cellDate['_d'].toLocaleDateString());

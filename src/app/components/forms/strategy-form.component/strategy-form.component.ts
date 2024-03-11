@@ -1,4 +1,4 @@
-import { Component,  Input, SimpleChanges, ViewChild,  } from '@angular/core';
+import { Component,  Input, SimpleChanges, ViewChild} from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { AppConfimActionComponent } from '../../common-forms/app-confim-action/app-confim-action.component';
@@ -8,7 +8,7 @@ import { customAsyncValidators } from 'src/app/services/customAsyncValidators.se
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AppTableStrategyComponent } from '../../tables/strategy_structure-table.component/strategy_structure-table.component';
 import { AuthService } from 'src/app/services/auth.service';
-import { AccountsTableModel, portfolioTypes } from 'src/app/models/interfaces.model';
+import { AccountsTableModel, StrategiesGlobalData, portfolioTypes } from 'src/app/models/interfaces.model';
 import { filter, switchMap, tap } from 'rxjs';
 
 @Component({
@@ -32,7 +32,7 @@ export class AppStrategyFormComponent {
   dialogRef: MatDialogRef<TablePortfolios>;
   actionType : string;
   showStrateryStructure: boolean;
-  data: any;
+  data: StrategiesGlobalData;
   accessToClientData: string = 'none';
   constructor (
     private fb:FormBuilder, 
@@ -55,7 +55,6 @@ export class AppStrategyFormComponent {
     })
   }
   ngOnInit(): void {
-
     this.getStrategyData (this.strategyId);
     this.action === 'View'||this.disabledControlElements? this.editStrategyForm.disable() : null;
   }
@@ -67,7 +66,6 @@ export class AppStrategyFormComponent {
           this.strategyStructureTable.ModelPortfolio = data[0]['s_level_id'];
           this.editStrategyForm.patchValue(data[0])
           this.action === 'Create_Example'? this.name.setErrors({uniqueStrategyCode:true}) : null;
-
         };
         this.editStrategyForm.controls['sname'].setAsyncValidators(customAsyncValidators.strategyCodeCustomAsyncValidator(this.InvestmentDataService, ['Create','Create_Example'].includes(this.action)? 0 : this.strategyId, this.name.value,
         this.action === 'Create_Example'? this.name.errors : null)); 
@@ -81,11 +79,11 @@ export class AppStrategyFormComponent {
   ngOnChanges(changes: SimpleChanges) {
     this.getStrategyData (changes['strategyId'].currentValue);
   }
-  snacksBox(result:any, action?:string){
+  snacksBox(result:{name:string,detail:string}|StrategiesGlobalData[], action?:string){
     if (result['name']=='error') {
       this.CommonDialogsService.snackResultHandler(result)
     } else {
-      this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' strategy'}, action)
+      this.CommonDialogsService.snackResultHandler({name:'success', detail: (result as StrategiesGlobalData[]).length + ' strategy'}, action)
       this.InvestmentDataService.sendReloadStrategyList (this.id.value );
     }
     ['Edit','Delete'].includes(this.action)? this.dialog.closeAll() : null;
@@ -102,12 +100,11 @@ export class AppStrategyFormComponent {
       case 'Delete':
         this.CommonDialogsService.confirmDialog('Delete strategy ' + this.name.value,'Delete').pipe(
           filter(isConfirmed => (isConfirmed.isConfirmed)),
-          switchMap(data => this.InvestmentDataService.updateStrategy(this.editStrategyForm.value,'Delete'))
+          switchMap(() => this.InvestmentDataService.updateStrategy(this.editStrategyForm.value,'Delete'))
         ).subscribe (result => this.snacksBox(result,'Deleted '))
       break;
     }
   }
-
   selectBenchmarkAccount () {
     this.dialogRef = this.dialog.open(TablePortfolios ,{minHeight:'400px', minWidth:'900px', autoFocus: false, maxHeight: '90vh'});
     this.dialogRef.componentInstance.action = 'Select_Benchmark';

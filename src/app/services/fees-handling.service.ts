@@ -35,11 +35,11 @@ export class AppFeesHandlingService {
   deleteFeesSchedulesCascade (id_fee_main:number):Observable<FeesSchedulesData> {
     return this.http.post <FeesSchedulesData> ('/api/AAM/updateFeesScheduleData/',{data:{id_fee_main:id_fee_main}, action:'Delete_Cascade'})
   }
-  updatePortfoliosFeesData (data:FeesPortfoliosWithSchedulesData, action:string):Observable<dFeesObject> {
-    return this.http.post <dFeesObject> ('/api/AAM/updatePortfoliosFeesData/',{data:data, action:action})
+  updatePortfoliosFeesData (data:FeesPortfoliosWithSchedulesData, action:string):Observable<dFeesObject[]> {
+    return this.http.post <dFeesObject[]> ('/api/AAM/updatePortfoliosFeesData/',{data:data, action:action})
   }
-  updateFeesMainData (data:FeesMainData, action:string):Observable<FeesMainData> {
-    return this.http.post <FeesMainData> ('/api/AAM/updateFeesData/',{data:data, action:action})
+  updateFeesMainData (data:FeesMainData, action:string):Observable<FeesMainData[]> {
+    return this.http.post <FeesMainData[]> ('/api/AAM/updateFeesData/',{data:data, action:action})
   }
   updateFeesScheduleData (data:FeesSchedulesData, action:string):Observable<FeesSchedulesData[]> {
     return this.http.post <FeesSchedulesData[]> ('/api/AAM/updateFeesScheduleData/',{data:data, action:action})

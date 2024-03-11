@@ -79,11 +79,11 @@ export class AppAccSchemesAL_FormComponent {
     )
     this.subscriptions.add(this.AccountingSchemesService.getSchemesParameters().subscribe(data=>this.schemesParams=data));
   }
-   snacksBox(result:any, action?:string){
+   snacksBox(result:{name:string,detail:string}|number, action?:string){
     if (result['name']=='error') {
       this.CommonDialogsService.snackResultHandler(result)
     } else {
-      this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' AL schemes'}, action,undefined,false)
+      this.CommonDialogsService.snackResultHandler({name:'success', detail: result + ' AL schemes'}, action,undefined,false)
       this.AccountingSchemesService.sendSchemeAccountTransactionReload();
       this.modal_principal_parent.emit(true)
     }
@@ -117,16 +117,16 @@ export class AppAccSchemesAL_FormComponent {
     switch (action) {
       case 'Create_Example':
       case 'Create':
-        this.AccountingSchemesService.updateSchemeLedgerTransaction(dataToUpdate,'Create','bcSchemeAccountTransaction').subscribe(result => this.snacksBox(result,'Created'))
+        this.AccountingSchemesService.updateSchemeLedgerTransaction(dataToUpdate,'Create','bcSchemeAccountTransaction').subscribe(result => this.snacksBox(result.length,'Created'))
       break;
       case 'Edit':
-        this.AccountingSchemesService.updateSchemeLedgerTransaction (dataToUpdate,'Edit','bcSchemeAccountTransaction').subscribe(result => this.snacksBox(result,'Updated'))
+        this.AccountingSchemesService.updateSchemeLedgerTransaction (dataToUpdate,'Edit','bcSchemeAccountTransaction').subscribe(result => this.snacksBox(result.length,'Updated'))
       break;
       case 'Delete':
         this.CommonDialogsService.confirmDialog('Delete Action: AL Accounting Scheme: '+this.id.value,'Delete').pipe(
           filter (isConfirmed => (isConfirmed.isConfirmed)),
           switchMap(() => this.AccountingSchemesService.updateSchemeLedgerTransaction(dataToUpdate,'Delete','bcSchemeAccountTransaction'))
-        ).subscribe(result => this.snacksBox(result,'Deleted'))
+        ).subscribe(result => this.snacksBox(result.length,'Deleted'))
       break;
     }
   }

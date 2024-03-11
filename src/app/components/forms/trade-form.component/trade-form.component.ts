@@ -1,9 +1,9 @@
 import { AfterContentInit, Component,  EventEmitter,  Input, Output, ViewChild} from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ClientData, allocation, allocation_fifo, counterParty, currencyCode, currencyPair, orders, trades} from 'src/app/models/interfaces.model';
+import { ClientData, allocation, allocation_fifo, counterParty, currencyCode, orders, trades} from 'src/app/models/interfaces.model';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AuthService } from 'src/app/services/auth.service';
-import { Observable, Subscription, debounceTime, distinctUntilChanged, filter, map, startWith, switchMap, tap } from 'rxjs';
+import { Observable, Subscription, debounceTime, distinctUntilChanged, filter, map, startWith, switchMap } from 'rxjs';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import { AppTradeService } from 'src/app/services/trades-service.service';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -195,7 +195,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
       this.CommonDialogsService.snackResultHandler({name:'error',detail:'No bulk order has been selected!'},'Allocation');
     }
   } 
-  async createAccountingForAllocation () {
+  createAccountingForAllocation () {
     this.AllocationService.createAccountingForAllocation(this.allocationTable)
   }
   deleteAccountingForAllocatedTrades () {
@@ -231,7 +231,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     instrument.secid=secidArr[0];
     this.secidChanged(instrument)
   }
-  secidChanged (item:any) {
+  secidChanged (item:Instruments|{ name: string; security_type_name: string,faceunit: string,facevalue: number,secid: string}){
     this.tidinstrument.patchValue(item.secid)
     this.secid_name.patchValue(item.name+' ('+item.security_type_name+')')
     this.securityTypes? this.price_type.patchValue(this.securityTypes.filter(el=>el['security_type_name']===item.security_type_name)[0]['price_type']):null;
@@ -249,7 +249,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
       this.market_price.patchValue(data.length? data[0].close:null)
     })
   }
-  clearCurrencies(): any {
+  clearCurrencies() {
     ['code_price_currency', 'price_currency_name', 'code_settlement_currency','settlement_currency_name','settlement_rate'].forEach(key => this.tradeModifyForm.get(key).patchValue(null))
   }
   checkCurrenciesHints (){
@@ -337,25 +337,22 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     } else this.executeTradeUpdate(action);
     srDisabled? this.settlement_rate.disable():null;
   }
-  snacksBox(result:any, action?:string){
+  snacksBox(result:{name:string,detail:string}|trades[], action?:string){
     if (result['name']=='error') {
       this.CommonDialogsService.snackResultHandler(result)
     } else {
       this.CommonDialogsService.dialogCloseAll();
-      this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' trade'}, action)
+      this.CommonDialogsService.snackResultHandler({name:'success', detail: (result as trades[]).length + ' trade'}, action)
       this.TradeService.getTradeInformation({idtrade:result[0].idtrade}).subscribe(
-        data=>this.TradeService.sendTradeDataToUpdateTableSource(action==='Deleted'? result:data,action)
+        data=>this.TradeService.sendTradeDataToUpdateTableSource(action==='Deleted'? (result as trades[]):data,action)
       );
     }
   }
-  showErrors () {
-    // Object.entries(this.tradeModifyForm.controls).forEach(el=>el[1].errors? console.log(el[0],el[1].errors):null)
-   }
   toggleAllRows(dataSource:MatTableDataSource<orders|allocation>,selection:SelectionModel<orders|allocation>, forceSelectAll:boolean=false) { 
     return this.SelectionService.toggleAllRows(dataSource, selection,forceSelectAll);
   }
-  isAllSelected() { return this.SelectionService.isAllSelected(this.orderTable.dataSource, this.orderTable.selection)}  
-  fNumber (value) { return Number(value)}
+  isAllSelected() {return this.SelectionService.isAllSelected(this.orderTable.dataSource, this.orderTable.selection)}  
+  fNumber (value:string) { return Number(value)}
   get idtrade() {return this.tradeModifyForm.get('idtrade')}
   get trtype() {return this.tradeModifyForm.get('trtype')}
   get qty() {return this.tradeModifyForm.get('qty')}

@@ -1,9 +1,19 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, tap } from 'rxjs';
+import { Observable, of, switchMap, tap } from 'rxjs';
 import { accessRestriction, objectStatus } from '../models/interfaces.model';
 interface userRoles {
   value: string;
+}
+interface siginResult {
+  message: string,
+  username: userData
+}
+interface userData {
+    id: number,
+    accessrole: string,
+    login: string,
+    hashed_password: string,
 }
 @Injectable({
   providedIn: 'root'
@@ -13,25 +23,27 @@ export class AuthService {
   accessRestrictions: accessRestriction[] = [];
   objectStatuses: objectStatus[] = [];
   userId:number;
-
-  public isAuthenticated() : Boolean {
-    let userData= localStorage.getItem('userInfo')
-    // return userData && JSON.parse(userData) && JSON.parse(userData).user.accessrole !=='testRole'?  true : false;
+  public isAuthenticated() : boolean {
+    if (Object.hasOwn(localStorage,'userInfo')) {
+    let userData =  Object.hasOwn(localStorage,'userInfo')? localStorage.getItem('userInfo'):'{user:null}'
     return userData && JSON.parse(userData) ?  true : false;
+    } else {
+      return false
+    } 
   }
-  async getAllAccessRestrictions () {
-    return new Promise <boolean> ((resolve,reject) => { 
-      let userData = JSON.parse(localStorage.getItem('userInfo'))
-      const params = {accessRole: userData.user.accessrole,action:'getAccessRestriction'}
-      // console.log('uer',userData);
-      this.userId=userData.user.id
-      this.http.get <accessRestriction[]>('/api/accessRestriction/',{ params: params }).subscribe((data) => {
-        this.accessRestrictions = data;
-        data.length? resolve(true) : reject(false)
-      })
-    })
+  getAllAccessRestrictions():Observable<boolean> {
+      if (Object.hasOwn(localStorage,'userInfo')) {
+        let userData =  JSON.parse(localStorage.getItem('userInfo'));
+        const params = {accessRole: userData.user.accessrole,action:'getAccessRestriction'}
+        this.userId=userData.user.id
+        return this.http.get <accessRestriction[]>('/api/accessRestriction/',{ params: params }).pipe(
+          tap(data=>this.accessRestrictions = data),
+          switchMap(data=>of(data.length>0))
+      )} else {
+        return of(false)
+      }
   }
-  async getObjectStatuses () {
+  getObjectStatuses () {
       let userData = JSON.parse(localStorage.getItem('userInfo'))
       const params = {accessRole: userData.user.accessrole,action:'getObjectStatuses'}
       this.http.get <objectStatus[]>('/api/accessRestriction/',{ params: params }).subscribe((data) => {
@@ -49,18 +61,18 @@ export class AuthService {
         elementtype:null, 
         elementvalue:'none'})) 
   } 
-  setUserInfo(user){
+  setUserInfo(user:{'user' : userData}){
     localStorage.setItem('userInfo',JSON.stringify(user));
   }
-  validate(login, password) {
-    return this.http.post ('/api/auth/',{'username' : login, 'password' : password}).toPromise()
+  validate(login:string, password:string):Observable<siginResult> {
+    return this.http.post <siginResult> ('/api/auth/',{'username' : login, 'password' : password})
   }
-  createNewUser(userrole, login, password) { 
-    return this.http.post ('/api/auth/newUser/',{'accessrole': userrole, 'username' : login, 'password' : password}).toPromise()
+  createNewUser(userrole:string, login:string, password: string):Observable<userData> { 
+    return this.http.post<userData> ('/api/auth/newUser/',{'accessrole': userrole, 'username' : login, 'password' : password})
   }
   LogOut() { 
-    localStorage.removeItem('userInfo')
-    this.http.post ('/api/logout/',{}).toPromise()
+    localStorage.clear()
+    this.http.post ('/api/logout/',{})
   }
   getUsersRoles(): Observable <userRoles[]>{
     return this.http.get < userRoles[]> ('/api/auth/userRoles/')

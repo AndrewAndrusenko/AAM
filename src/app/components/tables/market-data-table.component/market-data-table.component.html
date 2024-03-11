@@ -52,7 +52,7 @@
       [matTooltip]="getRatesb.disabled? 'Select sources to upload':'Click to start loading'"
       style=" margin-left:1%; font-size: larger; margin-right: 1%; margin-top: 1%; padding: 1%; width: 30%;"
       (click)="getMarketData()">
-      Get currencies rates data 
+      Get market quotes data 
     </button>
     <mat-form-field style="margin-right: 2%; width: 12%; " title="Date to upload">
       <input matInput formControlName = "dateForLoadingPrices" [matDatepicker]="dateForMarketData" placeholder="Date to upload">
@@ -64,6 +64,7 @@
       [style.color]="deleteOldMarketData.checked===true? 'rgb(255, 57, 57)':'white' "
       >Replace current quotes data <br>{{deleteOldMarketData.checked? 'allowed!':'forbidden'}}
     </mat-slide-toggle>
+    <button color = "accent" mat-raised-button  style=" margin-left:5%; font-size: 18px;" (click)="getMoexSecurities()">MOEX Instruments</button>
     <span 
       *ngFor="let marketSource of marketSources;let i=index" >
       <div style="border-color: rgb(33, 33, 33); border-width: 1%; border-style:dotted; margin: 1%;">

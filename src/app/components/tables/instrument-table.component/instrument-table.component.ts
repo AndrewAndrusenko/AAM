@@ -120,7 +120,7 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
     this.dialogInstrumentModify.componentInstance.instrumentDetails = this.instrumentDetailsArr.filter(el=> el.secid===element.secid&&element.primary_boardid===el.boardid)
     this.dialogInstrumentModify.componentInstance.instrumentCorpActions = this.instrumentCorpActions.filter(el=> el.isin===element.isin)
   }
-  async ngAfterViewInit() {
+  ngAfterViewInit() {
     if (this.FormMode==='Redis') {
       this.InstrumentDataS.getRedisMoexInstruments().subscribe(data => this.updateInstrumentDataTable(data))   
     } else {

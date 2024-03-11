@@ -8,7 +8,7 @@ import { AppAccountingService } from 'src/app/services/accounting.service';
 import { bAccounts, bLedger, bcAccountType_Ext, bcEnityType } from 'src/app/models/accountng-intefaces.model';
 import { AppClientsTableComponent } from '../../tables/clients-table.component/clients-table.component';
 import { TablePortfolios } from '../../tables/portfolios-table.component/portfolios-table.component';
-import { Observable, Subscription, distinctUntilChanged, filter, map, startWith, switchMap, tap } from 'rxjs';
+import { Observable, Subscription, distinctUntilChanged, filter, map, startWith, switchMap } from 'rxjs';
 import { MatTabGroup as MatTabGroup } from '@angular/material/tabs';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
@@ -170,29 +170,28 @@ export class AppAccAccountModifyFormComponent implements OnInit {
    let accType = (this.AccountTypes[ind].xActTypeCode == 1) ? 'Active' : 'Passive'
    this.accountLedgerModifyForm.controls['d_APType'].patchValue(accType)
   }
-  snacksBox(result:any, action?:string){
+  snacksBox(result:{name:string,detail:string}|number, action?:string){
     if (result['name']=='error') {
       this.CommonDialogsService.snackResultHandler(result)
     } else {
-      this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' account'}, action);
+      this.CommonDialogsService.snackResultHandler({name:'success', detail: result + ' account'}, action);
       this.aType == 1? this.AccountingDataService.sendReloadLedgerAccontList (this.ledgerNoId.value): this.AccountingDataService.sendReloadAccontList (this.accountId.value);
     }
-    // this.formDisabledFields.forEach(elem => this.accountModifyForm.controls[elem].disable())
   }
   updateAccountData(action:string){
     this.formDisabledFields.forEach(elem => this.accountModifyForm.controls[elem].enable())
     switch (action) {
       case 'Create':
-        this.AccountingDataService.updateAccountAccounting(this.accountModifyForm.value,'Create').subscribe(result => this.snacksBox(result,'Created'))
+        this.AccountingDataService.updateAccountAccounting(this.accountModifyForm.value,'Create').subscribe(result => this.snacksBox(result.length,'Created'))
       break;
       case 'Edit':
-        this.AccountingDataService.updateAccountAccounting (this.accountModifyForm.value,'Edit').subscribe(result => this.snacksBox(result,'Updated'))
+        this.AccountingDataService.updateAccountAccounting (this.accountModifyForm.value,'Edit').subscribe(result => this.snacksBox(result.length,'Updated'))
       break;
       case 'Delete':
         this.CommonDialogsService.confirmDialog('Delete Account ' + this.accountNo.value).pipe(
           filter (confirm => confirm.isConfirmed),
           switchMap(() => this.AccountingDataService.updateAccountAccounting(this.accountModifyForm.value,'Delete'))
-        ).subscribe(result => this.snacksBox(result,'Deleted'))
+        ).subscribe(result => this.snacksBox(result.length,'Deleted'))
       break;
     }
   }
@@ -201,16 +200,16 @@ export class AppAccAccountModifyFormComponent implements OnInit {
     switch (action) {
       case 'Create_Example':
       case 'Create':
-        this.AccountingDataService.updateLedgerAccountAccounting(this.accountLedgerModifyForm.value,'Create').subscribe(result => this.snacksBox(result,'Created'))
+        this.AccountingDataService.updateLedgerAccountAccounting(this.accountLedgerModifyForm.value,'Create').subscribe(result => this.snacksBox(result.length,'Created'))
       break;
       case 'Edit':
-        this.AccountingDataService.updateLedgerAccountAccounting (this.accountLedgerModifyForm.value,'Edit').subscribe(result => this.snacksBox(result,'Updated'))
+        this.AccountingDataService.updateLedgerAccountAccounting (this.accountLedgerModifyForm.value,'Edit').subscribe(result => this.snacksBox(result.length,'Updated'))
       break;
       case 'Delete':
         this.CommonDialogsService.confirmDialog('Delete Account ' + this.ledgerNo.value).pipe(
           filter (confirm =>confirm.isConfirmed),
           switchMap(() => this.AccountingDataService.updateLedgerAccountAccounting(this.accountLedgerModifyForm.value,'Delete'))
-        ).subscribe(result => this.snacksBox(result,'Deleted'))
+        ).subscribe(result => this.snacksBox(result.length,'Deleted'))
       break;
     }
   }

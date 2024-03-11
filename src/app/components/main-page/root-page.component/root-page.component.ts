@@ -23,11 +23,10 @@ export class DashboardComponent implements OnDestroy,OnInit {
     public dialog: MatDialog,
     private AutoCompService:AtuoCompleteService,
     private AccountingSchemesService:AccountingSchemesService,
-
     ) {
     this.subscriptionName= this.appMenuService.getToggleTree().subscribe (message => this.opened = message.text );
   }
-  async ngOnInit(): Promise<void> {
+  ngOnInit() {
     this.indexDBServiceS.indexdbDeleteAllCache('AAMCache').subscribe(data => {
       console.log('Cache has been cleared', data)
       this.AccountingSchemesService.subjectTransactionTypePipe.next(null);
@@ -36,7 +35,6 @@ export class DashboardComponent implements OnDestroy,OnInit {
     this.AutoCompService.createSecIDpipe();
     this.AutoCompService.createCurrencypipe();
     this.AutoCompService.createModelPortfoliospipe();
-
   }
   ngOnDestroy() { 
     this.subscriptionName.unsubscribe();

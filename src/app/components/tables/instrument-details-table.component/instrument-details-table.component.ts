@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ViewEncapsulation, EventEmitter, Output, ViewChild, Input, SimpleChanges} from '@angular/core';
+import {AfterViewInit, Component, ViewEncapsulation, EventEmitter, Output, ViewChild, Input} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
@@ -41,11 +41,11 @@ export class AppTableInstrumentDetailsComponent  implements AfterViewInit {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToInstrumentData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
   }
-  async ngAfterViewInit() {
+  ngAfterViewInit() {
     this.indexDBServiceS.getIndexDBStaticTables('getInstrumentDataDetails').subscribe ((data)=>this.updateInstrumentDataTable (data.data as instrumentDetails[]))
   }
-  ngOnChanges(changes: SimpleChanges) {this.dataSource? this.applyFilter(undefined, this.secid) : null}
-  applyFilter(event?: any, manualValue?:string) {
+  ngOnChanges() {this.dataSource? this.applyFilter(this.secid) : null}
+  applyFilter(manualValue?:string) {
     const filterValue =  manualValue || (event.target as HTMLInputElement).value;
     this.dataSource? this.dataSource.filter = filterValue.trim().toLowerCase():null
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
@@ -64,6 +64,6 @@ export class AppTableInstrumentDetailsComponent  implements AfterViewInit {
     this.dataSource  = new MatTableDataSource(corpActionData);
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
-    this.secid? this.applyFilter(undefined,this.secid) : null;
+    this.secid? this.applyFilter(this.secid) : null;
   }
 }

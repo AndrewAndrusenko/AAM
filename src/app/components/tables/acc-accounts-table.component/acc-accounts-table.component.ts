@@ -1,35 +1,27 @@
-import {Component, EventEmitter, OnInit, Output, ViewChild} from '@angular/core';
+import {Component, EventEmitter, Output, ViewChild} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
-import {animate, state, style, transition, trigger} from '@angular/animations';
-import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { bAccounts } from 'src/app/models/accountng-intefaces.model';
-import { AppAccountingService } from 'src/app/services/accounting.service';
-import { AppAccAccountModifyFormComponent } from '../../forms/acc-account-form.component/acc-account-form.component';
-import { SelectionModel } from '@angular/cdk/collections';
-import { MatChipInputEvent } from '@angular/material/chips';
-import { COMMA, ENTER } from '@angular/cdk/keycodes';
-import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
-import { formatNumber } from '@angular/common';
-import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
-import { AuthService } from 'src/app/services/auth.service';
-import { investmentNodeColor } from 'src/app/models/constants.model';
-import { HandlingTableSelectionService } from 'src/app/services/handling-table-selection.service';
+import {MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
+import {bAccounts } from 'src/app/models/accountng-intefaces.model';
+import {AppAccountingService } from 'src/app/services/accounting.service';
+import {AppAccAccountModifyFormComponent } from '../../forms/acc-account-form.component/acc-account-form.component';
+import {SelectionModel } from '@angular/cdk/collections';
+import {MatChipInputEvent } from '@angular/material/chips';
+import {COMMA, ENTER } from '@angular/cdk/keycodes';
+import {HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
+import {formatNumber } from '@angular/common';
+import {HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
+import {AuthService } from 'src/app/services/auth.service';
+import {investmentNodeColor } from 'src/app/models/constants.model';
+import {HandlingTableSelectionService } from 'src/app/services/handling-table-selection.service';
 
 @Component({
   selector: 'app-table-acc-accounts',
   templateUrl: './acc-accounts-table.component.html',
   styleUrls: ['./acc-accounts-table.component.scss'],
-  animations: [
-    trigger('detailExpand', [
-      state('collapsed', style({height: '0px', minHeight: '0'})),
-      state('expanded', style({height: '*'})),
-      transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
-    ]),
-  ],
 })
-export class AppTableAccAccountsComponent  implements OnInit {
+export class AppTableAccAccountsComponent {
   accessState: string = 'none';
   disabledControlElements: boolean = false;
   columnsToDisplay = ['select','accountId','accountNo','d_APTypeCodeAccount','d_Account_Type','Information','d_clientname','d_portfolioCode', 'd_entitytypedescription', 'action']
@@ -37,7 +29,7 @@ export class AppTableAccAccountsComponent  implements OnInit {
   dataSource: MatTableDataSource<bAccounts>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
-  @Output() public modal_principal_parent: EventEmitter <{id:string,accountNo:string}>;
+  @Output() public modal_principal_parent: EventEmitter <{id:number,accountNo:string}>;
   public readOnly: boolean = false; 
   public multiSelect: boolean = false; 
   public selectedRow: bAccounts  | null;
@@ -60,31 +52,23 @@ export class AppTableAccAccountsComponent  implements OnInit {
     this.modal_principal_parent = new EventEmitter();
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToBalanceData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true; 
-    this.accessState !=='none'? this.AccountingDataService.getReloadAccontList().subscribe (id => this.updateAccountsData(this.action)):null;
-  }
-  async updateAccountsData (action: string) {
-    return new Promise<number> (async (resolve) => {
-      this.dataSource? this.dataSource.data=null : null;
-      this.AccountingDataService.GetAccountsListAccounting (null,null,null,null,this.action).subscribe (AccountsList  => {
-        this.dataSource  = new MatTableDataSource(AccountsList);
-        this.dataSource.paginator = this.paginator;
-        this.dataSource.sort = this.sort;
-        resolve (AccountsList.length)
-      })
-    })
-  }
-  ngOnInit(): void {
-    
     this.updateAccountsData(this.action)
+    this.accessState !=='none'? this.AccountingDataService.getReloadAccontList().subscribe (id => this.updateAccountsData(this.action)):null;
+
   }
-  async submitQuery () {
-    this.dataSource.data=null;
-    await this.updateAccountsData(this.action).then (rowsCount => this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (rowsCount,'en-US') + ' rows'},'Loaded '))
+  updateAccountsData (action: string,snack:boolean=false) {
+    this.dataSource? this.dataSource.data=null : null;
+    this.AccountingDataService.GetAccountsListAccounting (null,null,null,null,action).subscribe (accountsList  => {
+      this.dataSource  = new MatTableDataSource(accountsList);
+      this.dataSource.paginator = this.paginator;
+      this.dataSource.sort = this.sort;
+      snack? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (accountsList.length,'en-US') + ' rows'},'Loaded '):null;
+    })
   }
   exportToExcel () {
     this.HandlingCommonTasksS.exportToExcel (this.dataSource.data,"accountData")
   }
-  applyFilter(event: Event) {
+  applyFilter(event: KeyboardEvent) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
@@ -94,7 +78,7 @@ export class AppTableAccAccountsComponent  implements OnInit {
     this.dataSource.filter = ''
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
   }
-  chooseAccount (element) {
+  chooseAccount (element:bAccounts) {
     this.selectedRow = element;
     this.modal_principal_parent.emit({id:element.accountId,accountNo:element.accountNo});
   }

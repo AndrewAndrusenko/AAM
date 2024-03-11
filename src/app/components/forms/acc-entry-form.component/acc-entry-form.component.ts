@@ -1,5 +1,5 @@
 import { Component,  EventEmitter,  Input, ViewChild } from '@angular/core';
-import { AsyncValidatorFn, FormBuilder, FormGroup, NgForm, ValidationErrors, Validators } from '@angular/forms';
+import { AsyncValidatorFn, FormBuilder, FormControlStatus, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators.service';
 import { AppAccountingService } from 'src/app/services/accounting.service';
@@ -10,8 +10,9 @@ import { COMMA, ENTER} from '@angular/cdk/keycodes';
 import { distinctUntilChanged, filter, Subscription } from 'rxjs';
 import { LogProcessingService } from 'src/app/services/log-processing.service';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
-import { bAccountTransaction, bLedgerTransaction, bcTransactionType_Ext } from 'src/app/models/accountng-intefaces.model';
+import { bAccountTransaction, bAccountsEntriesList, bLedgerTransaction, bTransactionForm, bcTransactionType_Ext } from 'src/app/models/accountng-intefaces.model';
 import { AccountingSchemesService } from 'src/app/services/accounting-schemes.service';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
 @Component({
   selector: 'app-acc-entry-modify-form',
   templateUrl: './acc-entry-form.component.html',
@@ -21,7 +22,7 @@ export class AppAccEntryModifyFormComponent {
   TransactionTypes: bcTransactionType_Ext[] = [];
   panelOpenState = true;
   actionType : string;
-  data: any;
+  data: bAccountsEntriesList|bAccountTransaction | bLedgerTransaction | bTransactionForm |{t_XactTypeCode: number; d_transactionType: string; };
   entryModifyForm: FormGroup;
   dialogChoseAccount: MatDialogRef<AppTableAccAccountsComponent>;
   dialogChoseLedger: MatDialogRef<AppTableAccLedgerAccountsComponent>;
@@ -84,7 +85,7 @@ export class AppAccEntryModifyFormComponent {
     this.AccountingSchemesService.subjectTransactionTypePipe.next(null);
     this.subscriptions.add(this.AccountingSchemesService.receiveTransactionTypesReady().subscribe(data=>this.TransactionTypes=data.data))
   }
-  async AddAsyncValidators (overdraftOverride:boolean, updateValidators:boolean=false) {
+  AddAsyncValidators (overdraftOverride:boolean, updateValidators:boolean=false) {
     if (this.FirstOpenedAccountingDate !=null) {
       this.validatorAccountOverdraft = customAsyncValidators.AccountingOverdraftAccountAsyncValidator (this.AccountingDataService, this.accountId ,this.amountTransaction, this.dataTime, this.xActTypeCode, this.d_closingBalance, this.id, this.FirstOpenedAccountingDate);
       this.validatorLedgerAccountOverdraft = customAsyncValidators.AccountingOverdraftLedgerAccountAsyncValidator (this.AccountingDataService, this.ledgerId ,this.amountTransaction, this.dataTime, this.xActTypeCode.getRawValue() === 0? 1: this.xActTypeCode, this.d_closingLedgerBalance, this.id, this.FirstOpenedAccountingDate,this.entryModifyForm );
@@ -101,13 +102,12 @@ export class AppAccEntryModifyFormComponent {
       }
       updateValidators? this.accountNo.updateValueAndValidity() :null;
       updateValidators? this.ledgerNo.updateValueAndValidity() :null; 
-      return console.log('AsyncValidators have been assigned') ;
     }
   }
   formInitialSetup (overdraftOverride:boolean=false,updateValidators:boolean=false) {
-    this.entryModifyForm.patchValue(this.data);
-    this.xActTypeCode_Ext.setValue(Number(this.data.t_XactTypeCode_Ext))
-    this.xActTypeCode.setValue(Number(this.data.t_XactTypeCode))
+    this.entryModifyForm.patchValue(this.data as bAccountsEntriesList );
+    this.xActTypeCode_Ext.setValue(Number((this.data as bAccountsEntriesList).t_XactTypeCode_Ext))
+    this.xActTypeCode.setValue(Number((this.data as bAccountsEntriesList).t_XactTypeCode))
     this.AddAsyncValidators(overdraftOverride,updateValidators);
     this.amountFormat();
     this.entryModifyForm.markAllAsTouched();
@@ -143,7 +143,7 @@ export class AppAccEntryModifyFormComponent {
           this.formStatusChange$=this.entryModifyForm.statusChanges.pipe(distinctUntilChanged()).subscribe(result=>{
             if (result==='PENDING') {
               this.pendingStatusAP = true;
-              setTimeout (()=> (<EventEmitter<any>> this.entryModifyForm.statusChanges).emit(this.entryModifyForm.status),500);
+              setTimeout (()=> (<EventEmitter<FormControlStatus>> this.entryModifyForm.statusChanges).emit(this.entryModifyForm.status),500);
             }
             result==='VALID' && this.pendingStatusAP?  this.updateEntryData('Create', false) : null;   
             result==='INVALID' && this.statusArray.length>0 ? this.getFormValidationErrors('full', this.Ref) : null; 
@@ -220,7 +220,7 @@ export class AppAccEntryModifyFormComponent {
       };
     }
   }
-  toggleOverdraftValidator ( overdraft :any, element: string) {
+  toggleOverdraftValidator ( overdraft :MatSlideToggle, element: string) {
     if (overdraft.checked)  { 
       if (element === 'd_ledgerNo') {
         this.ledgerNo.removeAsyncValidators(this.validatorLedgerAccountOverdraft);
@@ -282,13 +282,13 @@ export class AppAccEntryModifyFormComponent {
       this.amountTransaction.patchValue( new Intl.NumberFormat().format(this.amountTransaction.value))
     }
   }
-  updateResultHandler (result :any, action: string, dataForUpdateLog?:any, reloadEntryList:boolean=true) {
+  updateResultHandler (result :{name:string,detail:string}|number, action: string, dataForUpdateLog?:bAccountsEntriesList, reloadEntryList:boolean=true) {
     this.CommonDialogsService.snackResultHandler(result,action)
     if (result['name']==='error') {
       this.CommonDialogsService.snackResultHandler(result)
     } else {
       this.autoProcessingState? this.LogService.sendCreatedLogObject (dataForUpdateLog): null;
-      this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' entry'}, action);
+      this.CommonDialogsService.snackResultHandler({name:'success', detail: result + ' entry'}, action);
       reloadEntryList&&!this.swiftID? this.AccountingDataService.sendReloadEntryList (undefined) : null;     
       !this.autoProcessingState&&this.swiftID? this.AccountingDataService.sendReloadEntryList (this.t_extTransactionId.value) : null;        
     }
@@ -305,45 +305,45 @@ export class AppAccEntryModifyFormComponent {
       case 'Create_Example':
       case 'Create':
         if (this.d_transactionType.value === 'AL') { 
-         this.AccountingDataService.updateEntryAccountAccounting (dataForUpdate as bAccountTransaction,'Create',).subscribe (result => this.updateResultHandler(result,'Created',this.entryModifyForm.value, reloadEntryList))
+         this.AccountingDataService.updateEntryAccountAccounting (dataForUpdate as bAccountTransaction,'Create',).subscribe (result => this.updateResultHandler(result.length,'Created',this.entryModifyForm.value, reloadEntryList))
         } else {
-         this.AccountingDataService.updateLLEntryAccountAccounting (dataForUpdate as bLedgerTransaction,'Create').subscribe (result => this.updateResultHandler(result, 'Created',this.entryModifyForm.value,reloadEntryList))
+         this.AccountingDataService.updateLLEntryAccountAccounting (dataForUpdate as bLedgerTransaction,'Create').subscribe (result => this.updateResultHandler(result.length, 'Created',this.entryModifyForm.value,reloadEntryList))
         }
       break;
       case 'Edit':
         if (this.d_transactionType.value === 'AL') { 
-          this.AccountingDataService.updateEntryAccountAccounting (dataForUpdate as bAccountTransaction,'Edit').subscribe (result => this.updateResultHandler(result,'Updated'))
+          this.AccountingDataService.updateEntryAccountAccounting (dataForUpdate as bAccountTransaction,'Edit').subscribe (result => this.updateResultHandler(result.length,'Updated'))
          } else {
-          this.AccountingDataService.updateLLEntryAccountAccounting (dataForUpdate as bLedgerTransaction,'Edit').subscribe (result => this.updateResultHandler(result,'Updated'))
+          this.AccountingDataService.updateLLEntryAccountAccounting (dataForUpdate as bLedgerTransaction,'Edit').subscribe (result => this.updateResultHandler(result.length,'Updated'))
          }
       break;
       case 'Delete':
         this.CommonDialogsService.confirmDialog('Delete Entry '+ this.id.value).subscribe(action => {
           if (action.isConfirmed===true) {
             if (this.d_transactionType.value === 'AL') { 
-              this.AccountingDataService.updateEntryAccountAccounting (dataForUpdate as bAccountTransaction,'Delete').subscribe ((result) => this.updateResultHandler(result,'Deleted'))
+              this.AccountingDataService.updateEntryAccountAccounting (dataForUpdate as bAccountTransaction,'Delete').subscribe ((result) => this.updateResultHandler(result.length,'Deleted'))
             } else {
-              this.AccountingDataService.updateLLEntryAccountAccounting (dataForUpdate as bLedgerTransaction,'Delete').subscribe ((result) => this.updateResultHandler(result,'Deleted'))
+              this.AccountingDataService.updateLLEntryAccountAccounting (dataForUpdate as bLedgerTransaction,'Delete').subscribe ((result) => this.updateResultHandler(result.length,'Deleted'))
             }
           }
         })
       break;
     }
   }
-  get  d_transactionType() {return this.entryModifyForm.get('d_transactionType')}​
-  get  accountNo() {return this.entryModifyForm.get('d_accountNo')}​
-  get  accountId() {return this.entryModifyForm.get('t_accountId')}​
-  get  ledgerNo() {return this.entryModifyForm.get('d_ledgerNo')}​
-  get  ledgerId () {return this.entryModifyForm.get('t_ledgerNoId')}​
-  get  debit ()   {return this.entryModifyForm.get('d_Debit') } 
-  get  credit ()   {return this.entryModifyForm.get('d_Credit') } 
-  get  id ()   {return this.entryModifyForm.get('t_id') } 
-  get  dataTime ()   {return this.entryModifyForm.get('t_dataTime') } 
-  get  entryDetails ()   {return this.entryModifyForm.get('t_entryDetails') } 
-  get  amountTransaction ()   {return this.entryModifyForm.get('t_amountTransaction') } 
-  get  xActTypeCode_Ext ()   {return this.entryModifyForm.get('t_XactTypeCode_Ext') } 
-  get  xActTypeCode ()   {return this.entryModifyForm.get('t_XactTypeCode') } 
-  get  d_closingBalance ()   {return this.entryModifyForm.get('d_closingBalance') } 
-  get  d_closingLedgerBalance ()   {return this.entryModifyForm.get('d_closingLedgerBalance') } 
-  get  t_extTransactionId ()   {return this.entryModifyForm.get('t_extTransactionId') } 
+  get  d_transactionType() {return this.entryModifyForm.get('d_transactionType')}
+  get  accountNo() {return this.entryModifyForm.get('d_accountNo')}
+  get  accountId() {return this.entryModifyForm.get('t_accountId')}
+  get  ledgerNo() {return this.entryModifyForm.get('d_ledgerNo')}
+  get  ledgerId () {return this.entryModifyForm.get('t_ledgerNoId')}
+  get  debit () {return this.entryModifyForm.get('d_Debit')} 
+  get  credit () {return this.entryModifyForm.get('d_Credit')} 
+  get  id () {return this.entryModifyForm.get('t_id')} 
+  get  dataTime () {return this.entryModifyForm.get('t_dataTime')} 
+  get  entryDetails () {return this.entryModifyForm.get('t_entryDetails') } 
+  get  amountTransaction () {return this.entryModifyForm.get('t_amountTransaction')} 
+  get  xActTypeCode_Ext () {return this.entryModifyForm.get('t_XactTypeCode_Ext')} 
+  get  xActTypeCode () {return this.entryModifyForm.get('t_XactTypeCode') } 
+  get  d_closingBalance () {return this.entryModifyForm.get('d_closingBalance')} 
+  get  d_closingLedgerBalance () {return this.entryModifyForm.get('d_closingLedgerBalance')} 
+  get  t_extTransactionId () {return this.entryModifyForm.get('t_extTransactionId')} 
 }

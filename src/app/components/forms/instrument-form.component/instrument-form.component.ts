@@ -7,7 +7,7 @@ import { menuColorGl } from 'src/app/models/constants.model';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
 import { AuthService } from 'src/app/services/auth.service';
-import { Observable, distinctUntilChanged, filter, map, observable, startWith, switchMap } from 'rxjs';
+import { Observable, distinctUntilChanged, filter, map, startWith, switchMap } from 'rxjs';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import { InstrumentDataService } from 'src/app/services/instrument-data.service';
 import { currencyCode } from 'src/app/models/interfaces.model';
@@ -30,7 +30,7 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
   instrumentCorpActions:instrumentCorpActions[] = [];
   public title: string;
   public actionType : string;
-  public data: any;
+  public data: Instruments;
   @ViewChild(MatTabGroup) tabGroup: MatTabGroup;
   formDisabledFields: string[] = [];
   panelOpenStateFirst = false;
@@ -110,7 +110,7 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
     };
     this.action == 'View'|| this.disabledControlElements?  this.instrumentModifyForm.disable() : null;
   }
-  async addAsyncValidators(action:string) {
+  addAsyncValidators(action:string) {
     if (['Create','Create_Example'].includes(this.action)) {
       this.isin.setErrors({isinIsTaken:true});
       this.secid.setErrors({secidIsTaken:true})
@@ -175,13 +175,13 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
     this.addBasicValidators(filter);
     this.securityTypes? this.securityTypesFiltered = this.securityTypes.filter (elem => elem.security_group_name===filter) : null;
   }
-  snacksBox(result:any, action?:string){
+  snacksBox(result:Instruments[]|{name:string,detail:string}, action?:string){
     if (result['name']=='error') {
       this.CommonDialogsService.snackResultHandler(result)
     } else {
       this.CommonDialogsService.dialogCloseAll();
-      this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' instrument'}, action)
-      this.InstrumentDataS.sendInstrumentDataToUpdateTableSource(this.addJoinedFieldsToResult(result), action)
+      this.CommonDialogsService.snackResultHandler({name:'success', detail: (result as Instruments[]).length + ' instrument'}, action)
+      this.InstrumentDataS.sendInstrumentDataToUpdateTableSource(this.addJoinedFieldsToResult(result as Instruments[]), action)
     }
   }
   addJoinedFieldsToResult (result:Instruments[]):Instruments[] {

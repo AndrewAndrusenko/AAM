@@ -182,9 +182,8 @@ export class AppTableCurrenciesDataComponent {
     this.dataSource.filter = '';
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
   }
-  async submitQuery () {
-    return new Promise((resolve, reject) => {
-      this.dataSource? this.dataSource.data=null : null;
+  submitQuery () {
+    this.dataSource? this.dataSource.data=null : null;
     let searchObj = {};
     let pairsList = [];
     (this.pairs.indexOf('ClearAll') !== -1)? this.pairs.splice(this.pairs.indexOf('ClearAll'),1) : null;
@@ -201,9 +200,7 @@ export class AppTableCurrenciesDataComponent {
       this.dataSource.sort = this.sort;
       this.pairs.unshift('ClearAll')
       this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (marketData.length,'en-US') + ' rows'},'Loaded ');
-      resolve(marketData) 
     })
-  })
   }
   toggleAllSelection(elem:string, allSelected: boolean) {
     allSelected? 

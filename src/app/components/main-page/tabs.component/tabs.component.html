@@ -63,26 +63,26 @@
     [useGetClientsPortfolios]="true"
     ></app-inv-portfolio-npv_roi_performance>  
   </mat-tab>
-  <mat-tab label="Client Positions"> 
+  <mat-tab label="Positions"> 
     <app-inv-portfolio-position-table
     [useGetClientsPortfolios]="true"
     [rowsPerPages]="15"
     [UI_portfolio_selection]="false">
     </app-inv-portfolio-position-table>
   </mat-tab>
-  <mat-tab label="Client Transactions"> 
+  <mat-tab label="Transactions"> 
     <app-table-acc-entries
     [action]="'None'"    
     [rowsPerPages]="15">
     </app-table-acc-entries>
   </mat-tab>
-  <mat-tab label="Client Portfolios">
+  <mat-tab label="Portfolios">
     <app-portfolio-tablee 
       [clientId]="messageReceived.id"
       [actionOnAccountTable]="'Get_Portfolios_By_CientId'">
     </app-portfolio-tablee> 
   </mat-tab>
-  <mat-tab label="Client Summary" >
+  <mat-tab label="Summary" >
     <div class="client_form">
       <br>
       <app-app-client-form
@@ -91,9 +91,7 @@
       </app-app-client-form> 
     </div>
   </mat-tab>  
-
-
-  <mat-tab label="Client Trades"> 
+  <mat-tab label="Trades"> 
     <app-allocation-table
     [rowsPerPages]="15"
     [filters]="{disabled_controls:true}" >
@@ -147,7 +145,7 @@
   </mat-tab>
 </mat-tab-group>
 <mat-tab-group *ngIf="messageReceived.text=='Instruments'" mat-stretch-tabs #InstrumentInfo>
-  <mat-tab label="Instrment Details" >
+  <mat-tab label="Instrument Details" >
     <div class="instrument_form">
       <br>
       <app-inv-instrument-modify-form

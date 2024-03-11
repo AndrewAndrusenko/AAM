@@ -2,7 +2,7 @@ import { Component, EventEmitter,  Input, Output, ViewChild } from '@angular/cor
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { filter, switchMap } from 'rxjs';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
-import { FeesMainData, FeesPortfoliosWithSchedulesData } from 'src/app/models/fees-interfaces.model';
+import { FeesMainData, FeesPortfoliosWithSchedulesData, dFeesObject } from 'src/app/models/fees-interfaces.model';
 import { AppFeesHandlingService } from 'src/app/services/fees-handling.service';
 import { AppaIAccFeesSchedulesTable } from '../../tables/acc-fees-schedules-table.component/acc-fees-schedules-table.component';
 // import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -66,12 +66,12 @@ export class AppAccFeesPortfolioScheduleFormComponent {
       this.tableSchedules.submitQuery(false,false);
     }
   }
-  snacksBox(result:any, action?:string){
+  snacksBox(result:{name:string,detail:string}|dFeesObject[], action?:string){
     if (result['name']=='error') {
       this.CommonDialogsService.snackResultHandler(result)
     } else {
-      this.CommonDialogsService.snackResultHandler({name:'success', detail: result.length + ' fee schedules'}, action,undefined,false)
-      this.AppFeesHandlingService.sendFeesPortfoliosWithSchedulesReload(result,action);
+      this.CommonDialogsService.snackResultHandler({name:'success', detail: result + ' fee schedules'}, action,undefined,false)
+      this.AppFeesHandlingService.sendFeesPortfoliosWithSchedulesReload(result as dFeesObject[],action);
       this.modal_principal_parent.emit(true)
     }
   }

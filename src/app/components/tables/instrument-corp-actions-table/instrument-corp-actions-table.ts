@@ -53,7 +53,7 @@ export class AppTableCorporateActionsComponent  implements AfterViewInit {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToInstrumentData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
   }
-  async ngAfterViewInit() {
+  ngAfterViewInit() {
     this.indexDBServiceS.getIndexDBStaticTables('getInstrumentDataCorpActions').subscribe(data=> this.updateCAdataTable(data.data as instrumentCorpActions[]));
   }
   ngOnChanges(changes: SimpleChanges) {
