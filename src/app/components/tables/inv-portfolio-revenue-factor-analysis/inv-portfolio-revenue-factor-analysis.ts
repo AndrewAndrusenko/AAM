@@ -72,7 +72,7 @@ export class AppaInvPortfolioRevenueFactorAnalysisTableComponent {
   multiFilter?: (data: RevenueFactorData, filter: string) => boolean;
   constructor(
     private AuthServiceS:AuthService,  
-    private indexDBServiceS:indexDBService,
+    private indexDBService:indexDBService,
     private InvestmentDataService:AppInvestmentDataServiceService, 
     private HandlingCommonTasksS:HandlingCommonTasksService,
     private CommonDialogsService:HadlingCommonDialogsService,
@@ -91,15 +91,15 @@ export class AppaInvPortfolioRevenueFactorAnalysisTableComponent {
       p_report_date_end:null,
       p_report_currency:['840', { validators:  Validators.required}],
     });
+    this.AutoCompService.getCurrencyList();
+    this.AutoCompService.subModelPortfoliosList.next(true);
+    this.subscriptions.add(
+      this.AutoCompService.recieveCurrencyListReady().subscribe(()=>this.report_id_currency.updateValueAndValidity()));
+    this.subscriptions.add(
+      this.AutoCompService.getSMPsListReady().subscribe(data=>this.mp_strategies_list=data))
   }
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
-  }
+  ngOnDestroy(): void {this.subscriptions.unsubscribe()}
   ngOnInit(): void {
-    this.filters? this.setFilters(this.filters):null;
-    this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios').subscribe ((data)=>{
-      this.mp_strategies_list = data.data as StrategiesGlobalData[]
-    })
     if (this.useGetClientsPortfolios===true) {
       this.subscriptions.add(this.InvestmentDataService.getClientsPortfolios().pipe(
         tap(() => this.dataSource? this.dataSource.data = null: null),
@@ -110,8 +110,6 @@ export class AppaInvPortfolioRevenueFactorAnalysisTableComponent {
         this.setFilters (this.filters);
       }));
     }
-    this.subscriptions.add(this.AutoCompService.recieveCurrencyListReady().subscribe(()=>this.report_id_currency.updateValueAndValidity()));
-    this.AutoCompService.getCurrencyList();
     this.filteredCurrenciesList = this.report_id_currency.valueChanges.pipe (
       startWith (''),
       distinctUntilChanged(),
@@ -159,8 +157,8 @@ export class AppaInvPortfolioRevenueFactorAnalysisTableComponent {
   submitQuery (reset:boolean=false, showSnackResult:boolean=true) {
     let searchObj = reset?  {} : this.searchParametersFG.value;
     this.dataSource?.data? this.dataSource.data = null : null;
-    searchObj.p_report_date_start = new Date (this.dateRangeStart.value).toLocaleDateString();
-    searchObj.p_report_date_end = this.dateRangeEnd.value? new Date (this.dateRangeEnd.value).toLocaleDateString(): new Date().toLocaleDateString();
+    searchObj.p_report_date_start = new Date (this.dateRangeStart.value).toDateString();
+    searchObj.p_report_date_end = this.dateRangeEnd.value? new Date (this.dateRangeEnd.value).toDateString(): new Date().toDateString();
     of(this.portfolios.length).pipe(
       switchMap(portLength => portLength===1? this.InvestmentDataService.getPortfoliosListForMP('All','getPortfoliosByMP_StrtgyID'):from([[...this.portfolios]])),
       tap(ports=>searchObj.p_portfolios_list = ports.map(el=>el.toUpperCase())),

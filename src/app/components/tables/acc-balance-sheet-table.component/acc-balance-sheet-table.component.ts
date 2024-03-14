@@ -119,7 +119,7 @@ export class AppTableBalanceSheetComponent {
       this.AccountingDataService.GetbLastClosedAccountingDate('GetbLastClosedAccountingDate').subscribe(data=>{
         this.FirstOpenedAccountingDate = data[0].FirstOpenedDate;
         this.LastClosedDate = new Date(data[0].LastClosedDate);
-        checkBalance? this.checkBalance(new Date(this.LastClosedDate).toLocaleDateString(),false):null;
+        checkBalance? this.checkBalance(new Date(this.LastClosedDate).toDateString(),false):null;
         refreshData? this.AccountingDataService.GetALLClosedBalances(null,null,new Date(this.FirstOpenedAccountingDate).toDateString(), null, 'GetALLClosedBalances').subscribe (Balances => this.updateBalanceData(Balances)):null;
       })
       this.AccountingDataService.GetbbalacedDateWithEntries('GetbbalacedDateWithEntries').subscribe(data => {
@@ -150,7 +150,7 @@ export class AppTableBalanceSheetComponent {
     })
   }
   accountingBalanceClose (overdraftOverride:boolean) {
-    this.AccountingBalncesService.accountingBalanceClose(overdraftOverride,this.firstClosingDate.toLocaleDateString()).subscribe(executionLog=>{
+    this.AccountingBalncesService.accountingBalanceClose(overdraftOverride,this.firstClosingDate.toDateString()).subscribe(executionLog=>{
       executionLog.state==='closed'? this.updateResultHandler({name:executionLog.state,detail:''},executionLog.message,false,9000,true,false)
       :this.CommonDialogsService.snackResultHandler({name:executionLog.state,detail:executionLog.message},'Balance',undefined,undefined,9000);
     })
@@ -164,7 +164,7 @@ export class AppTableBalanceSheetComponent {
   openBalance () {
     this.CommonDialogsService.confirmDialog('Open date: ' + new Date(this.LastClosedDate).toLocaleDateString()).pipe(filter(
       confirm=>confirm.isConfirmed),
-      switchMap(()=> this.AccountingDataService.accountingBalanceDayOpen({dateToOpen : new Date(this.LastClosedDate).toLocaleDateString()}))
+      switchMap(()=> this.AccountingDataService.accountingBalanceDayOpen({dateToOpen : new Date(this.LastClosedDate).toDateString()}))
     ).subscribe(
           result => {
           result['name']!=='error'? result['detail']=result[0].rows_affected:null;

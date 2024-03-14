@@ -31,12 +31,11 @@ async function fGetStrategiesList (request,response) {
     break;
     default:
       query.text += ' ORDER BY s_level_id, sname ;'
-      request.query.action='fGetStrategiesList'
-
+      request.query.action==='undefined'? request.query.action = 'fGetStrategiesList':null
     break;
   }
   sql = pgp.as.format(query.text,query.values)
-  db_common_api.queryExecute (sql, response,null,request.query.action? request.query.action : 'fGetStrategiesList');
+  db_common_api.queryExecute (sql, response,null,request.query.action==='undefined'? 'fGetStrategiesList':request.query.action);
 }
 async function fGetStrategyStructure (request,response) {
   const query = {text: 'SELECT '+

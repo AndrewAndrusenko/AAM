@@ -140,11 +140,9 @@ async function fgetMarketData (request,response){//Get market data such as marke
   db_common_api.queryExecute(sql,response,undefined,'fgetMarketData')
 }
 async function fgetMarketDataSources (request,response) {//Get market sources. Needs to be moved to General data function
-  sql =  'SELECT  "sourceName", false AS "checkedAll", false AS indeterminate, false as disabled, json_agg("icMarketDataSources".*) AS "segments" '+
+  sql =  'SELECT  max("icMarketDataSources".type) as "type", "sourceName", false AS "checkedAll", false AS indeterminate, false as disabled, json_agg("icMarketDataSources".*) AS "segments" '+
   'FROM "icMarketDataSourcesGlobal" '+
-  'LEFT JOIN "icMarketDataSources" ON "icMarketDataSources"."sourceGlobal" = "icMarketDataSourcesGlobal"."sourceCode" '+
-  'WHERE "icMarketDataSources".type=${sourceType} GROUP BY "sourceName" ';
-  sql = pgp.as.format(sql,request.query);
+  'LEFT JOIN "icMarketDataSources" ON "icMarketDataSources"."sourceGlobal" = "icMarketDataSourcesGlobal"."sourceCode"  GROUP BY "sourceName" ;';
   db_common_api.queryExecute(sql,response,undefined,'fgetMarketDataSources')
 }
 async function fgetInstrumentsCodes (request,response) {//Get additional instruments codes, for example to import quotes from global market data source
@@ -271,7 +269,7 @@ async function fgetInstrumentDataGeneral(request,response) {
 
   }
   sql = pgp.as.format(query.text,request.query);
-  db_common_api.queryExecute(sql,response,undefined,'fgetInstrumentDataGeneral=>'+request.query.dataType);
+  db_common_api.queryExecute(sql,response,undefined,request.query.dataType);
 }
 async function fInstrumentCreate (request, response) {
   const query = {

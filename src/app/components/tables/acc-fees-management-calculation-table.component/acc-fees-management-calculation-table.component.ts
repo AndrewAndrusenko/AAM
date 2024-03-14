@@ -80,7 +80,7 @@ export class AppaIAccFeesManagementTableComponent {
     this.subscriptions.unsubscribe();
   }
   ngOnInit(): void {
-    this.AutoCompleteService.getModelPotfoliosList();
+    this.AutoCompleteService.subModelPortfoliosList.next(true);
     this.subscriptions.add(
       this.AutoCompleteService.getSMPsListReady().subscribe(data=>this.mp_strategies_list=data)
     )
@@ -115,8 +115,8 @@ export class AppaIAccFeesManagementTableComponent {
   submitQuery ( reset:boolean=false, showSnackResult:boolean=true) {
     let searchObj = reset?  {} : this.searchParametersFG.value;
     this.dataSource?.data? this.dataSource.data = null : null;
-    searchObj.p_report_date_start = new Date (this.dateRangeStart.value).toLocaleDateString();
-    searchObj.p_report_date_end = this.dateRangeEnd.value? new Date (this.dateRangeEnd.value).toLocaleDateString(): new Date().toLocaleDateString();
+    searchObj.p_report_date_start = new Date (this.dateRangeStart.value).toDateString();
+    searchObj.p_report_date_end = this.dateRangeEnd.value? new Date (this.dateRangeEnd.value).toDateString(): new Date().toDateString();
     of(this.portfolios.length).pipe(
       switchMap(portLength => 
         portLength===1? 
@@ -137,8 +137,8 @@ export class AppaIAccFeesManagementTableComponent {
   }
   approveCalculation () {
     let searchObj  = this.searchParametersFG.value;
-    searchObj.p_report_date_start = new Date (this.dateRangeStart.value).toLocaleDateString();
-    searchObj.p_report_date_end = this.dateRangeEnd.value? new Date (this.dateRangeEnd.value).toLocaleDateString(): new Date().toLocaleDateString();
+    searchObj.p_report_date_start = new Date (this.dateRangeStart.value).toDateString();
+    searchObj.p_report_date_end = this.dateRangeEnd.value? new Date (this.dateRangeEnd.value).toDateString(): new Date().toDateString();
     let countSavedCalcs = this.dataSource.data.filter(el=>el.id_fee_transaction>0).length
      if (countSavedCalcs===this.dataSource.data.filter(el=>el.npv>0).length) { 
       return this.CommonDialogsService.snackResultHandler({name:'error',detail:'Nothing to save. All calculations have already been saved'})

@@ -108,7 +108,7 @@ export class AppaIAccFeesProcessingTableComponent {
   }
   ngOnInit(): void {
     this.AppFeesHandlingService.getProfitTax(new Date().toDateString()).subscribe(data=>this.profitTaxRate=data[0].rate)
-    this.AutoCompleteService.getModelPotfoliosList();
+    this.AutoCompleteService.subModelPortfoliosList.next(true);
     this.subscriptions.add(
       this.AutoCompleteService.getSMPsListReady().subscribe(data=>this.mp_strategies_list=data)
     )
@@ -153,8 +153,8 @@ export class AppaIAccFeesProcessingTableComponent {
     this.selection.clear();
     let searchObj = reset?  {} : this.searchParametersFG.value;
     this.dataSource?.data? this.dataSource.data = null : null;
-    searchObj.p_report_date_start = new Date (this.dateRangeStart.value).toLocaleDateString();
-    searchObj.p_report_date_end = this.dateRangeEnd.value? new Date (this.dateRangeEnd.value).toLocaleDateString(): new Date().toLocaleDateString();
+    searchObj.p_report_date_start = new Date (this.dateRangeStart.value).toDateString();
+    searchObj.p_report_date_end = this.dateRangeEnd.value? new Date (this.dateRangeEnd.value).toDateString(): new Date().toDateString();
     of(this.portfolios.length).pipe(
       switchMap(portLength => portLength===1? this.InvestmentDataService.getPortfoliosListForMP('All','getPortfoliosByMP_StrtgyID'):from([[...this.portfolios]])),
       tap(ports=>searchObj.p_portfolios_list = ports.map(el=>el.toUpperCase())),

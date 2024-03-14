@@ -34,7 +34,6 @@ export class DashboardComponent implements OnDestroy,OnInit {
     })
     this.AutoCompService.createSecIDpipe();
     this.AutoCompService.createCurrencypipe();
-    this.AutoCompService.createModelPortfoliospipe();
   }
   ngOnDestroy() { 
     this.subscriptionName.unsubscribe();

@@ -140,7 +140,7 @@ export class AppTableAccEntriesComponent implements OnInit {
     };
   }
   ngOnInit(): void {
-    this.initiateTable();
+    this.initiateTable(true);
     this.subscriptions.add(this.TreeMenuSevice.getActiveTab().subscribe(tabName=>this.activeTab=tabName));
     this.subscriptions.add(this.InvestmentDataService.getClientsPortfolios().pipe(
       tap(() => this.dataSource? this.dataSource.data = null: null),
@@ -153,7 +153,7 @@ export class AppTableAccEntriesComponent implements OnInit {
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }
-  initiateTable() {
+  initiateTable(init:boolean=false) {
     switch (this.action) {
       case 'ShowEntriesForBalanceSheet':
         this.noAccountLedger.value.push(this.paramRowData.accountNo);
@@ -175,7 +175,7 @@ export class AppTableAccEntriesComponent implements OnInit {
       break;
       case 'ViewEntriesByPortfolio':
         this.portfolioCodes.patchValue([this.paramRowData.portfolioCode,this.paramRowData.portfolioCode])
-        this.submitQuery(false);
+        init? null: this.submitQuery(false);
       break;
       case 'None':
         this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate);
@@ -194,9 +194,9 @@ export class AppTableAccEntriesComponent implements OnInit {
     let searchObj = this.searchParametersFG.value;
     this.dataSource? this.dataSource.data = null: null;
     Object.assign (searchObj , {'dateRangeStart':
-      this.gRange.get('dateRangeStart').value===null? null:new Date (this.gRange.get('dateRangeStart').value).toLocaleDateString()});
+      this.gRange.get('dateRangeStart').value===null? null:new Date (this.gRange.get('dateRangeStart').value).toDateString()});
     Object.assign (searchObj , {'dateRangeEnd': 
-      this.gRange.get('dateRangeEnd').value===null? null : new Date (this.gRange.get('dateRangeEnd').value).toLocaleDateString()});
+      this.gRange.get('dateRangeEnd').value===null? null : new Date (this.gRange.get('dateRangeEnd').value).toDateString()});
     this.AccountingDataService.GetAccountsEntriesListAccounting(searchObj,null,null, null, 'GetAccountsEntriesListAccounting').subscribe (EntriesList  => {
       this.dataSource  = new MatTableDataSource(EntriesList);
       this.dataSource.paginator = this.paginator;

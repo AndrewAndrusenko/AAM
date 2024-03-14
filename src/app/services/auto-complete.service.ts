@@ -4,7 +4,6 @@ import { Subject, exhaustMap, tap } from 'rxjs';
 import { cacheAAM, indexDBService } from './indexDB.service';
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { StrategiesGlobalData, counterParty, currencyCode, currencyPair, currencyRateList } from '../models/interfaces.model';
-
 @Injectable({
   providedIn: 'root'
 })
@@ -16,13 +15,17 @@ export class AtuoCompleteService {
   private subjectSecIDList = new Subject<string[][]>();
   private subSecID = new Subject<boolean>();
   private subCurrencyList = new Subject<boolean>();
-  private subModelPortfoliosList = new Subject<boolean>();
+  public subModelPortfoliosList = new Subject<boolean>();
   private subCurrencyListReady = new Subject<boolean>();
   private subSecIdListReady = new Subject<boolean>();
   private subMPsListReady = new Subject<StrategiesGlobalData[]>();
   constructor(
     private indexDBServiceS: indexDBService
-  ) { }
+  ) {
+    this.subModelPortfoliosList.pipe (
+      exhaustMap(()=>this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios')),
+    ).subscribe((data) => this.subMPsListReady.next(data.data as StrategiesGlobalData[]));
+   }
 
   filterList(value: string, type: string):  string[][]|string[]|currencyCode[]|currencyRateList[]|currencyPair[]|counterParty[] {
     const filterValue = value.toString().toLowerCase();
@@ -51,11 +54,6 @@ export class AtuoCompleteService {
       this.subCurrencyListReady.next(true)
     });
   }
-  createModelPortfoliospipe (){
-    this.subModelPortfoliosList.pipe (
-      exhaustMap(()=>this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios')),
-    ).subscribe((data) => this.subMPsListReady.next(data.data as StrategiesGlobalData[]));
-  }
   getSMPsListReady(): Observable<StrategiesGlobalData[]> {
     return this.subMPsListReady.asObservable();
   }
@@ -66,9 +64,6 @@ export class AtuoCompleteService {
     return this.indexDBServiceS.getIndexDBStaticTables('getCounterPartyList').pipe(
       tap(data => this.fullCounterPatiesList = (data as cacheAAM).data as counterParty[])
     ) as Observable<counterParty[]>
-  }
-  getModelPotfoliosList() {
-     this.subModelPortfoliosList.next(true);
   }
   getCurrencyList() {
      this.subCurrencyList.next(true);

@@ -73,7 +73,7 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
   currencySymbol: string = '$';
   constructor(
     private AuthServiceS:AuthService,  
-    private indexDBServiceS:indexDBService,
+    private indexDBService:indexDBService,
     private InvestmentDataService:AppInvestmentDataServiceService, 
     private HandlingCommonTasksS:HandlingCommonTasksService,
     private CommonDialogsService:HadlingCommonDialogsService,
@@ -90,24 +90,22 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
       MP:null,
       p_report_date_start:null,
       p_report_date_end:null,
-      // dataRangeSF : [this.dataRange, { validators:  Validators.required, updateOn: 'blur' }],
       p_report_currency:['840', { validators:  Validators.required}],
     });
+    this.AutoCompService.getCurrencyList();
+    this.AutoCompService.subModelPortfoliosList.next(true);
+    this.subscriptions.add(
+      this.AutoCompService.recieveCurrencyListReady().subscribe(()=>this.report_id_currency.updateValueAndValidity()));
+    this.subscriptions.add(
+      this.AutoCompService.getSMPsListReady().subscribe(data=>this.mp_strategies_list=data))
   }
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }
   ngOnInit(): void {
-    this.filters? this.setFilters(this.filters):null;
-    this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios').subscribe ((data)=>{
-      this.mp_strategies_list = data.data as StrategiesGlobalData[]
-    })
     this.multiFilter = (data: PortfolioPerformnceData, filter: string) => {
       let filter_array = filter.split(',').map(el=>[el,1]);
-      this.columnsToDisplay.forEach(col=>filter_array.forEach(fil=>{
-        data[col]&&fil[0].toString().toUpperCase()===(data[col]).toString().toUpperCase()? fil[1]=0:null
-      })
-        );
+      this.columnsToDisplay.forEach(col=>filter_array.forEach(fil=>data[col]&&fil[0].toString().toUpperCase()===(data[col]).toString().toUpperCase()? fil[1]=0:null));
       return !filter || filter_array.reduce((acc,val)=>acc+Number(val[1]),0)===0;
     };
     this.filters==undefined&&this.fullDataSource!==undefined? this.initialFilterOfDataSource(this.filters) : null;
@@ -121,8 +119,6 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
         this.setFilters (this.filters);
       }));
     }
-    this.subscriptions.add(this.AutoCompService.recieveCurrencyListReady().subscribe(()=>this.report_id_currency.updateValueAndValidity()));
-    this.AutoCompService.getCurrencyList();
     this.filteredCurrenciesList = this.report_id_currency.valueChanges.pipe (
       startWith (''),
       distinctUntilChanged(),
@@ -184,8 +180,8 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
   submitQuery (reset:boolean=false, showSnackResult:boolean=true) {
     let searchObj = reset?  {} : this.searchParametersFG.value;
     this.dataSource?.data? this.dataSource.data = null : null;
-    searchObj.p_report_date_start = new Date (this.dateRangeStart.value).toLocaleDateString();
-    searchObj.p_report_date_end = this.dateRangeEnd.value? new Date (this.dateRangeEnd.value).toLocaleDateString(): new Date().toLocaleDateString();
+    searchObj.p_report_date_start = new Date (this.dateRangeStart.value).toDateString();
+    searchObj.p_report_date_end = this.dateRangeEnd.value? new Date (this.dateRangeEnd.value).toDateString(): new Date().toDateString();
     of(this.portfolios.length).pipe(
       switchMap(portLength => portLength===1? this.InvestmentDataService.getPortfoliosListForMP('All','getPortfoliosByMP_StrtgyID'):from([[...this.portfolios]])),
       tap(ports=>searchObj.p_portfolios_list = ports.map(el=>el.toUpperCase())),

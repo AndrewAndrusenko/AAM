@@ -75,7 +75,7 @@ export class AppaIAccFeesPerformanceTableComponent {
     this.subscriptions.unsubscribe();
   }
   ngOnInit(): void {
-    this.AutoCompleteService.getModelPotfoliosList();
+    this.AutoCompleteService.subModelPortfoliosList.next(true);
     this.subscriptions.add(
       this.AutoCompleteService.getSMPsListReady().subscribe(data=>this.mp_strategies_list=data)
     )
@@ -110,8 +110,8 @@ export class AppaIAccFeesPerformanceTableComponent {
   submitQuery ( reset:boolean=false, showSnackResult:boolean=true) {
     let searchObj = reset?  {} : this.searchParametersFG.value;
     this.dataSource?.data? this.dataSource.data = null : null;
-    searchObj.p_report_date = new Date (this.p_report_date.value).toLocaleDateString();
-    searchObj.p_report_date_hurdle = new Date (this.p_report_date_hurdle.value).toLocaleDateString();
+    searchObj.p_report_date = new Date (this.p_report_date.value).toDateString();
+    searchObj.p_report_date_hurdle = new Date (this.p_report_date_hurdle.value).toDateString();
     of(this.portfolios.length).pipe(
       switchMap(portLength => 
         portLength===1? 
@@ -129,7 +129,7 @@ export class AppaIAccFeesPerformanceTableComponent {
   }
   approveCalculation () {
     let searchObj  = this.searchParametersFG.value;
-    searchObj.report_date = new Date (this.p_report_date.value).toLocaleDateString();
+    searchObj.report_date = new Date (this.p_report_date.value).toDateString();
      let countSavedCalcs = this.dataSource.data.filter(el=>el.id_Calc>0).length
     of(this.portfolios.length).pipe(
       switchMap(portLength => 

@@ -74,13 +74,17 @@ export class AppaInvPortfolioPositionTableComponent {
       report_date : [new Date(), { validators:  Validators.required, updateOn: 'blur' }],
       report_id_currency:['840', { validators:  Validators.required}],
     });
+    this.AutoCompService.getCurrencyList();
+    this.AutoCompService.subModelPortfoliosList.next(true);
+    this.subscriptions.add(
+      this.AutoCompService.recieveCurrencyListReady().subscribe(()=>this.report_id_currency.updateValueAndValidity()));
+    this.subscriptions.add(
+      this.AutoCompService.getSMPsListReady().subscribe(data=>this.mp_strategies_list=data))
   }
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }
   ngOnInit(): void {
-    this.filters? this.setFilters(this.filters):null;
-    this.indexDBService.getIndexDBStaticTables('getModelPortfolios').subscribe (data=>this.mp_strategies_list = data.data as StrategiesGlobalData[]);
     if (this.useGetClientsPortfolios===true) {
       this.subscriptions.add(this.InvestmentDataService.getClientsPortfolios().pipe(
         tap(() => this.dataSource? this.dataSource.data = null: null),
@@ -91,8 +95,6 @@ export class AppaInvPortfolioPositionTableComponent {
         this.setFilters (this.filters);
               }));
     }
-    this.subscriptions.add(this.AutoCompService.recieveCurrencyListReady().subscribe(()=>this.report_id_currency.updateValueAndValidity()));
-    this.AutoCompService.getCurrencyList();
     this.filteredCurrenciesList = this.report_id_currency.valueChanges.pipe (
       startWith (''),
       distinctUntilChanged(),
@@ -155,7 +157,7 @@ export class AppaInvPortfolioPositionTableComponent {
   submitQuery (reset:boolean=false, showSnackResult:boolean=true) {
     let searchObj = reset?  {} : this.searchParametersFG.value;
     this.dataSource?.data? this.dataSource.data = null : null;
-    searchObj.report_date= new Date (searchObj.report_date).toLocaleDateString();
+    searchObj.report_date= new Date (searchObj.report_date).toDateString();
     searchObj.idportfolios = [0,1].includes(this.portfolios.length)&&this.portfolios[0]==='ClearAll'? null : this.portfolios.map(el=>el.toLocaleLowerCase())
     this.InvestmentDataService.getPortfoliosPositions(searchObj).subscribe(data => {
       this.updatePositionsDataTable(data)

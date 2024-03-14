@@ -220,10 +220,7 @@ export class AppMarketDataService {
     (sorting !== null) ?  Object.assign(params,{'sorting':sorting}): null;
     return this.http.get <marketData[]> ('/api/AAM/MD/getMarketData/', { params: params } )
   }
-  getMarketDataSources (sourceType:string):Observable<marketDataSources[]> {
-    let params = {sourceType:sourceType};
-    return this.http.get <marketDataSources[]> ('/api/AAM/MD/getMarketDataSources/', { params: params })
-  }  
+
   sendReloadMarketData ( dataSet:marketData[]) {
     this.subjectMarketData.next(dataSet); 
   }

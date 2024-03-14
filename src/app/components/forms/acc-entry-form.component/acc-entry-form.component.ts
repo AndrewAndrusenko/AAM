@@ -1,4 +1,4 @@
-import { Component,  EventEmitter,  Input, ViewChild } from '@angular/core';
+import { Component,  EventEmitter,  Input } from '@angular/core';
 import { AsyncValidatorFn, FormBuilder, FormControlStatus, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { customAsyncValidators } from 'src/app/services/customAsyncValidators.service';
@@ -13,6 +13,7 @@ import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dia
 import { bAccountTransaction, bAccountsEntriesList, bLedgerTransaction, bTransactionForm, bcTransactionType_Ext } from 'src/app/models/accountng-intefaces.model';
 import { AccountingSchemesService } from 'src/app/services/accounting-schemes.service';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { formatNumber } from '@angular/common';
 @Component({
   selector: 'app-acc-entry-modify-form',
   templateUrl: './acc-entry-form.component.html',
@@ -45,7 +46,6 @@ export class AppAccEntryModifyFormComponent {
   autoProcessingState : boolean = false
   pendingStatusAP: boolean = false
   statusArray: string[] =[]
-  
   private formStatusChange$: Subscription;
   private accountIDchanges$ :Subscription; 
   private ledgerIDchanges$ :Subscription; 
@@ -62,6 +62,7 @@ export class AppAccEntryModifyFormComponent {
    
   ) 
   {
+
     this.entryModifyForm = this.fb.group ({
       d_transactionType: {value:0, disabled: false},
       t_id: {value:0, disabled: false},
@@ -71,6 +72,7 @@ export class AppAccEntryModifyFormComponent {
       t_extTransactionId : {value:null, disabled: false}, 
       t_dataTime: [null, [Validators.required]],  
       t_amountTransaction: [null, [Validators.required, Validators.pattern('[0-9,]*([0-9.]{0,3})?$') ]   ], 
+      // t_amountTransaction: [null, [Validators.required, Validators.pattern(this.numbFormant) ]   ], 
       t_XactTypeCode: {value:null, disabled: false},  
       t_XactTypeCode_Ext: [null, [Validators.required]], 
       d_Debit : {value:null, disabled: false},  
@@ -277,10 +279,7 @@ export class AppAccEntryModifyFormComponent {
     });
   }
   amountFormat () {
-    if (this.amountTransaction.value) {
-      this.amountTransaction.patchValue (parseFloat(this.amountTransaction.value.replace(/,/g, '')))
-      this.amountTransaction.patchValue( new Intl.NumberFormat().format(this.amountTransaction.value))
-    }
+    this.amountTransaction.value? this.amountTransaction.patchValue(Number(parseFloat(this.amountTransaction.value.replace(/[^0-9.]/g, ''))).toLocaleString('en-US')):null;
   }
   updateResultHandler (result :{name:string,detail:string}|number, action: string, dataForUpdateLog?:bAccountsEntriesList, reloadEntryList:boolean=true) {
     this.CommonDialogsService.snackResultHandler(result,action)
@@ -298,7 +297,7 @@ export class AppAccEntryModifyFormComponent {
     let dataForUpdate:unknown= {};
     let renameFieldsForLL = [['ledgerNoId','ledgerID_Debit'],['dataTime','dateTime'],['accountId','ledgerID'],['amountTransaction','amount']];
     Object.entries(this.entryModifyForm.value).forEach(([key, value])=>Object.assign(dataForUpdate,{[key.substring(2)]: value}));
-    dataForUpdate['dataTime'] = newDate.toLocaleDateString();
+    dataForUpdate['dataTime'] = newDate.toDateString();
     dataForUpdate['amountTransaction'] = parseFloat(this.amountTransaction.value.replace(/,/g, ''));
     this.d_transactionType.value ==='LL'? renameFieldsForLL.forEach(pair => Object.assign(dataForUpdate,{[pair[1]]: dataForUpdate[pair[0]]})) : null;
     switch (action) {

@@ -22,7 +22,7 @@ export class AccountingBalncesService {
   accountingBalanceClose (overdraftOverride:boolean, firstClosingDate:string):Observable<{message:string, state:string}> {
     let executionLog:{message:string, state:string} = {message:null,state:'pending'}
     return this.AccountingDataService.GetbAccountingDateToClose('GetbAccountingDateToClose').pipe(
-      map(data=>new Date(data[0].accountingDateToClose).toLocaleDateString()),
+      map(data=>new Date(data[0].accountingDateToClose).toDateString()),
       tap(dateToClose=>{
         dateToClose!==firstClosingDate? this.CommonDialogsService.snackResultHandler({name:'error',detail:'Entries dated '+dateToClose+' have been generated. Please reload the page!'}):null
       }),

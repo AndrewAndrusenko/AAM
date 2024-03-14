@@ -90,13 +90,6 @@ export class AppOrderTableComponent {
   dialogOrderModify: MatDialogRef<AppTradeModifyFormComponent>;
   activeTab:string='';
   tabsNames = ['Orders']
-/*   @HostListener('document:keydown', ['$event'])
-  handleKeyboardEvent(event: KeyboardEvent) { 
-    if (this.tabsNames.includes(this.activeTab)){
-      event.altKey&&event.key==='r'? this.submitQuery(false,true):null;
-      event.altKey&&event.key==='w'? this.exportToExcel():null;
-    }
-  } */
   constructor(
     public TradeService: AppTradeService,
     private AuthServiceS:AuthService,  
@@ -169,10 +162,10 @@ export class AppOrderTableComponent {
             status:['confirmed','in_execution','executed']}))
           ).subscribe (ordersData =>this.updateordersDataTable(ordersData)));
       break;
-      case 'Parent,Per_Portfolio':
+/*       case 'Parent,Per_Portfolio':
         this.TradeService.getOrderInformation({
           idportfolio:this.filters.idportfolio[0]}).subscribe (ordersData => this.updateordersDataTable(ordersData));
-      break;
+      break; */
     }
     if (this.tableMode.includes('Child')) {
       this.columnsToDisplayWithExpand.splice(this.columnsToDisplayWithExpand.indexOf('action'),1);

@@ -1,7 +1,7 @@
 import {AfterViewInit, Component, EventEmitter, Output, ViewChild, Input, ChangeDetectionStrategy, ElementRef} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
-import {Observable } from 'rxjs';
+import {Observable, Subscription } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
 import { Instruments, instrumentCorpActions, instrumentDetails, moexBoard } from 'src/app/models/instruments.interfaces';
@@ -30,7 +30,7 @@ import { MatOptionSelectionChange } from '@angular/material/core';
 export class AppInstrumentTableComponent  implements AfterViewInit {
   accessState: string = 'none';
   disabledControlElements: boolean = false;
-  @Input() FormMode:string
+  private subscriptions = new Subscription();
   marketSources:marketDataSources[] =  [];
   columnsToDisplay = [ 
     'secid', 
@@ -53,16 +53,15 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
     'Action'
   ];
   dataSource: MatTableDataSource<Instruments>;
+  @Input() FormMode:string
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild('filterALL', { static: false }) filterALL: ElementRef;
   @Output() public modal_principal_parent = new EventEmitter();
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
-  ;
   panelOpenStateSecond = false;
   instrumentDetailsArr:instrumentDetails[] = [];
   instrumentCorpActions:instrumentCorpActions[] = [];
-  accessToClientData: string = 'true';
   instruments: string[] = ['ClearAll'];
   investmentNodeColor = investmentNodeColorChild;
   additionalLightGreen = additionalLightGreen;
@@ -78,39 +77,50 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
     private MarketDataService: AppMarketDataService,
     private TreeMenuSevice:TreeMenuSevice,
     private AuthServiceS:AuthService,  
-    private indexDBServiceS:indexDBService,
+    private indexDBService:indexDBService,
     private HandlingCommonTasksS:HandlingCommonTasksService,
     private InstrumentDataS:InstrumentDataService,
     private CommonDialogsService:HadlingCommonDialogsService,
     private dialog: MatDialog,
     private fb:FormBuilder, 
   ) {
+    
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToInstrumentData')[0].elementvalue;
+    if (this.accessState ==='none') {
+      this.CommonDialogsService.snackResultHandler({name:'error', detail:'Your role has no access to the data'})
+    } else {
+      this.InstrumentDataS.getMoexInstruments().subscribe (instrumentData => this.updateInstrumentDataTable(instrumentData))  
+    }
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.searchParametersFG = this.fb.group ({
       secidList: null,
       marketSource : {value:null, disabled:false},
       boards : {value:null, disabled:false}
     });
-     this.indexDBServiceS.getIndexDBStaticTables('getBoardsDataFromInstruments').subscribe ((data)=>this.boardIDs = (data.data as moexBoard[]))
-     this.MarketDataService.getMarketDataSources('stock').subscribe(marketSourcesData => this.marketSources = marketSourcesData);
-     this.InstrumentDataS.getInstrumentDataToUpdateTableSource().subscribe(data =>{
-     let index =  this.dataSource.data.findIndex(elem=>elem.id===data.data[0].id)
-      switch (data.action) {
-        case 'Deleted':
-          this.dataSource.data.splice(index,1)
-        break;
-        case 'Created':
-          this.dataSource.data.unshift(data.data[0])
-        break;
-        case 'Updated':
-          this.dataSource.data[index] = {...data.data[0]}
-        break;
-      }
-     this.dataSource.paginator = this.paginator;
-     this.dataSource.sort = this.sort;
-    })
+      this.indexDBService.pipeBoardsMoexSet.next(true);
+      this.subscriptions.add(this.indexDBService.receiveBoardsMoexSet().subscribe(marketSourcesData => this.boardIDs = marketSourcesData));
+      this.indexDBService.pipeMarketSourceSet.next(true);
+      this.subscriptions.add(this.indexDBService.receivMarketSourceSett().subscribe(marketSourcesData => this.marketSources = marketSourcesData));
+      this.subscriptions.add(
+        this.InstrumentDataS.getInstrumentDataToUpdateTableSource().subscribe(data =>{
+          let index =  this.dataSource.data.findIndex(elem=>elem.id===data.data[0].id)
+          switch (data.action) {
+            case 'Deleted':
+              this.dataSource.data.splice(index,1)
+            break;
+            case 'Created':
+              this.dataSource.data.unshift(data.data[0])
+            break;
+            case 'Updated':
+              this.dataSource.data[index] = {...data.data[0]}
+            break;
+          }
+          this.dataSource.paginator = this.paginator;
+          this.dataSource.sort = this.sort;
+        })
+      )
   }
+  ngOnDestroy(): void { this.subscriptions.unsubscribe()}
   openInstrumentModifyForm (action:string, element:Instruments) {
     this.dialogInstrumentModify = this.dialog.open (AppInvInstrumentModifyFormComponent,{minHeight:'600px', minWidth:'800px', maxWidth:'60vw', autoFocus: false, maxHeight: '90vh'})
     this.dialogInstrumentModify.componentInstance.moexBoards = this.boardIDs;
@@ -121,12 +131,7 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
     this.dialogInstrumentModify.componentInstance.instrumentCorpActions = this.instrumentCorpActions.filter(el=> el.isin===element.isin)
   }
   ngAfterViewInit() {
-    if (this.FormMode==='Redis') {
-      this.InstrumentDataS.getRedisMoexInstruments().subscribe(data => this.updateInstrumentDataTable(data))   
-    } else {
-      this.InstrumentDataS.getMoexInstruments().subscribe (instrumentData => this.updateInstrumentDataTable(instrumentData))  
-    }
-    this.indexDBServiceS.getIndexDBStaticTables('getInstrumentDataDetails').subscribe(data =>this.instrumentDetailsArr = (data.data as instrumentDetails[]));
+    this.indexDBService.getIndexDBStaticTables('getInstrumentDataDetails').subscribe(data =>this.instrumentDetailsArr = (data.data as instrumentDetails[]));
   }
   handleNewFavoriteClick(elem:Instruments){
     let userData = JSON.parse(localStorage.getItem('userInfo'));
@@ -170,7 +175,7 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
   }
   submitQuery () {
-      this.dataSource.data? this.dataSource.data = null : null;
+      this.dataSource?.data? this.dataSource.data = null : null;
       let searchObj = <instrumentsSearchParams>{};
       let instrumentsList = [];
       this.instruments.indexOf('ClearAll') !== -1? this.instruments.splice(this.instruments.indexOf('ClearAll'),1) : null;

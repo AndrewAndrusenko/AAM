@@ -114,7 +114,7 @@ async function fGetportfolioTable (request,response) {
     break;
   }
   sql = pgp.as.format(query.text,query.values)
-  db_common_api.queryExecute (sql, response,null,request.query.actionOnAccountTable);
+  db_common_api.queryExecute (sql, response,null,request.query.actionOnAccountTable==='undefined'? 'fGetportfolioTable': request.query.actionOnAccountTable );
 }
 async function fPutNewFavorite (request, response) {
     paramArr = [request.body.nodename, request.body.nodeparent, request.body.userId, request.body.idelement]

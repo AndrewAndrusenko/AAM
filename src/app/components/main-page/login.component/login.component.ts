@@ -28,7 +28,7 @@ export class LoginComponent  {
   ngOnInit(): void {
     //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
     //Add 'implements OnInit' to the class.
- document.body.style['zoom'] = "80%";
+//  document.body.style['zoom'] = "80%";
     
   }
   ISINuniqueAsyncValidator :ValidatorFn;

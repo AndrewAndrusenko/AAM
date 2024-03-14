@@ -70,7 +70,7 @@ export class AppNewAccountComponent {
     } 
   }
   ngOnChanges (changes: SimpleChanges) {
-    if (this.accessState !=='none') {
+    if (this.accessState !=='none'&&this.portfolioname.value!==changes['portfolioCode'].currentValue) {
       this.InvestmentDataService.getPortfoliosData('',changes['portfolioCode'].currentValue,0,undefined, 'Get_Portfolio_By_idPortfolio', null,this.accessToClientData).subscribe (portfoliosData => this.newAccountForm.patchValue(portfoliosData[0]));
     }
   }

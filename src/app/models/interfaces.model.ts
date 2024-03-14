@@ -189,6 +189,7 @@ export interface marketSourceSegements {
   }
 }
 export interface marketDataSources {
+  type:string;
   disabled:boolean,
   segments :marketSourceSegements [],
   sourceName : string,

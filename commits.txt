@@ -417,28 +417,30 @@ src\app\components\forms\instrument-corp-action-form.component\instrument-corp-a
 src\app\components\forms\acc-schemes-ll-form.component\acc-schemes-ll-form.component.ts
 src\app\components\forms\acc-schemes-al-form.component\acc-schemes-al-form.component.ts
 src\app\components\forms\acc-fees-portfolio-schedule-form.component\acc-fees-portfolio-schedule-form.component.ts
-src\app\components\forms\acc-fees-main-form.component\acc-fees-main-form.component.ts
+src\app\components\forms\acc-fees-main-
+form.component\acc-fees-main-form.component.ts
 src\app\components\forms\acc-entry-form.component\acc-entry-form.component.ts
 src\app\components\forms\acc-account-form.component\acc-account-form.component.ts
 src\app\components\charts\performance-twroi-chart.componentt\performance-twroi-chart.componentt.ts
 src/app/components/charts/chart-candle-marketdata/echart-marketdata-candle.ts
 src\app\components\charts\performance-revenue-factor-chart.component\performance-revenue-factor-chart.component.ts
 2|| Refactored function creating new depo accounts if they are required to generate trading accounting. Refactored to RxJS pipes  
+--------------------------------------------------------------------------------------------
+11/03/24 - 13/03/24
+1|| Bugs fixings related to local settings of a user computer. Testing has been started using different client computers and different browsers. Local dates format, numbers and etc
+2|| Created pipe and functions to store Moex Boards list. All requests go to the local storage or to the exhaustMap pipe if there is no data in storage yet. When exhaustMap pipe receives data to save it to the storage and send it to the subscribers. The same pipe has been created for market segments
+3|| Optimized loading big components by removing duplicates queries to DB
+4|| Local Tunnel has been added to the node servers
 
 ToDo
-|| Local Tunel for Alya
-|| Architecture 
-|| indexDB fgetMarketDataSources
-||exhaustMap pipe for fgetInstrumentDataGeneral=>getBoardsDataFromInstruments 276
-
-|| Store histrory of a portfolio changing strategies
-* Fix: Allocation acconting - FIFO/Accounting => Roll back FIFO/Accounting when other fails
-|| Revenue Factor Chart add info about management and perfomance fees deducted
-|| FIFO Bug possible=> Case of simultaneously two trades which should be netted on FIFO are sent in FIFO function. 
-    Idea is to sort processing batch according to the FIFO guidelines and execute FIFO function synchronously 
+|| Architecture
+|| Store history of a portfolio changing strategies
+* Fix: Allocation accounting - FIFO/Accounting => Roll back FIFO/Accounting when other fails
+|| Revenue Factor Chart add info about management and performance fees deducted
+|| FIFO Bug possible=> Case of simultaneously two trades which should be netted on FIFO are sent in FIFO function.
+	Idea is to sort processing batch according to the FIFO guidelines and execute FIFO function synchronously
 || Investment restrictions
-|| Check UserAccess model for UI, espesically the latest components
+|| Check UserAccess model for UI, especially the latest components
 || DB access roles
 || Hurdle Performance fee and Cash In/Outs -??? How to correct start and end NVP?
-*Performance Chart shows graph from the last selected object if new object is reused and there's no need to reload it 
-Today I'm going. To refactor Um any type Then I'm going. I'm just. stop. 
+*Performance Chart shows graph from the last selected object if new object is reused and there's no need to reload it

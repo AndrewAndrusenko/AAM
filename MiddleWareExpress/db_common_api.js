@@ -19,6 +19,7 @@ async function queryExecute (sql, response, responseType, sqlID) {
         res.length? res.map(el => rows.push(...el.rows) ): rows = res.rows;
         result = responseType === 'rowCount'?  res.rowCount : rows;
         console.log(new Date().toLocaleTimeString().slice(0,-3) +':'+ new Date().getMilliseconds(), sqlID,'Rows:'+  responseType === 'rowCount'?  res.rowCount :rows.length)
+        // console.log(sql)
         resolve (response? response.status(200).json(result):result)
       }
     })

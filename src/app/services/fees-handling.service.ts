@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HadlingCommonDialogsService } from './hadling-common-dialogs.service';
 import { AppAccountingService } from './accounting.service';
-import { BehaviorSubject, EMPTY, Observable, ReplaySubject, Subject, catchError, filter, forkJoin, from, map, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, EMPTY, Observable, Subject, catchError, filter, forkJoin, from, map, switchMap, tap } from 'rxjs';
 import { bAccountTransaction, bAccountingTransactionAll, bLedgerTransaction } from '../models/accountng-intefaces.model';
-import { AccountingTradesService } from './accounting-trades.service';
 import { HttpClient } from '@angular/common/http';
 import { formatNumber } from '@angular/common';
 import { FeesMainData, FeesMainWithSchedules, FeesPortfoliosWithSchedulesData, FeesSchedulesData, FeesTransactions, ManagementFeeCalcData, PerformanceFeeCalcData, dFeesObject } from '../models/fees-interfaces.model';

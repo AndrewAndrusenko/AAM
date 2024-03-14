@@ -94,14 +94,15 @@ export class AppaInvPortfolioNPVDynamicComponent {
       p_report_date_end:null,
       p_report_currency:['840', { validators:  Validators.required}],
     });
+    this.subscriptions.add(
+      this.AutoCompService.recieveCurrencyListReady().subscribe(()=>this.report_id_currency.updateValueAndValidity()));
+    this.subscriptions.add(
+      this.AutoCompService.getSMPsListReady().subscribe(data=>this.mp_strategies_list=data))
   }
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }
   ngOnInit(): void {
-    this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios').subscribe ((data)=>{
-      this.mp_strategies_list = data.data as StrategiesGlobalData[]
-    })
     this.multiFilter = (data: NPVDynamicData, filter: string) => {
       let filter_array = filter.split(',').map(el=>[el,1]);
       this.columnsToDisplay.forEach(col=>filter_array.forEach(fil=>{
@@ -141,7 +142,6 @@ export class AppaInvPortfolioNPVDynamicComponent {
         );
       return !filter || filter_array.reduce((acc,val)=>acc+Number(val[1]),0)===0;
     }
-    // this.subscriptions.add(this.TreeMenuSevice.getActiveTab().subscribe(tabName=>this.activeTab=tabName));
   }
   resetSearchForm () {
     this.searchParametersFG.reset();
@@ -183,8 +183,8 @@ export class AppaInvPortfolioNPVDynamicComponent {
   submitQuery (reset:boolean=false, showSnackResult:boolean=true) {
     let searchObj = reset?  {} : this.searchParametersFG.value;
     this.dataSource?.data? this.dataSource.data = null : null;
-    searchObj.p_report_date_start = new Date (this.dateRangeStart.value).toLocaleDateString();
-    searchObj.p_report_date_end = this.dateRangeEnd.value? new Date (this.dateRangeEnd.value).toLocaleDateString(): new Date().toLocaleDateString();
+    searchObj.p_report_date_start = new Date (this.dateRangeStart.value).toDateString();
+    searchObj.p_report_date_end = this.dateRangeEnd.value? new Date (this.dateRangeEnd.value).toDateString(): new Date().toDateString();
     of(this.portfolios.length).pipe(
       switchMap(portLength => portLength===1? this.InvestmentDataService.getPortfoliosListForMP('All','getPortfoliosByMP_StrtgyID'):from([[...this.portfolios]])),
       tap(ports=>searchObj.p_portfolios_list = ports.map(el=>el.toUpperCase())),

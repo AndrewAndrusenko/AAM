@@ -17,6 +17,7 @@ import {HandlingCommonTasksService } from 'src/app/services/handling-common-task
 import {AuthService } from 'src/app/services/auth.service';
 import {InstrumentDataService } from 'src/app/services/instrument-data.service';
 import {moexBoard } from 'src/app/models/instruments.interfaces';
+import { indexDBService } from 'src/app/services/indexDB.service';
 @Component({
   selector: 'app-table-market-data',
   templateUrl: './market-data-table.component.html',
@@ -117,19 +118,13 @@ export class AppTableMarketDataComponent {
     private AuthServiceS:AuthService,  
     private AutoCompService:AtuoCompleteService,
     private HandlingCommonTasks:HandlingCommonTasksService,
-    private InstrumentData:InstrumentDataService,
+    private indexDBService:indexDBService,
     private CommonDialogsService:HadlingCommonDialogsService,
     private fb:FormBuilder, 
     public snack:MatSnackBar
   ) {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToInstrumentData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
-    this.InstrumentData.getInstrumentDataGeneral('getBoardsDataFromInstruments').subscribe(boardsData => this.boardIDs=boardsData  as moexBoard[])
-    this.MarketDataService.getMarketDataSources('stock').subscribe(marketSourcesData => this.marketSources = marketSourcesData);
-    this.loadingDataLog.state = {Message:'',State: 'None'};
-    this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data=>{
-      this.FirstOpenedAccountingDate = data[0].FirstOpenedDate;
-    });
     this.searchParametersFG = this.fb.group ({
       dataRange : this.dataRange,
       secidList: null,
@@ -142,6 +137,7 @@ export class AppTableMarketDataComponent {
       sourceCode: [[],Validators.required],
       overwritingCurrentData : [false]
     });
+    this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data=>this.FirstOpenedAccountingDate = data[0].FirstOpenedDate);
     this.AutoCompService.getSecidLists();
     this.secidList.setValidators(this.AutoCompService.secidValirator())
     this.filterednstrumentsLists = this.secidList.valueChanges.pipe(
@@ -152,6 +148,12 @@ export class AppTableMarketDataComponent {
     this.subscriptions.add(this.MarketDataService.getReloadMarketData().subscribe(marketData => this.updateMarketDataTable(marketData)));
     this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
     this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
+    this.indexDBService.pipeMarketSourceSet.next(true);
+    this.indexDBService.pipeBoardsMoexSet.next(true);
+    this.subscriptions.add(this.indexDBService.receiveBoardsMoexSet().subscribe(boardsData => this.boardIDs = boardsData));
+    this.subscriptions.add(this.indexDBService.receivMarketSourceSett().subscribe(msData => this.marketSources = msData.filter(el=>el.type==='stock')));
+
+    this.loadingDataLog.state = {Message:'',State: 'None'};
   }
   ngOnDestroy(): void {this.subscriptions.unsubscribe()}
   updateAllComplete(index:number) {

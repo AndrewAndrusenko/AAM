@@ -1,46 +1,71 @@
 import { Injectable } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { AppAccountingService } from './accounting.service';
-import { Observable, catchError, of, switchMap, tap } from 'rxjs';
+import { Observable, Subject, catchError, exhaustMap, of, switchMap, tap } from 'rxjs';
 import { AppInvestmentDataServiceService } from './investment-data.service.service';
 import { CurrenciesDataService } from './currencies-data.service';
 import { InstrumentDataService } from './instrument-data.service';
 import { corporateActionsTypes, instrumentCorpActions, instrumentDetails, moexBoard, moexSecurityGroup, moexSecurityType } from '../models/instruments.interfaces';
-import { ClientData, StrategiesGlobalData, counterParty, currencyCode, currencyPair, currencyRateList } from '../models/interfaces.model';
+import { ClientData, StrategiesGlobalData, counterParty, currencyCode, currencyPair, currencyRateList, marketDataSources } from '../models/interfaces.model';
 import { bcTransactionType_Ext } from '../models/accountng-intefaces.model';
 export interface cacheAAM {
   code:string,
   data:cachedDataType
 }
- type cachedDataType = corporateActionsTypes[]| 
-moexSecurityGroup[]| 
-moexSecurityType[]|
-moexBoard[]|
-currencyRateList[]|
-bcTransactionType_Ext[]|
-ClientData[]|
-StrategiesGlobalData[]|
-instrumentCorpActions[]|
-instrumentDetails[]|
-currencyCode[]|
-currencyPair[]|
-counterParty[]|
-string[][]|
-{secid:string}[]|{isin:string}[];
+
+ type cachedDataType = marketDataSources[]|
+                      corporateActionsTypes[]| 
+                      moexSecurityGroup[]| 
+                      moexSecurityType[]|
+                      moexBoard[]|
+                      currencyRateList[]|
+                      bcTransactionType_Ext[]|
+                      ClientData[]|
+                      StrategiesGlobalData[]|
+                      instrumentCorpActions[]|
+                      instrumentDetails[]|
+                      currencyCode[]|
+                      currencyPair[]|
+                      counterParty[]|
+                      string[][]|
+                      {secid:string}[]|{isin:string}[];
+                      
 @Injectable({
   providedIn: 'root'
 })
+
 export class indexDBService {
+  public pipeBoardsMoexSet = new Subject<boolean> ()
+  public pipeMarketSourceSet = new Subject<boolean> ()
+  private subjectBoardsMoexReady = new Subject<moexBoard[]>
+  private subjectMarketSourceReady = new Subject<marketDataSources[]>
+/*   public pipeStrategiesListSet = new Subject<boolean> ()
+  private subjectStrategiesListReady = new Subject<StrategiesGlobalData[]> */
+
   constructor(
     private dbService: NgxIndexedDBService,
     private AccountingDataService:AppAccountingService, 
     private InvestmentDataService : AppInvestmentDataServiceService,   
     private CurrenciesDataSrv: CurrenciesDataService,
     private InstrumentDataS:InstrumentDataService,
-  ) { }
-  getUserData () {
-    let userData = JSON.parse(localStorage.getItem('userInfo'))
+  ) 
+  { 
+    this.pipeBoardsMoexSet.pipe(
+      exhaustMap(()=>this.getIndexDBStaticTables('getBoardsDataFromInstruments'))
+    ).subscribe(data=>this.sendBoardsMoexSet(data.data as moexBoard[]))
+    this.pipeMarketSourceSet.pipe(
+      exhaustMap(()=>this.getIndexDBStaticTables('getMarketDataSources'))
+    ).subscribe(data=>this.sendMarketSourceSet(data.data as marketDataSources[]))
+/*     this.pipeStrategiesListSet.pipe(
+      exhaustMap(()=>this.getIndexDBStaticTables('getModelPortfolios'))
+    ).subscribe(data=>this.sendStrategiesListSet(data.data as StrategiesGlobalData[])) */
   }
+/*   sendStrategiesListSet (data:StrategiesGlobalData[]) {this.subjectStrategiesListReady.next(data)}
+  receiveStrategiesListSet ():Observable<StrategiesGlobalData[]> {return this.subjectStrategiesListReady.asObservable()} */
+  sendBoardsMoexSet (data:moexBoard[]) {this.subjectBoardsMoexReady.next(data) }
+  receiveBoardsMoexSet ():Observable<moexBoard[]> {return this.subjectBoardsMoexReady.asObservable()}
+  sendMarketSourceSet (data:marketDataSources[]) {this.subjectMarketSourceReady.next(data) }
+  receivMarketSourceSett ():Observable<marketDataSources[]> {return this.subjectMarketSourceReady.asObservable()}
   indexdbDeleteAllCache (key:string) {
     return this.dbService.clear(key)
   }
@@ -93,6 +118,9 @@ export class indexDBService {
         break
         case 'getModelPortfolios':
          fetchServiceFunction =  this.InvestmentDataService.getGlobalStategiesList(undefined,undefined,'getModelPortfolios')
+        break
+        case 'getMarketDataSources':
+         fetchServiceFunction =  this.InstrumentDataS.getMarketDataSources()
         break
       }
       return fetchServiceFunction;

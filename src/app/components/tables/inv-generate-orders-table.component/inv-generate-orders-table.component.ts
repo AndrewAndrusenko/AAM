@@ -157,7 +157,7 @@ export class AppInvGenerateOrdersTable{
     this.dataSource?.data? this.dataSource.data = null : null;
     searchObj.secidList = [0,1].includes(this.instruments.length)&&this.instruments[0]==='ClearAll'? null : this.instruments.map(el=>el.toLocaleLowerCase())
     searchObj.idportfolios = [0,1].includes(this.portfolios.length)&&this.portfolios[0]==='ClearAll'? null : this.portfolios.map(el=>el.toLocaleLowerCase())
-    searchObj.report_date= new Date (searchObj.report_date).toLocaleDateString();
+    searchObj.report_date= new Date (searchObj.report_date).toDateString();
     this.InvestmentDataService.getPortfolioMpDeviations(searchObj).subscribe(data => {
       this.updatePositionsDataTable(data)
       showSnackResult? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ') : null;

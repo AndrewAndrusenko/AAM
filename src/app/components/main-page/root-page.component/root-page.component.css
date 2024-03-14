@@ -1,5 +1,5 @@
 .root-container {
-  width: 210vh;
+  width: 100vw;
   height: 95vh;
 }
 .root-sidenav-content {
@@ -7,11 +7,9 @@
   width:180vh;
   height: 100%;
 }
-.root-sidenav {
-}
 .mat-accent .mat-slide-toggle-thumb{
-filter: grayscale(100%);
+  filter: grayscale(100%);
 }
 .mat-checked .mat-slide-toggle-thumb{
-filter: grayscale(0);
+  filter: grayscale(0);
 }

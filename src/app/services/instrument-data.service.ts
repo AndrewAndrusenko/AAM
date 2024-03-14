@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
-import { Observable, Subject, map } from 'rxjs';
+import { Observable, Subject, exhaustMap, map } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { Instruments, instrumentCorpActions, instrumentDetails} from '../models/instruments.interfaces';
 import { corporateActionsTypes, moexBoard, moexSecurityGroup, moexSecurityType } from '../models/instruments.interfaces';
+import { indexDBService } from './indexDB.service';
+import { marketDataSources } from '../models/interfaces.model';
 interface InstrumentDataSet {
   data:Instruments[],
   action:string
@@ -35,8 +37,11 @@ export class InstrumentDataService {
   private subjectInstrument = new Subject<InstrumentDataSet> ()
   private subjectInstrumentDetails = new Subject<instrumentDetails[]> ()
   private subjectCorpActions = new Subject<instrumentCorpActions[]> ()
-  constructor(private http:HttpClient) { }
+  constructor(private http:HttpClient){}
 
+  getMarketDataSources ():Observable<marketDataSources[]> {
+    return this.http.get <marketDataSources[]> ('/api/AAM/MD/getMarketDataSources/')
+  }  
   getcouponPeriodInfo(vdate:string,tidinstrument:string,facevalue:number,qty:number):Observable<coupon_data> {
     const params = {'vdate':new Date(vdate).toISOString(),'tidinstrument':tidinstrument };
     let coupon_data : coupon_data = {days:0, accuredInterest:null,couponDetails:null, couponPeriod:null, couponPeriodAmount:null,currentCouponAmount:null}

@@ -1,9 +1,9 @@
-import { Component, ViewChild, Input, AfterViewInit, ChangeDetectionStrategy} from '@angular/core';
+import { Component, ViewChild, Input, ChangeDetectionStrategy} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
-import {catchError, EMPTY, map, Observable, startWith, switchMap, tap } from 'rxjs';
+import {catchError, EMPTY, map, Observable, startWith, Subscription } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
-import { currencyPair, currencyRateList,  marketDataSources, marketSourceSegements } from 'src/app/models/interfaces.model';
+import { currencyPair, currencyRateList,  marketDataSources } from 'src/app/models/interfaces.model';
 import { AppAccountingService } from 'src/app/services/accounting.service';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
@@ -11,13 +11,11 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { MatOption } from '@angular/material/core';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import { DatePipe, formatNumber, registerLocaleData } from '@angular/common';
-import localeFr from '@angular/common/locales/fr';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { CurrenciesDataService } from 'src/app/services/currencies-data.service';
-import { AppMarketDataService } from 'src/app/services/market-data.service';
-registerLocaleData(localeFr, 'fr');
+import { indexDBService } from 'src/app/services/indexDB.service';
 @Component({
   selector: 'app-table-currencies-data',
   changeDetection:ChangeDetectionStrategy.OnPush,
@@ -27,12 +25,13 @@ registerLocaleData(localeFr, 'fr');
 export class AppTableCurrenciesDataComponent {
   accessState: string = 'none';
   disabledControlElements: boolean = false;
-  @Input() FormMode:string = 'Full'
+  private subscriptions = new Subscription()
   loadMarketData: FormGroup;
   marketSources:marketDataSources[] =  [];
   columnsToDisplay=['id','pair', 'base_code','base_iso','quote_code','quote_iso','rate','inderect_rate','rate_date','rate_type','nominal','sourcecode'];
   columnsHeaderToDisplay=['ID','Pair','Base1','Base2','Quote1','Quote2','Rate','InD_Rate','Date','RateType','Ratio','Source'];
   dataSource: MatTableDataSource<currencyRateList>;
+  @Input() FormMode:string = 'Full'
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
   statusLogPanelOpenState:boolean=false;
@@ -61,7 +60,7 @@ export class AppTableCurrenciesDataComponent {
   constructor(
     private AccountingDataService:AppAccountingService, 
     private currenciesDataService: CurrenciesDataService,
-    private MarketDataService: AppMarketDataService,
+    private indexDBService: indexDBService,
     private AuthServiceS:AuthService,  
     private AutoCompService:AtuoCompleteService,
     private handlingCommonTasksService:HandlingCommonTasksService,
@@ -71,7 +70,15 @@ export class AppTableCurrenciesDataComponent {
     this.datePipe = new DatePipe ('en-US')
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToInstrumentData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
-    this.MarketDataService.getMarketDataSources('currency').subscribe(marketSourcesData => this.marketSources = marketSourcesData);
+    this.indexDBService.pipeMarketSourceSet.next(true);
+    this.subscriptions.add(this.indexDBService.receivMarketSourceSett().subscribe(marketSourcesData => {
+      console.log('ms',marketSourcesData);
+      this.marketSources = marketSourcesData.filter(el=>el.type==='currency');
+      this.marketSources[0].checkedAll=true;
+      this.setAll(0);
+    }));
+
+    // this.MarketDataService.getMarketDataSources('currency').subscribe(marketSourcesData => this.marketSources = marketSourcesData);
     this.loadingDataState={message:'',state:'None',deletedCount:0,loadedCount:0}
     this.searchParametersFG = this.fb.group ({
       dataRange : this.dataRange,
@@ -96,6 +103,7 @@ export class AppTableCurrenciesDataComponent {
     );
     this.currenciesDataService.getCurrencyRatesList().subscribe (currencyData => this.updateCurrencyDataTable(currencyData)) 
   }
+  ngOnDestroy(): void {this.subscriptions.unsubscribe()}
   updateAllComplete(index:number) {
     this.marketSources[index].checkedAll = this.marketSources[index].segments != null && this.marketSources[index].segments.every(t => t.checked); 
     this.marketSources[index].indeterminate = this.marketSources[index].segments.filter(t => t.checked).length > 0 && !this.marketSources[index].checkedAll; 
@@ -148,8 +156,7 @@ export class AppTableCurrenciesDataComponent {
     this.dataSource  = new MatTableDataSource(currencyData);
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
-    this.marketSources[0].checkedAll=true
-    this.setAll(0)
+
   }
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;

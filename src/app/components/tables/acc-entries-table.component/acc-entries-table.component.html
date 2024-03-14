@@ -27,6 +27,20 @@
       Reload 
       <mat-icon matSuffix >refresh</mat-icon>
     </button>
+    <button color = "accent" mat-raised-button [disabled]="disabledControlElements"
+      style=" margin-left:1%; font-size: 18px;"
+      matTooltip="New Entry Account-Ledger"
+      (click)="openEntryModifyForm('Create', null)">
+      Create item AL
+      <mat-icon matSuffix >add_circle</mat-icon>
+    </button>
+    <button color = "accent" mat-raised-button [disabled]="disabledControlElements"
+      style=" margin-left:1%; font-size: 18px;"
+      matTooltip="New Entry Ledger-Ledger"
+      (click)="openEntryModifyForm('CreateLL', null)">
+      Create item LL
+      <mat-icon matSuffix >add_circle</mat-icon>
+    </button>
     <button title="Delete Accounting"  
       color = "warn" mat-raised-button style=" margin-left:1%; font-size: 18px;"
       [disabled]="!selection.hasValue()"

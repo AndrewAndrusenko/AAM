@@ -1,7 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable, Subject, exhaustMap } from "rxjs";
-import { bcAccountType_Ext, bcTransactionType_Ext } from "../models/accountng-intefaces.model";
+import { bcTransactionType_Ext } from "../models/accountng-intefaces.model";
 import { indexDBService } from "./indexDB.service";
 import { bcSchemeAccountTransaction, bcSchemeLedgerTransaction, bcSchemesParameters, bcSchemesProcesses } from "../models/acc-schemes-interfaces";
 @Injectable ({

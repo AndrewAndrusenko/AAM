@@ -282,7 +282,7 @@ export class AppAccountingService {
   accountingBalanceCloseInsert (data:{closingDate : string}):Observable<{message:string,state:string}> {
     return this.http.post <{rows_affected: string}[]> ('/api/DEA/accountingBalanceCloseInsert/',{'data': data}).pipe(
       map(rows=>{return {
-        message:'Balance has been closed for '+ data.closingDate +'.\n'+ rows[0].rows_affected + ' rows has been inserted',
+        message:'Balance has been closed for '+ new Date(data.closingDate).toLocaleDateString() +'.\n'+ rows[0].rows_affected + ' rows has been inserted',
         state:'closed'}})
     )
   }
