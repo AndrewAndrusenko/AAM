@@ -46,11 +46,13 @@ export class HandlingCommonTasksService {
     };
   }
   toDateRangeNew (control:AbstractControl):string|null {
+    let end = '01/01/2050';
+    let start = '01/01/1970';
     if (!control.value['dateRangeStart']&&!control.value['dateRangeEnd']) {
       return null
     } else {
-      let start = control.value['dateRangeStart']? new Date(control.value['dateRangeStart']['_d']).toLocaleDateString() : '01/01/1970';
-      let end = control.value['dateRangeEnd']? new Date(control.value['dateRangeEnd']['_d']).toLocaleDateString() : '01/01/2050';
+      start=control.value['dateRangeStart']['_isAMomentObject']? new Date(control.value['dateRangeStart']['_d']).toDateString():new Date(control.value['dateRangeStart']).toDateString();
+      end=control.value['dateRangeEnd']['_isAMomentObject']? new Date(control.value['dateRangeEnd']['_d']).toDateString() : new Date(control.value['dateRangeEnd']).toDateString();
       return '['+start+','+end+']'
     }
   }

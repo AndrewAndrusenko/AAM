@@ -5,7 +5,7 @@ import {Subscription, filter, tap } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {animate, state, style, transition, trigger} from '@angular/animations';
 import {MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import {bAccountsEntriesList, bcTransactionType_Ext } from 'src/app/models/accountng-intefaces.model';
+import {bAccountsEntriesList, bcAccountType_Ext, bcTransactionType_Ext } from 'src/app/models/accountng-intefaces.model';
 import {AppAccountingService } from 'src/app/services/accounting.service';
 import {AppAccEntryModifyFormComponent } from '../../forms/acc-entry-form.component/acc-entry-form.component';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
@@ -24,6 +24,7 @@ import {HandlingTableSelectionService } from 'src/app/services/handling-table-se
 import {SelectionModel } from '@angular/cdk/collections';
 import {tableHeaders } from 'src/app/models/interfaces.model';
 import {AccountingSchemesService } from 'src/app/services/accounting-schemes.service';
+import { indexDBService } from 'src/app/services/indexDB.service';
 @Component({
   selector: 'app-table-acc-entries',
   templateUrl: './acc-entries-table.component.html',
@@ -92,6 +93,7 @@ export class AppTableAccEntriesComponent implements OnInit {
   searchParametersFG: FormGroup;
   dialogChooseAccountsList: MatDialogRef<AppTableAccAccountsComponent>;
   TransactionTypes: bcTransactionType_Ext[] = [];
+  accountTypes:bcAccountType_Ext[]=[];
   filterEntryTypes:string[] = ['ClearAll'];
   investmentNodeColor=investmentNodeColor;
   activeTab:string='';
@@ -103,6 +105,7 @@ export class AppTableAccEntriesComponent implements OnInit {
     private CommonDialogsService:HadlingCommonDialogsService,
     private AuthServiceS:AuthService,  
     private HandlingCommonTasksS:HandlingCommonTasksService,
+    private indexDBService:indexDBService, 
     private dialog: MatDialog,
     private fb:FormBuilder ,
     private AccountingSchemesService:AccountingSchemesService,
@@ -112,17 +115,20 @@ export class AppTableAccEntriesComponent implements OnInit {
     this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
     this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
     this.searchParametersFG = this.fb.group ({
-      dataRange : this.dataRange,
+      dateRange : {value:null, disabled:false},
       noAccountLedger: {value:['ClearAll'], disabled:false},
       portfolioCodes: {value:['ClearAll'], disabled:false},
       amount:{value:null, disabled:true},
       entryTypes : {value:null, disabled:false},
       externalId:{value:null, disabled:false},
       idtrade:{value:null, disabled:false},
-      entriesIds:{value:null, disabled:false}
+      entriesIds:{value:null, disabled:false},
+      accountTypes:{value:null, disabled:false}
+
     })
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToEntriesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
+    this.indexDBService.getIndexDBStaticTables('bcAccountType_Ext').subscribe (data => this.accountTypes=(data.data as bcAccountType_Ext[]))
     this.AccountingSchemesService.subjectTransactionTypePipe.next(null);
     this.subscriptions.add(this.AccountingSchemesService.receiveTransactionTypesReady().subscribe(data=>this.TransactionTypes=data.data))
     this.AccountingDataService.getReloadEntryList().pipe(
@@ -193,10 +199,8 @@ export class AppTableAccEntriesComponent implements OnInit {
     this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate);
     let searchObj = this.searchParametersFG.value;
     this.dataSource? this.dataSource.data = null: null;
-    Object.assign (searchObj , {'dateRangeStart':
-      this.gRange.get('dateRangeStart').value===null? null:new Date (this.gRange.get('dateRangeStart').value).toDateString()});
-    Object.assign (searchObj , {'dateRangeEnd': 
-      this.gRange.get('dateRangeEnd').value===null? null : new Date (this.gRange.get('dateRangeEnd').value).toDateString()});
+    searchObj.dateRange = this.dataRange.value? this.HandlingCommonTasksS.toDateRangeNew(this.dataRange):null;
+    searchObj.entryTypes=searchObj.entryTypes?.length? searchObj.entryTypes:null;
     this.AccountingDataService.GetAccountsEntriesListAccounting(searchObj,null,null, null, 'GetAccountsEntriesListAccounting').subscribe (EntriesList  => {
       this.dataSource  = new MatTableDataSource(EntriesList);
       this.dataSource.paginator = this.paginator;

@@ -27,7 +27,8 @@ export class AccountingBalncesService {
         dateToClose!==firstClosingDate? this.CommonDialogsService.snackResultHandler({name:'error',detail:'Entries dated '+dateToClose+' have been generated. Please reload the page!'}):null
       }),
       filter(dateToClose=>(dateToClose===firstClosingDate)),
-      switchMap(()=>this.AccountingDataService.GetALLClosedBalances({dateRangeStart:firstClosingDate,dateRangeEnd:firstClosingDate},null,new Date(firstClosingDate).toDateString(), null, 'GetALLClosedBalances')),
+      switchMap(()=>this.AccountingDataService.GetALLClosedBalances(
+        {dateRange:'['+firstClosingDate+','+firstClosingDate+']',noAccountLedger:null,accountTypes:null},null,firstClosingDate, null, 'GetALLClosedBalances')),
       map(data=>data.filter(el=>el.OutGoingBalance<0)),
       tap(data=>{
         if (data.length>0) {
@@ -49,7 +50,7 @@ export class AccountingBalncesService {
       totalPassive:of(0),
       totalActive:of(0),
       totalDebit:of(0),
-      balanceData:this.AccountingDataService.GetALLClosedBalances({dateRangeStart:dateBalance,dateRangeEnd:dateBalance},null,firstClosingDate, null, 'GetALLClosedBalances'),
+      balanceData:this.AccountingDataService.GetALLClosedBalances({dateRange:'['+dateBalance+','+dateBalance+']',noAccountLedger:null,accountTypes:null},null,firstClosingDate, null, 'GetALLClosedBalances'),
       entriesTotal: this.AccountingDataService.GetbAccountingSumTransactionPerDate(dateBalance,'SumTransactionPerDate').pipe(map(data=>data[0].amountTransaction))})
       .pipe(
         map(data=>{

@@ -7,13 +7,14 @@ import { CurrenciesDataService } from './currencies-data.service';
 import { InstrumentDataService } from './instrument-data.service';
 import { corporateActionsTypes, instrumentCorpActions, instrumentDetails, moexBoard, moexSecurityGroup, moexSecurityType } from '../models/instruments.interfaces';
 import { ClientData, StrategiesGlobalData, counterParty, currencyCode, currencyPair, currencyRateList, marketDataSources } from '../models/interfaces.model';
-import { bcTransactionType_Ext } from '../models/accountng-intefaces.model';
+import { bcAccountType_Ext, bcTransactionType_Ext } from '../models/accountng-intefaces.model';
 export interface cacheAAM {
   code:string,
   data:cachedDataType
 }
 
  type cachedDataType = marketDataSources[]|
+                      bcAccountType_Ext[]|
                       corporateActionsTypes[]| 
                       moexSecurityGroup[]| 
                       moexSecurityType[]|
@@ -39,8 +40,6 @@ export class indexDBService {
   public pipeMarketSourceSet = new Subject<boolean> ()
   private subjectBoardsMoexReady = new Subject<moexBoard[]>
   private subjectMarketSourceReady = new Subject<marketDataSources[]>
-/*   public pipeStrategiesListSet = new Subject<boolean> ()
-  private subjectStrategiesListReady = new Subject<StrategiesGlobalData[]> */
 
   constructor(
     private dbService: NgxIndexedDBService,
@@ -56,12 +55,7 @@ export class indexDBService {
     this.pipeMarketSourceSet.pipe(
       exhaustMap(()=>this.getIndexDBStaticTables('getMarketDataSources'))
     ).subscribe(data=>this.sendMarketSourceSet(data.data as marketDataSources[]))
-/*     this.pipeStrategiesListSet.pipe(
-      exhaustMap(()=>this.getIndexDBStaticTables('getModelPortfolios'))
-    ).subscribe(data=>this.sendStrategiesListSet(data.data as StrategiesGlobalData[])) */
   }
-/*   sendStrategiesListSet (data:StrategiesGlobalData[]) {this.subjectStrategiesListReady.next(data)}
-  receiveStrategiesListSet ():Observable<StrategiesGlobalData[]> {return this.subjectStrategiesListReady.asObservable()} */
   sendBoardsMoexSet (data:moexBoard[]) {this.subjectBoardsMoexReady.next(data) }
   receiveBoardsMoexSet ():Observable<moexBoard[]> {return this.subjectBoardsMoexReady.asObservable()}
   sendMarketSourceSet (data:marketDataSources[]) {this.subjectMarketSourceReady.next(data) }
@@ -121,6 +115,9 @@ export class indexDBService {
         break
         case 'getMarketDataSources':
          fetchServiceFunction =  this.InstrumentDataS.getMarketDataSources()
+        break
+        case 'bcAccountType_Ext':
+         fetchServiceFunction = this.AccountingDataService.GetAccountTypeList('',0,'','','bcAccountType_Ext')
         break
       }
       return fetchServiceFunction;

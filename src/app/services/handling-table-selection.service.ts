@@ -20,7 +20,7 @@ export class HandlingTableSelectionService {
       selection.clear();
       return;
     }
-    selection.select(...dataSource.data);
+    selection.select(...dataSource.filteredData);
   }
   /** The label for the checkbox on the passed row */
   checkboxLabel(dataSource: MatTableDataSource<{}>, selection : SelectionModel<{}> , row?: {}): string {

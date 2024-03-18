@@ -1,22 +1,22 @@
 <mat-toolbar color="primary" style="margin-bottom:1%; border-radius: 8px; width: 100%">
   {{action}} portfolio ID {{id.value}}
 </mat-toolbar>
-<form class="submit" [formGroup]="newAccountForm">
-  <div>
-    <button mat-flat-button color="primary" type="submit" 
-      [disabled]="!(newAccountForm.valid && submitbox.checked)"
-      (click)='newAccountForm.valid? updatePortfolioData(action) : null'
-      style="margin-top: 1px; width: 200px; font-size: 18px; margin-left: 1%;">
-        {{action}} portfolio
-    </button>
-    <mat-checkbox color="primary"  #submitbox checked="false" 
-    (click)="newAccountForm.markAllAsTouched()"
-    >Submit Data</mat-checkbox>
-  </div>
-  <mat-form-field style="width: 55%;"  enabled>
-    <mat-select   placeholder="Select Portfolio Type" formControlName="account_type" 
+<div>
+  <button mat-flat-button color="primary" type="submit" 
+    [disabled]="!(newAccountForm.valid && submitbox.checked)"
+    (click)='newAccountForm.valid? updatePortfolioData(action) : null'
+    style="margin-top: 1px; width: 200px; font-size: 18px; margin-left: 1%;">
+      {{action}} portfolio
+  </button>
+  <mat-checkbox color="primary"  #submitbox checked="false" 
+  (click)="newAccountForm.markAllAsTouched()"
+  >Submit Data</mat-checkbox>
+</div>  
+<form class="submit" [formGroup]="newAccountForm" >
+  <mat-form-field style="width: 55%;" >
+    <mat-select   placeholder="Select Portfolio Type" formControlName="account_type"
     (selectionChange)="calculateAccountCode()" > 
-      <mat-option *ngFor="let accountType of accountTypes" [value]="accountType.typeValue">
+      <mat-option *ngFor="let accountType of accountTypes" [value]="accountType.typeValue" [disabled]="['Edit','Delete'].includes(action)">
         {{accountType.typeValue}}: {{accountType.typeDescription}}
       </mat-option>
     </mat-select>

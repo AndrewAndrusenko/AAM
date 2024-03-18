@@ -51,6 +51,7 @@
   </span>
 
   <mat-expansion-panel *ngIf="!UI_min" class="complex-search-entries" 
+  [expanded]="1"
     (opened)="panelOpenState = true"
     (closed)="panelOpenState = false" >
     <mat-expansion-panel-header >
@@ -62,14 +63,14 @@
     </mat-expansion-panel-header >
     <form class="submit" [formGroup]="searchParametersFG"  style="font-size: 18px;">
       <span style="display: flex;  justify-content: space-between;   align-items:flex-start;  margin-right: 1%;margin-top: 0.2%;">
-        <span style="display:grid; width: 15%;">
+        <span style="display:grid; width: 15%;margin-top: 1%;">
           <button color = "primary" mat-raised-button style=" margin-left:1%; font-size: 18px;" (click)="submitQuery()"> Submit </button>
           <button color = "accent" mat-raised-button style=" margin-left:1%; margin-top: 2%; font-size: 18px;" 
           (click)="searchParametersFG.reset();
           noAccountLedger.patchValue(['ClearAll']);
           entryTypes.patchValue([0]);"> ClearAll </button>
         </span>
-        <mat-form-field appearance="fill">
+        <mat-form-field appearance="fill" style="width: 16%;">
           <mat-label>Enter a date range</mat-label>
           <mat-date-range-input [formGroup]="dataRange" [rangePicker]="picker" >
             <input matStartDate placeholder="Start date" formControlName="dateRangeStart">
@@ -81,7 +82,7 @@
           <mat-error *ngIf="dataRange.controls.dateRangeStart.hasError('matStartDateInvalid')">Invalid start date</mat-error>
           <mat-error *ngIf="dataRange.controls.dateRangeEnd.hasError('matEndDateInvalid')">Invalid end date</mat-error>
         </mat-form-field>
-        <mat-form-field class="example-chip-list" appearance="fill" style="width: 45%; ">
+        <mat-form-field class="example-chip-list" appearance="fill" style="width: 40%; ">
           <mat-chip-list #chipList aria-label="Fruit selection" 
           formControlName="noAccountLedger" >
             <mat-chip *ngFor="let account of noAccountLedger.value" (removed)="remove(account)" (click)=" clearAll($event);"> 
@@ -102,22 +103,31 @@
             </button>
           </mat-chip-list>
         </mat-form-field>
-        <mat-form-field  style="width: 18%;">
-          <mat-label>Transaction Type Code</mat-label>
-          <mat-select  #t_XactTypeCode_Ext formControlName="entryTypes"  multiple> 
-            <mat-option #allSelected [value]="0"
-              (click)="toggleAllSelection()" >
-              ALL - {{this.allSelected.selected? 'Clear' :'Select' }} All 
-            </mat-option>
-            <ng-container *ngFor="let TransactionType of TransactionTypes">
-            <mat-option [value]="TransactionType.id">
-                {{TransactionType.xActTypeCode_Ext |uppercase}} - {{TransactionType.code2==0?'LL':'AL'}} - {{TransactionType.description}}
-            </mat-option>
-            </ng-container>
-          </mat-select>
-        </mat-form-field>
-        
-      </span>
+          <mat-form-field  style="width: 15%;">
+            <mat-label>Transaction Type Code</mat-label>
+            <mat-select  #t_XactTypeCode_Ext formControlName="entryTypes"  multiple> 
+              <mat-option #allSelected [value]="0"
+                (click)="toggleAllSelection()" >
+                ALL - {{this.allSelected.selected? 'Clear' :'Select' }} All 
+              </mat-option>
+              <ng-container *ngFor="let TransactionType of TransactionTypes">
+              <mat-option [value]="TransactionType.id">
+                  {{TransactionType.xActTypeCode_Ext |uppercase}} - {{TransactionType.code2==0?'LL':'AL'}} - {{TransactionType.description}}
+              </mat-option>
+              </ng-container>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field  style="width: 15%;">
+            <mat-label>Account Type Code</mat-label>
+            <mat-select   formControlName="accountTypes" multiple> 
+              <ng-container *ngFor="let AccountType of accountTypes">
+              <mat-option  [value]="AccountType.accountType_Ext">
+                  {{AccountType.actCodeShort}} - {{AccountType.description}}
+              </mat-option>
+              </ng-container>
+            </mat-select>
+          </mat-form-field>
+        </span>
     </form>
   </mat-expansion-panel>
   <div class="mat-elevation-z8">

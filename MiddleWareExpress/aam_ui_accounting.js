@@ -96,7 +96,7 @@ async function fGetAccountingData (request,response) {
         'LEFT JOIN "bcAccountType_Ext" ON "bcAccountType_Ext"."accountType_Ext" = "bLedger"."accountTypeID" ;'
     break;
     case 'GetAccountsEntriesListAccounting':
-      query.text = 'SELECT *,0 as action FROM f_a_b_get_all_entries_transactions (${dateRangeStart},${dateRangeEnd},${entryTypes:raw},${portfolioCodes},${noAccountLedger}, ${idtrade:raw},${entriesIds:raw},${externalId:raw});';
+      query.text = 'SELECT *,0 as action FROM f_a_b_get_all_entries_transactions (${dateRange}::daterange,${entryTypes:raw},${portfolioCodes},${noAccountLedger}, ${idtrade:raw},${entriesIds:raw},${externalId:raw});';
       request = db_common_api.getTransformArrayParam(request,['entryTypes','entriesIds']);
     break;
     case 'GetBalanceDatePerPorfoliosOnData':
@@ -152,32 +152,20 @@ async function fGetAccountingData (request,response) {
       'ORDER BY 1;'
     break;
     case 'GetALLClosedBalances' :
-      conditions = {
-        'noAccountLedger':{
-          1: ' ("accountNo" = ANY(${noAccountLedger})) ',
-        },
-        'dateRangeStart': {
-          1: ' ("dateBalance"::date >= ${dateRangeStart}::date )',
-        },
-        'dateRangeEnd': {
-          1: ' ("dateBalance"::date <= ${dateRangeEnd}::date) ',
-        }
-      }
-      let conditionsBalance =' WHERE'
-      Object.entries(conditions).forEach(([key,value]) => {
-      if  (request.query.hasOwnProperty(key)) { conditionsBalance +=conditions[key][1] + ' AND '}
-    });
-    query.text = 'select * from f_a_b_balancesheet_total_closed_and_notclosed()'
-      query.text += conditionsBalance.slice(0,-5);
+      query.text = 'select * from f_a_b_balancesheet_total_closed_and_notclosed(${dateRange}::daterange, ${accountTypes},${noAccountLedger})'
+      request = db_common_api.getTransformArrayParam(request,['accountTypes']);
     break;
   }
   query.text = pgp.as.format(query.text,request.query);
-  if (['GetAccountsEntriesListAccounting'].includes(request.query.Action)) {
+  if (['GetAccountsEntriesListAccounting','GetALLClosedBalances'].includes(request.query.Action)) {
     request.query
     query.text = query.text.replaceAll("'null'",null);
     query.text = query.text.replaceAll("array[0,0]",null);
     query.text = query.text.replaceAll(",'ClearAll'",',null');
+    query.text = query.text.replaceAll("'null'::numrange",null);
+    query.text = query.text.replaceAll("'null'::daterange",null);
   }
+  // console.log(query.text);
   db_common_api.queryExecute(query.text,response,null, request.query.queryCode === undefined?  request.query.Action : request.query.queryCode );
 }
 async function fGetMT950Transactions (request,response) {

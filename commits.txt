@@ -431,12 +431,25 @@ src\app\components\charts\performance-revenue-factor-chart.component\performance
 2|| Created pipe and functions to store Moex Boards list. All requests go to the local storage or to the exhaustMap pipe if there is no data in storage yet. When exhaustMap pipe receives data to save it to the storage and send it to the subscribers. The same pipe has been created for market segments
 3|| Optimized loading big components by removing duplicates queries to DB
 4|| Local Tunnel has been added to the node servers
-
+--------------------------------------------------------------------------------------------
+14/03/2024 - 17/03/2024
+1|| Portfolio form => Changing portfolio type in edit mode has been disabled
+2|| Selection service => Changed logic of selection all. Now only filtered data is selected. It is usefull when a user selects list of accounts based on the text filter and wants to use it for the next search. Exmaple is to get accounts balance for the specific group
+3|| Account Selection Table Fix => All accounts are available for selection. Table intiation is moved to ngInit to get actual value of action variable
+4|| Balance Sheet Table refactored => 
+  All search parameters has been transferred into DB procedures in order to limit resulted dataset. Used patter allows to pass null value of parameter if it has to be ignored
+  Implemented new search parameter - account type
+  All DB  procedures have been updated accordingly
+  Used data range as a search parameter and and new pattern for arrays parameters
+5|| Balance Sheet check and deep check updated according to new DB functions
+Fix: Balance sheet: dates with entries are updated after execution of closing and opening balance functions
+--------------------------------------------------------------------------------------------
 ToDo
 || Architecture
+|| entries table => complex search by account type??
+|| Positions table => search by list of secid and money position
 || Store history of a portfolio changing strategies
 * Fix: Allocation accounting - FIFO/Accounting => Roll back FIFO/Accounting when other fails
-|| Revenue Factor Chart add info about management and performance fees deducted
 || FIFO Bug possible=> Case of simultaneously two trades which should be netted on FIFO are sent in FIFO function.
 	Idea is to sort processing batch according to the FIFO guidelines and execute FIFO function synchronously
 || Investment restrictions

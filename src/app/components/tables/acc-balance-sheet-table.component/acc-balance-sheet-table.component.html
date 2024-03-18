@@ -28,7 +28,7 @@
     </button>
   </span>
   <mat-expansion-panel class="headers-align"  label="Balance closing panel" [disabled]="disabledControlElements"
-    [expanded]="1"
+
     (opened)="panelOpenStateFirst = true"
     (closed)="panelOpenStateFirst = false" >
     <mat-expansion-panel-header>
@@ -93,7 +93,7 @@
             </p>
           </div>
         </span>
-        <span style="display: flex;  justify-content: space-between;   align-items: center;  margin-right: 2%; " > 
+        <span style="display: flex;  justify-content: space-between;   align-items: center;  margin-right: 2%; width:25%;" > 
           <mat-form-field  style=" width:50%;">
             <input #iBalanceDateToOpen 
             style="text-align: center;" 
@@ -110,6 +110,7 @@
     </form>
   </mat-expansion-panel>
   <mat-expansion-panel class="headers-align" title="ComplexSearch"
+  [expanded]="1"
     (opened)="panelOpenStateSecond = true"
     (closed)="panelOpenStateSecond = false" >
     <mat-expansion-panel-header >
@@ -121,31 +122,43 @@
     </mat-expansion-panel-header >
     <form class="submit" [formGroup]="searchParametersFG"  style="font-size: 18px; ">
       <span style="display: flex;  justify-content: space-between;   align-items:flex-start;  margin-right: 1%;margin-top: 0.2%;">
-        <span style="display:grid; width: 15%;">
+        <span style="display:grid; width: 12%; margin-top: 1%;">
           <button color = "primary"  class= "button-color" mat-raised-button 
             style="margin:1%; font-size: 18px;"
             (click)="submitQuery()">
             Submit
           </button>
-          <button color = "accent" mat-raised-button style="margin:1%; font-size: 18px;" (click)="searchParametersFG.reset();   this.accounts=['ClearAll']">ClearAll</button>
+          <button color = "accent" mat-raised-button style="margin:1%; font-size: 18px;" 
+            (click)="searchParametersFG.reset();dateRange.reset(); this.noAccountLedger.patchValue(['ClearAll'])">ClearAll
+          </button>
         </span>
-        <mat-form-field appearance="fill">
+        <mat-form-field appearance="fill" style="width: 15%;">
           <mat-label>Enter a date range</mat-label>
-          <mat-date-range-input [formGroup]="dataRange" [min]="dateOfOperaationsStart" [rangePicker]="picker" >
+          <mat-date-range-input [formGroup]="dateRange" [min]="dateOfOperaationsStart" [rangePicker]="picker" >
             <input matStartDate  placeholder="Start date" formControlName="dateRangeStart">
             <input matEndDate  placeholder="End date" formControlName="dateRangeEnd">
           </mat-date-range-input>
           <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
           <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
           <mat-date-range-picker [dateClass]="dateClass" #picker></mat-date-range-picker>
-          <mat-error *ngIf="dataRange.controls.dateRangeStart.hasError('matStartDateInvalid')">Invalid start date</mat-error>
-          <mat-error *ngIf="dataRange.controls.dateRangeEnd.hasError('matEndDateInvalid')">Invalid end date</mat-error>
+          <mat-error *ngIf="dateRange.controls.dateRangeStart.hasError('matStartDateInvalid')">Invalid start date</mat-error>
+          <mat-error *ngIf="dateRange.controls.dateRangeEnd.hasError('matEndDateInvalid')">Invalid end date</mat-error>
         </mat-form-field>
-        <mat-form-field class="example-chip-list" appearance="fill" style="width: 40%; ">
-          <mat-chip-list #chipList aria-label="Fruit selection"  >
-            <mat-chip *ngFor="let account of accounts" 
-            (removed)="remove(account)"
-            (click)=" clearAll($event);"
+        <mat-form-field  style="width: 12%;">
+          <mat-label>Account Type Code</mat-label>
+          <mat-select   formControlName="accountTypes" multiple> 
+            <ng-container *ngFor="let AccountType of accountTypes">
+            <mat-option  [value]="AccountType.accountType_Ext">
+                {{AccountType.actCodeShort}} - {{AccountType.description}}
+            </mat-option>
+            </ng-container>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field  appearance="fill" style="width: 35%; ">
+          <mat-chip-list #chipList >
+            <mat-chip *ngFor="let account of noAccountLedger.value" 
+            (removed)="removeNew(account,noAccountLedger)"
+            (click)=" clearAllNew($event,noAccountLedger);"
             >
               {{account}}
               <button matChipRemove *ngIf="account!=='ClearAll'">
@@ -154,19 +167,20 @@
             </mat-chip>
             <input 
             placeholder="Add account or account,account1,account2.."
-            formControlName="noAccountLedger"
             [matChipInputFor]="chipList"
             [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
             [matChipInputAddOnBlur]="true"
-            (matChipInputTokenEnd)="add($event)"
+            (matChipInputTokenEnd)="addNew($event,noAccountLedger)"
             matTooltip="Type account number or paste accounts list separated by comma and press enter" >
             <button style="font-size: 16px;" mat-raised-button matSuffix (click)="selectAccounts()">
               <mat-icon *ngIf="action!=='View'" class = "icon_search">search</mat-icon> MultiSelect </button>
           </mat-chip-list>
         </mat-form-field>
-        <button color = "accent"  class= "button-color" mat-raised-button [disabled]="this.gRange.get('dateRangeEnd').value>LastClosedDate||!gRange.get('dateRangeEnd').value"
+        <span style="display:grid; width: 22%; margin-top: 1%;">
+
+        <button color = "accent"  class= "button-color" mat-raised-button [disabled]="this.dateRangeEnd.value>LastClosedDate||!dateRangeEnd.value"
           style="margin:1%; font-size: 18px;"
-          (click)="balanceDeepCheck(dataRange.controls.dateRangeEnd.value,dataRange.controls.dateRangeStart.value) ">
+          (click)="balanceDeepCheck(dateRange.controls.dateRangeEnd.value,dateRange.controls.dateRangeStart.value) ">
           <button mat-icon-button (click)="showTip('balanceDeepCheck')"><mat-icon matSuffix>help</mat-icon></button>
           Balance Deep Check
         </button>
@@ -176,6 +190,7 @@
             'Balance incorrect!!\n Difference is ' + ((balanceCheckData.totalDebit - balanceCheckData.entriesTotal) | number )}}
           </span>
         </p>
+        </span>
       </span>
     </form>
   </mat-expansion-panel>

@@ -17,9 +17,8 @@ interface searchParametersEntiesTable {
 }
 interface searchParametersBalancesTable {
   noAccountLedger?:string[]|null,
-  dateRangeStart?:string,
-  dateRangeEnd?:string,
-  entryTypes?:number[]|null
+  accountTypes?:number[]|null,
+  dateRange?:string|null,
 }
 interface stpEntryData {
   entryDraft : bAccountTransaction | bLedgerTransaction|null|bTransactionForm, 
@@ -121,7 +120,7 @@ export class AppAccountingService {
     const params = {'dataRange': dataRange, 'id' :id, 'MTType': MTType,'Sender':Sender, 'Action': Action}
     return this.http.get <bcEnityType []>('/api/DEA/fGetAccountingData/', { params: params })
   }
-  GetAccountTypeList (dataRange: string, id: number, MTType:string, Sender: string, Action: string):Observable <bcAccountType_Ext[]> {
+   GetAccountTypeList (dataRange: string, id: number, MTType:string, Sender: string, Action: string):Observable <bcAccountType_Ext[]> {
     const params = {'dataRange': dataRange, 'id' :id, 'MTType': MTType,'Sender':Sender, 'Action': Action}
     return this.http.get <bcAccountType_Ext []>('/api/DEA/fGetAccountingData/', { params: params })
   }
@@ -275,7 +274,7 @@ export class AppAccountingService {
   }
   /*----------------------Balance Sheets----------------------------------------------------*/
   GetALLClosedBalances (searchParameters:searchParametersBalancesTable, id: number, lastClosedDate:string, Sender: string, Action: string):Observable <bBalanceFullData[]> {
-    let params = {'id' :id, 'lastClosedDate': lastClosedDate,'Sender':Sender, 'Action': Action};
+    let params = {'lastClosedDate': lastClosedDate, 'Action': Action};
     (searchParameters !== null) ?  params = {...params,...searchParameters}: null
     return this.http.get <bBalanceFullData[]>('/api/DEA/fGetAccountingData/', {params:params })
   }

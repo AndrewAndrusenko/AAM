@@ -13,6 +13,7 @@ import { MatTabGroup as MatTabGroup } from '@angular/material/tabs';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import { ClientData, currencyCode } from 'src/app/models/interfaces.model';
+import { indexDBService } from 'src/app/services/indexDB.service';
 
 @Component({
   selector: 'app-acc-account-modify-form',
@@ -50,9 +51,10 @@ export class AppAccAccountModifyFormComponent implements OnInit {
     private AccountingDataService:AppAccountingService, 
     private CommonDialogsService:HadlingCommonDialogsService,
     private AutoCompService:AtuoCompleteService,
+    private indexDBService:indexDBService
   ) 
   { this.AccountingDataService.GetEntityTypeList('',0,'','','bcEnityType').subscribe (data => this.EnityTypes=data)
-    this.AccountingDataService.GetAccountTypeList('',0,'','','bcAccountType_Ext').subscribe (data => this.AccountTypes=data)
+    this.indexDBService.getIndexDBStaticTables('bcAccountType_Ext').subscribe (data => this.AccountTypes=data.data as bcAccountType_Ext[])
     this.formDisabledFields = ['clientId', 'accountId', 'idportfolio']
     this.formLedgerDisabledFields = ['ledgerNoId', 'clientID']
     this.accountModifyForm = this.fb.group ({

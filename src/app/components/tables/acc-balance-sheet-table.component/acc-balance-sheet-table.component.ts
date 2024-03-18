@@ -5,11 +5,11 @@ import {Subscription, filter, switchMap, tap } from 'rxjs';
 import { MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import { animate, state, style, transition, trigger} from '@angular/animations';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { bAccountsEntriesList, bBalanceFullData, bcTransactionType_Ext } from 'src/app/models/accountng-intefaces.model';
+import { bAccountsEntriesList, bBalanceFullData, bcAccountType_Ext, bcTransactionType_Ext } from 'src/app/models/accountng-intefaces.model';
 import { AppAccountingService } from 'src/app/services/accounting.service';
 import { COMMA, ENTER} from '@angular/cdk/keycodes';
 import { MatChipInputEvent} from '@angular/material/chips';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { MatOption } from '@angular/material/core';
 import { AppTableAccAccountsComponent } from '../acc-accounts-table.component/acc-accounts-table.component';
 import { AppTableAccEntriesComponent } from '../acc-entries-table.component/acc-entries-table.component';
@@ -20,6 +20,7 @@ import { formatNumber } from '@angular/common';
 import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { AccountingBalncesService, checkBalanceData } from 'src/app/services/accounting-balances.service';
+import { indexDBService } from 'src/app/services/indexDB.service';
 @Component({
   selector: 'app-table-balance-sheet',
   templateUrl: './acc-balance-sheet-table.component.html',
@@ -68,11 +69,11 @@ export class AppTableBalanceSheetComponent {
   firstClosingDate : Date;
   filterDateFormated : string;
   LastClosedDate : Date;
-
+  accountTypes:bcAccountType_Ext[];
   searchParametersFG: FormGroup;
   filterlFormControl = new FormControl('');
   closingDate = new FormControl<Date | null>(null)
-  dataRange = new FormGroup ({
+  dateRange = new FormGroup ({
     dateRangeStart: new FormControl<Date | null>(null),
     dateRangeEnd: new FormControl<Date | null>(null),
   });
@@ -83,6 +84,7 @@ export class AppTableBalanceSheetComponent {
     private AuthServiceS:AuthService,  
     private CommonDialogsService:HadlingCommonDialogsService,
     private HandlingCommonTasksS:HandlingCommonTasksService, 
+    private indexDBService:indexDBService, 
     private dialog: MatDialog,
     private fb:FormBuilder, 
   ) {
@@ -92,12 +94,15 @@ export class AppTableBalanceSheetComponent {
     this.AccountingDataService.GetbbalacedDateWithEntries('GetbbalacedDateWithEntries').subscribe(data => this.balacedDateWithEntries = data[0]['datesarray']);
     this.AccountingDataService.GetbAccountingDateToClose('GetbAccountingDateToClose').subscribe(data =>this.firstClosingDate= new Date(data[0].accountingDateToClose));
     this.searchParametersFG = this.fb.group ({
-      dataRange : this.dataRange,
-      noAccountLedger: null,
+      dataRange:null,
+      noAccountLedger: [],
       amount:{value:null, disabled:true},
-      entryType : {value:[], disabled:true}
+      accountTypes: []
+
     })
     this.subscriptions.add(this.AccountingBalncesService.receivebBalanceData().subscribe(data=>this.updateBalanceData(data)))
+    this.indexDBService.getIndexDBStaticTables('bcAccountType_Ext').subscribe (data => this.accountTypes=(data.data as bcAccountType_Ext[]))
+    this.noAccountLedger.patchValue(['ClearAll'])
   }
   getCurrentBalanceData () {
     this.AccountingDataService.GetbLastClosedAccountingDate('GetbLastClosedAccountingDate').pipe(
@@ -105,7 +110,8 @@ export class AppTableBalanceSheetComponent {
         this.FirstOpenedAccountingDate = period[0].FirstOpenedDate;
         this.LastClosedDate = new Date(period[0].LastClosedDate)
       }),
-      switchMap(()=> this.AccountingDataService.GetALLClosedBalances(null,null,new Date(this.FirstOpenedAccountingDate).toDateString(), null, 'GetALLClosedBalances'))
+      switchMap(()=> this.AccountingDataService.GetALLClosedBalances(
+        {noAccountLedger:null,dateRange:null,accountTypes:null},null,new Date(this.FirstOpenedAccountingDate).toDateString(), null, 'GetALLClosedBalances'))
     ).subscribe (Balances => this.updateBalanceData(Balances))
   }
   updateBalanceData(Balances:bBalanceFullData[]){
@@ -120,10 +126,12 @@ export class AppTableBalanceSheetComponent {
         this.FirstOpenedAccountingDate = data[0].FirstOpenedDate;
         this.LastClosedDate = new Date(data[0].LastClosedDate);
         checkBalance? this.checkBalance(new Date(this.LastClosedDate).toDateString(),false):null;
-        refreshData? this.AccountingDataService.GetALLClosedBalances(null,null,new Date(this.FirstOpenedAccountingDate).toDateString(), null, 'GetALLClosedBalances').subscribe (Balances => this.updateBalanceData(Balances)):null;
+        refreshData? this.AccountingDataService.GetALLClosedBalances(
+          {noAccountLedger:null,dateRange:null,accountTypes:null},null,new Date(this.FirstOpenedAccountingDate).toDateString(), null, 'GetALLClosedBalances'
+          ).subscribe (Balances => this.updateBalanceData(Balances)):null;
       })
       this.AccountingDataService.GetbbalacedDateWithEntries('GetbbalacedDateWithEntries').subscribe(data => {
-        this.balacedDateWithEntries = data.flat()
+        data => this.balacedDateWithEntries = data[0]['datesarray']
       })
       this.AccountingDataService.GetbAccountingDateToClose('GetbAccountingDateToClose').subscribe(data => {
         this.firstClosingDate = new Date(data[0].accountingDateToClose)
@@ -132,17 +140,11 @@ export class AppTableBalanceSheetComponent {
   }
   submitQuery (showSnackMsg:boolean=true) {
     this.AccountingDataService.GetbAccountingDateToClose('GetbAccountingDateToClose').subscribe(data =>this.firstClosingDate= new Date(data[0].accountingDateToClose));
+    let searchObj = structuredClone(this.searchParametersFG.value);
     this.dataSource.data=null;
-    let searchObj = {};
-    let accountsList = [];
-    this.accounts.indexOf('ClearAll') !==-1? this.accounts.splice(this.accounts.indexOf('ClearAll'),1) : null;
-    this.accounts.length===1? accountsList = [...this.accounts,...this.accounts]: accountsList = this.accounts;
-    this.accounts.length? Object.assign (searchObj , {'noAccountLedger': accountsList}): null;
-    this.gRange.get('dateRangeStart').value===null? null : Object.assign (searchObj , {
-     'dateRangeStart':new Date (this.gRange.get('dateRangeStart').value).toDateString()});
-    this.gRange.get('dateRangeEnd').value===null? null : Object.assign (searchObj , {
-     'dateRangeEnd': new Date (this.gRange.get('dateRangeEnd').value).toDateString()});
-     this.entryTypes.value != null&&this.entryTypes.value.length !=0? Object.assign (searchObj , {'entryTypes': [this.entryTypes.value]}): null;
+    searchObj.noAccountLedger.map(el=>el.toUpperCase());
+    searchObj.accountTypes=searchObj.accountTypes?.length? searchObj.accountTypes:null;
+    searchObj.dateRange = this.dateRange.value? this.HandlingCommonTasksS.toDateRangeNew(this.dateRange) : null;
     this.AccountingDataService.GetALLClosedBalances(searchObj,null,new Date(this.FirstOpenedAccountingDate).toDateString(), null, 'GetALLClosedBalances').subscribe (Balances  => {
       this.updateBalanceData(Balances);
       this.accounts.unshift('ClearAll')
@@ -156,7 +158,7 @@ export class AppTableBalanceSheetComponent {
     })
   }
   checkBalance (dateBalance: string,showSnackMsg=true) {
-    this.AccountingBalncesService.checkBalance(dateBalance,new Date(this.FirstOpenedAccountingDate).toDateString()).subscribe(data=>{
+    this.AccountingBalncesService.checkBalance(new Date(dateBalance).toDateString(),new Date(this.FirstOpenedAccountingDate).toDateString()).subscribe(data=>{
       this.updateBalanceData(data.balanceData)
       this.balanceCheckData=data
     })
@@ -215,7 +217,7 @@ export class AppTableBalanceSheetComponent {
   showTip (elem:string) {
     this.CommonDialogsService.snackResultHandler(
       {name:'tip',
-      detail:'\nUse search date range to set start date and end date of the calculation.\nStart date sets the date of balance recalulcation based on enrries insted of using closed balance data.\nEnd date is the date of reconcile and should not greater than the last closed balance date'},'Tip','bottom',false,80000)
+      detail:'\nUse search date range to set start date and end date of the calculation.\nEach date must be a date with at least one entry. \nStart date sets the date of balance recalulcation based on enrries insted of using closed balance data.\nEnd date is the date of reconcile and should not greater than the last closed balance date.'},'Tip','bottom',false,80000)
   }
   dateClass: MatCalendarCellClassFunction<Date> = (cellDate, view) => {
     const index = this.balacedDateWithEntries.findIndex(x => new Date(x).toLocaleDateString() == cellDate['_d'].toLocaleDateString());
@@ -225,6 +227,19 @@ export class AppTableBalanceSheetComponent {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
+  }
+  addNew(event: MatChipInputEvent,control:AbstractControl) {
+    control.patchValue (((event.value || '').trim())?  ([...control.value,...event.value.split(',')]) : control.value);
+    event.chipInput!.clear();
+  }
+  removeNew(element: string, control:AbstractControl) {
+    const index = control.value.indexOf(element);
+    (index >= 0)? control.value.splice(index, 1) : null;
+  }
+  clearAllNew(event, control:AbstractControl) {
+    if (event.target.textContent.trim() === 'ClearAll') {
+      control.patchValue(['ClearAll']);
+    };
   }
   add(event: MatChipInputEvent): void {
     const value = (event.value || '').trim();
@@ -257,16 +272,9 @@ export class AppTableBalanceSheetComponent {
     this.dialogChooseAccountsList.componentInstance.readOnly = true;
     this.dialogChooseAccountsList.componentInstance.multiSelect = true;
     this.dialogChooseAccountsList.componentInstance.modal_principal_parent.subscribe ((item)=>{
-      this.accounts = [...this.accounts,...this.dialogChooseAccountsList.componentInstance.accounts]
+      this.noAccountLedger.patchValue ([...this.noAccountLedger.value,...this.dialogChooseAccountsList.componentInstance.accounts])
       this.dialogChooseAccountsList.close(); 
     });
-  }
-  toggleAllSelection() {
-    if (this.allSelected.selected) {
-      this.entryTypes.patchValue([...this.TransactionTypes.map(item => item.id), 0]);
-    } else {
-      this.entryTypes.patchValue([]);
-    }
   }
   exportToExcel() {
     const fileName = "balancesData.xlsx";
@@ -282,7 +290,8 @@ export class AppTableBalanceSheetComponent {
     }))
     this.HandlingCommonTasksS.exportToExcel (data,"balancesData")
   }
-  get  gRange () {return this.searchParametersFG.get('dataRange') } 
-  get  entryTypes () {return this.searchParametersFG.get('entryType') } 
+  get  dateRangeStart () {return this.dateRange.get('dateRangeStart') } 
+  get  dateRangeEnd () {return this.dateRange.get('dateRangeEnd') } 
+  get  noAccountLedger () {return this.searchParametersFG.get('noAccountLedger') } 
   
 }

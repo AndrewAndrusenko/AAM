@@ -52,9 +52,10 @@ export class AppTableAccAccountsComponent {
     this.modal_principal_parent = new EventEmitter();
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToBalanceData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true; 
-    this.updateAccountsData(this.action)
     this.accessState !=='none'? this.AccountingDataService.getReloadAccontList().subscribe (id => this.updateAccountsData(this.action)):null;
-
+  }
+  ngOnInit(): void {
+    this.updateAccountsData(this.action)
   }
   updateAccountsData (action: string,snack:boolean=false) {
     this.dataSource? this.dataSource.data=null : null;

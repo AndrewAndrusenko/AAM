@@ -1,10 +1,9 @@
--- FUNCTION: public.f_a_b_get_all_entries_transactions(date, date, numeric[], text[], text[], numeric, numeric[])
+-- FUNCTION: public.f_a_b_get_all_entries_transactions(date, date, numeric[], text[], text[], numeric, numeric[], numeric)
 
-DROP FUNCTION IF EXISTS public.f_a_b_get_all_entries_transactions(date, date, numeric[], text[], text[], numeric, numeric[]);
+DROP FUNCTION IF EXISTS public.f_a_b_get_all_entries_transactions(daterange, numeric[], text[], text[], numeric, numeric[], numeric);
 
 CREATE OR REPLACE FUNCTION public.f_a_b_get_all_entries_transactions(
-	p_start_date date,
-	p_end_date date,
+	p_range_date daterange,
 	p_entry_types numeric[],
 	p_portfolio_code text[],
 	p_account text[],
@@ -52,8 +51,7 @@ WITH account_entries AS (
 	  LEFT JOIN "bcTransactionType_Ext" ON "bAccountTransaction"."XactTypeCode_Ext" = "bcTransactionType_Ext".id
 	  LEFT JOIN "bAccounts" ON "bAccounts"."accountId" = "bAccountTransaction"."accountId"
 	  LEFT JOIN "bLedger" ON "bLedger"."ledgerNoId" = "bAccountTransaction"."ledgerNoId"
-	  WHERE (p_start_date ISNULL OR  "dataTime"::date >= p_start_date::date)
-		AND (p_end_date ISNULL OR  "dataTime"::date <= p_end_date::date)
+	  WHERE (p_range_date ISNULL OR p_range_date @> "dataTime"::date)
 		AND (p_idtrade ISNULL OR  "bAccountTransaction".idtrade = p_idtrade)
 		AND (p_external_id ISNULL OR  "bAccountTransaction"."extTransactionId" = p_external_id)
 		AND (p_entry_types ISNULL OR  "bAccountTransaction"."XactTypeCode_Ext" =ANY(p_entry_types))
@@ -87,8 +85,7 @@ WITH account_entries AS (
 	  LEFT JOIN "bcTransactionType_Ext" ON "bLedgerTransactions"."XactTypeCode_Ext" = "bcTransactionType_Ext".id
 	  LEFT JOIN "bLedger" ON "bLedger"."ledgerNoId" = "bLedgerTransactions"."ledgerID"
 	  LEFT JOIN "bLedger" AS "bLedgerDebit" ON "bLedgerDebit"."ledgerNoId" = "bLedgerTransactions"."ledgerID_Debit"
-	  WHERE (p_start_date ISNULL OR  "dateTime"::date >= p_start_date::date)
-		AND (p_end_date ISNULL OR "dateTime"::date <= p_end_date::date)
+	  WHERE (p_range_date ISNULL OR   p_range_date @> "dateTime"::date)
 		AND (p_idtrade ISNULL OR "bLedgerTransactions".idtrade = p_idtrade)
 		AND (p_external_id ISNULL OR  "bLedgerTransactions"."extTransactionId" = p_external_id)
 		AND (p_entry_types ISNULL OR  "bLedgerTransactions"."XactTypeCode_Ext" =ANY(p_entry_types))
@@ -129,5 +126,5 @@ ORDER BY entries."t_dataTime" DESC,entries."t_amountTransaction" DESC;
 END;
 $BODY$;
 
-ALTER FUNCTION public.f_a_b_get_all_entries_transactions(date, date, numeric[], text[], text[], numeric, numeric[],numeric)
+ALTER FUNCTION public.f_a_b_get_all_entries_transactions(daterange, numeric[], text[], text[], numeric, numeric[], numeric)
     OWNER TO postgres;
