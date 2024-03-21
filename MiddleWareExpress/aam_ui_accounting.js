@@ -96,8 +96,9 @@ async function fGetAccountingData (request,response) {
         'LEFT JOIN "bcAccountType_Ext" ON "bcAccountType_Ext"."accountType_Ext" = "bLedger"."accountTypeID" ;'
     break;
     case 'GetAccountsEntriesListAccounting':
-      query.text = 'SELECT *,0 as action FROM f_a_b_get_all_entries_transactions (${dateRange}::daterange,${entryTypes:raw},${portfolioCodes},${noAccountLedger}, ${idtrade:raw},${entriesIds:raw},${externalId:raw});';
-      request = db_common_api.getTransformArrayParam(request,['entryTypes','entriesIds']);
+      query.text = 'SELECT *,0 as action FROM f_a_b_get_all_entries_transactions ('+
+       '${dateRange}::daterange,${entryTypes:raw},${portfolioCodes},${noAccountLedger}, ${idtrade:raw},${entriesIds:raw},${externalId:raw},${amountRange}::numrange,${accountTypes});';
+      request = db_common_api.getTransformArrayParam(request,['entryTypes','entriesIds','accountTypes']);
     break;
     case 'GetBalanceDatePerPorfoliosOnData':
       query.text = 'SELECT * FROM f_a_get_balances_for_date(${p_portfolio_list},${p_report_date})'
@@ -163,9 +164,10 @@ async function fGetAccountingData (request,response) {
     query.text = query.text.replaceAll("array[0,0]",null);
     query.text = query.text.replaceAll(",'ClearAll'",',null');
     query.text = query.text.replaceAll("'null'::numrange",null);
-    query.text = query.text.replaceAll("'null'::daterange",null);
+    query.text = query.text.replaceAll("null::numrange",null);
+    query.text = query.text.replaceAll("null::daterange",null);
   }
-  // console.log(query.text);
+  //  console.log(query.text);
   db_common_api.queryExecute(query.text,response,null, request.query.queryCode === undefined?  request.query.Action : request.query.queryCode );
 }
 async function fGetMT950Transactions (request,response) {

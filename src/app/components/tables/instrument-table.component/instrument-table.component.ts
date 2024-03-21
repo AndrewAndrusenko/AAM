@@ -89,8 +89,12 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
     if (this.accessState ==='none') {
       this.CommonDialogsService.snackResultHandler({name:'error', detail:'Your role has no access to the data'})
     } else {
-      this.InstrumentDataS.getMoexInstruments().subscribe (instrumentData => this.updateInstrumentDataTable(instrumentData))  
+      this.InstrumentDataS.getMoexInstruments().subscribe (instrumentData => {
+        console.log('instruments arrived:',instrumentData.length);
+        this.updateInstrumentDataTable(instrumentData)
+      })  
     }
+    console.log('instruments sent request');
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.searchParametersFG = this.fb.group ({
       secidList: null,

@@ -4,7 +4,6 @@
     aria-label="Tree show/hide"
     [ngStyle]="{'color':treeOpened ? '  black' : 'white'}"
     (click)="showHideTree()">
-    
     {{treeOpened? 'Tree hide':'Tree show'}} 
   </button>
   <button mat-flat-button  [matMenuTriggerFor]="menu" [style.background-color] ="menuColor"  style="margin-left: 5px;" matRipple="">Clients</button>
@@ -35,32 +34,29 @@
   (click)="LogOut()">
   Sign out
 </button>
-
 </mat-menu>
 <button mat-flat-button mat-button color ="accent" style="color: black;"  (click)="indexdbDeleteAllCache()" >Clear cache</button>
 <button mat-flat-button mat-button color ="accent" style="color: black;"  (click)="nodecls()" >Node cls</button>
+<span style="float:right; ;  margin-right: 0.3%"> 
+  <button mat-flat-button
+    disableRipple    
+    aria-label="Example icon button fullscreen"
+    [ngStyle]="{'color':fullscreen ? 'indianred' : 'white'}"
+    (click)="toggleFullscreenMode()">
+    <mat-icon>{{fullscreen? 'fullscreen_exit' :'fullscreen'}} fullscreen</mat-icon>
+    {{fullscreen? 'Exit FullScreen':'FullScreen'}} 
+  </button>
 
-<button mat-flat-button
-  class="menuright"
-  disableRipple    
-  aria-label="Example icon button fullscreen"
-  [ngStyle]="{'color':fullscreen ? 'indianred' : 'white'}"
-  (click)="toggleFullscreenMode()">
-  <mat-icon>{{fullscreen? 'fullscreen_exit' :'fullscreen'}} fullscreen</mat-icon>
-  {{fullscreen? 'Exit FullScreen':'FullScreen'}} 
-</button>
-
-<button mat-flat-button 
-  class="menuright"
-  disableRipple    
-  aria-label="Example icon button fullscreen"
-  color="warn"
-  (click)="LogOut()">
-   Sign Out 
-</button>
-<h2 class="menuright"
->{{this.getLogin()}} 
-</h2>
-<mat-icon class="menuright " style = "transform: scale(2); margin-top: 8px;">account_box</mat-icon> 
+  <button mat-flat-button 
+    disableRipple    
+    aria-label="Example icon button fullscreen"
+    color="warn"
+    (click)="LogOut()">
+    Sign Out 
+  </button>
+  <button mat-flat-button disableRipple >
+    <mat-icon style = "transform: scale(1.5);margin-right: 1.5%;">account_box</mat-icon> {{this.getLogin()}} 
+  </button>
+</span>
 </div>
 

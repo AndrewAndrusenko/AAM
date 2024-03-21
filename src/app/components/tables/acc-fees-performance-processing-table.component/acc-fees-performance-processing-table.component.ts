@@ -196,6 +196,7 @@ export class AppaIAccFeesPerformanceProcessingTableComponent {
     this.dialogShowEntriesList = this.dialog.open(AppTableAccEntriesComponent ,{minHeight:'600px', minWidth:'1700px', autoFocus: false, maxHeight: '90vh'});
     this.dialogShowEntriesList.componentInstance.paramRowData = {entries:entries}; 
     this.dialogShowEntriesList.componentInstance.action = 'ViewEntriesByEntriesIds';
+    this.dialogShowEntriesList.componentInstance.UI_min = true; 
     this.subscriptions.add(this.dialogShowEntriesList.componentInstance.modal_principal_parent.subscribe (()=>this.dialogShowEntriesList.close()));
   }
   changedValueofChip (value:string, chipArray:string[]) {

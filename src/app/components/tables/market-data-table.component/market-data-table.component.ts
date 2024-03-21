@@ -15,7 +15,6 @@ import {DatePipe, formatNumber } from '@angular/common';
 import {HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import {HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import {AuthService } from 'src/app/services/auth.service';
-import {InstrumentDataService } from 'src/app/services/instrument-data.service';
 import {moexBoard } from 'src/app/models/instruments.interfaces';
 import { indexDBService } from 'src/app/services/indexDB.service';
 @Component({
@@ -183,6 +182,7 @@ export class AppTableMarketDataComponent {
     this.loadMarketData.disable();
     this.MarketDataService.uploadMarketData(dateToLoad, this.sourceCode.value,this.overwritingCurrentData.value).subscribe(data=>{
       this.loadingDataLog=data;
+      
       data.dataLoaded.length>0? this.loadingDataLog.state = {Message:'Loading is complited.', State:'Success'} : null;
       this.marketSources.forEach(el=>{
         el.checkedAll=false;

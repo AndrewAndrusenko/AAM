@@ -36,8 +36,13 @@ export class HandlingCommonTasksService {
     return obj;
   }
   toNumberRangeNew (value:string, control:AbstractControl):string|null {
+    if (!value) {return null};
     let arrayRange = value.split('-')
-    if (arrayRange.length>2||!Number(arrayRange[0])||(arrayRange.length===2&&!Number(arrayRange[1]))) {
+    if (arrayRange.length>2||
+      !Number(arrayRange[0])||
+      (arrayRange.length===2&&!Number(arrayRange[1]))||
+      Number(arrayRange[0])>Number(arrayRange[1])
+    ) {
       control.setErrors({incorrectRange:true})
       return null;
     } else { 

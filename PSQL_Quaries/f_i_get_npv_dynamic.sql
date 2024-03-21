@@ -1,12 +1,13 @@
 -- FUNCTION: public.f_i_get_npv_dynamic(text[], date, date, numeric)
 
--- DROP FUNCTION IF EXISTS public.f_i_get_npv_dynamic(text[], date, date, numeric);
+-- DROP FUNCTION IF EXISTS public.f_i_get_npv_dynamic(text[], date, date, numeric, numeric[]);
 
 CREATE OR REPLACE FUNCTION public.f_i_get_npv_dynamic(
 	p_portfolios_list text[],
 	p_report_date_start date,
 	p_report_date_end date,
-	p_report_currency numeric)
+	p_report_currency numeric,
+	p_account_types numeric[])
     RETURNS TABLE(report_date date, portfolioname character varying, "accountNo" text, secid character varying, balance numeric, pos_pv numeric, mtm_rate numeric, mtm_date date, boardid character varying, percentprice boolean, couponrate numeric, nominal_currency character varying, board_currency numeric, cross_rate numeric, accured numeric, dirty_price numeric, rate_date date, accountid numeric) 
     LANGUAGE 'plpgsql'
     COST 100
@@ -22,7 +23,7 @@ INSERT INTO
 SELECT
   *
 FROM
-  f_a_b_balancesheet_total_closed_and_notclosed ()
+  f_a_b_balancesheet_total_closed_and_notclosed (daterange(p_report_date_start,p_report_date_end,'[]'),p_account_types,null)
 WHERE
   f_a_b_balancesheet_total_closed_and_notclosed.portfolioname = ANY (p_portfolios_list);
 RETURN query
@@ -199,9 +200,5 @@ ORDER BY
 END;
 $BODY$;
 
-ALTER FUNCTION public.f_i_get_npv_dynamic(text[], date, date, numeric)
+ALTER FUNCTION public.f_i_get_npv_dynamic(text[], date, date, numeric,numeric[])
     OWNER TO postgres;
-SELECT * FROM public.f_i_get_npv_dynamic (
-array['ACM002','VPC004'],'01/15/2024','01/15/2024',
-	840
-)

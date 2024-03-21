@@ -82,13 +82,6 @@
       <mat-error *ngIf="dataRange.controls.dateRangeEnd.hasError('matEndDateInvalid')">Invalid end date</mat-error>
     </mat-form-field>
     <span style="display:grid; width: 20%; margin-right: 1%;"> <!-- MP Filter -->
-      <mat-select placeholder="Model Portfolio" class="search-filed" 
-        formControlName="MP" 
-        style="height: 100%; margin-bottom: 4%;"
-        (selectionChange)="setPortfoliosList($event.value)"  >
-        <mat-option [value]="'All'"> All codes </mat-option>
-        <mat-option *ngFor="let mp of mp_strategies_list" [value]="mp.name"> {{mp.name}} </mat-option>
-      </mat-select>
       
   <mat-form-field class="search-filed" title="Accounting Date" style="margin-top: 2%;"> <!-- Report Date Filter -->
     <input matInput 
@@ -102,6 +95,13 @@
     </span>
     <mat-form-field  appearance="fill" style="width: 60%; margin-bottom: 0.5%; " class="search-filed"><!-- Chio Portfolio Filter -->
       <mat-chip-list #chipPortList   >
+        <mat-select placeholder="Model Portfolio" class="search-filed" 
+        formControlName="MP" 
+        style="width: 20%;"
+        (selectionChange)="setPortfoliosList($event.value)"  >
+        <mat-option [value]="'All'"> All codes </mat-option>
+        <mat-option *ngFor="let mp of mp_strategies_list" [value]="mp.name"> {{mp.name}} </mat-option>
+      </mat-select>
         <mat-chip *ngFor="let portfolio of portfolios" 
         (removed)="remove(portfolio,portfolios,idportfolios)"
         (click)=" portfolios = clearAll($event,portfolios,idportfolios);">

@@ -36,9 +36,7 @@ interface filtersForTable {
   templateUrl: './allocation-table.component.html',
   styleUrls: ['./allocation-table.component.scss'],
 })
-
 export class AppallocationTableComponent  implements AfterViewInit {
-
   FirstOpenedAccountingDate: string=null;
   accessState: string = 'none';
   private subscriptions = new Subscription()
@@ -222,6 +220,7 @@ export class AppallocationTableComponent  implements AfterViewInit {
   showEntries (idtrade : number) {
     this.dialogShowEntriesList = this.dialog.open(AppTableAccEntriesComponent ,{minHeight:'600px', minWidth:'1700px', autoFocus: false, maxHeight: '90vh'});
     this.dialogShowEntriesList.componentInstance.paramRowData = {idtrade:idtrade}; 
+    this.dialogShowEntriesList.componentInstance.UI_min = true; 
     this.dialogShowEntriesList.componentInstance.action = 'ViewEntriesByIdTrade';
     this.subscriptions.add(this.dialogShowEntriesList.componentInstance.modal_principal_parent.subscribe (()=>this.dialogShowEntriesList.close()));
   }

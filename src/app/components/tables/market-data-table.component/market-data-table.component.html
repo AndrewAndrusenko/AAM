@@ -220,10 +220,10 @@
               {{ element[column] | date }}
           </p>          
           <p *ngSwitchCase="['open', 'low', 'high', 'marketprice2','close','admittedquote'].includes(column)">
-            {{!element['percentprice']? (element[column] | currency:element['currency']:element['spsymbol']:'1.2-2':'fr'):(element[column] |  currency:element['currency']:'%':'1.2-2':'fr')}}
+            {{!element['percentprice']? (element[column] | currency:element['currency']:element['spsymbol']:'1.2-2'):(element[column] |  currency:element['currency']:'%':'1.2-2')}}
           </p>
           <p *ngSwitchCase="['value'].includes(column)">
-            {{(element[column] | currency:element['currency']:element['spsymbol']:'1.2-2':'fr')}}
+            {{(element[column] | currency:element['currency']:element['spsymbol']:'1.2-2')}}
           </p>
           <p *ngSwitchCase="['volume'].includes(column)">
             {{element[column] | number:'1.0-0'}}

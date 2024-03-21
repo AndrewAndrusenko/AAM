@@ -434,25 +434,37 @@ src\app\components\charts\performance-revenue-factor-chart.component\performance
 --------------------------------------------------------------------------------------------
 14/03/2024 - 17/03/2024
 1|| Portfolio form => Changing portfolio type in edit mode has been disabled
-2|| Selection service => Changed logic of selection all. Now only filtered data is selected. It is usefull when a user selects list of accounts based on the text filter and wants to use it for the next search. Exmaple is to get accounts balance for the specific group
-3|| Account Selection Table Fix => All accounts are available for selection. Table intiation is moved to ngInit to get actual value of action variable
-4|| Balance Sheet Table refactored => 
-  All search parameters has been transferred into DB procedures in order to limit resulted dataset. Used patter allows to pass null value of parameter if it has to be ignored
+2|| Selection service => Changed logic of selection all. Now only filtered data is selected. It is useful when a user selects a list of accounts based on the text filter and wants to use it for the next search. Example is to get accounts balance for the specific group
+3|| Account Selection Table Fix => All accounts are available for selection. Table initiation is moved to ngInit to get actual value of action variable
+4|| Balance Sheet Table refactored =>
+  All search parameters have been transferred into DB procedures in order to limit the resulting dataset. Used pattern allows to pass null value of parameter if it has to be ignored
   Implemented new search parameter - account type
   All DB  procedures have been updated accordingly
   Used data range as a search parameter and and new pattern for arrays parameters
 5|| Balance Sheet check and deep check updated according to new DB functions
 Fix: Balance sheet: dates with entries are updated after execution of closing and opening balance functions
 --------------------------------------------------------------------------------------------
+18/03/2024 -20/03/2024
+|| entries table => complex search by account type
+|| npv_dynamic db function refactored due to the change in balance db functions. all related db functions such as fees, perfomance, revenue factor have been updated accordingly
+|| Positions table => Added filter select list which is updated on dataset refreshing  
+|| Trade Form => Fixed NG100 => Form is being patched with data in ngOnInit hook and only then all nessesary validators are added
+|| Market Service (Marketstack) => Added step to copy data received from Marketstack server to the main table of market quotes
+|| Trade Form - Create on Example => Fixed creating new trade on existing one. Trade date and value date set to today and allocated qty to zero to prevent disabling the form
+|| Positions Table => Added rows with NPV values. User is able to filter dataSet by selecting NPV from secid filter list and get fast snapshot
+|| Menu component css
+|| Portfolio Positions Fees => Fixed: When portfolios list is empty then DB function f_i_get_deducted_fees_per_portfolios_on_date.sql returns fees for all portfolios
+
 ToDo
+|| Investment restrictions
 || Architecture
-|| entries table => complex search by account type??
-|| Positions table => search by list of secid and money position
+* Fix:[webpack-dev-server] module constantly disconnecting and trying to reconnect - Old Asus
+|| manual add market quote
+|| generating orders => notificating about out of date market prices
 || Store history of a portfolio changing strategies
 * Fix: Allocation accounting - FIFO/Accounting => Roll back FIFO/Accounting when other fails
 || FIFO Bug possible=> Case of simultaneously two trades which should be netted on FIFO are sent in FIFO function.
 	Idea is to sort processing batch according to the FIFO guidelines and execute FIFO function synchronously
-|| Investment restrictions
 || Check UserAccess model for UI, especially the latest components
 || DB access roles
 || Hurdle Performance fee and Cash In/Outs -??? How to correct start and end NVP?

@@ -1,32 +1,33 @@
-  <button color = "accent" mat-raised-button title="Reload Table"
-    style=" margin-left:0.2%; font-size: 18px;margin-right: 1%;"
-    (click)="openTradeModifyForm('Create', {})">
-    New Trade
-    <mat-icon matSuffix >create_new_folder</mat-icon>
+
+<mat-form-field class = "filterField"  style="font-size: 22px;" title="All columns">
+  <mat-label class="whiteTextFilter">Search (all columns)...</mat-label>
+  <input 
+    (keyup)="applyFilter($event)"
+    matInput type="text" #filterALL
+    matTooltip="Use context menu to add filter"     >
+  <button matSuffix 
+    mat-icon-button aria-label="Clear" 
+    (click)="clearFilter(filterALL)">
+    <mat-icon>close</mat-icon>
   </button>
-  <mat-form-field class = "filterField"  style="font-size: 22px;" title="All columns">
-    <mat-label class="whiteTextFilter">Search (all columns)...</mat-label>
-    <input 
-      (keyup)="applyFilter($event)"
-      matInput type="text" #filterALL
-      matTooltip="Use context menu to add filter"     >
-    <button matSuffix 
-      mat-icon-button aria-label="Clear" 
-      (click)="clearFilter(filterALL)">
-      <mat-icon>close</mat-icon>
-    </button>
-  </mat-form-field>
-  <button color = "accent" mat-raised-button title="Export To Excel (ALT + W)"
-    style=" margin-left:1%; font-size: 18px;"
-    (click)="exportToExcel()">
-    Save as XLS 
-    <mat-icon matSuffix >save_alt</mat-icon>
-  </button>
-  <button color = "accent" mat-raised-button title="Reload Table (ALT + R)"
+</mat-form-field>
+<button color = "accent" mat-raised-button title="Export To Excel (ALT + W)"
+  style=" margin-left:1%; font-size: 18px;"
+  (click)="exportToExcel()">
+  Save as XLS 
+  <mat-icon matSuffix >save_alt</mat-icon>
+</button>
+<button color = "accent" mat-raised-button title="Reload Table (ALT + R)"
   style=" margin-left:1%; font-size: 18px;"
   (click)="submitQuery(true)">
   Reload 
   <mat-icon matSuffix >refresh</mat-icon>
+</button>
+<button color = "accent" mat-raised-button title="Reload Table"
+  style=" margin-left:0.2%; font-size: 18px;margin-left: 1%;"
+  (click)="openTradeModifyForm('Create', {})">
+  New Trade
+  <mat-icon matSuffix >create_new_folder</mat-icon>
 </button>
 <mat-expansion-panel class="headers-align" 
   (opened)="panelOpenStateSecond = true"
@@ -64,7 +65,7 @@
     </mat-form-field>
 
     <mat-form-field appearance="fill"  class="search-filed">
-      <mat-label >Enter a date range</mat-label>
+      <mat-label >Trade date range</mat-label>
       <mat-date-range-input [formGroup]="dataRange" [rangePicker]="pickerTDate" >
         <input matStartDate placeholder="Start date" formControlName="dateRangeStart" >
         <input matEndDate placeholder="End date" formControlName="tdate" formControlName="dateRangeEnd">
@@ -76,7 +77,7 @@
       <mat-error *ngIf="dataRange.controls.dateRangeEnd.hasError('matEndDateInvalid')">Invalid end date</mat-error>
     </mat-form-field>
     <mat-form-field appearance="fill"  class="search-filed">
-      <mat-label>Enter a date range</mat-label>
+      <mat-label>Value date range</mat-label>
       <mat-date-range-input [formGroup]="dataRangeVdate" [rangePicker]="pickerVDate" >
         <input matStartDate placeholder="Start date" formControlName="vdate" formControlName="dateRangeStart">
         <input matEndDate placeholder="End date" formControlName="dateRangeEnd">

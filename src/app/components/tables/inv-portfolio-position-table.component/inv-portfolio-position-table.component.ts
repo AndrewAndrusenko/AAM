@@ -50,6 +50,7 @@ export class AppaInvPortfolioPositionTableComponent {
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
   instruments: string[] = ['ClearAll'];
   portfolios: string[] = ['ClearAll'];
+  secidsArray: Set<string>;
   filterednstrumentsLists : Observable<string[]>;
   searchParametersFG: FormGroup;
   defaultFilterPredicate?: (data: portfolioPositions, filter: string) => boolean;
@@ -147,12 +148,35 @@ export class AppaInvPortfolioPositionTableComponent {
   }
   updatePositionsDataTable (positionsData:portfolioPositions[]) {
     this.fullDataSource = positionsData;
-    this.dataSource  = new MatTableDataSource(positionsData);
+    let setNPVs = new Set<string> ()
+    positionsData.forEach(npvRow=>{
+      let newRow = structuredClone(npvRow)
+      Object.entries(newRow).forEach(([key,value])=> {
+        switch (key) {
+          case 'secid': newRow[key]='NPV' 
+          break;
+          case 'mtm_positon': newRow[key]=npvRow.npv 
+          break;
+          case 'not_zero_npv': newRow[key]=value
+          break;
+          case 'portfolio_code': 
+          case 'npv': 
+          break;
+          default: newRow[key]=null
+          break;
+        }
+      })
+      newRow.mtm_positon? setNPVs.add(JSON.stringify(newRow)):null;
+    })
+    this.fullDataSource=[...this.fullDataSource,...Array.from(setNPVs).map(val=>val=JSON.parse(val)) ];
+    this.dataSource  = new MatTableDataSource(this.fullDataSource);
     this.dataSource.filterPredicate =this.multiFilter
     this.filterALL? this.filterALL.nativeElement.value=null : null;
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
+
     this.notNullCB?.checked===false? this.showZeroPortfolios(false):null;
+    this.secidsArray = new Set (this.dataSource.filteredData.map(el=>el.secid))
   }
   submitQuery (reset:boolean=false, showSnackResult:boolean=true) {
     let searchObj = reset?  {} : this.searchParametersFG.value;
@@ -191,6 +215,10 @@ export class AppaInvPortfolioPositionTableComponent {
     };
     return chipArray;
   }
+  filterBySecid (ev:MatSelectChange) {
+    this.filterALL.nativeElement.value = '';
+    this.updateFilter (ev.value);
+  }
   updateFilter (el: string) {
     this.filterALL.nativeElement.value = this.filterALL.nativeElement.value + el+',';
     this.dataSource.filter = this.filterALL.nativeElement.value.slice(0,-1).trim().toLowerCase();
@@ -207,7 +235,9 @@ export class AppaInvPortfolioPositionTableComponent {
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
   }
   getTotals (col:string) {
-    return (this.dataSource&&this.dataSource.data)?  this.dataSource.filteredData.map(el => el[col]).reduce((acc, value) => acc + Number(value), 0):0;
+    if (this.dataSource&&this.dataSource.data) { 
+      return this.dataSource.filteredData.map(el =>el.secid==='NPV'? 0: el[col]).reduce((acc, value) => acc + Number(value), 0)
+    }
   }
   exportToExcel() {
     let numberFields=['notnull_npv','mtm_positon_base_cur','npv','total_pl','roi','pl','unrealizedpl','cost_in_position','idportfolio','fact_weight','current_balance','mtm_positon','weight','planned_position','order_amount','order_qty','mtm_rate','cross_rate','mtm_dirty_price','pl'];

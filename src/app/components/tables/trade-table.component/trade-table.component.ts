@@ -88,6 +88,11 @@ export class AppTradeTableComponent  {
       price:null,
       qty:null,
     });
+    this.TradeService.getTradeInformation(null).subscribe (tradesData => {
+      console.log('trades arrived:',tradesData.length);
+      this.updateTradesDataTable(tradesData)
+    }); 
+    console.log('trades request sent:');
     this.arraySubscrition.add(this.TradeService.getReloadOrdersForExecution().subscribe(data=>{
       let i = this.dataSource.data.findIndex(el=>el.idtrade===data.idtrade);
       i!==-1? this.dataSource.data[i].allocatedqty =Number(data.data.filter(alloc=>alloc['id_joined']==this.dataSource.data[i].idtrade)[0].allocated)+Number(this.dataSource.data[i].allocatedqty) : null;
@@ -122,7 +127,7 @@ export class AppTradeTableComponent  {
       return !filter || filter_array.reduce((acc,val)=>acc+Number(val[1]),0)===0;
     };
     this.arraySubscrition.add(this.TreeMenuSeviceS.getActiveTab().subscribe(tabName=>this.activeTab=tabName));
-    this.TradeService.getTradeInformation(null).subscribe (tradesData => this.updateTradesDataTable(tradesData)); 
+
     this.AutoCompService.getSecidLists();
     this.AutoCompService.getCounterpartyLists().subscribe();
     this.filterednstrumentsLists = this.secidList.valueChanges.pipe(
@@ -164,7 +169,11 @@ export class AppTradeTableComponent  {
   }
   openTradeModifyForm (action:string, element:trades|{},tabIndex:number=0) {
     let dataToForm = structuredClone(element);
-    action==='Create_Example'? (dataToForm  as trades).allocatedqty=0:null;
+    if (action==='Create_Example') {
+      (dataToForm as trades).allocatedqty=0;
+      (dataToForm as trades).tdate=new Date();
+      (dataToForm as trades).vdate=new Date();
+    }
     this.dialogTradeModify = this.dialog.open (AppTradeModifyFormComponent,{minHeight:'600px', minWidth:'60vw', maxWidth:'80vw', maxHeight: '90vh'})
     this.dialogTradeModify.componentInstance.action = action;
     this.dialogTradeModify.componentInstance.tabIndex=tabIndex;

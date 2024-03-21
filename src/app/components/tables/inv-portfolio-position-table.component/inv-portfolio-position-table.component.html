@@ -11,6 +11,13 @@
       <mat-icon>close</mat-icon>
     </button>
   </mat-form-field>
+
+  <mat-select placeholder="SecID Filter" class="search-filed" 
+    style="width: 13%; margin-left: 1%;"
+    (selectionChange)="filterBySecid($event)"  >
+    <mat-option *ngFor="let secid of secidsArray" [value]="secid"> {{secid}} </mat-option>
+  </mat-select>
+
   <button color = "accent" mat-raised-button title="Export To Excel"
     style=" margin-left:1%; font-size: 18px;"
     (click)="exportToExcel()">
@@ -68,16 +75,14 @@
         Inccorect Code! 
       </mat-error>
     </mat-form-field>
-      <span *ngIf="UI_portfolio_selection===true" style="display:grid; width: 20%; margin-right: 1%;"> <!-- MP Filter -->
-        <mat-select placeholder="Model Portfolio" class="search-filed" 
-          formControlName="MP" 
-          style="height: 150%;"
-          (selectionChange)="setPortfoliosList($event)"  >
-          <mat-option *ngFor="let mp of mp_strategies_list" [value]="mp.name"> {{mp.name}} </mat-option>
-        </mat-select>
-      </span>
       <mat-form-field *ngIf="UI_portfolio_selection===true"  appearance="fill" style="width: 60%; margin-bottom: 0.5%; " class="search-filed">
         <mat-chip-list #chipPortList   >
+          <mat-select placeholder="Model Portfolio" class="search-filed" 
+            formControlName="MP" 
+            style="width: 20%;"
+            (selectionChange)="setPortfoliosList($event)"  >
+            <mat-option *ngFor="let mp of mp_strategies_list" [value]="mp.name"> {{mp.name}} </mat-option>
+          </mat-select>
           <mat-chip *ngFor="let portfolio of portfolios" 
           (removed)="remove(portfolio,portfolios,idportfolios)"
           (click)=" portfolios = clearAll($event,portfolios,idportfolios);">
@@ -95,7 +100,6 @@
           [matChipInputAddOnBlur]="true"
           (matChipInputTokenEnd)="portfolios = add($event,portfolios,idportfolios)"
           matTooltip="Type portfolio code or paste multiple codes separated by comma and press enter" >
-
         </mat-chip-list>
         <mat-hint style="color:rgb(104, 246, 246); font-style: italic;">
           Portfolios List

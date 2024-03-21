@@ -118,12 +118,12 @@ export class AppTableAccEntriesComponent implements OnInit {
       dateRange : {value:null, disabled:false},
       noAccountLedger: {value:['ClearAll'], disabled:false},
       portfolioCodes: {value:['ClearAll'], disabled:false},
-      amount:{value:null, disabled:true},
       entryTypes : {value:null, disabled:false},
       externalId:{value:null, disabled:false},
       idtrade:{value:null, disabled:false},
       entriesIds:{value:null, disabled:false},
-      accountTypes:{value:null, disabled:false}
+      accountTypes:{value:null, disabled:false},
+      amountRange:{value:null, disabled:false}
 
     })
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToEntriesData')[0].elementvalue;
@@ -199,8 +199,10 @@ export class AppTableAccEntriesComponent implements OnInit {
     this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate);
     let searchObj = this.searchParametersFG.value;
     this.dataSource? this.dataSource.data = null: null;
-    searchObj.dateRange = this.dataRange.value? this.HandlingCommonTasksS.toDateRangeNew(this.dataRange):null;
+    searchObj.dateRange =  this.HandlingCommonTasksS.toDateRangeNew(this.dataRange);
+    searchObj.amountRange = this.HandlingCommonTasksS.toNumberRangeNew(this.amountRange.value,this.amountRange);
     searchObj.entryTypes=searchObj.entryTypes?.length? searchObj.entryTypes:null;
+    searchObj.accountTypes=searchObj.accountTypes?.length? searchObj.accountTypes:null;
     this.AccountingDataService.GetAccountsEntriesListAccounting(searchObj,null,null, null, 'GetAccountsEntriesListAccounting').subscribe (EntriesList  => {
       this.dataSource  = new MatTableDataSource(EntriesList);
       this.dataSource.paginator = this.paginator;
@@ -315,5 +317,6 @@ export class AppTableAccEntriesComponent implements OnInit {
   get  idtrade () {return this.searchParametersFG.get('idtrade') } 
   get  noAccountLedger () {return this.searchParametersFG.get('noAccountLedger') } 
   get  portfolioCodes () {return this.searchParametersFG.get('portfolioCodes') } 
+  get  amountRange () {return this.searchParametersFG.get('amountRange') } 
   get  entriesIds () {return this.searchParametersFG.get('entriesIds') } 
 }

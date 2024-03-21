@@ -177,6 +177,7 @@ export class AppMarketDataService {
         switchMap(()=> this.http.get <MarketStackObject> (source.sourceURL, {params:params})),
         tap(data=>totalRows=data.data.length),
         switchMap(marketData=> this.insertMarketData (marketData.data,source.sourceCode,'MScom')),
+        switchMap(()=> this.moveMarketStackToMainTable(new Date(dateToLoad).toDateString())),
         switchMap(inserted=>of({'Source':'Marketstack - '+ source.sourceCode,'Total rows loaded - ' : inserted,'Total rows fetched from source - ': totalRows,'Date': dateToLoad}))
       ))
     })
@@ -206,8 +207,8 @@ export class AppMarketDataService {
     return  this.http.post <number> ('/api/AAM/MD/importData/',
     {'dataToInsert': dataToInsert,'sourceCode':sourceCode, 'gloabalSource':gloabalSource})
   }
-  moveMarketStackToMainTable (dateToMove:string) :Observable<{o_rows_moved:number}[]> {
-    return this.http.post <{o_rows_moved:number}[]> ('/api/AAM/MD/importData/',{date_to_move:dateToMove,gloabalSource:'MScomMoveToMainTable'})
+  moveMarketStackToMainTable (dateToMove:string) :Observable<number> {
+    return this.http.post <{o_rows_moved:number}[]> ('/api/AAM/MD/importData/',{date_to_move:dateToMove,gloabalSource:'MScomMoveToMainTable'}).pipe(map(data=>data[0].o_rows_moved))
   }  
   getMarketQuote (secid:string,trade_date:string):Observable<marketData[]> {
     const params = {secid:secid,trade_date:trade_date,Action:'getMarketQuote',}

@@ -101,24 +101,28 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data => this.firstOpenedAccountingDate = data[0].FirstOpenedDate);
     this.indexDBServiceS.getIndexDBStaticTables('getMoexSecurityTypes').subscribe (data=>this.securityTypes = (data.data as moexSecurityType[]));
     this.AutoCompService.getCurrencyList();
-    this.id_price_currency.setValidators([this.AutoCompService.currencyValirator(),Validators.required]);
-    this.id_settlement_currency.setValidators([this.AutoCompService.currencyValirator(),Validators.required]);
     this.arraySubscrition.add(this.AutoCompService.recieveCurrencyListReady().subscribe(()=>{
       this.id_price_currency.updateValueAndValidity();
       this.id_settlement_currency.updateValueAndValidity();
       this.checkCurrenciesHints()
     }));
-
-    this.faceunit.value? this.faceunit_name.patchValue(this.AutoCompService.getCurrecyData(this.faceunit.value)['CurrencyCode']):null;
     this.AutoCompService.getSecidLists();
-    this.tidinstrument.setValidators(this.AutoCompService.secidValirator());
     this.AutoCompService.getCounterpartyLists().subscribe(()=>this.id_cpty.setValidators(this.AutoCompService.counterPartyalirator(this.cpty_name)));
+  }
+  ngOnInit(): void {
+    //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
+    //Add 'implements OnInit' to the class.
+    this.tradeModifyForm.patchValue(this.data)
+    this.tidinstrument.setValidators(this.AutoCompService.secidValirator());
+    this.id_price_currency.setValidators([this.AutoCompService.currencyValirator(),Validators.required]);
+    this.id_settlement_currency.setValidators([this.AutoCompService.currencyValirator(),Validators.required]);
+    this.faceunit.value? this.faceunit_name.patchValue(this.AutoCompService.getCurrecyData(this.faceunit.value)['CurrencyCode']):null;
+    
   }
   ngOnDestroy(): void {
     this.arraySubscrition.unsubscribe()
   }
   ngAfterContentInit (): void {
-    this.tradeModifyForm.patchValue(this.data);
     if (this.data?.['secidAutocolmplete']===true) { 
       this.secidAutocolmplete(this.AutoCompService.fullInstrumentsLists.filter(el=>el[0]===(this.data as trades).tidinstrument)[0])
     };
@@ -245,7 +249,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     this.getMarketPrice()
   }
   getMarketPrice() {
-    this.MarketDataService.getMarketQuote(this.tidinstrument.value,new Date(this.tdate.value).toLocaleDateString()).subscribe(data=>{
+    this.MarketDataService.getMarketQuote(this.tidinstrument.value,new Date(this.tdate.value).toDateString()).subscribe(data=>{
       this.market_price.patchValue(data.length? data[0].close:null)
     })
   }
