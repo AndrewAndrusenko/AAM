@@ -72,7 +72,6 @@ export class AppTableCurrenciesDataComponent {
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.indexDBService.pipeMarketSourceSet.next(true);
     this.subscriptions.add(this.indexDBService.receivMarketSourceSett().subscribe(marketSourcesData => {
-      console.log('ms',marketSourcesData);
       this.marketSources = marketSourcesData.filter(el=>el.type==='currency');
       this.marketSources[0].checkedAll=true;
       this.setAll(0);
@@ -147,7 +146,6 @@ export class AppTableCurrenciesDataComponent {
         return EMPTY;
       })
     ).subscribe(loadingDataState=>{
-      console.log('sub ret',loadingDataState);
       this.loadingDataState = loadingDataState;
       this.completeLoading(loadingDataState.data)
     }) 

@@ -124,6 +124,7 @@ appServer.post('/Favorites/deleteItem/',uiAmmModule.fRemoveFavorite)
 appServer.get ('/AAM/treeMenu/',  jsPassport.authenticate('session') ,  uiAmmModule.FAmmGetTreeData)
 // -------------Get Tree for Tree Menu UI----------------------
 appServer.get ('/AAM/portfolioTable/',  jsPassport.authenticate('session') ,  uiAmmModule.fGetportfolioTable)
+appServer.get ('/AAM/PortfolioData/',  jsPassport.authenticate('session') ,  uiAmmModule.fGetPortfolioData)
 appServer.get ('/AAM/ClientData/',  jsPassport.authenticate('session') ,  uiAmmModule.fGetClientData)
 appServer.post('/AAM/ClientDataEdit/',jsPassport.authenticate('session') , uiAmmModule.fEditClientData)
 appServer.post('/AAM/ClientDataDelete/',jsPassport.authenticate('session') , uiAmmModule.fClientDataDelete)
@@ -134,8 +135,6 @@ appServer.post('/AAM/StrategyDataUpdate/',jsPassport.authenticate('session') , u
 appServer.post('/AAM/updateStrategyStructure/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fStrategyStructureUpdate)
 /*----------------------PortofoliosData----------------------------------------------------*/
 
-appServer.post('/AAM/AccountCreate/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fAccountCreate)
-appServer.post('/AAM/AccountDelete/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fAccountDelete)
 appServer.post('/AAM/AccountEdit/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fAccountEdit)
 appServer.post('/AAM/GetPortfolioPositions/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fGetPortfolioPositions)
 appServer.post('/AAM/GetPortfolioAnalytics/',jsPassport.authenticate('session') , uiAmmInvestmentsModule.fGetPortfolioAnalytics)
@@ -169,6 +168,7 @@ appServer.post('/DEA/accountingBalanceDayOpen/',jsPassport.authenticate('session
 
 /*----------------------MarketData----------------------------------------------------*/
 appServer.post('/AAM/MD/importData/',jsPassport.authenticate('session') , uiAmmMarketData.finsertMarketData)
+appServer.post('/AAM/MD/updateMarketQuote/',jsPassport.authenticate('session') , uiAmmMarketData.fupdateMarketQuote)
 appServer.get('/AAM/MD/getMarketData/',jsPassport.authenticate('session') , uiAmmMarketData.fgetMarketData)
 appServer.get('/AAM/MD/getMarketDataSources/',jsPassport.authenticate('session') , uiAmmMarketData.fgetMarketDataSources)
 appServer.get('/AAM/MD/getInstrumentsCodes/',jsPassport.authenticate('session') , uiAmmMarketData.fgetInstrumentsCodes)

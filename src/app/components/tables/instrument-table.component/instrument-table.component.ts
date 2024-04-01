@@ -4,7 +4,7 @@ import {MatSort} from '@angular/material/sort';
 import {Observable, Subscription } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import { MatDialog as MatDialog, MatDialogRef as MatDialogRef } from '@angular/material/dialog';
-import { Instruments, instrumentCorpActions, instrumentDetails, moexBoard } from 'src/app/models/instruments.interfaces';
+import { Instruments, instrumentCorpActions, instrumentDetails, moexBoard, moexSecurityGroup, moexSecurityType } from 'src/app/models/instruments.interfaces';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
@@ -66,7 +66,8 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
   investmentNodeColor = investmentNodeColorChild;
   additionalLightGreen = additionalLightGreen;
   public filterednstrumentsLists : Observable<string[]>;
-  boardIDs:moexBoard[] =[]
+  boardIDs:moexBoard[] =[];
+  securityGroups:moexSecurityGroup[];
   searchParametersFG: FormGroup;
   boardsOne = new FormControl('');
   dialogInstrumentModify: MatDialogRef<AppInvInstrumentModifyFormComponent>;
@@ -74,7 +75,6 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
   secidfilter?: (data: Instruments, filter: string) => boolean;
   selectedRow: Instruments;
   constructor(
-    private MarketDataService: AppMarketDataService,
     private TreeMenuSevice:TreeMenuSevice,
     private AuthServiceS:AuthService,  
     private indexDBService:indexDBService,
@@ -89,22 +89,25 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
     if (this.accessState ==='none') {
       this.CommonDialogsService.snackResultHandler({name:'error', detail:'Your role has no access to the data'})
     } else {
-      this.InstrumentDataS.getMoexInstruments().subscribe (instrumentData => {
+/*      this.InstrumentDataS.getMoexInstruments().subscribe (instrumentData => {
         console.log('instruments arrived:',instrumentData.length);
         this.updateInstrumentDataTable(instrumentData)
-      })  
+      })   */
     }
     console.log('instruments sent request');
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.searchParametersFG = this.fb.group ({
       secidList: null,
       marketSource : {value:null, disabled:false},
-      boards : {value:null, disabled:false}
+      boards : {value:null, disabled:false},
+      group:[],
+      isin:null
     });
       this.indexDBService.pipeBoardsMoexSet.next(true);
       this.subscriptions.add(this.indexDBService.receiveBoardsMoexSet().subscribe(marketSourcesData => this.boardIDs = marketSourcesData));
       this.indexDBService.pipeMarketSourceSet.next(true);
       this.subscriptions.add(this.indexDBService.receivMarketSourceSett().subscribe(marketSourcesData => this.marketSources = marketSourcesData));
+      this.indexDBService.getIndexDBStaticTables('getMoexSecurityGroups').subscribe (data=>this.securityGroups = (data.data as moexSecurityGroup[]));
       this.subscriptions.add(
         this.InstrumentDataS.getInstrumentDataToUpdateTableSource().subscribe(data =>{
           let index =  this.dataSource.data.findIndex(elem=>elem.id===data.data[0].id)
@@ -123,6 +126,17 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
           this.dataSource.sort = this.sort;
         })
       )
+  }
+  ngOnInit(): void {
+    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToInstrumentData')[0].elementvalue;
+    if (this.accessState ==='none') {
+      this.CommonDialogsService.snackResultHandler({name:'error', detail:'Your role has no access to the data'})
+    } else {
+      this.FormMode === 'Select'? this.InstrumentDataS.getMoexInstruments().subscribe (instrumentData => {
+        console.log('instruments arrived:',instrumentData.length);
+        this.updateInstrumentDataTable(instrumentData)
+      }) :null; 
+    }
   }
   ngOnDestroy(): void { this.subscriptions.unsubscribe()}
   openInstrumentModifyForm (action:string, element:Instruments) {
@@ -187,12 +201,14 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
       this.instruments.length? Object.assign (searchObj , {'secid': instrumentsList.map(el=>(el as string).toUpperCase()) }): null;
       this.marketSource.value != null&&this.marketSource.value.length !=0? Object.assign (searchObj , {'sourcecode': this.marketSource.value}): null;
       this.boards.value != null&&this.boards.value.length !=0? Object.assign (searchObj , {'boardid': this.boards.value}): null;
+      this.group.value != null&&this.group.value.length !=0? Object.assign (searchObj , {'securityGroup': this.group.value}): null;
+      this.isin.value? Object.assign (searchObj , {'isin': this.isin.value}): null;
       this.InstrumentDataS.getMoexInstruments(undefined,this.FormMode==='ChartMode'? 'secid ASC':undefined,searchObj).subscribe(data => {
         this.dataSource  = new MatTableDataSource(data);
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
         this.instruments.unshift('ClearAll')
-        this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ');
+        this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ',undefined,false);
       });
   }
   toggleAllSelection(elem:string, allSelected: boolean) {
@@ -204,5 +220,7 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
   exportToExcel() {this.HandlingCommonTasksS.exportToExcel (this.dataSource.data,"instrumentData")  }
   get  marketSource () {return this.searchParametersFG.get('marketSource') } 
   get  boards () {return this.searchParametersFG.get('boards') } 
+  get  group () {return this.searchParametersFG.get('group') } 
+  get  isin () {return this.searchParametersFG.get('isin') } 
   get  secidList () {return this.searchParametersFG.get('secidList') } 
 }

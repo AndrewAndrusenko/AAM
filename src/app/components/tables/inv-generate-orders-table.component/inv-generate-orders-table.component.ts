@@ -17,6 +17,7 @@ import { indexDBService } from 'src/app/services/indexDB.service';
 import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { AppTradeService } from 'src/app/services/trades-service.service';
 import { MatSelectChange } from '@angular/material/select';
+import { valHooks } from 'jquery';
 
 interface localFilters {
   reset?:boolean,
@@ -73,7 +74,9 @@ export class AppInvGenerateOrdersTable{
       idportfolios:  [],
       MP:null,
       secArray:null,
-      deviation:0.01,
+      leverage:[2,{validators:Validators.required}],
+      deviation:[0.01,{validators:Validators.pattern('[0-9.]*')}],
+      old_mark:[15,{validators:Validators.pattern('[0-9]*')}],
       report_date : [new Date(), { validators:  Validators.required, updateOn: 'blur' }],
       report_id_currency:['840', { validators:  [this.AutoCompService.currencyValirator(),Validators.required]}],
     });
@@ -140,7 +143,7 @@ export class AppInvGenerateOrdersTable{
     this.dataSource.filter = filterValue.trim().toLowerCase();
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
-  updatePositionsDataTable (positionsData:portfolioPositions[]) {
+  updatePositionsDataTable (positionsData:portfolioPositions[],snackResultHandler) {
     this.MP.value? positionsData = positionsData.filter(el=>el.mp_name===this.MP.value||el.strategy_name===this.MP.value) : null;
     this.fullDataSource=positionsData;
     this.dataSource  = new MatTableDataSource(positionsData);
@@ -148,6 +151,16 @@ export class AppInvGenerateOrdersTable{
     this.dataSource.sort = this.sort;
     this.instruments=['ClearAll',...[...new Set(this.dataSource.data.map(el=>el.secid))]];
     this.filters? this.initialFilterOfDataSource(this.filters) : null;
+    let outOfDateMarks = new Date()
+    outOfDateMarks.setDate(new Date().getDate()-this.old_mark.value)
+    let oldMarksSet =this.dataSource.data.filter(el=>new Date(el.mtm_date)<outOfDateMarks)
+    if (oldMarksSet.length) {
+      this.dataSource.data=oldMarksSet;
+      this.CommonDialogsService.snackResultHandler({name:'error',detail:oldMarksSet.length +' orders have been calculated based on irrelevant market quotes'})
+    } else {
+      snackResultHandler? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (positionsData.length,'en-US') + ' rows'}, 'Loaded ') : null;
+
+    };
     this.dataSource.filterPredicate =this.multiFilter
     this.defaultFilterPredicate = this.dataSource.filterPredicate;
     this.multiFilter = this.dataSource.filterPredicate;
@@ -159,8 +172,7 @@ export class AppInvGenerateOrdersTable{
     searchObj.idportfolios = [0,1].includes(this.portfolios.length)&&this.portfolios[0]==='ClearAll'? null : this.portfolios.map(el=>el.toLocaleLowerCase())
     searchObj.report_date= new Date (searchObj.report_date).toDateString();
     this.InvestmentDataService.getPortfolioMpDeviations(searchObj).subscribe(data => {
-      this.updatePositionsDataTable(data)
-      showSnackResult? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ') : null;
+      this.updatePositionsDataTable(data,showSnackResult)
     });
   }
   changedValueofChip (value:string, chipArray:string[],control:AbstractControl) {
@@ -200,6 +212,15 @@ export class AppInvGenerateOrdersTable{
   getTotals (col:string) {
     return (this.dataSource&&this.dataSource.data)?  this.dataSource.filteredData.map(el => el[col]).reduce((acc, value) => acc + Number(value), 0):0;
   }
+  showTip (tipIndex:number) {
+    let tips:string[] = [
+      '\nOrders are not generated if leverage restriction is exceeded',
+      '\nOrders are generated within available leverage restriction',
+      '\nAll confirmed orders deems as executed.\nThey are taken into account when leverage restriction is verified',
+      '\nLeverage resctriction is verified against model portfolio leverage.\nAn order is valid if restriction is above model portfolio leverage'
+    ]
+    this.CommonDialogsService.snackResultHandler({name:'success', detail:tips[tipIndex]},'Tip',undefined,undefined,15000)
+  }
   exportToExcel() {
     let numberFields=['total_pl','roi','pl','unrealizedpl','cost_in_position','idportfolio','fact_weight','current_balance','mtm_positon','weight','planned_position','order_amount','order_qty','mtm_rate','cross_rate','mtm_dirty_price','pl'];
     let dateFields=['mtm_date','rate_date'];
@@ -210,6 +231,7 @@ export class AppInvGenerateOrdersTable{
   get  report_date () {return this.searchParametersFG.get('report_date') } 
   get  report_id_currency () {return this.searchParametersFG.get('report_id_currency') } 
   get  deviation () {return this.searchParametersFG.get('deviation') } 
+  get  old_mark () {return this.searchParametersFG.get('old_mark') } 
   get  secArray () {return this.searchParametersFG.get('secArray') } 
   get  MP () {return this.searchParametersFG.get('MP') } 
 }

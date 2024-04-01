@@ -5,12 +5,10 @@
   <button mat-flat-button color="primary" type="submit" 
     [disabled]="!(newAccountForm.valid && submitbox.checked)"
     (click)='newAccountForm.valid? updatePortfolioData(action) : null'
-    style="margin-top: 1px; width: 200px; font-size: 18px; margin-left: 1%;">
+    style="margin-top: 1px; width: 15%; font-size: large; margin-left: 1%;">
       {{action}} portfolio
   </button>
-  <mat-checkbox color="primary"  #submitbox checked="false" 
-  (click)="newAccountForm.markAllAsTouched()"
-  >Submit Data</mat-checkbox>
+  <mat-checkbox color="primary" [labelPosition]="'before'" #submitbox checked="false" (click)="newAccountForm.markAllAsTouched()" style="margin-left: 1.5%;">Submit Data</mat-checkbox>
 </div>  
 <form class="submit" [formGroup]="newAccountForm" >
   <mat-form-field style="width: 55%;" >
@@ -67,13 +65,13 @@
   <mat-form-field>
     <input matInput placeholder="portleverage" formControlName="portleverage">
   </mat-form-field>
-  <div *ngIf="summaryShow" style="width: 150%;">
+  <div *ngIf="summaryShow" style="width: 98%;">
     <h2 class="mat-form-field">Portfolio Value {{summaryData.npv|currency}}</h2>
     <h2 class="mat-form-field">Result {{summaryData.PnL|currency}}</h2>
     <h2 class="mat-form-field">Management Fee {{summaryData.managementFee|currency}}</h2>
     <h2 class="mat-form-field">Perfomance Fee {{summaryData.perfomanceFee|currency}}</h2>
   </div>
-  <div *ngIf="id.value!==undefined" style="width: 120%;">
+  <div *ngIf="id.value!==undefined" style="width: 98%;">
     <mat-toolbar color="accent" style="margin-bottom:1%; border-radius: 8px;">
      Fees Schedules
     </mat-toolbar>
@@ -82,4 +80,20 @@
     [onChanges]="true"
     ></acc-fees-portfolios-with-schedules-table>
   </div>
+  <mat-expansion-panel style="margin-top: 0.5%; width: 98%;" class="headers-align"
+    [expanded]="true"
+    (opened)="panelOpenState1 = true"  
+    (closed)="panelOpenState1 = false" >
+    <mat-expansion-panel-header>
+      <mat-panel-title >
+        Strategy Structure History
+      </mat-panel-title>
+      <mat-panel-description  >
+        {{panelOpenState1 ? 'Hide' : 'Show'}}
+      </mat-panel-description>
+    </mat-expansion-panel-header >
+    <app-portfolios-hist-table 
+    [idportfolio]=id.value
+    ></app-portfolios-hist-table>
+</mat-expansion-panel>
 </form>

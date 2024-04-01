@@ -78,21 +78,20 @@
     >
   </app-table-strategy_structure>
   <mat-expansion-panel style="margin-left: 1%; margin-top: 0.5%; " class="headers-align"
-  [expanded]="true"
-  (opened)="panelOpenState1 = true"  
-  (closed)="panelOpenState1 = false" >
-  <mat-expansion-panel-header>
-    <mat-panel-title >
-      Strategy Structure History
-    </mat-panel-title>
-    <mat-panel-description  >
-      {{panelOpenState1 ? 'Hide' : 'Show'}}
-    </mat-panel-description>
-  </mat-expansion-panel-header >
-  <app-strategy_structure-hist-table 
-  [ModelPortfolio] = Level.value 
-  [parentStrategyId] = id.value
-  ></app-strategy_structure-hist-table>
-</mat-expansion-panel>
+    [expanded]="true"
+    (opened)="panelOpenState1 = true"  
+    (closed)="panelOpenState1 = false" >
+    <mat-expansion-panel-header>
+      <mat-panel-title >
+        Strategy Structure History
+      </mat-panel-title>
+      <mat-panel-description  >
+        {{panelOpenState1 ? 'Hide' : 'Show'}}
+      </mat-panel-description>
+    </mat-expansion-panel-header >
+    <app-strategy_structure-hist-table 
+    [parentStrategyId] = id.value
+    ></app-strategy_structure-hist-table>
+  </mat-expansion-panel>
 
 </ng-container>

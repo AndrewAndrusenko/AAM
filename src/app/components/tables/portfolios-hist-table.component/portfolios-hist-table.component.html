@@ -1,0 +1,85 @@
+<ng-container *ngIf="accessState!=='none'" >
+  <form class="submit" [formGroup]="searchParametersFG"  style="font-size: 18px; margin-left: 0.5%; margin-bottom: 0.5%; ">
+    <span style="display: flex;    align-items:flex-start;  margin-right: 1%;margin-top: 0.2%;">
+      <span style="display:grid; width: 11%; margin-right: 2%;">
+        <button color = "primary"  class= "button-color" mat-raised-button 
+          style="margin:1%; font-size: 18px;"
+          (click)="submitQuery()">
+          Submit
+        </button>
+        <button color = "accent" mat-raised-button 
+          style="margin-top:4%;margin-left: 1%; font-size: 18px;"
+          (click)="searchParametersFG.reset()">
+          ClearAll
+        </button>
+      </span>
+    <mat-form-field appearance="fill"  class="search-filed" style="width: 20%;">
+      <mat-label >Change date range</mat-label>
+      <mat-date-range-input [formGroup]="dataRange" [rangePicker]="pickerTDate" >
+        <input matStartDate placeholder="Start date" formControlName="dateRangeStart" >
+        <input matEndDate placeholder="End date" formControlName="dateRangeEnd">
+      </mat-date-range-input>
+      <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
+      <mat-datepicker-toggle matSuffix [for]="pickerTDate"></mat-datepicker-toggle>
+      <mat-date-range-picker  #pickerTDate></mat-date-range-picker>
+      <mat-error *ngIf="dataRange.controls.dateRangeStart.hasError('matStartDateInvalid')">Invalid start date</mat-error>
+      <mat-error *ngIf="dataRange.controls.dateRangeEnd.hasError('matEndDateInvalid')">Invalid end date</mat-error>
+    </mat-form-field>
+  </span>
+  </form>
+  <mat-form-field 
+    *ngIf="showFilter"
+    style="width: 20%;"class = "filterField"  title="Filter All columns">
+    <mat-label class="whiteTextFilter">Search (all columns)...</mat-label>
+    <input 
+      (keyup)="applyFilter($event)"
+      matInput type="text" #filterALL
+      matTooltip="Use context menu to add filter">
+    <button matSuffix 
+      mat-icon-button aria-label="Clear" 
+      (click)="clearFilter(filterALL)">
+      <mat-icon>close</mat-icon>
+    </button>
+  </mat-form-field>
+ <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort
+   class="mat-elevation-z8" 
+    style="width: 100%;" >
+    <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i=index" justify="right"  >
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> {{columnsHeaderToDisplay[i]}}</th>
+      <td 
+        mat-cell *matCellDef="let element" [cdkContextMenuTriggerFor]="instrumentcontextmenu" >
+        <span [ngSwitch]="true==true">
+          <p *ngSwitchDefault>{{element[column]}}</p>
+          <p *ngSwitchCase="['tr_date'].includes(column)">{{element[column] | date:'MMM d, y, HH:mm:ss'}} </p>
+         </span>
+        <ng-template  #instrumentcontextmenu>
+          <div class="tree-menu-context" cdkMenu >
+            <button 
+              (click)="updateFilter(element[column])"
+              class="tree-menu-item" cdkMenuItem>
+              <mat-icon class="menu-icon" matPrefix>filter_list</mat-icon> 
+              Add to filter
+            </button> 
+            <button 
+              (click)="exportToExcel()"
+              class="tree-menu-item" cdkMenuItem>
+              <mat-icon class="menu-icon" matPrefix>save_alt</mat-icon> 
+              Save as XLS
+            </button> 
+            <button 
+              (click)="submitQuery()"
+              class="tree-menu-item" cdkMenuItem>
+              <mat-icon class="menu-icon" matPrefix>refresh</mat-icon> 
+              Reload
+            </button> 
+          </div>
+        </ng-template>  
+      </td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+    <tr mat-row *matRowDef="let element; columns: columnsToDisplay; let dataindex=dataIndex;"
+      tabindex=0   >
+    </tr>
+  </table>
+  <mat-paginator ></mat-paginator>
+</ng-container>

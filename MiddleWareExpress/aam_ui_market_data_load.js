@@ -8,7 +8,10 @@ const pg = require('pg');
 pg.types.setTypeParser(1114, function(stringValue) {
   return stringValue;  //1114 for time without timezone type
 });
-
+async function fupdateMarketQuote (request, response) {
+  let fields = ['tradedate', 'boardid', 'secid',  'open', 'low', 'high',  'close','sourcecode','globalsource']
+ db_common_api.fUpdateTableDB ('t_moexdata_foreignshares',fields,'id',request, response)
+}
 async function fdeleteMarketData (request,response) {//Delete market data if a user decided to overwirte it
   const query = {
     text: 'DELETE FROM public.t_moexdata_foreignshares WHERE (sourcecode = ANY(array[${sourcecodes}]) AND tradedate::timestamp without time zone = ${dateToLoad}::date);'+
@@ -122,12 +125,12 @@ async function fgetMarketData (request,response){//Get market data such as marke
     break;
     default :  
       if ((conditionsMOEXiss.length>6 || conditionsmsFS.length===4) && request.query?.['sourcecode'] !=='msFS') {
-        query.text = 'SELECT boardid, secid, numtrades, value, open, low, high, close, volume, marketprice2, admittedquote,  globalsource, sourcecode, tradedate, percentprice,currency, spsymbol '+
+        query.text = 'SELECT t_moexdata_foreignshares.id, boardid, secid, numtrades, value, open, low, high, close, volume, marketprice2, admittedquote,  globalsource, sourcecode, tradedate, percentprice,currency, spsymbol '+
         'FROM t_moexdata_foreignshares '+
         'left join t_moex_boards on t_moex_boards.code = t_moexdata_foreignshares.boardid '
         query.text +=conditionsMOEXiss.slice(0,-5)+';';
       } else {
-        query.text ="SELECT exchange as boardid, secid,null,volume as value, open,low, high,  close, volume, adj_close, adj_close,  globalsource, sourcecode, date as tradedate , false as percentprice, 'USD' as currency, '$' as spsymbol "+
+        query.text ="SELECT id,exchange as boardid, secid,null,volume as value, open,low, high,  close, volume, adj_close, adj_close,  globalsource, sourcecode, date as tradedate , false as percentprice, 'USD' as currency, '$' as spsymbol "+
         'FROM public.t_marketstack_eod '+
         'left join "aInstrumentsCodes" on "aInstrumentsCodes".code=t_marketstack_eod.symbol '+
         'where "aInstrumentsCodes".mapcode = \'msFS\'  ';
@@ -193,6 +196,12 @@ function fGetMoexInstruments(request,response) { //Get general instruments list
       },
       'sourcecode' : {
         1: '(sourcecode = ANY(array[${sourcecode}]))  ',
+      },
+      'securityGroup' : {
+        1: '(mmoexsecuritytypes.security_group_name  = ANY(array[${securityGroup}]))  ',
+      },
+      'isin' : {
+        1: '(mmoexsecurities.isin  = ${isin})  ',
       }
     }
     let conditionsMOEXiss =' WHERE'
@@ -245,9 +254,9 @@ async function fgetInstrumentDataGeneral(request,response) {
   const query = {text: '', values:[]}
   switch (request.query.dataType) {
     case 'getBoardsDataFromInstruments':
-      query.text = "SELECT boardid, board_title FROM public.mmoexboards " +
+      query.text = "SELECT boardid, board_title FROM public.mmoexboards "  +
       "WHERE is_traded=1 " +
-      "ORDER BY row_num asc;"
+      "ORDER BY boardid asc;"
     break;
     case 'getMoexSecurityTypes':
       query.text = "SELECT id, security_type_name, security_type_title,security_group_name,price_type FROM public.mmoexsecuritytypes; " 
@@ -359,7 +368,8 @@ module.exports = {
   fInstrumentEdit,
   fInstrumentDelete,
   fUpdateInstrumentDetails,
-  fUpdateInstrumentDataCorpActions
+  fUpdateInstrumentDataCorpActions,
+  fupdateMarketQuote
 }
 
 

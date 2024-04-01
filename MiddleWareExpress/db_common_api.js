@@ -44,6 +44,7 @@ async function fUpdateTableDB (table, fields,idfieldName, request, response,date
       break;
       }
       sql = pgp.as.format(sqlText,request.body.data);
+      // console.log(sql);
     resolve(queryExecute (sql, response,undefined,'fUpdateTableDB '+request.body.action+' '+table,table))
   })
 }
@@ -57,9 +58,20 @@ function getTransformArrayParam(request,paramsList) {
   })
   return request
 }
+function sqlReplace(sql) {
+  sql = sql.replaceAll("'null'",null);
+  sql = sql.replaceAll("array[0,0]",null);
+  sql = sql.replaceAll(",'ClearAll'",',null');
+  sql = sql.replaceAll("'null'::numrange",null);
+  sql = sql.replaceAll("null::numrange",null);
+  sql = sql.replaceAll("null::daterange",null);
+  return sql;
+}
+
 module.exports = {
   queryExecute,
   fUpdateTableDB,
   getTransformArrayParam,
-  checkInternetConnection
+  checkInternetConnection,
+  sqlReplace
 }

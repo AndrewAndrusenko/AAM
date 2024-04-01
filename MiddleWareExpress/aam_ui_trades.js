@@ -190,7 +190,7 @@ async function fGetOrderData (request,response) {
   db_common_api.queryExecute(sql,response,undefined,'GetOrderData');
 }
 async function fCreateOrderbyMP (request, response) {
-  let sql = 'SELECT * FROM f_i_o_create_orders_by_mp(${idportfolios},${secidList},${report_date},${report_id_currency},${deviation});'
+  let sql = 'SELECT * FROM f_i_o_create_orders_by_mp_v2(${leverage},${idportfolios},${secidList},${report_date},${report_id_currency},${deviation});'
   sql = pgp.as.format(sql,request.body.params);
   db_common_api.queryExecute(sql,response,undefined,'fCreateOrderbyMP');
 }
@@ -240,17 +240,14 @@ async function fGetFIFOtransactions(request,response) {
   let sql ='SELECT * FROM f_fifo_select_all_trades(${qty}::numrange,${price}::numrange,${tdate}::daterange,${type},${portfoliosList},${secidList},${tradesIDs})';
   request = db_common_api.getTransformArrayParam(request,['tradesIDs']);
   sql = pgp.as.format(sql,request.query);
-  sql = sql.replaceAll("'null'::numrange",null);
-  sql = sql.replaceAll("'null'::daterange",null);
-  sql = sql.replaceAll("'null'",null);
+  sql = db_common_api.sqlReplace(sql);
   db_common_api.queryExecute(sql,response,undefined,'getFIFOtransactions');
 }
 async function fGetFIFOPositions(request,response) {
   let sql ='SELECT * FROM f_fifo_get_cost_detailed_data (${tdate},${portfoliosList},${secidList})';
   request = db_common_api.getTransformArrayParam(request,['tradesIDs']);
   sql = pgp.as.format(sql,request.query);
-  sql = sql.replaceAll("'null'::numrange",null);
-  sql = sql.replaceAll("'null'",null);
+  sql = db_common_api.sqlReplace(sql);
   db_common_api.queryExecute(sql,response,undefined,'fGetFIFOPositions');
 }
 module.exports = {

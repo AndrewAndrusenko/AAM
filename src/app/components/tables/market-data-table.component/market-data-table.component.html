@@ -64,7 +64,8 @@
       [style.color]="deleteOldMarketData.checked===true? 'rgb(255, 57, 57)':'white' "
       >Replace current quotes data <br>{{deleteOldMarketData.checked? 'allowed!':'forbidden'}}
     </mat-slide-toggle>
-    <button color = "accent" mat-raised-button  style=" margin-left:5%; font-size: 18px;" (click)="getMoexSecurities()">MOEX Instruments</button>
+    <button color = "accent" mat-raised-button  style=" margin-left:5%; font-size: 18px;" (click)="manualQuote('Create',null)">Manual Quote</button>
+    <button color = "accent" mat-raised-button  style=" margin-left:1%; font-size: 18px;" [disabled]="true" (click)="getMoexSecurities()">MOEX Instruments</button>
     <span 
       *ngFor="let marketSource of marketSources;let i=index" >
       <div style="border-color: rgb(33, 33, 33); border-width: 1%; border-style:dotted; margin: 1%;">
@@ -220,7 +221,7 @@
               {{ element[column] | date }}
           </p>          
           <p *ngSwitchCase="['open', 'low', 'high', 'marketprice2','close','admittedquote'].includes(column)">
-            {{!element['percentprice']? (element[column] | currency:element['currency']:element['spsymbol']:'1.2-2'):(element[column] |  currency:element['currency']:'%':'1.2-2')}}
+            {{!element['percentprice']? (element[column] | currency:element['currency']:element['spsymbol']:'1.0-5'):(element[column] |  currency:element['currency']:'%':'1.0-5')}}
           </p>
           <p *ngSwitchCase="['value'].includes(column)">
             {{(element[column] | currency:element['currency']:element['spsymbol']:'1.2-2')}}
@@ -234,6 +235,21 @@
         </span>
         <ng-template  #instrumentcontextmenu title="TableContextMenu">
           <div class="tree-menu-context" cdkMenu >
+            <div *ngIf="element['globalsource']==='Manual'">
+            <button 
+              class="tree-menu-item" cdkMenuItem
+              (click)="manualQuote('Edit', element)">
+              <mat-icon class="menu-icon" matPrefix>edit</mat-icon>      
+              Edit Quote
+            </button>
+            <button 
+              class="tree-menu-item" cdkMenuItem
+              (click)="manualQuote('Delete', element)">
+              <mat-icon class="menu-icon" matPrefix>delete</mat-icon> 
+              Delete Quote
+            </button> 
+
+            </div>
             <button 
               (click)="
                 updateFilter(element[column]);

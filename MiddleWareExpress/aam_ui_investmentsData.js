@@ -88,42 +88,14 @@ async function fStrategyStructureUpdate (request, response) {
   let fields = ['id_strategy_parent','id_strategy_child_integer','weight_of_child','id_strategy_child','user_id']
  db_common_api.fUpdateTableDB ('dstrategies_global_structure',fields,'id',request, response,[])
 }
-async function fAccountCreate (request, response) {
-  paramArr = request.body.data
-  const query = {
-  text: 'INSERT INTO public.dportfolios ' +
-        '(idclient, idstategy, portfolioname, portleverage)' +
-        ' VALUES (${idclient}, ${idstategy}, ${portfolioname}, ${portleverage}) RETURNING *;',
-    values: paramArr
-  }
-  sql = pgp.as.format(query.text,query.values)
-  db_common_api.queryExecute (sql, response,null,'fAccountCreate');
-}
-async function fAccountDelete (request, response) {
-  const query = {text: 'DELETE FROM public.dportfolios WHERE idportfolio=${id} RETURNING *;', values: request.body}
-  sql = pgp.as.format(query.text,query.values)
-  db_common_api.queryExecute (sql, response,null,'fAccountDelete');
-}
 async function fAccountEdit (request, response) {
-  paramArr = request.body.data
-  const query = {
-  text: 'UPDATE public.dportfolios ' +
-	'SET  ' +
-   'idclient=${idclient}, ' +
-   'idstategy=${idstategy}, '+
-   'portfolioname=${portfolioname}, '+
-   'portleverage=${portleverage} '+
-	 'WHERE idportfolio=${idportfolio} RETURNING *; ',
-    values: paramArr
-  } 
-  sql = pgp.as.format(query.text,query.values)
-  db_common_api.queryExecute (sql, response,null,'fAccountEdit');
+  let fields = ['idclient', 'idstategy', 'portfolioname', 'portleverage','user_id']
+  db_common_api.fUpdateTableDB ('dportfolios',fields,'idportfolio',request, response)
 }
 async function fGetPortfolioPositions (request,response) {
   let conditionsDic = {
     'secidList':' LOWER(secid) = ANY(${secidList}) ',
     'deviation':' ABS(order_amount/notnull_npv*100) > ${deviation}::numeric ',
-    // 'notnull':' npv !=0 ',
     }
   let conditions =' WHERE'
   Object.entries(conditionsDic).forEach(([key]) => {
@@ -167,11 +139,6 @@ async function fGetPortfolioAnalytics (request,response) {
     'deviation':' ABS(order_amount/notnull_npv*100) > ${deviation}::numeric ',
     }
   let conditions =' WHERE'
-/*   Object.entries(conditionsDic).forEach(([key]) => {
-  if  (request.body.params.hasOwnProperty(key)&&request.body.params[key]) {
-    conditions +=conditionsDic[key] + ' AND ';
-    }
-  }); */
   let sql = '';
   switch (request.body.action) {
     case 'getPortfolioPerformnceData':
@@ -195,8 +162,6 @@ module.exports = {
   fStrategyDataUpdate,
   fGetStrategyStructure,
   fStrategyStructureUpdate,
-  fAccountCreate,
-  fAccountDelete,
   fAccountEdit,
   fGetPortfolioPositions,
   fGetPortfolioAnalytics

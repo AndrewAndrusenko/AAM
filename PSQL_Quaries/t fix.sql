@@ -240,11 +240,9 @@ SELECT
 FROM
   full_portfolio_with_mtm_data
   LEFT JOIN npv_portfolios ON full_portfolio_with_mtm_data.idportfolio = npv_portfolios.idportfolio
-  LEFT JOIN 
-		(SELECT un_or.id_portfolio, un_or.secid, SUM(un_or.unaccounted_qty) AS unaccounted_qty 
-		 FROM f_i_o_get_orders_unaccounted_qty(p_idportfolios,ARRAY(SELECT instrument_list.secid FROM instrument_list)) un_or
-		 GROUP BY un_or.id_portfolio, un_or.secid) AS unaccounted_orders
-	ON (unaccounted_orders.secid = full_portfolio_with_mtm_data.secid	AND unaccounted_orders.id_portfolio = full_portfolio_with_mtm_data.idportfolio)
+  LEFT JOIN (SELECT * FROM f_i_o_get_orders_unaccounted_qty(p_idportfolios,ARRAY(SELECT instrument_list.secid FROM instrument_list))) AS unaccounted_orders ON (
+	unaccounted_orders.secid = full_portfolio_with_mtm_data.secid
+	AND unaccounted_orders.id_portfolio = full_portfolio_with_mtm_data.idportfolio)
 
 ORDER BY
   full_portfolio_with_mtm_data.idportfolio, secid;

@@ -1,6 +1,6 @@
 -- FUNCTION: public.f_i_model_portfolios_select_mp_structure_for_accounts(bigint[])
 
--- DROP FUNCTION IF EXISTS public.f_i_model_portfolios_select_mp_structure_for_accounts(bigint[]);
+DROP FUNCTION IF EXISTS public.f_i_model_portfolios_select_mp_structure_for_accounts(bigint[]);
 
 CREATE OR REPLACE FUNCTION public.f_i_model_portfolios_select_mp_structure_for_accounts(
 	p_idportfolios bigint[])

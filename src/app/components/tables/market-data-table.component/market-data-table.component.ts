@@ -3,7 +3,7 @@ import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {map, Observable, startWith, Subscription } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
-import {marketData, marketDataSources, marketSourceSegements, tableHeaders } from 'src/app/models/interfaces.model';
+import {marketData, marketDataSources, tableHeaders } from 'src/app/models/interfaces.model';
 import {AppAccountingService } from 'src/app/services/accounting.service';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
@@ -16,7 +16,9 @@ import {HadlingCommonDialogsService } from 'src/app/services/hadling-common-dial
 import {HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import {AuthService } from 'src/app/services/auth.service';
 import {moexBoard } from 'src/app/models/instruments.interfaces';
-import { indexDBService } from 'src/app/services/indexDB.service';
+import {indexDBService } from 'src/app/services/indexDB.service';
+import {MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { AppMarketQuoteManualFormComponent } from '../../forms/market-quote-manual-form.component/market-quote-manual-form.component';
 @Component({
   selector: 'app-table-market-data',
   templateUrl: './market-data-table.component.html',
@@ -26,7 +28,6 @@ export class AppTableMarketDataComponent {
   datePipe: DatePipe;
   accessState: string = 'none';
   disabledControlElements: boolean = false;
-  marketSources:marketDataSources[] =  [];
   columnsWithHeaders: tableHeaders[] = [
     {
       "fieldName": "globalsource",
@@ -100,10 +101,12 @@ export class AppTableMarketDataComponent {
   statusLogPanelOpenState = true;
   instruments: string[] = ['ClearAll'];
   filterednstrumentsLists : Observable<string[][]>;
-  
+  manualQuoteForm : MatDialogRef<AppMarketQuoteManualFormComponent>
   FirstOpenedAccountingDate : Date;
   searchParametersFG: FormGroup;
-  boardIDs:moexBoard[] = []
+  boardIDs:moexBoard[] = [];
+  marketSources:marketDataSources[] =  [];
+  fullSourcesSet:{code:string,name:string}[]=[];  
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
   filterlFormControl = new FormControl<string|null>('');
   dataRange = new FormGroup ({
@@ -119,8 +122,9 @@ export class AppTableMarketDataComponent {
     private HandlingCommonTasks:HandlingCommonTasksService,
     private indexDBService:indexDBService,
     private CommonDialogsService:HadlingCommonDialogsService,
+    private dialog:MatDialog,
     private fb:FormBuilder, 
-    public snack:MatSnackBar
+    public snack:MatSnackBar,
   ) {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToInstrumentData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
@@ -150,11 +154,22 @@ export class AppTableMarketDataComponent {
     this.indexDBService.pipeMarketSourceSet.next(true);
     this.indexDBService.pipeBoardsMoexSet.next(true);
     this.subscriptions.add(this.indexDBService.receiveBoardsMoexSet().subscribe(boardsData => this.boardIDs = boardsData));
-    this.subscriptions.add(this.indexDBService.receivMarketSourceSett().subscribe(msData => this.marketSources = msData.filter(el=>el.type==='stock')));
+    this.subscriptions.add(this.indexDBService.receivMarketSourceSett().subscribe(msData => {
+      msData.forEach(el=>el.segments.forEach(seg=>this.fullSourcesSet.push({code:seg.sourceCode,name:seg.description})))
+      this.marketSources = msData.filter(el=>el.type==='stock')}
+      ));
 
     this.loadingDataLog.state = {Message:'',State: 'None'};
   }
   ngOnDestroy(): void {this.subscriptions.unsubscribe()}
+  manualQuote (action1:string,data:marketData|null){
+    this.manualQuoteForm=this.dialog.open(AppMarketQuoteManualFormComponent,{ maxWidth:'60vw', autoFocus: false, maxHeight: '90vh'});
+    this.manualQuoteForm.componentInstance.action=action1;
+    this.manualQuoteForm.componentInstance.moexBoards=this.boardIDs;
+    this.manualQuoteForm.componentInstance.marketSergements=this.fullSourcesSet;
+    this.manualQuoteForm.componentInstance.data=data;
+    
+  }
   updateAllComplete(index:number) {
     this.marketSources[index].checkedAll = this.marketSources[index].segments != null && this.marketSources[index].segments.every(t => t.checked); 
     this.marketSources[index].indeterminate = this.marketSources[index].segments.filter(t => t.checked).length > 0 && !this.marketSources[index].checkedAll; 

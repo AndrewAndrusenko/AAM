@@ -89,6 +89,7 @@ type uploadMarketDataFunc = (ourceCodes:marketSourceSegements[],dateToLoad: stri
   providedIn: 'root'
 })
 export class AppMarketDataService {
+
   private subjectMarketData = new Subject<marketData[]> ()
   private subjectCharMarketData = new Subject<marketData[]> ()
   private deletedMarketDataRows:number;
@@ -96,6 +97,9 @@ export class AppMarketDataService {
     private http:HttpClient,
     private CommonDialogsService:HadlingCommonDialogsService,
     ) { }
+  updateMarketQuotes(dataToUpdate: marketData,action1:string):Observable<marketData[]> {
+    return this.http.post <marketData[]>('/api/AAM/MD/updateMarketQuote/',{data:dataToUpdate,action:action1})
+  }
   calculateMA(dayCount:number, data:number[]) {
     let result = [];
     for (let i = 0, len = data.length; i < len; i++) {

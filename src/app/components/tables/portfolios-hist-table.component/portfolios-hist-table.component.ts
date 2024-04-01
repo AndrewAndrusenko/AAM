@@ -3,51 +3,56 @@ import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {Subscription} from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
-import {StrategyStructureHistory, tableHeaders } from 'src/app/models/interfaces.model';
+import {PortfoliosHistory, tableHeaders } from 'src/app/models/interfaces.model';
 import {formatNumber } from '@angular/common';
 import {HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import {HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import {AuthService} from 'src/app/services/auth.service';
 import {AppInvestmentDataServiceService} from 'src/app/services/investment-data.service.service';
+import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 @Component({
-  selector: 'app-strategy_structure-hist-table',
+  selector: 'app-portfolios-hist-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './strategy_structure-hist-table.component.html',
-  styleUrls: ['./strategy_structure-hist-table.component.scss'],
+  templateUrl: './portfolios-hist-table.component.html',
+  styleUrls: ['./portfolios-hist-table.component.scss'],
 })
-export class AppStrategyStructureHistTable {
+export class AppPortfoliosHistTable {
   accessState: string = 'none';
   disabledControlElements: boolean = false;
   private subscriptions = new Subscription()
   @Input() readOnly:boolean = false;
-  @Input() parentStrategyId:number
+  @Input() idportfolio:number
   columnsWithHeaders: tableHeaders[] = [  
     {
       "fieldName": "type_trans",
       "displayName": "Type"
     },      {
-      "fieldName": "tr_date",
+      "fieldName": "transaction_date",
       "displayName": "TimeStamp"
     },
       {
-        "fieldName": "id_strategy_parent",
-        "displayName": "StrID"
+        "fieldName": "idportfolio",
+        "displayName": "ID"
       },
       {
-        "fieldName": "id_strategy_child",
-        "displayName": "SecID"
+        "fieldName": "portfolioname",
+        "displayName": "Code"
       },
       {
-        "fieldName": "weight_of_child",
-        "displayName": "Weight"
+        "fieldName": "strategy_name",
+        "displayName": "Stategy"
       },
       {
-        "fieldName": "login",
-        "displayName": "UserCode"
+        "fieldName": "clientname",
+        "displayName": "Client"
       },
       {
         "fieldName": "accessrole",
         "displayName": "UserRole"
+      },
+      {
+        "fieldName": "login",
+        "displayName": "UserName"
       },
       {
         "fieldName": "user",
@@ -56,36 +61,41 @@ export class AppStrategyStructureHistTable {
   ]
   columnsToDisplay: string [];
   columnsHeaderToDisplay: string [];
-  dataSource: MatTableDataSource<StrategyStructureHistory>;
-  dataWithSorting:StrategyStructureHistory[];
+  dataSource: MatTableDataSource<PortfoliosHistory>;
+  dataWithSorting:PortfoliosHistory[];
+  searchParametersFG :FormGroup
   @ViewChild('filterALL', { static: false }) filterALL: ElementRef;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
-  rDate: Date;
-  multiFilter?: (data: StrategyStructureHistory, filter: string) => boolean;
+  dataRange = new FormGroup ({
+    dateRangeStart: new FormControl<Date | null>(null),
+    dateRangeEnd: new FormControl<Date | null>(null),
+  });
+  multiFilter?: (data: PortfoliosHistory, filter: string) => boolean;
   showFilter = false;
   constructor(
     private AuthServiceS:AuthService,  
     private HandlingCommonTasksS:HandlingCommonTasksService,
     private CommonDialogsService:HadlingCommonDialogsService,
     private InvestmentDataService:AppInvestmentDataServiceService,
+    private fb:FormBuilder
   ) {
     this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
     this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
+    this.searchParametersFG = this.fb.group ({
+      p_type:null,
+      p_idportfolio:null,
+      p_user_id:null,
+      p_tr_date:this.dataRange
+    });
   }
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }
   ngOnInit(): void {
-    this.rDate = new Date('02/05/2024')
     this.disabledControlElements = this.accessState === 'full'&&this.readOnly===false? false : true;
-    this.subscriptions.add (
-      this.InvestmentDataService.getReloadStrategyStructure().subscribe(parentStrategyId=>{
-        this.parentStrategyId===parentStrategyId? this.submitQuery(false,false):null;
-      })
-    )
-    this.multiFilter = (data: StrategyStructureHistory, filter: string) => {
+    this.multiFilter = (data: PortfoliosHistory, filter: string) => {
       let filter_array = filter.split(',').map(el=>[el,1]);
       this.columnsToDisplay.forEach(col=>filter_array.forEach(fil=>{
         data[col]&&fil[0].toString().toUpperCase()===(data[col]).toString().toUpperCase()? 
@@ -95,9 +105,9 @@ export class AppStrategyStructureHistTable {
     };
   }
   ngOnChanges(changes: SimpleChanges) {
-    Object.hasOwn(changes,'parentStrategyId')&&this.parentStrategyId? this.submitQuery(false,false) : null;
+    Object.hasOwn(changes,'idportfolio')&&this.idportfolio? this.submitQuery(false,false) : null;
   }
-  updateDataTable (historyData:StrategyStructureHistory[]) {
+  updateDataTable (historyData:PortfoliosHistory[]) {
     this.dataWithSorting = historyData;
     this.dataSource  = new MatTableDataSource(historyData);
     this.dataSource.filterPredicate =this.multiFilter;
@@ -105,21 +115,16 @@ export class AppStrategyStructureHistTable {
     this.dataSource.sort = this.sort;
   }
  submitQuery (reset:boolean=false, showSnackResult:boolean=true) {
-    this.InvestmentDataService.getStrategyStructureHistory(this.parentStrategyId).subscribe(data => {
-      this.updateDataTable(data)
-      showSnackResult? this.CommonDialogsService.snackResultHandler({
-        name:data['name'], 
-        detail:data['name'] === 'error'? data['detail'] :  formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ') : null;
-    });
-  }
-  showHistoricalPortfolio (pDate:string) {
-   let portfolioChanges = new Map <string,StrategyStructureHistory>()
-   let reportDate = new Date (pDate)
-   this.dataWithSorting.forEach(el=>{
-      new Date(el.tr_date)>=reportDate? portfolioChanges.set(el.id_strategy_child,el):null
-    })
-  this.InvestmentDataService.sendStrategyStructureHistoryPortfolio(portfolioChanges)
-
+  this.p_idportfolio.patchValue(this.idportfolio)
+  let searchParams = this.searchParametersFG.value
+  searchParams.p_tr_date =this.HandlingCommonTasksS.toDateRangeNew(this.p_tr_date);
+  console.log(searchParams);
+  this.InvestmentDataService.getPortfoliosHistory(searchParams).subscribe(data => {
+    this.updateDataTable(data)
+    showSnackResult? this.CommonDialogsService.snackResultHandler({
+      name:data['name'], 
+      detail:data['name'] === 'error'? data['detail'] :  formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ') : null;
+  });
   }
   updateFilter (el: string) {
     this.filterALL.nativeElement.value = this.filterALL.nativeElement.value + el+',';
@@ -139,32 +144,11 @@ export class AppStrategyStructureHistTable {
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
   }
   exportToExcel() {
-    let dataTypes =  {
-      id_strategy_parent: 'number', 
-      weight_of_child : 'number',
-      id_item:'number',
-      id_strategy_child:'string',
-      id_strategy_child_integer:'number',
-      user_id:'number',
-      tr_date:'Date',
-      type:'number',
-      user:'number',
-    }
-    let dataToExport =  structuredClone(this.dataSource.data);
-    dataToExport.map(el=>{
-      Object.keys(el).forEach(key=>{
-        switch (true==true) {
-          case el[key]&&dataTypes[key]==='number': return el[key]=Number(el[key])
-          case el[key]&&dataTypes[key]==='Date': return el[key]=new Date(el[key])
-          default: return el[key]=el[key]
-        }
-      })
-      return el;
-    });
-    this.HandlingCommonTasksS.exportToExcel (dataToExport,"StrategyStructureHistory");  
-  }
-  // get  type () {return this.searchParametersFG.get('type') } 
-  // get  tdate () {return this.searchParametersFG.get('tdate') } 
+    this.HandlingCommonTasksS.exportToExcel (this.dataSource.data,"PortfoliosHistory",['id'],[]);  
+   }
+   get  p_tr_date () {return this.searchParametersFG.get('p_tr_date') } 
+   get  p_idportfolio () {return this.searchParametersFG.get('p_idportfolio') } 
+
 
 }
 

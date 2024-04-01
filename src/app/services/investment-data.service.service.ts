@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, Subject, map, tap } from 'rxjs';
-import { AccountsTableModel, accountTypes, ClientData, InstrumentData, NPVDynamicData, PortfolioPerformnceData, portfolioPositions, RevenueFactorData, StrategiesGlobalData, StrategyStructure, StrategyStructureHistory } from '../models/interfaces.model';
+import { AccountsTableModel, accountTypes, ClientData, InstrumentData, NPVDynamicData, PortfolioPerformnceData, portfolioPositions, PortfoliosHistory, RevenueFactorData, StrategiesGlobalData, StrategyStructure, StrategyStructureHistory } from '../models/interfaces.model';
 
 @Injectable({
   providedIn: 'root'
@@ -108,6 +108,11 @@ export class AppInvestmentDataServiceService {
       '/api/AAM/GetStrategyStructure/', 
       {params:  {p_id_strategy_parent:p_id_strategy_parent, action:'getStrategyStructureHistory'}})
   }
+  getPortfoliosHistory (searchParams:{p_type:number[]|null,  p_idportfolio:number|null, p_user_id:number|null, p_tr_date:string|null}) : Observable <PortfoliosHistory[]>  {
+    return this.http.get <PortfoliosHistory[]> (
+      '/api/AAM/PortfolioData/', 
+      {params:  {...searchParams, action:'getPortfoliosHistory'}})
+  }
   sendStrategyStructureHistoryPortfolio (historicalPortfolio: Map <string,StrategyStructureHistory>) {
     this.subjectHistoricalPortfolio.next(historicalPortfolio);
   }
@@ -120,14 +125,8 @@ export class AppInvestmentDataServiceService {
   updateStrategyStructure (data:StrategyStructure,action:string):Observable <StrategyStructure[]> { 
     return this.http.post <StrategyStructure[]> ('/api/AAM/updateStrategyStructure/',{data:data, action:action})
   }
-  createAccount (data:ClientData) { 
-    return this.http.post <AccountsTableModel[]> ('/api/AAM/AccountCreate/',{'data': data})
-  } 
-  deleteAccount (id:string) { 
-    return this.http.post <AccountsTableModel[]> ('/api/AAM/AccountDelete/',{'id': id})
-  } 
-  updateAccount (data:ClientData) { 
-    return this.http.post <AccountsTableModel[]> ('/api/AAM/AccountEdit/',{'data': data})
+  updateAccount (data:ClientData,action:string):Observable<AccountsTableModel[]> { 
+    return this.http.post <AccountsTableModel[]> ('/api/AAM/AccountEdit/',{data:data, action:action})
   }
   getPortfoliosPositions (params_data: {secidList:string[], idportfolios : number[], report_date: string, report_id_currency :number }):Observable<portfolioPositions[]> {
     return this.http.post <portfolioPositions[]> ('/api/AAM/GetPortfolioPositions/',{params:params_data,action:'getPortfolioPositions'})

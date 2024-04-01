@@ -16,18 +16,15 @@
   font-size: 20px;
 }
 .mat-header-cell {
+  padding-left: 0.5%;
   font-size: 20px;
-  background-color:#393737;
+  background-color:#252525;
+  text-align: center !important;
 }
-.mat-column-isin {
-  color: var(--additionalLightBlue)
+.mat-cell {
+  padding-left: 0.5%;
+  align-self: stretch;
 }
-.mat-column-action {
-  width: 8%;
-} 
-.mat-column-secid {
-  width: 10%;
-} 
 .search-filed {
   font-size: 18px;
   border-radius: 9px;

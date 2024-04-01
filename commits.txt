@@ -446,26 +446,36 @@ Fix: Balance sheet: dates with entries are updated after execution of closing an
 --------------------------------------------------------------------------------------------
 18/03/2024 -20/03/2024
 || entries table => complex search by account type
-|| npv_dynamic db function refactored due to the change in balance db functions. all related db functions such as fees, perfomance, revenue factor have been updated accordingly
+|| npv_dynamic db function refactored due to the change in balance db functions. all related db functions such as fees, performance, revenue factor have been updated accordingly
 || Positions table => Added filter select list which is updated on dataset refreshing  
-|| Trade Form => Fixed NG100 => Form is being patched with data in ngOnInit hook and only then all nessesary validators are added
+|| Trade Form => Fixed NG100 => Form is being patched with data in ngOnInit hook and only then all necessary validators are added
 || Market Service (Marketstack) => Added step to copy data received from Marketstack server to the main table of market quotes
 || Trade Form - Create on Example => Fixed creating new trade on existing one. Trade date and value date set to today and allocated qty to zero to prevent disabling the form
 || Positions Table => Added rows with NPV values. User is able to filter dataSet by selecting NPV from secid filter list and get fast snapshot
 || Menu component css
 || Portfolio Positions Fees => Fixed: When portfolios list is empty then DB function f_i_get_deducted_fees_per_portfolios_on_date.sql returns fees for all portfolios
+--------------------------------------------------------------------------------------------
+21/03/2024 - 30/03/2024
+1|| Restrictions implementations => 
+  Added new table to DB scheme
+  Created functions to retrieve data  
+  New version of fucntion to crete orders taking into account leverage restrictions => Process has been splitted in two step: 
+    fisrt new function f_i_o_prepare_orders_data_by_mp_v2.sql prepares data to be inserted according to leverage handle parameter
+    second function f_i_o_create_orders_by_mp_v2.sql is responsible for inserting orders data and canceling process if there are oppositie orders
+    created new functions to retrieve data regarding unaccounted orders f_i_o_get_orders_unaccounted_qty.sql (unaacounted orders are the created orders with any status excepet accounted and they haven't been reflected with client balance as executed trades)
+    3|| generating orders inv-generate-orders-table.component.ts => notificating about out of date market prices => Addedys when parameter to set quantity of days when quote is deemed as irrelevant. If there are quotes below set limit in order set then dataset filered to show irrelevant orders and alert is raised
+2|| Store history of a portfolio changing parameters such as: client, strategy etc. Created UI and DB updated accordingly:( function to retrieve data and trigger to store history)
+3|| Manual market quote insert => Created new form and services are updated. Only manually inserted quotes are available for editing or deleting
+4|| instrument table=> implemented complex search by instrument type or ISIN; updated UI
+5|| generate orders & leverage => UI => new select list to choose strategy how to handle violating of leverage restriction
 
 ToDo
 || Investment restrictions
 || Architecture
-* Fix:[webpack-dev-server] module constantly disconnecting and trying to reconnect - Old Asus
-|| manual add market quote
-|| generating orders => notificating about out of date market prices
-|| Store history of a portfolio changing strategies
-* Fix: Allocation accounting - FIFO/Accounting => Roll back FIFO/Accounting when other fails
 || FIFO Bug possible=> Case of simultaneously two trades which should be netted on FIFO are sent in FIFO function.
 	Idea is to sort processing batch according to the FIFO guidelines and execute FIFO function synchronously
 || Check UserAccess model for UI, especially the latest components
 || DB access roles
-|| Hurdle Performance fee and Cash In/Outs -??? How to correct start and end NVP?
+* Fix: Allocation accounting - FIFO/Accounting => Roll back FIFO/Accounting when other fails
 *Performance Chart shows graph from the last selected object if new object is reused and there's no need to reload it
+* Fix:[webpack-dev-server] module constantly disconnecting and trying to reconnect - Old Asus

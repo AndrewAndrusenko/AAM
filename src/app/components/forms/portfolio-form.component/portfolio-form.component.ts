@@ -28,10 +28,11 @@ export class AppNewAccountComponent {
   dialogClientsTabletRef: MatDialogRef<AppClientsTableComponent>;
   accountTypes: accountTypes [] = [];
   subscriptions = new Subscription()
+  panelOpenState1:boolean=true;
   constructor (
     private CommonDialogsService:HadlingCommonDialogsService,
     private InvestmentDataService : AppInvestmentDataServiceService,   
-    private AuthServiceS:AuthService,  
+    private AuthService:AuthService,  
     private fb:FormBuilder, 
     private dialog: MatDialog, 
   ) 
@@ -45,11 +46,12 @@ export class AppNewAccountComponent {
       stategy_name: [{value:null, disabled: true}],
       description: {value:null, disabled: true}, 
       portfolioname:[{value:null, disabled: false}, [Validators.required]],
-      portleverage: [ {value:0, disabled: false}, [Validators.required, Validators.pattern('[0-9]*')]]
+      portleverage: [ {value:0, disabled: false}, [Validators.required, Validators.pattern('[0-9]*')]],
+      user_id:[this.AuthService.userId]
     })
     this.InvestmentDataService.getAccountTypesList (0,'','Get_AccountTypes_List').subscribe (data => this.accountTypes = data);
-    this.accessToClientData = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToClientData')[0].elementvalue;
-    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToPortfolioData')[0].elementvalue;
+    this.accessToClientData = this.AuthService.accessRestrictions.filter(el =>el.elementid==='accessToClientData')[0].elementvalue;
+    this.accessState = this.AuthService.accessRestrictions.filter(el =>el.elementid==='accessToPortfolioData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
   }
   ngOnInit(): void {
@@ -86,15 +88,15 @@ export class AppNewAccountComponent {
     switch (action) {
       case 'Create':
       case 'Create_Example':
-          this.InvestmentDataService.createAccount (this.newAccountForm.value).subscribe (result => this.snacksBox(result,'Created'))
+          this.InvestmentDataService.updateAccount (this.newAccountForm.value,'Create').subscribe (result => this.snacksBox(result,'Created'))
       break;
       case 'Edit':
-        this.InvestmentDataService.updateAccount (this.newAccountForm.value).subscribe (result => this.snacksBox(result,'Updated'))
+        this.InvestmentDataService.updateAccount (this.newAccountForm.value,'Edit').subscribe (result => this.snacksBox(result,'Updated'))
       break;
       case 'Delete':
         this.CommonDialogsService.confirmDialog('Delete Portfolio ' + this.portfolioname.value).pipe (
           filter (isConfirmed => isConfirmed.isConfirmed),
-          switchMap(data => this.InvestmentDataService.deleteAccount (this.id.value))
+          switchMap(() => this.InvestmentDataService.updateAccount (this.newAccountForm.value,'Delete'))
         ).subscribe (result =>this.snacksBox(result,'Deleted'));
       break;
     }

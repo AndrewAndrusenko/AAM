@@ -113,6 +113,15 @@ export interface StrategyStructure {
   user_id?:number,
   old_weight?:number
 }
+export interface PortfoliosHistory extends AccountsTableModel {
+  transaction_date:Date,
+  type:number,
+  user:number,
+  user_login:string,
+  type_trans:string,
+  clientname:string,
+  strategy_name:string
+}
 export interface StrategyStructureHistory extends StrategyStructure {
   tr_date:Date,
   type:number,
@@ -145,29 +154,30 @@ export interface moexMarketDataForiegnShres {
   reportingDate: string
 }
 export interface marketData {
-  globalsource:string,
-  sourcecode: string,
-  boardid: string, 
-  shortname: number, 
-  secid: string, 
-  numtrades: number, 
-  value: number, 
-  open: number, 
-  low: number, 
-  high: number, 
-  legalcloseprice: number,
-  waprice: number,
-  close: number, 
-  volume: number,
-  marketprice2: number,
-  marketprice3: number, 
-  admittedquote: number, 
-  mp2valtrd: number,
-  marketprice3tradesvalue: number,
-  admittedvalue: number,
-  waval: number, 
-  tradingsession: string,
-  tradedate: string
+  id?:number,
+  globalsource?:string,
+  sourcecode?: string,
+  boardid?: string, 
+  shortname?: number, 
+  secid?: string, 
+  numtrades?: number, 
+  value?: number|null, 
+  open?: number|null, 
+  low?: number|null, 
+  high?: number|null, 
+  legalcloseprice?: number,
+  waprice?: number,
+  close?: number|null, 
+  volume?: number,
+  marketprice2?: number,
+  marketprice3?: number, 
+  admittedquote?: number, 
+  mp2valtrd?: number,
+  marketprice3tradesvalue?: number,
+  admittedvalue?: number,
+  waval?: number, 
+  tradingsession?: string,
+  tradedate?: string
 }
 
 export interface marketSourceSegements {

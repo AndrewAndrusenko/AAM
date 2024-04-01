@@ -1,5 +1,6 @@
 const config = require('./db_config');
-const db_common_api = require('./db_common_api')
+const db_common_api = require('./db_common_api');
+const { request, response } = require('express');
 var pgp = require('pg-promise')({
   capSQL: true // to capitalize all generated SQL
 });
@@ -75,6 +76,16 @@ async function FAmmGetTreeData(request,response) {
     value.push (['Favorites',FavoritesList])
     return response.status(200).json(value)
   })
+}
+async function fGetPortfolioData(request,response) {
+  switch (request.query.action) {
+    case 'getPortfoliosHistory':
+      sql='select * from public.f_i_h_get_dportfolios_history(${p_type},${p_idportfolio},${p_user_id},${p_tr_date}::daterange);';
+    break;
+  }
+  sql=pgp.as.format(sql,request.query)
+  sql=db_common_api.sqlReplace(sql);
+  db_common_api.queryExecute(sql,response,null,request.query.action)
 }
 async function fGetportfolioTable (request,response) {
   const clientDataFields = ", dclients.clientname, dclients.isclientproffesional , dclients.address, dclients.contact_person, dclients.email, dclients.phone" ;
@@ -200,5 +211,6 @@ module.exports = {
   fGetClientData,
   fEditClientData,
   fClientDataDelete,
-  fCreateClientData
+  fCreateClientData,
+  fGetPortfolioData
  }

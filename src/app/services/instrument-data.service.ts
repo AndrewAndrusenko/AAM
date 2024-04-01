@@ -24,6 +24,7 @@ interface couponMoexData {
   date:Date  
 }
 export interface instrumentsSearchParams {
+  securityGroup?:string[],
   secid?:string[],
   sourcecode?:string[],
   boardid?:string[],
