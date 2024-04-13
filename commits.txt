@@ -469,8 +469,23 @@ Fix: Balance sheet: dates with entries are updated after execution of closing an
 4|| instrument table=> implemented complex search by instrument type or ISIN; updated UI
 5|| generate orders & leverage => UI => new select list to choose strategy how to handle violating of leverage restriction
 
+01/04/2024 -12/04/2024
+1|| Restrictions implementations stage 2 => 
+  In addtion to a leverage restriction new types of limits have been introduced. Such as:
+    restriction setting a max weight of particular instrument in the client portfolio
+    restriction setting a max weight of type instruments in the client portfolio. for example option must not exceed 15% of the portfolio
+    restriction setting a max weight of instruments with particular listing value in the client portfolio. for example junk shares (listing=3) must not exceeed 10%
+  Refactored DB function f_i_r_get_restrictions.sql in order to retrieve restrcitions accroding to new restriction model scheme
+  Rewritten DB function f_i_o_get_orders_unaccounted.sql to provide unaccounted orders according to the restriction type
+2|| Created new function f_i_o_prepare_orders_data_by_mp_v3.sql to calculate order according to new restriction model:
+  the fucntion has been fully refactored
+  the function calculates max possible order amount based on instrument, instrument type and listing restriction. then takes min among them and initial order amount. and as a last step leverage restriction is applied to orders calculated in the previous step
+3|| Update UI to generate orders. function and several fields have been replaced by new ones
+
 ToDo
-|| Investment restrictions
+| Restrict short sale by weight of nvp
+* Fix Reload position by portfolio => reload doesn't retrieve actual data
+* Trade vs market quote deviation notification => Bug before verifing its required to convert prices to one currency
 || Architecture
 || FIFO Bug possible=> Case of simultaneously two trades which should be netted on FIFO are sent in FIFO function.
 	Idea is to sort processing batch according to the FIFO guidelines and execute FIFO function synchronously

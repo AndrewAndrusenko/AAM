@@ -244,14 +244,16 @@ FROM
 		(SELECT un_or.id_portfolio, un_or.secid, SUM(un_or.unaccounted_qty) AS unaccounted_qty 
 		 FROM f_i_o_get_orders_unaccounted_qty(p_idportfolios,ARRAY(SELECT instrument_list.secid FROM instrument_list)) un_or
 		 GROUP BY un_or.id_portfolio, un_or.secid) AS unaccounted_orders
-	ON (unaccounted_orders.secid = full_portfolio_with_mtm_data.secid	AND unaccounted_orders.id_portfolio = full_portfolio_with_mtm_data.idportfolio)
+	ON (unaccounted_orders.secid = full_portfolio_with_mtm_data.secid	AND unaccounted_orders.id_portfolio = full_portfolio_with_mtm_data.idportfolio);
 
-ORDER BY
-  full_portfolio_with_mtm_data.idportfolio, secid;
+-- ORDER BY
+--   full_portfolio_with_mtm_data.idportfolio,mp_id, secid;
 END;
 $BODY$;
 
 ALTER FUNCTION public.f_i_get_portfolios_structure_detailed_data(text[], date, integer)
     OWNER TO postgres;
-select * from f_i_get_portfolios_structure_detailed_data(array['acm002'],now()::date,840)
-where secid='AAPL-RM'
+SELECT 	* FROM f_i_get_portfolios_structure_detailed_data(
+	ARRAY['acm002'],
+	now()::date,840)
+	where secid=ANY(ARRAY['RI100000BF4','TSLA-RM'])

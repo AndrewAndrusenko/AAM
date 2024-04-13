@@ -92,6 +92,10 @@ export class InstrumentDataService {
     (sorting !== null) ?  Object.assign(params,{'sorting':sorting}): null;
     return this.http.get <Instruments[]> ('/api/AAM/MD/getMoexInstruments/',{params:params})
   }
+  getDerivativesList ():Observable<{secid:string}[]> {
+    let params = { rowslimit: null, sorting : null, action:'getInstrumentFutures'};
+    return this.http.get<{secid:string}[]> ('/api/AAM/MD/getMoexInstruments/',{params:params})
+  }
   getRedisMoexInstruments ():Observable<Instruments[]> {
     return this.http.get <Instruments[]> ('/api/AAM/Redis/getMoexInstrumentsList/')
   }

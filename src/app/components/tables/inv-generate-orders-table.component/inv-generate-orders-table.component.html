@@ -85,10 +85,10 @@
           <button mat-icon-button (click)="showTip(0)" class="icon-tip"><mat-icon>more</mat-icon></button>
         </mat-option>
         <mat-option   [value]=2>Max available limit
-          <button mat-icon-button class="icon-tip" (click)="showTip(1)"><mat-icon>more</mat-icon></button> 
+          <button mat-icon-button class="icon-tip" (click)="showTip(2)"><mat-icon>more</mat-icon></button> 
         </mat-option>
         <mat-option  [value]=1>MP leverage
-          <button mat-icon-button class="icon-tip" (click)="showTip(2)"><mat-icon>more</mat-icon></button> 
+          <button mat-icon-button class="icon-tip" (click)="showTip(1)"><mat-icon>more</mat-icon></button> 
         </mat-option>
       </mat-select>
     </span>
@@ -99,7 +99,7 @@
       <mat-chip-list #chipPortList   >
         <mat-chip *ngFor="let portfolio of portfolios" 
         (removed)="remove(portfolio,portfolios,idportfolios)"
-        (click)=" portfolios = clearAll($event,portfolios,idportfolios);">
+        (click)=" MP.patchValue(null); portfolios = clearAll($event,portfolios,idportfolios);">
           {{portfolio}}
           <button matChipRemove *ngIf="portfolio!=='ClearAll'">
             <mat-icon>cancel</mat-icon>
@@ -160,13 +160,13 @@
         <span [ngSwitch]="true==true">
           <p *ngSwitchDefault></p>
           <p *ngSwitchCase="['idportfolio'].includes(column)">{{'Totals'}} </p>
-          <p *ngSwitchCase="['mtm_positon','order_amount','weight','planned_position'].includes(column)">{{getTotals(column)| number }} </p>
+          <p *ngSwitchCase="['mtm_positon','order_amount','weight','planned_position','order_amount_final'].includes(column)">{{getTotals(column)| number }} </p>
         </span></h2>
       <td 
         mat-cell *matCellDef="let element" [cdkContextMenuTriggerFor]="instrumentcontextmenu" >
         <span [ngSwitch]="true==true">
           <p *ngSwitchDefault>{{element[column]}}</p>
-          <p *ngSwitchCase="['order_amount','order_qty','mtm_dirty_price','cost_in_position','orders_unaccounted_qty'].includes(column)">{{element[column]|currency :' '}} </p>
+          <p *ngSwitchCase="['order_amount','order_qty','mtm_dirty_price','cost_in_position','orders_unaccounted_qty','order_amount_final','ord_diff'].includes(column)">{{element[column]|currency :' '}} </p>
           <p *ngSwitchCase="['current_balance','mtm_positon',
           'planned_position','current_account_balance',
           'pl','unrealizedpl','total_pl'].includes(column)">
@@ -190,10 +190,7 @@
       </td>
     </ng-container>
     <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
-    <tr mat-row  *matRowDef="let element; columns: columnsToDisplay; let dataindex=dataIndex;"
-      tabindex=0
-    >
-    </tr>
+    <tr mat-row  *matRowDef="let element; columns: columnsToDisplay; let dataindex=dataIndex;" tabindex=0 > </tr>
 <!--       <tr mat-row  *matRowDef="let element; columns: columnsToDisplay; let dataindex=dataIndex;"
       tabindex=0
       [ngClass]="{'highlight':element && this.selectedRowID  == element.id}"

@@ -30,8 +30,8 @@ FROM
       t_moexdata_foreignshares.close,
       t_moexdata_foreignshares.tradedate::date,
       t_moexdata_foreignshares.boardid,
-      t_moex_boards.currency_code,
-      t_moex_boards.percentprice,
+      COALESCE(t_moex_boards.currency_code,840) AS currency_code,
+      COALESCE(t_moex_boards.percentprice,false) AS percentprice,
       mmoexboards.is_primary
     FROM
       t_moexdata_foreignshares

@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Output, ViewChild, Input, ChangeDetectionStrategy, ElementRef, SimpleChanges} from '@angular/core';
+import {Component, EventEmitter, Output, ViewChild, Input, ChangeDetectionStrategy, ElementRef} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {Observable, Subscription, distinctUntilChanged, map, startWith, switchMap, tap } from 'rxjs';
@@ -17,7 +17,6 @@ import { indexDBService } from 'src/app/services/indexDB.service';
 import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { AppTradeService } from 'src/app/services/trades-service.service';
 import { MatSelectChange } from '@angular/material/select';
-import { valHooks } from 'jquery';
 
 interface localFilters {
   reset?:boolean,
@@ -37,8 +36,8 @@ export class AppInvGenerateOrdersTable{
   disabledControlElements: boolean = false;
   @Input() rowsPerPages:number = 15;
   @Input() filters:localFilters;
-  columnsToDisplay = ['portfolio_code','secid','fact_weight','weight','deviation_percent','order_amount','mtm_positon','planned_position','mtm_rate','mtm_date','orders_unaccounted','mp_name','strategy_name','order_qty','orders_unaccounted_qty','current_balance','order_type','mtm_dirty_price','cross_rate','rate_date'];
-  columnsHeaderToDisplay = ['Code','SecID','Fact %','MP %','DV%','Deviation','CurrentMTM','Targeted_MP','MTM_Rate','MTM_Date','Active Orders','MP','Strategy','Deviation Qty','Orders Qty','Balance','TypeBS','MTM_Dirty','CurRate','CurDate']
+  columnsToDisplay = ['portfolio_code','secid','fact_weight','weight','deviation_percent','order_amount','order_amount_final','ord_diff', 'mtm_positon','planned_position','mtm_rate','mtm_date','orders_unaccounted','mp_name','strategy_name','order_qty','orders_unaccounted_qty','current_balance','order_type','mtm_dirty_price','cross_rate','rate_date'];
+  columnsHeaderToDisplay = ['Code','SecID','Fact %','MP %','DV%','Deviation','OrderToAdd','Delta','CurrentMTM','Targeted_MP','MTM_Rate','MTM_Date','Active Orders','MP','Strategy','Deviation Qty','Orders Qty','Balance','TypeBS','MTM_Dirty','CurRate','CurDate']
   dataSource: MatTableDataSource<portfolioPositions>;
   fullDataSource: portfolioPositions[];
   @ViewChild('filterALL', { static: false }) filterALL: ElementRef;
@@ -99,7 +98,7 @@ export class AppInvGenerateOrdersTable{
     this.AutoCompService.getCurrencyList();
     this.subscriptions.add(this.AutoCompService.recieveCurrencyListReady().subscribe(()=>this.report_id_currency.updateValueAndValidity()));
     this.AutoCompService.getSecidLists();
-    this.filters==undefined&&this.fullDataSource!==undefined? this.initialFilterOfDataSource(this.filters) : null;
+   
     this.filterednstrumentsLists = this.secidList.valueChanges.pipe(
       startWith(''),
       distinctUntilChanged(),
@@ -118,15 +117,6 @@ export class AppInvGenerateOrdersTable{
       this.portfolios=['ClearAll',...data];
       this.dataSource?.paginator? this.dataSource.paginator.firstPage() : null;
     })
-  }
-  initialFilterOfDataSource (filter:localFilters) {
-   Object.keys(filter).every(key=>{
-    this.dataSource.data = this.fullDataSource.filter(el=>el[key]===filter[key])
-    if (this.dataSource.data.length) {return false}  else return true;
-   })
-  }
-  ngOnChanges(changes: SimpleChanges) {
-    changes['filters'].currentValue==undefined&&this.fullDataSource!==undefined?  this.initialFilterOfDataSource (changes['filters'].currentValue):null;
   }
   createOrders (){
     let params_data = this.searchParametersFG.value;
@@ -150,7 +140,6 @@ export class AppInvGenerateOrdersTable{
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
     this.instruments=['ClearAll',...[...new Set(this.dataSource.data.map(el=>el.secid))]];
-    this.filters? this.initialFilterOfDataSource(this.filters) : null;
     let outOfDateMarks = new Date()
     outOfDateMarks.setDate(new Date().getDate()-this.old_mark.value)
     let oldMarksSet =this.dataSource.data.filter(el=>new Date(el.mtm_date)<outOfDateMarks)
@@ -214,15 +203,14 @@ export class AppInvGenerateOrdersTable{
   }
   showTip (tipIndex:number) {
     let tips:string[] = [
-      '\nOrders are not generated if leverage restriction is exceeded',
-      '\nOrders are generated within available leverage restriction',
-      '\nAll confirmed orders deems as executed.\nThey are taken into account when leverage restriction is verified',
-      '\nLeverage resctriction is verified against model portfolio leverage.\nAn order is valid if restriction is above model portfolio leverage'
+      '\nOrders are generated without verifying leverage restriction',
+      '\nLeverage restriction is verified against model portfolio leverage.\nAn order is valid if restriction* is above model portfolio leverage.\n*ratio of restriction according to model portfoio weight in the strategy',
+      '\nAll confirmed orders deems as executed.\nThey are taken into account when leverage restriction is verified.\nOrders are generated within available leverage restriction',
     ]
     this.CommonDialogsService.snackResultHandler({name:'success', detail:tips[tipIndex]},'Tip',undefined,undefined,15000)
   }
   exportToExcel() {
-    let numberFields=['total_pl','roi','pl','unrealizedpl','cost_in_position','idportfolio','fact_weight','current_balance','mtm_positon','weight','planned_position','order_amount','order_qty','mtm_rate','cross_rate','mtm_dirty_price','pl'];
+    let numberFields=['total_pl','roi','pl','unrealizedpl','cost_in_position','idportfolio','fact_weight','current_balance','mtm_positon','weight','planned_position','order_amount','order_qty','mtm_rate','cross_rate','mtm_dirty_price','pl','order_amount_main'];
     let dateFields=['mtm_date','rate_date'];
     this.HandlingCommonTasksS.exportToExcel (this.dataSource.data,"generateOrdersData",numberFields,dateFields);  
   }

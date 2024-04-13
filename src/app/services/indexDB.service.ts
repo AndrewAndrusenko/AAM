@@ -104,6 +104,9 @@ export class indexDBService {
         case 'getInstrumentAutoCompleteList':
          fetchServiceFunction =  this.InstrumentDataS.getMoexInstruments(undefined,undefined,{Action:'getInstrumentAutoCompleteList'})
         break;
+        case 'getInstrumentFutures':
+         fetchServiceFunction =  this.InstrumentDataS.getDerivativesList()
+        break;
         case 'bcTransactionType_Ext':
          fetchServiceFunction =  this.AccountingDataService.GetTransactionType_Ext('',0,'','','bcTransactionType_Ext')
         break;

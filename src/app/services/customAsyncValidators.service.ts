@@ -8,7 +8,7 @@ export class customAsyncValidators {
 
   static clientNameCustomAsyncValidator(userService: AppInvestmentDataServiceService, clientId: number, client:string='', errors?:ValidationErrors): AsyncValidatorFn {
     return (control: AbstractControl): Observable<ValidationErrors> => {
-      if (control.value.toUpperCase() !== client.toUpperCase() && control.touched||control.dirty) {
+      if (control.value.toUpperCase() !== client.toUpperCase() && (control.touched||control.dirty)) {
         return userService
         .getClientData(clientId, control.value, 'Check_clientname')
         .pipe(
@@ -129,7 +129,7 @@ export class customAsyncValidators {
   }  
   static MD_SecidUniqueAsyncValidator (InstrumentDataS: InstrumentDataService, secid:string,  errors?:ValidationErrors): AsyncValidatorFn {
     return (control: AbstractControl): Observable<ValidationErrors> => {
-      if (control.value.toUpperCase() !== secid.toUpperCase() && control.touched||control.dirty) {
+    if (control.value.toUpperCase() !== secid.toUpperCase() && (control.touched||control.dirty)) {
         return InstrumentDataS
           .getInstrumentDataGeneral('validateSecidForUnique', control.value.toUpperCase())
           .pipe(

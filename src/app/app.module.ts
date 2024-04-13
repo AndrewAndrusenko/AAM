@@ -201,7 +201,8 @@ const appInitializerFn = (accessRestirictions:AuthService) => {
         AppAccSchemesParamsTable,
         AppAccSchemesAL_FormComponent,
         AppMarketQuoteManualFormComponent,
-        AppPortfoliosHistTable
+        AppPortfoliosHistTable,
+        AppGGGGComponent
 
      ],
     bootstrap: [AppComponent],
@@ -266,5 +267,6 @@ import { AppAccSchemesParamsTable } from './components/tables/acc-schemes-params
 import { AppAccSchemesAL_FormComponent } from './components/forms/acc-schemes-al-form.component/acc-schemes-al-form.component';
 import { AppMarketQuoteManualFormComponent } from './components/forms/market-quote-manual-form.component/market-quote-manual-form.component';
 import { AppPortfoliosHistTable } from './components/tables/portfolios-hist-table.component/portfolios-hist-table.component';
+import { AppGGGGComponent } from './components/main-page/gggg.component/gggg.component';
 
 

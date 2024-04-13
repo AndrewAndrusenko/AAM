@@ -52,40 +52,39 @@ export class AppTableStrategyComponent   {
     this.subscription.add(
       this.InvestmentDataService.receiveStrategyStructureHistoryPortfolio().subscribe(chagesMap =>{
       this.historicalData=true;
-    this.dataSource.data = structuredClone( this.dataSourceInit);
-
-        chagesMap.forEach(el=>{
-          let index = this.dataSource.data.findIndex(row=>row['id']===el.id_strategy_child)
-          if (index>-1)  {
-            console.log('Item for instrument ' +el.id_strategy_child+' has not been found. Op: ',el.type_trans);
-          }
-            switch (el.type_trans) {
-              case 'New':
-                index>-1? this.dataSource.data[index].weight_of_child=null: console.log('error new',el.id_strategy_child);
-              break;
-              case 'Old':
-                index>-1? this.dataSource.data[index].weight_of_child = el.weight_of_child :this.dataSource.data.push({
+      this.dataSource.data = structuredClone( this.dataSourceInit);
+      chagesMap.forEach(el=>{
+        let index = this.dataSource.data.findIndex(row=>row['id']===el.id_strategy_child)
+        if (index>-1)  {
+          console.log('Item for instrument ' +el.id_strategy_child+' has not been found. Op: ',el.type_trans);
+        }
+          switch (el.type_trans) {
+            case 'New':
+              index>-1? this.dataSource.data[index].weight_of_child=null: console.log('error new',el.id_strategy_child);
+            break;
+            case 'Old':
+              index>-1? this.dataSource.data[index].weight_of_child = el.weight_of_child :this.dataSource.data.push({
+              id:el.id_strategy_child,
+              id_item:null,
+              description:null,
+              id_strategy_parent:el.id_strategy_parent,
+              weight_of_child: el.weight_of_child,
+              name:el.sec_name,
+              isin:el.isin,
+              })
+            break;
+            case 'Delete':
+              this.dataSource.data.push({
                 id:el.id_strategy_child,
                 id_item:null,
                 description:null,
                 id_strategy_parent:el.id_strategy_parent,
-                weight_of_child: el.weight_of_child,
+                weight_of_child:el.weight_of_child,
                 name:el.sec_name,
                 isin:el.isin,
                 })
-              break;
-              case 'Delete':
-                this.dataSource.data.push({
-                  id:el.id_strategy_child,
-                  id_item:null,
-                  description:null,
-                  id_strategy_parent:el.id_strategy_parent,
-                  weight_of_child:el.weight_of_child,
-                  name:el.sec_name,
-                  isin:el.isin,
-                  })
-              break;
-            }
+            break;
+          }
         })
         this.columnsHToDisplay = ['id','isin', 'name', 'historical %','current %'] ;
         this.columnsToDisplay = ['id','isin', 'name', 'weight_of_child','old_weight'] ;

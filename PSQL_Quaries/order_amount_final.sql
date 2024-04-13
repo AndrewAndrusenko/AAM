@@ -24,9 +24,9 @@ orders_to_insert AS (
 		"generated",
 		"type",
 		secid,
-		FLOOR(order_amount_final/price) AS qty,
+		FLOOR(order_amount_main/price) AS qty,
 		price,
-		ROUND(FLOOR(order_amount_final/price)*price,2) order_amount_main,
+		ROUND(FLOOR(order_amount_main/price)*price,2) order_amount_main,
 		qty_executed,
 		status,
 		parent_order,
@@ -39,7 +39,7 @@ orders_to_insert AS (
 	FROM
 	f_i_o_prepare_orders_data_by_mp_v3 (p_leverage_handle,p_portfolio_code,p_secid_list,p_report_date,p_report_currency,p_min_deviation) pr_ords
 	WHERE
-		FLOOR(order_amount_final/price) > 0
+		FLOOR(order_amount_main/price) > 0
 )
 INSERT INTO
   public.dorders (

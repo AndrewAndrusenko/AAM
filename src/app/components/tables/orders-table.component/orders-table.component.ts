@@ -261,9 +261,9 @@ export class AppOrderTableComponent {
         filter(isConfirmed=>isConfirmed.isConfirmed),
         switchMap(()=>this.TradeService.deleteOrders(clientOrdersIds))
       ).subscribe(data => {
-        this.CommonDialogsService.snackResultHandler(data,'Delete ')
+        this.CommonDialogsService.snackResultHandler({name:'success',detail:data.length+' rows'},'Delete ')
         this.selection.clear();
-        data.hasOwnProperty('name')? null: this.submitQuery();
+        data.hasOwnProperty('name')? null: this.submitQuery(false,false);
       })
     } else {
       this.CommonDialogsService.snackResultHandler({name:'error',detail:'No orders have been selected'})

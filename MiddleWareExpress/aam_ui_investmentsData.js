@@ -94,8 +94,8 @@ async function fAccountEdit (request, response) {
 }
 async function fGetPortfolioPositions (request,response) {
   let conditionsDic = {
-    'secidList':' LOWER(secid) = ANY(${secidList}) ',
-    'deviation':' ABS(order_amount/notnull_npv*100) > ${deviation}::numeric ',
+    'secidList':' LOWER(deviats.secid) = ANY(${secidList}) ',
+    'deviation':' (ABS(order_amount/notnull_npv*100) > ${deviation}::numeric OR mtm_dirty_price ISNULL)',
     }
   let conditions =' WHERE'
   Object.entries(conditionsDic).forEach(([key]) => {
@@ -123,14 +123,20 @@ async function fGetPortfolioPositions (request,response) {
         ,NULL,NULL,NULL,0,NULL,0,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,NULL
         FROM f_i_get_deducted_fees_per_portfolios_on_date`+'(${idportfolios},${report_date})'+`
         WHERE "accountNo" isnull AND transaction_type notnull
-        ORDER BY set_number,secid,portfolio_code`
+        ORDER BY set_number,mp_id,secid,portfolio_code`
     break;
     case 'getPortfolioMpDeviations':
-      sql= 'select round(order_amount/notnull_npv*100,2) as deviation_percent,(npv!=0) as not_zero_npv, * from f_i_get_portfolios_structure_detailed_data(${idportfolios},${report_date},${report_id_currency}) '
-      sql += conditions.slice(0,-5) +' ORDER BY secid,portfolio_code;'
+      sql= 'SELECT deviats.*, '+
+          'round(order_amount/notnull_npv*100,2) as deviation_percent,(deviats.npv!=0) as not_zero_npv, '+
+          ' orders.order_amount_final,deviats.order_amount - COALESCE(orders.order_amount_final,0) as ord_diff '+
+          'FROM f_i_get_portfolios_structure_detailed_data(${idportfolios},${report_date},${report_id_currency}) deviats '+
+          'LEFT JOIN (SELECT * FROM f_i_o_prepare_orders_data_by_mp_v3(${leverage},${idportfolios},${secidList},${report_date},${report_id_currency},${deviation})) orders '+
+          'ON orders.id_portfolio = deviats.idportfolio AND orders.secid = deviats.secid '
+      sql += conditions.slice(0,-5) +' ORDER BY deviats.secid,deviats.portfolio_code;'
     break;
   }
   sql = pgp.as.format(sql,request.body.params);
+  console.log(sql);
   db_common_api.queryExecute(sql,response,undefined,request.body.action);
 }
 async function fGetPortfolioAnalytics (request,response) {

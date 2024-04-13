@@ -247,16 +247,16 @@ export class AppTableMarketDataComponent {
     this.dataSource? this.dataSource.data=null : null;
     let searchObj = {};
     let instrumentsList = [];
-    (this.instruments.indexOf('ClearAll') !== -1)? this.instruments.splice(this.instruments.indexOf('ClearAll'),1) : null;
-    (this.instruments.length===1)? instrumentsList = [...this.instruments,...this.instruments]: instrumentsList = this.instruments;
-    (this.instruments.length)? Object.assign (searchObj , {'secid': instrumentsList}): null;
-    (this.gRange.get('dateRangeStart').value)===null? null : Object.assign (searchObj , {
+    this.instruments.indexOf('ClearAll') !== -1? this.instruments.splice(this.instruments.indexOf('ClearAll'),1) : null;
+    this.instruments.length===1? instrumentsList = [...this.instruments,...this.instruments]: instrumentsList = this.instruments;
+    this.instruments.length? Object.assign (searchObj , {'secid': instrumentsList}): null;
+    this.gRange.get('dateRangeStart').value===null? null : Object.assign (searchObj , {
       'dateRangeStart':new Date (this.gRange.get('dateRangeStart').value).toDateString()});
-    (this.gRange.get('dateRangeEnd').value)===null? null : Object.assign (searchObj , {
+    this.gRange.get('dateRangeEnd').value===null? null : Object.assign (searchObj , {
       'dateRangeEnd': new Date (this.gRange.get('dateRangeEnd').value).toDateString()});
-    ( this.marketSource.value != null&&this.marketSource.value.length !=0)? Object.assign (searchObj , {'sourcecode': this.marketSource.value}): null;
-    ( this.boards.value != null&&this.boards.value.length !=0)? Object.assign (searchObj , {'boardid': this.boards.value}): null;
-    this.MarketDataService.getMarketData(undefined,this.FormMode==='ChartMode'? 'tradedate ASC':undefined,searchObj).subscribe (marketData  => {
+    this.marketSource.value != null&&this.marketSource.value.length !=0? Object.assign (searchObj , {'sourcecode': this.marketSource.value}): null;
+    this.boards.value != null&&this.boards.value.length !=0? Object.assign (searchObj , {'boardid': this.boards.value}): null;
+    this.MarketDataService.getMarketData(undefined,this.FormMode==='ChartMode'? 'tradedate ASC':'tradedate DESC',searchObj).subscribe (marketData  => {
       this.dataSource  = new MatTableDataSource(marketData);
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;

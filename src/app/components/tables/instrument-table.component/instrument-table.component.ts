@@ -204,9 +204,7 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
       this.group.value != null&&this.group.value.length !=0? Object.assign (searchObj , {'securityGroup': this.group.value}): null;
       this.isin.value? Object.assign (searchObj , {'isin': this.isin.value}): null;
       this.InstrumentDataS.getMoexInstruments(undefined,this.FormMode==='ChartMode'? 'secid ASC':undefined,searchObj).subscribe(data => {
-        this.dataSource  = new MatTableDataSource(data);
-        this.dataSource.paginator = this.paginator;
-        this.dataSource.sort = this.sort;
+        this.updateInstrumentDataTable(data)
         this.instruments.unshift('ClearAll')
         this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ',undefined,false);
       });

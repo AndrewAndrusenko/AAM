@@ -125,6 +125,7 @@ color: green;
   background-color: rgb(80, 156, 109);
   color: rgb(62, 61, 61);
   white-space: pre-wrap;
+  padding: 1%;
 }
 .snackbar-error, .mat-simple-snack-bar-content {
   font-size: 20px !important;
@@ -135,6 +136,7 @@ color: green;
   height: 110%;
   font-size: 16px;
   font-style: italic;
+  padding: 1%;
 }
 input.ng-invalid.ng-touched {
   color: rgb(234, 54, 54);

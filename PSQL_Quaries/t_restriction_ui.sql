@@ -1,3 +1,4 @@
-SELECT id, idportfolio, restriction_type_id, value
+SELECT id, idportfolio, restriction_type_id, value,param
 	FROM public.d_i_restrictions
-	where idportfolio=11
+	where idportfolio=29
+	

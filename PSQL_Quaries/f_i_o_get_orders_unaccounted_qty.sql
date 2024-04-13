@@ -65,4 +65,4 @@ $BODY$;
 
 ALTER FUNCTION public.f_i_o_get_orders_unaccounted_qty(numeric[], text[])
     OWNER TO postgres;
-select * from  f_i_o_get_orders_unaccounted_qty(array[25],null)
+select * from f_i_o_get_orders_unaccounted_qty(array[29,7],null)
