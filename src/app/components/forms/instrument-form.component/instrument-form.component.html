@@ -146,6 +146,12 @@
       {{facevalue.value | number}}
     </mat-hint>
   </mat-form-field>
+  <mat-form-field style="width: 14%;" title="listing">
+    <input matInput [placeholder]="'List'" formControlName="listing" >   
+    <mat-error  *ngIf="listing?.errors?.['pattern']">
+      Only numbers
+    </mat-error>
+  </mat-form-field>
   <br>
   <br>
   <h3 style="color:rgb(252, 113, 113)" *ngIf="instrumentModifyForm.invalid"> Please check the form. Data is invalid</h3>

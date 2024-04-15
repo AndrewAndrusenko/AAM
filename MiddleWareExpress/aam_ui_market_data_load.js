@@ -229,7 +229,7 @@ function fGetMoexInstruments(request,response) { //Get general instruments list
         query.text = 
         "SELECT  mmoexsecuritygroups.id as groupid, mmoexsecurities.id, secid, security_type_title, stock_type, security_type_name, shortname, "+ 
         " primary_boardid, board_title, mmoexboardgroups.title,mmoexboardgroups.category, mmoexsecurities.name, "+
-        " COALESCE(mmoexsecurities.isin,'') as isin, emitent_title, emitent_inn, type, \"group\", marketprice_boardid, mmoexsecuritygroups.title as group_title, security_group_name, 0 as action, faceunit, facevalue, maturitydate, regnumeric "+
+        " COALESCE(mmoexsecurities.isin,'') as isin, emitent_title, emitent_inn, type, \"group\", marketprice_boardid, mmoexsecuritygroups.title as group_title, security_group_name, 0 as action, faceunit, facevalue, maturitydate, regnumeric,listing "+
         "FROM public.mmoexsecurities " +
         "LEFT JOIN mmoexsecuritytypes ON mmoexsecurities.type=mmoexsecuritytypes.security_type_name "+
         "LEFT JOIN mmoexsecuritygroups ON mmoexsecuritygroups.name=mmoexsecuritytypes.security_group_name "+
@@ -317,6 +317,7 @@ async function fInstrumentEdit (request, response) {
     'faceunit=${faceunit}, '+
     'facevalue=${facevalue}, '+
     'maturitydate=${maturitydate}, '+
+    'listing=${listing}, '+
     'regnumeric=${regnumeric} '+
     'WHERE id=${id} RETURNING *;',
   } 

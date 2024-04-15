@@ -115,7 +115,7 @@
         </mat-form-field>
           <mat-form-field  style="width: 15%;">
             <mat-label>Transaction Type Code</mat-label>
-            <mat-select  #t_XactTypeCode_Ext formControlName="entryTypes"  multiple> 
+            <mat-select  #t_XactTypeCode_Ext formControlName="entryTypes"  multiple class="longList"> 
               <mat-option #allSelected [value]="0"
                 (click)="toggleAllSelection()" >
                 ALL - {{this.allSelected.selected? 'Clear' :'Select' }} All 

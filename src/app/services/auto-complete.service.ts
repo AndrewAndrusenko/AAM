@@ -90,7 +90,7 @@ export class AtuoCompleteService {
   }
   secidValirator(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors => {
-      return (this.fullInstrumentsLists.filter(el => el[0] === control.value).length||this.derivatives.filter(el => el.secid === control.value).length ?  
+      return (this.fullInstrumentsLists.length===0||this.fullInstrumentsLists.filter(el => el[0] === control.value).length||this.derivatives.filter(el => el.secid === control.value).length ?  
       null : { noSecid: true });
     };
   }

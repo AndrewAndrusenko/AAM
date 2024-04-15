@@ -55,4 +55,16 @@ export const dbErrorsMap: errorsDescription[] = [
     constraintCode: 'unique constraint "u_c_xActTypeCode_Ext"',
     errorText:'Attempt to create duplicate transaction type. The record with such Code and Type already exists. u_c_xActTypeCode_Ext blocked transaction'
   },
+  {
+    constraintCode: 'violates unique constraint "unique_leverage_restriction"',
+    errorText:'Attempt to create duplicate leverage restriction. unique_leverage_restriction blocked transaction'
+  },
+  {
+    constraintCode: 'violates unique constraint "unique_security_type_restriction"',
+    errorText:'Attempt to create duplicate security type restriction. unique_security_type_restriction blocked transaction'
+  },
+  {
+    constraintCode: 'violates unique constraint "unique_listing_secid_restriction"',
+    errorText:'Attempt to create duplicate listing or instrument restriction. unique_listing_secid_restriction blocked transaction'
+  },
 ]

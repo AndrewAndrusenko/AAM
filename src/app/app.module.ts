@@ -202,7 +202,9 @@ const appInitializerFn = (accessRestirictions:AuthService) => {
         AppAccSchemesAL_FormComponent,
         AppMarketQuoteManualFormComponent,
         AppPortfoliosHistTable,
-        AppGGGGComponent
+        AppGGGGComponent,
+        AppaInvRestrictionSchemesTable,
+        AppInvRestrictionMainFormComponent
 
      ],
     bootstrap: [AppComponent],
@@ -268,5 +270,7 @@ import { AppAccSchemesAL_FormComponent } from './components/forms/acc-schemes-al
 import { AppMarketQuoteManualFormComponent } from './components/forms/market-quote-manual-form.component/market-quote-manual-form.component';
 import { AppPortfoliosHistTable } from './components/tables/portfolios-hist-table.component/portfolios-hist-table.component';
 import { AppGGGGComponent } from './components/main-page/gggg.component/gggg.component';
+import { AppaInvRestrictionSchemesTable } from './components/tables/inv-restriction-schemes-table.component/inv-restriction-schemes-table.component';
+import { AppInvRestrictionMainFormComponent } from './components/forms/inv-restriction-main-form/inv-restriction-main-form';
 
 

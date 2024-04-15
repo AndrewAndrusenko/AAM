@@ -12,6 +12,7 @@ const uiAmmMarketData = require ('./aam_ui_market_data_load')
 const uiAmmTradeData = require ('./aam_ui_trades')
 const uiAmmCurrencyData = require ('./aam_currenciesData')
 const uiAmmFeesData = require ('./aam_feesData')
+const uiAmmRestricitionsData = require ('./aam_restricitionsData')
 const RedisService = require ('./redis')
 const auth_module = require('./auth_module');
 const uiAmmAccoutingSchemes = require('./amm_accounting_schemes');
@@ -217,6 +218,8 @@ appServer.get('/DEA/getAccountingSchemes/',jsPassport.authenticate('session'), u
 appServer.post('/DEA/updateSchemeTransaction/',jsPassport.authenticate('session'), uiAmmAccoutingSchemes.updateSchemeTransaction)
 appServer.post('/DEA/updateTransactionTypes/',jsPassport.authenticate('session'), uiAmmAccoutingSchemes.updateTransactionTypes)
 
+appServer.get('/AAM/getRestrictionsData/',jsPassport.authenticate('session'), uiAmmRestricitionsData.geRestrictionsData)
+appServer.post('/AAM/updateRestrictionsData/',jsPassport.authenticate('session'), uiAmmRestricitionsData.fupdateRestrictionMainData)
 
 // RedisService.TestRedis();
 // RedisService.redisSetInstrumentList();

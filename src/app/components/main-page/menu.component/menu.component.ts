@@ -45,22 +45,9 @@ constructor(
   }
   tools () {
     let obj = `
-    XactTypeCode_Ext:number,
-    id:number,
-    XactTypeCode:number,
-    amountTransaction:string,
-    accountNo:string,
-    entryDetails:string,
-    cSchemeGroupId:string,
-    cDate:string,
-    cxActTypeCode_Ext:string,
-    cxActTypeCode:string,
-    cLedgerType:string,
-    extTransactionId:string,
-    ledgerNoId:string,
-    idtrade:string,
-    dataTime:string,
-    accountId:string
+    id :number, portfolioname :string, idportfolio :number, restriction_type_id: number, 
+    value: number, param :string,
+    object_code :string, object_id: number, object_description :string
   `
   let a = obj.split(',').map(el=> {return {fieldName:el.split(':')[0].trim(),displayName:el.split(':')[0].trim()}});
   console.log('obj',a.flat());

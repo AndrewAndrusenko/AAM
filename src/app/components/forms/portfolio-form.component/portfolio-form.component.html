@@ -71,7 +71,13 @@
     <h2 class="mat-form-field">Management Fee {{summaryData.managementFee|currency}}</h2>
     <h2 class="mat-form-field">Perfomance Fee {{summaryData.perfomanceFee|currency}}</h2>
   </div>
-  <div *ngIf="id.value!==undefined" style="width: 98%;">
+  <div *ngIf="id.value!==undefined&&id.value!==null" style="width: 98%;">
+    <mat-toolbar color="accent" style="margin-bottom:1%; border-radius: 8px;">
+     Investment Restrictions
+    </mat-toolbar>
+    <inv-restriction-schemes-table [idportfolios]="[id.value]" [onChanges]="true" [portCodes]="[portfolioname.value]"></inv-restriction-schemes-table>
+  </div>
+  <div *ngIf="id.value!==undefined" style="width: 98%;margin-top: 0.5%;">
     <mat-toolbar color="accent" style="margin-bottom:1%; border-radius: 8px;">
      Fees Schedules
     </mat-toolbar>

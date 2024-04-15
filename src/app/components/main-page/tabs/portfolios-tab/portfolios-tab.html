@@ -6,6 +6,9 @@
     <app-inv-portfolio-position-table> 
   </app-inv-portfolio-position-table> 
   </mat-tab>  
+  <mat-tab label="Restrictions">  
+    <inv-restriction-schemes-table [onChanges]="false"></inv-restriction-schemes-table>  
+  </mat-tab>
   <mat-tab label="Revenue Factors" >  
     <app-inv-portfolio-revenue-factor-analysis
     [filters]="{reset:true}"

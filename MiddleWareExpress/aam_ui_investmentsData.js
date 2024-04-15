@@ -136,7 +136,6 @@ async function fGetPortfolioPositions (request,response) {
     break;
   }
   sql = pgp.as.format(sql,request.body.params);
-  console.log(sql);
   db_common_api.queryExecute(sql,response,undefined,request.body.action);
 }
 async function fGetPortfolioAnalytics (request,response) {

@@ -40,6 +40,7 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
     'primary_boardid', 
     'board_title', 
     'emitent_inn', 
+    'listing', 
     'action'
   ];
   columnsHeaderToDisplay = [ 
@@ -50,6 +51,7 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
     'Board Title', 
     'Board', 
     'Issuer INN', 
+    'List', 
     'Action'
   ];
   dataSource: MatTableDataSource<Instruments>;

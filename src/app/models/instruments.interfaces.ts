@@ -58,5 +58,6 @@ export interface Instruments  {
   faceunit: string, 
   facevalue: number, 
   maturitydate: Date, 
-  regnumber: string 
+  regnumber: string,
+  listing: number
 }

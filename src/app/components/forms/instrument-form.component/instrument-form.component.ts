@@ -86,6 +86,7 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
       facevalue:  [null,{validators: Validators.pattern('[0-9]*([0-9.]{0,3})?$'),updateOn: 'blur'}],
       maturitydate:  {value:null, disabled: false},
       regnumeric:  {value:null, disabled: false},
+      listing:  [null, {validators: Validators.pattern('[0-9]'),updateOn: 'blur'}],
     })
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToInstrumentData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
@@ -225,4 +226,5 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
   get  maturitydate ()   {return this.instrumentModifyForm.get('maturitydate') }
   get  regnumeric ()   {return this.instrumentModifyForm.get('regnumeric') }
   get  groupid ()   {return this.instrumentModifyForm.get('groupid') }
+  get  listing ()   {return this.instrumentModifyForm.get('listing') }
 }

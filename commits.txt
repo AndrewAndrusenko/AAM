@@ -469,21 +469,29 @@ Fix: Balance sheet: dates with entries are updated after execution of closing an
 4|| instrument table=> implemented complex search by instrument type or ISIN; updated UI
 5|| generate orders & leverage => UI => new select list to choose strategy how to handle violating of leverage restriction
 
-01/04/2024 -12/04/2024
-1|| Restrictions implementations stage 2 => 
-  In addtion to a leverage restriction new types of limits have been introduced. Such as:
-    restriction setting a max weight of particular instrument in the client portfolio
-    restriction setting a max weight of type instruments in the client portfolio. for example option must not exceed 15% of the portfolio
-    restriction setting a max weight of instruments with particular listing value in the client portfolio. for example junk shares (listing=3) must not exceeed 10%
-  Refactored DB function f_i_r_get_restrictions.sql in order to retrieve restrcitions accroding to new restriction model scheme
+01/04/2024 - 12/04/2024
+1|| Restrictions implementations stage 2 =>
+  In addition to a leverage restriction new types of limits have been introduced. Such as:
+	restriction setting a max weight of particular instrument in the client portfolio
+	restriction setting a max weight of type instruments in the client portfolio. for example option must not exceed 15% of the portfolio
+	restriction setting a max weight of instruments with particular listing value in the client portfolio. for example junk shares (listing=3) must not exceed 10%
+  Refactored DB function f_i_r_get_restrictions.sql in order to retrieve restrictions according to new restriction model scheme
   Rewritten DB function f_i_o_get_orders_unaccounted.sql to provide unaccounted orders according to the restriction type
 2|| Created new function f_i_o_prepare_orders_data_by_mp_v3.sql to calculate order according to new restriction model:
-  the fucntion has been fully refactored
-  the function calculates max possible order amount based on instrument, instrument type and listing restriction. then takes min among them and initial order amount. and as a last step leverage restriction is applied to orders calculated in the previous step
+  the function has been fully refactored
+  the function calculates the max possible order amount based on instrument, instrument type and listing restriction. then takes min among them and initial order amount. and as a last step leverage restriction is applied to orders calculated in the previous step
 3|| Update UI to generate orders. function and several fields have been replaced by new ones
 
+13/04/2024 -15/04/2024
+1|| Restrictions UI =>
+  Created inv-restriction-schemes-table.component to retrieve list of restrictions by portfolio or whole set.
+  Created inv-restriction-main-form to create/modify/delete restrictions. Validators are dynamically changing depending on restriction type. for example: field parameter is required for instrument restriction and its value is verified against securities list
+  Created service to handle restriction related tasks restrictions-handling.service.ts Added functions to retrieve, update restrictions data. Middleware layer has been updated accordingly
+2|| Added listing parameter to instrument table => new parameter is available in the instrument table and could be updated via instrument form
+3|| DB d_i_restrictions unique indexes = > implemented three unique indexes to prevent creating duplicate restrictions per type. new errors descriptions have been added to the dictionary
+
+
 ToDo
-| Restrict short sale by weight of nvp
 * Fix Reload position by portfolio => reload doesn't retrieve actual data
 * Trade vs market quote deviation notification => Bug before verifing its required to convert prices to one currency
 || Architecture

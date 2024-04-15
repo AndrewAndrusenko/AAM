@@ -118,7 +118,6 @@ export class AppPortfoliosHistTable {
   this.p_idportfolio.patchValue(this.idportfolio)
   let searchParams = this.searchParametersFG.value
   searchParams.p_tr_date =this.HandlingCommonTasksS.toDateRangeNew(this.p_tr_date);
-  console.log(searchParams);
   this.InvestmentDataService.getPortfoliosHistory(searchParams).subscribe(data => {
     this.updateDataTable(data)
     showSnackResult? this.CommonDialogsService.snackResultHandler({
