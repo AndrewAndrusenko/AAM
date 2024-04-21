@@ -15,8 +15,9 @@ async function geRestrictionsData (request,response) {
 
   sql = pgp.as.format(sql,request.query);
   sql = sql.replaceAll("'null'",null);
-  db_common_api.queryExecute(sql,response,undefined,request.query.action);
-
+  db_common_api.queryExecute(sql,response,undefined,request.query.action,undefined,request.isAuthenticated());
+  console.log(request.session);
+  console.log(request.sessionID);
 }
 async function fupdateRestrictionMainData (request, response) {
   let fields = [ 'idportfolio', 'restriction_type_id', 'value', 'param']

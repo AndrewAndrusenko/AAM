@@ -1,26 +1,42 @@
 const config = require ('./db_config');
 const Pool = require('pg').Pool;
-const pool = new Pool(config.dbConfig);
+const poolSuper = new Pool(config.dbConfig);
+var pool;
+const pool_middle_officer = new Pool(config.dbConfig_aam_middile_officer);
 var pgp = require ('pg-promise')({capSQL:true});
 const pg = require('pg');
 async function checkInternetConnection () {
 let isConnected = !!await require('dns').promises.resolve('google.com').catch(()=>{});
 return isConnected;
 }
-async function queryExecute (sql, response, responseType, sqlID) {
+async function queryExecute (sql, response, responseType, sqlID, SendResponse=true) {
+  let accRole;
+  accRole = response? response.req.user.accessrole:'super'
+  switch (accRole) {
+    case 'testRole':
+    case 'backOffice':
+    case 'portfolioManager':
+      pool = poolSuper;
+    break;
+    case 'middleOffice':
+      pool = pool_middle_officer;
+    break;
+    default:
+      return console.log('ERROR => '+sqlID+' There is no response object in params');
+    break;
+  }
   return new Promise ((resolve) => {
     pool.query (sql,  (err, res) => {
       if (err) {
         console.log (sqlID,err.stack.split("\n", 1).join(""))
         err.detail = err.stack
-        resolve (response? response.send(err):err)
+        resolve (response? response.status(409).send(err):err)
       } else {
         let rows = [];
         res.length? res.map(el => rows.push(...el.rows) ): rows = res.rows;
         result = responseType === 'rowCount'?  res.rowCount : rows;
         console.log(new Date().toLocaleTimeString().slice(0,-3) +':'+ new Date().getMilliseconds(), sqlID,'Rows:'+  responseType === 'rowCount'?  res.rowCount :rows.length)
-        // console.log(sql)
-        resolve (response? response.status(200).json(result):result)
+        resolve (response&&SendResponse? response.status(200).json(result):result)
       }
     })
   })

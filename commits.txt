@@ -490,15 +490,29 @@ Fix: Balance sheet: dates with entries are updated after execution of closing an
 2|| Added listing parameter to instrument table => new parameter is available in the instrument table and could be updated via instrument form
 3|| DB d_i_restrictions unique indexes = > implemented three unique indexes to prevent creating duplicate restrictions per type. new errors descriptions have been added to the dictionary
 
+16/04/2024 - 21/04/2024
+1|| Middleware authentication fixing/refactoring =>
+  JS passport applied to protect api from unauthorized access.
+  Realized sessions access.
+  Every session has to be authorized via application login form. Changed route verification policy and cookie data.
+  Logout procedure fixed/refactored. Session duly destroyed and local storage cleared in order to ensure ActiveGuard of UI correct behavior.
+  UI refactored so when session became unauthorized (due to server relaunch or etc) user is notified and prompted to log in again
+2|| DB created a new role for middle officers and provided privileges according to its business functions. Besides access restrictions to UI components realized DB role access segregation as the final layer of data protection
+3|| DB RLS (row level security policy). For new role of middle officer implemented RLS for client table (dclient) and accounting entries table (AL and LL)
+  RLS on client table allows to show client data only for counterparts and hide sensitive data of investment clients
+  RLS on accounting entries table implemented in terms of creating and delete transaction. As a part of allocation process middle officer is responsible of processing trade and creating corresponding accounting. All such accounting created automatically, by functions. RLS allowed to restrict middle officer rights to creating and deleting only autoprocessed entries and the role is forbidden to create any manual entries.
+  Changed accounting creating form by excluding autoprocessed type of transaction from UI. Accordingly accounting entries table has been by removing option to copy autoprocessed entry and make it as manual one.
+4|| Middleware routing according to DB access role => refactored middleware api call execution by redirecting them to the query pool connected to DB via specific access role
+5|| HTTP error handling => Implemented http call interceptor in order to properly notify user about error and particularly regarding lack of permissions or unauthorized api call
+7|| Allocation function rollback => Realized correct error handling procedure in order to rollback all created transactions (entries and fifo) if anything went wrong
+8|| Fixed: Trade vs market quote deviation notification => Bug before verifying its required to convert prices to one currency
+9|| Fixed: Allocation accounting - FIFO/Accounting => Roll back FIFO/Accounting when any of accounting fails
+10|| Fixed: Revenue Factor shows graph from the last selected object if new object is reused and there's no need to reload it
+
 
 ToDo
-* Fix Reload position by portfolio => reload doesn't retrieve actual data
-* Trade vs market quote deviation notification => Bug before verifing its required to convert prices to one currency
+|| DB access roles => redirection pool
 || Architecture
-|| FIFO Bug possible=> Case of simultaneously two trades which should be netted on FIFO are sent in FIFO function.
-	Idea is to sort processing batch according to the FIFO guidelines and execute FIFO function synchronously
 || Check UserAccess model for UI, especially the latest components
-|| DB access roles
-* Fix: Allocation accounting - FIFO/Accounting => Roll back FIFO/Accounting when other fails
-*Performance Chart shows graph from the last selected object if new object is reused and there's no need to reload it
+|| Restrictions:Trades allocation, Entries generating, Restrictions verification reports
 * Fix:[webpack-dev-server] module constantly disconnecting and trying to reconnect - Old Asus

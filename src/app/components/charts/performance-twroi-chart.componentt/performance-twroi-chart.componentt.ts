@@ -11,7 +11,7 @@ type EChartsOption = echarts.EChartsOption;
 })
 export class AppPerformanceTWROiEchartComponentt  {
   portfolios: string[];
-  countryCasesChartOptions: EChartsOption;
+  performanceROIOptions: EChartsOption;
   seriesMarketPrice :number [] = []
   @ViewChild('fontlarge') fontLarge : ElementRef;
   @ViewChild('selectPortfolio') selectPortfolio: MatSelect;
@@ -29,7 +29,7 @@ export class AppPerformanceTWROiEchartComponentt  {
       this.selectPortfolio.value=this.portfolios[0];
     })
   }
-  onChangeCountry(portfolio:string) {
+  onChangePortfolio(portfolio:string) {
     this.setOptions(portfolio);
   }
   setOptions(portfolio:string) {
@@ -52,7 +52,7 @@ export class AppPerformanceTWROiEchartComponentt  {
         seriesDate.push(new Date(el.report_date).toLocaleDateString())
       }
     })
-    this.countryCasesChartOptions = {
+    this.performanceROIOptions = {
         backgroundColor: '#2c343c',
       legend: {
         textStyle: {
@@ -331,7 +331,7 @@ export class AppPerformanceTWROiEchartComponentt  {
         }
       ]
     };
-    let chartOptions = this.countryCasesChartOptions
+    let chartOptions = this.performanceROIOptions
   }
 
 }

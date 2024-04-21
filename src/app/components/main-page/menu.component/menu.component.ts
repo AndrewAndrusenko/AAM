@@ -21,7 +21,7 @@ constructor(
 
   public getLogin = () => {
     let userData = JSON.parse(localStorage.getItem ('userInfo'));
-    return userData.user.login +" (AR: " +userData.user.accessrole+ ")"
+    return userData? userData.user.login +" (AR: " +userData.user.accessrole+ ")":null;
   }
   toggleFullscreenMode = () => {
     var elem = document.documentElement;
@@ -29,8 +29,8 @@ constructor(
     this.fullscreen=!this.fullscreen;
   }
   LogOut = () => {
+    console.log('LogOut cpm',);
     this.authService.LogOut();
-    window.location.reload();
   }
   showHideTree = () => {
     this.treeOpened = !this.treeOpened

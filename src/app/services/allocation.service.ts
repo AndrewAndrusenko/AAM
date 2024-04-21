@@ -3,7 +3,7 @@ import { HadlingCommonDialogsService } from './hadling-common-dialogs.service';
 import { AppTradeService } from './trades-service.service';
 import { AppAccountingService } from './accounting.service';
 import { AppallocationTableComponent } from '../components/tables/allocation-table.component/allocation-table.component';
-import { Observable, Subject,  filter, forkJoin, map,  of, switchMap, tap } from 'rxjs';
+import { EMPTY, Observable, Subject,  catchError,  filter, forkJoin, map,  of, switchMap, tap } from 'rxjs';
 import { AbstractControl } from '@angular/forms';
 import { AppOrderTableComponent } from '../components/tables/orders-table.component/orders-table.component';
 import { allocation, allocation_fifo } from '../models/interfaces.model';
@@ -67,22 +67,45 @@ export class AppAllocationService {
           forkJoin([
             this.AccountingDataService.getAccountingScheme(bcEntryParameters,cSchemeGroupId).pipe(
               map(entryDrafts=>entryDrafts.forEach(draft=>
-                accountingToCreate$.push(this.AccountingDataService.updateEntryAccountAccounting (draft,'Create'))
-              )),
-            ),
+                accountingToCreate$.push(
+                  this.AccountingDataService.updateEntryAccountAccounting (draft,'Create').pipe(
+                    catchError((err) => {
+                      console.log('err updateEntryAccountAccounting',);
+                      this.CommonDialogsService.snackResultHandler(err.error)
+                      return of(err);
+                    })
+                  )
+                )
+              ))
+            ) ,
             this.AccountingDataService.getAccountingScheme(bcEntryParameters,cSchemeGroupId,'LL').pipe(
               map(entryDrafts=>entryDrafts.forEach(draft=>{
-                accountingToCreate$.push(this.AccountingDataService.updateLLEntryAccountAccounting (draft,'Create'))
+                accountingToCreate$.push(
+                  this.AccountingDataService.updateLLEntryAccountAccounting (draft,'Create').pipe(
+                    catchError((err) => {
+                      console.log('err updateLLEntryAccountAccounting',);
+                      this.CommonDialogsService.snackResultHandler(err.error)
+                      return of(err);
+                    })
+                  )
+                )
               }))
             )
           ])
         ),
         switchMap(()=>forkJoin(accountingToCreate$))
-      ).subscribe(data=>{
-        createdAccountingTransactions.push(data)
-        let index = tradeToConfirmProcessStatus.findIndex(el=>el.id===clientTrade.id);
-        index!==-1? tradeToConfirmProcessStatus[index].accounting=0 : null;
-        this.createAllocationAccountingStatus(allocationTable,tradeToConfirmProcessStatus,createdAccountingTransactions)
+      ).subscribe( (data)=> {
+        let err = data.filter(el=>el['error'])
+        if (err.length) { 
+          this.accountingTradeService.deleteAccountingAndFIFOtransactions (this.tradeToConfirm.map(el=>Number(el.id))).subscribe(d=>{
+            console.log('rollback:',d)
+          })
+        } else { 
+          createdAccountingTransactions.push(data)
+          let index = tradeToConfirmProcessStatus.findIndex(el=>el.id===clientTrade.id);
+          index!==-1? tradeToConfirmProcessStatus[index].accounting=0 : null;
+          this.createAllocationAccountingStatus(allocationTable,tradeToConfirmProcessStatus,createdAccountingTransactions)
+        }
       })
     })
   }

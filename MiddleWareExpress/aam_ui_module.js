@@ -4,7 +4,7 @@ const { request, response } = require('express');
 var pgp = require('pg-promise')({
   capSQL: true // to capitalize all generated SQL
 });
-async function TreeSQLQueryExc (RootNode, userId, nodeParentFavorite) {
+async function TreeSQLQueryExc (RootNode, userId, nodeParentFavorite,response) {
   RootNode = RootNode.split('_')
   sql = {text:'', rowMode: "array" }
   switch (RootNode[0]) {
@@ -59,7 +59,7 @@ async function TreeSQLQueryExc (RootNode, userId, nodeParentFavorite) {
   RootNode[1] ? RootNode = RootNode.join('_') : RootNode = RootNode[0]
   PromQty = new Promise(
     (resolve) => {
-      db_common_api.queryExecute(sql,null,null,RootNode).then(result => {
+      db_common_api.queryExecute(sql,response,null,RootNode,false).then(result => {
         if (result === undefined) {resolve([RootNode,[]])} else {resolve([RootNode,result])} 
       })
     }
@@ -71,7 +71,7 @@ async function FAmmGetTreeData(request,response) {
   Paramlist.splice (Paramlist.indexOf('Favorites'),1)
   FavoritesList = Paramlist.filter(el=>!['Trades & Orders','Accounting','Non-Trade Operations'].includes(el)).map (element => 'Favorites_' + element);
   Treelist = [...Paramlist,...FavoritesList]
-  await Promise.all (Treelist.map(RootNode => TreeSQLQueryExc(RootNode, request.query.userId,'')))
+  await Promise.all (Treelist.map(RootNode => TreeSQLQueryExc(RootNode, request.query.userId,'',response)))
   .then((value) => {
     value.push (['Favorites',FavoritesList])
     return response.status(200).json(value)

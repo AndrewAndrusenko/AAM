@@ -1,7 +1,7 @@
 import {CollectionViewer, SelectionChange, DataSource} from '@angular/cdk/collections';
 import {FlatTreeControl} from '@angular/cdk/tree';
 import {Component, Injectable, ViewChild} from '@angular/core';
-import {BehaviorSubject,  merge, Observable} from 'rxjs';
+import {BehaviorSubject,  merge, Observable, Subscription} from 'rxjs';
 import {map} from 'rxjs/operators';
 import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { MatMenuTrigger as MatMenuTrigger } from '@angular/material/menu';
@@ -119,12 +119,14 @@ export class DynamicDataSource implements DataSource<DynamicFlatNode> {
 export class TreeComponent {
   routesPathsTreeMenu = routesTreeMenu.map (el=>el.path)
   dataChange: BehaviorSubject<DynamicFlatNode[]>;
+  private subs = new Subscription();
   constructor(
     database: DynamicDatabase, 
     private TreeMenuSevice:TreeMenuSevice, 
     private AuthServiceS:AuthService,  
     private router: Router)  
   {
+    this.subs.add(this.TreeMenuSevice.receiveRefreshTree().subscribe(()=>this.initialData()))
     this.treeControl = new FlatTreeControl<DynamicFlatNode>(this.getLevel, this.isExpandable);
     this.dataSource = new DynamicDataSource(this.treeControl, database);
     this.databaseM = database;
@@ -140,10 +142,12 @@ export class TreeComponent {
   public activeNode : DynamicFlatNode;
   public rootLevelNodes: string[];
   rootAccountingNodes = rootNodesColor
+  ngOnDestroy(): void {
+    this.subs.unsubscribe();
+  }
   getLevel = (node: DynamicFlatNode) => node.level;
   isExpandable = (node: DynamicFlatNode) => node.expandable;
   hasChild = (_: number, _nodeData: DynamicFlatNode) => _nodeData.expandable;
-  // SendMessage: when node is selected method sends node rootTypeName to the Tab component to show relevant information structure     
   sendMessage = (node: DynamicFlatNode) => {
     this.routesPathsTreeMenu.includes(node.item)? this.router.navigate(['tree/'+node.item]) : this.router.navigate(['tree/']) ;
     this.TreeMenuSevice.sendUpdate(node.nodeRoot, node.item, +node.id)

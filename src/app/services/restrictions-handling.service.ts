@@ -50,7 +50,7 @@ export class AppRestrictionsHandlingService {
     return this.http.get <FeesPortfoliosWithSchedulesData[]> ('/api/AAM/getFeesData/',{params:{p_object_id:p_object_id,p_id_fee_main:p_id_fee_main, action:'getFeesPortfoliosWithSchedulesData'}})
   } */
   getRestrictionsDataMain (p_idportfolios:number[]|null,p_portfolios_codes=null) :Observable<restrictionsData[]> {
-    return this.http.get <restrictionsData[]> ('/api/AAM/getRestrictionsData/',{params:{
+    return this.http.get <restrictionsData[]> ('/api/AAM/getRestrictionsData/',{withCredentials: true,params:{
       action:'getRestrictionsDataMain',
       p_idportfolios:p_idportfolios,
       p_portfolios_codes:p_portfolios_codes

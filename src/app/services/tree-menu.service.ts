@@ -17,10 +17,17 @@ export class TreeMenuSevice {
   }
   private subjectName = new Subject<{text: string, name:string, id:number, action:string}>(); 
   private subjectTabName = new Subject <string>();
+  private subRefreshTree = new Subject <boolean>;
   
   getTreeData ( userId:number, paramList: string[] ):Observable < string[]>{
     const params = {'userId': userId, 'paramList': paramList}
     return this.http.get <string[]>('/api/AAM/treeMenu/',{ params: params } ) 
+  }
+  sendRefreshTree(refresh: boolean) { 
+    this.subRefreshTree.next(refresh); 
+  }
+  receiveRefreshTree(): Observable<boolean> { 
+    return this.subRefreshTree.asObservable();  
   }
   public addItemToFavorites (nodename:string, nodeparent:string, userId:number, idelement:string):Observable<favoriteObject[]> { 
     return this.http.post <favoriteObject[]> ('/api/Favorites/newItem/',{'nodename': nodename, 'nodeparent' : nodeparent, 'userId' : userId, 'idelement':idelement})

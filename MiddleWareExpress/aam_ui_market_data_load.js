@@ -110,9 +110,9 @@ async function fgetMarketData (request,response){//Get market data such as marke
     }
   });
   switch (request.query.Action) {
-
     case 'getMarketQuote':
-      query.text = 'select * from f_i_get_market_quote_for_trade (${secid},${trade_date});';
+      query.text = 'SELECT *, (SELECT rate FROM f_i_get_cross_rate_for_trade(${trade_currency},tt.currency_code,${trade_date},810)) as rate '+
+                  'FROM f_i_get_market_quote_for_trade(${secid},${trade_date}) tt';
     break;
     case 'checkLoadedMarketData':
       query.text = 'SELECT sourcecode, count(secid) FROM t_moexdata_foreignshares '+
@@ -124,24 +124,14 @@ async function fgetMarketData (request,response){//Get market data such as marke
       'GROUP BY sourcecode ';
     break;
     default :  
-/*       if ((conditionsMOEXiss.length>6 || conditionsmsFS.length===4) && request.query?.['sourcecode'] !=='msFS') { */
       query.text = 'SELECT t_moexdata_foreignshares.id, boardid, secid, numtrades, value, open, low, high, close, volume, marketprice2, admittedquote,  globalsource, sourcecode, tradedate, percentprice,currency, spsymbol '+
       'FROM t_moexdata_foreignshares '+
       'left join t_moex_boards on t_moex_boards.code = t_moexdata_foreignshares.boardid '
       query.text +=conditionsMOEXiss.slice(0,-5);
       query.text += request.query.hasOwnProperty('sorting')? ' ORDER BY ${sorting:raw} LIMIT ${rowslimit:raw};' : ';';
-/*       } else {
-        query.text ="SELECT id,exchange as boardid, secid,null,volume as value, open,low, high,  close, volume, adj_close, adj_close,  globalsource, sourcecode, date as tradedate , false as percentprice, 'USD' as currency, '$' as spsymbol "+
-        'FROM public.t_marketstack_eod '+
-        'left join "aInstrumentsCodes" on "aInstrumentsCodes".code=t_marketstack_eod.symbol '+
-        'where "aInstrumentsCodes".mapcode = \'msFS\'  ';
-        query.text +=conditionsmsFS.slice(0,-5);
-        query.text += request.query.hasOwnProperty('sorting')? ' ORDER BY ${sorting:raw} LIMIT ${rowslimit:raw};' : ';';
-      } */
     break;
   }
   sql = pgp.as.format(query.text,request.query);
-  console.log(sql);
   db_common_api.queryExecute(sql,response,undefined,'fgetMarketData')
 }
 async function fgetMarketDataSources (request,response) {//Get market sources. Needs to be moved to General data function

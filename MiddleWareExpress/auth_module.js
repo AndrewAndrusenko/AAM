@@ -1,7 +1,6 @@
 const Module = require('module')
 const bcrypt = require('bcryptjs');
 const config = require('./db_config');
-const { log } = require('console');
 const Pool = require('pg').Pool;
 const pool = new Pool(config.dbConfig);
 var pgp = require('pg-promise')({

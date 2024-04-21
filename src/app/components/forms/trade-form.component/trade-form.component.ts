@@ -110,8 +110,6 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     this.AutoCompService.getCounterpartyLists().subscribe(()=>this.id_cpty.setValidators(this.AutoCompService.counterPartyalirator(this.cpty_name)));
   }
   ngOnInit(): void {
-    //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
-    //Add 'implements OnInit' to the class.
     this.tradeModifyForm.patchValue(this.data)
     this.tidinstrument.setValidators(this.AutoCompService.secidValirator());
     this.id_price_currency.setValidators([this.AutoCompService.currencyValirator(),Validators.required]);
@@ -249,8 +247,8 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     this.getMarketPrice()
   }
   getMarketPrice() {
-    this.MarketDataService.getMarketQuote(this.tidinstrument.value,new Date(this.tdate.value).toDateString()).subscribe(data=>{
-      this.market_price.patchValue(data.length? data[0].close:null)
+    this.MarketDataService.getMarketQuote(this.tidinstrument.value,new Date(this.tdate.value).toDateString(),this.id_price_currency.value).subscribe(data=>{
+      this.market_price.patchValue(data.length? (data[0].close/(this.price_type.value==='1'&&data[0].rate!==null? data[0].rate:1)).toFixed(4):null)
     })
   }
   clearCurrencies() {
@@ -306,6 +304,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     this.settlementAmountUpdate();
   }
   fullAmountCalcualtion(accured_interest_update:boolean) {
+    this.getMarketPrice();
     if (this.price_type.value==='2'&&accured_interest_update) {
       this.InstrumentDataS.getcouponPeriodInfo(this.vdate.value,this.tidinstrument.value,this.facevalue.value,this.qty.value).subscribe (coupon=>{ 
         this.coupon_details.patchValue(coupon.couponDetails);

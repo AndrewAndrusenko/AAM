@@ -2,12 +2,14 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, of, switchMap, tap } from 'rxjs';
 import { accessRestriction, objectStatus } from '../models/interfaces.model';
+import { Router } from '@angular/router';
 interface userRoles {
   value: string;
 }
 interface siginResult {
   message: string,
-  username: userData
+  username: userData,
+  sessionID:string
 }
 interface userData {
     id: number,
@@ -19,7 +21,10 @@ interface userData {
   providedIn: 'root'
 })
 export class AuthService {
-  constructor(private http : HttpClient) { }
+  constructor(
+    private http : HttpClient,
+    private router : Router
+    ) { }
   accessRestrictions: accessRestriction[] = [];
   objectStatuses: objectStatus[] = [];
   userId:number;
@@ -61,8 +66,9 @@ export class AuthService {
         elementtype:null, 
         elementvalue:'none'})) 
   } 
-  setUserInfo(user:{'user' : userData}){
+  setUserInfo(user:{'user' : userData},sessionID:string){
     localStorage.setItem('userInfo',JSON.stringify(user));
+    sessionID? localStorage.setItem('sessionID',sessionID):null;
   }
   validate(login:string, password:string):Observable<siginResult> {
     return this.http.post <siginResult> ('/api/auth/',{'username' : login, 'password' : password})
@@ -72,7 +78,10 @@ export class AuthService {
   }
   LogOut() { 
     localStorage.clear()
-    this.http.post ('/api/logout/',{})
+    this.http.post ('/api/logout/',{}).subscribe(d=>{
+      console.log('sub logout',);
+      this.router.navigate(['login']);   
+      })
   }
   getUsersRoles(): Observable <userRoles[]>{
     return this.http.get < userRoles[]> ('/api/auth/userRoles/')

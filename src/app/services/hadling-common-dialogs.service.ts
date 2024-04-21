@@ -39,7 +39,7 @@ export class HadlingCommonDialogsService {
     this.verticalPosition=postion;
     if (result['name']=='error') { 
       this.dbErrorsMap.forEach (el => result['detail'].includes(el.constraintCode)? result['detail'] = el.errorText : null);
-      this.snack.open('Error: ' + result['detail'].split("\n", 1).join(""),'OK',{
+      this.snack.open('Error: ' + result['detail'],'OK',{
         panelClass: ['snackbar-error'],
         verticalPosition: this.verticalPosition
       }); 

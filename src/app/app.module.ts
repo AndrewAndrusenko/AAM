@@ -9,7 +9,7 @@ import {MatIconModule} from '@angular/material/icon';
 import {CdkMenuModule} from '@angular/cdk/menu';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatNativeDateModule} from '@angular/material/core';
-import {HttpClientModule} from '@angular/common/http';
+import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
 import { AppMenuComponent } from './components/main-page/menu.component/menu.component';
 import { AppTabsComponent } from './components/main-page/tabs.component/tabs.component';
 import { DashboardComponent } from './components/main-page/root-page.component/root-page.component';
@@ -216,6 +216,11 @@ const appInitializerFn = (accessRestirictions:AuthService) => {
             multi: true,
             deps: [AuthService]
         },
+        {
+            provide: HTTP_INTERCEPTORS,
+            useClass: ErrorCatchingInterceptor,
+            multi: true
+        },
         {provide: MAT_MOMENT_DATE_ADAPTER_OPTIONS, useValue: {strict: true}}, 
         {provide: RouteReuseStrategy, useClass: MaltsevRouteReuseStrategy} 
     ],
@@ -272,5 +277,6 @@ import { AppPortfoliosHistTable } from './components/tables/portfolios-hist-tabl
 import { AppGGGGComponent } from './components/main-page/gggg.component/gggg.component';
 import { AppaInvRestrictionSchemesTable } from './components/tables/inv-restriction-schemes-table.component/inv-restriction-schemes-table.component';
 import { AppInvRestrictionMainFormComponent } from './components/forms/inv-restriction-main-form/inv-restriction-main-form';
+import { ErrorCatchingInterceptor } from './services/errors-interceptor.service';
 
 

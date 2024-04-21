@@ -1,7 +1,7 @@
 import {Component, ViewChild, Input, ChangeDetectionStrategy, ElementRef, ChangeDetectorRef} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
-import {Subscription, filter, } from 'rxjs';
+import {EMPTY, Subscription } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {formatNumber } from '@angular/common';
 import {HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
@@ -73,18 +73,6 @@ export class AppAccSchemesAL_Table {
       "fieldName": "accountNo",
       "displayName": "AccountNo"
     },
-/*     {
-      "fieldName": "cDate",
-      "displayName": "cDate"
-    },
-    {
-      "fieldName": "cxActTypeCode_Ext",
-      "displayName": "cxActTypeCode_Ext"
-    },
-    {
-      "fieldName": "cxActTypeCode",
-      "displayName": "cxActTypeCode"
-    }, */
     {
       "fieldName": "cLedgerType",
       "displayName": "cLedgerType"
@@ -156,7 +144,9 @@ export class AppAccSchemesAL_Table {
   }
 
   submitQuery (reset:boolean=false, showSnackResult:boolean=true) {
+    console.log('submitQuery','getSchemeAccountTransaction');
     this.AccountingSchemesService.getSchemeAccountTransaction().subscribe(data => {
+      console.log('data',data);
       this.updateDataTable(data)
       showSnackResult? this.CommonDialogsService.snackResultHandler({
         name:data['name'], 

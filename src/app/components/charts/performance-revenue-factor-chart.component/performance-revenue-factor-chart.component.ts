@@ -2,7 +2,7 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
 import { AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
 import { RevenueFactorData } from 'src/app/models/interfaces.model';
 import { MatSelect } from '@angular/material/select';
-import { filter } from 'rxjs';
+import { filter, tap } from 'rxjs';
 type EChartsOption = echarts.EChartsOption;
 type EChartsOptionSeries = echarts.LineSeriesOption
 @Component({
@@ -12,16 +12,21 @@ type EChartsOptionSeries = echarts.LineSeriesOption
 })
 export class AppPerformanceRevenueFactorChartComponentt  {
   portfolios: string[];
-  countryCasesChartOptions: EChartsOption;
+  revenueFactorOptions: EChartsOption;
   series :number [] = []
   @ViewChild('fontlarge') fontLarge : ElementRef;
   @ViewChild('selectPortfolio') selectPortfolio: MatSelect;
   RevenueFactorData: RevenueFactorData[] = [];
   currencySymbol:string;
+  instrumentsList: string[]=[];
+
   constructor(
   private InvestmentDataService:AppInvestmentDataServiceService, 
   ) {
-    this.InvestmentDataService.recieveRevenueFactorData().pipe(filter(data=>data.data.length>0)).subscribe(data=>{
+    this.InvestmentDataService.recieveRevenueFactorData().pipe(
+      tap(data=>data.data.length===0? this.instrumentsList=[]:null),
+      filter(data=>data.data.length>0)
+      ).subscribe(data=>{
       this.RevenueFactorData=data.data;
       this.portfolios = [...new Set(data.data.map(el=>(el.portfolioname)))]
       this.currencySymbol=data.currencySymbol;
@@ -29,22 +34,21 @@ export class AppPerformanceRevenueFactorChartComponentt  {
       this.selectPortfolio.value=this.portfolios[0];
     })
   }
-  onChangeCountry(portfolio:string) {
+  onChangePortfolio(portfolio:string) {
     this.setOptions(portfolio);
   }
   setOptions(portfolio:string) {
-    let instrumentsList: string[];
     this.series=[]
     let seriesSet :EChartsOptionSeries[]=[];
     let seriesDate :string [] = []
     let sizeLarge = parseFloat(window.getComputedStyle(this.fontLarge.nativeElement, null).getPropertyValue('font-size'));
     let currencySymbol = this.currencySymbol;
     let dataSet = this.RevenueFactorData.filter(el=>el.portfolioname === portfolio);
-    instrumentsList = [... new Set(dataSet.map(el=>el.secid))]
+    this.instrumentsList = [... new Set(dataSet.map(el=>el.secid))]
     seriesDate = [... new Set(dataSet.map(el=>new Date(el.report_date).toLocaleDateString()))]
     let tempDataSet:number[] = []
     let legendSet : {name:string, data: number[]}[] = []
-    instrumentsList.forEach(el=>{
+    this.instrumentsList.forEach(el=>{
       tempDataSet = dataSet.filter(pl=>pl.secid===el).map(pl=>Math.round(pl.total_pl*100)/100);
       legendSet.push({name:el,data:[seriesDate.length - tempDataSet.length,tempDataSet[0],tempDataSet[tempDataSet.length-1]]})
       tempDataSet = [...Array(seriesDate.length - tempDataSet.length).fill(0), ...tempDataSet]
@@ -65,7 +69,7 @@ export class AppPerformanceRevenueFactorChartComponentt  {
     let profitLegend = legendSet.filter(el=>el.data[2]>0).sort((lg,lg1)=>lg.data[0]-lg1.data[0]).map(el=>el.name).reverse();
     let lossLegend = legendSet.filter(el=>el.data[2]<0).map(el=>el.name).sort()
      
-    this.countryCasesChartOptions = {
+    this.revenueFactorOptions = {
       title: {
         text: "PnL: "+legendSet.map(el=>el.data[2]).reduce((acc,cur)=>acc+cur).toLocaleString(undefined,{maximumFractionDigits:2})+currencySymbol,
         right: "15%",
@@ -272,7 +276,7 @@ export class AppPerformanceRevenueFactorChartComponentt  {
 
       ]
     };
-    let chartOptions = this.countryCasesChartOptions
+    let chartOptions = this.revenueFactorOptions
   }
   
 }

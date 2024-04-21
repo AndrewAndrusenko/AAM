@@ -4,7 +4,7 @@
   style="margin-left: 1%;font-size: larger; background-color: rgb(46, 93, 147); text-align: center; width: 12%; border-radius: 12px;"  >
   <mat-label style="color: rgb(241, 235, 235);font-size:large;">Select Portfolio..</mat-label>
   <mat-select style="margin-left: 1%;font-size:larger;" #selectPortfolio>
-    <mat-option *ngFor="let portfolio of portfolios" (click)="onChangeCountry(portfolio)"  [value]="portfolio">{{portfolio}}</mat-option>
+    <mat-option *ngFor="let portfolio of portfolios" (click)="onChangePortfolio(portfolio)"  [value]="portfolio">{{portfolio}}</mat-option>
   </mat-select>
 </mat-form-field>
 <a class=" navbar-brand mx-auto" style="align-items: center; font-size:x-large;">
@@ -13,6 +13,6 @@
 </nav>
 <div *ngIf="seriesMarketPrice.length!==0" style="background-color: azure;">
 <div style="width: 100%; top: 1%;" >
-  <div echarts [options]="countryCasesChartOptions" style="width: 100%; min-height: 70vh" class="demo-chart"></div>
+  <div echarts [options]="performanceROIOptions" style="width: 100%; min-height: 70vh"></div>
 </div>
 </div> 

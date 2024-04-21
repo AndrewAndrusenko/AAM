@@ -116,10 +116,10 @@ color: green;
   font-size: 16px !important
 }
 .snackbar-error {
-  max-width: 100% !important;
   background-color: rgb(151, 30, 30);
   color: rgb(223, 217, 217);
-  // font-weight:bolder;
+  white-space: pre-wrap;
+  padding: 1%;
 }
 .snackbar-success {
   background-color: rgb(80, 156, 109);

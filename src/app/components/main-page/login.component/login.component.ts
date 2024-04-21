@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { EMPTY, catchError } from 'rxjs';
 import { AuthService } from 'src/app/services/auth.service';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
+import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
 
 interface userRoles {
   value: string;
@@ -23,16 +24,9 @@ export class LoginComponent  {
     login: [null, {validators: [Validators.required]}],
     password: [null, {validators: [Validators.required]}],
   }
-  
   )
-  ngOnInit(): void {
-    //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
-    //Add 'implements OnInit' to the class.
-//  document.body.style['zoom'] = "80%";
-    
-  }
   ISINuniqueAsyncValidator :ValidatorFn;
-
+  public sessionID: string
   hide : boolean = true;
   userroles:userRoles[] 
   loginsArray: string[];
@@ -40,6 +34,7 @@ export class LoginComponent  {
     private authService : AuthService, 
     private router : Router,
     private CommonDialogsService:HadlingCommonDialogsService,
+    private TreeMenuSevice:TreeMenuSevice,
     private fb:FormBuilder, 
   ) {
     this.authService.getUsersRoles().subscribe (usersRolesData => this.userroles=usersRolesData)
@@ -63,8 +58,9 @@ export class LoginComponent  {
         this.CommonDialogsService.snackResultHandler({name:'error', detail:err.error.text});
         return EMPTY
       })).subscribe(response => {
-      this.authService.setUserInfo({'user' : response.username});
+      this.authService.setUserInfo({'user' : response.username},response.sessionID);
       this.router.navigate(['tree']);    
+      this.TreeMenuSevice.sendRefreshTree(true);
     })
   }
   handleNewUserClick(){

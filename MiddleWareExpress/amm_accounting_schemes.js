@@ -1,4 +1,5 @@
 const db_common_api = require('./db_common_api')
+const server = require('./server')
 var pgp = require('pg-promise')({capSQL:true});
 function getAccountingSchemes (request,response) {
   let sql = '';
@@ -17,9 +18,12 @@ function getAccountingSchemes (request,response) {
     break;
     case 'getSchemesParameters':
       sql='SELECT * FROM public."bcSchemesParameters";'
+      break;
+      default:
+      sql='SELECT * FROM public."bcSchemesParameters";'
     break;
   }
-  db_common_api.queryExecute(sql,response,undefined,request.query.action);
+  db_common_api.queryExecute(sql,response,undefined,request.query.action,undefined,request);
 }
 function updateTransactionTypes (request,response) {
   fields = ['xActTypeCode_Ext', 'description', 'code2', 'manual_edit_forbidden']

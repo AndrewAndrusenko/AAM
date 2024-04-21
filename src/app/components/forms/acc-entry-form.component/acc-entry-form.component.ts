@@ -85,7 +85,7 @@ export class AppAccEntryModifyFormComponent {
       t_idtrade: {value:null, disabled: false} 
     })    
     this.AccountingSchemesService.subjectTransactionTypePipe.next(null);
-    this.subscriptions.add(this.AccountingSchemesService.receiveTransactionTypesReady().subscribe(data=>this.TransactionTypes=data.data))
+    this.subscriptions.add(this.AccountingSchemesService.receiveTransactionTypesReady().subscribe(data=>this.TransactionTypes=data.data.filter(el=>el.manual_edit_forbidden===false)))
   }
   AddAsyncValidators (overdraftOverride:boolean, updateValidators:boolean=false) {
     if (this.FirstOpenedAccountingDate !=null) {

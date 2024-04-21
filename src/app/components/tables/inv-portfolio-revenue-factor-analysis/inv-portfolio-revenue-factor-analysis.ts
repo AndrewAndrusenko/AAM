@@ -72,7 +72,6 @@ export class AppaInvPortfolioRevenueFactorAnalysisTableComponent {
   multiFilter?: (data: RevenueFactorData, filter: string) => boolean;
   constructor(
     private AuthServiceS:AuthService,  
-    private indexDBService:indexDBService,
     private InvestmentDataService:AppInvestmentDataServiceService, 
     private HandlingCommonTasksS:HandlingCommonTasksService,
     private CommonDialogsService:HadlingCommonDialogsService,

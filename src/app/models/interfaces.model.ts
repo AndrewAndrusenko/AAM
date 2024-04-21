@@ -177,7 +177,8 @@ export interface marketData {
   admittedvalue?: number,
   waval?: number, 
   tradingsession?: string,
-  tradedate?: string
+  tradedate?: string,
+  rate?:number
 }
 
 export interface marketSourceSegements {
