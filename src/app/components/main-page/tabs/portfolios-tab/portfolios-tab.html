@@ -7,7 +7,15 @@
   </app-inv-portfolio-position-table> 
   </mat-tab>  
   <mat-tab label="Restrictions">  
-    <inv-restriction-schemes-table [onChanges]="false"></inv-restriction-schemes-table>  
+    <mat-tab-group mat-stretch-tabs>
+      <mat-tab label="Cntrol">
+        <app-inv-restriction-verify-table
+        [rowsPerPages]="25"></app-inv-restriction-verify-table>  
+      </mat-tab>
+      <mat-tab label="Dictionary">
+        <inv-restriction-schemes-table [onChanges]="false"></inv-restriction-schemes-table>  
+      </mat-tab>
+    </mat-tab-group>
   </mat-tab>
   <mat-tab label="Revenue Factors" >  
     <app-inv-portfolio-revenue-factor-analysis

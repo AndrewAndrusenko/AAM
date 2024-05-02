@@ -51,6 +51,7 @@
     <button color = "accent" #getRatesb mat-raised-button title="getMarketData"
       [matTooltip]="getRatesb.disabled? 'Select sources to upload':'Click to start loading'"
       style=" margin-left:1%; font-size: larger; margin-right: 1%; margin-top: 1%; padding: 1%; width: 30%;"
+      [disabled]="sourceCode.value.length===0"
       (click)="getMarketData()">
       Get market quotes data 
     </button>

@@ -9,7 +9,7 @@ import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dia
 import { AppTableStrategyComponent } from '../../tables/strategy_structure-table.component/strategy_structure-table.component';
 import { AuthService } from 'src/app/services/auth.service';
 import { AccountsTableModel, StrategiesGlobalData, portfolioTypes } from 'src/app/models/interfaces.model';
-import { filter, switchMap, tap } from 'rxjs';
+import { filter, of, switchMap, tap } from 'rxjs';
 
 @Component({
   selector: 'app-app-strategy-form',
@@ -106,11 +106,15 @@ export class AppStrategyFormComponent {
     }
   }
   selectBenchmarkAccount () {
+    let portfolioData:AccountsTableModel
     this.dialogRef = this.dialog.open(TablePortfolios ,{minHeight:'400px', minWidth:'900px', autoFocus: false, maxHeight: '90vh'});
     this.dialogRef.componentInstance.action = 'Select_Benchmark';
     this.dialogRef.componentInstance.modal_principal_parent.pipe (
-      filter(strategy=> this.id.value !== strategy['idstategy']),
-      tap (strategy => {
+      tap(data=>portfolioData=data),
+      // filter(portfolio=> this.id.value !== strategy.idstategy),
+      switchMap((portfolio)=> this.id.value !== portfolio.idstategy? this.CommonDialogsService.confirmDialog('Select account with different strategy','Confirm' ):of({isConfirmed:true})),
+/*       tap (strategy => {
+       
         this.dialogRefConfirm = this.dialog.open(AppConfimActionComponent, {panelClass: 'custom-modalbox'});
         let actionToConfim = {
           action:'Select account with different strategy' ,
@@ -118,10 +122,10 @@ export class AppStrategyFormComponent {
           data: strategy
         };
         this.dialogRefConfirm.componentInstance.actionToConfim = actionToConfim;
-      }),
-      switchMap(strategy => this.dialogRefConfirm.afterClosed()),
-      filter(el => el['isConfirmed'])
-    ).subscribe(data => this.setBenchmarkAccount(data.data));
+      }), */
+      // switchMap(strategy => this.dialogRefConfirm.afterClosed()),
+      filter(el => el.isConfirmed)
+    ).subscribe(data => this.setBenchmarkAccount(portfolioData));
     this.dialogRef.componentInstance.modal_principal_parent.subscribe (portfolio=> this.id.value === portfolio['idstategy']? this.setBenchmarkAccount(portfolio): null);
   }
   setBenchmarkAccount(data:AccountsTableModel) {

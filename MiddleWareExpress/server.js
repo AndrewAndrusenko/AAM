@@ -44,7 +44,7 @@ appServer.use(session({
   resave: false,
   saveUninitialized: true,
   cookie: {
-    maxAge: 600000 ,
+    // maxAge: 600000 ,
     secure: false } 
 }));
 appServer.use(jsPassport.initialize());

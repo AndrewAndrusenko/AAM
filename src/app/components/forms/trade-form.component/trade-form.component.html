@@ -4,10 +4,10 @@ cdkDragRootElement=".cdk-overlay-pane"
 cdkDragHandle
 color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4">
   
-  <span style="margin-right: 2%;">{{action}} Trade | ID {{idtrade.value}} </span>
+  <span style="margin-right: 1%;">{{action}} Trade | ID {{idtrade.value}} </span>
   <span class="example-spacer"></span>
   <ng-container  *ngIf="!disabledControlElements&&tabIndex===1" style="margin-bottom: 1%;">
-    <button mat-raised-button  [matMenuTriggerFor]="menu" color="accent"  style="margin-left:1%; font-size: 18px; width: 10%;" matRipple="">Select
+    <button mat-raised-button  [matMenuTriggerFor]="menu" color="accent"  style="font-size: 18px; width: 10%;" matRipple="">Select
     </button>
     <mat-menu #menu="matMenu">
       <button mat-menu-item style="margin-left:0.5%; font-size: 18px;"

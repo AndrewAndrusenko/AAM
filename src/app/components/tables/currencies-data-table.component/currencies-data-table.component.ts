@@ -140,9 +140,18 @@ export class AppTableCurrenciesDataComponent {
     this.loadingDataState.state='Pending';
     this.currenciesDataService.getRatestData( this.datePipe.transform(this.dateForLoadingPrices.value,'YYYY-MM-dd'),this.sourceCode.value,this.overwritingCurrentData.value).pipe (
       catchError((err)=>{
+        let errMsg:string =''
         console.log('CBR RatestData error',err);
         this.loadingDataState.state='Error'
-        this.CommonDialogsService.snackResultHandler({name:'error',detail:'There is no access to www.cbr.ru'})
+        switch (err.error.code) {
+          case 'ENOTFOUND':
+            errMsg='There is no accesss to cbr.ru'  
+          break;
+          default:
+            errMsg=err.error.hasOwnProperty('detail')? err['error']['detail'].split('\n')[0]:'There is no accesss to to cbr.ru'  
+          break;
+        }
+        this.CommonDialogsService.snackResultHandler({name:'error',detail:errMsg})
         return EMPTY;
       })
     ).subscribe(loadingDataState=>{

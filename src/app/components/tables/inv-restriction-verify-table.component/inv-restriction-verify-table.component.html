@@ -1,0 +1,127 @@
+<ng-container *ngIf="accessState!=='none'" >
+  <mat-form-field style="width: 20%;"class = "filterField"  title="Filter All columns">
+    <mat-label class="whiteTextFilter">Search (all columns)...</mat-label>
+    <input 
+      (keyup)="applyFilter($event)"
+      matInput type="text" #filterALL
+      matTooltip="Use context menu to add filter"     >
+    <button matSuffix 
+      mat-icon-button aria-label="Clear" 
+      (click)="clearFilter(filterALL)">
+      <mat-icon>close</mat-icon>
+    </button>
+  </mat-form-field>
+
+
+  <button color = "accent" mat-raised-button title="Export To Excel"
+    style=" margin-left:1%; font-size: 18px;"
+    (click)="exportToExcel()">
+    Save as XLS 
+    <mat-icon matSuffix >save_alt</mat-icon>
+  </button>
+  <button color = "accent" mat-raised-button title="Reload Table"
+    style=" margin-left:1%; font-size: 18px;"
+    (click)="submitQuery()">
+    Reload 
+    <mat-icon matSuffix >refresh</mat-icon>
+  </button>
+  <mat-checkbox   title="Show only violated restrictions" #onlyViolations [checked]="true"
+    (change)="showOnlyViolations($event.checked)"
+    style="font-size:medium; margin-left: 2%;">
+    Only violations
+  </mat-checkbox> 
+  <!-- complexSearch Form -->
+<form class="submit" *ngIf="readOnly!==true" [formGroup]="searchParametersFG" 
+ style="font-size: 18px; margin-left: 0.5%; "> 
+  <span style="display: flex;    align-items:flex-start;  margin-right: 1%;margin-top: 0.2%;"> 
+    <span style="display:grid; width: 15%; margin-right: 2%;"> <!-- submitQuery/CleaAll Buttons -->
+      <button color = "primary"  class= "button-color" mat-raised-button 
+        [disabled]="searchParametersFG.invalid"
+        style="margin:1%; font-size: 18px;"
+        (click)="submitQuery()">
+        Submit
+      </button>
+      <button color = "accent" mat-raised-button 
+        style="margin-top:4%;margin-left: 1%; font-size: 18px;"
+        (click)="searchParametersFG.reset();
+         portfolios=['ClearAll']">
+        ClearAll
+      </button>
+
+    </span>
+      <mat-form-field *ngIf="UI_portfolio_selection===true"  appearance="fill" style="width: 60%; margin-bottom: 0.5%; " class="search-filed">
+        <mat-chip-list #chipPortList   >
+          <mat-select placeholder="Model Portfolio" class="search-filed" 
+            formControlName="MP" 
+            style="width: 20%;"
+            (selectionChange)="setPortfoliosList($event)"  >
+            <mat-option *ngFor="let mp of mp_strategies_list" [value]="mp.name"> {{mp.name}} </mat-option>
+          </mat-select>
+          <mat-chip *ngFor="let portfolio of portfolios" 
+          (removed)="remove(portfolio,portfolios,idportfolios)"
+          (click)=" portfolios = clearAll($event,portfolios,idportfolios);">
+            {{portfolio}}
+            <button matChipRemove *ngIf="portfolio!=='ClearAll'">
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </mat-chip>
+          <input style="width: 45%;"
+          matInput
+          placeholder="Add portfolio or portfolio1,portfolio2.."
+          formControlName="idportfolios"
+          [matChipInputFor]="chipPortList"
+          [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+          [matChipInputAddOnBlur]="true"
+          (matChipInputTokenEnd)="portfolios = add($event,portfolios,idportfolios)"
+          matTooltip="Type portfolio code or paste multiple codes separated by comma and press enter" >
+        </mat-chip-list>
+        <mat-hint style="color:rgb(104, 246, 246); font-style: italic;">
+          Portfolios List
+        </mat-hint>
+      </mat-form-field>
+</span>
+</form>
+  <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort
+   class="mat-elevation-z8" 
+    class ="childTable" style="width: 100%; margin-top: 0.5%;" >
+    <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i=index" justify="right"  >
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> {{columnsHeaderToDisplay[i]}}</th>
+      <td 
+        mat-cell *matCellDef="let element" [cdkContextMenuTriggerFor]="instrumentcontextmenu" >
+        <span [ngSwitch]="true==true">
+          <p *ngSwitchDefault>{{element[column]}}</p>
+          <p *ngSwitchCase="['act_mtm','npv','net_orders'].includes(column)">{{element[column]|currency :' '}} </p>
+          <p *ngSwitchCase="['rest_type','param'].includes(column)">{{element[column]? element[column].toLocaleUpperCase():''}} </p>
+          <p *ngSwitchCase="['act_violation_and_orders','act_violation','mp_violation'].includes(column)&&element[column]!==null">
+            <span [style.color]="element[column]==0? 'default' : element[column]>0?'indianred':'white'">{{element[column]|currency :' '}}{{'%'}} </span>
+          </p>
+          <p *ngSwitchCase="['act_weight_and_orders','act_weight','mp_weight'].includes(column)&&element[column]!==null">
+            {{element[column]|currency :' '}}{{'%'}} 
+          </p>
+        </span>
+        <ng-template  #instrumentcontextmenu>
+          <div class="tree-menu-context" cdkMenu >
+            <button 
+            (click)="updateFilter(element[column])"
+            class="tree-menu-item" cdkMenuItem>
+            <mat-icon class="menu-icon" matPrefix>filter_list</mat-icon> 
+            Add to filter
+          </button> 
+          </div>
+        </ng-template>  
+      </td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+    <tr mat-row  *matRowDef="let element; columns: columnsToDisplay; let dataindex=dataIndex;"
+      tabindex=0
+   >
+    </tr>
+<!--       <tr mat-row  *matRowDef="let element; columns: columnsToDisplay; let dataindex=dataIndex;"
+      tabindex=0
+      [ngClass]="{'highlight':element && this.selectedRowID  == element.id}"
+      (keydown)="keyDownEvent($event)"
+      (click)="highlight(element)">
+    </tr> -->
+  </table>
+  <mat-paginator [pageSizeOptions]="[5, 15, 25, 100]" [pageSize]="rowsPerPages" aria-label="Select page of allocation"></mat-paginator>
+</ng-container>

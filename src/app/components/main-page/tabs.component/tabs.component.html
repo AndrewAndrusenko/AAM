@@ -29,6 +29,12 @@
     [UI_portfolio_zero]="false"
     [filters]="{portfolio_code:[messageReceived.name]}">
     </app-inv-portfolio-position-table>
+    <app-inv-restriction-verify-table 
+    style="margin-top: 4%;"
+    [UI_portfolio_selection]="false"
+    [readOnly]="true"
+    [filters]="{portfolio_code:[messageReceived.name]}"
+    ></app-inv-restriction-verify-table>  
   </mat-tab>
   <mat-tab label="Trades" aria-label="Trades"> 
     <app-allocation-table
@@ -69,6 +75,12 @@
     [rowsPerPages]="15"
     [UI_portfolio_selection]="false">
     </app-inv-portfolio-position-table>
+    <app-inv-restriction-verify-table 
+    style="margin-top: 4%;"
+    [useGetClientsPortfolios]="true"
+    [UI_portfolio_selection]="false"
+    [readOnly]="true"
+  ></app-inv-restriction-verify-table>  
   </mat-tab>
   <mat-tab label="Transactions"> 
     <app-table-acc-entries
@@ -98,6 +110,7 @@
     </app-allocation-table>
   </mat-tab>
 </mat-tab-group>
+
 <mat-tab-group *ngIf="messageReceived.text=='Strategies'" #StrategiesInfo mat-stretch-tabs>
   <mat-tab label="Strategy Structure" >
     <div class="instrument_form">
@@ -108,7 +121,7 @@
       </app-app-strategy-form> 
     </div>
   </mat-tab>  
-  <mat-tab label="Orders by Strategy"> 
+  <mat-tab label="Orders"> 
     <app-orders-table style="width: 150%;"
     [tableMode]="['Parent']" 
     [filters]="{
@@ -117,20 +130,24 @@
     }"
     ></app-orders-table>
   </mat-tab>
-  <mat-tab label="Portfolios by Strategy"> 
+  <mat-tab label="Portfolios"> 
     <app-portfolio-tablee
     [strategyMpName]="messageReceived.name"
     [actionOnAccountTable]="'Get_Portfolios_By_StrategyId'">
     </app-portfolio-tablee>
   </mat-tab>
-  <mat-tab label="Positions by Strategy"> 
+  <mat-tab label="Positions"> 
     <app-inv-portfolio-position-table
       [rowsPerPages]="15"
       [useGetClientsPortfolios]="true"
       >
     </app-inv-portfolio-position-table>
+    <app-inv-restriction-verify-table 
+      style="margin-top: 4%;"
+      [useGetClientsPortfolios]="true"
+    ></app-inv-restriction-verify-table>  
   </mat-tab>
-  <mat-tab label="Trades by Strategy">
+  <mat-tab label="Trades">
     <app-allocation-table
     [rowsPerPages]="15"
     [filters]="{

@@ -215,6 +215,20 @@ export class AppFeesHandlingService {
         this.feesToProcess.filter(el=>el.id>0&&el.portfolioname===feeTransaction.portfolioname).map(el=>Number(el.id)),
         ((data as unknown) as number[]),
         new Date(accountingDate).toLocaleDateString()
+        ).pipe(
+          catchError((err) => {
+            let entriesIds = createdAccountingTransactions.flat().map(arr=>{return {AL:arr[0]['accountId'],id:arr[0]['id']}})
+            console.log('LL entriesIds',entriesIds.filter(el=>!el.AL).map(el=>Number(el.id)));
+            console.log('AL Ids',entriesIds.filter(el=>el.AL).map(el=>Number(el.id)));
+            this.AccountingDataService.deleteSTPBulkEntries(
+              entriesIds.filter(el=>!el.AL).map(el=>Number(el.id)),
+              entriesIds.filter(el=>el.AL).map(el=>Number(el.id))
+            ).subscribe(data=>{
+              this.CommonDialogsService.snackResultHandler(err.error)
+              console.log('rollback entries',data);
+            }) 
+            return EMPTY
+          })
         )),
       catchError((err) => {
         console.log('err',err);

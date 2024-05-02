@@ -1,5 +1,6 @@
+-- FUNCTION: public.f_i_o_prepare_orders_data_by_mp_v3(integer, text[], text[], date, integer, numeric)
 
-DROP FUNCTION IF EXISTS public.f_i_o_prepare_orders_data_by_mp_v3(integer, text[], text[], date, integer, numeric);
+-- DROP FUNCTION IF EXISTS public.f_i_o_prepare_orders_data_by_mp_v3(integer, text[], text[], date, integer, numeric);
 
 CREATE OR REPLACE FUNCTION public.f_i_o_prepare_orders_data_by_mp_v3(
 	p_leverage_handle integer,
@@ -8,40 +9,7 @@ CREATE OR REPLACE FUNCTION public.f_i_o_prepare_orders_data_by_mp_v3(
 	p_report_date date,
 	p_report_currency integer,
 	p_min_deviation numeric)
-    RETURNS TABLE (
-			order_amount_final numeric,
-			order_at_max_limit numeric,
-			balance_corrected_by_mp numeric,
-			leverage_amount numeric,
-			lv_corr numeric,
-      total_net_orders numeric,
-			mp_leverage_good boolean,
-			balance numeric,
-			orders_net_amt_rt numeric,
-			mp_weight numeric,
-			order_amount_main numeric, 
-			order_rs_secid numeric,
-			order_rs_sec_type numeric,
-			order_rs_listing numeric,
-			mp_restriction_good boolean, npv numeric, mp_npv numeric,  
-			npv_sec_type numeric, 
-			npv_listing numeric,
-			orders_net_amount_rt_sec_type numeric, 
-			orders_net_amount_rt_listing numeric,
-			net_orders_sec_type numeric,
-			net_orders_listing numeric,
-			net_orders_secid numeric,
-			portfolio_code character varying, mp_object_weight numeric, 
-			portfolio_restriction_by_mp numeric, 
-			rs_amount_sec_type numeric, 
-			rs_amount_listing numeric,
-			leverage_handle integer,
-			rs_sec_type numeric,rs_secid numeric, rs_listing numeric,
-			secid_balance numeric,
-			id bigint, 
-			generated date, order_type numeric, idcurrency numeric, child_orders integer[], mp_id bigint, qty numeric, price numeric, 
-			amount numeric, qty_executed numeric, parent_order integer, id_portfolio numeric, type character varying, secid character varying,
-			status character varying, ordertype character varying,sec_type text,listing numeric) 
+    RETURNS TABLE(order_amount_final numeric, order_at_max_limit numeric, balance_corrected_by_mp numeric, leverage_amount numeric, lv_corr numeric, total_net_orders numeric, mp_leverage_good boolean, balance numeric, orders_net_amt_rt numeric, mp_weight numeric, order_amount_main numeric, order_rs_secid numeric, order_rs_sec_type numeric, order_rs_listing numeric, mp_restriction_good boolean, npv numeric, mp_npv numeric, npv_sec_type numeric, npv_listing numeric, orders_net_amount_rt_sec_type numeric, orders_net_amount_rt_listing numeric, net_orders_sec_type numeric, net_orders_listing numeric, net_orders_secid numeric, portfolio_code character varying, mp_object_weight numeric, portfolio_restriction_by_mp numeric, rs_amount_sec_type numeric, rs_amount_listing numeric, leverage_handle integer, rs_sec_type numeric, rs_secid numeric, rs_listing numeric, secid_balance numeric, id bigint, generated date, order_type numeric, idcurrency numeric, child_orders integer[], mp_id bigint, qty numeric, price numeric, amount numeric, qty_executed numeric, parent_order integer, id_portfolio numeric, type character varying, secid character varying, status character varying, ordertype character varying, sec_type text, listing numeric) 
     LANGUAGE 'plpgsql'
     COST 100
     VOLATILE PARALLEL UNSAFE
@@ -231,6 +199,7 @@ main_set AS (
 main_set_orders_by_rs AS (
 	SELECT 
 		CASE 
+			WHEN main_set."type"='SELL' THEN main_set.amount
 			WHEN main_set.rs_secid/100*main_set.npv-main_set.secid_balance-main_set.net_orders_secid<0 
 			THEN 0
 			ELSE LEAST(main_set.rs_secid/100*main_set.npv-main_set.secid_balance-main_set.net_orders_secid,main_set.amount) 
@@ -321,13 +290,15 @@ main_set_with_order_at_max_lever AS (
 )
 SELECT 
 	CASE 
+		WHEN msmo."type"='SELL' THEN msmo.order_amount_main
 		WHEN p_leverage_handle = 0 THEN msmo.order_amount_main
 		WHEN p_leverage_handle = 1 THEN CASE WHEN msmo.mp_leverage_good=true THEN msmo.order_amount_main ELSE 0 END
 		WHEN p_leverage_handle = 2 THEN msmo.order_at_max_limit
-	END AS order_amount_final,msmo.* 
+	END::numeric(20,2) AS order_amount_final,msmo.* 
 	FROM main_set_with_order_at_max_lever msmo
 WHERE (	
 	CASE 
+		WHEN msmo."type"='SELL' THEN msmo.order_amount_main
 		WHEN p_leverage_handle = 0 THEN msmo.order_amount_main
 		WHEN p_leverage_handle = 1 THEN CASE WHEN msmo.mp_leverage_good=true THEN msmo.order_amount_main ELSE 0 END
 		WHEN p_leverage_handle = 2 THEN msmo.order_at_max_limit
@@ -338,45 +309,10 @@ $BODY$;
 
 ALTER FUNCTION public.f_i_o_prepare_orders_data_by_mp_v3(integer, text[], text[], date, integer, numeric)
     OWNER TO postgres;
-SELECT 
-		order_amount_final::money as ord_fn,
-		order_at_max_limit::money as or_max,
-	balance_corrected_by_mp::money as bal_crt,
-	leverage_amount::money as lv_amt,
-	portfolio_code,
-	lv_corr,
-	total_net_orders ::money,
-	secid,
-	type,
-	sec_type,
-	listing,
-	orders_net_amt_rt::money,
-	order_amount_main::money,
-	amount::money as ord_int,
-	order_rs_sec_type::money,
-	order_rs_listing::money,
-	order_rs_secid::money,
-	rs_secid,
-	rs_sec_type,
-	rs_listing,
-		npv_listing::money,
-	npv_sec_type::money,
-	orders_net_amount_rt_listing::money as ord_rt_ls,
-	orders_net_amount_rt_sec_type::money as ord_rt_st,
-	net_orders_listing::money as net_orders_ls,
-	order_rs_secid::money,
-	secid_balance::money,
-	net_orders_secid::money as net_orders_sec,
-	order_amount_main::money,
-	-- (order_amount_main-amount)::money as delta,
-	net_orders_sec_type::money as net_orders_sc,
-	amount,* 
-from f_i_o_prepare_orders_data_by_mp_v3(
-	2,array['vpc005','icm011'],
-	array['clearall','aapl-rm','nflx-rm','ri100000bf4','ri100000br4','rim4','spot-rm','lkoh','tsla-rm','sberp','lly-rm','su29008rmfs8','xs0993162683']
-	,now()::date,840,0)
--- where id_portfolio=7
--- or 
--- secid='LKOH'
-order by 
- id_portfolio, mp_id, "type" DESC, f_i_o_prepare_orders_data_by_mp_v3.order_amount_main
+select * from f_i_o_prepare_orders_data_by_mp_v3(
+	0 ,
+	array['acm002'],
+	array['tsla-rm','aapl-rm'],
+	now()::date,
+	840,
+	1)

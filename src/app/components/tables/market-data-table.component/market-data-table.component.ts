@@ -1,7 +1,7 @@
 import {Component,ViewChild, Input} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
-import {map, Observable, startWith, Subscription } from 'rxjs';
+import {catchError, EMPTY, map, Observable, startWith, Subscription } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {marketData, marketDataSources, tableHeaders } from 'src/app/models/interfaces.model';
 import {AppAccountingService } from 'src/app/services/accounting.service';
@@ -195,9 +195,17 @@ export class AppTableMarketDataComponent {
     this.loadingDataLog.state = {Message : 'Loading', State: 'Pending'}
     let dateToLoad = this.datePipe.transform(this.dateForLoadingPrices.value,'YYYY-MM-dd')
     this.loadMarketData.disable();
-    this.MarketDataService.uploadMarketData(dateToLoad, this.sourceCode.value,this.overwritingCurrentData.value).subscribe(data=>{
+    this.MarketDataService.uploadMarketData(dateToLoad, this.sourceCode.value,this.overwritingCurrentData.value).pipe(
+      catchError(err=>{
+        console.log('comp err',err);
+        this.loadMarketData.enable();
+        this.loadingDataLog.state = {Message: 'Loading has been aborted due to error.', State: 'terminated'}
+        this.loadingDataLog.dataLoaded = [];
+        return EMPTY
+      })
+    ).subscribe(data=>{
       this.loadingDataLog=data;
-      
+      console.log('data',data);
       data.dataLoaded.length>0? this.loadingDataLog.state = {Message:'Loading is complited.', State:'Success'} : null;
       this.marketSources.forEach(el=>{
         el.checkedAll=false;

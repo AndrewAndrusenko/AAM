@@ -1,4 +1,6 @@
 <ng-container *ngIf="accessState!=='none'" >
+  <label >{{tableMode.length}}</label>
+  <label >{{tableMode[0]}}</label>
     <mat-form-field class = "filterField" *ngIf="tableMode.includes('Parent')&&tableMode.length===1"
     style="width: 10%;"> <!-- Order Type Filter -->
       <mat-label class="whiteTextFilter">Order type</mat-label>
@@ -50,24 +52,25 @@
     </button>
   </ng-container>
   <ng-container  *ngIf="tableMode.includes('Parent')&&tableMode.length===1">  <!-- Parent Mode Block -->
-    <ng-container  *ngIf="!disabledControlElements"> <!-- Edit Buks Orders Block -->
-      <button  title="Create Bulk Orders"
+<!--     <ng-container  *ngIf="!disabledControlElements">  --><!-- Edit Buks Orders Block -->
+    <ng-container  *ngIf="true===true"> <!-- Edit Buks Orders Block -->
+      <button  title="Create Bulk Orders" *ngIf="!showClientOrdersCB.checked"
         color = "primary" mat-raised-button style=" margin-left:2%; font-size: 18px;"
         (click)="createBulkOrders()">
         Create Bulk Orders 
         <mat-icon matSuffix >call_merge</mat-icon>
       </button>
-      <button title="Unmerge Bulk Orders"  
+      <button title="Unmerge Bulk Orders"  *ngIf="!showClientOrdersCB.checked"
         color = "warn" mat-raised-button style=" margin-left:1%; font-size: 18px;"
         (click)="unmergeBulk()">
         Unmerge Bulk Orders 
         <mat-icon matSuffix>call_split</mat-icon>
       </button>
-      <button title="Unmerge Bulk Orders"  
-      color = "warn" mat-raised-button style=" margin-left:1%; font-size: 18px;"
-      (click)="deleteClientOrders()">
-      Delete Client Orders 
-      <mat-icon matSuffix>delete</mat-icon>
+      <button title="Unmerge Bulk Orders" *ngIf="!showClientOrdersCB.checked"
+        color = "warn" mat-raised-button style=" margin-left:1%; font-size: 18px;"
+        (click)="deleteClientOrders()">
+        Delete Client Orders 
+        <mat-icon matSuffix>delete</mat-icon>
       </button>
     </ng-container>
     <mat-checkbox style="font-size:larger; margin-left: 1%;" #showClientOrdersCB

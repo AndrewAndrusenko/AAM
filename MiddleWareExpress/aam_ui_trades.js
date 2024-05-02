@@ -229,6 +229,9 @@ async function fAllocation(request,response) {
            'SELECT COALESCE(id_order,id_bulk_order,idtrade) as id_joined,id_order,id_bulk_order,idtrade, sum(allocation.qty) AS allocated '+
            'FROM allocation GROUP BY  GROUPING SETS ((id_order),(id_bulk_order),(idtrade)); ';
     break;
+    case 'getDraftExecuteOrders':
+      sql= 'SELECT corrected_qty,${tradeId},id_portfolio,id,parent_order,mp_id FROM f_i_allocation_orders(${qtyForAllocation},ARRAY[${ordersForExecution}])  WHERE corrected_qty!=0; ';
+    break;
     case 'deleteAllocation':
       sql = 'DELETE FROM dtrades_allocated WHERE id=ANY(ARRAY[${tradesIDs}]) RETURNING *'; 
     break;

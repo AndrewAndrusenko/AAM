@@ -3,27 +3,60 @@ import { HadlingCommonDialogsService } from './hadling-common-dialogs.service';
 import { AppTradeService } from './trades-service.service';
 import { AppAccountingService } from './accounting.service';
 import { AppallocationTableComponent } from '../components/tables/allocation-table.component/allocation-table.component';
-import { EMPTY, Observable, Subject,  catchError,  filter, forkJoin, map,  of, switchMap, tap } from 'rxjs';
+import { Observable, Subject,  catchError,  filter, forkJoin, map,  of, switchMap, tap } from 'rxjs';
 import { AbstractControl } from '@angular/forms';
 import { AppOrderTableComponent } from '../components/tables/orders-table.component/orders-table.component';
-import { allocation, allocation_fifo } from '../models/interfaces.model';
+import { allocation, allocation_fifo, orders } from '../models/interfaces.model';
 import { AccountingTradesService } from './accounting-trades.service';
 import { bAccountTransaction, bAccounts, bLedgerTransaction } from '../models/accountng-intefaces.model';
 import { bcEntryParameters } from '../models/acc-schemes-interfaces';
+import { AppRestrictionsHandlingService } from './restrictions-handling.service';
+import { restrictionVerificationAllocation } from '../models/restrictions-interfaces.model';
+import { AppInvRestrictionVerifyAllocTableComponent } from '../components/tables/inv-restriction-verify-alloc-table.component/inv-restriction-verify-alloc-table.component';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AppAllocationService {
+
   private tradeToConfirm:allocation[];
   private deletedAccounting$ = new Subject <allocation_fifo[]>
   private createdAccounting$ = new Subject <bAccountTransaction[]|bLedgerTransaction[]>
+  dialogRestrcitionsViolations: MatDialogRef<AppInvRestrictionVerifyAllocTableComponent>;
+
   constructor(
     private CommonDialogsService:HadlingCommonDialogsService,
     private TradeService: AppTradeService,
     private AccountingDataService:AppAccountingService, 
     private accountingTradeService: AccountingTradesService,
+    private RestrictionsHandlingService: AppRestrictionsHandlingService,
+    private dialog: MatDialog
   ) { }
+  executeOrdersSrv(
+    qtyForAllocation: number, unexecutedTotal: number, ordersForExecution: number[], price: number, tidinstrument: string,idtrade:number,ordType:string
+    ):Observable<orders[]> {
+    return of(qtyForAllocation).pipe (
+      tap(data=>data<1? this.CommonDialogsService.snackResultHandler({name:'error',detail:'The whole trade volume has been allocated!'},'Allocation'):null),
+      filter(data=>data>0),
+      tap(()=>!unexecutedTotal? this.CommonDialogsService.snackResultHandler({name:'error',detail:'Orders have been allocated!'},'Allocation'):null),
+      filter(()=>unexecutedTotal>0),
+      switchMap(()=>ordType==='BUY'? this.RestrictionsHandlingService.getVerificationForAllocation(
+        price,
+        tidinstrument,
+        ordersForExecution,
+        Number(qtyForAllocation)
+        ):of([])),
+      switchMap(data=>data.length? this.showViolations(data):of(true)),
+      filter(allocApproved=>allocApproved===true),
+      switchMap(()=>this.TradeService.executeOrders(ordersForExecution,Number(qtyForAllocation),idtrade))
+      )
+  }
+  showViolations (data:restrictionVerificationAllocation[]):Observable <boolean> {
+    this.dialogRestrcitionsViolations = this.dialog.open(AppInvRestrictionVerifyAllocTableComponent)
+    this.dialogRestrcitionsViolations.componentInstance.dataVerification = data
+    return this.dialogRestrcitionsViolations.afterClosed()
+  }
   createAccountingForAllocation (allocationTable:AppallocationTableComponent) {
     this.tradeToConfirm = allocationTable.selection.selected;
     this.TradeService.getEntriesPerAllocatedTrade(this.tradeToConfirm.map(el=>Number(el.id))).pipe(

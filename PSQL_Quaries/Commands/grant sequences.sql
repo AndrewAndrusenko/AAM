@@ -1,3 +1,3 @@
-GRANT update
+GRANT UPDATE
 ON ALL SEQUENCES IN SCHEMA public
-    TO aam_middile_officer
+    TO aam_trader

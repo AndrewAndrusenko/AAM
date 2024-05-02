@@ -94,6 +94,10 @@ export class AppTradeService {
     let data={ordersForExecution:ordersForExecution,qtyForAllocation:qtyForAllocation,tradeId:tradeId}
     return this.http.post <orders[]>('api/AAM/MD/Allocation',{data:data,action:'executeOrders'})
   }
+  getDraftExecuteOrders (ordersForExecution:number[],qtyForAllocation:number,tradeId:number):Observable<orders[]>{
+    let data={ordersForExecution:ordersForExecution,qtyForAllocation:qtyForAllocation,tradeId:tradeId}
+    return this.http.post <orders[]>('api/AAM/MD/Allocation',{data:data,action:'getDraftExecuteOrders'})
+  }
   sendReloadOrdersForExecution (data:orders[],idtrade:number,ordersForExecution:number[]) {
     this.reloadExecution.next({data:data,idtrade:idtrade,ordersForExecution:ordersForExecution});
   }

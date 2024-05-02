@@ -35,11 +35,11 @@ export class HadlingCommonDialogsService {
     this.dialogRefConfirm.componentInstance.jsonData = jsonData;
     this.dialogRefConfirm.componentInstance.captionTitle = captionTitle;
   }
-  snackResultHandler (result :{name:string,detail:string}|Array<{}>|number, action?: string, postion:MatSnackBarVerticalPosition = 'top', closeAll:boolean=true, duration:number=3000) {
+  snackResultHandler (result :{name:string,detail:string}|Array<{}>|number, action?: string, postion:MatSnackBarVerticalPosition = 'top', closeAll:boolean=true, duration:number=3000,err=true) {
     this.verticalPosition=postion;
     if (result['name']=='error') { 
       this.dbErrorsMap.forEach (el => result['detail'].includes(el.constraintCode)? result['detail'] = el.errorText : null);
-      this.snack.open('Error: ' + result['detail'],'OK',{
+      this.snack.open(err? 'Error: '+ result['detail']:'' + result['detail'],'OK',{
         panelClass: ['snackbar-error'],
         verticalPosition: this.verticalPosition
       }); 

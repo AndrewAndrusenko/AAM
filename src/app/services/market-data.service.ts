@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, Subject, forkJoin, map, of, switchMap, tap } from 'rxjs';
+import { EMPTY, Observable, Subject, catchError, forkJoin, map, of, switchMap, tap, throwError } from 'rxjs';
 import { InstrumentsMapCodes, marketData, marketDataSources, marketSourceSegements } from '../models/interfaces.model';
 import { HadlingCommonDialogsService } from './hadling-common-dialogs.service';
 interface marketDataCheck {
@@ -148,6 +148,7 @@ export class AppMarketDataService {
       params.start = 0;
       uploadStreams.push(
       this.http.get <moexIssDataObject[]> (source.sourceURL, {params:params}).pipe(
+        tap(d=>console.log('first step',d)),
         tap (marketData=>{
           totalRows = marketData[1]['history.cursor'][0].TOTAL;
           for (let index = 0; index <= totalRows; index=index + marketData[1]['history.cursor'][0].PAGESIZE) {
@@ -158,7 +159,21 @@ export class AppMarketDataService {
         switchMap(()=>forkJoin(getIssMoexStreams)),
         map(dataIssMoex=>dataIssMoex.map(el=>{return el[1].history.flat()}).flat()),
         switchMap(dataIssMoex=> this.insertMarketData (dataIssMoex,source.sourceCode,'MOEXiss')),
-        switchMap(inserted=>of({'Source':'MOEXiss - '+ source.sourceCode,'Total rows loaded - ' : inserted,'Total rows fetched from source - ': totalRows,'Date': dateToLoad}))
+        switchMap(inserted=>of({'Source':'MOEXiss - '+ source.sourceCode,'Total rows loaded - ' : inserted,'Total rows fetched from source - ': totalRows,'Date': dateToLoad})),
+        catchError((err)=>{
+          let errMsg:string =''
+          console.log('MOEXiss loading error',err);
+          switch (err.error.code) {
+            case 'ENOTFOUND':
+              errMsg='There is no accesss to MOEXiss'  
+            break;
+            default:
+              errMsg=err.error.hasOwnProperty('detail')? err['error']['detail'].split('\n')[0]:'There is no accesss to MOEXiss'  
+            break;
+          }
+          this.CommonDialogsService.snackResultHandler({name:'error',detail:errMsg})
+          return throwError(() => err);
+        })
       ))
      })
     return forkJoin(uploadStreams).pipe(
@@ -166,7 +181,22 @@ export class AppMarketDataService {
           dataLoaded:data, 
           deletedRows: this.deletedMarketDataRows,
           state:{Message:'Loaded',State:'Success'}
-        })));
+        })),
+      catchError((err)=>{
+            let errMsg:string =''
+            console.log('forkJoin MOEXiss loading error',err);
+            switch (err.error.code) {
+              case 'ENOTFOUND':
+                errMsg='There is no accesss to MOEXiss'  
+              break;
+              default:
+                errMsg=err.error.hasOwnProperty('detail')? err['error']['detail'].split('\n')[0]:'There is no accesss to MOEXiss'  
+              break;
+            }
+            this.CommonDialogsService.snackResultHandler({name:'error',detail:errMsg})
+            return throwError(() => err);
+          })
+      );
   }
   loadMarketDataMarketStack (sourceCodes:marketSourceSegements[],dateToLoad: string):Observable<{dataLoaded: marketDateLoaded[],deletedRows:number,state:logLoadingState}>  {
     let uploadStreams :Observable<marketDateLoaded>[]=[];

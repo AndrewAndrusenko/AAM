@@ -45,9 +45,22 @@ constructor(
   }
   tools () {
     let obj = `
-    id :number, portfolioname :string, idportfolio :number, restriction_type_id: number, 
-    value: number, param :string,
-    object_code :string, object_id: number, object_description :string
+    id :number,
+    code :string,
+    mp_name :string,
+    rest_type :string,
+    param :string,
+    restrictinon :number,
+    act_violation_and_orders :number,
+    act_violation :number,
+    mp_violation :number,
+    act_weight_and_orders :number,
+    act_weight :number,
+    mp_weight :number,
+    sum_weight :number,
+    act_mtm :number,
+    npv :number,
+    net_orders  :number
   `
   let a = obj.split(',').map(el=> {return {fieldName:el.split(':')[0].trim(),displayName:el.split(':')[0].trim()}});
   console.log('obj',a.flat());

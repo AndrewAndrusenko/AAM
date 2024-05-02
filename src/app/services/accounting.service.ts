@@ -213,7 +213,7 @@ export class AppAccountingService {
     let idsAccountTransactions = new bAccountTransactionC ();
     let idsLedgerTransactions = new bLedgerTransactionC ();
     idsAccountTransactions.id=idsAL;
-    idsLedgerTransactions.id=idsAL;
+    idsLedgerTransactions.id=idsLL;
     this.CommonDialogsService.confirmDialog('Delete Entries','Delete').pipe(
       filter(confirm=>confirm.isConfirmed===true),
       switchMap(()=>{
@@ -229,6 +229,16 @@ export class AppAccountingService {
       };
       this.sendReloadEntryList(undefined)
     })
+  }
+  deleteSTPBulkEntries (idsLL:number[],idsAL:number[]) : Observable<[bAccountTransaction[],bLedgerTransaction[]]> {
+    let idsAccountTransactions = new bAccountTransactionC ();
+    let idsLedgerTransactions = new bLedgerTransactionC ();
+    idsAccountTransactions.id=idsAL;
+    idsLedgerTransactions.id=idsLL;
+    return forkJoin([
+          this.updateEntryAccountAccounting(idsAccountTransactions,'Delete'),
+          this.updateLLEntryAccountAccounting(idsLedgerTransactions,'Delete')
+    ])
   }
   sendReloadEntryList ( id:number) {this.relplaySubject.next(id)}
   getReloadEntryList(): Observable<number> {return this.relplaySubject.asObservable()}

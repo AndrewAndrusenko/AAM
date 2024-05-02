@@ -3,6 +3,10 @@ const Pool = require('pg').Pool;
 const poolSuper = new Pool(config.dbConfig);
 var pool;
 const pool_middle_officer = new Pool(config.dbConfig_aam_middile_officer);
+const pool_back_officer = new Pool(config.dbConfig_aam_back_officer);
+const pool_portfolio_manager = new Pool(config.dbConfig_aam_portfolio_manager);
+const pool_accountant = new Pool(config.dbConfig_aam_accountant);
+const pool_trader = new Pool(config.dbConfig_aam_trader);
 var pgp = require ('pg-promise')({capSQL:true});
 const pg = require('pg');
 async function checkInternetConnection () {
@@ -14,15 +18,25 @@ async function queryExecute (sql, response, responseType, sqlID, SendResponse=tr
   accRole = response? response.req.user.accessrole:'super'
   switch (accRole) {
     case 'testRole':
-    case 'backOffice':
-    case 'portfolioManager':
       pool = poolSuper;
+      break;
+    case 'portfolioManager':
+      pool = pool_portfolio_manager;
     break;
     case 'middleOffice':
       pool = pool_middle_officer;
     break;
+    case 'backOffice':
+      pool = pool_back_officer;
+    break;
+    case 'trader':
+      pool = pool_trader;
+    break;
+    case 'AccountantOfficer':
+      pool = pool_accountant;
+    break;
     default:
-      return console.log('ERROR => '+sqlID+' There is no response object in params');
+      console.log('ERROR => '+sqlID+' There is no response object in params');
     break;
   }
   return new Promise ((resolve) => {
@@ -35,7 +49,8 @@ async function queryExecute (sql, response, responseType, sqlID, SendResponse=tr
         let rows = [];
         res.length? res.map(el => rows.push(...el.rows) ): rows = res.rows;
         result = responseType === 'rowCount'?  res.rowCount : rows;
-        console.log(new Date().toLocaleTimeString().slice(0,-3) +':'+ new Date().getMilliseconds(), sqlID,'Rows:'+  responseType === 'rowCount'?  res.rowCount :rows.length)
+        console.log(
+          new Date().toLocaleTimeString().slice(0,-3) +':'+ new Date().getMilliseconds(), sqlID,'Rows:'+  responseType === 'rowCount'?  res.rowCount :rows.length)
         resolve (response&&SendResponse? response.status(200).json(result):result)
       }
     })
@@ -78,6 +93,7 @@ function sqlReplace(sql) {
   sql = sql.replaceAll("'null'",null);
   sql = sql.replaceAll("array[0,0]",null);
   sql = sql.replaceAll(",'ClearAll'",',null');
+  sql = sql.replaceAll("'clearall'",null);
   sql = sql.replaceAll("'null'::numrange",null);
   sql = sql.replaceAll("null::numrange",null);
   sql = sql.replaceAll("null::daterange",null);

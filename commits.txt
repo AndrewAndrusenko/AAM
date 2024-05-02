@@ -509,10 +509,30 @@ Fix: Balance sheet: dates with entries are updated after execution of closing an
 9|| Fixed: Allocation accounting - FIFO/Accounting => Roll back FIFO/Accounting when any of accounting fails
 10|| Fixed: Revenue Factor shows graph from the last selected object if new object is reused and there's no need to reload it
 
+22/04/2024-01/05/2024
+1|| Investment restrictions verification =>
+  Created DB function to calculate violated investment restrictions. All restriction are being verified against current relative position, model portfolio ratio and current position with created orders deemed as executed
+  Created UI table to verify investment restrictions. Full UI table is available in portfolios block and the same component with necessary filtering has been added to portfolio, client and Strategy tab
+2|| Allocation with restrictions verification => Refactored order execution/allocation process.  
+  Each new allocated trade beforehand is verified against all restrictions, and a list of violations is demonstrated to a user with options to accept/reject potential allocation.
+  Main allocation function is refactored to RxJS and moved to the allocation service.
+  Created new component inv-restriction-verify-alloc-table.component/inv-restriction-verify-alloc-table.component.tsto show violated investment restriction with functions to approve allocation or reject it.
+  Added new DB functions f_i_r_verify_allocation_vs_restrictions.sql to calculate violations and update middleware accordingly
+3|| New RLS (bAccountTransaction/bLedgerTransactions) =>
+  New table bcTransactionType_Ext_Privileges has been introduced to DB.
+  Table contains transaction types allowed to be inserted or deleted for the particular access role. User based on its accessRole can to modify only transactions types that exist in the table
+  Thus RLS on insert and delete entries has been granted to public and conditions on existing links in bcTransactionType_Ext_Privileges have been added
+4|| Introduced new DB roles aam_back_officer, aam_portfolio_manager, aam_trader, aam_accountant.
+  Middleware: For each DB access role a separate connection configuration has been  and a separate query pool  is opened based on role configuration. accessRole is an obligatory parameter for a request.  Based on access role server select a right pool
+  DB: granted necessary privileges and added several RLS policies to segregate access.
+  Implemented RLS policy on accounts tables to separate auto depo account creation as a part of allocation process from manual account modifying (accountant privilege)
+5|| Fixed order delete process. Added RLS policy on dorders to prevent deletion of client orders linked to bulk order
+6|| Correct error handler for currencies and market quotes external importing
+
+
 
 ToDo
-|| DB access roles => redirection pool
 || Architecture
-|| Check UserAccess model for UI, especially the latest components
-|| Restrictions:Trades allocation, Entries generating, Restrictions verification reports
+|| UI to grant privileges on transaction type (accounting generating)
+|| DB Roles => accounting, trader, and check market price import access
 * Fix:[webpack-dev-server] module constantly disconnecting and trying to reconnect - Old Asus

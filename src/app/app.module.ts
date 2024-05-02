@@ -204,7 +204,9 @@ const appInitializerFn = (accessRestirictions:AuthService) => {
         AppPortfoliosHistTable,
         AppGGGGComponent,
         AppaInvRestrictionSchemesTable,
-        AppInvRestrictionMainFormComponent
+        AppInvRestrictionMainFormComponent,
+        AppInvRestrictionVerifyTableComponent,
+        AppInvRestrictionVerifyAllocTableComponent
 
      ],
     bootstrap: [AppComponent],
@@ -278,5 +280,7 @@ import { AppGGGGComponent } from './components/main-page/gggg.component/gggg.com
 import { AppaInvRestrictionSchemesTable } from './components/tables/inv-restriction-schemes-table.component/inv-restriction-schemes-table.component';
 import { AppInvRestrictionMainFormComponent } from './components/forms/inv-restriction-main-form/inv-restriction-main-form';
 import { ErrorCatchingInterceptor } from './services/errors-interceptor.service';
+import { AppInvRestrictionVerifyTableComponent } from './components/tables/inv-restriction-verify-table.component/inv-restriction-verify-table.component';
+import { AppInvRestrictionVerifyAllocTableComponent } from './components/tables/inv-restriction-verify-alloc-table.component/inv-restriction-verify-alloc-table.component';
 
 

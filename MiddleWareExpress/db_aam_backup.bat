@@ -1,5 +1,5 @@
 @echo off
-For /f %%a in ('powershell -Command "Get-Date -format dd_MMM_yyyy_HHMM"') do set datetime=%%a
+For /f %%a in ('powershell -Command "Get-Date -format dd_MM_yyyy_HHMM"') do set datetime=%%a
 set BACKUP_FILE=c:\JS\JSP\AAM\DB_BackUp\BackupDB_%datetime%h.sql
 SET PGPASSWORD=5236
 echo on

@@ -1,0 +1,1 @@
+REVOKE ALL PRIVIlEGES ON ALL TABLES IN SCHEMA public FROM aam_portfolio_manager

@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ClientData, allocation, allocation_fifo, counterParty, currencyCode, orders, trades} from 'src/app/models/interfaces.model';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AuthService } from 'src/app/services/auth.service';
-import { Observable, Subscription, debounceTime, distinctUntilChanged, filter, map, startWith, switchMap } from 'rxjs';
+import { Observable, Subscription, debounceTime, distinctUntilChanged, filter, map, of, startWith, switchMap, tap } from 'rxjs';
 import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import { AppTradeService } from 'src/app/services/trades-service.service';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -23,6 +23,8 @@ import { CurrenciesDataService } from 'src/app/services/currencies-data.service'
 import { AppMarketDataService } from 'src/app/services/market-data.service';
 import { Instruments, moexSecurityType } from 'src/app/models/instruments.interfaces';
 import { bAccountTransaction, bLedgerTransaction } from 'src/app/models/accountng-intefaces.model';
+import { AppRestrictionsHandlingService } from 'src/app/services/restrictions-handling.service';
+import { AppInvRestrictionVerifyAllocTableComponent } from '../../tables/inv-restriction-verify-alloc-table.component/inv-restriction-verify-alloc-table.component';
 @Component({
   selector: 'app-trade-modify-form',
   templateUrl: './trade-form.component.html',
@@ -177,25 +179,15 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
   executeOrders () {
     let qtyForAllocation = this.qty.value - this.allocatedqty.value;
     let unexecutedTotal = this.orderTable.selection.selected.map(el=>Number(el.unexecuted)).reduce((acc, val)=> acc+val,0)
-    if (qtyForAllocation<1) {
-      this.CommonDialogsService.snackResultHandler({name:'error',detail:'The whole trade volume has been allocated!'},'Allocation');
-      return;
-    };
-    if (!unexecutedTotal) {
-      this.CommonDialogsService.snackResultHandler({name:'error',detail:'Orders have been allocated!'},'Allocation');
-      return;
-    };
     let ordersForExecution = this.orderTable.selection.selected.map(el=> Number(el.id));
-    if (ordersForExecution.length) {
-      this.TradeService.executeOrders(ordersForExecution,Number(qtyForAllocation),this.idtrade.value).subscribe(data=>{
-        this.CommonDialogsService.snackResultHandler({name:'sucess',detail:'Orders have been allocated'},'Allocation',undefined,false)
-        this.TradeService.sendReloadOrdersForExecution(data,this.idtrade.value,ordersForExecution);
-        this.allocationTable.submitQuery(true,false)
-        this.allocatedqty.patchValue(Number(this.allocatedqty.value) + Number(data.filter(el=>el['id_joined']==this.idtrade.value)[0].allocated))
-      })
-    } else {
-      this.CommonDialogsService.snackResultHandler({name:'error',detail:'No bulk order has been selected!'},'Allocation');
-    }
+    this.AllocationService.executeOrdersSrv (
+      qtyForAllocation,unexecutedTotal,ordersForExecution,this.price.value, this.tidinstrument.value,this.idtrade.value,this.trtype.value
+      ).subscribe(data=>{
+      this.CommonDialogsService.snackResultHandler({name:'sucess',detail:'Orders have been allocated'},'Allocation',undefined,false)
+      this.TradeService.sendReloadOrdersForExecution(data,this.idtrade.value,ordersForExecution);
+      this.allocationTable.submitQuery(true,false)
+      this.allocatedqty.patchValue(Number(this.allocatedqty.value) + Number(data.filter(el=>el['id_joined']==this.idtrade.value)[0].allocated))
+    })
   } 
   createAccountingForAllocation () {
     this.AllocationService.createAccountingForAllocation(this.allocationTable)

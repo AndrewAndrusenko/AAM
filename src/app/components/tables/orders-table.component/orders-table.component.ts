@@ -194,10 +194,12 @@ export class AppOrderTableComponent {
     this.dataSource.paginator = this.paginator;
     this.dataSource.filterPredicate=this.multiFilter;
     this.dataSource.sort = this.sort;
+
     switch (this.tableMode.join()) {
       case 'Parent,Per_Portfolio':
       break;
       default:
+        this.showClientOrdersCB.checked=false;
         this.filters!==undefined&&this.fullOrdersSet!==undefined? this.initialFilterOfDataSource(this.filters):null;
         this.dataSource.data = this.excludeOrdersWithParent()
       break;
@@ -253,9 +255,13 @@ export class AppOrderTableComponent {
     this.updateordersDataTable(this.dataSource.data.filter(el=>allocOrders.includes(el.id)));
   }
   deleteClientOrders (){
+/*     let buldOrdersToDelete = this.selection.selected.map(el=>el.id)
+    let a = this.fullOrdersSet.filter(el=>el.ordertype==='Client'&&buldOrdersToDelete.includes(el.parent_order)) */
     let clientOrdersIds:number[] = this.selection.selected
     .filter(el=>el.ordertype==='Client')
     .map(el=> Number(el.id))
+    if (this.selection.selected.filter(el=>el.parent_order!=null).length>0) {
+      return this.CommonDialogsService.snackResultHandler({name:'error',detail:'Merged orders have been selected.\nPlease unmerge them first and then delete'})} 
     if (clientOrdersIds.length>0) {
       this.CommonDialogsService.confirmDialog('Delete Orders','Delete').pipe(
         filter(isConfirmed=>isConfirmed.isConfirmed),
@@ -393,7 +399,9 @@ export class AppOrderTableComponent {
     return chipArray;
   }
   isAllSelected() { return this.SelectionService.isAllSelected(this.dataSource, this.selection)} 
-  toggleAllRows(forceSelectAll:boolean=false) { return this.SelectionService.toggleAllRows(this.dataSource, this.selection,forceSelectAll)} 
+  toggleAllRows(forceSelectAll:boolean=false) { 
+    return this.SelectionService.toggleAllRows(this.dataSource, this.selection,forceSelectAll)
+  } 
   checkboxLabel(row?: orders): string {
     return this.SelectionService.checkboxLabel(this.dataSource, this.selection, row)
   }
