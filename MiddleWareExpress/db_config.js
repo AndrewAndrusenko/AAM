@@ -46,6 +46,14 @@ const dbConfig_aam_accountant = {
   port: 5432,
   parseJSON:true
 }
+const dbConfig_aam_salesRM = {
+  user: 'aam_salesRM',
+  host: 'localhost',
+  database: 'AAM_DB',
+  password: "aam_salesRM",
+  port: 5432,
+  parseJSON:true
+}
 
 module.exports = {
   dbConfig,
@@ -53,5 +61,6 @@ module.exports = {
   dbConfig_aam_back_officer,
   dbConfig_aam_portfolio_manager,
   dbConfig_aam_accountant,
-  dbConfig_aam_trader
+  dbConfig_aam_trader,
+  dbConfig_aam_salesRM
 }

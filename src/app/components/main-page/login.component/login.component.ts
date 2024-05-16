@@ -28,7 +28,7 @@ export class LoginComponent  {
   ISINuniqueAsyncValidator :ValidatorFn;
   public sessionID: string
   hide : boolean = true;
-  userroles:userRoles[] 
+  userroles:string[] 
   loginsArray: string[];
   constructor(
     private authService : AuthService, 

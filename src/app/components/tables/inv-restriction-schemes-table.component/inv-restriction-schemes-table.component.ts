@@ -109,9 +109,9 @@ export class AppaInvRestrictionSchemesTable {
   ngOnChanges(): void {
     this.onChanges&&this.idportfolios.length? this.submitQuery(false,false):null;
   }
-  updateDataTable (managementFeeData:restrictionsData[]) {
-    this.fullDataSource=managementFeeData;
-    this.dataSource  = new MatTableDataSource(managementFeeData);
+  updateDataTable (restrictionsData:restrictionsData[]) {
+    this.fullDataSource=restrictionsData;
+    this.dataSource  = new MatTableDataSource(restrictionsData);
     this.dataSource.filterPredicate =this.multiFilter
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;

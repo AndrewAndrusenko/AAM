@@ -529,10 +529,30 @@ Fix: Balance sheet: dates with entries are updated after execution of closing an
 5|| Fixed order delete process. Added RLS policy on dorders to prevent deletion of client orders linked to bulk order
 6|| Correct error handler for currencies and market quotes external importing
 
-
+02/05/2024 - 15/05/24
+The project is completed according to the planned functionality list on 8th of May. 
+The second phase is to prepare technical and presentation documentation, thorough testing, fixing and small refactoring. 
+1|| Created UI and backend to grant privileges on transaction type (accounting generating) to a specific access role.Table: acc-access-transaction-types-table.component.ts Form: acc-access-transaction-types-form.component.ts
+2|| DB Roles => Introduced a new role - salesRM (responsible for updating dclients => tested, creating and updaing portfolios)
+3|| The project is made accessible through Ngrok service https://parrot-organic-overly.ngrok-free.app
+4|| Fixing
+* Fixed: No action parameter in the portfolio form =>  Pass action parameter to portfolio page when negative by tree. Default set as view when no action parameter has been passed
+* Fixed: First opening of portfolio pages requested the whole set of fees schedules - portfolios => Correction onChange lifehook verifies idportfolio is not undefined 
+* Fixed: Unable to create fees schedule from portfolio page => Fixed by passing necessary portfolio parameters to the form
+* Fixed: Removed all pool queries which don't use common module with pool redirection
+* Fixed: Incorrect FIFO position calculation if there are more than one in trade within a day. => DB function f_fifo_get_cost_detailed_data.sql Added rest qty as ordering parameter in order to select last positions trades correctly
+* Fixed: FIFO position search with date parameter secid and portfolio => fixed by removing last boolean parameter in middle ware query execution function
++ Checked market quotes and currencies rates import on middleOfficer access role. Everythhig is okay
 
 ToDo
 || Architecture
-|| UI to grant privileges on transaction type (accounting generating)
-|| DB Roles => accounting, trader, and check market price import access
+|| Business process flow chart
+|| Access segregation model
+|| linkedIn
+|| Discord
+|| CV 
+|| Git
+|| YouTube 
+|| Local Tunnel or hosting VPS VDS
+|| Instrument tabs to fill inquery
 * Fix:[webpack-dev-server] module constantly disconnecting and trying to reconnect - Old Asus

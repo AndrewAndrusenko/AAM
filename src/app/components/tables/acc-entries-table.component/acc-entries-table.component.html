@@ -229,8 +229,8 @@
             </p>
           </span>
           <ng-template  #instrumentcontextmenu>
-            <div class="tree-menu-context" *ngIf="!disabledControlElements" cdkMenu >
-              <ng-container *ngIf="!UI_min">
+            <div class="tree-menu-context" cdkMenu >
+              <ng-container *ngIf="!UI_min&&!disabledControlElements">
                 <button 
                   (click)="openEntryModifyForm('Create', element)"
                   class="tree-menu-item" cdkMenuItem >

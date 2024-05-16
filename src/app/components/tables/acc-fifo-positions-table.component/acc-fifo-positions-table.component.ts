@@ -124,7 +124,7 @@ export class AppAccFifoPositionsTable {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
   }
- submitQuery (reset:boolean=false, showSnackResult:boolean=true) {
+  submitQuery (reset:boolean=false, showSnackResult:boolean=true) {
     let searchObj:{
       secidList: string[],
       portfoliosList: string [],
@@ -134,7 +134,7 @@ export class AppAccFifoPositionsTable {
     this.dataSource?.data? this.dataSource.data = null : null;
     searchObj.secidList = [0,1].includes(this.secidList.value.length)&&this.secidList.value[0]==='ClearAll'? null : this.secidList.value.map(el=>el.toUpperCase());
     searchObj.portfoliosList = [0,1].includes(this.portfoliosList.value.length)&&this.portfoliosList.value[0]==='ClearAll'? null : this.portfoliosList.value.map(el=>el.toUpperCase());
-    searchObj.tdate = this.tdate.value? this.HandlingCommonTasksS.toDateRangeNew(this.tdate) : null;
+    searchObj.tdate = this.tdate.value? new Date (this.tdate.value).toDateString(): null;
     this.accountingTradeService.getFifoPositions(searchObj).subscribe(data => {
       this.updateDataTable(data)
       showSnackResult? this.CommonDialogsService.snackResultHandler({

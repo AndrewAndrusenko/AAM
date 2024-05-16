@@ -148,7 +148,6 @@ export class AppMarketDataService {
       params.start = 0;
       uploadStreams.push(
       this.http.get <moexIssDataObject[]> (source.sourceURL, {params:params}).pipe(
-        tap(d=>console.log('first step',d)),
         tap (marketData=>{
           totalRows = marketData[1]['history.cursor'][0].TOTAL;
           for (let index = 0; index <= totalRows; index=index + marketData[1]['history.cursor'][0].PAGESIZE) {

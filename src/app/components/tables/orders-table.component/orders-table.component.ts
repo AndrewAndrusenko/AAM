@@ -103,7 +103,8 @@ export class AppOrderTableComponent {
   ) {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.orderStatuses = this.AuthServiceS.objectStatuses.filter(el =>el.id_object==='Order');
-    this.ordersPermissions = this.AuthServiceS.accessRestrictions.filter(el=>el.elementid==='dorders_status_list')[0].elementvalue.split(',');
+    let perms = this.AuthServiceS.accessRestrictions.filter(el=>el.elementid==='dorders_status_list')
+    this.ordersPermissions = perms.length?  perms[0].elementvalue.split(',') : [] 
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.searchParametersFG = this.fb.group ({
       type:null,

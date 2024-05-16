@@ -12,6 +12,13 @@
     </mat-tab-group>
   </mat-tab>
   <mat-tab  label="Transaction Types" >
-    <acc-transaction-types-table></acc-transaction-types-table>
+    <mat-tab-group  mat-stretch-tabs>
+    <mat-tab label="TT Access">
+      <acc-access-transaction-types-table></acc-access-transaction-types-table>
+    </mat-tab>
+    <mat-tab label="TT List">
+      <acc-transaction-types-table></acc-transaction-types-table>
+    </mat-tab>
+  </mat-tab-group>
   </mat-tab>  
 </mat-tab-group>

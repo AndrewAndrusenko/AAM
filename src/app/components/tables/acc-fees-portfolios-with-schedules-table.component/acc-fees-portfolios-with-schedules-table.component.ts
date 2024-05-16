@@ -108,14 +108,14 @@ export class AppAccFeesPortfoliosWithSchedulesTableComponent  {
       };
       this.subscriptions.add(
         this.AppFeesHandlingService.recieveFeesPortfoliosWithSchedulesReload().pipe(
-        filter(data=>Number(data.data[0].object_id)===this.id_portfolio)
+          filter(data=>Number(data.data[0].object_id)===this.id_portfolio),
         ).subscribe(()=>this.submitQuery(false,false))
       )
     }
     ngAfterViewInit(): void {
       this.subscriptions.add(this.AppFeesHandlingService.recieveFeesPortfoliosWithSchedulesIsOpened().pipe(
         skip(1),
-        filter(sub=>sub[0].id===this.id_portfolio&&(this.dataSource===undefined||sub[0].rewriteDS===true))
+        filter(sub=>sub[0].id===this.id_portfolio&&(this.dataSource===undefined||sub[0].rewriteDS===true)),
       ).subscribe(()=>{
         this.submitQuery(false,false);
         this.AppFeesHandlingService.getFeesMainData().subscribe(data=>{
@@ -126,7 +126,7 @@ export class AppAccFeesPortfoliosWithSchedulesTableComponent  {
       }));
     }
     ngOnChanges(changes: SimpleChanges): void {
-      this.onChanges? this.submitQuery(false,false):null;
+      this.onChanges&&this.id_portfolio? this.submitQuery(false,false):null;
     }
     updateDataTable (managementFeeData:FeesPortfoliosWithSchedulesData[]) {
       this.fullDataSource=managementFeeData;

@@ -1,9 +1,11 @@
 const db_common_api = require('./db_common_api')
-const server = require('./server')
-var pgp = require('pg-promise')({capSQL:true});
 function getAccountingSchemes (request,response) {
   let sql = '';
   switch (request.query.action) {
+    case 'getAccessTransactionTypes':
+      sql='SELECT tp.id, transaction_type_id,tt.description, tt."xActTypeCode_Ext",tp.role,tt.code2, 0 AS action FROM public."bcTransactionType_Ext_Privileges" tp '+
+          'LEFT JOIN public."bcTransactionType_Ext" tt  ON tp.transaction_type_id=tt.id  ORDER BY tp.role, tt."xActTypeCode_Ext";'
+    break;
     case 'getTransactionTypes':
       sql='SELECT id, "xActTypeCode_Ext", description, code2, manual_edit_forbidden,0 as action  FROM public."bcTransactionType_Ext";'
     break;
@@ -23,11 +25,15 @@ function getAccountingSchemes (request,response) {
       sql='SELECT * FROM public."bcSchemesParameters";'
     break;
   }
-  db_common_api.queryExecute(sql,response,undefined,request.query.action,undefined,request);
+  db_common_api.queryExecute(sql,response,undefined,request.query.action,undefined);
 }
 function updateTransactionTypes (request,response) {
   fields = ['xActTypeCode_Ext', 'description', 'code2', 'manual_edit_forbidden']
   db_common_api.fUpdateTableDB('bcTransactionType_Ext',fields,'id',request,response,[])
+}
+function updateAccessTransactionTypes (request,response) {
+  fields = ['transaction_type_id', 'role']
+  db_common_api.fUpdateTableDB('bcTransactionType_Ext_Privileges',fields,'id',request,response,[])
 }
 function updateSchemeTransaction (request,response) {
   fields = request.body.table==='bcSchemeLedgerTransaction' ?
@@ -40,5 +46,6 @@ function updateSchemeTransaction (request,response) {
 module.exports = {
   getAccountingSchemes,
   updateTransactionTypes,
-  updateSchemeTransaction
+  updateSchemeTransaction,
+  updateAccessTransactionTypes
 }

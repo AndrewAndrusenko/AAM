@@ -205,7 +205,6 @@ export class AppTableMarketDataComponent {
       })
     ).subscribe(data=>{
       this.loadingDataLog=data;
-      console.log('data',data);
       data.dataLoaded.length>0? this.loadingDataLog.state = {Message:'Loading is complited.', State:'Success'} : null;
       this.marketSources.forEach(el=>{
         el.checkedAll=false;
@@ -237,7 +236,6 @@ export class AppTableMarketDataComponent {
    (index >= 0)? this.instruments.splice(index, 1) : null
   }
   clearAll(event) {
-    console.log('event', event.target.textContent);
     event.target.textContent.trim() === 'ClearAll'? this.instruments = ['ClearAll']: null;
   }
   addChips (el: string, column: string) {(['accountNo'].includes(column))? this.instruments.push(el):null;}
@@ -300,7 +298,6 @@ export class AppTableMarketDataComponent {
   msQuoteToMT (){
     let dateToLoad = this.datePipe.transform(this.dateForLoadingPrices.value,'YYYY-MM-dd')
     this.MarketDataService.moveMarketStackToMainTable(dateToLoad).subscribe(data=> {
-      console.log('row',data)
       this.CommonDialogsService.snackResultHandler({name:'success',detail: data[0].o_rows_moved + ' rows'},'Copied ')
     })  
   }

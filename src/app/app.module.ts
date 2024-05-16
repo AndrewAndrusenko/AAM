@@ -206,8 +206,9 @@ const appInitializerFn = (accessRestirictions:AuthService) => {
         AppaInvRestrictionSchemesTable,
         AppInvRestrictionMainFormComponent,
         AppInvRestrictionVerifyTableComponent,
-        AppInvRestrictionVerifyAllocTableComponent
-
+        AppInvRestrictionVerifyAllocTableComponent,
+        AppaAccAccessTransactionTypesTable,
+        AppAccAccessTTFormComponent
      ],
     bootstrap: [AppComponent],
     providers: [ 
@@ -282,5 +283,7 @@ import { AppInvRestrictionMainFormComponent } from './components/forms/inv-restr
 import { ErrorCatchingInterceptor } from './services/errors-interceptor.service';
 import { AppInvRestrictionVerifyTableComponent } from './components/tables/inv-restriction-verify-table.component/inv-restriction-verify-table.component';
 import { AppInvRestrictionVerifyAllocTableComponent } from './components/tables/inv-restriction-verify-alloc-table.component/inv-restriction-verify-alloc-table.component';
+import { AppaAccAccessTransactionTypesTable } from './components/tables/acc-access-transaction-types-table.component/acc-access-transaction-types-table.component';
+import { AppAccAccessTTFormComponent } from './components/forms/acc-access-transaction-types-form.component/acc-access-transaction-types-form.component';
 
 

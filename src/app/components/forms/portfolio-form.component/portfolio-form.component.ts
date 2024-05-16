@@ -18,7 +18,7 @@ export class AppNewAccountComponent {
   disabledControlElements: boolean = false;
   accessToClientData: string = 'none';
   portfolioData:AccountsTableModel;
-  newAccountForm: FormGroup;
+  portfolioForm: FormGroup;
   summaryData:{npv:number,managementFee:number,perfomanceFee:number,PnL:number}
   @Input() portfolioCode: number;
   @Input() ClientID: number;
@@ -37,7 +37,7 @@ export class AppNewAccountComponent {
     private dialog: MatDialog, 
   ) 
   {
-    this.newAccountForm=this.fb.group ({
+    this.portfolioForm=this.fb.group ({
       idportfolio: {value:null, disabled: false, }, 
       account_type: [{value:null, disabled: false}],
       idclient: [{value:null, disabled: false}, [Validators.required]],
@@ -46,12 +46,11 @@ export class AppNewAccountComponent {
       stategy_name: [{value:null, disabled: true}],
       description: {value:null, disabled: true}, 
       portfolioname:[{value:null, disabled: false}, [Validators.required]],
-      portleverage: [ {value:0, disabled: false}, [Validators.required, Validators.pattern('[0-9]*')]],
       user_id:[this.AuthService.userId]
     })
     this.InvestmentDataService.getAccountTypesList (0,'','Get_AccountTypes_List').subscribe (data => this.accountTypes = data);
     this.accessToClientData = this.AuthService.accessRestrictions.filter(el =>el.elementid==='accessToClientData')[0].elementvalue;
-    this.accessState = this.AuthService.accessRestrictions.filter(el =>el.elementid==='accessToPortfolioData')[0].elementvalue;
+    this.accessState = this.AuthService.accessRestrictions.filter(el =>el.elementid==='accessToClientData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
   }
   ngOnInit(): void {
@@ -59,21 +58,21 @@ export class AppNewAccountComponent {
       this.summaryData=data;
       this.summaryShow=true;
     })
-    this.action === 'View'||this.disabledControlElements? this.newAccountForm.disable() : null;
+    this.action === 'View'||this.disabledControlElements? this.portfolioForm.disable() : null;
     if (this.accessState !=='none'&&this.action!=='Create') {
       this.InvestmentDataService.getPortfoliosData('',this.portfolioCode,0,undefined,'Get_Portfolio_By_idPortfolio',null, this.accessToClientData).subscribe (data => {
         this.portfolioData=data[0];
-        this.newAccountForm.patchValue(this.portfolioData);
+        this.portfolioForm.patchValue(this.portfolioData);
         if (this.action === 'Create_Example') {
           this.action ='Create';
-          this.newAccountForm.get('portfolioname').setValue(null)
+          this.portfolioForm.get('portfolioname').setValue(null)
         }
       })
     } 
   }
   ngOnChanges (changes: SimpleChanges) {
     if (this.accessState !=='none'&&this.portfolioname.value!==changes['portfolioCode'].currentValue) {
-      this.InvestmentDataService.getPortfoliosData('',changes['portfolioCode'].currentValue,0,undefined, 'Get_Portfolio_By_idPortfolio', null,this.accessToClientData).subscribe (portfoliosData => this.newAccountForm.patchValue(portfoliosData[0]));
+      this.InvestmentDataService.getPortfoliosData('',changes['portfolioCode'].currentValue,0,undefined, 'Get_Portfolio_By_idPortfolio', null,this.accessToClientData).subscribe (portfoliosData => this.portfolioForm.patchValue(portfoliosData[0]));
     }
   }
   snacksBox (result:{name:string,detail:string}|AccountsTableModel[], action?:string) {
@@ -88,15 +87,15 @@ export class AppNewAccountComponent {
     switch (action) {
       case 'Create':
       case 'Create_Example':
-          this.InvestmentDataService.updateAccount (this.newAccountForm.value,'Create').subscribe (result => this.snacksBox(result,'Created'))
+          this.InvestmentDataService.updateAccount (this.portfolioForm.value,'Create').subscribe (result => this.snacksBox(result,'Created'))
       break;
       case 'Edit':
-        this.InvestmentDataService.updateAccount (this.newAccountForm.value,'Edit').subscribe (result => this.snacksBox(result,'Updated'))
+        this.InvestmentDataService.updateAccount (this.portfolioForm.value,'Edit').subscribe (result => this.snacksBox(result,'Updated'))
       break;
       case 'Delete':
         this.CommonDialogsService.confirmDialog('Delete Portfolio ' + this.portfolioname.value).pipe (
           filter (isConfirmed => isConfirmed.isConfirmed),
-          switchMap(() => this.InvestmentDataService.updateAccount (this.newAccountForm.value,'Delete'))
+          switchMap(() => this.InvestmentDataService.updateAccount (this.portfolioForm.value,'Delete'))
         ).subscribe (result =>this.snacksBox(result,'Deleted'));
       break;
     }
@@ -107,9 +106,9 @@ export class AppNewAccountComponent {
     this.dialogTableStrategiesRef.componentInstance.strategyTableInitParams.action = action;
     this.dialogTableStrategiesRef.componentInstance.strategyTableInitParams.filterData = filer;
     this.dialogTableStrategiesRef.componentInstance.modal_principal_parent.subscribe ((item:StrategiesGlobalData)=>{
-      this.newAccountForm.controls['idstategy'].patchValue(item.id)
-      this.newAccountForm.controls['stategy_name'].patchValue(item.name)
-      this.newAccountForm.controls['description'].patchValue(item.description)
+      this.portfolioForm.controls['idstategy'].patchValue(item.id)
+      this.portfolioForm.controls['stategy_name'].patchValue(item.name)
+      this.portfolioForm.controls['description'].patchValue(item.description)
       this.dialogTableStrategiesRef.close(); 
     });
   }
@@ -117,25 +116,25 @@ export class AppNewAccountComponent {
     this.dialogClientsTabletRef = this.dialog.open(AppClientsTableComponent ,{minHeight:'400px', minWidth:'90vw', autoFocus: false, maxHeight: '90vh'});
     this.dialogClientsTabletRef.componentInstance.action = 'Select';
     this.dialogClientsTabletRef.componentInstance.modal_principal_parent.subscribe ((item:ClientData )=>{
-      this.newAccountForm.controls['idclient'].patchValue(item.idclient)
-      this.newAccountForm.controls['clientname'].patchValue(item.clientname)
+      this.portfolioForm.controls['idclient'].patchValue(item.idclient)
+      this.portfolioForm.controls['clientname'].patchValue(item.clientname)
       this.dialogClientsTabletRef.close(); 
     });
   }
   calculateAccountCode () {
     let newNumberS : string;
-    let accountType = this.newAccountForm.controls['account_type'].value
+    let accountType = this.portfolioForm.controls['account_type'].value
     this.InvestmentDataService.getPortfoliosData (accountType, 0,0,undefined, 'calculateAccountCode',null,this.accessToClientData).subscribe(dataA => {
       if (dataA.length === 0) {newNumberS = "001"} else {
         let data = dataA[0]
         let newNumber = Number (data['portfolioname'].substr(accountType.length)) + 1
         newNumberS = newNumber.toString().padStart (3,"0")
       }
-      this.newAccountForm.controls['portfolioname'].setValue (accountType + newNumberS)
+      this.portfolioForm.controls['portfolioname'].setValue (accountType + newNumberS)
     })
   }
-  get id (){return this.newAccountForm.get('idportfolio')}
-  get portfolioname (){return this.newAccountForm.get('portfolioname')}
-  get idclient (){return this.newAccountForm.get('idclient')}
-  get idstategy (){return this.newAccountForm.get('idstategy')}
+  get id (){return this.portfolioForm.get('idportfolio')}
+  get portfolioname (){return this.portfolioForm.get('portfolioname')}
+  get idclient (){return this.portfolioForm.get('idclient')}
+  get idstategy (){return this.portfolioForm.get('idstategy')}
 }

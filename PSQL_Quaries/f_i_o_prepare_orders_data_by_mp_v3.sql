@@ -238,7 +238,7 @@ SELECT
 	LEAST(mt.npv*cash_restrictions.mp_weight/100 - mt.mp_npv,nord.amount) AS balance_corrected_by_mp,
 	ROUND(cash_restrictions.portfolio_restriction_by_mp/100*mt.npv,2) as leverage_amount,
 	cash_restrictions.portfolio_restriction_by_mp AS lv_corr,
-	total_unacc_orders.net_orders as total_net_orders,
+	COALESCE(total_unacc_orders.net_orders,0) as total_net_orders,
 	cash_restrictions.mp_leverage_good,
 	nord.amount AS balance,
 	SUM(
@@ -295,24 +295,18 @@ SELECT
 		WHEN p_leverage_handle = 1 THEN CASE WHEN msmo.mp_leverage_good=true THEN msmo.order_amount_main ELSE 0 END
 		WHEN p_leverage_handle = 2 THEN msmo.order_at_max_limit
 	END::numeric(20,2) AS order_amount_final,msmo.* 
-	FROM main_set_with_order_at_max_lever msmo
-WHERE (	
-	CASE 
-		WHEN msmo."type"='SELL' THEN msmo.order_amount_main
-		WHEN p_leverage_handle = 0 THEN msmo.order_amount_main
-		WHEN p_leverage_handle = 1 THEN CASE WHEN msmo.mp_leverage_good=true THEN msmo.order_amount_main ELSE 0 END
-		WHEN p_leverage_handle = 2 THEN msmo.order_at_max_limit
-	END
-	*100/msmo.npv)>=p_min_deviation OR msmo.price isnull;
+	FROM main_set_with_order_at_max_lever msmo;
+-- WHERE (	
+-- 	CASE 
+-- 		WHEN msmo."type"='SELL' THEN msmo.order_amount_main
+-- 		WHEN p_leverage_handle = 0 THEN msmo.order_amount_main
+-- 		WHEN p_leverage_handle = 1 THEN CASE WHEN msmo.mp_leverage_good=true THEN msmo.order_amount_main ELSE 0 END
+-- 		WHEN p_leverage_handle = 2 THEN msmo.order_at_max_limit
+-- 	END
+-- 	*100/msmo.npv)>=p_min_deviation OR msmo.price isnull;
 END;
 $BODY$;
 
 ALTER FUNCTION public.f_i_o_prepare_orders_data_by_mp_v3(integer, text[], text[], date, integer, numeric)
     OWNER TO postgres;
-select * from f_i_o_prepare_orders_data_by_mp_v3(
-	0 ,
-	array['acm002'],
-	array['tsla-rm','aapl-rm'],
-	now()::date,
-	840,
-	1)
+select * from f_i_o_prepare_orders_data_by_mp_v3 (2,array['icm019'],array['aapl-rm','csco-rm','goog-rm','tsla-rm'],now()::date,840,1)

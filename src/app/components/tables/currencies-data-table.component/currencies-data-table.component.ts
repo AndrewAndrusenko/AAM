@@ -76,8 +76,6 @@ export class AppTableCurrenciesDataComponent {
       this.marketSources[0].checkedAll=true;
       this.setAll(0);
     }));
-
-    // this.MarketDataService.getMarketDataSources('currency').subscribe(marketSourcesData => this.marketSources = marketSourcesData);
     this.loadingDataState={message:'',state:'None',deletedCount:0,loadedCount:0}
     this.searchParametersFG = this.fb.group ({
       dataRange : this.dataRange,
@@ -87,7 +85,6 @@ export class AppTableCurrenciesDataComponent {
     });
     this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data=>{
       this.FirstOpenedAccountingDate = data[0].FirstOpenedDate;
-      this.dateForLoadingPrices.setValue(new Date(this.FirstOpenedAccountingDate));
     });
     this.loadMarketData = this.fb.group ({
       dateForLoadingPrices : [new Date(), Validators.required],
@@ -128,8 +125,6 @@ export class AppTableCurrenciesDataComponent {
     currencyData!==null? this.updateCurrencyDataTable(currencyData):null;
     this.loadMarketData.enable();
     this.loadMarketData.reset();
-    this.dateForLoadingPrices.setValue(new Date(this.FirstOpenedAccountingDate));
-
     this.marketSources.forEach(el=>{
       el.checkedAll=false;
       el.segments.forEach(el=>el.checked=false)

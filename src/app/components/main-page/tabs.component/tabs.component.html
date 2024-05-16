@@ -5,7 +5,7 @@
     <div class="instrument_form" style="width: 100%;">
       <br>
       <app-app-portfolio
-      [action]="'View'"
+      [action]="messageReceived.action||'View'"
       [portfolioCode]="messageReceived.id">
       </app-app-portfolio> 
     </div>
@@ -61,7 +61,8 @@
     ></app-orders-table>
   </mat-tab>
 
-</mat-tab-group  >
+</mat-tab-group>
+
 <mat-tab-group  *ngIf="messageReceived.text=='Clients'" mat-stretch-tabs #ClientInfo>
   <mat-tab label="Performance" aria-label="Performance"> 
     <app-inv-portfolio-npv_roi_performance
@@ -161,6 +162,7 @@
     ></app-inv-portfolio-npv_roi_performance>  
   </mat-tab>
 </mat-tab-group>
+
 <mat-tab-group *ngIf="messageReceived.text=='Instruments'" mat-stretch-tabs #InstrumentInfo>
   <mat-tab label="Instrument Details" >
     <div class="instrument_form">
@@ -176,12 +178,14 @@
   <mat-tab label="Positions"> Detailed positions with deviations versus model Portfolio  </mat-tab>
   <mat-tab label="Trades by Instrument"> Trades history by Instrument</mat-tab>
 </mat-tab-group>
+
 <mat-tab-group  *ngIf="messageReceived.text=='Trades & Orders'" mat-stretch-tabs #TradesOrdersInfo>
   <mat-tab label="Orders" >OrdersTable</mat-tab>  
   <mat-tab label="Trades"> Trades table</mat-tab>
   <mat-tab label="Positions"> Positions table</mat-tab>
   <mat-tab label="Orders by Strategy"> Orders history</mat-tab>
 </mat-tab-group>
+
 <router-outlet></router-outlet>
 
 

@@ -251,6 +251,7 @@ async function fGetFIFOPositions(request,response) {
   request = db_common_api.getTransformArrayParam(request,['tradesIDs']);
   sql = pgp.as.format(sql,request.query);
   sql = db_common_api.sqlReplace(sql);
+  console.log('fifo', sql);
   db_common_api.queryExecute(sql,response,undefined,'fGetFIFOPositions');
 }
 module.exports = {

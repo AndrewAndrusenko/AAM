@@ -1,12 +1,7 @@
 const  db_common_api = require ('./db_common_api')
 const config = require ('./db_config');
-const Pool = require('pg').Pool;
-const pool = new Pool(config.dbConfig);
 var pgp = require ('pg-promise')({capSQL:true});
-const pg = require('pg');
-pg.types.setTypeParser(1114, function(stringValue) {
-  return stringValue;  
-});
+
 async function fUpdateAccountAccounting (request, response) {
   let fields =  ['accountNo','accountTypeExt','Information','clientId','currencyCode','entityTypeCode','idportfolio','secid','dateOpening']
   db_common_api.fUpdateTableDB ('bAccounts',fields,'accountId',request, response,['dateOpening'])
@@ -241,7 +236,37 @@ async function GetEntryScheme (request, response) {
   }
   sql +=conditionsTrades.slice(0,-5);
   sql = pgp.as.format(sql,request.query)
-  pool.query (sql,  (err, res) => {if (err) {
+  db_common_api.queryExecute(sql,response,null,request.query.Action,false).then(data =>{
+    if (data.length !== 0) {
+      let entryDraftData = [];
+      data.forEach(draft=> entryDraftData.push(JSON.stringify(JSON.parse (pgp.as.format (JSON.stringify(draft), request.query)))));
+      switch (request.query.entryType) {
+        case 'LL':
+          sql = 'SELECT ' + 
+          '"bLedger"."ledgerNo", "bLedgerDebit"."ledgerNo", "bcTransactionType_Ext"."xActTypeCode_Ext", "bcTransactionType_DE"."name", '+ 'json_populate_recordset.* ' +
+          'FROM json_populate_recordset(null::public."bcSchemeLedgerTransaction",\'[' + entryDraftData +']\') ' +
+          'LEFT JOIN "bcTransactionType_Ext" ON "bcTransactionType_Ext".id = json_populate_recordset."XactTypeCode_Ext" ' +
+          'LEFT JOIN "bcTransactionType_DE" ON "bcTransactionType_DE"."xActTypeCode" = json_populate_recordset."XactTypeCode" ' +
+          'LEFT JOIN "bLedger" ON "bLedger"."ledgerNoId"::text = json_populate_recordset."ledgerID" '+
+          'LEFT JOIN "bLedger" AS "bLedgerDebit" ON "bLedgerDebit"."ledgerNoId"::text = json_populate_recordset."ledgerID_Debit";'
+        break;
+        default:
+          sql = 'SELECT ' + 
+          '"bLedger"."ledgerNo", "bAccounts"."accountNo", "bcTransactionType_Ext"."xActTypeCode_Ext", "bcTransactionType_DE"."name", '+ 'json_populate_recordset.* ' +
+          'FROM json_populate_recordset(null::public."bAccountTransaction",\'[' + entryDraftData +']\') ' +
+          'LEFT JOIN "bcTransactionType_Ext" ON "bcTransactionType_Ext".id = json_populate_recordset."XactTypeCode_Ext" ' +
+          'LEFT JOIN "bcTransactionType_DE" ON "bcTransactionType_DE"."xActTypeCode" = json_populate_recordset."XactTypeCode" ' +
+          'LEFT JOIN "bLedger" ON "bLedger"."ledgerNoId" = json_populate_recordset."ledgerNoId"	' +
+          'LEFT JOIN "bAccounts" ON "bAccounts"."accountId" = json_populate_recordset."accountId";'; 	
+        break;
+        
+      }
+      db_common_api.queryExecute(sql,response,null,'STP_Get Entry Scheme');
+    } else {
+      response.status(200).json([])
+    }
+  } )
+/*   pool.query (sql,  (err, res) => {if (err) {
       console.log (err.stack.split("\n", 1).join(""))
       err.detail = err.stack
       return response.send(err)
@@ -275,13 +300,8 @@ async function GetEntryScheme (request, response) {
         response.status(200).json([])
       }
     }
-  })
+  }) */
 }
-/* async function fCreateEntryAccountingInsertRow (request, response) {
-    fields = Object.keys(request.body.data).map(filed => `"${filed}"`).join()
-    let sqlText = 'INSERT INTO public."bAccountTransaction" '+'('+fields+')'+' VALUES ('+Object.values(request.body.data).map(value =>`'${value}'`).join() + ');';
-    db_common_api.queryExecute(sqlText,response,'STP_f Create Entry Accounting InsertRow')
-} */
 async function faccountingOverdraftAccountCheck (request, response) {
   let sqlText = 'SELECT "accountId", "openingBalance", CAST ("closingBalance" AS NUMERIC) AS "closingBalance", "closingBalance" AS "EndBalance"'+
   'FROM f_checkoverdraftbyaccountandbydate'+
@@ -309,7 +329,6 @@ module.exports = {
   fGetMT950Transactions,
   fGetAccountingData,
   GetEntryScheme,
-  // fCreateEntryAccountingInsertRow,
   fUpdateAccountAccounting,
   fUpdateLedgerAccountAccounting,
   fUpdateLLEntryAccounting,

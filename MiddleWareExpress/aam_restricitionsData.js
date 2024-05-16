@@ -26,7 +26,7 @@ async function geRestrictionsData (request,response) {
   request = db_common_api.getTransformArrayParam(request,['p_idportfolios','ordersForExecution']);
   sql = pgp.as.format(sql,request.query);
   sql = db_common_api.sqlReplace(sql)
-  db_common_api.queryExecute(sql,response,undefined,request.query.action,undefined,request.isAuthenticated());
+  db_common_api.queryExecute(sql,response,undefined,request.query.action,undefined);
 }
 async function fupdateRestrictionMainData (request, response) {
   let fields = [ 'idportfolio', 'restriction_type_id', 'value', 'param']

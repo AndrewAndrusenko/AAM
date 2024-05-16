@@ -1,9 +1,5 @@
-const config = require('./db_config');
 const db_common_api = require('./db_common_api');
-const { request, response } = require('express');
-var pgp = require('pg-promise')({
-  capSQL: true // to capitalize all generated SQL
-});
+var pgp = require('pg-promise')({capSQL: true });
 async function TreeSQLQueryExc (RootNode, userId, nodeParentFavorite,response) {
   RootNode = RootNode.split('_')
   sql = {text:'', rowMode: "array" }
@@ -164,8 +160,6 @@ async function fGetClientData(request,response) {
     break;
   }
   sql = pgp.as.format(query.text,query.values)
-  console.log( request.query.action);
-  console.log( request.query.action,sql);
   db_common_api.queryExecute (sql, response,null,request.query.action? request.query.action :'fGetClientDataALL');
 }
 async function fEditClientData (request, response) {

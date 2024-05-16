@@ -49,6 +49,11 @@ export class AppAccFeesPortfolioScheduleFormComponent {
     this.action==='View'? this.FeesPortfolioForm.disable():null;
     this.FeesPortfolioForm.patchValue(this.data);
     this.dataRange.patchValue({period_start:this.period_start.value,period_end:this.period_end.value});
+    this.feeCodes===undefined? this.AppFeesHandlingService.getFeesMainData().subscribe(data=>{
+      this.feeCodes = data
+      .map(el=>{return {value:el.id.toString(),name:el.fee_code.toString(),desc: el.fee_description,feeType:el.fee_type_desc}})
+      .sort((el,el1)=>el.name>el1.name? 1: el.name<el1.name? -1 : 0)
+    }):null;
   }
   ngAfterViewInit(): void {
     this.id_fee_main.value? this.tableSchedules.submitQuery(false,false) : null;

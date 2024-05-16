@@ -7,15 +7,16 @@ const pool_back_officer = new Pool(config.dbConfig_aam_back_officer);
 const pool_portfolio_manager = new Pool(config.dbConfig_aam_portfolio_manager);
 const pool_accountant = new Pool(config.dbConfig_aam_accountant);
 const pool_trader = new Pool(config.dbConfig_aam_trader);
+const pool_salesRM = new Pool(config.dbConfig_aam_salesRM);
 var pgp = require ('pg-promise')({capSQL:true});
 const pg = require('pg');
 async function checkInternetConnection () {
 let isConnected = !!await require('dns').promises.resolve('google.com').catch(()=>{});
 return isConnected;
 }
-async function queryExecute (sql, response, responseType, sqlID, SendResponse=true) {
+async function queryExecute (sql, response, responseType, sqlID, SendResponse=true,resPure=false) {
   let accRole;
-  accRole = response? response.req.user.accessrole:'super'
+  accRole = response? response.req.user.accessrole:'error'
   switch (accRole) {
     case 'testRole':
       pool = poolSuper;
@@ -35,12 +36,17 @@ async function queryExecute (sql, response, responseType, sqlID, SendResponse=tr
     case 'AccountantOfficer':
       pool = pool_accountant;
     break;
-    default:
-      console.log('ERROR => '+sqlID+' There is no response object in params');
+    case 'salesRM':
+      pool = pool_salesRM;
     break;
+    default:
+      pool = undefined;
+    break
   }
-  return new Promise ((resolve) => {
-    pool.query (sql,  (err, res) => {
+  return new Promise ((resolve,reject) => {
+    // if (pool===undefined) {resolve (response.headersSent? console.log('There is no pool connection'): response.status(409).send('There is no pool connection'))}
+    if (pool===undefined) {resolve (console.log('There is no pool connection'))}
+    if (pool!==undefined) {pool.query (sql,  (err, res) => {
       if (err) {
         console.log (sqlID,err.stack.split("\n", 1).join(""))
         err.detail = err.stack
@@ -49,11 +55,12 @@ async function queryExecute (sql, response, responseType, sqlID, SendResponse=tr
         let rows = [];
         res.length? res.map(el => rows.push(...el.rows) ): rows = res.rows;
         result = responseType === 'rowCount'?  res.rowCount : rows;
+        resPure? result = res : null;
         console.log(
           new Date().toLocaleTimeString().slice(0,-3) +':'+ new Date().getMilliseconds(), sqlID,'Rows:'+  responseType === 'rowCount'?  res.rowCount :rows.length)
         resolve (response&&SendResponse? response.status(200).json(result):result)
       }
-    })
+    })}
   })
 } 
 async function fUpdateTableDB (table, fields,idfieldName, request, response,dates) {

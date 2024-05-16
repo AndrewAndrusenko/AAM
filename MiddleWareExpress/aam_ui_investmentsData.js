@@ -1,4 +1,3 @@
-const config = require ('./db_config');
 const db_common_api = require ('./db_common_api')
 var pgp = require ('pg-promise')({capSQL:true});
 async function fGetStrategiesList (request,response) {
@@ -89,7 +88,7 @@ async function fStrategyStructureUpdate (request, response) {
  db_common_api.fUpdateTableDB ('dstrategies_global_structure',fields,'id',request, response,[])
 }
 async function fAccountEdit (request, response) {
-  let fields = ['idclient', 'idstategy', 'portfolioname', 'portleverage','user_id']
+  let fields = ['idclient', 'idstategy', 'portfolioname','user_id']
   db_common_api.fUpdateTableDB ('dportfolios',fields,'idportfolio',request, response)
 }
 async function fGetPortfolioPositions (request,response) {

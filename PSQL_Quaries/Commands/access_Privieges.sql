@@ -4,7 +4,7 @@ FROM
 LEFT JOIN (
 	SELECT *
 	FROM information_schema.role_table_grants 
-	WHERE grantee = 'aam_middile_officer'
+	WHERE grantee = 'aam_accountant'
 	AND privilege_type='UPDATE'
 ) acpr ON acpr.table_name = tt.table_name
 WHERE (tt.table_schema='public') 

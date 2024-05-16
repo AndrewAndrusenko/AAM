@@ -28,7 +28,7 @@
             <p *ngSwitchCase="['portfolioname'].includes(column)">
               <button mat-stroked-button style="font-size: 18px; margin-top: 3%;"  matTooltip="Portfolio details"
               class =  "navigate-button"
-              (click)="navigateToAccountForm(disabledControlElements? 'View': 'Edit', element)">
+              (click)="navigateToAccountForm( 'View', element)">
                 {{element[column] }}
               </button> 
             </p>
@@ -41,7 +41,7 @@
               <ng-container  *ngIf="!disabledControlElements">
                 <button mat-icon-button color="accent"
                   matTooltip="Edit Client"
-                  (click)="openAccountForm('Edit',element)">
+                  (click)="navigateToAccountForm('Edit', element)">
                   <mat-icon >edit</mat-icon>
                 </button>
                 <button mat-icon-button color="accent"

@@ -1,8 +1,5 @@
 const db_common_api = require('./db_common_api');
-const https = require('https');
 const config = require ('./db_config');
-const Pool = require('pg').Pool;
-const pool = new Pool(config.dbConfig);
 var pgp = require ('pg-promise')({capSQL:true});
 const pg = require('pg');
 pg.types.setTypeParser(1114, function(stringValue) {
@@ -18,15 +15,10 @@ async function fdeleteMarketData (request,response) {//Delete market data if a u
     'DELETE FROM  public.t_marketstack_eod WHERE (sourcecode = ANY(array[${sourcecodes}]) AND "date"::timestamp without time zone = ${dateToLoad}::date);'
   }
   sql = pgp.as.format(query.text,request.body.params);
-  pool.query (sql,  (err, res) => 
-  {if (err) {
-    console.log (err.stack.split("\n", 1).join(""))
-    err.detail = err.stack
-    return response.send(err)
-    } else {
-      return response.status(200).json({deletedRows: res[0].rowCount + res[1].rowCount})
-    }
-  })  
+  db_common_api.queryExecute(sql,response,undefined,'fdeleteMarketData',false,true).then(data=>{
+    return response.status(200).json({deletedRows: data[0].rowCount + data[1].rowCount})
+  })
+
 }
 async function finsertMarketData (request, response) {//Insert market data recieved form moex iss or MScom
   let sql = '';
@@ -146,7 +138,7 @@ async function fgetInstrumentsCodes (request,response) {//Get additional instrum
   sql = pgp.as.format(sql,request.query);
   db_common_api.queryExecute(sql,response,undefined,'fgetInstrumentsCodes')
 }
-async function fgetMoexIssSecuritiesList (start) {//Get instrument dictionary from moex iss
+/* async function fgetMoexIssSecuritiesList (start) {//Get instrument dictionary from moex iss
   let url='https://iss.moex.com/iss/securities.json?iss.json=extended&limit=100&lang=en&iss.meta=off&is_trading=true&start='+start.toString()
   return new Promise ((resolve) => {
     https.get(url, (resp) => {
@@ -167,7 +159,7 @@ async function fgetMoexIssSecuritiesList (start) {//Get instrument dictionary fr
       });
     })
   })
-}
+} */
 async function fimportMoexInstrumentsList (request, response){ //Update instrument table based on MOEX data
   let rowsretrived = 100
   for (let index = 0; rowsretrived === 100&&index<50000; index=index+100) {

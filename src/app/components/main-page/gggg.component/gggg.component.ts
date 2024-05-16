@@ -9,16 +9,54 @@ import { Component, HostListener} from '@angular/core';
 export class AppGGGGComponent {
 drawInt:NodeJS.Timer;
 sphere:HTMLElement;
+star:HTMLElement;
 initTop:any;
 initLeft:any;
 @HostListener('document:keydown', ['$event'])
 handleKeyboardEvent(event: KeyboardEvent) { 
 
   if (event.key==='ArrowRight') {
+
     this.forceStop();  
     this.drawInt = setInterval(()=>{this.sphere.style.left= parseInt(this.sphere.style.left,10)+2+'px'},10)
+    for (let index = 2; index < 8; index++) {
+      let bi:string;
+      bi='url(assets/star'+index+'.JPG)';
+      if (index===7) {
+        setTimeout(() => {
+          this.star.style.left=parseInt(this.star.style.left,10)+118+'px'
+          this.star.style.backgroundImage='url(assets/star1.JPG)';
+          console.log('backgroundImage',this.star.style.backgroundImage,this.star.style.left);
+        }, 20*(index-1));
+      } 
+      else {
+        setTimeout(() => {
+          this.star.style.backgroundImage=bi;
+          console.log('backgroundImage',this.star.style.backgroundImage);
+        }, 20*(index-1));
+      }
+    }
+
   }
+
   if (event.key==='ArrowLeft') {
+    for (let index = 6; index > 0; index--) {
+      let bi:string;
+      bi='url(assets/star'+index+'.JPG)';
+      if (index===6) {
+        setTimeout(() => {
+          this.star.style.left=parseInt(this.star.style.left,10)-118+'px'
+          this.star.style.backgroundImage='url(assets/star6.JPG)';
+          console.log('backgroundImage',this.star.style.backgroundImage,this.star.style.left);
+        }, 20*(6-index+1));
+      } 
+      else {
+        setTimeout(() => {
+          this.star.style.backgroundImage=bi;
+          console.log('backgroundImage',this.star.style.backgroundImage);
+        }, 20*(6-index+1));
+      }
+    }
     this.forceStop();  
     this.drawInt = setInterval(()=>{this.sphere.style.left= parseInt(this.sphere.style.left,10)-2+'px'},10)
   }
@@ -36,6 +74,7 @@ constructor(
 
 ngAfterViewInit(): void {
  this.sphere = document.getElementById('sphere')
+ this.star = document.getElementById('star')
 this.initTop = this.sphere.style.top;
 this.initLeft = this.sphere.style.left;
   

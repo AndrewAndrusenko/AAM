@@ -1,7 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { Observable, Subject, exhaustMap } from "rxjs";
-import { bcTransactionType_Ext } from "../models/accountng-intefaces.model";
+import { Observable, Subject, exhaustMap, tap } from "rxjs";
+import { accessTransactionTypes, bcTransactionType_Ext } from "../models/accountng-intefaces.model";
 import { indexDBService } from "./indexDB.service";
 import { bcSchemeAccountTransaction, bcSchemeLedgerTransaction, bcSchemesParameters, bcSchemesProcesses } from "../models/acc-schemes-interfaces";
 @Injectable ({
@@ -12,6 +12,7 @@ export class AccountingSchemesService {
   public subjectTransactionTypePipe = new Subject <null>
   private subjectTransactionTypeReady = new Subject <{key:string, data:bcTransactionType_Ext[]}>
   private subjectTransactionTypes = new Subject <null>
+  private subjectAcessTransactionTypes = new Subject <null>
   private subjectSchemeLedgerTransaction = new Subject <null>
   private subjectSchemeAccountTransaction = new Subject <null>
   constructor (
@@ -38,6 +39,9 @@ export class AccountingSchemesService {
   getTransactionTypes ():Observable<bcTransactionType_Ext[]> {
     return this.http.get <bcTransactionType_Ext[]> ('api/DEA/getAccountingSchemes/',{params:{action:'getTransactionTypes'}})
   } 
+  getAccessTransactionTypes ():Observable<accessTransactionTypes[]> {
+    return this.http.get <accessTransactionTypes[]> ('api/DEA/getAccountingSchemes/',{params:{action:'getAccessTransactionTypes'}})
+  } 
   rewriteTransactionTypes (data:bcTransactionType_Ext[]) {
     this.indexDBService.rewrteIndexDBStaticTable('bcTransactionType_Ext',data).subscribe(()=>{
       this.sendTransactionTypesReady({key:'bcTransactionType_Ext',data:data})
@@ -55,11 +59,20 @@ export class AccountingSchemesService {
   updateTransactionTypes (data:bcTransactionType_Ext,action:string):Observable<bcTransactionType_Ext[]> {
     return this.http.post <bcTransactionType_Ext[]> ('api/DEA/updateTransactionTypes/',{data:data,action:action})
   }
+  updateAccessTransactionTypes (data:accessTransactionTypes,action:string):Observable<bcTransactionType_Ext[]> {
+    return this.http.post <bcTransactionType_Ext[]> ('api/DEA/updateAcessTransactionTypes/',{data:data,action:action})
+  }
   receiveTransactionTypesReload () {
     return this.subjectTransactionTypes.asObservable()
   }
   sendTransactionTypesReload () {
     this.subjectTransactionTypes.next(null)
+  }
+  receiveTAceessransactionTypesReload () {
+    return this.subjectAcessTransactionTypes.asObservable()
+  }
+  sendAceessTransactionTypesReload () {
+    this.subjectAcessTransactionTypes.next(null)
   }
   sendSchemeLedgerTransactionReload () {
     this.subjectSchemeLedgerTransaction.next(null)

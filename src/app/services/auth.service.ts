@@ -3,9 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable, of, switchMap, tap } from 'rxjs';
 import { accessRestriction, objectStatus } from '../models/interfaces.model';
 import { Router } from '@angular/router';
-interface userRoles {
-  value: string;
-}
+
 interface siginResult {
   message: string,
   username: userData,
@@ -25,6 +23,15 @@ export class AuthService {
     private http : HttpClient,
     private router : Router
     ) { }
+  public dbAccessRoles =[
+    'aam_middile_officer',
+    'aam_back_officer',
+    'aam_portfolio_manager',
+    'aam_trader',
+    'aam_accountant',
+    'aam_salesRM',
+    'aam_clientManager'
+  ]
   accessRestrictions: accessRestriction[] = [];
   objectStatuses: objectStatus[] = [];
   userId:number;
@@ -83,8 +90,8 @@ export class AuthService {
       this.router.navigate(['login']);   
       })
   }
-  getUsersRoles(): Observable <userRoles[]>{
-    return this.http.get < userRoles[]> ('/api/auth/userRoles/')
+  getUsersRoles(): Observable <string[]>{
+    return this.http.get < string[]> ('/api/auth/userRoles/')
   }
   getloginsArray(): Observable <string[]>{
     return this.http.get <string[]> ('/api/auth/loginsArray/')

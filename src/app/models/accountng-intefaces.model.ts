@@ -49,6 +49,14 @@ export interface bcTransactionType_Ext {
   description:string,
   code2:number
 }
+export interface accessTransactionTypes {
+  id :number, 
+  transaction_type_id :number,
+  description:string, 
+  xActTypeCode_Ext:number,
+  role:string,
+  code2 :number
+}
 export interface bAccounts {
   accountNo: string,  
   accountTypeExt: number,  

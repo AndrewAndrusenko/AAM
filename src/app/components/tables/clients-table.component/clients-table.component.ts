@@ -92,9 +92,9 @@ export class AppClientsTableComponent  {
   }
   openNewPortfolioForm (element:ClientData) {
     this.expandAllowed = false;
-    this.dialogNewAccountRef = this.dialog.open(AppNewAccountComponent ,{minHeight:'400px', width:'900px' });
-    this.dialogNewAccountRef.componentInstance.newAccountForm.controls['idclient'].patchValue(element.idclient)
-    this.dialogNewAccountRef.componentInstance.newAccountForm.controls['clientname'].patchValue(element.clientname)
+    this.dialogNewAccountRef = this.dialog.open(AppNewAccountComponent ,{minHeight:'50vh', minWidth:'60vw' });
+    this.dialogNewAccountRef.componentInstance.portfolioForm.controls['idclient'].patchValue(element.idclient)
+    this.dialogNewAccountRef.componentInstance.portfolioForm.controls['clientname'].patchValue(element.clientname)
     this.dialogNewAccountRef.componentInstance.action = 'Create';
   }
 

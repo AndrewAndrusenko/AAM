@@ -3,7 +3,7 @@ import { HadlingCommonDialogsService } from './hadling-common-dialogs.service';
 import { AppTradeService } from './trades-service.service';
 import { AppAccountingService } from './accounting.service';
 import { AppallocationTableComponent } from '../components/tables/allocation-table.component/allocation-table.component';
-import { Observable, Subject,  catchError,  filter, forkJoin, map,  of, switchMap, tap } from 'rxjs';
+import { Observable, Subject,  catchError,  exhaustMap,  filter, forkJoin, map,  of, switchMap, tap } from 'rxjs';
 import { AbstractControl } from '@angular/forms';
 import { AppOrderTableComponent } from '../components/tables/orders-table.component/orders-table.component';
 import { allocation, allocation_fifo, orders } from '../models/interfaces.model';
@@ -96,6 +96,7 @@ export class AppAllocationService {
       this.accountingTradeService.createFIFOtransactions(clientTrade.trtype==='BUY'? -1 : 1,null,clientTrade.idportfolio,clientTrade.secid,clientTrade.qty,clientTrade.trade_amount/clientTrade.qty, clientTrade.id).pipe (
         tap(data=>data['name']==='error'? this.CommonDialogsService.snackResultHandler(data):createdAccountingTransactions.push(data)),
         filter(data=>data['name']!=='error'),
+        
         switchMap(()=> 
           forkJoin([
             this.AccountingDataService.getAccountingScheme(bcEntryParameters,cSchemeGroupId).pipe(
