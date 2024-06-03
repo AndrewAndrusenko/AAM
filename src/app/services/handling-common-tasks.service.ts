@@ -1,3 +1,4 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 import * as XLSX from 'xlsx'
@@ -5,7 +6,9 @@ import * as XLSX from 'xlsx'
   providedIn: 'root'
 })
 export class HandlingCommonTasksService {
-  constructor() { }
+  constructor(
+    private http : HttpClient,
+  ) { }
   exportToExcel (data:Array<{}>, name:string,numberFields?:string[],dateFields?:string[])  {
     let dataToExport=data;
     if (numberFields!==undefined) {
@@ -57,7 +60,9 @@ export class HandlingCommonTasksService {
       return null
     } else {
       start=control.value['dateRangeStart']['_isAMomentObject']? new Date(control.value['dateRangeStart']['_d']).toDateString():new Date(control.value['dateRangeStart']).toDateString();
-      end=control.value['dateRangeEnd']['_isAMomentObject']? new Date(control.value['dateRangeEnd']['_d']).toDateString() : new Date(control.value['dateRangeEnd']).toDateString();
+      if (control.value['dateRangeEnd']) {
+        end=control.value['dateRangeEnd']['_isAMomentObject']? new Date(control.value['dateRangeEnd']['_d']).toDateString() : new Date(control.value['dateRangeEnd']).toDateString()
+      }
       return '['+start+','+end+']'
     }
   }
@@ -66,5 +71,30 @@ export class HandlingCommonTasksService {
     obj[name + '_min'] = control.value['dateRangeStart']? new Date(control.value['dateRangeStart']['_d']).toDateString() : null;
     obj[name + '_max'] = control.value['dateRangeEnd']? new Date(control.value['dateRangeEnd']['_d']).toDateString() : null;
     return obj;
+  }
+  nodecls (){
+      return this.http.get <string> ('/api/nodecls/').subscribe(data=>console.log('nodeTerminalClear',data))
+  }
+  tools () {
+    let obj = `
+    id :number,
+    code :string,
+    mp_name :string,
+    rest_type :string,
+    param :string,
+    restrictinon :number,
+    act_violation_and_orders :number,
+    act_violation :number,
+    mp_violation :number,
+    act_weight_and_orders :number,
+    act_weight :number,
+    mp_weight :number,
+    sum_weight :number,
+    act_mtm :number,
+    npv :number,
+    net_orders  :number
+  `
+  let a = obj.split(',').map(el=> {return {fieldName:el.split(':')[0].trim(),displayName:el.split(':')[0].trim()}});
+  console.log('obj',a.flat());
   }
 }

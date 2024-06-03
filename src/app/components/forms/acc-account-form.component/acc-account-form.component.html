@@ -1,31 +1,30 @@
 <mat-toolbar color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4">
-  <span>{{title}} Account ID {{accountTypeExt.value}}</span>
+  <span>{{title}} Account ID {{accountId.value}}</span>
   <span class="example-spacer"></span>
-  <mat-checkbox style= "font-size: 14px; color:rgb(255, 255, 255); padding: 1%;" #submitbox checked="false" 
-    (click)=" accountModifyForm.markAllAsTouched();
-    accountLedgerModifyForm.markAllAsTouched();"
-    >Submit Data
-  </mat-checkbox>
-  <button *ngIf="aType!==1"mat-raised-button color="accent" 
-    [disabled]="!(accountModifyForm.valid && submitbox.checked)||action==='View'"
-    (click)="updateAccountData(action)"
-    style="margin-top: 1px; width: 30%; font-size: 18px; margin-left: 1%;">
-    {{action}} Account
-  </button>
-  <button *ngIf="aType==1" mat-raised-button color="accent" 
-    [disabled]="!(accountLedgerModifyForm.valid && submitbox.checked)||action==='View'"
-    (click)="updateLedgerAccountData(action)"
-    style="margin-top: 1px; width: 30%; font-size: 18px; margin-left: 1%;">
-    {{action}} Ledger Account
-  </button>
+
 </mat-toolbar>
 <mat-tab-group mat-stretch-tabs [selectedIndex]="aType*1" >
   <mat-tab  label="Clients">
-    <form class="submit" [formGroup]="accountModifyForm" >
-      <fieldset [disabled]="action==='View'? true: false">
-      <h3 style="color:rgb(177, 174, 174)" *ngIf="accountModifyForm.valid"> 
-        To save data please select 'Submit data' check and then press button 
-      </h3>
+    <form  [formGroup]="accountModifyForm"  >
+      <p style="margin-top: 1%;">
+        <button *ngIf="aType!==1"mat-raised-button color="accent" 
+          [disabled]="!(accountModifyForm.valid && submitbox.checked)||action==='View'"
+          (click)="updateAccountData(action)"
+          style="margin-top: 1px; width: 30%;  margin-left: 1%;">
+          {{action}} Account
+        </button>
+        <button *ngIf="aType==1" mat-raised-button color="accent" 
+          [disabled]="!(accountLedgerModifyForm.valid && submitbox.checked)||action==='View'"
+          (click)="updateLedgerAccountData(action)"
+          style="margin-top: 1px; width: 30%;  margin-left: 1%;">
+          {{action}} Ledger Account
+        </button>
+        <mat-checkbox style= "padding: 1%;" #submitbox checked="false" color="primary"
+          (click)=" accountModifyForm.markAllAsTouched();
+          accountLedgerModifyForm.markAllAsTouched();"
+          >Submit Data
+        </mat-checkbox>
+      </p>
       <p>
         <mat-form-field style="width: 6%;">
           <input matInput placeholder="ID" formControlName="accountId" [readonly]="true">
@@ -39,8 +38,6 @@
             The field is required.    
           </mat-error>
         </mat-form-field>
-
-        
         <mat-form-field style = "width: 15%;" *ngIf="accountTypeExt.value!=15">
           <input matInput placeholder = "Currency" formControlName="currencyCode"
           [matAutocomplete]="auto" >
@@ -89,13 +86,12 @@
           </mat-error>
         </mat-form-field>
       </p>
-
       <p> 
         <mat-form-field style="width: 15%;" >
           <input matInput placeholder="ClientID" formControlName="clientId">
           <button mat-icon-button matSuffix
           (click)="selectClient()">
-          <mat-icon class = "icon_search">search</mat-icon></button>
+          <mat-icon class = "icon_search">input</mat-icon></button>
         </mat-form-field>
 
         <mat-form-field style="width: 35%;" >
@@ -128,7 +124,7 @@
           <input matInput placeholder="Portfolio" formControlName="idportfolio" >
           <button mat-icon-button matSuffix [disabled]="this.clientId.value===null"
           (click)="  selectPortfolio ()">
-          <mat-icon [class] = "this.clientId.value!==null? 'icon_search':''">search</mat-icon></button>
+          <mat-icon [class] = "this.clientId.value!==null? 'icon_search':''">input</mat-icon></button>
         </mat-form-field>
 
         <mat-form-field style="width: 20%;">
@@ -159,18 +155,32 @@
       <mat-form-field style="width: 95%;">
         <input matInput placeholder="Information" formControlName="Information">
       </mat-form-field>
-      <h3 style="color:rgb(252, 113, 113)" *ngIf="accountModifyForm.invalid"> Please check the form. Data is invalid</h3>
-    </fieldset>
+      <h4 style="margin-left: 0.5%;" class="warn-color"  *ngIf="action!='View'&&accountModifyForm.invalid"> Please check the form. Data is invalid</h4>
     </form>
   </mat-tab>  
 
   <mat-tab   label="Ledger"> 
-    <form class="submit" [formGroup]="accountLedgerModifyForm">
-      <fieldset [disabled]="action==='View'? true: false">
-      <h3 style="color:rgb(177, 174, 174)" *ngIf="accountLedgerModifyForm.valid"> 
-        To save data please select 'Submit data' check and then press button 
-      </h3>
-      <p>
+    <form  [formGroup]="accountLedgerModifyForm">
+      <p style="margin-top: 1%;">
+        <button *ngIf="aType!==1"mat-raised-button color="accent" 
+          [disabled]="!(accountModifyForm.valid && submitbox.checked)||action==='View'"
+          (click)="updateAccountData(action)"
+          style="margin-top: 1px; width: 30%;  margin-left: 1%;">
+          {{action}} Account
+        </button>
+        <button *ngIf="aType==1" mat-raised-button color="accent" 
+          [disabled]="!(accountLedgerModifyForm.valid && submitbox.checked)||action==='View'"
+          (click)="updateLedgerAccountData(action)"
+          style="margin-top: 1px; width: 30%;  margin-left: 1%;">
+          {{action}} Ledger Account
+        </button>
+        <mat-checkbox style= "padding: 1%;" #submitbox checked="false" color="primary"
+          (click)=" accountModifyForm.markAllAsTouched();
+          accountLedgerModifyForm.markAllAsTouched();"
+          >Submit Data
+        </mat-checkbox>
+      </p>
+       <p>
         <mat-form-field style="width: 6%;">
           <input matInput placeholder="ID" formControlName="ledgerNoId">
         </mat-form-field>
@@ -289,8 +299,7 @@
       <mat-form-field style="width: 95%;">
         <input matInput placeholder="Information" formControlName="name">
       </mat-form-field>
-      <h3 style="color:rgb(252, 113, 113)" *ngIf="accountLedgerModifyForm.invalid"> Please check the form. Data is invalid</h3>
-      </fieldset>
+      <h4 style="margin-left: 0.5%;" class="warn-color"  *ngIf="action!='View'&&accountLedgerModifyForm.invalid"> Please check the form. Data is invalid</h4>
     </form>
   </mat-tab>
 </mat-tab-group>

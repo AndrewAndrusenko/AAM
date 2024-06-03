@@ -1,6 +1,6 @@
-<ng-container *ngIf="accessState!=='none'" >
-  <mat-form-field style="width: 20%;"class = "filterField"  title="Filter All columns">
-    <mat-label class="whiteTextFilter">Search (all columns)...</mat-label>
+<ng-container *ngIf="accessState!=='none'" style="margin-bottom: 0.5%;">
+  <mat-form-field style="width: 30%;"class = "filter-field"  title="Filter All columns">
+    <mat-label>Type to search...</mat-label>
     <input 
       (keyup)="applyFilter($event)"
       matInput type="text" #filterALL
@@ -12,13 +12,13 @@
     </button>
   </mat-form-field>
   <button color = "accent" mat-raised-button title="Export To Excel"
-    style=" margin-left:1%; font-size: 18px;"
+    style=" margin-left:1%; "
     (click)="exportToExcel()">
     Save as XLS 
     <mat-icon matSuffix >save_alt</mat-icon>
   </button>
   <button color = "accent" mat-raised-button title="Reload Table"
-    style=" margin-left:1%; font-size: 18px;"
+    style=" margin-left:1%; "
     (click)="submitQuery()">
     Reload 
     <mat-icon matSuffix >refresh</mat-icon>
@@ -36,34 +36,31 @@
       <mat-icon color = 'accent'>filter_alt</mat-icon>
     </mat-panel-description>
   </mat-expansion-panel-header >
-  <form class="submit" [formGroup]="searchParametersFG"  style="font-size: 18px; margin-left: 0.5%; margin-top: 0.5%;"> <!-- complexSearch Form -->
-    <span style="display: flex;    align-items:flex-start;  margin-right: 1%;margin-top: 0.2%;"> 
-      <span style="display:grid; width: 11%; margin-right: 2%;"> <!-- submitQuery/CleaAll Buttons -->
-        <button color = "primary"  class= "button-color" mat-raised-button 
-          style="margin:1%; font-size: 18px;"
+  <form  [formGroup]="searchParametersFG"  style=" margin-left: 0.5%; margin-top: 0.5%;"> <!-- complexSearch Form -->
+    <span style="display: flex;    align-items:flex-start; "> 
+      <span style="display:grid; width: 11%; margin-right: 1%;margin-top: 0.5%;"> <!-- submitQuery/CleaAll Buttons -->
+        <button color = "primary"   mat-raised-button 
+          style="margin:1%; "
           (click)="submitQuery()">
           Submit
         </button>
         <button color = "accent" mat-raised-button 
-          style="margin-top:4%;margin-left: 1%; font-size: 18px;"
+          style="margin-top:4%;margin-left: 1%; "
           (click)="searchParametersFG.reset();
            secidList.patchValue(['ClearAll']);
-           portfoliosList.patchValue(['ClearAll']);
-          ">
+           portfoliosList.patchValue(['ClearAll']);          ">
           ClearAll
         </button>
       </span>
-     <mat-form-field appearance="fill"  class="search-filed"> <!-- Date Filter -->
+      <mat-form-field appearance="fill"  > <!-- Date Filter -->
         <mat-label >Enter a date range</mat-label>
           <input matInput placeholder="Report date" [matDatepicker]="pickerTDate" formControlName="tdate" >
         <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
         <mat-datepicker-toggle matSuffix [for]="pickerTDate"></mat-datepicker-toggle>
         <mat-datepicker  #pickerTDate></mat-datepicker>
       </mat-form-field>
-    </span>
-    <p style="margin-top: 1%;">
-      <mat-form-field  appearance="fill" style="width: 40%; " class="search-filed">
-        <mat-chip-list #chipList   >
+      <mat-form-field *ngIf="secidList.value.length" appearance="fill" style="width: 45%;" class="no-hint-fields" >
+        <mat-chip-list #chipListSecid   >
           <mat-chip *ngFor="let secid of secidList.value" 
           (removed)="removeNew(secid,secidList)"
           (click)=" clearAllNew($event,secidList);">
@@ -76,22 +73,19 @@
           [matAutocomplete]="auto"
           matInput
           placeholder="Add secid or secid,secid1,secid2.."
-          [matChipInputFor]="chipList"
+          formControlName="secidIn"
+          [matChipInputFor]="chipListSecid"
           [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
           [matChipInputAddOnBlur]="true"
-          (matChipInputTokenEnd)="addNew($event,secidList)"
-          matTooltip="Type secid or paste multiple secid codes separated by comma and press enter" >
+          (matChipInputTokenEnd)="addNew($event,secidList)" >
         </mat-chip-list>
         <mat-autocomplete #auto="matAutocomplete" (optionSelected)="changedValueofChip($event.option.value,secidList)">
           <mat-option *ngFor="let secid of filterednstrumentsLists | async" [value]="secid.toString().split(',')[0]">
             {{secid.toString().replaceAll(',',' - ')}}
           </mat-option>
         </mat-autocomplete>
-        <mat-hint style="color:rgb(104, 246, 246); font-style: italic;">
-          Instruments List
-        </mat-hint>
       </mat-form-field>
-      <mat-form-field  appearance="fill" style="width: 40%; " class="search-filed">
+      <mat-form-field  appearance="fill" style="width: 30%; "  class="no-hint-fields" >
         <mat-chip-list #chipPortList   >
           <mat-chip *ngFor="let portfolio of portfoliosList.value" 
           (removed)="removeNew(portfolio,portfoliosList)"
@@ -110,16 +104,11 @@
           (matChipInputTokenEnd)="addNew($event,portfoliosList)"
           matTooltip="Type portfolio code or paste multiple codes separated by comma and press enter" >
         </mat-chip-list>
-        <mat-hint style="color:rgb(104, 246, 246); font-style: italic;">
-          Portfolios List
-        </mat-hint>
       </mat-form-field>
-    </p>
+    </span>
   </form>
 </mat-expansion-panel>
- <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort
-   class="mat-elevation-z8" 
-    class ="childTable" style="width: 100%;" >
+ <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort       style="width: 100%;" >
     <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i=index" justify="right"  >
       <th mat-header-cell *matHeaderCellDef mat-sort-header> {{columnsHeaderToDisplay[i]}}</th>
       <td 
@@ -131,7 +120,7 @@
           <p *ngSwitchCase="['fifo_cost','price_in'].includes(column)">{{element[column]|currency}} </p>
           <p *ngSwitchCase="['qty_out','qty','fifo_rest','rest'].includes(column)">{{element[column]|currency:' '}} </p>
           <p *ngSwitchCase="['ext_trade'].includes(column)&&element['ext_trade']!==null">
-            <button mat-stroked-button style=" font-size: 18px; margin-top: 5%;"  
+            <button mat-stroked-button style="  margin-top: 5%;"  
             class="navigate-button"  matTooltip="Trade Details"
             (click)=" showTradeDetails (element[column])">
               {{element[column] }}
@@ -142,10 +131,10 @@
             {{element['fee_type_value']===1? element[column] + '%':element[column] + ''}}  </p>
         </span>
         <ng-template  #instrumentcontextmenu>
-          <div class="tree-menu-context" cdkMenu >
+          <div class="menu-context" cdkMenu >
             <button 
               (click)="updateFilter(element[column])"
-              class="tree-menu-item" cdkMenuItem>
+              class="menu-context-item" cdkMenuItem>
               <mat-icon class="menu-icon" matPrefix>filter_list</mat-icon> 
               Add to filter
             </button> 

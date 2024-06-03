@@ -5,6 +5,7 @@ import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dia
 import { FeesMainData, FeesPortfoliosWithSchedulesData, dFeesObject } from 'src/app/models/fees-interfaces.model';
 import { AppFeesHandlingService } from 'src/app/services/fees-handling.service';
 import { AppaIAccFeesSchedulesTable } from '../../tables/acc-fees-schedules-table.component/acc-fees-schedules-table.component';
+import { DateRange } from '@angular/material/datepicker';
 // import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 // import { AppAccFeesSchedulesTableComponent } from '../../tables/acc-fees-main-table.component/acc-fees-main-table.component';
 @Component({
@@ -14,7 +15,7 @@ import { AppaIAccFeesSchedulesTable } from '../../tables/acc-fees-schedules-tabl
 })
 export class AppAccFeesPortfolioScheduleFormComponent {
   FeesPortfolioForm: FormGroup;
-  dataRange = new FormGroup ({
+  dateRange = new FormGroup ({
     period_start: new FormControl<Date | null>(new Date(),Validators.required),
     period_end: new FormControl<Date | null>(new Date()),
   });
@@ -41,14 +42,14 @@ export class AppAccFeesPortfolioScheduleFormComponent {
       fee_type_desc: {value:null, disabled: false},
       id_fee_main: [null, { validators:  [Validators.required]}],
       period_desc: {value:null, disabled: false},
-      period_start:[null],
-      period_end :[null],
+      period_start:[null,{ validators:  [Validators.required]}],
+      period_end :[null,{ validators:  [Validators.required]}],
     })
   }
   ngOnInit(): void {
     this.action==='View'? this.FeesPortfolioForm.disable():null;
     this.FeesPortfolioForm.patchValue(this.data);
-    this.dataRange.patchValue({period_start:this.period_start.value,period_end:this.period_end.value});
+    this.dateRange.patchValue({period_start:this.period_start.value,period_end:this.period_end.value});
     this.feeCodes===undefined? this.AppFeesHandlingService.getFeesMainData().subscribe(data=>{
       this.feeCodes = data
       .map(el=>{return {value:el.id.toString(),name:el.fee_code.toString(),desc: el.fee_description,feeType:el.fee_type_desc}})
@@ -113,6 +114,6 @@ export class AppAccFeesPortfolioScheduleFormComponent {
   get  fee_description () {return this.FeesPortfolioForm.get('fee_description') }
   get  fee_type_desc () {return this.FeesPortfolioForm.get('fee_type_desc') }
   get  portfolioname () {return this.FeesPortfolioForm.get('portfolioname') }
-  get  rangeStart () {return this.dataRange.get('period_start') }
-  get  rangeEnd () {return this.dataRange.get('period_end') }
+  get  rangeStart () {return this.dateRange.get('period_start') }
+  get  rangeEnd () {return this.dateRange.get('period_end') }
 }

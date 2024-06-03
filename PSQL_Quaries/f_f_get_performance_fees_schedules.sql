@@ -66,4 +66,3 @@ $BODY$;
 
 ALTER FUNCTION public.f_f_get_performance_fees_schedules(text[], date, date)
     OWNER TO postgres;
-	select * from f_f_get_performance_fees_schedules (array['ACM002'],now()::date,now()::date)

@@ -1,44 +1,8 @@
 
-.mat-error {
-  color: rgb(255, 153, 153);
-  transform: (1.1);
-  height: 110%;
-  font-size: 16px;
-  font-style: italic;
-}
-::ng-deep button.date-highlighted {
-  background:rgb(107, 56, 62);
-  border-radius: 100%;
-}
-.complex-search-entries .mat-expansion-panel-header-description {
-  justify-content: space-between;
-  align-items: center;
-  color: rgb(241, 136, 136);
-  // font-weight: bold;
-  font-size: 18px;
-
-}
-.complex-search-entries .mat-expansion-panel-header-title {
-  justify-content: space-between;
-  align-items: center;
-  color: rgb(191, 188, 188);
-  // font-weight: bold;
-  font-size: 18px;
-}
-.mat-table {
-  background-color:#4f4e4e;
-  width: 100%;
-  font-size: 26px;
-  margin-left: 0px;
-}
-.mat-header-cell {
-  font-size: 20px;
-  background-color:#393737;
-}
 tr.detail-row {
   height: 0;
 }
-.element-detail {
-  overflow: hidden;
+tr.mat-row:hover {
+  border: unset !important;
+  background:unset !important;
 }
-

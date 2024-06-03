@@ -1,7 +1,7 @@
 import {Component, ViewChild, Input, ChangeDetectionStrategy, ElementRef} from '@angular/core';
 import {MatPaginator as MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
-import {Observable, Subscription, } from 'rxjs';
+import {Observable, Subscription, distinctUntilChanged, map, startWith, tap, } from 'rxjs';
 import {MatTableDataSource as MatTableDataSource} from '@angular/material/table';
 import {tableHeaders } from 'src/app/models/interfaces.model';
 import {formatNumber } from '@angular/common';
@@ -16,6 +16,7 @@ import {AppTradeService } from 'src/app/services/trades-service.service';
 import {AbstractControl, FormBuilder, FormGroup } from '@angular/forms';
 import {COMMA, ENTER } from '@angular/cdk/keycodes';
 import {FifoPositions } from 'src/app/models/accountng-intefaces.model';
+import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 @Component({
   selector: 'acc-fifo-positions-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -80,11 +81,12 @@ export class AppAccFifoPositionsTable {
   multiFilter?: (data: FifoPositions, filter: string) => boolean;
   refFeeForm : MatDialogRef<AppAccFeesScheduleFormComponent>
   panelOpenState = false;
-  filterednstrumentsLists : Observable<string[]>;
+  filterednstrumentsLists : Observable<string[][]>;
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
   searchParametersFG: FormGroup;
   constructor(
     private AuthServiceS:AuthService,  
+    private AutoCompleteService:AtuoCompleteService,  
     private HandlingCommonTasksS:HandlingCommonTasksService,
     private CommonDialogsService:HadlingCommonDialogsService,
     private TradeService: AppTradeService,
@@ -97,8 +99,10 @@ export class AppAccFifoPositionsTable {
     this.searchParametersFG = this.fb.group ({
       secidList: [],
       portfoliosList:  [],
+      secidIn:  null,
       tdate : new Date(),
     });
+    this.AutoCompleteService.getSecidLists();
   }
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
@@ -106,6 +110,11 @@ export class AppAccFifoPositionsTable {
   ngOnInit(): void {
    this.portfoliosList.patchValue(['ClearAll'])
    this.secidList.patchValue(['ClearAll'])
+   this.filterednstrumentsLists = this.secidIn.valueChanges.pipe(
+     startWith(''),
+     distinctUntilChanged(),
+     map((value)=>this.AutoCompleteService.filterList(value||'','secid') as string[][]),
+   )
     this.disabledControlElements = this.accessState === 'full'&&this.readOnly===false? false : true;
     this.multiFilter = (data: FifoPositions, filter: string) => {
       let filter_array = filter.split(',').map(el=>[el,1]);
@@ -183,7 +192,10 @@ export class AppAccFifoPositionsTable {
     });
     this.HandlingCommonTasksS.exportToExcel (dataToExport,"FIFOPositions");  
   }
-  changedValueofChip (value:string, control:AbstractControl)  {control.value.push(value);}
+  changedValueofChip (value:string, control:AbstractControl)  {
+    control.value.length>1? control.value.pop():null;
+    control.value.push(value);
+  }
   addNew(event: MatChipInputEvent,control:AbstractControl) {
     control.patchValue (((event.value || '').trim())?  ([...control.value,...event.value.split(',')]) : control.value);
     event.chipInput!.clear();
@@ -200,6 +212,7 @@ export class AppAccFifoPositionsTable {
   get  type () {return this.searchParametersFG.get('type') } 
   get  tdate () {return this.searchParametersFG.get('tdate') } 
   get  secidList () {return this.searchParametersFG.get('secidList') } 
+  get  secidIn () {return this.searchParametersFG.get('secidIn') } 
   get  portfoliosList () {return this.searchParametersFG.get('portfoliosList') } 
 }
 

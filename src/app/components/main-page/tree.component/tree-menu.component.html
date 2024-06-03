@@ -1,39 +1,38 @@
 <!-- Context menu for treeMenu element -->
 <ng-template  #treecontextmenu>
-  <div class="tree-menu-context" cdkMenu *ngIf="activeNode.nodeRoot !==''">
+  <div class="menu-context" cdkMenu *ngIf="activeNode.nodeRoot !==''">
     <!-- -----------toggle favorite button of context menu. more readable version it semms------ -->
     <button *ngIf="activeNode.favoriteRoot !=='Favorites'"
       (click)="handleNewFavoriteClick()" 
-      class="tree-menu-item" cdkMenuItem>
+      class="menu-context-item" cdkMenuItem>
       <mat-icon class="menu-icon" matPrefix>favorite</mat-icon> 
        Add to favorites
     </button>    
     <button *ngIf="activeNode.favoriteRoot=='Favorites'"
       (click)="handleDeleteFavoriteClick()"
-      class="tree-menu-item" cdkMenuItem>
+      class="menu-context-item" cdkMenuItem>
       <mat-icon class="menu-icon" matPrefix>favorite_border</mat-icon>      
       Remove from favorites
     </button>  
     <!-- -----------toggle favorite button of context menu. more readable version it semms------ -->
     <button 
       (click)="handleAddFavUpdate()"
-      class="tree-menu-item" cdkMenuItem >
+      class="menu-context-item" cdkMenuItem >
       <mat-icon class="menu-icon" matPrefix>add_circle</mat-icon>      
        New Item</button>
     <button 
-       class="tree-menu-item" cdkMenuItem>
+       class="menu-context-item" cdkMenuItem>
       <mat-icon class="menu-icon" matPrefix>edit</mat-icon>      
        Edit Item
     </button>
   </div>
 </ng-template>
 <!-- //Context menu for treeMenu element -->
-
+<div class="color-background" >
 <!-- ---Search Tree input------- -->
-<mat-form-field class = "filterText" style="font-size: 22px; ">
-<mat-label class="colorLabel">Search tree</mat-label>
-<input 
-(keyup.enter)="searchByTree(SearchTree.value)"
+<mat-form-field style="margin-left: 2%;" class="filter-field">
+<mat-label >Search tree</mat-label>
+<input (keyup.enter)="searchByTree(SearchTree.value)"
 matInput type="text" #SearchTree  name="SearchTree">
 <button matSuffix mat-icon-button aria-label="Clear" (click)="SearchTree.value=''">
   <mat-icon>close</mat-icon>
@@ -48,9 +47,9 @@ matInput type="text" #SearchTree  name="SearchTree">
 <!-- ---Expand All / Collapse Tree menu button------- -->
 
 <!-- ---Tree Menu items with scrolling area------- -->
-<cdk-virtual-scroll-viewport appendOnly itemSize="50" class="example-viewport">
+
 <div class="tree-menu" >
-<mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
+<mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="color-background">
   <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding>
     <button mat-flat-button [cdkContextMenuTriggerFor]="treecontextmenu" 
     [style.background-color] = "node.color? node.color : 'white'"
@@ -78,8 +77,7 @@ matInput type="text" #SearchTree  name="SearchTree">
   </mat-tree-node>
 </mat-tree>
 </div>
-</cdk-virtual-scroll-viewport>
-
+</div>
 <!-- ---Tree Menu items with scrolling area------- -->
 <!-- (click)="sendMessage(node);
 activeNode = node;" -->

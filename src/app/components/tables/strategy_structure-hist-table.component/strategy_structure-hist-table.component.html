@@ -1,11 +1,11 @@
 <ng-container *ngIf="accessState!=='none'" >
   <span style="display: flex;    align-items:flex-start;  margin-right: 1%;margin-top: 0.2%;"> 
       <button color = "accent"  mat-raised-button 
-        style="margin:1%; font-size: 18px;"
+        style="margin:1%; "
         (click)="showHistoricalPortfolio(reportDate.value)">
         Show Historical Portfolio
       </button>
-   <mat-form-field  style="font-size: large;"> <!-- Date Filter -->
+   <mat-form-field > <!-- Date Filter -->
       <mat-label >Enter a date </mat-label>
         <input matInput placeholder="Report date" [matDatepicker]="pickerTDate" #reportDate [value]="rDate" >
       <mat-datepicker-toggle matSuffix [for]="pickerTDate"></mat-datepicker-toggle>
@@ -14,8 +14,8 @@
   </span>
   <mat-form-field 
     *ngIf="showFilter"
-    style="width: 20%;"class = "filterField"  title="Filter All columns">
-    <mat-label class="whiteTextFilter">Search (all columns)...</mat-label>
+    style="width: 30%;"class = "filter-field"  title="Filter All columns">
+    <mat-label>Type to search...</mat-label>
     <input 
       (keyup)="applyFilter($event)"
       matInput type="text" #filterALL
@@ -26,9 +26,7 @@
       <mat-icon>close</mat-icon>
     </button>
   </mat-form-field>
- <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort
-   class="mat-elevation-z8" 
-    style="width: 100%;" >
+  <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort style="width: 100%;" >
     <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i=index" justify="right"  >
       <th mat-header-cell *matHeaderCellDef mat-sort-header> {{columnsHeaderToDisplay[i]}}</th>
       <td 
@@ -38,22 +36,22 @@
           <p *ngSwitchCase="['tr_date'].includes(column)">{{element[column] | date:'MMM d, y, HH:mm:ss'}} </p>
          </span>
         <ng-template  #instrumentcontextmenu>
-          <div class="tree-menu-context" cdkMenu >
+          <div class="menu-context" cdkMenu >
             <button 
               (click)="updateFilter(element[column])"
-              class="tree-menu-item" cdkMenuItem>
+              class="menu-context-item" cdkMenuItem>
               <mat-icon class="menu-icon" matPrefix>filter_list</mat-icon> 
               Add to filter
             </button> 
             <button 
               (click)="exportToExcel()"
-              class="tree-menu-item" cdkMenuItem>
+              class="menu-context-item" cdkMenuItem>
               <mat-icon class="menu-icon" matPrefix>save_alt</mat-icon> 
               Save as XLS
             </button> 
             <button 
               (click)="submitQuery()"
-              class="tree-menu-item" cdkMenuItem>
+              class="menu-context-item" cdkMenuItem>
               <mat-icon class="menu-icon" matPrefix>refresh</mat-icon> 
               Reload
             </button> 

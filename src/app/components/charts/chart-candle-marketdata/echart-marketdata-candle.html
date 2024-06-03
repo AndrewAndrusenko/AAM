@@ -1,7 +1,6 @@
 <nav class="navbar navbar-expand-sm navbar-dark bg-primary"  style="align-items: center;">
-  <mat-form-field 
-  style="color: black;; margin-left: 1%;font-size: large; background-color: rgb(46, 93, 147); text-align: center; width: 12%; border-radius: 12px;"  >
-    <mat-label style="color: black;">Select SecID..</mat-label>
+  <mat-form-field   style=" text-align: center; width: 12%;" class="no-hint-fields" >
+    <mat-label >Select SecID..</mat-label>
     <mat-select >
       <mat-option *ngFor="let secId of secIds" (click)="onChangeCountry(secId)"  [value]="secId">{{secId}}</mat-option>
     </mat-select>
@@ -11,6 +10,6 @@
 
 <div *ngIf="seriesCandle.length!==0" style="background-color: azure;">
 <div style="width: 98%; top: 1%;" >
-  <div echarts [options]="countryCasesChartOptions" style="width: 100%; min-height: 700px" class="demo-chart"></div>
+  <div echarts [options]="countryCasesChartOptions" style="width: 100%; min-height: 70vh" ></div>
 </div>
 </div> 

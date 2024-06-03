@@ -1,13 +1,11 @@
 
-const accountingNodeColor = 'rebeccapurple'
-const accountingNodeColorChild = 'rgb(77, 38, 117)'
-export const investmentNodeColor = 'crimson'
-export const investmentNodeColorChild = 'rgb(184, 28, 59)'
-export const faovritesNodeColor = 'rgb(53, 153, 168)'
-const faovritesNodeColorChild = 'rgb(53, 153, 168)'
+const accountingNodeColor = 'rgb(27, 112, 125)'
+const accountingNodeColorChild = 'rgb(27, 112, 125)'
+export const investmentNodeColor = 'rgb(22, 68, 128)'
+export const investmentNodeColorChild = 'rgb(22, 68, 128)'
 export const additionalLightGreen = 'rgb(53, 168, 110)'
  
-export const menuColorGl = 'crimson'
+export const menuColorGl = 'rgb(22, 68, 128)'
 
 export const rootNodesColor = [
   {
@@ -22,8 +20,6 @@ export const rootNodesColor = [
   },
   {
     nodes:['Favorites'],  
-/*     color:faovritesNodeColor,
-    colorChild:faovritesNodeColorChild */
     color:investmentNodeColor,
     colorChild:investmentNodeColorChild
   }

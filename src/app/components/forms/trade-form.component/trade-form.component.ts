@@ -23,8 +23,6 @@ import { CurrenciesDataService } from 'src/app/services/currencies-data.service'
 import { AppMarketDataService } from 'src/app/services/market-data.service';
 import { Instruments, moexSecurityType } from 'src/app/models/instruments.interfaces';
 import { bAccountTransaction, bLedgerTransaction } from 'src/app/models/accountng-intefaces.model';
-import { AppRestrictionsHandlingService } from 'src/app/services/restrictions-handling.service';
-import { AppInvRestrictionVerifyAllocTableComponent } from '../../tables/inv-restriction-verify-alloc-table.component/inv-restriction-verify-alloc-table.component';
 @Component({
   selector: 'app-trade-modify-form',
   templateUrl: './trade-form.component.html',
@@ -80,7 +78,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
       trtype:[null, { validators:  Validators.required, updateOn: 'blur' }], action:{value:null, disabled: false},
       tdate:[new Date(), { validators:  Validators.required, updateOn: 'blur' }],
       vdate:[new Date(), { validators:  Validators.required, updateOn: 'blur' }],
-      tidinstrument:[null, { validators:  Validators.required }],
+      tidinstrument:[null, { validators:  Validators.required, updateOn: 'blur'  }],
       qty:[null, { validators:  [Validators.required,Validators.pattern('[0-9]*([0-9.]{0,8})?$')], updateOn: 'blur' }], 
       price:[null, { validators: [ Validators.required, Validators.pattern('[0-9]*([0-9.]{0,8})?$')], updateOn: 'blur' }],
       price_type:[1, { validators:  Validators.required, updateOn: 'blur' }],
@@ -113,7 +111,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
   }
   ngOnInit(): void {
     this.tradeModifyForm.patchValue(this.data)
-    this.tidinstrument.setValidators(this.AutoCompService.secidValirator());
+    this.tidinstrument.setValidators([this.AutoCompService.secidValirator(),Validators.required]);
     this.id_price_currency.setValidators([this.AutoCompService.currencyValirator(),Validators.required]);
     this.id_settlement_currency.setValidators([this.AutoCompService.currencyValirator(),Validators.required]);
     this.faceunit.value? this.faceunit_name.patchValue(this.AutoCompService.getCurrecyData(this.faceunit.value)['CurrencyCode']):null;
@@ -239,9 +237,11 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     this.getMarketPrice()
   }
   getMarketPrice() {
-    this.MarketDataService.getMarketQuote(this.tidinstrument.value,new Date(this.tdate.value).toDateString(),this.id_price_currency.value).subscribe(data=>{
-      this.market_price.patchValue(data.length? (data[0].close/(this.price_type.value==='1'&&data[0].rate!==null? data[0].rate:1)).toFixed(4):null)
-    })
+    if (this.tidinstrument.value&&new Date(this.tdate.value).toDateString()&&this.id_price_currency.value) {
+      this.MarketDataService.getMarketQuote(this.tidinstrument.value,new Date(this.tdate.value).toDateString(),this.id_price_currency.value).subscribe(data=>{
+        this.market_price.patchValue(data.length? (data[0].close/(this.price_type.value==='1'&&data[0].rate!==null? data[0].rate:1)).toFixed(4):null)
+      })
+    }
   }
   clearCurrencies() {
     ['code_price_currency', 'price_currency_name', 'code_settlement_currency','settlement_currency_name','settlement_rate'].forEach(key => this.tradeModifyForm.get(key).patchValue(null))

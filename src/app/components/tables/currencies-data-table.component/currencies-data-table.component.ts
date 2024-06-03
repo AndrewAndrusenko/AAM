@@ -124,12 +124,10 @@ export class AppTableCurrenciesDataComponent {
   completeLoading (currencyData:currencyRateList[]){
     currencyData!==null? this.updateCurrencyDataTable(currencyData):null;
     this.loadMarketData.enable();
-    this.loadMarketData.reset();
     this.marketSources.forEach(el=>{
       el.checkedAll=false;
       el.segments.forEach(el=>el.checked=false)
     });
-    this.overwritingCurrentData.patchValue(false)
   }
   getRatestData(){
     this.loadingDataState.state='Pending';

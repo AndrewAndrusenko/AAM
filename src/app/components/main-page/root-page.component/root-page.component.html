@@ -2,11 +2,11 @@
   [treeOpened]="opened">
 </app-app-menu>
 <mat-drawer-container class="root-container" >
-  <mat-drawer #sidenav class="root-sidenav" mode="side" [(opened)]="opened"  >
+  <mat-drawer #sidenav class="root-sidenav" mode="side" [(opened)]="opened" style="width: 14vw;" >
     <app-tree-menu></app-tree-menu>
   </mat-drawer>
   <div class="root-sidenav-content"
-    [style.width]="sidenav.opened===true?  '80vw' : '100vw'">
+    [style.width]="sidenav.opened===true?  '84vw' : '100vw'">
     <button  title="Hide SideBar Menu" *ngIf="sidenav.opened===true"
       style="height: 100%; background-color: rgb(44, 44, 44); width: 2%; border-radius: 5px; border-color:rgb(67, 79, 79);" 
       
@@ -23,7 +23,7 @@
       <mat-icon style="align-items: center; color: white;" title="Show SideBar Menu">chevron_right</mat-icon>
       <mat-icon style="align-items: center; color: white;" title="Show SideBar Menu">chevron_right</mat-icon>
     </button>
-    <app-app-tabs [style.min-width]="sidenav.opened===true?  '80vw' : '100vw'"></app-app-tabs>
+    <app-app-tabs [style.min-width]="sidenav.opened===true?  '84vw' : '100vw'"></app-app-tabs>
   </div>
 </mat-drawer-container>
 

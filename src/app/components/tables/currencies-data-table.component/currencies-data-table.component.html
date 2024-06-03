@@ -1,6 +1,6 @@
 <span *ngIf="FormMode==='QuotesMode'" title="TableFilterGroup"> 
-  <mat-form-field  class = "filterField" >
-    <mat-label class="whiteTextFilter">Type to search...</mat-label>
+  <mat-form-field  class = "filter-field" >
+    <mat-label>Type to search...</mat-label>
     <input 
       (keyup)="applyFilter($event)"
       [formControl]="filterlFormControl" 
@@ -14,19 +14,18 @@
     </button>
   </mat-form-field>
   <button color = "accent" mat-raised-button 
-    style=" margin-left:1%; font-size: 18px;"
+    style=" margin-left:1%; "
     (click)="exportToExcel()">
     Save as XLS 
     <mat-icon matSuffix >save_alt</mat-icon>
   </button>
   <button color = "accent" mat-raised-button 
-    style=" margin-left:1%; font-size: 18px;"
+    style=" margin-left:1%; "
     (click)="submitQuery()">
     Reload 
     <mat-icon matSuffix >refresh</mat-icon>
   </button>
 </span>
-
 <mat-expansion-panel 
   *ngIf="FormMode==='QuotesMode'&&!disabledControlElements" 
   class="headers-align" 
@@ -40,23 +39,23 @@
     </mat-panel-title>
     <mat-panel-description>
       Tap to {{panelOpenStateFirst? 'hide': 'open'}} control elements
-      <mat-icon  style = "color : rgb(44, 43, 43);">cloud_download</mat-icon>
+      <mat-icon>cloud_download</mat-icon>
     </mat-panel-description>
   </mat-expansion-panel-header >
-  <h2 style="  text-align: center;" *ngIf="loadingDataState.state==='Pending'">Loading market data...</h2>
-  <form class="submit"   [formGroup]="loadMarketData" style="font-size: 18px;   margin-top: 0.5%;">
+  <h4 style="  text-align: center;" *ngIf="loadingDataState.state==='Pending'">Loading market data...</h4>
+  <form    [formGroup]="loadMarketData" style="   margin-top: 0.5%;">
     <div style="text-align: center;">
       <span *ngIf="!['None','Pending'].includes(loadingDataState.state)" title="loadingDataState">
-        <span style="font-size: larger;" [style.color]="loadingDataState.state=='terminated'? 'black': 'rgb(168, 162, 162)'">
-          Status: {{loadingDataState.message}} 
-          <span *ngIf="loadingDataState.loadedCount" [style.color]="'white'">Uploaded: {{loadingDataState.loadedCount}} rows </span>
-          <span *ngIf="loadingDataState.deletedCount" [style.color]="'black'"> ||  Deleted: {{loadingDataState.deletedCount}} rows</span> 
+        <span [style.color]="loadingDataState.state=='terminated'? 'var(--warnColor)': 'default'">
+          Status: {{loadingDataState.message}}.
+          <span *ngIf="loadingDataState.loadedCount"> Uploaded: {{loadingDataState.loadedCount}} rows </span>
+          <span *ngIf="loadingDataState.deletedCount" [style.color]="'var(--accentColor)'"> &&  Deleted: {{loadingDataState.deletedCount}} rows</span> 
         </span>
       </span>
     </div>
     <button color = "accent" #getRatesb mat-raised-button title="getMarketData"
       [matTooltip]="getRatesb.disabled? 'Select sources to upload':'Click to start loading'"
-      style=" margin-left:1%; font-size: larger; margin-right: 1%; margin-top: 1%; padding: 1%; width: 30%;"
+      style=" margin-left:1%; margin-right: 1%; margin-top: 1%; width: 20%;"
       [disabled]="loadingDataState.state==='Pending' || loadMarketData.invalid"
       (click)="getRatestData()">
       Get currencies rates data 
@@ -67,13 +66,13 @@
       <mat-datepicker  #dateForMarketData></mat-datepicker>
     </mat-form-field> 
     <mat-slide-toggle #deleteOldMarketData formControlName="overwritingCurrentData"
-      style="font-size:larger; letter-spacing: .05rem; margin-left: 1%; margin-right: 1%;"
-      [style.color]="deleteOldMarketData.checked===true? 'rgb(255, 57, 57)':'white'  "
+      style="margin-left: 1%; margin-right: 1%;"
+      [style.color]="deleteOldMarketData.checked===true? 'var(--warnColor)':'var(--mainFontColor)'"
       >Replace current rates data <br>{{deleteOldMarketData.checked? 'allowed!':'forbidden'}}
     </mat-slide-toggle>
     <span style=" display:inline-block;"
       *ngFor="let marketSource of marketSources;let i=index" >
-      <span class="example-list-section" style="margin-left: 3%; font-size:larger;" >
+      <span style="margin-left: 3%;;" >
         <mat-checkbox  class="marketSource-margin"
                       [indeterminate]="marketSource.indeterminate"
                       (change)="marketSource.checkedAll=!marketSource.checkedAll;
@@ -83,7 +82,7 @@
                       {{marketSource.sourceName}}
         </mat-checkbox>
       </span>
-      <span class="example-list-section" style="font-size:larger;">
+      <span>
         <ul>
           <li *ngFor="let segment of marketSource.segments; let z=index">
             <mat-checkbox [disabled]="marketSource.disabled"
@@ -99,7 +98,6 @@
   </form>
   <mat-progress-bar *ngIf="loadMarketData.disabled" color="primary" mode="query"></mat-progress-bar>
 </mat-expansion-panel>
-
 <mat-expansion-panel class="headers-align" 
   (opened)="panelOpenStateSecond = true"
   (closed)="panelOpenStateSecond = false" >
@@ -112,16 +110,16 @@
       <mat-icon color = 'accent'>filter_alt</mat-icon>
     </mat-panel-description>
   </mat-expansion-panel-header >
-  <form class="submit" [formGroup]="searchParametersFG"  style="font-size: 18px; ">
+  <form  [formGroup]="searchParametersFG" >
     <span style="display: flex;  justify-content: space-between;   align-items:flex-start;  margin-right: 1%;margin-top: 0.2%;">
       <span style="display:grid; width: 15%; margin-top: 1%;">
-        <button color = "primary"  class= "button-color" mat-raised-button 
-          style="margin:1%; font-size: 18px;"
+        <button color = "primary"   mat-raised-button 
+          style="margin:1%; "
           (click)="submitQuery()">
           Submit
         </button>
         <button color = "accent" mat-raised-button 
-          style="margin:1%; font-size: 18px;"
+          style="margin:1%; "
           (click)="searchParametersFG.reset();
            pairs=['ClearAll']">
           ClearAll
@@ -152,7 +150,7 @@
         </mat-optgroup>
         </mat-select>
       </mat-form-field>
-      <mat-form-field class="example-chip-list" appearance="fill" style="width: 40%; ">
+      <mat-form-field appearance="fill" style="width: 40%; " class="no-hint-fields">
         <mat-chip-list #chipList  >
           <mat-chip *ngFor="let pair of pairs" 
           (removed)="remove(pair)"
@@ -182,46 +180,43 @@
     </span>
   </form>
 </mat-expansion-panel>
-
-<div class="mat-elevation-z8">
-  <table  #strategyTable mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class="mat-elevation-z8">
-    <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i=index">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>  {{columnsHeaderToDisplay[i]}}</th>
-      <td 
-        mat-cell 
-        *matCellDef="let element" [cdkContextMenuTriggerFor]="instrumentcontextmenu"  > 
-        <span [ngSwitch]="true==true" title ="TableColumnFormatting">
-          <p *ngSwitchCase="['rate_date'].includes(column)">
-            {{ element[column] | date }}
-          </p>          
-          <p *ngSwitchDefault>
-            {{element[column]}}
-          </p>
-        </span>
-        <ng-template  #instrumentcontextmenu title="TableContextMenu">
-          <div class="tree-menu-context" *ngIf="!readOnly" cdkMenu >
-            <button 
-              (click)="updateFilter(element[column],column)"
-              class="tree-menu-item" cdkMenuItem>
-              <mat-icon class="menu-icon" matPrefix>filter_list</mat-icon> 
-              Add to filter
-            </button> 
-            <button 
-              (click)="addChips( element[column], column)"
-              class="tree-menu-item" cdkMenuItem>
-              <mat-icon class="menu-icon" matPrefix>filter_alt</mat-icon> 
-              ComplexFilter
-            </button> 
-          </div>
-        </ng-template>   
-      </td>
-    </ng-container>
-    <ng-container matColumnDef="expand">
-      <th mat-header-cell *matHeaderCellDef aria-label="row actions">&nbsp;</th>
-      <td mat-cell *matCellDef="let element"></td>
-    </ng-container>
-    <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
-    <tr mat-row  *matRowDef="let element; columns: columnsToDisplay"></tr>
-  </table>
-  <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" [pageSize]="20" aria-label="Select page of users"></mat-paginator>
-</div>
+<table  #strategyTable mat-table [dataSource]="dataSource" multiTemplateDataRows matSort>
+  <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i=index">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>  {{columnsHeaderToDisplay[i]}}</th>
+    <td 
+      mat-cell 
+      *matCellDef="let element" [cdkContextMenuTriggerFor]="instrumentcontextmenu"  > 
+      <span [ngSwitch]="true==true" title ="TableColumnFormatting">
+        <p *ngSwitchCase="['rate_date'].includes(column)">
+          {{ element[column] | date }}
+        </p>          
+        <p *ngSwitchDefault>
+          {{element[column]}}
+        </p>
+      </span>
+      <ng-template  #instrumentcontextmenu title="TableContextMenu">
+        <div class="menu-context" *ngIf="!readOnly" cdkMenu >
+          <button 
+            (click)="updateFilter(element[column],column)"
+            class="menu-context-item" cdkMenuItem>
+            <mat-icon class="menu-icon" matPrefix>filter_list</mat-icon> 
+            Add to filter
+          </button> 
+          <button 
+            (click)="addChips( element[column], column)"
+            class="menu-context-item" cdkMenuItem>
+            <mat-icon class="menu-icon" matPrefix>filter_alt</mat-icon> 
+            ComplexFilter
+          </button> 
+        </div>
+      </ng-template>   
+    </td>
+  </ng-container>
+  <ng-container matColumnDef="expand">
+    <th mat-header-cell *matHeaderCellDef aria-label="row actions">&nbsp;</th>
+    <td mat-cell *matCellDef="let element"></td>
+  </ng-container>
+  <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+  <tr mat-row  *matRowDef="let element; columns: columnsToDisplay"></tr>
+</table>
+<mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" [pageSize]="20" aria-label="Select page of users"></mat-paginator>

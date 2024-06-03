@@ -239,8 +239,9 @@ export class AppallocationTableComponent  implements AfterViewInit {
     this.selection.clear();
     this.dataSource  = new MatTableDataSource(allocationData);
     this.filters!==undefined&&this.fullDataSource!==undefined? this.initialFilterOfDataSource(this.filters):null;
-    this.dataSource.paginator = this.paginator;
+    this.paginator? this.dataSource.paginator = this.paginator:null;
     this.dataSource.sort = this.sort;
+    this.paginator? this.paginator.firstPage():null;
     this.dataSource.filterPredicate = this.multiFilter
     this.filterALL? this.filterALL.nativeElement.value=null : null;
     if (!this.tableMode.includes('Trade'))  {

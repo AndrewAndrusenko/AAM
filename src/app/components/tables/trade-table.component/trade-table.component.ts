@@ -174,7 +174,7 @@ export class AppTradeTableComponent  {
       (dataToForm as trades).tdate=new Date();
       (dataToForm as trades).vdate=new Date();
     }
-    this.dialogTradeModify = this.dialog.open (AppTradeModifyFormComponent,{minHeight:'600px', minWidth:'60vw', maxWidth:'80vw', maxHeight: '90vh'})
+    this.dialogTradeModify = this.dialog.open (AppTradeModifyFormComponent,{minHeight:'600px', minWidth:'70vw', maxWidth:'80vw', maxHeight: '90vh'})
     this.dialogTradeModify.componentInstance.action = action;
     this.dialogTradeModify.componentInstance.tabIndex=tabIndex;
     this.dialogTradeModify.componentInstance.data = action ==='Create'? null :dataToForm;

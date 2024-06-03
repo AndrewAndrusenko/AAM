@@ -2,48 +2,48 @@
 cdkDrag
 cdkDragRootElement=".cdk-overlay-pane" 
 cdkDragHandle
-color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4">
+color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4" style="height: 6.5vh;">
   
   <span style="margin-right: 1%;">{{action}} Trade | ID {{idtrade.value}} </span>
   <span class="example-spacer"></span>
   <ng-container  *ngIf="!disabledControlElements&&tabIndex===1" style="margin-bottom: 1%;">
-    <button mat-raised-button  [matMenuTriggerFor]="menu" color="accent"  style="font-size: 18px; width: 10%;" matRipple="">Select
+    <button mat-raised-button  [matMenuTriggerFor]="menu" color="accent"  style=" width: 10%;" matRipple="">Select
     </button>
     <mat-menu #menu="matMenu">
-      <button mat-menu-item style="margin-left:0.5%; font-size: 18px;"
+      <button mat-menu-item style="margin-left:0.5%; "
       (click)="toggleAllRows(orderTable.dataSource,orderTable.selection,(orderTable?.selection.hasValue() && orderTable.isAllSelected())? false : true  );   
       orderTable.dataSource.paginator = orderTable.paginator;">
       {{(orderTable!==undefined&&orderTable?.selection.hasValue() && orderTable.isAllSelected())? 'Unselect' : 'Select' }}  Orders 
       </button>
-      <button mat-menu-item style="margin-left:0.5%; font-size: 18px;"
+      <button mat-menu-item style="margin-left:0.5%; "
       (click)="toggleAllRows(allocationTable.dataSource,  allocationTable.selection, (allocationTable.selection.hasValue() && allocationTable.isAllSelected())? false : true  );   
       allocationTable.dataSource.paginator = allocationTable.paginator;">
       {{(allocationTable!==undefined&&allocationTable?.selection.hasValue() && allocationTable.isAllSelected())? 'Unselect' : 'Select' }}  Trades 
     </button>
     </mat-menu>
     <button  title="Execute selected orders" 
-      color = "accent" mat-raised-button style=" margin-left:1%; font-size: 18px;"
+      color = "accent" mat-raised-button style=" margin-left:1%; "
       (click)="executeOrders()">
       Execute Orders
       <mat-icon matSuffix >gavel</mat-icon>
     </button>
     <button title="Create Accounting"  
       [disabled]="!allocationTable?.selection.hasValue()"
-      color = "accent" mat-raised-button style=" margin-left:1%; font-size: 18px;"
+      color = "accent" mat-raised-button style=" margin-left:1%; "
       (click)="  createAccountingForAllocation()">
       Create Accounting
       <mat-icon matSuffix>account_balance</mat-icon>
     </button>
     <button title="Delete Allocated Trades"  
       [disabled]="!allocationTable?.selection.hasValue()"
-      color = "warn" mat-raised-button style=" margin-left:1%; font-size: 18px;"
+      color = "warn" mat-raised-button style=" margin-left:1%; "
       (click)="deleteAllocatedTrades()">
       Delete Trades
       <mat-icon matSuffix>delete</mat-icon>
     </button>
     <button title="Delete Accounting"  
       [disabled]="!allocationTable?.selection.hasValue()"
-      color = "warn" mat-raised-button style=" margin-left:1%; font-size: 18px;"
+      color = "warn" mat-raised-button style=" margin-left:1%; "
       (click)="deleteAccountingForAllocatedTrades()">
       Delete Accounting
       <mat-icon matSuffix>delete</mat-icon>
@@ -51,17 +51,16 @@ color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4"
   </ng-container>
 </mat-toolbar>
 <mat-tab-group mat-stretch-tabs [(selectedIndex)]="tabIndex" >
-  <mat-tab label="Trade Details">
-    <form class="submit" 
+  <mat-tab  label="Trade Details"  style="width: 100%;">
+    <form  
       [formGroup]="tradeModifyForm" style="background-color: rgb(40, 39, 39);">
       <button mat-raised-button color="accent" 
         [disabled]="!(tradeModifyForm.valid && submitbox.checked&&!allocatedqty.value)"
         (click)="updateInstrumentData(action)"
-        style="margin-top: 1%; width: 20%; font-size: 18px; margin-left: 1%;">
+        style="margin-top: 1%; width: 20%;  margin-left: 1%; margin-right: 1%;">
         {{action}} Trade
       </button> 
-      <br>
-      <mat-checkbox style= "font-size: 14px; color:rgb(255, 255, 255); margin-top: 0.5%;" #submitbox checked="false" 
+      <mat-checkbox style= "margin-top: 0.5%;" #submitbox checked="false" 
         (click)=" tradeModifyForm.markAllAsTouched();
                   tradeModifyForm.updateValueAndValidity()">
         Submit Data 
@@ -69,8 +68,8 @@ color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4"
       <span style="color:rgb(177, 174, 174);margin-left: 5%;" *ngIf="tradeModifyForm.valid&&!allocatedqty.value"> 
         To save data please select 'Submit data' check and then press button 
       </span>
-      <span style="color:indianred;margin-left: 5%;" *ngIf="tradeModifyForm.valid&&allocatedqty.value"> 
-        Trade has been allocated. Modifing the trade is forbidden
+      <span style="color:var(--warnColor);margin-left: 5%;" *ngIf="tradeModifyForm.valid&&allocatedqty.value"> 
+        Trade has been allocated. Modification is forbidden
       </span>
       <p>
         <span style="display: flex;   align-items:flex-start;  margin-right: 1%;margin-top: 0.2%;">
@@ -115,8 +114,8 @@ color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4"
             {{vdate.value|date}}
           </mat-hint>
         </mat-form-field>
-          <span style="display:grid;  margin-top: 2%; font-size:18px ; margin-bottom: -5%;">
-          <span >
+          <span style="display:grid;  margin-top: 2%;  margin-bottom: -5%;">
+          <span>
             Trade Amount:  {{trade_amount.value | currency :this.code_price_currency.value+' '}} 
           </span> 
         <br> <span *ngIf="price_type.value==2" style="margin-top: 2%;" >
@@ -125,7 +124,7 @@ color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4"
           <br><span style="margin-top: 2%; " *ngIf="fNumber(settlement_amount.value)">
             Settlement Amount :  {{ settlement_amount.value | currency :this.code_settlement_currency.value+' '}} 
           </span>
-          <span  style="margin-top: 2%;"  *ngIf="!fNumber(settlement_amount.value)">
+          <span style="margin-top: 2%;"  *ngIf="!fNumber(settlement_amount.value)">
             Settlement Amount :  {{ settlement_amount.value }} 
           </span>
         </span>
@@ -145,7 +144,7 @@ color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4"
           <mat-error  *ngIf="tidinstrument?.errors?.['required']">
             Required!    
           </mat-error>
-          <mat-error  *ngIf="tidinstrument?.errors?.['noSecid']">
+          <mat-error  *ngIf="!(tidinstrument?.errors?.['required'])&&tidinstrument?.errors?.['noSecid']">
             Inccorect Code! 
           </mat-error>
       
@@ -208,7 +207,7 @@ color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4"
           <mat-error  *ngIf="id_price_currency?.errors?.['required']">
             Required!    
           </mat-error>
-          <mat-error  *ngIf="id_price_currency?.errors?.['currencyCode']">
+          <mat-error  *ngIf=" (!id_price_currency?.errors?.['required'])&& id_price_currency?.errors?.['currencyCode']">
             Inccorect Code! 
           </mat-error>
           <mat-hint *ngIf="id_price_currency.valid&&id_price_currency.value">
@@ -249,7 +248,7 @@ color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4"
       </mat-form-field>
       <br>
       <br>
-      <h3 style="margin-left: 0.5%; color:rgb(252, 113, 113)" *ngIf="tradeModifyForm.invalid"> Please check the form. Data is invalid</h3>
+      <h4 style="margin-left: 0.5%;" class="warn-color"  *ngIf="tradeModifyForm.invalid">Please check the form. Data is invalid</h4>
       <mat-expansion-panel class="headers-align" title=""
         (opened)="panelOpenStateSecond = true"
         (closed)="panelOpenStateSecond = false" >
@@ -352,7 +351,7 @@ color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4"
     </form>
   </mat-tab>
   <mat-tab *ngIf="action==='Edit'" label="Allocation" style="width: 100%;">
-    <form class="submit" [formGroup]="tradeModifyForm" style="background-color: rgb(40, 39, 39);"  >
+    <form  [formGroup]="tradeModifyForm" style="background-color: rgb(40, 39, 39);"  >
       <p>
         <span style="display: flex;   align-items:flex-start;  margin-right: 1%;margin-top: 0.2%;">
           <mat-form-field  style="width: 12%;" title="Security Group Code" >
@@ -379,7 +378,7 @@ color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4"
             </mat-hint>
           </mat-form-field>
           <mat-form-field style="width: 27%;" title="Type to filter data. Click to select">
-            <input matInput [placeholder]="'SecID'" formControlName="tidinstrument" [matAutocomplete]="autoSecID" [readonly]="true" >
+            <input matInput [placeholder]="'SecID'" formControlName="tidinstrument"  [readonly]="true" >
             <mat-error  *ngIf="tidinstrument?.errors?.['required']">
               Required!    
             </mat-error>
@@ -411,10 +410,9 @@ color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4"
               {{qty?.errors?.['pattern']? 'Format 0,00' :qty.value | number}}
             </mat-hint>
           </mat-form-field>
-          <span style="display:grid; width: 25%; font-size:1px ">
-            <mat-label style="width: 95%;" class="mat-form-field" title="Unalloacted">Unalloacted: {{(qty.value-allocatedqty.value)|number}} </mat-label>
-            <br>
-            <mat-label style="width: 95%;" class="mat-form-field" title="Unalloacted">Dirty: {{(trade_amount.value/qty.value)|number}}        </mat-label>
+          <span style="display:grid; width: 25%;">
+            <mat-label style="width: 95%; margin: 2%;" class="mat-form-field" title="UnAlloacted Qty">Unalloacted Qty: {{(qty.value-allocatedqty.value)|number}} </mat-label>
+            <mat-label style="width: 95%;" class="mat-form-field" title="Dirty price">Dirty Price: {{(trade_amount.value/qty.value)|number}}        </mat-label>
           </span>
         </span>
       </p>
@@ -424,7 +422,7 @@ color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4"
       [UI_min]="false"
       [allocationFilters]="{secid:tidinstrument.value,type:trtype.value,bulkorders:null}">
     </app-orders-table>
-    <mat-expansion-panel class="headers-align" [expanded]="true"
+    <mat-expansion-panel class="headers-align" [expanded]="true" style=" border-style:solid; border-width: 1px;"
     (opened)="panellAlocationTable = true"
     (closed)="panellAlocationTable = false" >
     <mat-expansion-panel-header style="margin-bottom: 1%;">
@@ -445,6 +443,6 @@ color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4"
   </mat-tab>
 </mat-tab-group>
 <details *ngIf="statusDetailsHeader">
-  <summary style="font-size: 18px;">{{statusDetailsHeader}}</summary>
-  <pre style="font-size: 18px;"> {{statusDetails|json }}</pre>
+  <summary style="">{{statusDetailsHeader}}</summary>
+  <pre style=""> {{statusDetails|json }}</pre>
 </details>

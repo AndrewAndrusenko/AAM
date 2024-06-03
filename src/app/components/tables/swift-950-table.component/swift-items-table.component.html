@@ -1,111 +1,113 @@
-<mat-form-field>
-  <input matInput (keyup)="applyFilter($event)" class = "filterField" #input>
-  <mat-label class="whiteTextFilter">Type to search...</mat-label>
+<mat-form-field class = "filter-field" style="width: 30%;">
+  <input matInput (keyup)="applyFilter($event)" #filter>
+  <mat-label>Type to search...</mat-label>
+  <button matSuffix 
+    mat-icon-button aria-label="Clear" 
+    (click)="clearFilter(filter)">
+  <mat-icon>close</mat-icon>
+</button>
 </mat-form-field>
-
-<div class="mat-elevation-z8">
-  <table  #strategyTable mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class="mat-elevation-z8">
-    <ng-container   matColumnDef="select">
-      <th mat-header-cell *matHeaderCellDef>
-        <mat-checkbox style="  vertical-align: top;"
-        (change)="$event ? toggleAllRows() : null;"
-                      [checked]="(!this.dataSource)? false : selection.hasValue() && isAllSelected()"
-                      [indeterminate]="selection.hasValue() && !isAllSelected()"
-                      [aria-label]="checkboxLabel()"
-                      [disabled]="!multiSelect">
-        </mat-checkbox>
-      </th>
-      <td mat-cell *matCellDef="let row">
-        <mat-checkbox (click)="$event.stopPropagation()"
-                      (change)="$event ? selection.toggle(row) : null;"
-                      [checked]="(!this.dataSource)? false: selection.isSelected(row)"
-                      [aria-label]="checkboxLabel(row)"
-                      [disabled]="!multiSelect">
-        </mat-checkbox>
-      </td>
-    </ng-container>
-    <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay| slice:1; let i = index">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header> {{columnsHeaderToDisplay[i]  | uppercase}}</th>
-      <td  mat-cell *matCellDef="let element"> 
-        <span [ngSwitch]="column">
-          <p *ngSwitchCase="'amountTransaction'">{{element[column] | currency}} </p>
-          <p *ngSwitchCase="'entriesAmount'">{{element[column] | currency}} </p>
-          <p *ngSwitchCase="'valueDate'">{{element[column] | date}} </p>
-          <p *ngSwitchDefault>{{element[column]}}</p>
-        </span>
-      </td>
-    </ng-container>
-
-    <ng-container   matColumnDef="expand" >
-      <th  mat-header-cell *matHeaderCellDef aria-label="row actions">&nbsp;</th>
-      <td  mat-cell *matCellDef="let element" >
-        <div *ngIf="['CR','DR'].includes(element['typeTransaction'])" style="width: 200%;">
-          <button style="width: 5%;" mat-icon-button aria-label="expand row" 
-            (click)="(expandedElement = expandedElement === element ? null : element); 
-              $event.stopPropagation();">
-            <mat-icon *ngIf="expandedElement !== element">keyboard_arrow_down</mat-icon>
-            <mat-icon *ngIf="expandedElement === element">keyboard_arrow_up</mat-icon>
-          </button>
-        </div>
-      </td>
-    </ng-container>
-    
-    <ng-container matColumnDef="expandedDetail"  >
-      <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplayWithExpand.length+1">
-        <div class="element-detail" *ngIf="['CR','DR'].includes(element['typeTransaction'])"
-          [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'"
-          style=" width: 100%;">
-          <mat-expansion-panel class="complex-search-entries"
-            (opened)="panelDraftOpenState = true"
-            (closed)="panelDraftOpenState = false" >
-            <mat-expansion-panel-header  >
-              <mat-panel-title>
-                Entry Draft
-              </mat-panel-title>
-              <mat-panel-description>
-                Tap to {{panelDraftOpenState? 'hide': 'open'}} draft details
-                <mat-icon color = 'accent'>filter_alt</mat-icon>
-              </mat-panel-description>
-            </mat-expansion-panel-header >
-            <app-acc-entry-modify-form *ngIf="+element['amountTransaction']>+element['entriesAmount']"
-              [Ref]="element['refTransaction']"
-              [swiftID]="parentMsgRow['id']"
-              [FirstOpenedAccountingDate]="FirstOpenedAccountingDate">
-            </app-acc-entry-modify-form > 
-            <h2 *ngIf="+element['amountTransaction']<=+element['entriesAmount']" style="justify-content: center;">
-              Full amount has been allocated. Edit existing entries or delete them 
-            </h2>
-          </mat-expansion-panel>
-          <mat-expansion-panel class="complex-search-entries" 
-            (opened)="panelEntryListOpenState = true"
-            (closed)="panelEntryListOpenState = false" >
-            <mat-expansion-panel-header >
-              <mat-panel-title>
-                Linked entries
-              </mat-panel-title>
-              <mat-panel-description>
-                Tap to {{panelEntryListOpenState? 'hide': 'open'}} the list for ID: {{element['id']}}
-                <mat-icon color = 'accent'>filter_alt</mat-icon>
-              </mat-panel-description>
-            </mat-expansion-panel-header >
-            <app-table-acc-entries 
-              (newAllocatedSum)="changeAllocatedSum($event)"
-              [FirstOpenedAccountingDate] = "FirstOpenedAccountingDate"
-              [UI_min]="true" 
-              [swiftID]="parentMsgRow['id']"
-              [action]="'ViewEntriesByExternalId'" 
-              [externalId]="element['id']" >
-            </app-table-acc-entries>
-          </mat-expansion-panel>
-        </div>
-      </td>
-    </ng-container>
-    <tr mat-header-row *matHeaderRowDef="columnsToDisplayWithExpand"></tr>
-    <tr mat-row *matRowDef="let element; columns: columnsToDisplayWithExpand;"
-      [class.expanded-row]="expandedElement === element"
-      (click)="(expandedElement = expandedElement === element ? null : element)">
-    </tr>
-    <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row"    ></tr>
-  </table>
-  <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" [pageSize]="20" aria-label="Select page of users"></mat-paginator>
-</div>
+<table  #strategyTable mat-table [dataSource]="dataSource" multiTemplateDataRows matSort  style="width: 100%;">
+  <ng-container   matColumnDef="select">
+    <th mat-header-cell *matHeaderCellDef>
+      <mat-checkbox style="  vertical-align: top;"
+      (change)="$event ? toggleAllRows() : null;"
+                    [checked]="(!this.dataSource)? false : selection.hasValue() && isAllSelected()"
+                    [indeterminate]="selection.hasValue() && !isAllSelected()"
+                    [aria-label]="checkboxLabel()"
+                    [disabled]="!multiSelect">
+      </mat-checkbox>
+    </th>
+    <td mat-cell *matCellDef="let row">
+      <mat-checkbox (click)="$event.stopPropagation()"
+                    (change)="$event ? selection.toggle(row) : null;"
+                    [checked]="(!this.dataSource)? false: selection.isSelected(row)"
+                    [aria-label]="checkboxLabel(row)"
+                    [disabled]="!multiSelect">
+      </mat-checkbox>
+    </td>
+  </ng-container>
+  <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay| slice:1; let i = index">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header> {{columnsHeaderToDisplay[i]  | uppercase}}</th>
+    <td  mat-cell *matCellDef="let element"> 
+      <span [ngSwitch]="column">
+        <p *ngSwitchCase="'amountTransaction'">{{element[column] | currency}} </p>
+        <p *ngSwitchCase="'entriesAmount'">{{element[column] | currency}} </p>
+        <p *ngSwitchCase="'valueDate'">{{element[column] | date}} </p>
+        <p *ngSwitchDefault>{{element[column]}}</p>
+      </span>
+    </td>
+  </ng-container>
+  <ng-container   matColumnDef="expand" >
+    <th  mat-header-cell *matHeaderCellDef aria-label="row actions">&nbsp;</th>
+    <td  mat-cell *matCellDef="let element" >
+      <div *ngIf="['CR','DR'].includes(element['typeTransaction'])" style="width: 200%;">
+        <button style="width: 5%;" mat-icon-button aria-label="expand row" 
+          (click)="(expandedElement = expandedElement === element ? null : element); 
+            $event.stopPropagation();">
+          <mat-icon *ngIf="expandedElement !== element">keyboard_arrow_down</mat-icon>
+          <mat-icon *ngIf="expandedElement === element">keyboard_arrow_up</mat-icon>
+        </button>
+      </div>
+    </td>
+  </ng-container>
+  <ng-container matColumnDef="expandedDetail"  >
+    <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplayWithExpand.length+1" style="padding-left: 0px;">
+      <div class="detail-block" *ngIf="['CR','DR'].includes(element['typeTransaction'])"
+        [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'"    >
+        <mat-expansion-panel class="headers-align" style="width: 100%; border-style:solid; border-width: 1px;"
+          (opened)="panelDraftOpenState = true"
+          (closed)="panelDraftOpenState = false" >
+          <mat-expansion-panel-header  >
+            <mat-panel-title>
+              Entry Draft
+            </mat-panel-title>
+            <mat-panel-description>
+              Tap to {{panelDraftOpenState? 'hide': 'open'}} draft details
+              <mat-icon color = 'accent'>filter_alt</mat-icon>
+            </mat-panel-description>
+          </mat-expansion-panel-header >
+          <app-acc-entry-modify-form *ngIf="+element['amountTransaction']>+element['entriesAmount']"
+            [Ref]="element['refTransaction']"
+            [swiftID]="parentMsgRow['id']"
+            [FirstOpenedAccountingDate]="FirstOpenedAccountingDate">
+          </app-acc-entry-modify-form > 
+          <h4 *ngIf="+element['amountTransaction']<=+element['entriesAmount']" style="justify-content: center;">
+            Full amount has been allocated. Edit existing entries or delete them 
+          </h4>
+        </mat-expansion-panel>
+      </div>
+      <div class="detail-block" *ngIf="['CR','DR'].includes(element['typeTransaction'])"
+      [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'"    >
+      <mat-expansion-panel class="headers-align" style="width: 100%; border-style:solid; border-width: 1px;"
+      (opened)="panelEntryListOpenState = true"
+      (closed)="panelEntryListOpenState = false" >
+      <mat-expansion-panel-header >
+        <mat-panel-title>
+          Linked entries
+        </mat-panel-title>
+        <mat-panel-description>
+          Tap to {{panelEntryListOpenState? 'hide': 'open'}} the list for ID: {{element['id']}}
+          <mat-icon color = 'accent'>filter_alt</mat-icon>
+        </mat-panel-description>
+      </mat-expansion-panel-header >
+      <app-table-acc-entries 
+        (newAllocatedSum)="changeAllocatedSum($event)"
+        [FirstOpenedAccountingDate] = "FirstOpenedAccountingDate"
+        [UI_min]="true" 
+        [swiftID]="parentMsgRow['id']"
+        [action]="'ViewEntriesByExternalId'" 
+        [externalId]="element['id']" >
+      </app-table-acc-entries>
+    </mat-expansion-panel>
+    </div>
+    </td>
+  </ng-container>
+  <tr mat-header-row *matHeaderRowDef="columnsToDisplayWithExpand"></tr>
+  <tr mat-row *matRowDef="let element; columns: columnsToDisplayWithExpand;"
+    [class.expanded-row]="expandedElement === element"
+    (click)="(expandedElement = expandedElement === element ? null : element)">
+  </tr>
+  <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row" ></tr>
+</table>
+<mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" [pageSize]="20" aria-label="Select page of users"></mat-paginator>

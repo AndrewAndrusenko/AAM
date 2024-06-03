@@ -55,7 +55,7 @@ export class AppStrategyFormComponent {
     })
   }
   ngOnInit(): void {
-    this.getStrategyData (this.strategyId);
+    this.strategyId? this.getStrategyData (this.strategyId) :null;
     this.action === 'View'||this.disabledControlElements? this.editStrategyForm.disable() : null;
   }
   getStrategyData (strategyId:number) {
@@ -77,7 +77,7 @@ export class AppStrategyFormComponent {
     }
   }
   ngOnChanges(changes: SimpleChanges) {
-    this.getStrategyData (changes['strategyId'].currentValue);
+    changes['strategyId'].currentValue? this.getStrategyData (changes['strategyId'].currentValue):null;
   }
   snacksBox(result:{name:string,detail:string}|StrategiesGlobalData[], action?:string){
     if (result['name']=='error') {

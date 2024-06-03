@@ -1,6 +1,6 @@
 <ng-container *ngIf="accessState!=='none'" >
-  <mat-form-field style="width: 20%;"class = "filterField"  title="Filter All columns">
-    <mat-label class="whiteTextFilter">Search (all columns)...</mat-label>
+  <mat-form-field style="width: 20%;"class = "filter-field"  title="Filter All columns">
+    <mat-label>Search (all columns)...</mat-label>
     <input 
       (keyup)="applyFilter($event)"
       matInput type="text" #filterALL
@@ -11,21 +11,19 @@
       <mat-icon>close</mat-icon>
     </button>
   </mat-form-field>
-
   <mat-select placeholder="SecID Filter" class="search-filed" 
     style="width: 13%; margin-left: 1%;"
     (selectionChange)="filterBySecid($event)"  >
     <mat-option *ngFor="let secid of secidsArray" [value]="secid"> {{secid}} </mat-option>
   </mat-select>
-
   <button color = "accent" mat-raised-button title="Export To Excel"
-    style=" margin-left:1%; font-size: 18px;"
+    style=" margin-left:1%; "
     (click)="exportToExcel()">
     Save as XLS 
     <mat-icon matSuffix >save_alt</mat-icon>
   </button>
   <button color = "accent" mat-raised-button title="Reload Table"
-    style=" margin-left:1%; font-size: 18px;"
+    style=" margin-left:1%; "
     (click)="submitQuery()">
     Reload 
     <mat-icon matSuffix >refresh</mat-icon>
@@ -39,77 +37,75 @@
      Current positions ({{report_date.value.toLocaleDateString()}}) in USD
   </h2>
   <!-- complexSearch Form -->
-<form class="submit" *ngIf="readOnly!==true" [formGroup]="searchParametersFG" 
- style="font-size: 18px; margin-left: 0.5%; "> 
-  <span style="display: flex;    align-items:flex-start;  margin-right: 1%;margin-top: 0.2%;"> 
-    <span style="display:grid; width: 10%; margin-right: 1%;"> <!-- submitQuery/CleaAll Buttons -->
-      <button color = "primary"  class= "button-color" mat-raised-button 
-        [disabled]="searchParametersFG.invalid"
-        style="margin:1%; font-size: 18px;"
-        (click)="submitQuery()">
-        Submit
-      </button>
-      <button color = "accent" mat-raised-button 
-        style="margin-top:4%;margin-left: 1%; font-size: 18px;"
-        (click)="searchParametersFG.reset();
-         instruments=['ClearAll'];
-         portfolios=['ClearAll']">
-        ClearAll
-      </button>
-    </span>
-    <mat-form-field class="search-filed" title="Date to upload"> <!-- Report Date Filter -->
-      <input matInput formControlName = "report_date" [matDatepicker]="dateForMarketData" placeholder="Report Date">
-      <mat-datepicker-toggle matSuffix [for]="dateForMarketData"></mat-datepicker-toggle>
-      <mat-datepicker  #dateForMarketData></mat-datepicker>
-    </mat-form-field> 
-    <mat-form-field class="search-filed" title="Type to filter data. Click to select" > <!-- Report Currency Filter -->
-      <input matInput [placeholder]="'Report Currency'" 
-      formControlName="report_id_currency" 
-      [matAutocomplete]="autoSet" >
-      <mat-autocomplete #autoSet="matAutocomplete" >
-        <mat-option *ngFor="let currency of filteredCurrenciesList | async" [value]="currency['CurrencyCodeNum']">
-          {{currency['CurrencyCodeNum']}} -  {{currency['CurrencyCode']}} -  {{currency['CurrencyName']}} 
-        </mat-option>
-      </mat-autocomplete>   
-      <mat-error  *ngIf="report_id_currency?.errors?.['currencyCode']">
-        Inccorect Code! 
-      </mat-error>
-    </mat-form-field>
-      <mat-form-field *ngIf="UI_portfolio_selection===true"  appearance="fill" style="width: 60%; margin-bottom: 0.5%; " class="search-filed">
-        <mat-chip-list #chipPortList   >
-          <mat-select placeholder="Model Portfolio" class="search-filed" 
-            formControlName="MP" 
-            style="width: 20%;"
-            (selectionChange)="setPortfoliosList($event)"  >
-            <mat-option *ngFor="let mp of mp_strategies_list" [value]="mp.name"> {{mp.name}} </mat-option>
-          </mat-select>
-          <mat-chip *ngFor="let portfolio of portfolios" 
-          (removed)="remove(portfolio,portfolios,idportfolios)"
-          (click)=" portfolios = clearAll($event,portfolios,idportfolios);">
-            {{portfolio}}
-            <button matChipRemove *ngIf="portfolio!=='ClearAll'">
-              <mat-icon>cancel</mat-icon>
-            </button>
-          </mat-chip>
-          <input style="width: 45%;"
-          matInput
-          placeholder="Add portfolio or portfolio1,portfolio2.."
-          formControlName="idportfolios"
-          [matChipInputFor]="chipPortList"
-          [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-          [matChipInputAddOnBlur]="true"
-          (matChipInputTokenEnd)="portfolios = add($event,portfolios,idportfolios)"
-          matTooltip="Type portfolio code or paste multiple codes separated by comma and press enter" >
-        </mat-chip-list>
-        <mat-hint style="color:rgb(104, 246, 246); font-style: italic;">
-          Portfolios List
-        </mat-hint>
+  <form  *ngIf="readOnly!==true" [formGroup]="searchParametersFG" 
+  style=" margin-left: 0.5%; "> 
+    <span style="display: flex;    align-items:flex-start;  margin-right: 1%;margin-top: 0.2%;"> 
+      <span style="display:grid; width: 10%; margin-right: 1%;"> <!-- submitQuery/CleaAll Buttons -->
+        <button color = "primary"   mat-raised-button 
+          [disabled]="searchParametersFG.invalid"
+          style="margin:1%; "
+          (click)="submitQuery()">
+          Submit
+        </button>
+        <button color = "accent" mat-raised-button 
+          style="margin-top:4%;margin-left: 1%; "
+          (click)="searchParametersFG.reset();
+          instruments=['ClearAll'];
+          portfolios=['ClearAll']">
+          ClearAll
+        </button>
+      </span>
+      <mat-form-field class="search-filed" title="Date to upload"> <!-- Report Date Filter -->
+        <input matInput formControlName = "report_date" [matDatepicker]="dateForMarketData" placeholder="Report Date">
+        <mat-datepicker-toggle matSuffix [for]="dateForMarketData"></mat-datepicker-toggle>
+        <mat-datepicker  #dateForMarketData></mat-datepicker>
+      </mat-form-field> 
+      <mat-form-field class="search-filed" title="Type to filter data. Click to select" > <!-- Report Currency Filter -->
+        <input matInput [placeholder]="'Report Currency'" 
+        formControlName="report_id_currency" 
+        [matAutocomplete]="autoSet" >
+        <mat-autocomplete #autoSet="matAutocomplete" >
+          <mat-option *ngFor="let currency of filteredCurrenciesList | async" [value]="currency['CurrencyCodeNum']">
+            {{currency['CurrencyCodeNum']}} -  {{currency['CurrencyCode']}} -  {{currency['CurrencyName']}} 
+          </mat-option>
+        </mat-autocomplete>   
+        <mat-error  *ngIf="report_id_currency?.errors?.['currencyCode']">
+          Inccorect Code! 
+        </mat-error>
       </mat-form-field>
-</span>
-</form>
-  <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort
-   class="mat-elevation-z8" 
-    class ="childTable" style="width: 150%; margin-top: 0.5%;" >
+        <mat-form-field *ngIf="UI_portfolio_selection===true"  appearance="fill" style="width: 60%; margin-bottom: 0.5%; " class="search-filed">
+          <mat-chip-list #chipPortList   >
+            <mat-select placeholder="Model Portfolio" class="search-filed" 
+              formControlName="MP" 
+              style="width: 20%;"
+              (selectionChange)="setPortfoliosList($event)"  >
+              <mat-option *ngFor="let mp of mp_strategies_list" [value]="mp.name"> {{mp.name}} </mat-option>
+            </mat-select>
+            <mat-chip *ngFor="let portfolio of portfolios" 
+            (removed)="remove(portfolio,portfolios,idportfolios)"
+            (click)=" portfolios = clearAll($event,portfolios,idportfolios);">
+              {{portfolio}}
+              <button matChipRemove *ngIf="portfolio!=='ClearAll'">
+                <mat-icon>cancel</mat-icon>
+              </button>
+            </mat-chip>
+            <input style="width: 45%;"
+            matInput
+            placeholder="Add portfolio or portfolio1,portfolio2.."
+            formControlName="idportfolios"
+            [matChipInputFor]="chipPortList"
+            [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+            [matChipInputAddOnBlur]="true"
+            (matChipInputTokenEnd)="portfolios = add($event,portfolios,idportfolios)"
+            matTooltip="Type portfolio code or paste multiple codes separated by comma and press enter" >
+          </mat-chip-list>
+          <mat-hint style="color:rgb(104, 246, 246); font-style: italic;">
+            Portfolios List
+          </mat-hint>
+        </mat-form-field>
+  </span>
+  </form>
+  <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class ="childTable" style="width: 150%; margin-top: 0.5%;" >
     <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i=index" justify="right"  >
       <th mat-header-cell *matHeaderCellDef mat-sort-header> {{columnsHeaderToDisplay[i]}}</th>
       <td mat-footer-cell *matFooterCellDef let> <p style="margin-top: 5%; color: lightslategray; font-size: large;">
@@ -126,18 +122,18 @@
           'planned_position','current_account_balance','order_amount','order_qty','mtm_dirty_price','cost_in_position','orders_unaccounted_qty','cost_full_position'].includes(column)">{{element[column]|currency :' '}} </p>
           <p *ngSwitchCase="[
           'pl','unrealizedpl','total_pl'].includes(column)">
-            <span [style.color]="element[column]==0? 'default' : element[column]<0?'indianred':'lightgreen'">{{element[column]|currency :' '}} </span>
+            <span [style.color]="element[column]==0? 'default' : element[column]<0?'var(--warnColor)':'lightgreen'">{{element[column]|currency :' '}} </span>
           </p>
           <p *ngSwitchCase="['roi','fact_weight','weight'].includes(column)&&element[column]!==null">
-            <span [style.color]="element[column]==0? 'default' : element[column]<0?'indianred':'white'">{{element[column]|currency :' '}}{{'%'}} </span>
+            <span [style.color]="element[column]==0? 'default' : element[column]<0?'var(--warnColor)':'white'">{{element[column]|currency :' '}}{{'%'}} </span>
           </p>
           <p *ngSwitchCase="['mtm_date','rate_date'].includes(column)">{{element[column] | date}} </p>
         </span>
         <ng-template  #instrumentcontextmenu>
-          <div class="tree-menu-context" cdkMenu >
+          <div class="menu-context" cdkMenu >
             <button 
             (click)="updateFilter(element[column])"
-            class="tree-menu-item" cdkMenuItem>
+            class="menu-context-item" cdkMenuItem>
             <mat-icon class="menu-icon" matPrefix>filter_list</mat-icon> 
             Add to filter
           </button> 

@@ -95,7 +95,16 @@ export class AppInstrumentCorpActionFormComponent {
         this.CorpActionsForm.patchValue(this.data);
       break; 
     } 
-    this.indexDBServiceS.getIndexDBStaticTables('getCorpActionTypes').subscribe(data =>this.caTypes=(data.data as corporateActionsTypes[]).filter(el=>el.sectype.includes(Number(this.instrument.groupid))))
+    this.indexDBServiceS.getIndexDBStaticTables('getCorpActionTypes')
+    .subscribe(data =>{
+      this.instrument? this.caTypes=(data.data as corporateActionsTypes[]).filter(el=>el.sectype.includes(Number(this.instrument.groupid))):null;
+      if (!this.instrument&&this.actiontype) {
+        let grp = (data.data as corporateActionsTypes[]).find(el=>el.id===this.actiontype.value).sectype
+        console.log('grp',grp,this.actiontype.value);
+        this.caTypes=(data.data as corporateActionsTypes[]).filter(el=>el.sectype.includes(Number(...grp)))
+        console.log(data.data);
+      }
+    })
   }
   snacksBox(result:{name:string,detail:string}|instrumentCorpActions[], action?:string){
     if (result['name']=='error') {

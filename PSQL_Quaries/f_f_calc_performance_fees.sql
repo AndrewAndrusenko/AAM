@@ -35,7 +35,7 @@ WITH
 	  fees_schedules.highwatermark,
 	  fees_schedules.schedule_range
     FROM
-      public.f_i_get_npv_dynamic (p_portfolio_list, p_report_date_end, p_report_date_end, 840) AS end_npv
+      public.f_i_get_npv_dynamic (p_portfolio_list, p_report_date_end, p_report_date_end, 840,null) AS end_npv
       LEFT JOIN LATERAL (
         SELECT
           f_i_get_deposits_withdrawals_per_portfolios_on_date.cash_flow
@@ -76,7 +76,7 @@ WITH
       FROM 
 		  public.f_i_get_npv_dynamic (
 			  ARRAY(SELECT fees_dataset.portfolioname FROM fees_dataset WHERE fees_dataset.pf_hurdle>0)
-			  , p_report_date_start, p_report_date_start, 840) 
+			  , p_report_date_start, p_report_date_start, 840,null) 
 	  WHERE 
 		  f_i_get_npv_dynamic."accountNo" ISNULL	  
   )
@@ -115,11 +115,14 @@ SELECT
   fees_dataset.pf_hurdle
 FROM
   fees_dataset
-LEFt JOIN start_period_npv ON fees_dataset.portfolioname=start_period_npv.portfolioname
+LEFt JOIN start_period_npv ON fees_dataset.portfolioname=start_period_npv.portfolioname;
 WHERE  fees_dataset.schedule_range@>fees_dataset.pl_above_hwm;
 END
 $BODY$;
 
 ALTER FUNCTION public.f_f_calc_performance_fees(text[], date, date)
     OWNER TO postgres;
-select * from f_f_calc_performance_fees(array['ACM002'],now()::date,now()::date)
+
+      SELECT
+      *
+      FROM f_f_calc_performance_fees(array['CLEARALL','VPC005'],'Nov 01 2023','Dec 31 2023')

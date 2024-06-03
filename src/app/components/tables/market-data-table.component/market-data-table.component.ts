@@ -97,7 +97,7 @@ export class AppTableMarketDataComponent {
     dataLoaded:[], deletedRows:0,state: {Message:'',State:''}
   }
   panelOpenStateFirst = true; 
-  panelOpenStateSecond = true;
+  panelOpenStateSecond = false;
   statusLogPanelOpenState = true;
   instruments: string[] = ['ClearAll'];
   filterednstrumentsLists : Observable<string[][]>;

@@ -5,20 +5,11 @@
 .mat-table {
   background-color:#313131;
   width: 100%;
-  font-size: 26px;
-}
-.navigate-button {
-  background-color: var(--investmentNodeColor );
-}
-.mat-header-cell {
-  margin-left: 10px;
-  font-size: 20px;
-  background-color:#393737;
 }
 tr.detail-row {
   height: 0;
 }
-.element-detail {
+.detail-block {
   overflow: hidden;
   display: flex;
 }

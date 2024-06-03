@@ -25,7 +25,7 @@ export class AppMarketQuoteManualFormComponent {
     low:[0, { validators:Validators.pattern('[0-9]*([0-9.]{0,6})?$'), updateOn: 'blur' }],
     volume:[0, { validators:Validators.pattern('[0-9]*([0-9.]{0,3})?$'), updateOn: 'blur' }],
     sourcecode:'',
-    boardid:'',
+    boardid:['', { validators:[Validators.required]}],
     globalsource:'Manual',
     id:0
   })
@@ -87,6 +87,7 @@ export class AppMarketQuoteManualFormComponent {
     });
   }
   get  secid ()   {return this.manualQuoteEdit.get('secid') } 
+  get  boardid ()   {return this.manualQuoteEdit.get('boardid') } 
   get  close ()   {return this.manualQuoteEdit.get('close') } 
   get  low ()   {return this.manualQuoteEdit.get('low') } 
   get  high ()   {return this.manualQuoteEdit.get('high') } 

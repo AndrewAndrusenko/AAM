@@ -13,7 +13,6 @@ import {MatChipInputEvent} from '@angular/material/chips';
 import {FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import {AppTableAccAccountsComponent } from '../acc-accounts-table.component/acc-accounts-table.component';
 import {MatOption } from '@angular/material/core';
-import {investmentNodeColor, menuColorGl } from 'src/app/models/constants.model';
 import {HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import {formatNumber } from '@angular/common';
 import {HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
@@ -95,12 +94,9 @@ export class AppTableAccEntriesComponent implements OnInit {
   TransactionTypes: bcTransactionType_Ext[] = [];
   accountTypes:bcAccountType_Ext[]=[];
   filterEntryTypes:string[] = ['ClearAll'];
-  investmentNodeColor=investmentNodeColor;
-  activeTab:string='';
   tabsNames = ['Transactions List']
   multiFilter?: (data: bAccountsEntriesList, filter: string) => boolean;
   constructor(
-    private TreeMenuSevice: TreeMenuSevice,
     private AccountingDataService:AppAccountingService, 
     private CommonDialogsService:HadlingCommonDialogsService,
     private AuthServiceS:AuthService,  
@@ -147,7 +143,6 @@ export class AppTableAccEntriesComponent implements OnInit {
   }
   ngOnInit(): void {
     this.initiateTable(true);
-    this.subscriptions.add(this.TreeMenuSevice.getActiveTab().subscribe(tabName=>this.activeTab=tabName));
     this.subscriptions.add(this.InvestmentDataService.getClientsPortfolios().pipe(
       tap(() => this.dataSource? this.dataSource.data = null: null),
       filter(portfolios=>portfolios.length>0)
@@ -254,7 +249,7 @@ export class AppTableAccEntriesComponent implements OnInit {
     this.selection.toggle(row? row: this.dataSource.data[this.selectedRowIndex])
   }
   selectAccounts () {
-    this.dialogChooseAccountsList = this.dialog.open(AppTableAccAccountsComponent ,{minHeight:'600px', minWidth:'1700px', autoFocus: false, maxHeight: '90vh'});
+    this.dialogChooseAccountsList = this.dialog.open(AppTableAccAccountsComponent ,{minHeight:'60vh', minWidth:'90vw', autoFocus: false, maxHeight: '90vh'});
     this.dialogChooseAccountsList.componentInstance.action = "GetALLAccountsDataWholeList";
     this.dialogChooseAccountsList.componentInstance.readOnly = true;
     this.dialogChooseAccountsList.componentInstance.multiSelect = true;

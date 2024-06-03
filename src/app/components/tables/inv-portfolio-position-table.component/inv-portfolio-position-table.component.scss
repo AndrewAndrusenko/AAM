@@ -47,15 +47,15 @@ tr.detail-row {
 .edit-child-button {
   background: var(--additionalLightGreen);
 }
-.element-row td {
+.child-row td {
   border-bottom-width: 0;
 }
-.element-detail {
+.detail-block {
   overflow: hidden;
   display: flex;
 }
 .search-filed {
-  font-size: 18px;
+  
   border-radius: 9px;
   background-color: rgb(40, 40, 40);
   margin-right: 1%;

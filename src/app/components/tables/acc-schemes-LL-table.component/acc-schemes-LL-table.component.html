@@ -1,7 +1,7 @@
 <ng-container *ngIf="accessState!=='none'" >
 
-  <mat-form-field style="width: 20%;"class = "filterField"  title="Filter All columns">
-    <mat-label class="whiteTextFilter">Search (all columns)...</mat-label>
+  <mat-form-field style="width: 30%;"class = "filter-field"  title="Filter All columns">
+    <mat-label>Type to search...</mat-label>
     <input 
       (keyup)="applyFilter($event)"
       matInput type="text" #filterALL
@@ -13,19 +13,19 @@
     </button>
   </mat-form-field>
   <button color = "accent" mat-raised-button title="Export To Excel"
-    style=" margin-left:1%; font-size: 18px;"
+    style=" margin-left:1%; "
     (click)="exportToExcel()">
     Save as XLS 
     <mat-icon matSuffix >save_alt</mat-icon>
   </button>
   <button color = "accent" mat-raised-button title="Reload Table"
-    style=" margin-left:1%; font-size: 18px;"
+    style=" margin-left:1%; "
     (click)="submitQuery()">
     Reload 
     <mat-icon matSuffix >refresh</mat-icon>
   </button>
   <button color = "accent" mat-raised-button [disabled]="disabledControlElements"
-    style=" margin-left:1%; font-size: 18px;"
+    style=" margin-left:1%; "
     matTooltip="Create AL Scheme"
     (click)="openALSchemeModifyForm('Create',null)">
     Create item 
@@ -33,9 +33,7 @@
   </button>
 
   <!-- complexSearch Form -->
- <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort
-   class="mat-elevation-z8" 
-    class ="childTable" style="width: 166%;" >
+ <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort      style="width: 150%;" >
     <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i=index" justify="right"  >
       <th mat-header-cell *matHeaderCellDef mat-sort-header> {{columnsHeaderToDisplay[i]}}</th>
       <td 
@@ -43,8 +41,8 @@
         <span [ngSwitch]="true==true">
           <p *ngSwitchDefault>{{element[column]!=='null'? element[column]:''}}</p>
           <p *ngSwitchCase="['cSchemeGroupId'].includes(column)">
-            <button mat-stroked-button style=" font-size: 18px; margin-top: 5%;"  
-            class="navigate-button"  matTooltip="Edit AL Scheme"
+            <button mat-flat-button style="  margin-top: 5%;"  color="primary"
+            matTooltip="Edit AL Scheme"
             (click)=" openALSchemeModifyForm (disabledControlElements? 'View': 'Edit',element)">
               {{element[column] }}
             </button> 
@@ -60,17 +58,12 @@
               <mat-icon >pageview</mat-icon>
             </button>
             <ng-container  *ngIf="!disabledControlElements">
-              <button mat-icon-button color="accent"
-                matTooltip="Edit AL Scheme"
-                (click)="openALSchemeModifyForm('Edit',element)">
-                <mat-icon >edit</mat-icon>
-              </button>
-              <button mat-icon-button color="accent"
+              <button mat-icon-button color="accent" style="width: unset !important;"
                 matTooltip="Copy AL Scheme"
                 (click)="openALSchemeModifyForm('Create_Example',element)">
                 <mat-icon >file_copy</mat-icon>
               </button>
-              <button 
+              <button style="width: unset !important;"
                 mat-icon-button 
                 color="accent" 
                 matTooltip="Delete AL Scheme"
@@ -81,30 +74,30 @@
           </p>
         </span>
         <ng-template  #instrumentcontextmenu>
-          <div class="tree-menu-context" cdkMenu >
+          <div class="menu-context" cdkMenu >
             <button 
               (click)="updateFilter(element[column])"
-              class="tree-menu-item" cdkMenuItem>
-              <mat-icon class="menu-icon" matPrefix>filter_list</mat-icon> 
+              class="menu-context-item" cdkMenuItem>
+              <mat-icon matPrefix>filter_list</mat-icon> 
               Add to filter
             </button> 
             <ng-container  *ngIf="!disabledControlElements">
               <button
-                class="tree-menu-item" cdkMenuItem
+                class="menu-context-item" cdkMenuItem
                 (click)="openALSchemeModifyForm('Edit',element)">
-                <mat-icon class="menu-icon" matPrefix>edit</mat-icon>
+                <mat-icon matPrefix>edit</mat-icon>
                 Edit AL Scheme 
               </button>
               <button 
-                class="tree-menu-item" cdkMenuItem
+                class="menu-context-item" cdkMenuItem
                 (click)="openALSchemeModifyForm('Create_Example',element)">
-                <mat-icon class="menu-icon" matPrefix>file_copy</mat-icon>
+                <mat-icon matPrefix>file_copy</mat-icon>
                 Copy AL Scheme
               </button>
               <button 
-                class="tree-menu-item" cdkMenuItem
+                class="menu-context-item" cdkMenuItem
                 (click)="openALSchemeModifyForm('Delete',element)">
-                <mat-icon class="menu-icon" matPrefix>delete</mat-icon>
+                <mat-icon matPrefix>delete</mat-icon>
                 Delete AL Scheme
               </button>
             </ng-container>

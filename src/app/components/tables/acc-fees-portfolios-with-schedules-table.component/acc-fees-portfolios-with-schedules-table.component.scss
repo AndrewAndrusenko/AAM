@@ -1,39 +1,26 @@
 .mat-table {
-  background-color:#313131;
   width: 100%;
-  font-size: 26px;
-}
-.mat-header-cell {
-  margin-left: 10px;
-  font-size: 20px;
-  background-color:#393737;
 }
 tr.detail-row {
   height: 0;
 }
 .childTable {
-  background-color:#0c1322;
-  font-size: 26px;
+ background-color: var(--secondaryBackgroundColor);
 }
-.element-row-fee td {
-  border-bottom-width: 0;
+.parentTable {
+ width: 100%;
+ background-color:var(--mainBackgroundColor);
 }
-.element-detail {
-  overflow: hidden;
-  display: flex;
-}
-.mat-column-address {
-  color: rgb(85, 167, 238)
-}
-.navigate-button {
-  background-color: var(--investmentNodeColor );
+tr.mat-row:hover {
+  border: unset !important;
+  background:unset !important;
 }
 .mat-column-fee_description {
   width: 30%;
 } 
 .mat-column-period_desc {
   width: 10%;
-} fee_code
+} 
 .mat-column-fee_code {
   width: 20%;
 } 

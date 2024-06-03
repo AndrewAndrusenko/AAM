@@ -1,7 +1,7 @@
 <ng-container *ngIf="accessState!=='none'">
   <span label="main buttons section"> 
-    <mat-form-field class = "filterField">
-      <mat-label class="whiteTextFilter">Type to search...</mat-label>
+    <mat-form-field class = "filter-field" style="width: 30%">
+      <mat-label>Type to search...</mat-label>
       <input 
         (keyup)="applyFilter($event)"
         [formControl]="filterlFormControl" 
@@ -15,13 +15,13 @@
       </button>
     </mat-form-field>
     <button color = "accent" mat-raised-button 
-      style=" margin-left:1%; font-size: 18px;"
+      style=" margin-left:1%; "
       (click)="exportToExcel()">
       Save as XLS 
       <mat-icon matSuffix >save_alt</mat-icon>
     </button>
     <button color = "accent" mat-raised-button 
-      style=" margin-left:1%; font-size: 18px;"
+      style=" margin-left:1%; "
       (click)="submitQuery()">
       Reload 
       <mat-icon matSuffix >refresh</mat-icon>
@@ -40,18 +40,18 @@
         <mat-icon color = 'accent'>account_balance</mat-icon>
       </mat-panel-description>
     </mat-expansion-panel-header >
-    <form class="submit"   style="font-size: 18px;   margin-top: 0.5%;">
+    <form    style="   margin-top: 0.5%;">
       <span style="display: flex;  justify-content: space-between;   align-items: center;">
         <span style="display: flex;  justify-content: space-between;   align-items: center; width:25%;margin-left: 1%;">
           <span style="display:grid; width: 50%;">
             <button color = "primary" mat-raised-button 
-              style=" margin-left:1%; font-size: 18px;margin-top: 2%;"
+              style=" margin-left:1%; margin-top: 2%;"
               (click)="accountingBalanceClose(overdraftClosingBalance.checked)">
               Close Balance
             </button>
             <mat-slide-toggle #overdraftClosingBalance 
               style="font-size:100%; letter-spacing: .05rem; margin-left: 4%;margin-top: 4%;"
-              [style.color]="overdraftClosingBalance.checked ? 'rgb(255, 57, 57)':'white'  "
+              [style.color]="overdraftClosingBalance.checked ? 'var(--warnColor)':'default'  "
               >Overdraft {{overdraftClosingBalance.checked? 'allowed!':'forbidden'}}
             </mat-slide-toggle>
           </span>
@@ -64,7 +64,7 @@
         </span>
         <span style="display: flex;  justify-content: space-between;   align-items: center; width:44%; margin-left: 2%;"> 
           <button color = "accent" mat-raised-button 
-            style="  font-size: 18px;width: 25%;"
+            style="  width: 25%;"
             (click)="checkBalance(iBalanceDate.value)">
             Check Balance
           </button>
@@ -78,15 +78,15 @@
             <mat-datepicker-toggle matSuffix [for]="balancedate"></mat-datepicker-toggle>
             <mat-datepicker [dateClass]="dateClass" #balancedate></mat-datepicker>
           </mat-form-field>
-          <div style="margin-left:1%; width:50%; color:  rgb(191, 188, 188);;">
-            <p class="mat-form-field" style = "margin-left:1%; color:rgb(198, 255, 215);">
-              <span style="color:rgb(191, 188, 188); font-weight: bold;"[style.color]=" (balanceCheckData.totalActive - balanceCheckData.totalPassive) ==0 ? 'green' : 'rgb(114, 0, 0)'" >
+          <div style="margin-left:1%; width:50%;">
+            <p class="mat-form-field" style = "margin-left:1%;">
+              <span style="color:var(--mainFontColor); "[style.color]=" (balanceCheckData.totalActive - balanceCheckData.totalPassive) ==0 ? 'default' : 'var(--warnColor)'" >
                 {{(balanceCheckData.totalActive - balanceCheckData.totalPassive) ==0? 'Active = Passive : '+ (balanceCheckData.totalActive | number):
                 'Balance incorrect!! Difference is' + ((balanceCheckData.totalActive - balanceCheckData.totalPassive) )}}
               </span>
             </p>
-            <p  *ngIf="(balanceCheckData.entriesTotal!=0)" class="mat-form-field" style = "margin-left:1%; color:rgb(198, 255, 215);"> 
-              <span style="color:rgb(191, 188, 188); font-weight: bold;" [style.color]=" (balanceCheckData.totalDebit - balanceCheckData.entriesTotal) ==0 ? 'green' : 'red'" >
+            <p  *ngIf="(balanceCheckData.entriesTotal!=0)" class="mat-form-field" style = "margin-left:1%;"> 
+              <span style="color:var(--mainFontColor);" [style.color]=" (balanceCheckData.totalDebit - balanceCheckData.entriesTotal) ==0 ? 'default' : 'var(--warnColor)'" >
                 {{(balanceCheckData.totalDebit - balanceCheckData.entriesTotal) == 0? 'Debit = Entries : '+ (balanceCheckData.entriesTotal | number):
                 'Balance incorrect!! Difference is ' + ((balanceCheckData.totalDebit - balanceCheckData.entriesTotal) | number )}}
               </span>
@@ -103,7 +103,7 @@
             <mat-datepicker-toggle matSuffix [for]="openBalanceDatePicker"></mat-datepicker-toggle>
             <mat-datepicker [dateClass]="dateClass" #openBalanceDatePicker></mat-datepicker>
           </mat-form-field>
-          <button color = "warn" mat-raised-button style="  font-size: 18px;width: 45%;" (click)="openBalance()"> Open Balance</button>
+          <button color = "warn" mat-raised-button style="  width: 45%;" (click)="openBalance()"> Open Balance</button>
         </span>
       </span>
       <mat-divider style="margin-bottom: 1%;"></mat-divider>
@@ -120,15 +120,15 @@
         <mat-icon color = 'accent'>filter_alt</mat-icon>
       </mat-panel-description>
     </mat-expansion-panel-header >
-    <form class="submit" [formGroup]="searchParametersFG"  style="font-size: 18px; ">
+    <form  [formGroup]="searchParametersFG"  style=" ">
       <span style="display: flex;  justify-content: space-between;   align-items:flex-start;  margin-right: 1%;margin-top: 0.2%;">
         <span style="display:grid; width: 12%; margin-top: 1%;">
-          <button color = "primary"  class= "button-color" mat-raised-button 
-            style="margin:1%; font-size: 18px;"
+          <button color = "primary"   mat-raised-button 
+            style="margin:1%; "
             (click)="submitQuery()">
             Submit
           </button>
-          <button color = "accent" mat-raised-button style="margin:1%; font-size: 18px;" 
+          <button color = "accent" mat-raised-button style="margin:1%; " 
             (click)="searchParametersFG.reset();dateRange.reset(); this.noAccountLedger.patchValue(['ClearAll'])">ClearAll
           </button>
         </span>
@@ -154,7 +154,7 @@
             </ng-container>
           </mat-select>
         </mat-form-field>
-        <mat-form-field  appearance="fill" style="width: 35%; ">
+        <mat-form-field  appearance="fill" style="width: 35%; " class="no-hint-fields">
           <mat-chip-list #chipList >
             <mat-chip *ngFor="let account of noAccountLedger.value" 
             (removed)="removeNew(account,noAccountLedger)"
@@ -172,20 +172,20 @@
             [matChipInputAddOnBlur]="true"
             (matChipInputTokenEnd)="addNew($event,noAccountLedger)"
             matTooltip="Type account number or paste accounts list separated by comma and press enter" >
-            <button style="font-size: 16px;" mat-raised-button matSuffix (click)="selectAccounts()">
-              <mat-icon *ngIf="action!=='View'" class = "icon_search">search</mat-icon> MultiSelect </button>
+            <button mat-raised-button matSuffix (click)="selectAccounts()">
+              <mat-icon *ngIf="action!=='View'" >input</mat-icon> Select </button>
           </mat-chip-list>
         </mat-form-field>
         <span style="display:grid; width: 22%; margin-top: 1%;">
 
-        <button color = "accent"  class= "button-color" mat-raised-button [disabled]="this.dateRangeEnd.value>LastClosedDate||!dateRangeEnd.value"
-          style="margin:1%; font-size: 18px;"
+        <button color = "accent"   mat-raised-button [disabled]="this.dateRangeEnd.value>LastClosedDate||!dateRangeEnd.value"
+          style="margin:1%; "
           (click)="balanceDeepCheck(dateRange.controls.dateRangeEnd.value,dateRange.controls.dateRangeStart.value) ">
           <button mat-icon-button (click)="showTip('balanceDeepCheck')"><mat-icon matSuffix>help</mat-icon></button>
           Balance Deep Check
         </button>
-        <p class="mat-form-field" style = " color:rgb(198, 255, 215);"> 
-          <span style="color:rgb(191, 188, 188);white-space: pre-line;" [style.color]=" (balanceCheckData.totalDebit - balanceCheckData.entriesTotal) ==0 ? 'green' : 'red'" >
+        <p class="mat-form-field"> 
+          <span style="color:var(--mainFontColor); white-space: pre-line;" [style.color]=" (balanceCheckData.totalDebit - balanceCheckData.entriesTotal) ==0 ? 'default' : 'red'" >
             {{(balanceCheckData.totalDebit - balanceCheckData.entriesTotal) == 0? 'Balance = Entries : '+ (balanceCheckData.entriesTotal | number):
             'Balance incorrect!!\n Difference is ' + ((balanceCheckData.totalDebit - balanceCheckData.entriesTotal) | number )}}
           </span>
@@ -194,72 +194,70 @@
       </span>
     </form>
   </mat-expansion-panel>
-  <div class="mat-elevation-z8">
-    <table  #strategyTable mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class="mat-elevation-z8">
-      <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i=index">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>  {{columnsHeaderToDisplay[i]  | titlecase}}</th>
-        <td 
-          [ngStyle]="{'color': element['datePreviousBalance'] == null ? 'rgb(198, 255, 215)' : 'white'}"
-          mat-cell 
-          *matCellDef="let element" [cdkContextMenuTriggerFor]="instrumentcontextmenu"  > 
-          <span [ngSwitch]="true==true">
-            <p *ngSwitchCase="['dateBalance','datePreviousBalance'].includes(column)">
-              <button mat-stroked-button matTooltip="Entries list by account for the date"
-                *ngIf="column=='dateBalance'"
-                (click)="showEntries(element)">
-                {{ element[column] | date }}
-              </button>
-              <span *ngIf="column!=='dateBalance'">
-                {{ element[column] == null ? element['dateBalance']=='2049-12-31T21:00:00.000Z'? 'Entries': 'Day is open' : element[column] | date }}
-              </span>
-            </p>          
-            <p *ngSwitchCase="['openingBalance','totalCredit', 'totalDebit', 'OutGoingBalance', 'checkClosing'].includes(column)">
-              {{element[column] | currency}}
-            </p>
-            <p *ngSwitchCase="['accountNo'].includes(column)">
-              <button mat-stroked-button style="width: 80%;"  matTooltip="Account details"
-                (click)="showAccounInfo(element)">
-                {{element[column] }}
-              </button> 
-            </p>            
-            <p *ngSwitchDefault>
-              {{element[column]}}  
-            </p>
-          </span>
-          <ng-template  #instrumentcontextmenu>
-            <div class="tree-menu-context" *ngIf="!readOnly" cdkMenu >
-              <button 
-                (click)="
-                  updateFilter(element[column],column);
-                  iBalanceDate.value = filterDateFormated;"
-                class="tree-menu-item" cdkMenuItem>
-                <mat-icon class="menu-icon" matPrefix>filter_list</mat-icon> 
-                Add to filter
-              </button> 
-              <button 
-                (click)="addChips( element[column], column)"
-                class="tree-menu-item" cdkMenuItem>
-                <mat-icon class="menu-icon" matPrefix>filter_alt</mat-icon> 
-                ComplexFilter
-              </button> 
-            </div>
-          </ng-template>   
-        </td>
-      </ng-container>
-      <ng-container matColumnDef="expand">
-        <th mat-header-cell *matHeaderCellDef aria-label="row actions">&nbsp;</th>
-        <td mat-cell *matCellDef="let element"></td>
-      </ng-container>
-      <ng-container matColumnDef="expandedDetail" >
-        <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplayWithExpand.length"></td>
-      </ng-container>
-      <tr mat-header-row *matHeaderRowDef="columnsToDisplayWithExpand"></tr>
-      <tr mat-row  *matRowDef="let element; columns: columnsToDisplayWithExpand;"
-        class="element-row"
-        [class.example-expanded-row]="expandedElement === element"
-        (click)="expandedElement = expandedElement === element ? null : element">
-      </tr>
-    </table>
-    <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" [pageSize]="20" aria-label="Select page"></mat-paginator>
-  </div>
+  <table  #strategyTable mat-table [dataSource]="dataSource" multiTemplateDataRows matSort>
+    <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i=index">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>  {{columnsHeaderToDisplay[i]  | titlecase}}</th>
+      <td 
+        [ngStyle]="{'filter': element['datePreviousBalance'] == null ? '' : 'brightness(75%)'}"
+        mat-cell 
+        *matCellDef="let element" [cdkContextMenuTriggerFor]="instrumentcontextmenu"  > 
+        <span [ngSwitch]="true==true">
+          <p *ngSwitchCase="['dateBalance','datePreviousBalance'].includes(column)">
+            <button mat-stroked-button matTooltip="Entries list by account for the date"
+              *ngIf="column=='dateBalance'"
+              (click)="showEntries(element)">
+              {{ element[column] | date }}
+            </button>
+            <span *ngIf="column!=='dateBalance'">
+              {{ element[column] == null ? element['dateBalance']=='2049-12-31T21:00:00.000Z'? 'Entries': 'Day is open' : element[column] | date }}
+            </span>
+          </p>          
+          <p *ngSwitchCase="['openingBalance','totalCredit', 'totalDebit', 'OutGoingBalance', 'checkClosing'].includes(column)">
+            {{element[column] | currency}}
+          </p>
+          <p *ngSwitchCase="['accountNo'].includes(column)">
+            <button mat-stroked-button style="width: 80%;"  matTooltip="Account details"
+              (click)="showAccounInfo(element)">
+              {{element[column] }}
+            </button> 
+          </p>            
+          <p *ngSwitchDefault>
+            {{element[column]}}  
+          </p>
+        </span>
+        <ng-template  #instrumentcontextmenu>
+          <div class="menu-context" *ngIf="!readOnly" cdkMenu >
+            <button 
+              (click)="
+                updateFilter(element[column],column);
+                iBalanceDate.value = filterDateFormated;"
+              class="menu-context-item" cdkMenuItem>
+              <mat-icon class="menu-icon" matPrefix>filter_list</mat-icon> 
+              Add to filter
+            </button> 
+            <button 
+              (click)="addChips( element[column], column)"
+              class="menu-context-item" cdkMenuItem>
+              <mat-icon class="menu-icon" matPrefix>filter_alt</mat-icon> 
+              ComplexFilter
+            </button> 
+          </div>
+        </ng-template>   
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="expand">
+      <th mat-header-cell *matHeaderCellDef aria-label="row actions">&nbsp;</th>
+      <td mat-cell *matCellDef="let element"></td>
+    </ng-container>
+    <ng-container matColumnDef="expandedDetail" >
+      <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplayWithExpand.length"></td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="columnsToDisplayWithExpand"></tr>
+    <tr mat-row  *matRowDef="let element; columns: columnsToDisplayWithExpand;"
+      class="child-row"
+      [class.example-expanded-row]="expandedElement === element"
+      (click)="expandedElement = expandedElement === element ? null : element">
+    </tr>
+  </table>
+  <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" [pageSize]="20" aria-label="Select page"></mat-paginator>
 </ng-container>

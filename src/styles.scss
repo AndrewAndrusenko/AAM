@@ -1,125 +1,199 @@
 @import '@angular/material/theming';
 @include mat-core();
-@import "@angular/material/prebuilt-themes/pink-bluegrey.css";
+@import "node_modules/@angular/material/prebuilt-themes/pink-bluegrey.css";
 @import url("https://fonts.googleapis.com/icon?family=Material+Icons");
 
 :root 
 {
---faovritesNodeColor: rgb(53, 153, 168);
+--primaryColor:#164480;
+--warnColor:#f44336;
+--accentColor:rgb(176, 190, 197);
+--mainFontColor: rgb(241, 243, 243);
+--contrastFontColor: black;
+--mainBackgroundColor:#424242;
+--secondaryBackgroundColor:#3f3d46; //child tables
+
+--filterPlaceHolderColor:rgb(186, 246, 235); 
 --faovritesDarkNodeColor: rgb(34, 104, 114);
 --formFieldLightGray: rgb(57, 56, 56);
 --formFieldDeepGray: rgb(25, 24, 24);
---investmentNodeColor : crimson;
---investmentNodeColorChild: rgb(184, 28, 59);
---faovritesNodeColor: rgb(53, 153, 168);
---faovritesNodeColorChild: rgb(53, 153, 168);
+--investmentNodeColor : rgb(22, 68, 128);
+--investmentNodeColorChild: rgb(22, 68, 128);
+
 --additionalLightGreen: rgb(53, 168, 110);
 --additionalLightBlue: rgb(85, 167, 238);
 --additionalLightRed: rgb(252, 66, 81);
 }
-.upClass {
-color: green;
-}
-.downClass {
-  color: red;
-}
-.edit-item-button {
-  background: var(--investmentNodeColorChild)
-}
-.whiteTextFilter {
-  color: white;
-  font-size: 18px;
-}
-.filterField {
-  margin-left: 10px;
-  font-size: 18px;
-  width: 20%;
-}
-[mat-dialog-title] {
-  margin: -24px -24px 0px -24px !important;
-  padding: 10px 24px;
-  background: #369;
-  color: #fff;
-  cursor: move;
-}
-.tree-menu-context {
+.menu-context {
   display: inline-flex;
   flex-direction: column;
-  min-width: 180px;
-  max-width: 350px;
-  background-color: rgb(184, 184, 184);
-  padding: 3px 0;
-  font-size: 18px;
+  font-size: small;
 }
-.tree-menu-item {
-  background-color: transparent;
+
+.menu-context-item {
   cursor: pointer;
   border: none;
   user-select: none;
   min-width: 64px;
+  min-height: 20px;
   line-height: 36px;
-  padding: 6px;
   display: flex;
   align-items: center;
   flex-direction: row;
   flex: 1;
 }
-.tree-menu-item:hover {
-  background-color: rgb(237, 162, 162);
+.mat-checkbox-ripple { display: none !important; }
+
+//---------------- Forms-------------------------------------------------
+.mat-form-field-label {
+  color:var(--mainFontColor) !important;
+ }
+.mat-form-field {
+  font-size: 1em;
+  border-radius: 5px;
+  padding: 0.9%;
+  background-color: var(--formFieldLightGray);
+  margin-right: 0.5%;
+  margin-left: 0.5%;
+  margin-bottom: 0.5%;
+  margin-top: 0.5%;
 }
-.tree-menu-item:active {
-  background-color: rgb(147, 128, 128);
-}
-.menu-icon {
-  margin-left: 0px;
-  // margin-bottom: 0px;
-  margin-right: 5px;
-}
-.element-row:hover {
-  background: rgb(43, 43, 245);
-}
-.mat-cell {
-  font-size: 18px;
-}
-.mat-select-disabled .mat-select-value {
-  color: rgb(226, 229, 232);
-  font: optional;
+.no-hint-fields  {
+ padding: 0px !important;
 }
 
+.warn-color {
+  color:var(--warnColor)
+}
+//---------------- Charts------------------------------------------------
+.upClass {
+  color: green;
+}
+.downClass {
+  color: red;
+}
+//---------------- Paginator------------------------------------------------
+.mat-paginator {
+  height: 5vh;
+  align-items:none;
+}
+::ng-deep .custom-class .mat-form-field-underline {
+  display: none;
+}
+.mat-paginator .mat-form-field .mat-form-field-wrapper  {
+  font-size: 8px;
+  margin-bottom: -1.25em;
+  margin-top: -1em;
+}
+.mat-paginator .mat-paginator-range-actions {
+  align-items: initial;
+}
+.mat-paginator .mat-paginator-page-size   {
+  margin-top: -1%;
+  box-sizing:unset !important;
+} 
+.mat-paginator .mat-paginator-range-label   {
+   padding: 0;
+   margin-top: 3% !important;
+   margin: 0;
+}
+.mat-paginator .mat-form-field   {
+  background-color:default;
+  margin-top: -5%;
+}
+.mat-paginator .mat-paginator-icon {
+  transform: scale(0.8);
+  vertical-align: unset !important;
+}
+
+//---------------- Table------------------------------------------------
+.mat-cell {
+  font-size:small;
+  color:lightgrey;
+}
+.mat-footer-cell {
+  font-size:small !important;
+  color:lightgrey;
+}
+.mat-header-cell {
+  font-size:medium;
+  background-color:var(--backGroundColor );
+  font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  font-weight: 500;
+}
+.child-row td {
+  border-bottom-width: 0;
+}
+tr.detail-row {
+  height: 0;
+}
+.detail-block {
+  overflow: hidden;
+  display: flex;
+}
+tr.mat-row:hover {
+  border: 1px solid blue;
+  border-radius: 10px;
+  background: #2b2be3; /* green */
+}
+//---------------- Tabs-----------------------------------------------
+.mat-tab-label {
+  font: size 1em !important;
+} 
+.mat-tab-label-active{
+  font-size: 1em !important;
+} 
+//----------------filter-fields-----------------------------------------------
+.filter-field {
+  padding: 0px !important;
+}
+.filter-field .mat-form-field-wrapper {
+  margin-bottom: -1.25em;
+  // padding-bottom: 0.9%;
+}
+.whiteTextFilter {
+  color: var(--mainFontColor);
+  font-size: small;
+}
+
+
+//----------------Buttons-----------------------------------------------
+.mat-chip {
+  // background-color:var(--primaryColor) !important;
+  font-size: 0.7rem;
+	margin: 0.2% !important;
+}
+
+.mat-option {
+  font-size: 0.8rem;
+}
+//---------------- Expansion-panels -----------------------------------------------
+.headers-align  {
+  justify-content: space-between;
+  align-items: center;
+  font-size: medium;
+  background-color:var(--backGroundColor );
+
+}
+.headers-align .mat-expansion-panel-header-description {
+  justify-content: space-between;
+  align-items: center;
+  font-size: small;
+
+}
+.headers-align .mat-expansion-panel-header-title {
+  justify-content: space-between;
+  align-items: center;
+  font-size: small;
+}
 .mat-expansion-panel-body {
   padding: 0 !important;
 }
-.custom-modalbox > mat-dialog-container {
-  background-color:transparent !important;
-  border-radius: 15px;
-  border-width: 3px;
-  border-color: gray
-}
-.mat-focused label {
-  color:rgb(0, 47, 255) !important;
-  transform: 1.2 !important;
-  font-size:x-large !important;
- }
- .mat-form-field-label {
-  color:rgb(59, 112, 121) !important;
-/*   transform: 1.2 !important;
-  font-size:x-large !important; */
- }
-.mat-tab-label {
-  font-size: 20px !important;
-} 
-.mat-tab-label-active{
-  font-size: 20px !important;
-  background-color: rgb(60, 60, 60)!important;
-} 
-.mat-tooltip {
-  font-size: 16px !important
-}
+//---------------- Snacks Msgs -----------------------------------------------
 .snackbar-error {
   background-color: rgb(151, 30, 30);
   color: rgb(223, 217, 217);
   white-space: pre-wrap;
-  padding: 1%;
 }
 .snackbar-success {
   background-color: rgb(80, 156, 109);
@@ -128,16 +202,52 @@ color: green;
   padding: 1%;
 }
 .snackbar-error, .mat-simple-snack-bar-content {
-  font-size: 20px !important;
+  font-size: small !important;
 }
 .mat-error {
   color: rgb(234, 54, 54);
   transform: (1.1);
   height: 110%;
-  font-size: 16px;
+  font-size:small;
   font-style: italic;
   padding: 1%;
 }
+//---------------- Other -----------------------------------------------
+.icon_search {
+  transform: scale(1.7) !important
+}
+.mat-icon {
+  transform: scale(0.8);
+}
+.mat-toolbar {
+  font-size:medium;
+  height: 4vh;
+}
+
+
+[mat-dialog-title] {
+  margin: -24px -24px 0px -24px !important;
+  padding: 10px 24px;
+
+  cursor: move;
+}
+
+
+
+/* 
+.mat-select-disabled .mat-select-value {
+  color: rgb(226, 229, 232);
+  font: optional;
+}
+
+
+.custom-modalbox > mat-dialog-container {
+  background-color:transparent !important;
+  border-radius: 15px;
+  border-width: 3px;
+  border-color: gray
+}
+
 input.ng-invalid.ng-touched {
   color: rgb(234, 54, 54);
 }
@@ -146,4 +256,4 @@ input.ng-invalid.ng-touched {
 }
 ::ng-deep .mat-form-field-disabled .mat-input-element {
   color:white !important;
-}
+} */

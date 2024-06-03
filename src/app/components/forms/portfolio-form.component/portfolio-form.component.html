@@ -10,7 +10,7 @@
   </button>
   <mat-checkbox color="primary" [labelPosition]="'before'" #submitbox checked="false" (click)="portfolioForm.markAllAsTouched();" style="margin-left: 1.5%;">Submit Data</mat-checkbox>
 </div>  
-<form class="submit" [formGroup]="portfolioForm" >
+<form  [formGroup]="portfolioForm" >
   <mat-form-field style="width: 55%;" >
     <mat-select   placeholder="Select Portfolio Type" formControlName="account_type"
     (selectionChange)="calculateAccountCode()" > 
@@ -62,21 +62,21 @@
   <mat-form-field style="width: 85%">
     <input matInput placeholder="Stategy Description" formControlName="description" [readonly]="true">
   </mat-form-field>
-  <div *ngIf="summaryShow" style="width: 98%;">
-    <h2 class="mat-form-field">Portfolio Value {{summaryData.npv|currency}}</h2>
-    <h2 class="mat-form-field">Result {{summaryData.PnL|currency}}</h2>
-    <h2 class="mat-form-field">Management Fee {{summaryData.managementFee|currency}}</h2>
-    <h2 class="mat-form-field">Perfomance Fee {{summaryData.perfomanceFee|currency}}</h2>
+  <div *ngIf="summaryShow" style="width: 98%; margin: 1%;">
+    <h3 class="mat-form-field" style="margin-right: 1%;">Portfolio Value {{summaryData.npv|currency}}</h3>
+    <h3 class="mat-form-field" style="margin-right: 1%;">Result {{summaryData.PnL|currency}}</h3>
+    <h3 class="mat-form-field" style="margin-right: 1%;">Management Fee {{summaryData.managementFee|currency}}</h3>
+    <h3 class="mat-form-field">Per fomance Fee {{summaryData.perfomanceFee|currency}}</h3>
   </div>
   <div *ngIf="['View','Edit'].includes(action)">
     <div *ngIf="id.value!==undefined&&id.value!==null" style="width: 98%;">
-      <mat-toolbar color="accent" style="margin-bottom:1%; border-radius: 8px;">
+      <mat-toolbar color="primary" style="margin-bottom:1%; border-radius: 8px;">
       Investment Restrictions
       </mat-toolbar>
       <inv-restriction-schemes-table [idportfolios]="[id.value]" [onChanges]="true" [portCodes]="[portfolioname.value]"></inv-restriction-schemes-table>
     </div>
     <div *ngIf="id.value!==undefined" style="width: 98%;margin-top: 0.5%;">
-      <mat-toolbar color="accent" style="margin-bottom:1%; border-radius: 8px;">
+      <mat-toolbar color="primary" style="margin-bottom:1%; border-radius: 8px;">
       Fees Schedules
       </mat-toolbar>
       <acc-fees-portfolios-with-schedules-table 
@@ -85,11 +85,11 @@
       [portfolioname]="portfolioname.value"
       ></acc-fees-portfolios-with-schedules-table>
     </div>
-    <mat-expansion-panel style="margin-top: 0.5%; width: 98%;" class="headers-align"
+    <mat-expansion-panel style="margin-top: 0.5%; width: 98%;" class="headers-align color-background"
       [expanded]="false"
       (opened)="panelOpenState1 = true"  
       (closed)="panelOpenState1 = false" >
-      <mat-expansion-panel-header>
+      <mat-expansion-panel-header  class="color-background">
         <mat-panel-title >
           Strategy Structure History
         </mat-panel-title>

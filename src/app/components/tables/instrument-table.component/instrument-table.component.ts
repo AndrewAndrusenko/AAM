@@ -8,8 +8,6 @@ import { Instruments, instrumentCorpActions, instrumentDetails, moexBoard, moexS
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { AppMarketDataService } from 'src/app/services/market-data.service';
-import { investmentNodeColorChild, additionalLightGreen } from 'src/app/models/constants.model';
 import { AppInvInstrumentModifyFormComponent } from '../../forms/instrument-form.component/instrument-form.component';
 import { TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import { indexDBService } from 'src/app/services/indexDB.service';
@@ -65,8 +63,6 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
   instrumentDetailsArr:instrumentDetails[] = [];
   instrumentCorpActions:instrumentCorpActions[] = [];
   instruments: string[] = ['ClearAll'];
-  investmentNodeColor = investmentNodeColorChild;
-  additionalLightGreen = additionalLightGreen;
   public filterednstrumentsLists : Observable<string[]>;
   boardIDs:moexBoard[] =[];
   securityGroups:moexSecurityGroup[];

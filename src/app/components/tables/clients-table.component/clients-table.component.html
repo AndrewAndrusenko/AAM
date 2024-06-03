@@ -1,30 +1,29 @@
 <ng-container *ngIf="accessState!=='none'">
-  <mat-form-field style="width: 30%;" class = "filterField">
-    <mat-label class="whiteTextFilter">Type search string..</mat-label>
+  <mat-form-field style="width: 30%;" class = "filter-field">
+    <mat-label>Type search string..</mat-label>
     <input matInput (keyup)="applyFilter($event)" placeholder="Type search string" #input>
   </mat-form-field>
   <button color = "accent" mat-raised-button title="Export To Excel"
-    style=" margin-left:1%; font-size: 18px;"
+    style=" margin-left:1%; "
     (click)="exportToExcel()">
     Save as XLS 
     <mat-icon matSuffix >save_alt</mat-icon>
   </button>
   <button color = "accent" mat-raised-button title="Reload Table"
-    style=" margin-left:1%; font-size: 18px;"
+    style=" margin-left:1%; "
     (click)="updateClientData (null,null,null,true) ">
     Reload 
     <mat-icon matSuffix >refresh</mat-icon>
   </button>
   <h2 *ngIf="action=='Select_Benchmark'" style="color: rgb(224, 73, 73);">Use double click to select benchmark Portfolio</h2>
-  <div class="mat-elevation-z8">
-    <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class="mat-elevation-z8">
+    <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort >
       <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i=index">
         <th mat-header-cell *matHeaderCellDef mat-sort-header> {{columnsToHeaderDisplay[i]}}</th>
         <td 
           mat-cell *matCellDef="let element">
           <span [ngSwitch]="true==true">
             <p *ngSwitchCase="['clientname'].includes(column)">
-              <button mat-stroked-button style="width: 90; font-size: 18px; margin-top: 5%;"  
+              <button mat-stroked-button style="width: 90;  margin-top: 5%;"  
               [matTooltip]="action==='Select'? 'Click to select client':'Client details'"
               [style.background-color] = "action==='Select'? '': investmentNodeColor"
               (click)="action==='Select'? chooseClient(element) : navigateToClientModifyForm (disabledControlElements? 'View': 'Edit',element)">
@@ -71,9 +70,9 @@
           </button>
         </td>
       </ng-container>
-      <ng-container matColumnDef="expandedDetail" class="element-detail"  >
+      <ng-container matColumnDef="expandedDetail" class="detail-block"  >
         <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplayWithExpand.length" >
-          <div class="element-detail" *ngIf="accessToPortfolioData!=='none'&&action!=='Select'"
+          <div class="detail-block" *ngIf="accessToPortfolioData!=='none'&&action!=='Select'"
             [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
               <app-portfolio-tablee style="width: 100%" class="myclass" 
                 [sendClientsPortfolio]="false"
@@ -85,45 +84,45 @@
       </ng-container>
       <tr mat-header-row *matHeaderRowDef="columnsToDisplayWithExpand"></tr>
       <tr mat-row [cdkContextMenuTriggerFor]="instrumentcontextmenu"  *matRowDef="let element; columns: columnsToDisplayWithExpand;"
-        class="element-row"
+        class="child-row"
         [class.expanded-row]="expandedElement === element"
         (click)="action==='Select'? chooseClient(element): showPortfolios($event,element) ">
         <ng-template  #instrumentcontextmenu>
-          <div class="tree-menu-context" cdkMenu >
+          <div class="menu-context" cdkMenu >
             <button  *ngIf="disabledControlElements"
               (click)="openClientModifyForm('View',element)"
-              class="tree-menu-item" cdkMenuItem >
+              class="menu-context-item" cdkMenuItem >
               <mat-icon class="menu-icon" matPrefix>pageview</mat-icon>      
               View Client
             </button>
             <ng-container *ngIf="!disabledControlElements">
               <button 
                 (click)="openNewPortfolioForm(element)"
-                class="tree-menu-item" cdkMenuItem >
+                class="menu-context-item" cdkMenuItem >
                 <mat-icon class="menu-icon" matPrefix>account_box</mat-icon>      
                 Open Portfolio
               </button>
               <button 
                 (click)="openClientModifyForm('Create', null)"
-                class="tree-menu-item" cdkMenuItem >
+                class="menu-context-item" cdkMenuItem >
                 <mat-icon class="menu-icon" matPrefix>sentiment_satisfied_alt</mat-icon>      
                 Open Client
               </button>
               <button 
                 (click)="openClientModifyForm('Create_Example', element)"
-                class="tree-menu-item" cdkMenuItem >
+                class="menu-context-item" cdkMenuItem >
                 <mat-icon class="menu-icon" matPrefix>sentiment_satisfied_alt</mat-icon>      
                 New Client (on sample)
               </button>
               <button 
                 (click)="openClientModifyForm('Edit', element)"
-                class="tree-menu-item" cdkMenuItem>
+                class="menu-context-item" cdkMenuItem>
                 <mat-icon class="menu-icon" matPrefix>edit</mat-icon>      
                 Edit Client
               </button>
               <button 
                 (click)="openClientModifyForm('Delete', element)"
-                class="tree-menu-item" cdkMenuItem>
+                class="menu-context-item" cdkMenuItem>
                 <mat-icon class="menu-icon" matPrefix>delete</mat-icon> 
                 Delete Client
               </button> 
@@ -132,9 +131,8 @@
         </ng-template>
       </tr>
       <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row"></tr>
-    </table>
-    <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" [pageSize]="20" aria-label="Select page of users"></mat-paginator>
-  </div>
+  </table>
+  <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" [pageSize]="20" aria-label="Select page of users"></mat-paginator>
 </ng-container>
 <h2 *ngIf="action=='Select'" style="color: rgb(224, 73, 73);"> Use context menu to select client</h2>
 

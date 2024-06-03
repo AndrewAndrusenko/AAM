@@ -39,12 +39,12 @@ export class HadlingCommonDialogsService {
     this.verticalPosition=postion;
     if (result['name']=='error') { 
       this.dbErrorsMap.forEach (el => result['detail'].includes(el.constraintCode)? result['detail'] = el.errorText : null);
-      this.snack.open(err? 'Error: '+ result['detail']:'' + result['detail'],'OK',{
+      this.snack.open(err? 'Error: '+ result['detail']:'' + result['detail'],'ok',{
         panelClass: ['snackbar-error'],
         verticalPosition: this.verticalPosition
       }); 
     } else {
-      this.snack.open(result['detail']? action +': ' + result['detail'] : action ,'OK',{
+      this.snack.open(result['detail']? action +': ' + result['detail'] : action ,'ok',{
         panelClass: ['snackbar-success'], 
         verticalPosition: this.verticalPosition, 
         duration: duration

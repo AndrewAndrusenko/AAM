@@ -1,51 +1,7 @@
-.mat-select-panel {
-  max-height: 80vh !important;
-}
-.headers-align  .mat-expansion-panel-header {
-  background-color: #504f4f;
-}
-.headers-align .mat-expansion-panel-header-description {
-  justify-content: space-between;
-  align-items: center;
-  font-size: 20px;
-}
-.red_color {
-  color: var(--investmentNodeColor);
-}
-.headers-align .mat-expansion-panel-header-title {
-  justify-content: space-between;
-  align-items: center;
-  color: rgb(210, 205, 205);
-  font-size: 20px;
-}
-.highlight{
-  background: #2b2be3; /* green */
-}
-/* th.mat-header-cell  {
-  text-align: center !important;
-
-} */
-.mat-header-cell {
-  padding-left: 0.5%;
-  font-size: 20px;
-  background-color:#252525;
-  text-align: center !important;
-
-}
-.mat-cell {
-  padding-left: 0.5%;
-  border-right: 1px solid rgb(30, 30, 30);
-  align-self: stretch;
-  // text-align: center !important;
-}
 .childTable {
-  background-color:#0c1322;
-  font-size: 26px;
 }
 .parentTable {
-  background-color:#1f323e;
   width: 100%;
-  font-size: 26px;
 }
 tr.detail-row {
   height: 0;
@@ -53,20 +9,10 @@ tr.detail-row {
 .edit-child-button {
   background: var(--additionalLightGreen);
 }
-.element-row td {
+.child-row td {
   border-bottom-width: 0;
 }
-.element-detail {
-  overflow: hidden;
-  display: flex;
+tr.mat-row:hover {
+  border: unset !important;
+  background:unset !important;
 }
-/* .mat-column-secid, .mat-column-portfolioname {
-  color: var(--additionalLightBlue)
-} */
-.search-filed {
-  font-size: 18px;
-  border-radius: 9px;
-  background-color: rgb(40, 40, 40);
-  margin-right: 1%;
-  padding:0.5%;
-  }

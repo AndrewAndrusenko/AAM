@@ -29,8 +29,8 @@ import { InstrumentDataService } from 'src/app/services/instrument-data.service'
 export class AppTableCorporateActionsComponent  implements AfterViewInit {
   accessState: string = 'none';
   disabledControlElements: boolean = false;
-  columnsToDisplay = ['date', 'actiontype','actiontypename', 'unredemeedvalue','couponrate','couponamount', 'currency', 'action'];
-  columnsHeaderToDisplay = ['date','Code', 'Action Title','unredemeed','rate','Amount', 'currency', 'issue','action' ];
+  columnsToDisplay = ['date','secid', 'actiontype','actiontypename', 'unredemeedvalue','couponrate','couponamount', 'currency', 'action'];
+  columnsHeaderToDisplay = ['date','SecID','Code', 'Action Title','unredemeed','rate','Amount', 'currency', 'issue','action' ];
   columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
   dataSource: MatTableDataSource<instrumentCorpActions>;
   @ViewChild(MatPaginator) paginator: MatPaginator;

@@ -1,6 +1,6 @@
 
-<mat-form-field class = "filterField"  style="font-size: 22px;" title="All columns">
-  <mat-label class="whiteTextFilter">Search (all columns)...</mat-label>
+<mat-form-field  title="All columns" class="filter-field" style="width: 30%;">
+  <mat-label>Type to search...</mat-label>
   <input 
     (keyup)="applyFilter($event)"
     matInput type="text" #filterALL
@@ -11,20 +11,20 @@
     <mat-icon>close</mat-icon>
   </button>
 </mat-form-field>
-<button color = "accent" mat-raised-button title="Export To Excel (ALT + W)"
-  style=" margin-left:1%; font-size: 18px;"
+<button color = "accent" mat-raised-button title="Export To Excel"
+  style=" margin-left:1%;"
   (click)="exportToExcel()">
   Save as XLS 
   <mat-icon matSuffix >save_alt</mat-icon>
 </button>
-<button color = "accent" mat-raised-button title="Reload Table (ALT + R)"
-  style=" margin-left:1%; font-size: 18px;"
+<button color = "accent" mat-raised-button title="Reload Table " 
+  style=" margin-left:1%;"
   (click)="submitQuery(true)">
   Reload 
   <mat-icon matSuffix >refresh</mat-icon>
 </button>
-<button color = "accent" mat-raised-button title="Reload Table"
-  style=" margin-left:0.2%; font-size: 18px;margin-left: 1%;"
+<button color = "accent" mat-raised-button title="Reload Table" 
+  style=" margin-left:0.2%;margin-left: 1%;"
   (click)="openTradeModifyForm('Create', {})">
   New Trade
   <mat-icon matSuffix >create_new_folder</mat-icon>
@@ -41,22 +41,22 @@
       <mat-icon color = 'accent'>filter_alt</mat-icon>
     </mat-panel-description>
   </mat-expansion-panel-header >
-  <form class="submit" [formGroup]="searchParametersFG"  style="font-size: 18px; margin-left: 0.5%; ">
-    <span style="display: flex;    align-items:flex-start;  margin-right: 1%;margin-top: 0.2%;">
-      <span style="display:grid; width: 11%; margin-right: 2%;">
-        <button color = "primary"  class= "button-color" mat-raised-button 
-          style="margin:1%; font-size: 18px;"
+  <form  [formGroup]="searchParametersFG"  style=" margin-left: 0.5%; ">
+    <span style="display: flex;    align-items:flex-start;  margin-right: 1%;"> 
+      <span style="display:grid; width: 11%; margin-right: 1%; margin-top: 0.7%; margin-left: 1%;">
+        <button color = "primary"  mat-raised-button 
+          style="margin:1%;"
           (click)="submitQuery()">
           Submit
         </button>
         <button color = "accent" mat-raised-button 
-          style="margin-top:4%;margin-left: 1%; font-size: 18px;"
+          style="margin-top:4%;margin-left: 1%;"
           (click)="searchParametersFG.reset();
            instruments=['ClearAll']">
           ClearAll
         </button>
       </span>
-      <mat-form-field  class="search-filed">
+      <mat-form-field  >
       <mat-select placeholder="Type" formControlName="type">
         <mat-option [value]="null">ALL</mat-option>
         <mat-option [value]="'BUY'">BUY</mat-option>
@@ -64,7 +64,7 @@
       </mat-select>
     </mat-form-field>
 
-    <mat-form-field appearance="fill"  class="search-filed">
+    <mat-form-field appearance="fill"  >
       <mat-label >Trade date range</mat-label>
       <mat-date-range-input [formGroup]="dataRange" [rangePicker]="pickerTDate" >
         <input matStartDate placeholder="Start date" formControlName="dateRangeStart" >
@@ -76,7 +76,7 @@
       <mat-error *ngIf="dataRange.controls.dateRangeStart.hasError('matStartDateInvalid')">Invalid start date</mat-error>
       <mat-error *ngIf="dataRange.controls.dateRangeEnd.hasError('matEndDateInvalid')">Invalid end date</mat-error>
     </mat-form-field>
-    <mat-form-field appearance="fill"  class="search-filed">
+    <mat-form-field appearance="fill"  >
       <mat-label>Value date range</mat-label>
       <mat-date-range-input [formGroup]="dataRangeVdate" [rangePicker]="pickerVDate" >
         <input matStartDate placeholder="Start date" formControlName="vdate" formControlName="dateRangeStart">
@@ -88,7 +88,7 @@
       <mat-error *ngIf="dataRange.controls.dateRangeStart.hasError('matStartDateInvalid')">Invalid start date</mat-error>
       <mat-error *ngIf="dataRange.controls.dateRangeEnd.hasError('matEndDateInvalid')">Invalid end date</mat-error>
     </mat-form-field>
-    <mat-form-field class="search-filed" style="width: 16%;"> 
+    <mat-form-field  style="width: 16%;"> 
       <input matInput placeholder="Quantity (Value or Min - Max)" formControlName="qty">
       <mat-hint *ngIf="qty.valid">
         Qty or QtyMin-QtyMax
@@ -97,7 +97,7 @@
         Incorrect Range
       </mat-error>
     </mat-form-field>
-    <mat-form-field class="search-filed" style="width: 15%;">
+    <mat-form-field  style="width: 15%;">
       <input matInput placeholder="Price (Value or Min - Max)" formControlName="price">
       <mat-hint *ngIf="price.valid">
         Price or PriceMin-PriceMax
@@ -107,14 +107,13 @@
       </mat-error>
     </mat-form-field>
   </span>
-<p style="margin-top: 1%;">
-      <mat-form-field  appearance="fill" style="width: 40%; " class="search-filed">
+      <mat-form-field  appearance="fill" style="width: 40%; " class="no-hint-fields">
         <mat-chip-list #chipList   >
           <mat-chip *ngFor="let secid of instruments" 
           (removed)="remove(secid,instruments,secidList)"
           (click)=" instruments = clearAll($event,instruments,secidList);">
             {{secid}}
-            <button matChipRemove *ngIf="secid!=='ClearAll'">
+            <button  matChipRemove *ngIf="secid!=='ClearAll'">
               <mat-icon>cancel</mat-icon>
             </button>
           </mat-chip>
@@ -129,16 +128,14 @@
           (matChipInputTokenEnd)="instruments = add($event,instruments,secidList)"
           matTooltip="Type secid or paste multiple secid codes separated by comma and press enter" >
         </mat-chip-list>
-        <mat-autocomplete #auto="matAutocomplete" (optionSelected)="changedValueofChip($event.option.value,instruments,secidList)">
+        <mat-autocomplete #auto="matAutocomplete" (optionSelected)="changedValueofChip($event.option.value,instruments,secidList)" class="color-background">
           <mat-option *ngFor="let secid of filterednstrumentsLists | async" [value]="secid.toString().split(',')[0]">
             {{secid.toString().replaceAll(',',' - ')}}
           </mat-option>
         </mat-autocomplete>
-        <mat-hint style="color:rgb(104, 246, 246);">
-          INSTRUMENTS LIST
-        </mat-hint>
       </mat-form-field>
-      <mat-form-field appearance="fill" style="width: 40%;" class="search-filed">
+      
+      <mat-form-field appearance="fill" style="width: 40%;" class="no-hint-fields">
         <mat-chip-list #chipListCpty   >
           <mat-chip *ngFor="let cpty of counterparties" 
           (removed)="remove(cpty,counterparties,cptyList)"
@@ -159,129 +156,118 @@
           (matChipInputTokenEnd)="counterparties = add($event,counterparties,cptyList)"
           matTooltip="Type cpty name or paste multiple names separated by comma and press enter" >
         </mat-chip-list>
-        <mat-autocomplete #autoCpty="matAutocomplete" (optionSelected)="changedValueofChip($event.option.value[0],counterparties,cptyList)">
+        <mat-autocomplete #autoCpty="matAutocomplete" (optionSelected)="changedValueofChip($event.option.value[0],counterparties,cptyList)"  class="color-background">
           <mat-option *ngFor="let cpty of filteredCptyLists | async"[value]="[cpty['clientname'],cpty['idclient']] ">
             {{cpty['clientname']}} -  {{cpty['idclient']}} 
           </mat-option>
         </mat-autocomplete>
-        <mat-hint style="color:rgb(104, 246, 246);">
-          COUNTERPARTIES LIST
-        </mat-hint>
       </mat-form-field>
-    </p>
   </form>
 </mat-expansion-panel>
-
-<div class="mat-elevation-z8" >
-  <table  #strategyTable mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class="mat-elevation-z8">
-    <ng-container matColumnDef="{{column}}"  *ngFor="let column of columnsToDisplay; let i=index">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header >  {{columnsHeaderToDisplay[i] }}</th>
-      <td  mat-cell *matCellDef="let element" [cdkContextMenuTriggerFor]="instrumentcontextmenu"  > 
-        <span [ngSwitch]="true==true">
-          <p  *ngSwitchCase="['action'].includes(column) " >
+<table  #strategyTable mat-table [dataSource]="dataSource" multiTemplateDataRows matSort >
+  <ng-container matColumnDef="{{column}}"  *ngFor="let column of columnsToDisplay; let i=index">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header >  {{columnsHeaderToDisplay[i] }}</th>
+    <td  mat-cell *matCellDef="let element" [cdkContextMenuTriggerFor]="instrumentcontextmenu"  > 
+      <span [ngSwitch]="true==true">
+        <p  *ngSwitchCase="['action'].includes(column) " >
+          <button mat-icon-button 
+          matTooltip="Copy Trade"
+          (click)="openTradeModifyForm('Create_Example',element)">
+          <mat-icon >file_copy</mat-icon>
+          </button>
+          <button  *ngIf="disabledControlElements ||element.tdate<FirstOpenedAccountingDate" mat-icon-button color="accent"
+            matTooltip="View Trade"
+            (click)="openTradeModifyForm('View', element)">
+            <mat-icon >pageview</mat-icon>
+          </button>
+          <ng-container  *ngIf="element.tdate>=FirstOpenedAccountingDate&&!disabledControlElements">
             <button mat-icon-button color="accent"
-            matTooltip="Copy Trade"
-            (click)="openTradeModifyForm('Create_Example',element)">
-            <mat-icon >file_copy</mat-icon>
+              matTooltip="Edit Trade"
+              (click)="openTradeModifyForm('Edit',element)">
+              <mat-icon >edit</mat-icon>
             </button>
-            <button  *ngIf="disabledControlElements ||element.tdate<FirstOpenedAccountingDate" mat-icon-button color="accent"
-              matTooltip="View Trade"
-              (click)="openTradeModifyForm('View', element)">
-              <mat-icon >pageview</mat-icon>
+            <button mat-icon-button color="accent" *ngIf="element['qty']>element['allocatedqty']"
+              matTooltip="Allocate Trade"
+              (click)="openTradeModifyForm('Edit',element,1)">
+              <mat-icon >share</mat-icon>
             </button>
-           <!--  matTooltip="Copy Trade"
-            matTooltip="Edit Trade"
-            matTooltip="Allocate"
-            matTooltip="Trade has been allocated" -->
-            <ng-container  *ngIf="element.tdate>=FirstOpenedAccountingDate&&!disabledControlElements">
-              <button mat-icon-button color="accent"
-                matTooltip="Edit Trade"
-                (click)="openTradeModifyForm('Edit',element)">
-                <mat-icon >edit</mat-icon>
-              </button>
-              <button mat-icon-button color="accent" *ngIf="element['qty']>element['allocatedqty']"
-                matTooltip="Allocate Trade"
-                (click)="openTradeModifyForm('Edit',element,1)">
-                <mat-icon >share</mat-icon>
-              </button>
-              <button mat-icon-button color="accent" *ngIf="element['qty']<=element['allocatedqty']"
-                matTooltip="Trade is allocated"
-                (click)="openTradeModifyForm('Edit',element,1)">
-                <mat-icon >not_interested</mat-icon>
-              </button>
+            <button mat-icon-button color="accent" *ngIf="element['qty']<=element['allocatedqty']"
+              matTooltip="Trade is allocated"
+              (click)="openTradeModifyForm('Edit',element,1)">
+              <mat-icon >not_interested</mat-icon>
+            </button>
 
-              <button 
-                mat-icon-button 
-                color="accent" 
-                matTooltip="Delete Trade"
-                (click)="openTradeModifyForm('Delete',element)">
-                <mat-icon >delete</mat-icon>
-              </button>
-            </ng-container>
-          </p>
-          <p *ngSwitchCase="['tdate','vdate'].includes(column)"> {{element[column] | date}} </p>
-          <p *ngSwitchCase="['idtrade'].includes(column)">
-            <button mat-stroked-button style="font-size: 18px;margin-top: 8%;"  
-            [matTooltip]="'Trade details'"
-            class = "edit-item-button"
-            (click)="openTradeModifyForm(disabledControlElements? 'View': 'Edit',element)">
-            {{element[column] }}
-            </button> 
-          </p>
-          <p *ngSwitchDefault> {{element[column]}} </p>
-        </span>
-        <ng-template  #instrumentcontextmenu>
-          <div class="tree-menu-context" cdkMenu >
             <button 
-              (click)="updateFilter(element[column])"
-              class="tree-menu-item" cdkMenuItem>
-              <mat-icon class="menu-icon" matPrefix>filter_list</mat-icon> 
-              Add to filter
+              mat-icon-button 
+              color="accent" 
+              matTooltip="Delete Trade"
+              (click)="openTradeModifyForm('Delete',element)">
+              <mat-icon >delete</mat-icon>
+            </button>
+          </ng-container>
+        </p>
+        <p *ngSwitchCase="['tdate','vdate'].includes(column)"> {{element[column] | date}} </p>
+        <p *ngSwitchCase="['idtrade'].includes(column)">
+          <button mat-flat-button style="margin-top: 8%;"  
+          [matTooltip]="'Trade details'"
+          color="primary"
+          (click)="openTradeModifyForm(disabledControlElements? 'View': 'Edit',element)">
+          {{element[column] }}
+          </button> 
+        </p>
+        <p *ngSwitchDefault> {{element[column]}} </p>
+      </span>
+      <ng-template  #instrumentcontextmenu>
+        <div class="menu-context" cdkMenu >
+          <button 
+            (click)="updateFilter(element[column])"
+            class="menu-context-item" cdkMenuItem>
+            <mat-icon class="menu-icon" matPrefix>filter_list</mat-icon> 
+            Add to filter
+          </button> 
+          <ng-container *ngIf="element.tdate<FirstOpenedAccountingDate||disabledControlElements">
+            <button 
+              (click)="openTradeModifyForm('View', element)"
+              class="menu-context-item" cdkMenuItem>
+              <mat-icon class="menu-icon" matPrefix>pageview</mat-icon> 
+              View Trade
             </button> 
-            <ng-container *ngIf="element.tdate<FirstOpenedAccountingDate||disabledControlElements">
-              <button 
-                (click)="openTradeModifyForm('View', element)"
-                class="tree-menu-item" cdkMenuItem>
-                <mat-icon class="menu-icon" matPrefix>pageview</mat-icon> 
-                View Trade
-              </button> 
-            </ng-container>
-            
-            <ng-container *ngIf="element.tdate>=FirstOpenedAccountingDate&&!disabledControlElements" title="Edit block">
+          </ng-container>
+          
+          <ng-container *ngIf="element.tdate>=FirstOpenedAccountingDate&&!disabledControlElements" title="Edit block">
 
-              <button 
-                class="tree-menu-item" cdkMenuItem 
-                (click)="openTradeModifyForm('Create', element)">
-                <mat-icon class="menu-icon" matPrefix>create_new_folder</mat-icon>      
-                New Trade
-              </button>
-              <button 
-                class="tree-menu-item" cdkMenuItem 
-                (click)="openTradeModifyForm('Create_Example', element)">
-                <mat-icon class="menu-icon" matPrefix>file_copy</mat-icon>      
-                New Trade (on sample)
-              </button>
-              <button 
-                class="tree-menu-item" cdkMenuItem
-                (click)="openTradeModifyForm('Edit', element)">
-                <mat-icon class="menu-icon" matPrefix>edit</mat-icon>      
-                Edit Trade
-              </button>
-              <button 
-                class="tree-menu-item" cdkMenuItem
-                (click)="openTradeModifyForm('Delete', element)">
-                <mat-icon class="menu-icon" matPrefix>delete</mat-icon> 
-                Delete Trade
-              </button> 
-            </ng-container>
-          </div>
-        </ng-template>   
-      </td>
-    </ng-container>
-    <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
-    <tr mat-row  *matRowDef="let element; columns: columnsToDisplay"
-      (click)="FormMode==='Select'? selectInstrument(element): null ">
-    </tr>
-  </table>
-  <mat-paginator [pageSizeOptions]="[5, 15, 25,50, 100]" [pageSize]="15" aria-label="Select page of trades"></mat-paginator>
-</div>
+            <button 
+              class="menu-context-item" cdkMenuItem 
+              (click)="openTradeModifyForm('Create', element)">
+              <mat-icon class="menu-icon" matPrefix>create_new_folder</mat-icon>      
+              New Trade
+            </button>
+            <button 
+              class="menu-context-item" cdkMenuItem 
+              (click)="openTradeModifyForm('Create_Example', element)">
+              <mat-icon class="menu-icon" matPrefix>file_copy</mat-icon>      
+              New Trade (on sample)
+            </button>
+            <button 
+              class="menu-context-item" cdkMenuItem
+              (click)="openTradeModifyForm('Edit', element)">
+              <mat-icon class="menu-icon" matPrefix>edit</mat-icon>      
+              Edit Trade
+            </button>
+            <button 
+              class="menu-context-item" cdkMenuItem
+              (click)="openTradeModifyForm('Delete', element)">
+              <mat-icon class="menu-icon" matPrefix>delete</mat-icon> 
+              Delete Trade
+            </button> 
+          </ng-container>
+        </div>
+      </ng-template>   
+    </td>
+  </ng-container>
+  <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+  <tr mat-row  *matRowDef="let element; columns: columnsToDisplay"
+    (click)="FormMode==='Select'? selectInstrument(element): null ">
+  </tr>
+</table>
+<mat-paginator class="custom-class" [pageSizeOptions]="[5, 15, 25,50, 100]" [pageSize]="15" aria-label="Select page of trades"></mat-paginator>

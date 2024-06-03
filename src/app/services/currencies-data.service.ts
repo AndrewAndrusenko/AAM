@@ -65,7 +65,11 @@ export class CurrenciesDataService {
       switchMap(result=>result.isConfirmed? this.deleteOldRateData(sourceCodesArray,dateToDelete):of(null)),
       tap(rowsDeleted=>rowsDeleted? loadingDataState.deletedCount = rowsDeleted.length:null),
       switchMap(()=>loadingDataState.state==='allowed'? this.getCbrRateDaily(sourcesData, dateToLoad,undefined) : of(null)),
-      tap(data=>data? loadingDataState.loadedCount = data.length:null),
+      tap(data=>data? loadingDataState = {
+        ...loadingDataState,
+        loadedCount: data.length,
+        message:'Completed'
+      }:null),
       switchMap(loadedData=>of({...loadingDataState,data:loadedData})),
      ) as Observable<{message:string,state:string,deletedCount:number,loadedCount:number, data:currencyRateList[]}>
   }

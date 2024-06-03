@@ -1,22 +1,22 @@
-<mat-toolbar style="margin-left: 1%;" color="primary" 
+<mat-toolbar style="margin-left: 1%; margin-bottom: 1%;" color="primary" 
 cdkDrag
 cdkDragRootElement=".cdk-overlay-pane" 
 cdkDragHandle>
-  {{action}} {{id.value}}| Entry: {{d_transactionType.value=='LL'? ' Ledger - Ledger':' Account - Ledger'}}
+  {{action}} {{id.value}} | Entry: {{d_transactionType.value=='LL'? ' Ledger - Ledger':' Account - Ledger'}}
 </mat-toolbar>
-<button mat-raised-button color="accent" 
+<button mat-raised-button color="primary" 
   [disabled]="!(entryModifyForm.valid && submitbox.checked)"
   (click)="showAValidator();
            updateEntryData(action)"
-  style="margin-top: 1px; width: 200px; font-size: 18px; margin-left: 1%;">
+  style="margin-top: 1px; width: 30%;  margin-left: 1%;">
   {{action}} Entry 
 </button>
-<mat-checkbox color="primary"  #submitbox checked="false" style = "margin-left: 5%;"
+<mat-checkbox color="primary"  #submitbox checked="false" style = "margin-left: 2%;"
   (click)="showAValidator();
             entryModifyForm.markAllAsTouched();">
   Submit Data {{ (action!='View')? '(change to update overdraft data)' : ''}}
 </mat-checkbox>
-<form class="submit" [formGroup]="entryModifyForm" #formDirective="ngForm" >
+<form [formGroup]="entryModifyForm" #formDirective="ngForm" >
   <mat-form-field  style="width: 27%;">
     <mat-label>Type Code</mat-label>
     <mat-select  #t_XactTypeCode_Ext formControlName="t_XactTypeCode_Ext"  > 
@@ -51,17 +51,17 @@ cdkDragHandle>
     </mat-error>
   </mat-form-field>
   <mat-button-toggle-group 
-    style=" width: 26%;font-size: 18px;" formControlName="t_XactTypeCode" 
-    aria-label="Font Style" matTooltip="Choose Ledger Side"
+    style=" width: 26%;" formControlName="t_XactTypeCode" 
+    matTooltip="Choose Ledger Side"
     (click)="xActTypeCode_Ext.patchValue(''); 
              xActTypeCode_Ext.markAsTouched();
              showAValidator();">
     <mat-button-toggle 
-      [disabled]="d_transactionType.value=='LL'" style="width: 50%;font-size: 18px;" [value]="1">
+      [disabled]="d_transactionType.value=='LL'" style="width: 50%;" [value]="1">
       Debit 
     </mat-button-toggle>
     <mat-button-toggle 
-      [disabled]="d_transactionType.value=='LL'" style="width: 50%;font-size: 18px;" [value]="2">
+      [disabled]="d_transactionType.value=='LL'" style="width: 50%;" [value]="2">
       Credit
     </mat-button-toggle>
   </mat-button-toggle-group>
@@ -70,13 +70,13 @@ cdkDragHandle>
       <mat-slide-toggle #overdraft 
         style="font-size:85%; letter-spacing: .05rem;"
         [checked]="!ledgerNo.hasAsyncValidator(validatorLedgerAccountOverdraft)"
-        [style.color]="ledgerNo.hasAsyncValidator(validatorLedgerAccountOverdraft)? 'rgb(43, 43, 245)' : 'brown'"
+        [style.color]="ledgerNo.hasAsyncValidator(validatorLedgerAccountOverdraft)? 'default' :'var(--warnColor)'"
         (toggleChange)="toggleOverdraftValidator(overdraft,'d_ledgerNo');"
         >Overdraft {{overdraft.checked? 'allowed!':'forbidden'}}
       </mat-slide-toggle>
       <input matInput placeholder="Debit" formControlName="d_ledgerNo">   
       <button mat-icon-button matSuffix (click)="selectLedger('ledger')">
-      <mat-icon *ngIf="action!=='View'" class = "icon_search">search</mat-icon></button>
+      <mat-icon *ngIf="action!=='View'" class = "icon_search">input</mat-icon></button>
       <mat-error *ngIf="ledgerNo.hasError('overdraft')">
         Overdraft!! {{d_closingLedgerBalance.value| currency }}
       </mat-error>
@@ -85,7 +85,7 @@ cdkDragHandle>
       </mat-error>
       <mat-hint 
         class="mat-error" 
-        [style.color]="d_closingLedgerBalance.value<0 ? 'brown' : 'white'"
+        [style.color]="d_closingLedgerBalance.value<0 ?'var(--warnColor)' : 'white'"
         *ngIf="!ledgerNo.hasError('overdraft')">
         Expceted balance {{d_closingLedgerBalance.value | currency}}
       </mat-hint>
@@ -97,13 +97,13 @@ cdkDragHandle>
       <mat-slide-toggle #overdraft 
         style="font-size:85%; letter-spacing: .05rem;"
         [checked]="!accountNo.hasAsyncValidator(validatorAccountOverdraft)"
-        [style.color]="accountNo.hasAsyncValidator(validatorAccountOverdraft) ? 'rgb(43, 43, 245)' : 'brown'"
+        [style.color]="accountNo.hasAsyncValidator(validatorAccountOverdraft) ? 'default' :'var(--warnColor)'"
         (toggleChange)="toggleOverdraftValidator(overdraft,'d_accountNo');"
         >Overdraft {{overdraft.checked? 'allowed!':'forbidden'}}
       </mat-slide-toggle>
       <input matInput placeholder="Credit" formControlName="d_accountNo">
       <button mat-icon-button matSuffix (click)="selectAccount()">
-        <mat-icon *ngIf="action!=='View'" class = "icon_search">search</mat-icon>
+        <mat-icon *ngIf="action!=='View'" class = "icon_search">input</mat-icon>
       </button>
       <mat-error *ngIf="accountNo.errors?.['required']">
         Required!
@@ -116,7 +116,7 @@ cdkDragHandle>
       </mat-error>
       <mat-hint 
         class="mat-error" 
-        [style.color]="d_closingBalance.value<0 ? 'brown' : 'white'"
+        [style.color]="d_closingBalance.value<0 ?'var(--warnColor)' : 'white'"
         *ngIf="!accountNo.hasError('overdraft')">
         Expceted balance {{d_closingBalance.value | currency}}
       </mat-hint>
@@ -125,14 +125,14 @@ cdkDragHandle>
       <mat-slide-toggle #overdraft 
         style="font-size:85%; letter-spacing: .05rem;"
         [checked]="!accountNo.hasAsyncValidator(validatorAccountOverdraft)"
-        [style.color]="accountNo.hasAsyncValidator(validatorAccountOverdraft) ? 'rgb(43, 43, 245)' : 'brown'"
+        [style.color]="accountNo.hasAsyncValidator(validatorAccountOverdraft) ? 'default' :'var(--warnColor)'"
         (toggleChange)="toggleOverdraftValidator( overdraft,'d_accountNo' );"
         >Overdraft {{overdraft.checked? 'allowed!':'forbidden'}}
       </mat-slide-toggle>
       <input matInput placeholder="Debit" formControlName="d_accountNo" >   
       <button mat-icon-button matSuffix 
         (click)="selectAccount()">
-        <mat-icon *ngIf="action!=='View'" class = "icon_search">search</mat-icon>
+        <mat-icon *ngIf="action!=='View'" class = "icon_search">input</mat-icon>
       </button>
       <mat-error *ngIf="accountNo.errors?.['required']">
         Required!
@@ -145,7 +145,7 @@ cdkDragHandle>
       </mat-error>
       <mat-hint 
         class="mat-error" 
-        [style.color]="(d_closingBalance.value<0) ? 'brown' : 'white'">
+        [style.color]="(d_closingBalance.value<0) ?'var(--warnColor)' : 'white'">
         Expceted balance {{d_closingBalance.value | currency}}
       </mat-hint>
     </mat-form-field>
@@ -153,14 +153,14 @@ cdkDragHandle>
       <mat-slide-toggle #overdraft 
         style="font-size:85%; letter-spacing: .05rem;"
         [checked]="!ledgerNo.hasAsyncValidator(validatorLedgerAccountOverdraft)"
-        [style.color]="ledgerNo.hasAsyncValidator(validatorLedgerAccountOverdraft)? 'rgb(43, 43, 245)' : 'brown'"
+        [style.color]="ledgerNo.hasAsyncValidator(validatorLedgerAccountOverdraft)? 'default' :'var(--warnColor)'"
         (toggleChange)="toggleOverdraftValidator(overdraft,'d_ledgerNo');"
         >Overdraft {{overdraft.checked? 'allowed!':'forbidden'}}
       </mat-slide-toggle>
       <input matInput placeholder="Credit" formControlName="d_ledgerNo">
       <button mat-icon-button matSuffix
         (click)="selectLedger('ledger')">
-        <mat-icon *ngIf="action!=='View'" class = "icon_search">search</mat-icon>
+        <mat-icon *ngIf="action!=='View'" class = "icon_search">input</mat-icon>
       </button>
       <mat-error *ngIf="ledgerNo.hasError('overdraft')">
         Overdraft!! {{d_closingLedgerBalance.value| currency }}
@@ -170,7 +170,7 @@ cdkDragHandle>
       </mat-error>
       <mat-hint 
         class="mat-error" 
-        [style.color]="(d_closingLedgerBalance.value<0 )? 'brown' : 'white'"
+        [style.color]="(d_closingLedgerBalance.value<0 )?'var(--warnColor)' : 'white'"
         *ngIf="!ledgerNo.hasError('overdraft')">
         Expceted balance {{d_closingLedgerBalance.value | currency}}
       </mat-hint>
@@ -182,14 +182,14 @@ cdkDragHandle>
       <mat-slide-toggle #overdraft 
         style="font-size:85%; letter-spacing: .05rem;"
         [checked]="!ledgerNo.hasAsyncValidator(validatorLedgerAccountOverdraft)"
-        [style.color]="!overdraft.checked ? 'rgb(43, 43, 245)' : 'brown'"
+        [style.color]="!overdraft.checked ? 'default' :'var(--warnColor)'"
         (toggleChange)="toggleOverdraftValidator(overdraft,'d_ledgerNo');"
         >Overdraft {{overdraft.checked? 'allowed!':'forbidden'}}
       </mat-slide-toggle>
       <input matInput placeholder="Debit" formControlName="d_ledgerNo" >   
       <button mat-icon-button matSuffix 
         (click)="selectLedger('ledger')">
-        <mat-icon *ngIf="action!=='View'" class = "icon_search">search</mat-icon>
+        <mat-icon *ngIf="action!=='View'" class = "icon_search">input</mat-icon>
       </button>
       <mat-error *ngIf="ledgerNo.hasError('overdraft')">
         Overdraft!! {{d_closingLedgerBalance.value| currency }}
@@ -199,7 +199,7 @@ cdkDragHandle>
       </mat-error>
       <mat-hint 
         class="mat-error" 
-        [style.color]="(d_closingLedgerBalance.value<0 )? 'brown' : 'white'"
+        [style.color]="(d_closingLedgerBalance.value<0 )?'var(--warnColor)' : 'white'"
         *ngIf="!ledgerNo.hasError('overdraft')">
         Expceted balance {{d_closingLedgerBalance.value | currency}}
       </mat-hint>
@@ -211,14 +211,14 @@ cdkDragHandle>
       <mat-slide-toggle #overdraft 
         style="font-size:85%; letter-spacing: .05rem;"
         [checked]="!accountNo.hasAsyncValidator(validatorLedgerLL2Overdraft)"
-        [style.color]="!overdraft.checked ? 'rgb(43, 43, 245)' : 'brown'"
+        [style.color]="!overdraft.checked ? 'default' :'var(--warnColor)'"
         (toggleChange)="toggleOverdraftValidator(overdraft,'d_accountNo');"
         >Overdraft {{overdraft.checked? 'allowed!':'forbidden'}}
       </mat-slide-toggle>
       <input matInput placeholder="Credit" formControlName="d_accountNo">
       <button mat-icon-button matSuffix
         (click)="selectLedger('account')">
-        <mat-icon *ngIf="action!=='View'" class = "icon_search">search</mat-icon>
+        <mat-icon *ngIf="action!=='View'" class = "icon_search">input</mat-icon>
       </button>
       <mat-error *ngIf="accountNo.errors?.['required']">
         Required!
@@ -231,7 +231,7 @@ cdkDragHandle>
       </mat-error>
       <mat-hint 
         class="mat-error" 
-        [style.color]="(d_closingBalance.value<0) ? 'brown' : 'white'">
+        [style.color]="(d_closingBalance.value<0) ?'var(--warnColor)' : 'white'">
         Expceted balance {{d_closingBalance.value | currency}}
       </mat-hint>
     </mat-form-field>
@@ -254,14 +254,5 @@ cdkDragHandle>
       Required!
     </mat-error>
   </mat-form-field>
-<!--   <mat-form-field style="width: 10%;">
-    <input matInput placeholder="t_accountId" formControlName="t_accountId">
-  </mat-form-field>
-  <mat-form-field style="width: 10%;">
-    <input matInput placeholder="t_ledgerNoId" formControlName="t_ledgerNoId">
-  </mat-form-field> -->
-  <h3 *ngIf="action!='View'"
-    [style.color]="setupDone&&entryModifyForm.invalid ? 'rgb(252, 113, 113)' : null">
-    {{setupDone&&entryModifyForm.invalid? 'Please check the form. Data is invalid' : 'Data is valid. Please select "Submit data"'}}
-  </h3>
+  <h4 style="margin-left: 0.5%;" class="warn-color"  *ngIf="action!='View'&&entryModifyForm.invalid"> Please check the form. Data is invalid</h4>
 </form>

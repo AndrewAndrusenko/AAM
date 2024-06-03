@@ -1,6 +1,6 @@
 <ng-container *ngIf="accessState!=='none'" >
-  <mat-form-field style="width: 20%;"class = "filterField"  title="Filter All columns">
-    <mat-label class="whiteTextFilter">Search (all columns)...</mat-label>
+  <mat-form-field style="width: 20%;"class = "filter-field"  title="Filter All columns">
+    <mat-label>Search (all columns)...</mat-label>
     <input 
       (keyup)="applyFilter($event)"
       matInput type="text" #filterALL
@@ -12,27 +12,25 @@
     </button>
   </mat-form-field>
   <button color = "accent" mat-raised-button title="Export To Excel"
-    style=" margin-left:1%; font-size: 18px;"
+    style=" margin-left:1%; "
     (click)="exportToExcel()">
     Save as XLS 
     <mat-icon matSuffix >save_alt</mat-icon>
   </button>
   <button color = "accent" mat-raised-button title="Reload Table"
-    style=" margin-left:1%; font-size: 18px;"
+    style=" margin-left:1%; "
     (click)="submitQuery()">
     Reload 
     <mat-icon matSuffix >refresh</mat-icon>
   </button>
   <button color = "accent" mat-raised-button [disabled]="disabledControlElements||!onChanges"
-    style=" margin-left:1%; font-size: 18px;"
+    style=" margin-left:1%; "
     matTooltip="Create Restriction"
     (click)="openFeeModifyForm('Create',null)">
     Create item 
     <mat-icon matSuffix >add_circle</mat-icon>
   </button>
- <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort
-   class="mat-elevation-z8" 
-    class ="childTable" style="width: 100%;" >
+  <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class ="childTable" style="width: 100%;" >
     <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i=index" justify="right"  >
       <th mat-header-cell *matHeaderCellDef mat-sort-header> {{columnsHeaderToDisplay[i]}}</th>
       <td 
@@ -40,14 +38,14 @@
         <span [ngSwitch]="true==true">
           <p *ngSwitchDefault>{{element[column]!=='null'? element[column]:''}}</p>
           <p *ngSwitchCase="['id'].includes(column)">
-            <button mat-stroked-button style=" font-size: 18px; margin-top: 5%;"  
+            <button mat-stroked-button style="  margin-top: 5%;"  
             class="navigate-button"  matTooltip="Edit Restriction"
             (click)=" openFeeModifyForm (disabledControlElements? 'View': 'Edit',element)">
               {{element[column] }}
             </button> 
           </p>
           <p *ngSwitchCase="['value'].includes(column)&&element[column]!==null">
-            <span [style.color]="element[column]==0? 'default' : element[column]<0?'indianred':'white'">{{element[column]|currency :' '}}{{'%'}} </span>
+            <span [style.color]="element[column]==0? 'default' : element[column]<0?'var(--warnColor)':'white'">{{element[column]|currency :' '}}{{'%'}} </span>
           </p>
           <p  *ngSwitchCase="['action'].includes(column) " >
             <button  *ngIf="disabledControlElements" mat-icon-button color="accent"
@@ -77,28 +75,28 @@
           </p>
         </span>
         <ng-template  #instrumentcontextmenu>
-          <div class="tree-menu-context" cdkMenu >
+          <div class="menu-context" cdkMenu >
             <button 
               (click)="updateFilter(element[column])"
-              class="tree-menu-item" cdkMenuItem>
+              class="menu-context-item" cdkMenuItem>
               <mat-icon class="menu-icon" matPrefix>filter_list</mat-icon> 
               Add to filter
             </button> 
             <ng-container  *ngIf="!disabledControlElements">
               <button
-                class="tree-menu-item" cdkMenuItem
+                class="menu-context-item" cdkMenuItem
                 (click)="openFeeModifyForm('Edit',element)">
                 <mat-icon class="menu-icon" matPrefix>edit</mat-icon>
                 Edit Restriction 
               </button>
               <button 
-                class="tree-menu-item" cdkMenuItem
+                class="menu-context-item" cdkMenuItem
                 (click)="openFeeModifyForm('Create_Example',element)">
                 <mat-icon class="menu-icon" matPrefix>file_copy</mat-icon>
                 Copy Restriction
               </button>
               <button 
-                class="tree-menu-item" cdkMenuItem
+                class="menu-context-item" cdkMenuItem
                 (click)="openFeeModifyForm('Delete',element)">
                 <mat-icon class="menu-icon" matPrefix>delete</mat-icon>
                 Delete Restriction

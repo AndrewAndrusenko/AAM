@@ -1,5 +1,5 @@
-  <mat-form-field  class = "filterField" title="only by SecID" >
-    <mat-label class="whiteTextFilter">Search by SecID..</mat-label>
+  <mat-form-field  class = "filter-field" title="only by SecID" >
+    <mat-label>Search by SecID..</mat-label>
     <input 
       (keyup)="applyFilter($event,'secid')"
       matInput type="text" #filterSecid  
@@ -10,8 +10,8 @@
       <mat-icon>close</mat-icon>
     </button>
   </mat-form-field>
-  <mat-form-field  style="width: 20%;" class = "filterField" title="filter by BoardID">
-    <mat-label class="whiteTextFilter">BoardID</mat-label>
+  <mat-form-field  style="width: 20%;" class = "filter-field" title="filter by BoardID">
+    <mat-label>BoardID</mat-label>
     <mat-select  #BoardID  [formControl]="boardsOne" > 
       <mat-option 
         *ngFor="let board of boardIDs" 
@@ -21,8 +21,8 @@
       </mat-option>
     </mat-select>
   </mat-form-field>
-  <mat-form-field class = "filterField"  style="font-size: 22px;" title="All columns">
-    <mat-label class="whiteTextFilter">Search (all columns)...</mat-label>
+  <mat-form-field class = "filter-field"  title="All columns" style="width: 30%;">
+    <mat-label>Type to search...</mat-label>
     <input 
       (keyup)="applyFilter($event)"
       matInput type="text" #filterALL
@@ -34,13 +34,13 @@
     </button>
   </mat-form-field>
   <button color = "accent" mat-raised-button title="Export To Excel"
-    style=" margin-left:1%; font-size: 18px;"
+    style=" margin-left:1%; "
     (click)="exportToExcel()">
     Save as XLS 
     <mat-icon matSuffix >save_alt</mat-icon>
   </button>
   <button color = "accent" mat-raised-button title="Reload Table"
-  style=" margin-left:1%; font-size: 18px;"
+  style=" margin-left:1%; "
   (click)="submitQuery()">
   Reload 
   <mat-icon matSuffix >refresh</mat-icon>
@@ -58,25 +58,24 @@
       <mat-icon color = 'accent'>filter_alt</mat-icon>
     </mat-panel-description>
   </mat-expansion-panel-header >
-  <form class="submit" [formGroup]="searchParametersFG"  style="font-size: 18px; ">
-    <span style="display: flex;  justify-content: space-between;   align-items:flex-start; margin-left: 0.2%; margin-right: 1%;margin-top: 0.2%;">
-      <span style="display:grid; width: 12%;">
-        <button color = "primary"  class= "button-color" mat-raised-button 
-          style="margin:1%; font-size: 18px;"
+  <form  [formGroup]="searchParametersFG">
+    <span style="display: flex; align-items:flex-start; margin-left: 0.2%; margin-right: 1%;">
+      <span style="display:grid; width: 12%; margin-top: 0.4%;">
+        <button color = "primary"   mat-raised-button 
+          style="margin:1%; "
           (click)="submitQuery()">
           Submit
         </button>
         <button color = "accent" mat-raised-button 
-          style="margin:1%; font-size: 18px;"
+          style="margin:1%; "
           (click)="searchParametersFG.reset();
            instruments=['ClearAll']">
           ClearAll
         </button>
       </span>
-      <mat-form-field  style="width: 20%; margin-left: 1%;" title="Security Group Code" class="search-filed">
+      <mat-form-field  style="width: 20%; margin-left: 1%;" title="Security Group Code" >
         <mat-label >Main Type Code</mat-label>
-        <mat-select #securityGroup formControlName="group" multiple
-> 
+        <mat-select #securityGroup formControlName="group" multiple> 
           <ng-container *ngFor="let securityGroup of securityGroups">
           <mat-option  [value]="securityGroup.name">
               {{securityGroup.name }} - {{securityGroup.title}}
@@ -84,8 +83,7 @@
           </ng-container>
         </mat-select>
       </mat-form-field>
-
-      <mat-form-field  style="width: 20%;" class="search-filed">
+      <mat-form-field  style="width: 20%;" >
         <mat-label>BoardID</mat-label>
         <mat-select  #BoardID formControlName="boards"  multiple> 
           <mat-option #allSelected [value]="0"
@@ -97,145 +95,140 @@
           </mat-option>
         </mat-select>
       </mat-form-field>
-      <mat-form-field  class="search-filed" title="ISIN">
+      <mat-form-field   title="ISIN">
         <mat-label>ISIN</mat-label>
         <input formControlName="isin"     
           matInput type="text" #filterSecid  
           matTooltip="Search by ISIN">
       </mat-form-field>
-      <mat-form-field class="example-chip-list" appearance="fill" style="width: 40%; " class="search-filed">
-        <mat-chip-list #chipList aria-label="Fruit selection"  >
-          <mat-chip *ngFor="let account of instruments" 
-          (removed)="remove(account)"
-          (click)=" clearAll($event);">
-            {{account}}
-            <button matChipRemove>
-              <mat-icon>cancel</mat-icon>
-            </button>
-          </mat-chip>
-          <input #iputForChip
-          [matAutocomplete]="auto"
-          matInput
-          placeholder="Add secid or secid,secid1,secid2.."
-          formControlName="secidList"
-          [matChipInputFor]="chipList"
-          [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-          [matChipInputAddOnBlur]="true"
-          (matChipInputTokenEnd)="add($event)"
-          matTooltip="Type secid or several secids separated by comma and press enter" >
-        </mat-chip-list>
-        <mat-autocomplete #auto="matAutocomplete" (optionSelected)='changedValueofChip($event.option.value)'>
-          <mat-option *ngFor="let secid of filterednstrumentsLists | async" [value]="secid">
-            {{secid}}
-          </mat-option>
-        </mat-autocomplete>
-      </mat-form-field>
     </span>
+    <mat-form-field  appearance="fill" style="width: 70%; " class="no-hint-fields">
+      <mat-chip-list #chipList aria-label="Fruit selection"  >
+        <mat-chip *ngFor="let account of instruments" 
+        (removed)="remove(account)"
+        (click)=" clearAll($event);">
+          {{account}}
+          <button matChipRemove>
+            <mat-icon>cancel</mat-icon>
+          </button>
+        </mat-chip>
+        <input #iputForChip
+        [matAutocomplete]="auto"
+        matInput
+        placeholder="Add secid or secid,secid1,secid2.."
+        formControlName="secidList"
+        [matChipInputFor]="chipList"
+        [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+        [matChipInputAddOnBlur]="true"
+        (matChipInputTokenEnd)="add($event)"
+        matTooltip="Type secid or several secids separated by comma and press enter" >
+      </mat-chip-list>
+      <mat-autocomplete #auto="matAutocomplete" (optionSelected)='changedValueofChip($event.option.value)'>
+        <mat-option *ngFor="let secid of filterednstrumentsLists | async" [value]="secid">
+          {{secid}}
+        </mat-option>
+      </mat-autocomplete>
+    </mat-form-field>
   </form>
 </mat-expansion-panel>
-
-<div class="mat-elevation-z8" >
-  <table  #strategyTable mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class="mat-elevation-z8">
-    <ng-container matColumnDef="{{column}}"  *ngFor="let column of columnsToDisplay; let i=index">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header >  {{columnsHeaderToDisplay[i] }}</th>
-      <td  mat-cell *matCellDef="let element" [cdkContextMenuTriggerFor]="instrumentcontextmenu"  > 
-        <span [ngSwitch]="true==true">
-          <p  *ngSwitchCase="['action'].includes(column) " >
-            <button  *ngIf="disabledControlElements" mat-icon-button color="accent"
-              matTooltip="View Instrument"
-              (click)="openInstrumentModifyForm('View', element)">
-              <mat-icon >pageview</mat-icon>
+<table  #strategyTable mat-table [dataSource]="dataSource" multiTemplateDataRows matSort>
+  <ng-container matColumnDef="{{column}}"  *ngFor="let column of columnsToDisplay; let i=index">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header >  {{columnsHeaderToDisplay[i] }}</th>
+    <td  mat-cell *matCellDef="let element" [cdkContextMenuTriggerFor]="instrumentcontextmenu"  > 
+      <span [ngSwitch]="true==true">
+        <p  *ngSwitchCase="['action'].includes(column) " >
+          <button  *ngIf="disabledControlElements" mat-icon-button color="accent"
+            matTooltip="View Instrument"
+            (click)="openInstrumentModifyForm('View', element)">
+            <mat-icon >pageview</mat-icon>
+          </button>
+          <ng-container  *ngIf="!disabledControlElements">
+            <button mat-icon-button color="accent"
+              matTooltip="Edit Instrument"
+              (click)="openInstrumentModifyForm('Edit',element)">
+              <mat-icon >edit</mat-icon>
             </button>
-            <ng-container  *ngIf="!disabledControlElements">
-              <button mat-icon-button color="accent"
-                matTooltip="Edit Instrument"
-                (click)="openInstrumentModifyForm('Edit',element)">
-                <mat-icon >edit</mat-icon>
-              </button>
-              <button 
-                mat-icon-button 
-                color="accent" 
-                matTooltip="Delete Instrument"
-                (click)="openInstrumentModifyForm('Delete',element)">
-                <mat-icon >delete</mat-icon>
-              </button>
-            </ng-container>
-          </p>
-          <p style="text-align:center" *ngSwitchCase="['primary_boardid','emitent_inn'].includes(column) "
-          [style.color]="additionalLightGreen">
-             {{element[column] }}
-          </p>
-          <p *ngSwitchCase="['secid'].includes(column)">
-            <button mat-stroked-button style="font-size: 18px; margin-left: 0;"  
-            [matTooltip]="FormMode==='Select'? 'Click to select instrument':'Instrument details'"
-            [style.background-color] = "FormMode==='Select'? '': investmentNodeColor"
-            (click)="FormMode==='Select'? selectInstrument(element) : openInstrumentModifyForm(disabledControlElements? 'View': 'Edit',element)">
-            <mat-icon matPrefix *ngIf="FormMode==='Select'">check</mat-icon>  
+            <button 
+              mat-icon-button 
+              color="accent" 
+              matTooltip="Delete Instrument"
+              (click)="openInstrumentModifyForm('Delete',element)">
+              <mat-icon >delete</mat-icon>
+            </button>
+          </ng-container>
+        </p>
+        <p style="text-align:center" *ngSwitchCase="['primary_boardid','emitent_inn'].includes(column) "     >
             {{element[column] }}
-            </button> 
-          </p>
-          <p *ngSwitchDefault>
-            {{element[column]}}
-          </p>
-        </span>
-        <ng-template  #instrumentcontextmenu>
-          <div class="tree-menu-context" cdkMenu >
+        </p>
+        <p *ngSwitchCase="['secid'].includes(column)">
+          <button mat-flat-button style=" margin-left: 0;margin-top: 4%;" color="primary"  
+          [matTooltip]="FormMode==='Select'? 'Click to select instrument':'Instrument details'"
+          (click)="FormMode==='Select'? selectInstrument(element) : openInstrumentModifyForm(disabledControlElements? 'View': 'Edit',element)">
+          <mat-icon matPrefix *ngIf="FormMode==='Select'">check</mat-icon>  
+          {{element[column] }}
+          </button> 
+        </p>
+        <p *ngSwitchDefault>
+          {{element[column]}}
+        </p>
+      </span>
+      <ng-template  #instrumentcontextmenu>
+        <div class="menu-context" cdkMenu >
+          <button 
+            (click)="updateFilter(element[column])"
+            class="menu-context-item" cdkMenuItem>
+            <mat-icon class="menu-icon" matPrefix>filter_list</mat-icon> 
+            Add to filter
+          </button> 
+          <button 
+            (click)="handleNewFavoriteClick(element)"
+            class="menu-context-item" cdkMenuItem>
+            <mat-icon class="menu-icon" matPrefix>favorite</mat-icon> 
+            Favorites
+          </button> 
+          <ng-container *ngIf="disabledControlElements">
             <button 
-              (click)="updateFilter(element[column])"
-              class="tree-menu-item" cdkMenuItem>
-              <mat-icon class="menu-icon" matPrefix>filter_list</mat-icon> 
-              Add to filter
+              (click)="openInstrumentModifyForm('View', element)"
+              class="menu-context-item" cdkMenuItem>
+              <mat-icon class="menu-icon" matPrefix>pageview</mat-icon> 
+              View Instrument
             </button> 
-            <button 
-              (click)="handleNewFavoriteClick(element)"
-              class="tree-menu-item" cdkMenuItem>
-              <mat-icon class="menu-icon" matPrefix>favorite</mat-icon> 
-              Favorites
-            </button> 
-            <ng-container *ngIf="disabledControlElements">
-              <button 
-                (click)="openInstrumentModifyForm('View', element)"
-                class="tree-menu-item" cdkMenuItem>
-                <mat-icon class="menu-icon" matPrefix>pageview</mat-icon> 
-                View Instrument
-              </button> 
-            </ng-container>
-            
-            <ng-container *ngIf="!disabledControlElements" title="Edit block">
+          </ng-container>
+          
+          <ng-container *ngIf="!disabledControlElements" title="Edit block">
 
-              <button 
-                class="tree-menu-item" cdkMenuItem 
-                (click)="openInstrumentModifyForm('Create', element)">
-                <mat-icon class="menu-icon" matPrefix>add_circle</mat-icon>      
-                New Instrument
-              </button>
-              <button 
-                class="tree-menu-item" cdkMenuItem 
-                (click)="openInstrumentModifyForm('Create_Example', element)">
-                <mat-icon class="menu-icon" matPrefix>add_circle</mat-icon>      
-                New Instrument (on sample)
-              </button>
-              <button 
-                class="tree-menu-item" cdkMenuItem
-                (click)="openInstrumentModifyForm('Edit', element)">
-                <mat-icon class="menu-icon" matPrefix>edit</mat-icon>      
-                Edit Instrument
-              </button>
-              <button 
-                class="tree-menu-item" cdkMenuItem
-                (click)="openInstrumentModifyForm('Delete', element)">
-                <mat-icon class="menu-icon" matPrefix>delete</mat-icon> 
-                Delete Instrument
-              </button> 
-            </ng-container>
-          </div>
-        </ng-template>   
-      </td>
-    </ng-container>
-    <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
-    <tr mat-row  *matRowDef="let element; columns: columnsToDisplay"
-      (click)="FormMode==='Select'? selectInstrument(element): null ">
-    </tr>
-  </table>
-  <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" [pageSize]="20" aria-label="Select page of users"></mat-paginator>
-</div>
+            <button 
+              class="menu-context-item" cdkMenuItem 
+              (click)="openInstrumentModifyForm('Create', element)">
+              <mat-icon class="menu-icon" matPrefix>add_circle</mat-icon>      
+              New Instrument
+            </button>
+            <button 
+              class="menu-context-item" cdkMenuItem 
+              (click)="openInstrumentModifyForm('Create_Example', element)">
+              <mat-icon class="menu-icon" matPrefix>add_circle</mat-icon>      
+              New Instrument (on sample)
+            </button>
+            <button 
+              class="menu-context-item" cdkMenuItem
+              (click)="openInstrumentModifyForm('Edit', element)">
+              <mat-icon class="menu-icon" matPrefix>edit</mat-icon>      
+              Edit Instrument
+            </button>
+            <button 
+              class="menu-context-item" cdkMenuItem
+              (click)="openInstrumentModifyForm('Delete', element)">
+              <mat-icon class="menu-icon" matPrefix>delete</mat-icon> 
+              Delete Instrument
+            </button> 
+          </ng-container>
+        </div>
+      </ng-template>   
+    </td>
+  </ng-container>
+  <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+  <tr mat-row  *matRowDef="let element; columns: columnsToDisplay"
+    (click)="FormMode==='Select'? selectInstrument(element): null ">
+  </tr>
+</table>
+<mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" [pageSize]="20" aria-label="Select page of users"></mat-paginator>

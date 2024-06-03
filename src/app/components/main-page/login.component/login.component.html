@@ -4,7 +4,7 @@
   </h1>
   <mat-tab-group  style="padding-left: 50px;" #AccountInfo>
     <mat-tab label="Sign In to System" style="padding: 20px;">
-      <form class="submit" class="AccessForm" [formGroup]="signInForm">
+      <form  class="AccessForm" [formGroup]="signInForm">
         <div class="logo">
           <img class="mb-4" src="assets/logo.png" alt="" width="64" height="64" >
         </div>
@@ -36,7 +36,7 @@
             The field is required    
           </mat-error>
         </mat-form-field>
-        <button class="submit"
+        <button 
           mat-flat-button class="buttons-signin"
           [ngClass]="signInForm.valid? 'activeB' : 'disabledButton'" class="buttons-signin"
           (click)="signInForm.valid? handleLoginClick() : null"
@@ -45,7 +45,7 @@
       </form>
     </mat-tab>  
     <mat-tab label="Create New User" style="padding: 120px;"> 
-      <form class="submit" class="AccessForm" [formGroup]="addNewUserForm">
+      <form  class="AccessForm" [formGroup]="addNewUserForm">
         <img class="mb-4" src="assets/logo.png" alt="" width="64" height="64" >
         <h1 class="h2 mb-3 font-weight-normal" >Please sign up</h1>
           <mat-form-field  appearance="fill" style="min-height: 8.2vh;">
@@ -97,7 +97,7 @@
             Minimum length is 4 characters  
           </mat-error>
           </mat-form-field>
-          <button class="submit"
+          <button 
             mat-flat-button 
             [ngClass]="addNewUserForm.valid? 'activeB' : 'disabledButton'" class="buttons-signin"
             (click)="addNewUserForm.valid? handleNewUserClick() : null"

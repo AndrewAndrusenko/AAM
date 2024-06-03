@@ -83,8 +83,8 @@ export class AppTableSWIFTsInListsComponent  implements OnInit,OnDestroy {
       this.FirstOpenedAccountingDate = data[0].FirstOpenedDate;
       this.cDateToProcessSwift.setValue(new Date(this.FirstOpenedAccountingDate))
       this.cDateAccounting.setValue(new Date(this.FirstOpenedAccountingDate))
-      this.cDateToProcessSwift.setValue(new Date('2023-06-29'))
-      this.cDateAccounting.setValue(new Date('2023-06-29'))
+      this.cDateToProcessSwift.setValue(new Date())
+      this.cDateAccounting.setValue(new Date())
     });
     this.AccountingDataService.GetSWIFTsList (null,null,null,null,'DatesWithSWIFT').pipe(takeUntil(this.destroy$)).subscribe(dates=>this.dateWithSWIFTs = dates[0]['datesarray']);
     this.swiftProcessingFB = this.fb.group ({

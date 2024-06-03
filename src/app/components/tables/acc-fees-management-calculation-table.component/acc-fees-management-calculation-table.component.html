@@ -1,6 +1,6 @@
 <ng-container *ngIf="accessState!=='none'" >
-  <mat-form-field style="width: 20%;"class = "filterField"  title="Filter All columns">
-    <mat-label class="whiteTextFilter">Search (all columns)...</mat-label>
+  <mat-form-field style="width: 30%;"class = "filter-field"  title="Filter All columns">
+    <mat-label>Type to search...</mat-label>
     <input 
       (keyup)="applyFilter($event)"
       matInput type="text" #filterALL
@@ -12,50 +12,50 @@
     </button>
   </mat-form-field>
   <button color = "accent" mat-raised-button title="Export To Excel"
-    style=" margin-left:1%; font-size: 18px;"
+    style=" margin-left:1%; "
     (click)="exportToExcel()">
     Save as XLS 
     <mat-icon matSuffix >save_alt</mat-icon>
   </button>
   <button color = "accent" mat-raised-button title="Reload Table"
-    style=" margin-left:1%; font-size: 18px;"
+    style=" margin-left:1%; "
     (click)="submitQuery()">
     Reload 
     <mat-icon matSuffix >refresh</mat-icon>
   </button>
   <button color = "accent" mat-raised-button title="Reload Table"
-    style=" margin-left:1%; font-size: 18px;"
+    style=" margin-left:1%; "
     (click)="
       detailedView=!detailedView;
       showCalcDetails(detailedView)">
-    {{detailedView? 'Hide':'Show'}} Calculation Details 
+    {{detailedView? 'Show':'Hide'}} Calculation Details 
     <mat-icon matSuffix >list</mat-icon>
   </button>
   <button title="Approve Calculation"  
-    color = "accent" mat-raised-button style=" margin-left:1%; font-size: 18px;"
+    color = "accent" mat-raised-button style=" margin-left:1%; "
     (click)="  approveCalculation()">
     Create Calculation
     <mat-icon matSuffix>save</mat-icon>
   </button>
   <!-- complexSearch Form -->
-<form class="submit" *ngIf="readOnly!==true" [formGroup]="searchParametersFG" 
- style="font-size: 18px; margin-left: 0.5%; "> 
+<form  *ngIf="readOnly!==true" [formGroup]="searchParametersFG" 
+ style=" margin-left: 0.5%; "> 
   <span style="display: flex;    align-items:flex-start;  margin-right: 1%;margin-top: 0.2%;"> 
-    <span style="display:grid; width: 15%; margin-right: 1%;"> <!-- submitQuery/CleaAll Buttons -->
-      <button color = "primary"  class= "button-color" mat-raised-button 
+    <span style="display:grid; width: 15%; margin-right: 1%; margin-top: 1%;"> <!-- submitQuery/CleaAll Buttons -->
+      <button color = "primary"   mat-raised-button 
         [disabled]="searchParametersFG.invalid"
-        style="margin:1%; font-size: 18px;"
+        style="margin:1%; "
         (click)="submitQuery()">
         Submit
       </button>
       <button color = "accent" mat-raised-button 
-        style="margin-top:4%;margin-left: 1%; font-size: 18px;"
+        style="margin-top:4%;margin-left: 1%; "
         (click)="resetSearchForm()">
         ClearAll
       </button>
 
     </span>
-    <mat-form-field appearance="fill"  class="search-filed" title="Report period"><!-- Report Date Filter -->
+    <mat-form-field appearance="fill"   title="Report period"><!-- Report Date Filter -->
       <mat-label>Enter a date range</mat-label>
       <mat-date-range-input [formGroup]="dataRange" [rangePicker]="picker" >
         <input matStartDate  placeholder="Start date" formControlName="dateRangeStart">
@@ -67,9 +67,9 @@
       <mat-error *ngIf="dataRange.controls.dateRangeStart.hasError('matStartDateInvalid')">Invalid start date</mat-error>
       <mat-error *ngIf="dataRange.controls.dateRangeEnd.hasError('matEndDateInvalid')">Invalid end date</mat-error>
     </mat-form-field>
-    <mat-form-field  appearance="fill" style="width: 80%; margin-bottom: 0.5%; " class="search-filed"><!-- Chio Portfolio Filter -->
+    <mat-form-field  appearance="fill" style="width: 80%; margin-top: 1%;"  class="no-hint-fields"><!-- Chio Portfolio Filter -->
       <mat-chip-list #chipPortList   >
-        <mat-select placeholder="Model Portfolio" class="search-filed" 
+        <mat-select placeholder="Model Portfolio" class="mat-form-field"
           formControlName="MP" 
           style="width: 20%;"
           (selectionChange)="setPortfoliosList($event.value)"  >
@@ -94,15 +94,10 @@
         (matChipInputTokenEnd)="portfolios = add($event,portfolios)"
         matTooltip="Type portfolio code or paste multiple codes separated by comma and press enter" >
       </mat-chip-list>
-      <mat-hint style="color:rgb(104, 246, 246); font-style: italic;">
-        Portfolios List
-      </mat-hint>
     </mat-form-field>
 </span>
 </form>
- <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort
-   class="mat-elevation-z8" 
-    class ="childTable" style="width: 100%;" >
+ <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class ="childTable" style="width: 100%;" >
     <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i=index" justify="right"  >
       <th mat-header-cell *matHeaderCellDef mat-sort-header> {{columnsHeaderToDisplay[i]}}</th>
       <td 
@@ -117,10 +112,10 @@
           <p *ngSwitchCase="['report_date'].includes(column)&&!element[column]"><span style="color: grey; font-weight: bold;">Total Fee {{currencySymbol}} </span></p>
         </span>
         <ng-template  #instrumentcontextmenu>
-          <div class="tree-menu-context" cdkMenu >
+          <div class="menu-context" cdkMenu >
             <button 
             (click)="updateFilter(element[column])"
-            class="tree-menu-item" cdkMenuItem>
+            class="menu-context-item" cdkMenuItem>
             <mat-icon class="menu-icon" matPrefix>filter_list</mat-icon> 
             Add to filter
           </button> 

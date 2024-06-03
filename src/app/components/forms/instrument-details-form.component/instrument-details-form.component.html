@@ -2,7 +2,7 @@
   <span>{{title}} Instrument</span>
   <span class="example-spacer"></span>
 </mat-toolbar>
-<form class="submit" [formGroup]="instrumentDetailsForm">
+<form  [formGroup]="instrumentDetailsForm">
   <h3 style="color:rgb(177, 174, 174)" *ngIf="instrumentDetailsForm.valid"> 
     To save data please select 'Submit data' check and then press button 
   </h3>
@@ -51,7 +51,7 @@
     <button mat-raised-button color="primary" 
       [disabled]="!(instrumentDetailsForm.valid && submitbox.checked)"
       (click)="updateInstrumentData(action)"
-      style="margin-top: 1px; width: 25%; font-size: 18px; margin-left: 1%;">
+      style="margin-top: 1px; width: 25%;  margin-left: 1%;">
       {{title}} Instrument
     </button>
   </div>

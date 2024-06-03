@@ -72,6 +72,11 @@ export class AppTableSWIFT950ItemsComponent  implements  AfterViewInit {
     this.dataSource.filter = filterValue.trim().toLowerCase();
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
+  clearFilter (input: HTMLInputElement) {
+    input.value='';
+    this.dataSource.filter = '';
+    this.dataSource.paginator? this.dataSource.paginator.firstPage() : null;
+  }
   isAllSelected() { return this.SelectionService.isAllSelected(this.dataSource, this.selection)} 
   toggleAllRows(forceSelectAll:boolean=false) { return this.SelectionService.toggleAllRows(this.dataSource, this.selection,forceSelectAll)} 
   checkboxLabel(row?: SWIFTStatement950model): string {return this.SelectionService.checkboxLabel(this.dataSource, this.selection, row)}

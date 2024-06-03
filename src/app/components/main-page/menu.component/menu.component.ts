@@ -12,7 +12,6 @@ import { indexDBService } from 'src/app/services/indexDB.service';
 export class AppMenuComponent {
 @Input()  treeOpened : boolean = true;
 fullscreen : boolean = false;
-public menuColor = menuColorGl
 constructor(
   private authService : AuthService, 
   private appMenuService : AppMenuServiceService,
@@ -36,34 +35,10 @@ constructor(
     this.treeOpened = !this.treeOpened
     this.appMenuService.sendToggleTree(this.treeOpened)
   }
-  showChart () {}
+
   indexdbDeleteAllCache (){
     this.indexDBServiceS.indexdbDeleteAllCache('AAMCache')
   }
-  nodecls (){
-    this.authService.nodeTerminalClear().subscribe(data=>console.log('nodeTerminalClear',data))
-  }
-  tools () {
-    let obj = `
-    id :number,
-    code :string,
-    mp_name :string,
-    rest_type :string,
-    param :string,
-    restrictinon :number,
-    act_violation_and_orders :number,
-    act_violation :number,
-    mp_violation :number,
-    act_weight_and_orders :number,
-    act_weight :number,
-    mp_weight :number,
-    sum_weight :number,
-    act_mtm :number,
-    npv :number,
-    net_orders  :number
-  `
-  let a = obj.split(',').map(el=> {return {fieldName:el.split(':')[0].trim(),displayName:el.split(':')[0].trim()}});
-  console.log('obj',a.flat());
-  }
+
 }
 

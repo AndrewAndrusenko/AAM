@@ -96,6 +96,8 @@ export class AppAccAccountModifyFormComponent implements OnInit {
   ngOnInit(): void {
     this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate);
     (this.aType == 1)? this.accountLedgerModifyForm.patchValue(this.data): this.accountModifyForm.patchValue(this.data);
+    this.action==='View'? this.accountLedgerModifyForm.disable():null;
+    this.action==='View'? this.accountModifyForm.disable():null;
     this.AutoCompService.getCurrencyList();
     this.filteredCurrenciesList = this.currencyCode.valueChanges.pipe (
       startWith (''),

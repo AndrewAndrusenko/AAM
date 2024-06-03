@@ -13,7 +13,6 @@ import {HadlingCommonDialogsService } from 'src/app/services/hadling-common-dial
 import {formatNumber } from '@angular/common';
 import {HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
 import {AuthService } from 'src/app/services/auth.service';
-import {investmentNodeColor } from 'src/app/models/constants.model';
 import {HandlingTableSelectionService } from 'src/app/services/handling-table-selection.service';
 
 @Component({
@@ -40,7 +39,6 @@ export class AppTableAccAccountsComponent {
   selection = new SelectionModel<bAccounts>(true, []);
   accounts: string[] = [];
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
-  investmentNodeColor=investmentNodeColor;
   constructor(
     private AccountingDataService:AppAccountingService, 
     private CommonDialogsService:HadlingCommonDialogsService,

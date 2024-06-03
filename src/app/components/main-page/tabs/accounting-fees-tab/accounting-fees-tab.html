@@ -21,10 +21,8 @@
   </mat-tab-group>
 </mat-tab>  
 <mat-tab  label="Portfolios - Fee Schedule" >
-  <app-portfolio-tablee 
-  [readOnly]="true"
-  [actionOnAccountTable]="'PortfoliosListWithSchedules'"
-  ></app-portfolio-tablee>  
+  <acc-fees-portfolios-with-schedules-table  [onChanges]="false" >
+  </acc-fees-portfolios-with-schedules-table>
 </mat-tab>
 <mat-tab  label="Fees Dictonary" >
   <acc-fees-main-table></acc-fees-main-table>  

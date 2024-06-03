@@ -1,31 +1,28 @@
-<mat-toolbar color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4"
+<mat-toolbar color="primary" mat-stretch-tabs 
 cdkDrag
 cdkDragRootElement=".cdk-overlay-pane" 
 cdkDragHandle>
   <span>{{action==='Create_Example'? 'Create':action}} LL Accounting Scheme {{id?.value}}</span>
-  <span class="example-spacer"></span>
 </mat-toolbar>
-<mat-checkbox style= "font-size: 14px; color:rgb(255, 255, 255); padding: 1%;" #submitbox checked="false" 
+
+<button mat-raised-button color="primary" 
+  [disabled]="!(SchemeFormAL.valid && submitbox.checked)"
+  (click)="updateSchemeDataLL(action)"
+  style="margin-top: 1px; width: 20%;  margin-left: 1%; margin-top: 1%;">
+  {{action==='Create_Example'? 'Create':action}} LL Accounting Scheme
+</button>
+<mat-checkbox color="primary"  #submitbox checked="false" style = "margin-left: 1%;" 
   (click)=" SchemeFormAL.markAllAsTouched();
   SchemeFormAL.markAllAsTouched();"
   >Submit Data
 </mat-checkbox>
-<button mat-raised-button color="primary" 
-  [disabled]="!(SchemeFormAL.valid && submitbox.checked)"
-  (click)="updateSchemeDataLL(action)"
-  style="margin-top: 1px; width: 20%; font-size: large; margin-left: 1%;">
-  {{action==='Create_Example'? 'Create':action}} LL Accounting Scheme
-</button>
-<form class="submit" [formGroup]="SchemeFormAL">
-  <h3 style="color:rgb(177, 174, 174);margin-left: 1%;" *ngIf="SchemeFormAL.valid"> 
-    To save data please select 'Submit data' check and then press button 
-  </h3>
+<form  [formGroup]="SchemeFormAL">
   <p>
     <mat-form-field style="width: 15%;" title="Scheme Code">
       <input matInput placeholder="Scheme Code" formControlName="cSchemeGroupId"  >
-      <mat-hint class='mat-error' *ngIf="cSchemeGroupId.errors?.['required']">
+      <mat-error *ngIf="cSchemeGroupId.errors?.['required']">
         Required!
-      </mat-hint>
+      </mat-error>
     </mat-form-field>
     <mat-form-field style="width: 20%;" title="Type">
       <mat-select placeholder="Type" formControlName="XactTypeCode" (selectionChange)="changeTransactionType()">
@@ -33,9 +30,9 @@ cdkDragHandle>
           {{type[1]}}
         </mat-option>
       </mat-select>
-      <mat-hint class='mat-error' *ngIf="XactTypeCode.errors?.['required']">
+      <mat-error *ngIf="XactTypeCode.errors?.['required']">
         Required!
-      </mat-hint>
+      </mat-error>
     </mat-form-field>
 
     <mat-form-field style="width: 25%;" title="Code">
@@ -44,17 +41,17 @@ cdkDragHandle>
          {{item.name}}
         </mat-option>
       </mat-select>
-      <mat-hint class='mat-error' *ngIf="XactTypeCode_Ext.errors?.['required']">
+      <mat-error *ngIf="XactTypeCode_Ext.errors?.['required']">
         Required!
-      </mat-hint>
+      </mat-error>
     </mat-form-field>
   </p>
   <p *ngIf="XactTypeCode.value==='2'">
     <mat-form-field style="width: 14%;" title="Debit ID">
       <input matInput placeholder="Debit ID" formControlName="accountId"  >
-      <mat-hint class='mat-error' *ngIf="accountId.errors?.['required']">
+      <mat-error *ngIf="accountId.errors?.['required']">
         Required!
-      </mat-hint>
+      </mat-error>
     </mat-form-field>
     <mat-form-field style="width: 25%" title="Debit">
       <input matInput placeholder="Debit" formControlName="account_no" [readonly]="true"  >
@@ -63,18 +60,18 @@ cdkDragHandle>
       (click)="selectAccount() ">
       <mat-icon >input</mat-icon>
       </button>
-      <mat-hint class='mat-error' *ngIf="ledgerNoId.errors?.['required']">
+      <mat-error *ngIf="ledgerNoId.errors?.['required']">
        Required! (Use button to select)
-      </mat-hint>
+      </mat-error>
       <mat-hint  *ngIf="ledgerNoId.valid">
         Use button to change account
       </mat-hint>
     </mat-form-field>
     <mat-form-field style="width: 14%;" title="Credit ID">
       <input matInput placeholder="Credit ID" formControlName="ledgerNoId"  >
-      <mat-hint class='mat-error' *ngIf="ledgerNoId.errors?.['required']">
+      <mat-error *ngIf="ledgerNoId.errors?.['required']">
         Required!
-      </mat-hint>
+      </mat-error>
     </mat-form-field>
     <mat-form-field style="width: 25%" title="Credit">
       <input matInput placeholder="Credit" formControlName="ledger_no" [readonly]="true"  >
@@ -86,17 +83,17 @@ cdkDragHandle>
       <mat-hint  *ngIf="ledger_no.valid">
         Use button to chage account
       </mat-hint>
-      <mat-hint class='mat-error' *ngIf="ledger_no.errors?.['required']">
+      <mat-error *ngIf="ledger_no.errors?.['required']">
         Required! (Use button to select)
-      </mat-hint>
+      </mat-error>
     </mat-form-field>
   </p>
   <p *ngIf="XactTypeCode.value==='1'">
     <mat-form-field style="width: 14%;" title="Debit ID">
       <input matInput placeholder="Debit ID" formControlName="ledgerNoId"  >
-      <mat-hint class='mat-error' *ngIf="ledgerNoId.errors?.['required']">
+      <mat-error *ngIf="ledgerNoId.errors?.['required']">
         Required!
-      </mat-hint>
+      </mat-error>
     </mat-form-field>
     <mat-form-field style="width: 25%" title="Debit">
       <input matInput placeholder="Debit" formControlName="ledger_no" [readonly]="true"  >
@@ -105,18 +102,18 @@ cdkDragHandle>
       (click)="selectLedger() ">
       <mat-icon >input</mat-icon>
       </button>
-      <mat-hint class='mat-error' *ngIf="ledgerNoId.errors?.['required']">
+      <mat-error *ngIf="ledgerNoId.errors?.['required']">
        Required! (Use button to select)
-      </mat-hint>
+      </mat-error>
       <mat-hint  *ngIf="ledgerNoId.valid">
         Use button to change account
       </mat-hint>
     </mat-form-field>
     <mat-form-field style="width: 14%;" title="Credit ID">
       <input matInput placeholder="Credit ID" formControlName="accountId"  >
-      <mat-hint class='mat-error' *ngIf="accountId.errors?.['required']">
+      <mat-error *ngIf="accountId.errors?.['required']">
         Required!
-      </mat-hint>
+      </mat-error>
     </mat-form-field>
     <mat-form-field style="width: 25%" title="Credit">
       <input matInput placeholder="Credit" formControlName="account_no" [readonly]="true"  >
@@ -128,31 +125,31 @@ cdkDragHandle>
       <mat-hint  *ngIf="ledger_no.valid">
         Use button to chage account
       </mat-hint>
-      <mat-hint class='mat-error' *ngIf="ledger_no.errors?.['required']">
+      <mat-error *ngIf="ledger_no.errors?.['required']">
         Required! (Use button to select)
-      </mat-hint>
+      </mat-error>
     </mat-form-field>
   </p>
   <mat-form-field style="width: 20%;" title="Date">
     <input matInput placeholder="Date" formControlName="dataTime"  >
-    <mat-hint class='mat-error' *ngIf="dataTime.errors?.['required']">
+    <mat-error *ngIf="dataTime.errors?.['required']">
       Required!
-    </mat-hint>
+    </mat-error>
     <mat-hint  *ngIf="dataTime.valid&&!dataTime.value">
       Default is current date
     </mat-hint>
   </mat-form-field>
   <mat-form-field style="width: 20%;" title="Amount">
     <input matInput placeholder="Amount" formControlName="amountTransaction"  >
-    <mat-hint class='mat-error' *ngIf="amountTransaction.errors?.['required']">
+    <mat-error *ngIf="amountTransaction.errors?.['required']">
       Required!
-    </mat-hint>
+    </mat-error>
   </mat-form-field>
   <mat-form-field style="width: 20%;" title="idtrade">
     <input matInput placeholder="idtrade" formControlName="idtrade"  >
-    <mat-hint class='mat-error' *ngIf="idtrade.errors?.['required']">
+    <mat-error *ngIf="idtrade.errors?.['required']">
       Required!
-    </mat-hint>
+    </mat-error>
   </mat-form-field>
   <mat-form-field style="width: 20%;" title="extTransactionId">
     <input matInput placeholder="extTransactionId" formControlName="extTransactionId"  >
@@ -160,18 +157,18 @@ cdkDragHandle>
   <p>  
     <mat-form-field style="width: 90%;" title="entryDetails">
     <input matInput placeholder="entryDetails" formControlName="entryDetails"  >
-    <mat-hint class='mat-error' *ngIf="entryDetails.errors?.['required']">
+    <mat-error *ngIf="entryDetails.errors?.['required']">
       Required!
-    </mat-hint>
+    </mat-error>
   </mat-form-field>
 </p>
-<mat-expansion-panel style="margin-top: 0.5%; color:black; " class="headers-align">
-  <mat-expansion-panel-header style="font-size: large;">
+<mat-expansion-panel style="margin-top: 0.5%;" class="headers-align">
+  <mat-expansion-panel-header >
     Scheme Parameters
   </mat-expansion-panel-header>
   <acc-schemes-params-table
   [schemesProcess]="schemesProcess"
   ></acc-schemes-params-table>
 </mat-expansion-panel>
-  <h3 style="color:rgb(252, 113, 113)" *ngIf="SchemeFormAL.invalid"> Please check the form. Data is invalid</h3>
+<h4 style="margin-left: 0.5%;" class="warn-color"  *ngIf="SchemeFormAL.invalid"> Please check the form. Data is invalid</h4>
 </form>

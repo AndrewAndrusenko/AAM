@@ -22,18 +22,7 @@ const Pool = require('pg').Pool;
 const pool = new Pool(config.dbConfig);
 const cors = require('cors');
 var session = require('express-session');
-const localtunnel = require('/Users/aandr/AppData/Roaming/npm/node_modules/localtunnel');
 
-(async () => {
-  const tunnel = await localtunnel({ port: 4200,subdomain: 'strong-lies-leave' });
-  console.log('local tunnel url: ', tunnel.url);
-  tunnel.on('close', () => {
-    console.log('the local tunnel is closed')
-  });
-  tunnel.on('error', (err) => {
-    console.log('the local tunnel: error',err)
-  });
-})();
 appServer.use(cors({credentials: true} ));
 appServer.use(cookieParser());
 appServer.use (express.static('public'));
@@ -44,7 +33,6 @@ appServer.use(session({
   resave: false,
   saveUninitialized: true,
   cookie: {
-    // maxAge: 600000 ,
     secure: false } 
 }));
 appServer.use(jsPassport.initialize());
@@ -147,7 +135,6 @@ appServer.post('/AAM/GetPortfolioAnalytics/',mustAuthenticated , uiAmmInvestment
 appServer.get('/DEA/fGetMT950Transactions/',mustAuthenticated , uiAmmAccountingModule.fGetMT950Transactions)
 appServer.get('/DEA/fGetAccountingData/',mustAuthenticated , uiAmmAccountingModule.fGetAccountingData)
 appServer.get('/DEA/GetEntryScheme/',mustAuthenticated , uiAmmAccountingModule.GetEntryScheme)
-// appServer.post('/DEA/fCreateEntryAccountingInsertRow/',mustAuthenticated , uiAmmAccountingModule.fCreateEntryAccountingInsertRow)
 
 /*----------------------FIFO---------------------------------------------------------*/
 appServer.get('/DEA/getFIFOtransactions/',mustAuthenticated , uiAmmTradeData.fGetFIFOtransactions)
@@ -225,8 +212,7 @@ appServer.post('/DEA/updateAcessTransactionTypes/',mustAuthenticated, uiAmmAccou
 
 appServer.get('/AAM/getRestrictionsData/',mustAuthenticated, uiAmmRestricitionsData.geRestrictionsData)
 appServer.post('/AAM/updateRestrictionsData/',mustAuthenticated, uiAmmRestricitionsData.fupdateRestrictionMainData)
-// RedisService.TestRedis();
-// RedisService.redisSetInstrumentList();
+
 appServer.get('/AAM/Redis/getMoexInstrumentsList/',mustAuthenticated, RedisService.redisGetInstrumentList)
 appServer.listen (port,'localhost', () => {console.log (`AAM Server is running on port ${port}`)})
 appServer.on('error', (e) =>  console.log('AAAAAAA in use, retrying...'))

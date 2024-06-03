@@ -18,11 +18,12 @@ import { AppAccFeesPortfolioScheduleFormComponent } from '../../forms/acc-fees-p
   templateUrl: './acc-fees-portfolios-with-schedules-table.component.html',
   styleUrls: ['./acc-fees-portfolios-with-schedules-table.component.scss'],
   animations: [
-    trigger('detailFeeExpand', [
-      state('collapsed', style({height: '0px', minHeight: '0'})),
-      state('expanded', style({height: '*'})),
-      transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
-    ]),
+    trigger('detailFeeExpandFPS', 
+    [   state('collapsed, void', style({ height: '0px'})),
+        state('expanded', style({ height: '*' })),
+        transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
+        transition('expanded <=> void', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)'))
+    ])
   ],
 })
 export class AppAccFeesPortfoliosWithSchedulesTableComponent  {
@@ -37,6 +38,10 @@ export class AppAccFeesPortfoliosWithSchedulesTableComponent  {
     {
       'fieldName': 'id',
       'displayName': 'ID'
+    },
+    {
+      'fieldName': 'portfolioname',
+      'displayName': 'PrCode'
     },
     {
       'fieldName': 'fee_code',
@@ -99,6 +104,7 @@ export class AppAccFeesPortfoliosWithSchedulesTableComponent  {
       this.subscriptions.unsubscribe();
     }
     ngOnInit(): void {
+      this.id_portfolio===null&&this.onChanges===false? this.submitQuery(false,false):null;
       this.multiFilter = (data: FeesPortfoliosWithSchedulesData, filter: string) => {
         let filter_array = filter.split(',').map(el=>[el,1]);
         this.columnsToDisplay.forEach(col=>filter_array.forEach(fil=>{
@@ -109,6 +115,7 @@ export class AppAccFeesPortfoliosWithSchedulesTableComponent  {
       this.subscriptions.add(
         this.AppFeesHandlingService.recieveFeesPortfoliosWithSchedulesReload().pipe(
           filter(data=>Number(data.data[0].object_id)===this.id_portfolio),
+          tap(()=>console.log('113'))
         ).subscribe(()=>this.submitQuery(false,false))
       )
     }
@@ -117,6 +124,7 @@ export class AppAccFeesPortfoliosWithSchedulesTableComponent  {
         skip(1),
         filter(sub=>sub[0].id===this.id_portfolio&&(this.dataSource===undefined||sub[0].rewriteDS===true)),
       ).subscribe(()=>{
+        console.log('recieveFeesPortfoliosWithSchedulesIsOpened',);
         this.submitQuery(false,false);
         this.AppFeesHandlingService.getFeesMainData().subscribe(data=>{
           this.feeMainCodes = data
@@ -178,42 +186,8 @@ export class AppAccFeesPortfoliosWithSchedulesTableComponent  {
       if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
     }
     exportToExcel() {
-      this.AppFeesHandlingService.getFeesMainWithSchedulesData().subscribe(data=>{
-        let dataTypes =  {
-          id :'number',
-          id_object :'number',
-          fee_object_type:'number',
-          fee_amount:'number', 
-          fee_date:'Date', 
-          calculation_date :'Date', 
-          b_transaction_date :'Date', 
-          id_b_entry:'number', 
-          fee_rate:'number', 
-          calculation_base:'number', 
-          id_fee_main:'number', 
-          fee_type:'number',
-          idfee_scedule :'number', 
-          fee_type_value :'number',
-          feevalue :'number',
-          calculation_period :'number', 
-          deduction_period :'number',
-          range_parameter:'string', 
-          below_ranges_calc_type:'number', 
-          pf_hurdle:'number',
-          highwatermark:'boolean'
-        }
-        let dataToExport =  structuredClone(data);
-        dataToExport.map(el=>{
-          Object.keys(el).forEach(key=>{
-            switch (true==true) {
-              case el[key]&&dataTypes[key]==='number': return el[key]=Number(el[key])
-              case el[key]&&dataTypes[key]==='Date': return el[key]=new Date(el[key])
-              default: return el[key]=el[key]
-            }
-          })
-          return el;
-        });
-        this.HandlingCommonTasksS.exportToExcel (dataToExport,"FeeDataMainWithSchedules");  
-      })
+        let dataToExport =  structuredClone(this.dataSource.data);
+        this.HandlingCommonTasksS.exportToExcel (dataToExport,"FeeDataMainWithSchedules",['id_fee',	'id_fee_period',	'id'	,'object_id'	,'id_fee_main',		'idportfolio'],['period_start','period_end','created','modified']);  
     }
 }
+	

@@ -1,4 +1,4 @@
--- FUNCTION: public.f_i_get_npv_dynamic(text[], date, date, numeric)
+-- FUNCTION: public.f_i_get_npv_dynamic(text[], date, date, numeric, numeric[])
 
 -- DROP FUNCTION IF EXISTS public.f_i_get_npv_dynamic(text[], date, date, numeric, numeric[]);
 
@@ -23,7 +23,10 @@ INSERT INTO
 SELECT
   *
 FROM
-  f_a_b_balancesheet_total_closed_and_notclosed (daterange(p_report_date_start,p_report_date_end,'[]'),p_account_types,null)
+  f_a_b_balancesheet_total_closed_and_notclosed (
+		daterange(
+			((SELECT "FirstOpenedDate" FROM public."gAppMainParams")-INTERVAL '1 DAY')::date,
+			p_report_date_end,'[]'),p_account_types,null)
 WHERE
   f_a_b_balancesheet_total_closed_and_notclosed.portfolioname = ANY (p_portfolios_list);
 RETURN query
@@ -200,5 +203,8 @@ ORDER BY
 END;
 $BODY$;
 
-ALTER FUNCTION public.f_i_get_npv_dynamic(text[], date, date, numeric,numeric[])
+ALTER FUNCTION public.f_i_get_npv_dynamic(text[], date, date, numeric, numeric[])
     OWNER TO postgres;
+   select * 
+	 FROM
+      public.f_i_get_npv_dynamic (array['VPC005'], 'May 28 2024', 'May 28 2024', 840,null) 

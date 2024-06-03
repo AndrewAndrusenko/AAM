@@ -96,7 +96,5 @@ export class AuthService {
   getloginsArray(): Observable <string[]>{
     return this.http.get <string[]> ('/api/auth/loginsArray/')
   }
-  nodeTerminalClear(): Observable <string> {
-    return this.http.get <string> ('/api/nodecls/')
-  }
+
 }

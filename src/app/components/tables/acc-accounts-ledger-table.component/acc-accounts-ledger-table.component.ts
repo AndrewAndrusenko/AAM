@@ -10,7 +10,6 @@ import {HandlingCommonTasksService } from 'src/app/services/handling-common-task
 import {HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import {formatNumber } from '@angular/common';
 import {AuthService } from 'src/app/services/auth.service';
-import {investmentNodeColor } from 'src/app/models/constants.model';
 
 @Component({
   selector: 'app-table-acc-ledger-accounts',
@@ -32,7 +31,6 @@ export class AppTableAccLedgerAccountsComponent {
   public readOnly: boolean = false; 
   action ='GetLedgerAccountsDataWholeList';
   dialogRef: MatDialogRef<AppAccAccountModifyFormComponent>;
-  investmentNodeColor = investmentNodeColor
   constructor(    
     private AccountingDataService:AppAccountingService, 
     private CommonDialogsService:HadlingCommonDialogsService,

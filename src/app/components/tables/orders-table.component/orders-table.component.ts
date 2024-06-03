@@ -8,7 +8,6 @@ import { objectStatus, orders } from 'src/app/models/interfaces.model';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {MatChipInputEvent} from '@angular/material/chips';
 import { AbstractControl, FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { investmentNodeColorChild, additionalLightGreen } from 'src/app/models/constants.model';
 import { formatNumber } from '@angular/common';
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { HandlingCommonTasksService } from 'src/app/services/handling-common-tasks.service';
@@ -77,7 +76,6 @@ export class AppOrderTableComponent {
   @ViewChild('allSelected', { static: false }) allSelected: MatCheckbox;
   @Output() public modal_principal_parent = new EventEmitter();
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
-  investmentNodeColor = investmentNodeColorChild;
   panelOpenStateSecond = false;
   panelOpenStateFirst = false;
   instruments: string[] = ['ClearAll'];
@@ -90,6 +88,7 @@ export class AppOrderTableComponent {
   dialogOrderModify: MatDialogRef<AppTradeModifyFormComponent>;
   activeTab:string='';
   tabsNames = ['Orders']
+  hidePaginator: boolean = true;
   constructor(
     public TradeService: AppTradeService,
     private AuthServiceS:AuthService,  
@@ -148,7 +147,8 @@ export class AppOrderTableComponent {
       break;
       case 'Allocation,Child':
       case 'Child':
-        this.dataSource  = new MatTableDataSource(this.dataToShow.filter(el=>el.parent_order===Number(this.bulkOrder)))
+        this.dataSource  = new MatTableDataSource(this.dataToShow.filter(el=>el.parent_order===Number(this.bulkOrder)));
+        this.hidePaginator = this.dataSource.data.length>10;
       break;
       case 'Allocation,Parent':
         this.TradeService.getOrderInformation({
@@ -195,7 +195,7 @@ export class AppOrderTableComponent {
     this.dataSource.paginator = this.paginator;
     this.dataSource.filterPredicate=this.multiFilter;
     this.dataSource.sort = this.sort;
-
+    this.hidePaginator = this.dataSource.data.length>10
     switch (this.tableMode.join()) {
       case 'Parent,Per_Portfolio':
       break;

@@ -11,17 +11,17 @@
     background-color: rgb(67, 79, 79);
     border-radius: 5px;
   }
-  .tree-menu-context {
+  .menu-context {
     display: inline-flex;
     flex-direction: column;
     min-width: 180px;
     max-width: 280px;
     background-color: rgb(255, 255, 255);
     padding: 1px 0;
-    font-size: 18px;
+    
   }
   
-  .tree-menu-item {
+  .menu-context-item {
     background-color: transparent;
     cursor: pointer;
     border: none;
@@ -37,11 +37,11 @@
     flex: 1;
   }
   
-  .tree-menu-item:hover {
+  .menu-context-item:hover {
     background-color: rgb(237, 162, 162);
   }
   
-  .tree-menu-item:active {
+  .menu-context-item:active {
     background-color: rgb(147, 128, 128);
   }
 

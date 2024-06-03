@@ -1,6 +1,6 @@
 <ng-container *ngIf="accessState!=='none'" >
-  <mat-form-field style="width: 20%;"class = "filterField"  title="Filter All columns">
-    <mat-label class="whiteTextFilter">Search (all columns)...</mat-label>
+  <mat-form-field style="width: 20%;"class = "filter-field"  title="Filter All columns">
+    <mat-label>Search (all columns)...</mat-label>
     <input 
       (keyup)="applyFilter($event)"
       matInput type="text" #filterALL
@@ -11,10 +11,8 @@
       <mat-icon>close</mat-icon>
     </button>
   </mat-form-field>
-
-
   <button color = "accent" mat-raised-button title="Export To Excel"
-    style=" margin-left:1%; font-size: 18px;"
+    style=" margin-left:1%; "
     (click)="exportToExcel()">
     Save as XLS 
     <mat-icon matSuffix >save_alt</mat-icon>
@@ -31,10 +29,7 @@
     Cancel Allocation
     <mat-icon matSuffix >thumb_down_alt</mat-icon>
   </button>
-
-  <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort
-   class="mat-elevation-z8" 
-    class ="childTable" style="width: 150%; margin-top: 0.5%;" >
+  <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort  class ="childTable" style="width: 150%; margin-top: 0.5%;" >
     <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i=index" justify="right"  >
       <th mat-header-cell *matHeaderCellDef mat-sort-header> {{columnsHeaderToDisplay[i]}}</th>
       <td 
@@ -44,17 +39,17 @@
           <p *ngSwitchCase="['act_mtm','new_mtm','npv','net_orders'].includes(column)">{{element[column]|currency :' '}} </p>
           <p *ngSwitchCase="['rest_type','param'].includes(column)">{{element[column]? element[column].toLocaleUpperCase():''}} </p>
           <p *ngSwitchCase="['act_violation_and_orders','act_violation','mp_violation','new_wgt','new_viol'].includes(column)&&element[column]!==null">
-            <span [style.color]="element[column]==0? 'default' : element[column]>0?'indianred':'white'">{{element[column]|currency :' '}}{{'%'}} </span>
+            <span [style.color]="element[column]==0? 'default' : element[column]>0?'var(--warnColor)':'white'">{{element[column]|currency :' '}}{{'%'}} </span>
           </p>
           <p *ngSwitchCase="['act_weight_and_orders','act_weight','mp_weight'].includes(column)&&element[column]!==null">
             {{element[column]|currency :' '}}{{'%'}} 
           </p>
         </span>
         <ng-template  #instrumentcontextmenu>
-          <div class="tree-menu-context" cdkMenu >
+          <div class="menu-context" cdkMenu >
             <button 
             (click)="updateFilter(element[column])"
-            class="tree-menu-item" cdkMenuItem>
+            class="menu-context-item" cdkMenuItem>
             <mat-icon class="menu-icon" matPrefix>filter_list</mat-icon> 
             Add to filter
           </button> 

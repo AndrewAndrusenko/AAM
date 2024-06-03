@@ -16,7 +16,7 @@
   >Submit Data
 </mat-checkbox>
 
-<form class="submit" [formGroup]="RestrictionMainForm">
+<form  [formGroup]="RestrictionMainForm">
   <mat-form-field style="width: 30%;" title="restriction_type_id">
     <mat-select placeholder="Restriction" formControlName="restriction_type_id"(selectionChange)="restTypeChanged()">
       <mat-option *ngFor="let rest of restricionsType" [value]="rest.id" >

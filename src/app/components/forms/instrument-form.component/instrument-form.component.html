@@ -1,39 +1,23 @@
-<mat-toolbar *ngIf="dragAllowed"  color="primary"
+<mat-toolbar *ngIf="dragAllowed"  color="primary" style="margin-bottom: 0.5%;"
   cdkDrag  cdkDragRootElement=".cdk-overlay-pane"  cdkDragHandle>
   <span>{{action}} Instrument</span>
-  <span class="example-spacer"></span>
-  <mat-checkbox style= "font-size: 14px; color:rgb(255, 255, 255); padding: 1%;" #submitbox checked="false" 
-    (click)=" instrumentModifyForm.markAllAsTouched();
-    instrumentModifyForm.updateValueAndValidity();"
-    >Submit Data
-  </mat-checkbox>
-  <button mat-raised-button color="accent" 
-    [disabled]="!(instrumentModifyForm.valid && submitbox.checked)"
-    (click)="updateInstrumentData(action)"
-    style="margin-top: 1px; width: 30%; font-size: 18px; margin-left: 1%;">
-    {{action}} Instrument
-  </button>
 </mat-toolbar>
-<mat-toolbar *ngIf="!dragAllowed" color="primary" style="cursor:default;">
+<mat-toolbar *ngIf="!dragAllowed" color="primary" style="cursor:default; margin-bottom: 0.5%;">
   <span>{{action}} Instrument</span>
-  <span class="example-spacer"></span>
-  <mat-checkbox style= "font-size: 14px; color:rgb(255, 255, 255); padding: 1%;" #submitbox checked="false" 
-    (click)=" instrumentModifyForm.markAllAsTouched();
-    instrumentModifyForm.updateValueAndValidity();"
-    >Submit Data
-  </mat-checkbox>
-  <button mat-raised-button color="accent" 
-    [disabled]="!(instrumentModifyForm.valid && submitbox.checked)"
-    (click)="updateInstrumentData(action)"
-    style="margin-top: 1px; width: 30%; font-size: 18px; margin-left: 1%;">
-    {{action}} Instrument
-  </button>
 </mat-toolbar>
 
-<form class="submit" [formGroup]="instrumentModifyForm">
-  <h3 style="color:rgb(177, 174, 174)" *ngIf="instrumentModifyForm.valid"> 
-    To save data please select 'Submit data' check and then press button {{secid.hasError('secidIsTaken')}}
-  </h3>
+<button mat-raised-button color="accent" 
+  [disabled]="!(instrumentModifyForm.valid && submitbox.checked)"
+  (click)="updateInstrumentData(action)"
+  style="margin-top: 1px; width: 30%;  margin-left: 1%;">
+  {{action}} Instrument
+</button>
+<mat-checkbox style= "padding: 1%;" #submitbox checked="false" 
+  (click)=" instrumentModifyForm.markAllAsTouched();
+  instrumentModifyForm.updateValueAndValidity();"
+  >Submit Data
+</mat-checkbox>
+<form  [formGroup]="instrumentModifyForm">
   <mat-form-field style="width: 14%;" title="SecID">
     <input matInput placeholder="SecID" formControlName="secid">
     <mat-error  *ngIf="secid?.errors?.['required']">
@@ -154,7 +138,7 @@
   </mat-form-field>
   <br>
   <br>
-  <h3 style="color:rgb(252, 113, 113)" *ngIf="instrumentModifyForm.invalid"> Please check the form. Data is invalid</h3>
+  <h4 style="color:var(--warnColor)" *ngIf="instrumentModifyForm.invalid"> Please check the form. Data is invalid</h4>
 </form>
 <mat-expansion-panel class="headers-align" title="instrumenCorpActionsTable"
   (opened)="panelOpenStateSecond = true"

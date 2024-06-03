@@ -1,7 +1,7 @@
 <ng-container *ngIf="accessState!=='none'" >
   <ng-container  *ngIf="tableMode.includes('Parent')">  <!-- Parent Mode Block -->
-    <mat-form-field style="width: 20%;"class = "filterField"  title="Filter All columns">
-      <mat-label class="whiteTextFilter">Search (all columns)...</mat-label>
+    <mat-form-field style="width: 20%;"class = "filter-field"  title="Filter All columns">
+      <mat-label>Type to search...</mat-label>
       <input 
         (keyup)="applyFilter($event)"
         matInput type="text" #filterALL
@@ -13,21 +13,21 @@
       </button>
     </mat-form-field>
     <button color = "accent" mat-raised-button title="Export To Excel (ALT + W)"
-      style=" margin-left:1%; font-size: 18px;"
+      style=" margin-left:1%; "
       (click)="exportToExcel()">
       Save as XLS 
       <mat-icon matSuffix >save_alt</mat-icon>
     </button>
     <button  *ngIf="tableMode.includes('Parent')"
       color = "accent" mat-raised-button title="Reload Table (ALT + R)" 
-      style=" margin-left:1%; font-size: 18px;"
+      style=" margin-left:1%; "
       (click)="submitQuery(true)">
       Reload 
       <mat-icon matSuffix >refresh</mat-icon>
     </button>
     <ng-container  *ngIf="!disabledControlElements"> <!-- Edit Buks Orders Block -->
       <button  title="Execute selected orders" 
-      color = "accent" mat-raised-button style=" margin-left:2%; font-size: 18px;"
+      color = "accent" mat-raised-button style=" margin-left:2%; "
       (click)="toggleAllRows((selection.hasValue() && isAllSelected())? false : true  );   
       dataSource.paginator = paginator;">
       {{(selection.hasValue() && isAllSelected())? 'Unselect' : 'Select' }} 
@@ -37,21 +37,21 @@
     </button>
     <button title="Create Accounting"  
       [disabled]="!selection.hasValue()"
-      color = "accent" mat-raised-button style=" margin-left:1%; font-size: 18px;"
+      color = "accent" mat-raised-button style=" margin-left:1%; "
       (click)="  createAccountingForAllocation()">
       Create Accounting
       <mat-icon matSuffix>account_balance</mat-icon>
     </button>
     <button title="Delete Allocated Trades"  
       [disabled]="!selection.hasValue()"
-      color = "warn" mat-raised-button style=" margin-left:1%; font-size: 18px;"
+      color = "warn" mat-raised-button style=" margin-left:1%; "
       (click)="deleteAllocatedTrades()">
       Delete Trades
       <mat-icon matSuffix>delete</mat-icon>
     </button>
     <button title="Delete Accounting"  
       [disabled]="!selection.hasValue()"
-      color = "warn" mat-raised-button style=" margin-left:1%; font-size: 18px;"
+      color = "warn" mat-raised-button style=" margin-left:1%; "
       (click)="deleteAccountingForAllocatedTrades()">
       Delete Accounting
       <mat-icon matSuffix>delete</mat-icon>
@@ -70,30 +70,30 @@
       <mat-icon color = 'accent'>filter_alt</mat-icon>
     </mat-panel-description>
   </mat-expansion-panel-header >
-  <form class="submit" [formGroup]="searchParametersFG"  style="font-size: 18px; margin-left: 0.5%; "> <!-- complexSearch Form -->
-    <span style="display: flex;    align-items:flex-start;  margin-right: 1%;margin-top: 0.2%;"> 
-      <span style="display:grid; width: 11%; margin-right: 2%;"> <!-- submitQuery/CleaAll Buttons -->
-        <button color = "primary"  class= "button-color" mat-raised-button 
-          style="margin:1%; font-size: 18px;"
+  <form  [formGroup]="searchParametersFG"  style=" margin-left: 0.5%; "> <!-- complexSearch Form -->
+    <span style="display: flex;    align-items:flex-start;  margin-right: 1%;"> 
+      <span style="display:grid; width: 11%; margin-right: 1%; margin-top: 0.7%; margin-left: 1%;"> <!-- submitQuery/CleaAll Buttons -->
+        <button color = "primary"   mat-raised-button 
+          style="margin:1%; "
           (click)="submitQuery()">
           Submit
         </button>
         <button color = "accent" mat-raised-button 
-          style="margin-top:4%;margin-left: 1%; font-size: 18px;"
+          style="margin-top:4%;margin-left: 1%; "
           (click)="searchParametersFG.reset();
            instruments=['ClearAll'];
            portfolios=['Clear All']">
           ClearAll
         </button>
       </span>
-      <mat-form-field  class="search-filed"> <!-- Order Type Filter -->
+      <mat-form-field  > <!-- Order Type Filter -->
         <mat-select placeholder="Type" formControlName="type">
           <mat-option [value]="null">ALL</mat-option>
           <mat-option [value]="'BUY'">BUY</mat-option>
           <mat-option [value]="'SELL'">SELL</mat-option>
         </mat-select>
       </mat-form-field>
-      <mat-form-field appearance="fill"  class="search-filed"> <!-- Date Filter -->
+      <mat-form-field appearance="fill"  > <!-- Date Filter -->
         <mat-label >Enter a date range</mat-label>
         <mat-date-range-input [formGroup]="dataRange" [rangePicker]="pickerTDate" >
           <input matStartDate placeholder="Start date" formControlName="dateRangeStart" >
@@ -105,7 +105,7 @@
         <mat-error *ngIf="dataRange.controls.dateRangeStart.hasError('matStartDateInvalid')">Invalid start date</mat-error>
         <mat-error *ngIf="dataRange.controls.dateRangeEnd.hasError('matEndDateInvalid')">Invalid end date</mat-error>
       </mat-form-field>
-      <mat-form-field class="search-filed" style="width: 16%;"> <!-- Quantity Filter -->
+      <mat-form-field  style="width: 16%;"> <!-- Quantity Filter -->
         <input matInput placeholder="Quantity (Value or Min - Max)" formControlName="qty">
         <mat-hint *ngIf="qty.valid">
           Qty or QtyMin-QtyMax
@@ -114,7 +114,7 @@
           Incorrect Range
         </mat-error>
       </mat-form-field>
-      <mat-form-field class="search-filed" style="width: 15%;"> <!-- Price Filter -->
+      <mat-form-field  style="width: 15%;"> <!-- Price Filter -->
         <input matInput placeholder="Price (Value or Min - Max)" formControlName="price">
         <mat-hint *ngIf="price.valid">
           Price or PriceMin-PriceMax
@@ -124,8 +124,8 @@
         </mat-error>
       </mat-form-field>
     </span>
-    <p style="margin-top: 1%;">
-      <mat-form-field  appearance="fill" style="width: 40%; " class="search-filed">
+    <p>
+      <mat-form-field  appearance="fill" style="width: 40%; " class="no-hint-fields">
         <mat-chip-list #chipList   >
           <mat-chip *ngFor="let secid of instruments" 
           (removed)="remove(secid,instruments,secidList)"
@@ -151,13 +151,8 @@
             {{secid.toString().replaceAll(',',' - ')}}
           </mat-option>
         </mat-autocomplete>
-        <mat-hint style="color:rgb(104, 246, 246); font-style: italic;">
-          Instruments List
-        </mat-hint>
       </mat-form-field>
-
-
-      <mat-form-field  appearance="fill" style="width: 40%; " class="search-filed">
+      <mat-form-field  appearance="fill" style="width: 40%;" class="no-hint-fields">
         <mat-chip-list #chipPortList   >
           <mat-chip *ngFor="let portfolio of portfolios" 
           (removed)="remove(portfolio,portfolios,portfoliosList)"
@@ -177,14 +172,11 @@
           (matChipInputTokenEnd)="portfolios = add($event,portfolios,portfoliosList)"
           matTooltip="Type portfolio code or paste multiple codes separated by comma and press enter" >
         </mat-chip-list>
-        <mat-hint style="color:rgb(104, 246, 246); font-style: italic;">
-          Portfolios List
-        </mat-hint>
       </mat-form-field>
     </p>
   </form>
 </mat-expansion-panel>
-  <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class="mat-elevation-z8" [class]="tableMode.includes('Child')? 'childTable':'parentTable'">
+  <table *ngIf="dataSource?.data?.length"  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort  [class]="tableMode.includes('Child')? 'childTable':'parentTable'">
     <ng-container   matColumnDef="select">
       <th mat-header-cell *matHeaderCellDef>
         <mat-checkbox style="  vertical-align: top;" #allSelected
@@ -205,38 +197,41 @@
     </ng-container>
     <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay| slice:1; let i=index">
       <th mat-header-cell *matHeaderCellDef mat-sort-header> {{columnsHeaderToDisplay[i]}}</th>
-      <td mat-footer-cell *matFooterCellDef let> <h2 style="margin-top: 5%;">
+      <td mat-footer-cell *matFooterCellDef let> <span style="margin-top: 5%;">
         <span [ngSwitch]="true==true">
           <p *ngSwitchDefault></p>
           <p *ngSwitchCase="['id'].includes(column)">{{'Totals'}} </p>
           <p *ngSwitchCase="['qty','trade_amount','pl'].includes(column)">{{getTotals(column)| number }} </p>
           
-        </span></h2>
+        </span></span>
       <td 
         mat-cell *matCellDef="let element" [cdkContextMenuTriggerFor]="instrumentcontextmenu" >
         <span [ngSwitch]="true==true">
           <p *ngSwitchDefault>{{element[column]}}</p>
           <p *ngSwitchCase="['trade_amount'].includes(column)">{{element[column]|currency :' '}} </p>
           <p *ngSwitchCase="['fifo','depo_account_balance','pl','current_account_balance'].includes(column)">
-            <span [style.color]="element[column]<0?'indianred':'lightgreen'">{{element[column]|currency :' '}} </span>
+            <span [style.color]="element[column]<0?'var(--warnColor)':'default'">{{element[column]|currency :' '}} </span>
           </p>
           <p *ngSwitchCase="['tdate'].includes(column)">{{element[column] | date}} </p>
           <p *ngSwitchCase="['entries'].includes(column)">
-            <button mat-flat-button style="font-size: 18px; margin-left: 0; width: 15%;margin-top: 8%;"  
+            <button 
+            mat-stroked-button style=" margin-left: 0; width: 15%;margin-top: 8%;"  
               [matTooltip]="'List of entries'" 
               (click)="showEntries(element.id)">
               {{element[column] }}
             </button> 
           </p>
           <p *ngSwitchCase="['id_bulk_order'].includes(column)">
-            <button mat-flat-button style="font-size: 18px; margin-top: 8%;"  
+            <button 
+            mat-stroked-button style=" margin-top: 8%; padding:0px"  
             [matTooltip]="'Order details'" 
             (click)="showOrderDetails(element.id_bulk_order)">
             {{element[column] }}
             </button> 
           </p>
           <p *ngSwitchCase="['idtrade'].includes(column)">
-            <button mat-flat-button style="font-size: 18px; margin-top: 8%;"  
+            <button 
+            mat-stroked-button style=" margin-top: 8%;"  
             [matTooltip]="'Trade details'" 
             (click)="showTradeDetails(element.idtrade)">
             {{element[column] }}
@@ -244,10 +239,10 @@
           </p>
         </span>
         <ng-template  #instrumentcontextmenu>
-          <div class="tree-menu-context" cdkMenu *ngIf="filterALL">
+          <div class="menu-context" cdkMenu *ngIf="filterALL">
             <button 
               (click)="updateFilter(element[column])"
-              class="tree-menu-item" cdkMenuItem>
+              class="menu-context-item" cdkMenuItem>
               <mat-icon class="menu-icon" matPrefix>filter_list</mat-icon> 
               Add to filter
             </button> 
@@ -264,5 +259,7 @@
     </tr>
     <tr mat-footer-row *matFooterRowDef="columnsToDisplay; sticky: true"></tr>
   </table>
-  <mat-paginator  [pageSizeOptions]="[5, 15, 25,50, 100]" [pageSize]="rowsPerPages" aria-label="Select page of allocation"></mat-paginator>
+  <div [hidden]="!dataSource||dataSource?.data?.length<10">
+    <mat-paginator class="custom-class" [pageSizeOptions]="[5, 15, 25,50, 100]" [pageSize]="rowsPerPages" aria-label="Select page of allocation"> </mat-paginator>
+  </div>
 </ng-container>
