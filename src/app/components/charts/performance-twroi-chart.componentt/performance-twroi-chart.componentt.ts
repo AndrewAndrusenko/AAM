@@ -56,10 +56,10 @@ export class AppPerformanceTWROiEchartComponentt  {
         backgroundColor: '#2c343c',
       legend: {
         textStyle: {
-          fontSize: 22,
+          fontSize: sizeLarge,
           color:'white'
         },
-        bottom: 10,
+        bottom: 2,
         left: 'center',
         data: ['TWR','ROI', 'MA10','NPV','Cash D/W']
       },
@@ -160,7 +160,7 @@ export class AppPerformanceTWROiEchartComponentt  {
           },
 
           axisLabel: {
-            fontSize:16,
+            fontSize:sizeLarge,
             fontWeight: "bold",
             color:'white'
           }
@@ -199,7 +199,7 @@ export class AppPerformanceTWROiEchartComponentt  {
           scale: true,
           axisLabel: {
             formatter: '{value} %',
-            fontSize:20,
+            fontSize:sizeLarge,
             fontWeight: "bold"
           }
         },
@@ -215,7 +215,7 @@ export class AppPerformanceTWROiEchartComponentt  {
 
           },
           position: 'right',
-          offset:140,
+          offset:100,
           alignTicks: true,
           axisLine: {
             show: true,
@@ -228,7 +228,7 @@ export class AppPerformanceTWROiEchartComponentt  {
             formatter: function (value) {
               return Math.round(value/1000000)<1? currencySymbol+ Math.round(value/1000) + ' k' : currencySymbol+Math.round(value/100000)/10 +' mln'
             },
-            fontSize:20,
+            fontSize:sizeLarge,
             fontWeight: "bold"
           }
         },
@@ -285,9 +285,9 @@ export class AppPerformanceTWROiEchartComponentt  {
               },
             ],
             symbol: "pin",
-            symbolSize: 120,
+            symbolSize: 90,
             label: {
-              fontSize: 18,
+              fontSize: sizeLarge,
               formatter: function (dataObj) {
                 return  dataObj.data['name']==='coordinate'? Math.round(dataObj.data['coord'][1]*10)/10 + ' %' : Math.round(dataObj.data['value']*10)/10 + ' %:\n' +dataObj.data['type']
               },

@@ -11,7 +11,7 @@ import { Subscription, filter, switchMap } from 'rxjs';
 @Component({
   selector: 'app-app-portfolio',
   templateUrl: './portfolio-form.component.html',
-  styleUrls: ['./portfolio-form.component.css']
+  styleUrls: ['./portfolio-form.component.scss']
 })
 export class AppNewAccountComponent {
   accessState: string = 'none';

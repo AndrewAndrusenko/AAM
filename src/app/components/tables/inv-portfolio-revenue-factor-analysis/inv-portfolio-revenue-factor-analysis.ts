@@ -13,7 +13,6 @@ import {HandlingCommonTasksService } from 'src/app/services/handling-common-task
 import {AuthService } from 'src/app/services/auth.service';
 import {AtuoCompleteService } from 'src/app/services/auto-complete.service';
 import {AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
-import {indexDBService } from 'src/app/services/indexDB.service';
 import { MatSelectChange } from '@angular/material/select';
 interface localFilters {
   reset?:boolean,

@@ -164,7 +164,7 @@
             <span [style.color]="element[column]==0? 'default' : element[column]<0?'':'default'">{{element[column]|currency :' '}} </span>
           </p>
           <p *ngSwitchCase="['roi','fact_weight','weight'].includes(column)&&element[column]!==null">
-            <span [style.color]="element[column]==0? 'default' : element[column]<0?'var(--warnColor)':'default'">{{element[column]|currency :' '}}{{'%'}} </span>
+            <span [style.color]="element[column]==0? 'default' : element[column]<0?'var(--warnColor)':'var(--mainFontColor)'">{{element[column]|currency :' '}}{{'%'}} </span>
           </p>
           <p *ngSwitchCase="['mtm_date','rate_date'].includes(column)">{{element[column] | date}} </p>
         </span>

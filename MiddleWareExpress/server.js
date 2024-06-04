@@ -209,9 +209,11 @@ appServer.get('/DEA/getAccountingSchemes/',mustAuthenticated,  uiAmmAccoutingSch
 appServer.post('/DEA/updateSchemeTransaction/',mustAuthenticated, uiAmmAccoutingSchemes.updateSchemeTransaction)
 appServer.post('/DEA/updateTransactionTypes/',mustAuthenticated, uiAmmAccoutingSchemes.updateTransactionTypes)
 appServer.post('/DEA/updateAcessTransactionTypes/',mustAuthenticated, uiAmmAccoutingSchemes.updateAccessTransactionTypes)
-
+/*----------------------RestrictionsData----------------------------------------------------*/
 appServer.get('/AAM/getRestrictionsData/',mustAuthenticated, uiAmmRestricitionsData.geRestrictionsData)
 appServer.post('/AAM/updateRestrictionsData/',mustAuthenticated, uiAmmRestricitionsData.fupdateRestrictionMainData)
+/*----------------------GeneralData----------------------------------------------------*/
+appServer.get('/AAM/getGeneralData/',mustAuthenticated, uiAmmModule.getGeneralData)
 
 appServer.get('/AAM/Redis/getMoexInstrumentsList/',mustAuthenticated, RedisService.redisGetInstrumentList)
 appServer.listen (port,'localhost', () => {console.log (`AAM Server is running on port ${port}`)})

@@ -143,7 +143,7 @@ async function fRemoveFavorite (request, response) {
     db_common_api.queryExecute (sql, response,null,'fRemoveFavorite');
 }
 async function fGetClientData(request,response) {
-  const query = {text: ' SELECT * FROM public.dclients'}
+  const query = {text: ' SELECT dclients.*,cc."CountryName" AS idcountryname FROM public.dclients LEFT JOIN  public."dCountries" cc ON cc."IdCountry" = dclients.idcountrydomicile '}
   switch (request.query.action) {
     case 'Check_clientname':
       query.text += ' WHERE UPPER(clientname) = UPPER($1) AND idclient != $2;'
@@ -198,6 +198,15 @@ async function fClientDataDelete (request, response) {
   sql = pgp.as.format(query.text,query.values)
   db_common_api.queryExecute (sql, response,null,'fClientDataDelete'); 
 }
+async function getGeneralData (request,response) {
+  let sql = '';
+  switch (request.query.action) {
+    case 'get_Countries_Data':
+      sql = 'SELECT "IdCountry", "CountryName", "IsOffshore" 	FROM public."dCountries";'
+      break;
+  }
+  db_common_api.queryExecute(sql,response,undefined,request.query.action)
+}
 
 module.exports = {
   FAmmGetTreeData,
@@ -208,5 +217,6 @@ module.exports = {
   fEditClientData,
   fClientDataDelete,
   fCreateClientData,
-  fGetPortfolioData
+  fGetPortfolioData,
+  getGeneralData
  }

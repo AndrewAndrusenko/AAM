@@ -5,15 +5,11 @@ tr.detail-row {
   height: 0;
 }
 .childTable {
- background-color: var(--secondaryBackgroundColor);
+//  background-color: var(--secondaryBackgroundColor);
 }
 .parentTable {
  width: 100%;
- background-color:var(--mainBackgroundColor);
-}
-tr.mat-row:hover {
-  border: unset !important;
-  background:unset !important;
+//  background-color:var(--mainBackgroundColor);
 }
 .mat-column-fee_description {
   width: 30%;

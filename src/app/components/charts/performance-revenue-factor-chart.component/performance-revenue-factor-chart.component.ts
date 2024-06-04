@@ -75,7 +75,7 @@ export class AppPerformanceRevenueFactorChartComponentt  {
         right: "15%",
         top:'6%',
         textStyle: {
-          fontSize: 22,
+          fontSize: sizeLarge,
           color:legendSet.map(el=>el.data[2]).reduce((acc,cur)=>acc+cur)>0?'green':'brown'
         }
       },
@@ -84,7 +84,7 @@ export class AppPerformanceRevenueFactorChartComponentt  {
         icon: "roundRect",
         itemGap: 30,
         textStyle: {
-          fontSize: 22,
+          fontSize: sizeLarge,
           color:'white'
         },
         top:'25%',
@@ -201,7 +201,7 @@ export class AppPerformanceRevenueFactorChartComponentt  {
           },
 
           axisLabel: {
-            fontSize:16,
+            fontSize:sizeLarge,
             fontWeight: "bold",
             color:'white'
           }
@@ -243,7 +243,7 @@ export class AppPerformanceRevenueFactorChartComponentt  {
             formatter: function (value) {
               return Math.round(value/1000000)<1? currencySymbol+ Math.round(value/1000) + ' k' : currencySymbol+Math.round(value/100000)/10 +' mln'
             },
-            fontSize:20,
+            fontSize:sizeLarge,
             fontWeight: "bold"
           }
         },

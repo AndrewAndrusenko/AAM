@@ -42,7 +42,7 @@
   </mat-expansion-panel-header >
   <h4 style="text-align: center;" *ngIf="loadingDataLog.state.State==='Pending'">Loading market data...</h4>
   <div *ngIf="loadingDataLog.state.State==='Success'||loadingDataLog.state.State==='terminated'" title="loadingDataState">
-    <h4 style="text-align: center;" [style.color]="loadingDataLog.state.State=='terminated'? 'var(--warnColor)':'default'">
+    <h4 style="text-align: center;" [style.color]="loadingDataLog.state.State=='terminated'? 'var(--warnColor)':'var(--mainFontColor)'">
       {{loadingDataLog.state.Message}}
     </h4>
   </div>

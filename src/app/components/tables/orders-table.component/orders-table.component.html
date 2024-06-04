@@ -286,7 +286,7 @@
       </td>
     </ng-container>
     <ng-container   matColumnDef="expand">
-      <th  mat-header-cell *matHeaderCellDef aria-label="row actions">More</th>
+      <th  mat-header-cell *matHeaderCellDef >More</th>
       <td  mat-cell *matCellDef="let element">
         <button *ngIf="element['ordertype']==='Bulk'"
         style="width: 5%;" mat-icon-button aria-label="expand row" (click)="(expandedElement = expandedElement === element ? null : element); $event.stopPropagation()">

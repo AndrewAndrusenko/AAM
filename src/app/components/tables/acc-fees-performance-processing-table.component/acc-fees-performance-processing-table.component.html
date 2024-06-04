@@ -120,7 +120,7 @@
     <summary style="padding: 1%;" >{{statusDetailsHeader}}</summary>
     <pre> {{statusDetails|json }}</pre>
   </details>
-  <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class ="childTable" style="width: 100%;" >
+  <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort style="width: 100%;" >
    <ng-container   matColumnDef="select">
     <th mat-header-cell *matHeaderCellDef style="padding:0px">
       <mat-checkbox style="   margin-left: 4%; " #allSelected

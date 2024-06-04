@@ -1,21 +1,20 @@
-<mat-toolbar color="primary" mat-stretch-tabs class="example-stretched-tabs mat-elevation-z4">
+<mat-toolbar color="primary" mat-stretch-tabs>
   <span>{{action}} Restriction ID {{id?.value}}</span>
-  <span class="example-spacer"></span>
-  <span style="color: black;"> Portfolio {{portfolioname.value}} ID: {{idportfolio.value}}</span>
+  <span style="flex: 1 1 auto;"></span>
+  <span> Portfolio {{portfolioname.value}} ID: {{idportfolio.value}}</span>
 </mat-toolbar>
 
 <button mat-raised-button color="primary" 
   [disabled]="!(RestrictionMainForm.valid && submitbox.checked)"
   (click)="updateRestrictionData(action)"
-  style="margin-top: 1px; width: 20%; font-size: large; margin-left: 1%;">
+  style="margin-top: 1%; width: 20%; margin-left: 1%;">
   {{action}} Restriction 
 </button>
-<mat-checkbox style= "font-size: 14px; color:rgb(255, 255, 255); padding: 1%;" #submitbox checked="false" 
+<mat-checkbox style= "padding: 1%;" #submitbox checked="false" 
   (click)=" RestrictionMainForm.markAllAsTouched();
   RestrictionMainForm.markAllAsTouched();"
   >Submit Data
 </mat-checkbox>
-
 <form  [formGroup]="RestrictionMainForm">
   <mat-form-field style="width: 30%;" title="restriction_type_id">
     <mat-select placeholder="Restriction" formControlName="restriction_type_id"(selectionChange)="restTypeChanged()">
@@ -48,48 +47,6 @@
   <mat-form-field style="width: 11%;" title="object_id" >
     <input matInput placeholder="SecType ID" formControlName="object_id"  >
   </mat-form-field>
-
-  <p style="color:rgb(177, 174, 174); font-size: medium; margin-left: 2%;" *ngIf="RestrictionMainForm.valid"> 
-    To save data please select 'Submit data' check and then press button 
-</p>
-
-
-<!-- 
-  id :{value:null, disabled: false}, 
-   :{value:null, disabled: false}, 
-   :{value:null, disabled: false}, 
-  : {value:null, disabled: false}, 
-  : {value:null, disabled: false}, 
-   :{value:null, disabled: false},
-  object_code :{value:null, disabled: false}, 
-  : {value:null, disabled: false}, 
-   :{value:null, disabled: false} -->
-<!--   <mat-form-field  style="width: 26%;" title="Fee Type">
-    <mat-label>Fee Type</mat-label>
-    <mat-select  #actionT formControlName="fee_type"  > 
-      <mat-option  [value]="'1'">Management Fee</mat-option>
-      <mat-option  [value]="'2'">Performance Fee</mat-option>
-    </mat-select>
-    <mat-error  *ngIf="fee_type.errors?.['required']">
-      Required!    
-    </mat-error>
-  </mat-form-field>
-  <mat-form-field  style="width: 16%;" title="Object Type">
-    <mat-label>Object Type</mat-label>
-    <mat-select   formControlName="fee_object_type"  > 
-      <mat-option  [value]="1">Portfolio</mat-option>
-      <mat-option  [value]="2">Account</mat-option>
-    </mat-select>
-    <mat-error  *ngIf="fee_object_type.errors?.['required']">
-      Required!    
-    </mat-error>
-  </mat-form-field>
-  <mat-form-field style="width: 70%" title="Description">
-    <input matInput placeholder="Description" formControlName="fee_description"  >
-    <mat-error  *ngIf="fee_description.errors?.['required']">
-      Required!    
-    </mat-error>
-  </mat-form-field> -->
   <br>
-  <h3 style="color:rgb(252, 113, 113)" *ngIf="RestrictionMainForm.invalid"> Please check the form. Data is invalid</h3>
+  <h4 style="margin-left: 0.5%;" class="warn-color"  *ngIf="RestrictionMainForm.invalid">Please check the form. Data is invalid</h4>
 </form>

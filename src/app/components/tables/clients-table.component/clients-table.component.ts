@@ -19,7 +19,7 @@ import { routesTreeMenu } from 'src/app/app-routing.module';
 @Component({
   selector: 'app-app-clients-table',
   templateUrl: './clients-table.component.html',
-  styleUrls: ['./clients-table.component.css'],
+  styleUrls: ['./clients-table.component.scss'],
   animations: [
     trigger('detailExpand',
     [   state('collapsed, void', style({ height: '0px'})),
@@ -80,13 +80,13 @@ export class AppClientsTableComponent  {
     this.modal_principal_parent.emit(element);
   }
   navigateToClientModifyForm (actionType: string, element:ClientData) {
-    this.routesPathsTreeMenu.includes('Clients')? this.router.navigate(['tree/'+'Clients']) : this.router.navigate(['tree/']);
-    this.TreeMenuSeviceS.sendUpdate('Clients', element.clientname, element.idclient,'View')
+    this.router.navigate(['tree/']);
+    this.TreeMenuSeviceS.sendUpdate('Clients', element.clientname, element.idclient,'Edit')
     this.expandAllowed = false;
   }
   openClientModifyForm (actionType: string, element:ClientData) {
     this.expandAllowed = false;
-    this.dialogRef = this.dialog.open(AppClientFormComponent ,{minHeight:'400px', width:'900px' });
+    this.dialogRef = this.dialog.open(AppClientFormComponent ,{minHeight:'50vh', minWidth:'50vw' });
     this.dialogRef.componentInstance.client = element === null? 0 : element.idclient;
     this.dialogRef.componentInstance.action = actionType;
   }

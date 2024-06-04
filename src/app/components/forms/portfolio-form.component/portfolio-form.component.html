@@ -5,10 +5,12 @@
   <button mat-flat-button color="primary" type="submit" 
     [disabled]="!(portfolioForm.valid && submitbox.checked)"
     (click)='portfolioForm.valid? updatePortfolioData(action) : null'
-    style="margin-top: 1px; width: 15%; font-size: large; margin-left: 1%;">
+    style="margin-top: 1px; width: 15%; margin-left: 0.5%;">
       {{action}} portfolio
   </button>
-  <mat-checkbox color="primary" [labelPosition]="'before'" #submitbox checked="false" (click)="portfolioForm.markAllAsTouched();" style="margin-left: 1.5%;">Submit Data</mat-checkbox>
+  <mat-checkbox color="primary" [labelPosition]="'before'" #submitbox checked="false" (click)="portfolioForm.markAllAsTouched();" style="margin-left: 1%;">
+    Submit Data
+  </mat-checkbox>
 </div>  
 <form  [formGroup]="portfolioForm" >
   <mat-form-field style="width: 55%;" >
@@ -70,13 +72,13 @@
   </div>
   <div *ngIf="['View','Edit'].includes(action)">
     <div *ngIf="id.value!==undefined&&id.value!==null" style="width: 98%;">
-      <mat-toolbar color="primary" style="margin-bottom:1%; border-radius: 8px;">
+      <mat-toolbar color="accent" style="margin-bottom:1%; border-radius: 8px;">
       Investment Restrictions
       </mat-toolbar>
       <inv-restriction-schemes-table [idportfolios]="[id.value]" [onChanges]="true" [portCodes]="[portfolioname.value]"></inv-restriction-schemes-table>
     </div>
     <div *ngIf="id.value!==undefined" style="width: 98%;margin-top: 0.5%;">
-      <mat-toolbar color="primary" style="margin-bottom:1%; border-radius: 8px;">
+      <mat-toolbar color="accent" style="margin-bottom:1%; border-radius: 8px;">
       Fees Schedules
       </mat-toolbar>
       <acc-fees-portfolios-with-schedules-table 
@@ -85,13 +87,13 @@
       [portfolioname]="portfolioname.value"
       ></acc-fees-portfolios-with-schedules-table>
     </div>
-    <mat-expansion-panel style="margin-top: 0.5%; width: 98%;" class="headers-align color-background"
+    <mat-expansion-panel style="margin-top: 0.5%; width: 98%;" class="headers-align"
       [expanded]="false"
       (opened)="panelOpenState1 = true"  
       (closed)="panelOpenState1 = false" >
-      <mat-expansion-panel-header  class="color-background">
+      <mat-expansion-panel-header>
         <mat-panel-title >
-          Strategy Structure History
+          Strategy Change History
         </mat-panel-title>
         <mat-panel-description  >
           {{panelOpenState1 ? 'Hide' : 'Show'}}

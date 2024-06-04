@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { Instruments, instrumentCorpActions, instrumentDetails} from '../models/instruments.interfaces';
 import { corporateActionsTypes, moexBoard, moexSecurityGroup, moexSecurityType } from '../models/instruments.interfaces';
 import { indexDBService } from './indexDB.service';
-import { marketDataSources } from '../models/interfaces.model';
+import { countriesData, marketDataSources } from '../models/interfaces.model';
 interface InstrumentDataSet {
   data:Instruments[],
   action:string
@@ -39,7 +39,9 @@ export class InstrumentDataService {
   private subjectInstrumentDetails = new Subject<instrumentDetails[]> ()
   private subjectCorpActions = new Subject<instrumentCorpActions[]> ()
   constructor(private http:HttpClient){}
-
+  getGeneralData ():Observable <countriesData[]> {
+    return this.http.get <countriesData[]>('/api/AAM/getGeneralData/',{params:{action:'get_Countries_Data'}})
+  }
   getMarketDataSources ():Observable<marketDataSources[]> {
     return this.http.get <marketDataSources[]> ('/api/AAM/MD/getMarketDataSources/')
   }  

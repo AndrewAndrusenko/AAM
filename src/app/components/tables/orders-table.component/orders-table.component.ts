@@ -132,7 +132,7 @@ export class AppOrderTableComponent {
     if (this.tableMode.includes('Allocation')) {
       this.columnsToDisplayWithExpand = ['select','id','ordertype','type','secid','qty','price','amount','unexecuted','status','allocated','portfolioname','idcurrency','generated','expand'];
     } else {
-      this.columnsToDisplayWithExpand = ['select','id','ordertype','type','secid','security_group_name','mp_name','qty','price','amount','unexecuted','status','portfolioname','idcurrency','generated','action','parent_order'];
+      this.columnsToDisplayWithExpand = ['select','id','ordertype','type','secid','security_group_name','mp_name','qty','price','amount','unexecuted','status','portfolioname','idcurrency','generated','action','parent_order','expand'];
     }
     switch (this.tableMode.join()) {
       case 'Parent':

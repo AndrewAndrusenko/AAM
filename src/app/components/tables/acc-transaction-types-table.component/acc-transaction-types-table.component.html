@@ -47,7 +47,7 @@
           <p *ngSwitchDefault>{{element[column]!=='null'? element[column]:''}}</p>
           <p *ngSwitchCase="['code2'].includes(column)">{{TransactionTypes.get(element[column])}}</p>
           <p *ngSwitchCase="['manual_edit_forbidden'].includes(column)">
-              <span [style.color]="element[column]===true? 'var(--warnColor)':'default'">{{manualEdit.get(element[column])}} </span>
+              <span [style.color]="element[column]===true? 'var(--warnColor)':'var(--mainFontColor)'">{{manualEdit.get(element[column])}} </span>
           <p  *ngSwitchCase="['action'].includes(column) " >
             <button  *ngIf="disabledControlElements" mat-icon-button color="accent"
               matTooltip="View Transaction Type"

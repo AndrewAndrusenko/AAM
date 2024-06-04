@@ -173,7 +173,7 @@
           <p *ngSwitchCase="['out_date','trade_date','generated'].includes(column)">{{element[column] | date}} </p>
           <p *ngSwitchCase="['price_in','price_out'].includes(column)">{{element[column]|currency}} </p>
           <p *ngSwitchCase="['profit_loss'].includes(column)">
-            <span [style.color]="element[column]==0? 'default' : element[column]<0?'var(--warnColor)':'lightgreen'">{{element[column]|currency}} </span>
+            <span [style.color]="element[column]==0? 'default' : element[column]<0?'var(--warnColor)':'var(--mainFontColor)'">{{element[column]|currency}} </span>
           </p>
           <p *ngSwitchCase="['idtrade'].includes(column)">
             <button mat-stroked-button style="  margin-top: 5%;"  

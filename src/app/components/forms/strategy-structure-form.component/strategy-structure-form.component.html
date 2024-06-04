@@ -13,7 +13,7 @@
     Inccorect SecID!   
    </mat-error>
   </mat-form-field>
-  <mat-form-field  *ngIf="MP===1"  style="width: 35%; height: 5%; " appearance="fill">
+  <mat-form-field  *ngIf="MP===1"  style="width: 35%; height: 5%; " appearance="fill" class="no-hint-fields">
     <mat-label>SecID</mat-label>
     <input type="text"
            placeholder="Choose SecID"
@@ -58,6 +58,4 @@
     {{action}} Item 
   </button>
 </form>
-
-
 <h4 *ngIf="!strategyId" style="color:var(--accentColor)">To add new items please save strategy or model portfolio and then reopen it for editing </h4>

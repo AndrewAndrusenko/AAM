@@ -1,6 +1,6 @@
 <ng-container *ngIf="accessState!=='none'" >
-  <mat-form-field style="width: 20%;"class = "filter-field"  title="Filter All columns">
-    <mat-label>Search (all columns)...</mat-label>
+  <mat-form-field style="width: 30%;"class = "filter-field"  title="Filter All columns">
+    <mat-label>Type to search...</mat-label>
     <input 
       (keyup)="applyFilter($event)"
       matInput type="text" #filterALL
@@ -11,7 +11,7 @@
       <mat-icon>close</mat-icon>
     </button>
   </mat-form-field>
-  <mat-select placeholder="SecID Filter" class="search-filed" 
+  <mat-select placeholder="SecID Filter"  
     style="width: 13%; margin-left: 1%;"
     (selectionChange)="filterBySecid($event)"  >
     <mat-option *ngFor="let secid of secidsArray" [value]="secid"> {{secid}} </mat-option>
@@ -30,17 +30,17 @@
   </button>
   <mat-checkbox  *ngIf="UI_portfolio_zero===true"  title="Show zero portfolios" #notNull
     (change)="showZeroPortfolios($event.checked)"
-    style="font-size:larger; margin-left: 2%;">
+    style="margin-left: 2%;">
     Zero Portfolio
   </mat-checkbox> 
-  <h2 *ngIf="readOnly===true" style="margin-left: 1%;">
+  <h3 *ngIf="readOnly===true" style="margin-left: 1%;">
      Current positions ({{report_date.value.toLocaleDateString()}}) in USD
-  </h2>
+  </h3>
   <!-- complexSearch Form -->
   <form  *ngIf="readOnly!==true" [formGroup]="searchParametersFG" 
   style=" margin-left: 0.5%; "> 
     <span style="display: flex;    align-items:flex-start;  margin-right: 1%;margin-top: 0.2%;"> 
-      <span style="display:grid; width: 10%; margin-right: 1%;"> <!-- submitQuery/CleaAll Buttons -->
+      <span style="display:grid; width: 10%; margin-right: 1%; margin-top: 0.5%;"> <!-- submitQuery/CleaAll Buttons -->
         <button color = "primary"   mat-raised-button 
           [disabled]="searchParametersFG.invalid"
           style="margin:1%; "
@@ -55,12 +55,12 @@
           ClearAll
         </button>
       </span>
-      <mat-form-field class="search-filed" title="Date to upload"> <!-- Report Date Filter -->
+      <mat-form-field  title="Date to upload"> <!-- Report Date Filter -->
         <input matInput formControlName = "report_date" [matDatepicker]="dateForMarketData" placeholder="Report Date">
         <mat-datepicker-toggle matSuffix [for]="dateForMarketData"></mat-datepicker-toggle>
         <mat-datepicker  #dateForMarketData></mat-datepicker>
       </mat-form-field> 
-      <mat-form-field class="search-filed" title="Type to filter data. Click to select" > <!-- Report Currency Filter -->
+      <mat-form-field  title="Type to filter data. Click to select" > <!-- Report Currency Filter -->
         <input matInput [placeholder]="'Report Currency'" 
         formControlName="report_id_currency" 
         [matAutocomplete]="autoSet" >
@@ -73,9 +73,9 @@
           Inccorect Code! 
         </mat-error>
       </mat-form-field>
-        <mat-form-field *ngIf="UI_portfolio_selection===true"  appearance="fill" style="width: 60%; margin-bottom: 0.5%; " class="search-filed">
+        <mat-form-field *ngIf="UI_portfolio_selection===true"  appearance="fill" style="width: 60%; margin-bottom: 0.5%; "class="no-hint-fields" >
           <mat-chip-list #chipPortList   >
-            <mat-select placeholder="Model Portfolio" class="search-filed" 
+            <mat-select placeholder="Model Portfolio"  class="mat-form-field"
               formControlName="MP" 
               style="width: 20%;"
               (selectionChange)="setPortfoliosList($event)"  >
@@ -99,33 +99,29 @@
             (matChipInputTokenEnd)="portfolios = add($event,portfolios,idportfolios)"
             matTooltip="Type portfolio code or paste multiple codes separated by comma and press enter" >
           </mat-chip-list>
-          <mat-hint style="color:rgb(104, 246, 246); font-style: italic;">
-            Portfolios List
-          </mat-hint>
         </mat-form-field>
   </span>
   </form>
-  <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class ="childTable" style="width: 150%; margin-top: 0.5%;" >
+  <table  mat-table [dataSource]="dataSource" multiTemplateDataRows  matSort style="width: 150%; margin-top: 0.5%;" >
     <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i=index" justify="right"  >
       <th mat-header-cell *matHeaderCellDef mat-sort-header> {{columnsHeaderToDisplay[i]}}</th>
-      <td mat-footer-cell *matFooterCellDef let> <p style="margin-top: 5%; color: lightslategray; font-size: large;">
+      <td mat-footer-cell *matFooterCellDef let> 
         <span [ngSwitch]="true==true">
           <p *ngSwitchDefault></p>
           <p *ngSwitchCase="['portfolio_code'].includes(column)">{{'Totals'}} </p>
           <p *ngSwitchCase="['mtm_positon','order_amount','weight','planned_position','total_pl','unrealizedpl','pl'].includes(column)">{{getTotals(column)| number }} </p>
-        </span></p>
+        </span>
       <td 
         mat-cell *matCellDef="let element" [cdkContextMenuTriggerFor]="instrumentcontextmenu" >
         <span [ngSwitch]="true==true">
           <p *ngSwitchDefault>{{element[column]}}</p>
           <p *ngSwitchCase="['current_balance','mtm_positon',
           'planned_position','current_account_balance','order_amount','order_qty','mtm_dirty_price','cost_in_position','orders_unaccounted_qty','cost_full_position'].includes(column)">{{element[column]|currency :' '}} </p>
-          <p *ngSwitchCase="[
-          'pl','unrealizedpl','total_pl'].includes(column)">
-            <span [style.color]="element[column]==0? 'default' : element[column]<0?'var(--warnColor)':'lightgreen'">{{element[column]|currency :' '}} </span>
+          <p *ngSwitchCase="['pl','unrealizedpl','total_pl'].includes(column)">
+            <span [style.color]="element[column]==0? 'default' : element[column]<0?'var(--warnColor)':'var(--mainFontColor)'">{{element[column]|currency :' '}} </span>
           </p>
           <p *ngSwitchCase="['roi','fact_weight','weight'].includes(column)&&element[column]!==null">
-            <span [style.color]="element[column]==0? 'default' : element[column]<0?'var(--warnColor)':'white'">{{element[column]|currency :' '}}{{'%'}} </span>
+            <span [style.color]="element[column]==0? 'default' : element[column]<0?'var(--warnColor)':'var(--mainFontColor)'">{{element[column]|currency :' '}}{{'%'}} </span>
           </p>
           <p *ngSwitchCase="['mtm_date','rate_date'].includes(column)">{{element[column] | date}} </p>
         </span>
@@ -142,16 +138,7 @@
       </td>
     </ng-container>
     <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
-    <tr mat-row  *matRowDef="let element; columns: columnsToDisplay; let dataindex=dataIndex;"
-      tabindex=0
-   >
-    </tr>
-<!--       <tr mat-row  *matRowDef="let element; columns: columnsToDisplay; let dataindex=dataIndex;"
-      tabindex=0
-      [ngClass]="{'highlight':element && this.selectedRowID  == element.id}"
-      (keydown)="keyDownEvent($event)"
-      (click)="highlight(element)">
-    </tr> -->
+    <tr mat-row  *matRowDef="let element; columns: columnsToDisplay; let dataindex=dataIndex;" tabindex=0 > </tr>
     <tr mat-footer-row *matFooterRowDef="columnsToDisplay; sticky: true"></tr>
   </table>
   <mat-paginator [pageSizeOptions]="[5, 15, 25, 100]" [pageSize]="rowsPerPages" aria-label="Select page of allocation"></mat-paginator>

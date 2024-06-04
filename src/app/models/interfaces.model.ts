@@ -30,6 +30,11 @@ export interface formInitParams {
   },
   readOnly:boolean|null
 }
+export interface countriesData {
+  IdCountry : number, 
+  CountryName :string, 
+  IsOffshore:boolean
+}
 export interface AccountsTableModel {
  idportfolio:number;
  idclient:number;
@@ -79,6 +84,7 @@ export interface ClientData {
   phone: string,
   code : string,
   action:number
+  idcountryname:string
 }
 export interface counterParty {
   idclient:number, 

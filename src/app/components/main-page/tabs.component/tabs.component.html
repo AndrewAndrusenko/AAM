@@ -29,12 +29,23 @@
     [UI_portfolio_zero]="false"
     [filters]="{portfolio_code:[messageReceived.name]}">
     </app-inv-portfolio-position-table>
-    <app-inv-restriction-verify-table 
-    style="margin-top: 4%;"
-    [UI_portfolio_selection]="false"
-    [readOnly]="true"
-    [filters]="{portfolio_code:[messageReceived.name]}"
-    ></app-inv-restriction-verify-table>  
+    <mat-expansion-panel  class="headers-align" [expanded]="false"
+      (opened)="panel_Pr_Res_OpenState = true"
+      (closed)="panel_Pr_Res_OpenState = false" >
+      <mat-expansion-panel-header >
+        <mat-panel-title> Restriction verification </mat-panel-title>
+        <mat-panel-description>
+          Tap to {{panel_Pr_Res_OpenState? 'hide': 'open'}} violations
+          <mat-icon color = 'accent'>filter_alt</mat-icon>
+        </mat-panel-description>
+      </mat-expansion-panel-header >
+      <app-inv-restriction-verify-table 
+      style="margin-top: 4%;"
+      [UI_portfolio_selection]="false"
+      [readOnly]="true"
+      [filters]="{portfolio_code:[messageReceived.name]}"
+      ></app-inv-restriction-verify-table>  
+    </mat-expansion-panel>
   </mat-tab>
   <mat-tab label="Trades" aria-label="Trades"> 
     <app-allocation-table
@@ -143,10 +154,18 @@
       [useGetClientsPortfolios]="true"
       >
     </app-inv-portfolio-position-table>
-    <app-inv-restriction-verify-table 
-      style="margin-top: 4%;"
-      [useGetClientsPortfolios]="true"
-    ></app-inv-restriction-verify-table>  
+    <mat-expansion-panel  class="headers-align" [expanded]="false"
+    (opened)="panel_St_Res_OpenState = true"
+    (closed)="panel_St_Res_OpenState = false" >
+    <mat-expansion-panel-header >
+      <mat-panel-title> Restriction verification </mat-panel-title>
+      <mat-panel-description>
+        Tap to {{panel_St_Res_OpenState? 'hide': 'open'}} violations
+        <mat-icon color = 'accent'>filter_alt</mat-icon>
+      </mat-panel-description>
+      </mat-expansion-panel-header >
+      <app-inv-restriction-verify-table style="margin-top: 4%;" [useGetClientsPortfolios]="true"></app-inv-restriction-verify-table>  
+    </mat-expansion-panel>
   </mat-tab>
   <mat-tab label="Trades">
     <app-allocation-table

@@ -3,7 +3,7 @@ import { Observable } from 'rxjs/internal/Observable';
 import { Subject, exhaustMap, tap } from 'rxjs';
 import { cacheAAM, indexDBService } from './indexDB.service';
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
-import { StrategiesGlobalData, counterParty, currencyCode, currencyPair, currencyRateList } from '../models/interfaces.model';
+import { StrategiesGlobalData, counterParty, countriesData, currencyCode, currencyPair, currencyRateList } from '../models/interfaces.model';
 @Injectable({
   providedIn: 'root'
 })
@@ -17,6 +17,8 @@ export class AtuoCompleteService {
   private subSecID = new Subject<boolean>();
   private subCurrencyList = new Subject<boolean>();
   public subModelPortfoliosList = new Subject<boolean>();
+  public subCountries = new Subject <boolean> ();
+  private subCountriesReady = new Subject <countriesData[]> ();
   private subDerivativesList = new Subject<boolean>();
   private subCurrencyListReady = new Subject<boolean>();
   private subSecIdListReady = new Subject<boolean>();
@@ -31,6 +33,9 @@ export class AtuoCompleteService {
     this.subModelPortfoliosList.pipe (
       exhaustMap(()=>this.indexDBService.getIndexDBStaticTables('getModelPortfolios')),
     ).subscribe((data) => this.subMPsListReady.next(data.data as StrategiesGlobalData[]));
+    this.subCountries.pipe (
+      exhaustMap(()=>this.indexDBService.getIndexDBStaticTables('getCountriesData'))
+    ).subscribe(data=>this.subCountriesReady.next(data.data as countriesData[]))
    }
 
   filterList(value: string, type: string):  string[][]|string[]|currencyCode[]|currencyRateList[]|currencyPair[]|counterParty[] {
@@ -60,6 +65,9 @@ export class AtuoCompleteService {
       this.fullCurrenciesList = (data.data as currencyCode[]);
       this.subCurrencyListReady.next(true)
     });
+  }
+  getCountriesReady ():Observable<countriesData[]> {
+    return this.subCountriesReady.asObservable();
   }
   getSMPsListReady(): Observable<StrategiesGlobalData[]> {
     return this.subMPsListReady.asObservable();

@@ -78,7 +78,7 @@
       </mat-form-field>
       <mat-slide-toggle #overdraft 
         style="font-size:100%; letter-spacing: .05rem; margin-left: 2%;"
-        [style.color]="overdraft.checked ? 'var(--warnColor)':'default' "
+        [style.color]="overdraft.checked ? 'var(--warnColor)':'var(--mainFontColor)' "
         >Overdraft {{overdraft.checked? 'allowed!':'forbidden'}}
       </mat-slide-toggle>
     </form>

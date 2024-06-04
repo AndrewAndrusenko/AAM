@@ -6,7 +6,7 @@ import { AppInvestmentDataServiceService } from './investment-data.service.servi
 import { CurrenciesDataService } from './currencies-data.service';
 import { InstrumentDataService } from './instrument-data.service';
 import { corporateActionsTypes, instrumentCorpActions, instrumentDetails, moexBoard, moexSecurityGroup, moexSecurityType } from '../models/instruments.interfaces';
-import { ClientData, StrategiesGlobalData, counterParty, currencyCode, currencyPair, currencyRateList, marketDataSources } from '../models/interfaces.model';
+import { ClientData, StrategiesGlobalData, counterParty, countriesData, currencyCode, currencyPair, currencyRateList, marketDataSources } from '../models/interfaces.model';
 import { bcAccountType_Ext, bcTransactionType_Ext } from '../models/accountng-intefaces.model';
 export interface cacheAAM {
   code:string,
@@ -28,6 +28,7 @@ export interface cacheAAM {
                       currencyCode[]|
                       currencyPair[]|
                       counterParty[]|
+                      countriesData[]|
                       string[][]|
                       {secid:string}[]|{isin:string}[];
                       
@@ -121,6 +122,9 @@ export class indexDBService {
         break
         case 'bcAccountType_Ext':
          fetchServiceFunction = this.AccountingDataService.GetAccountTypeList('',0,'','','bcAccountType_Ext')
+        break
+        case 'getCountriesData':
+         fetchServiceFunction = this.InstrumentDataS.getGeneralData()
         break
       }
       return fetchServiceFunction;

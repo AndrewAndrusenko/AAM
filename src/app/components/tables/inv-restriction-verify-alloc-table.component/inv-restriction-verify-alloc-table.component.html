@@ -1,6 +1,6 @@
 <ng-container *ngIf="accessState!=='none'" >
-  <mat-form-field style="width: 20%;"class = "filter-field"  title="Filter All columns">
-    <mat-label>Search (all columns)...</mat-label>
+  <mat-form-field style="width: 30%;"class = "filter-field"  title="Filter All columns">
+    <mat-label>Type to search...</mat-label>
     <input 
       (keyup)="applyFilter($event)"
       matInput type="text" #filterALL
@@ -18,18 +18,18 @@
     <mat-icon matSuffix >save_alt</mat-icon>
   </button>
   <button color = "warn" mat-raised-button title="Accept Violations"
-    style=" margin-left:1%; font-size: large;"
+    style=" margin-left:1%; "
     (click)="acceptAlloc()">
     Accept Violations
     <mat-icon matSuffix >thumb_up_alt</mat-icon>
   </button>
   <button color = "primary" mat-raised-button title="Cancel Allocation"
-    style=" margin-left:1%; font-size: large;"
+    style=" margin-left:1%;"
     (click)="cancelAlloc()">
     Cancel Allocation
     <mat-icon matSuffix >thumb_down_alt</mat-icon>
   </button>
-  <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort  class ="childTable" style="width: 150%; margin-top: 0.5%;" >
+  <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort   style="width: 150%; margin-top: 0.5%;" >
     <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay; let i=index" justify="right"  >
       <th mat-header-cell *matHeaderCellDef mat-sort-header> {{columnsHeaderToDisplay[i]}}</th>
       <td 
@@ -58,10 +58,7 @@
       </td>
     </ng-container>
     <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
-    <tr mat-row  *matRowDef="let element; columns: columnsToDisplay; let dataindex=dataIndex;"
-      tabindex=0
-   >
-    </tr>
+    <tr mat-row  *matRowDef="let element; columns: columnsToDisplay; let dataindex=dataIndex;" tabindex=0></tr>
   </table>
   <mat-paginator [pageSizeOptions]="[5, 15, 25, 100]" [pageSize]="rowsPerPages" aria-label="Select page of allocation"></mat-paginator>
 </ng-container>

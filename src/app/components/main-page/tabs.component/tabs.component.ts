@@ -2,7 +2,7 @@ import {Component, OnDestroy, ViewChild } from '@angular/core';
 import {Subscription } from 'rxjs';
 import {TreeMenuSevice } from 'src/app/services/tree-menu.service';
 import {Title} from "@angular/platform-browser";
-import { MatTabGroup } from '@angular/material/tabs';
+import {MatTabGroup } from '@angular/material/tabs';
 @Component({
   selector: 'app-app-tabs',
   templateUrl: './tabs.component.html',
@@ -15,7 +15,8 @@ export class AppTabsComponent implements OnDestroy {
   @ViewChild('tabGroup') tabGroup:MatTabGroup
   tabsToFollow:string[]=['Portfolios']
   lastIndexChanged:number = null
-
+  panel_Pr_Res_OpenState:boolean=false;
+  panel_St_Res_OpenState:boolean=false;
   constructor (private TreeMenuSevice : TreeMenuSevice, private titleService:Title) {
     this.subscriptions.add (
       this.TreeMenuSevice.getUpdate().subscribe( message => {

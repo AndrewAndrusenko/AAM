@@ -1,7 +1,9 @@
 <ng-container *ngIf="accessState!=='none'">
-  <mat-toolbar color="primary" >
-  {{action==='Create_Example'? 'Create' : action}} {{Level.value===2? ' Strategy':'Model Portfolio'}}  <span style=""> {{':  '+ Description.value}}</span>
+  <mat-toolbar color="primary" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle>
+  {{action==='Create_Example'? 'Create' : action}} {{Level.value===2? ' Strategy':'Model Portfolio'}}  <span> {{':  '+ Description.value}}</span>
   </mat-toolbar>
+  <mat-dialog-content style="min-height: 90vh;">
+
   <mat-expansion-panel  class="headers-align"
     [expanded]="true"
     (opened)="panelOpenState = true"  
@@ -18,7 +20,7 @@
     <button mat-raised-button color="primary" 
       [disabled]="!(editStrategyForm.valid && submitbox.checked)"
       (click)="updateStrategyData(action)"
-      style="margin-left: 1%;width: 15%;">
+      style="margin-left: 0.5%;width: 15%; margin-top: 0.5%;">
       {{action==='Create_Example'? 'Create' : action}} Strategy
     </button>
     <mat-checkbox color="primary"  #submitbox checked="false" style="margin-left: 1%;"
@@ -27,7 +29,6 @@
         editStrategyForm.controls['sname'].updateValueAndValidity();"
       >Submit Data
     </mat-checkbox>
-
     <form  [formGroup]="editStrategyForm">
       <mat-form-field style="width: 10%;">
         <input [value]="id"  matInput placeholder="id" formControlName="id" [readonly]="true">
@@ -71,13 +72,14 @@
       <h4 style="margin-left: 0.5%;" class="warn-color"  *ngIf="editStrategyForm.invalid"> Please check the form. Data is invalid</h4>
     </form>
   </mat-expansion-panel>
-  <app-table-strategy_structure style="width:130%" #strategyStructureTable
+  <mat-divider style="border-width: 2px; border-color: var(--mainFontColor);"></mat-divider>
+  <app-table-strategy_structure style="width:130%" #strategyStructureTable 
     [ModelPortfolio] = Level.value 
     [parentStrategyId] = id.value
     >
   </app-table-strategy_structure>
-  <mat-expansion-panel style=" margin-top: 0.5%; " class="headers-align"
-    [expanded]="true"
+  <mat-expansion-panel style=" margin-top: 0.5%; " class="headers-align" style=" border-style:solid; border-width: 1px;"
+    [expanded]="false"
     (opened)="panelOpenState1 = true"  
     (closed)="panelOpenState1 = false" >
     <mat-expansion-panel-header>
@@ -92,4 +94,5 @@
     [parentStrategyId] = id.value
     ></app-strategy_structure-hist-table>
   </mat-expansion-panel>
+</mat-dialog-content>
 </ng-container>

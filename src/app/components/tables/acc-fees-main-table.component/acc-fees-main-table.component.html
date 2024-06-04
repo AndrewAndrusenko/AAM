@@ -29,7 +29,7 @@
     Create item 
     <mat-icon matSuffix >add_circle</mat-icon>
   </button>
-  <table  mat-table [dataSource]="dataSource" multiTemplateDataRows matSort class ="childTable" style="width: 100%;" >
+  <table  mat-table [dataSource]="dataSource" multiTemplateDataRows  matSort style="width: 100%;" >
     <ng-container matColumnDef="{{column}}" *ngFor="let column of columnsToDisplay ; let i=index" justify="right"  >
       <th mat-header-cell *matHeaderCellDef mat-sort-header> 
         <span [ngSwitch]="true==true">

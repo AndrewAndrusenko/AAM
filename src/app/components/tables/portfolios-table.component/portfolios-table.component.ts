@@ -100,13 +100,13 @@ export class TablePortfolios {
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage();}
   }
   navigateToAccountForm (actionType:string, row: AccountsTableModel ) {
-    this.routesPathsTreeMenu.includes('Portfolios')? this.router.navigate(['tree/'+'Portfolios']) : this.router.navigate(['tree/']);
+    this.router.navigate(['tree/']);
     this.TreeMenuSeviceS.sendUpdate('Portfolios', row.portfolioname, +row.idportfolio,actionType)
     this.expandAllowed = false;
   }
   openAccountForm (actionType:string, row: AccountsTableModel ) {
     this.expandAllowed = false;
-    this.dialogRef = this.dialog.open(AppNewAccountComponent ,{minHeight:'50vh', minWidth:'60vw' });
+    this.dialogRef = this.dialog.open(AppNewAccountComponent ,{minWidth:'60vw' });
     this.dialogRef.componentInstance.action = actionType;
     this.dialogRef.componentInstance.portfolioCode = Number(row['idportfolio']);
   }

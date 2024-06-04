@@ -210,7 +210,7 @@
           <p *ngSwitchDefault>{{element[column]}}</p>
           <p *ngSwitchCase="['trade_amount'].includes(column)">{{element[column]|currency :' '}} </p>
           <p *ngSwitchCase="['fifo','depo_account_balance','pl','current_account_balance'].includes(column)">
-            <span [style.color]="element[column]<0?'var(--warnColor)':'default'">{{element[column]|currency :' '}} </span>
+            <span [style.color]="element[column]<0?'var(--warnColor)':'var(--mainFontColor)'">{{element[column]|currency :' '}} </span>
           </p>
           <p *ngSwitchCase="['tdate'].includes(column)">{{element[column] | date}} </p>
           <p *ngSwitchCase="['entries'].includes(column)">

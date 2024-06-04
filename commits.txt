@@ -544,16 +544,19 @@ The second phase is to prepare technical and presentation documentation, thoroug
 * Fixed: FIFO position search with date parameter secid and portfolio => fixed by removing last boolean parameter in middle ware query execution function
 + Checked market quotes and currencies rates import on middleOfficer access role. Everythhig is okay
 
-In Progress:
-- Global style refactoring:
-  - Changed pre-built theme by direct modification of its css file. Primary color has been changed to indigo
-  - A set of color parameters have been introduced inside styles.css. These params are used to style non-material elements of UI
-  - 90% of local components style has been replaced by global styling via style.scc
-Done:
+30/05/2024
 || Access segregation model
 || NgRok to access via web. Local Tunnel has been dropped due to its instability
 * Fixed performance fee calculation => Changed function f_i_get_npv_dynamic. Portfolio NPV is built upon balance data and in order to get the whole list of positions balance data have to be calculated from the last closed operational day at least. Thus balance data retrieved from the least between last closed open day and start_date parameter 
 * Fixed entries table complex search => refactored common function which transfoms date range objet to postgres range - open range without end date and corrected reset of search form 
+- In Progress =>  Global style refactoring
+
+04/06/2024:
+|| Global style refactoring:
+  - Changed pre-built theme by direct modification of its css file. Primary color has been changed to indigo
+  - A set of color parameters have been introduced inside styles.css. These params are used to style non-material elements of UI
+  - 95% of local components styles has been replaced by global styling via style.scc
+  - Created unified flexible style approach.Easy to modify and expand 
 
 ToDo
 || Architecture

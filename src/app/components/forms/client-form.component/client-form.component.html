@@ -1,25 +1,24 @@
-<mat-toolbar color="primary" >
+<mat-toolbar color="primary" cdkDrag cdkDragRootElement=".cdk-overlay-pane" cdkDragHandle>
   {{action==='Create_Example'? 'Create' : action}} Client 
 </mat-toolbar>
-<div class="client_form">
+
+<form  [formGroup]="editClienttForm">
   <button mat-raised-button color="primary" 
     [disabled]="editClienttForm.invalid || !submitbox.checked"
     (click)="editClienttForm.valid? updateClientData(action) : null"
-    style="margin-top: 10px; width: 200px; ">
+    style="margin-top: 1%; margin-bottom: 1%; width: 15% ">
     {{action==='Create_Example'? 'Create' : action}} Client 
   </button>
-  <mat-checkbox color="primary"  #submitbox 
-    (click)=" 
-      editClienttForm.markAllAsTouched();
-      editClienttForm.controls['clientname'].updateValueAndValidity();
-    "
-  >Submit Data</mat-checkbox>
-</div>
-<form  [formGroup]="editClienttForm">
-  <mat-form-field>
+  <mat-checkbox color="primary"  #submitbox style="margin-left: 2%;"
+    (click)=" editClienttForm.markAllAsTouched();
+              editClienttForm.controls['clientname'].updateValueAndValidity();"
+    >Submit Data
+  </mat-checkbox>
+  <br>
+  <mat-form-field style="width: 15%;">
     <input matInput placeholder="id client" formControlName="idclient" [readonly]="true">
   </mat-form-field>
-  <mat-form-field>
+  <mat-form-field  style="width: 50%;">
     <input matInput placeholder="client name" formControlName="clientname">
     <mat-error  *ngIf="clientname?.errors?.['required']">
       Required!    
@@ -28,32 +27,33 @@
        Not unique. Please choose another one.    
     </mat-error>
   </mat-form-field>
-  <mat-form-field>
-    <input matInput placeholder="country" formControlName="idcountrydomicile">
-    <mat-error  *ngIf="idcountrydomicile?.errors?.['required']">
-      Required!    
-    </mat-error>
-    <mat-error  *ngIf="idcountrydomicile?.errors?.['pattern']">
-      Only digts are allowed.    
-   </mat-error>
+  <mat-slide-toggle formControlName="isclientproffesional" #professional class="mat-form-field"   color='primary'>
+    Status  {{ professional.checked? 'Professional':'Non-Professional'}} 
+  </mat-slide-toggle>
+  <br>
+
+  <mat-form-field style="width: 60%;">
+    <mat-select placeholder="Country" formControlName="idcountrydomicile">
+      <mat-option *ngFor="let country of countriesList" [value]="country.IdCountry.toString()">
+        {{country.IdCountry}} - {{country.CountryName}}
+      </mat-option>
+    </mat-select>
   </mat-form-field>
-  <mat-slide-toggle formControlName="isclientproffesional" #professional
-    labelPosition='before'
-    color='primary'
-    >Status  {{ professional.checked? 'Professional':'Non-Professional'}} </mat-slide-toggle>
-  <mat-form-field>
-    <input matInput placeholder="address" formControlName="address">
+  <br>
+  <mat-form-field style="width: 90%;">
+    <input matInput placeholder="address" formControlName="address" >
     <mat-error  *ngIf="address?.errors?.['required']">
       Required!    
     </mat-error>
   </mat-form-field>
-  <mat-form-field>
+  <br>
+  <mat-form-field style="width: 30%;">
     <input matInput placeholder="contact person" formControlName="contact_person">
     <mat-error  *ngIf="contact_person?.errors?.['required']">
       Required!    
     </mat-error>
   </mat-form-field>
-  <mat-form-field>
+  <mat-form-field style="width: 30%;">
     <input matInput placeholder="email" formControlName="email">
     <mat-error  *ngIf="email?.errors?.['required']">
       Required!    
@@ -62,7 +62,7 @@
       Email is incorrect. Please check.    
     </mat-error>
   </mat-form-field>
-  <mat-form-field>
+  <mat-form-field style="width: 25%;">
     <input matInput placeholder="phone" formControlName="phone">
     <mat-error  *ngIf="phone?.errors?.['required']">
       Required!    
@@ -71,5 +71,5 @@
       Only digts are allowed.    
     </mat-error>
   </mat-form-field>
-  <p color = 'red' *ngIf="editClienttForm.invalid"> Please check the form. Data is invalid</p>
+  <h4 style="margin-left: 0.5%;" class="warn-color"  *ngIf="editClienttForm.invalid"> Please check the form. Data is invalid</h4>
 </form>

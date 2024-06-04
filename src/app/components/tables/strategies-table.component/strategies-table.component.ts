@@ -92,12 +92,12 @@ export class AppTableStrategiesComponentComponent  implements AfterViewInit {
     this.modal_principal_parent.emit(element);
   }
   NavigateToStrategyForm (actionType:string, row: StrategiesGlobalData ) {
-    this.routesPathsTreeMenu.includes('Strategies')? this.router.navigate(['tree/'+'Strategies']) : null;
-    this.TreeMenuSeviceS.sendUpdate('Strategies', row.name, +row.id)
+    this.router.navigate(['tree/']);
+    this.TreeMenuSeviceS.sendUpdate('Strategies', row.name, +row.id);
   }
   openStrategyForm (actionType:string, row: StrategiesGlobalData ) {
     this.expandAllowed = false;
-    this.StrategyForm = this.dialog.open(AppStrategyFormComponent ,{minHeight:'400px', maxWidth:'1000px' });
+    this.StrategyForm = this.dialog.open(AppStrategyFormComponent ,{minWidth:'70vw' });
     this.StrategyForm.componentInstance.action = actionType;
     actionType !=='Create'? this.StrategyForm.componentInstance.strategyId = row['id'] : null;
   }

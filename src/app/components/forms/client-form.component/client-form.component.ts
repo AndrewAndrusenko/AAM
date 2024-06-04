@@ -7,21 +7,24 @@ import { customAsyncValidators } from 'src/app/services/customAsyncValidators.se
 import { HadlingCommonDialogsService } from 'src/app/services/hadling-common-dialogs.service';
 import { AppInvestmentDataServiceService } from 'src/app/services/investment-data.service.service';
 import { AuthService } from 'src/app/services/auth.service';
-import { ClientData } from 'src/app/models/interfaces.model';
-import { filter, switchMap } from 'rxjs';
+import { ClientData, countriesData } from 'src/app/models/interfaces.model';
+import { Subscription, filter, switchMap } from 'rxjs';
+import { AtuoCompleteService } from 'src/app/services/auto-complete.service';
 @Component({
   selector: 'app-app-client-form',
   templateUrl: './client-form.component.html',
-  styleUrls: ['./client-form.component.css'],
+  styleUrls: ['./client-form.component.scss'],
 })
 export class AppClientFormComponent implements OnInit {
   accessState: string = 'none';
   disabledControlElements: boolean = false;
   accessToPortfolioData: string = 'none';
   editClienttForm: FormGroup;
+  countriesList: countriesData[];
   @Input() client : number;
   @Input() action: string;
   dialogRefConfirm: MatDialogRef<AppConfimActionComponent>;
+  private subscriptions = new Subscription();
   public actionToConfim = {'action':'delete_client' ,'isConfirmed': false}
   public AppSnackMsgbox : AppSnackMsgboxComponent
   constructor (
@@ -29,17 +32,27 @@ export class AppClientFormComponent implements OnInit {
     private CommonDialogsService:HadlingCommonDialogsService,
     private InvestmentDataServiceService : AppInvestmentDataServiceService,   
     private AuthServiceS:AuthService,  
+    private AutoCompleteService:AtuoCompleteService
   ) 
   {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToClientData')[0].elementvalue;
     this.accessToPortfolioData = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToPortfolioData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
+    this.AutoCompleteService.subCountries.next(true);
+    this.subscriptions.add(this.AutoCompleteService.getCountriesReady().subscribe(data=>{
+      this.countriesList = data
+    console.log('countries',data);
+    }))
+  }
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe()
   }
   ngOnInit(): void {
     this.editClienttForm=this.fb.group ({
       idclient: {value: 0, disabled: false}, 
       clientname: [null, {validators: [Validators.required], updateOn:'blur' } ],
       idcountrydomicile: [null, [Validators.required, Validators.pattern('[0-9]*')]],
+      idcountryname: [null],
       isclientproffesional: [false],
       address: [null, [Validators.required]],
       contact_person: [null, [Validators.required]],

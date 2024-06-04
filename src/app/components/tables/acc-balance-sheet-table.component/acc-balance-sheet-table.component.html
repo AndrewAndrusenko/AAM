@@ -51,7 +51,7 @@
             </button>
             <mat-slide-toggle #overdraftClosingBalance 
               style="font-size:100%; letter-spacing: .05rem; margin-left: 4%;margin-top: 4%;"
-              [style.color]="overdraftClosingBalance.checked ? 'var(--warnColor)':'default'  "
+              [style.color]="overdraftClosingBalance.checked ? 'var(--warnColor)':'var(--mainFontColor)'  "
               >Overdraft {{overdraftClosingBalance.checked? 'allowed!':'forbidden'}}
             </mat-slide-toggle>
           </span>

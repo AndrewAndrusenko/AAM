@@ -136,6 +136,10 @@ tr.mat-row:hover {
   border-radius: 10px;
   background: #2b2be3; /* green */
 }
+.detail-row:hover{
+  border: unset !important;
+  background:unset !important;
+}
 //---------------- Tabs-----------------------------------------------
 .mat-tab-label {
   font: size 1em !important;
