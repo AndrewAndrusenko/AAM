@@ -1,5 +1,8 @@
 # AAM
-
+A full-scale SPA Asset Management Platform. 
+Features:
+- Whole investment managment cycle (client portfolios, stratiegies, investment restrictions, model portfolios, orders, trades, analitics, performance/mangement fees)
+- Whole accounting cycle (balance sheet (closing, opening, reconcilation), fees processing, FIFO (including short sales), deatiled reporting, flexible accounting schemes managemnt system, cash/securities accounts (overdrafts), manual/automantic/stp transactions,  swifts 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 15.0.2.
 
 ## Development server
