@@ -9,6 +9,7 @@ Architecture: Angualr UI => NodeJS Express RESTful API => PostgreSQL DB
 - User Interface => Angualr UI
 - MiddleWare API => NodeJS Express
 - Database => PostgreSQL
+DDD
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 15.0.2.
 
