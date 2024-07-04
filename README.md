@@ -1,8 +1,5 @@
 # AAM
-AAA
-Full-Scale SPA: Asset Management Platform.
-
-Architecture: Angua
+Full-Scale SPA: Asset Management Platform
 
 Features:
 - Whole investment managment cycle (client portfolios, stratiegies, investment restrictions, model portfolios, orders, trades, analitics, performance/mangement fees)
