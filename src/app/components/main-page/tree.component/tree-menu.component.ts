@@ -150,14 +150,8 @@ export class TreeComponent {
   hasChild = (_: number, _nodeData: DynamicFlatNode) => _nodeData.expandable;
   sendMessage = (node: DynamicFlatNode) => {
     this.routesPathsTreeMenu.includes(node.item)? this.router.navigate(['tree/'+node.item]) : this.router.navigate(['tree/']) ;
-    console.log('tree/'+node.item);
     this.TreeMenuSevice.sendUpdate(node.nodeRoot, node.item, +node.id)
   }
-/*   navigateToClientModifyForm (actionType: string, element:ClientData) {
-    this.routesPathsTreeMenu.includes('Clients')? this.router.navigate(['tree/'+'Clients']) : this.router.navigate(['tree/']);
-    this.TreeMenuSeviceS.sendUpdate('Clients', element.clientname, element.idclient,'Edit')
-    this.expandAllowed = false;
-  } */
   initialData() {
     let nodeColor:string
     let userData = JSON.parse(localStorage.getItem('userInfo'));
@@ -182,7 +176,6 @@ export class TreeComponent {
   // Method to search the Tree Menu element for the item inputed in Search field. 
   searchByTree = (SearchText:string) => {
     SearchText = SearchText.toUpperCase();
-    console.log('SearchText',SearchText)
     var parentName : string;
     var isFinded : boolean = false;
     var parentIndex: number;

@@ -89,8 +89,8 @@ export class AppAccAccountModifyFormComponent implements OnInit {
       d_APType: {value:null, disabled: true},
       dateOpening:[new Date(), [Validators.required]] 
     })
-    this.subscriptions.add(this.AutoCompService.recieveCurrencyListReady().subscribe(()=>this.currencyCode.updateValueAndValidity()));
-    this.subscriptions.add(this.AutoCompService.recieveSecIdListReady().subscribe(()=>this.secid.updateValueAndValidity()));
+    this.subscriptions.add(this.AutoCompService.subCurrencyList.subscribe(()=>this.currencyCode.updateValueAndValidity()));
+    this.subscriptions.add(this.AutoCompService.subSecIdList.subscribe(()=>this.secid.updateValueAndValidity()));
 
   }
   ngOnInit(): void {
@@ -98,13 +98,13 @@ export class AppAccAccountModifyFormComponent implements OnInit {
     (this.aType == 1)? this.accountLedgerModifyForm.patchValue(this.data): this.accountModifyForm.patchValue(this.data);
     this.action==='View'? this.accountLedgerModifyForm.disable():null;
     this.action==='View'? this.accountModifyForm.disable():null;
-    this.AutoCompService.getCurrencyList();
+    this.AutoCompService.subCurrencyList.next(true);
     this.filteredCurrenciesList = this.currencyCode.valueChanges.pipe (
       startWith (''),
       distinctUntilChanged(),
       map(value => this.AutoCompService.filterList(value || '','currency') as currencyCode[] )
       );
-    this.AutoCompService.getSecidLists();
+    this.AutoCompService.subSecIdList.next(true);
     this.filterednstrumentsLists = this.secid.valueChanges.pipe(
         startWith(''),
         distinctUntilChanged(),

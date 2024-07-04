@@ -90,14 +90,16 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
       MP:null,
       p_report_date_start:null,
       p_report_date_end:null,
-      p_report_currency:['840', { validators:  Validators.required}],
+      p_report_currency:['840', { validators:  [this.AutoCompService.currencyValirator(),Validators.required]}],
     });
-    this.AutoCompService.getCurrencyList();
-    this.AutoCompService.subModelPortfoliosList.next(true);
-    this.subscriptions.add(
-      this.AutoCompService.recieveCurrencyListReady().subscribe(()=>this.report_id_currency.updateValueAndValidity()));
-    this.subscriptions.add(
-      this.AutoCompService.getSMPsListReady().subscribe(data=>this.mp_strategies_list=data))
+    if (this.AutoCompService.fullCurrenciesList.length) {
+      this.report_id_currency.updateValueAndValidity()
+    } else {
+      this.AutoCompService.subCurrencyList.next(true);
+      this.subscriptions.add(this.AutoCompService.subCurrencyList.subscribe(()=>this.report_id_currency.updateValueAndValidity()));
+    }
+    this.AutoCompService.subModelPortfolios.next([])
+    this.subscriptions.add(this.AutoCompService.subModelPortfolios.subscribe(data=>this.mp_strategies_list=data))
   }
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();

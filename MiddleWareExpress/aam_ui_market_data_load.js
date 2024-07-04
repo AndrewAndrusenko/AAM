@@ -243,7 +243,7 @@ async function fgetInstrumentDataGeneral(request,response) {
   const query = {text: '', values:[]}
   switch (request.query.dataType) {
     case 'getBoardsDataFromInstruments':
-      query.text = "SELECT boardid, board_title FROM public.mmoexboards "  +
+      query.text = "SELECT boardid, board_title, is_primary::numeric FROM public.mmoexboards "  +
       "WHERE is_traded=1 " +
       "ORDER BY boardid asc;"
     break;

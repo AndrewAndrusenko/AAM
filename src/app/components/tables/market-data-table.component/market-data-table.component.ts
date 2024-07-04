@@ -90,6 +90,7 @@ export class AppTableMarketDataComponent {
   columnsHeaderToDisplay:string[]=[];
   dataSource: MatTableDataSource<marketData>;
   @Input() FormMode:string = 'Full'
+  @Input() secidInput:string = '';
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
   loadMarketData: FormGroup;
@@ -126,6 +127,7 @@ export class AppTableMarketDataComponent {
     private fb:FormBuilder, 
     public snack:MatSnackBar,
   ) {
+    this.AutoCompService.subSecIdList.next(true)
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToInstrumentData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.searchParametersFG = this.fb.group ({
@@ -141,7 +143,6 @@ export class AppTableMarketDataComponent {
       overwritingCurrentData : [false]
     });
     this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data=>this.FirstOpenedAccountingDate = data[0].FirstOpenedDate);
-    this.AutoCompService.getSecidLists();
     this.secidList.setValidators(this.AutoCompService.secidValirator())
     this.filterednstrumentsLists = this.secidList.valueChanges.pipe(
       startWith(''),
@@ -153,13 +154,25 @@ export class AppTableMarketDataComponent {
     this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
     this.indexDBService.pipeMarketSourceSet.next(true);
     this.indexDBService.pipeBoardsMoexSet.next(true);
-    this.subscriptions.add(this.indexDBService.receiveBoardsMoexSet().subscribe(boardsData => this.boardIDs = boardsData));
+    this.subscriptions.add(this.indexDBService.receiveBoardsMoexSet().subscribe(boardsData =>{
+      this.boardIDs = boardsData
+      this.instruments = ['ClearAll',this.secidInput];
+      this.dataRange.get('dateRangeStart').patchValue(new Date(new Date().getTime() - 180 * 24 * 60 * 60 * 1000));
+      this.boards.patchValue([...this.boardIDs.filter(el=>Number(el.is_primary)===1).map(item => item.boardid ), 0])
+      }));
     this.subscriptions.add(this.indexDBService.receivMarketSourceSett().subscribe(msData => {
       msData.forEach(el=>el.segments.forEach(seg=>this.fullSourcesSet.push({code:seg.sourceCode,name:seg.description})))
       this.marketSources = msData.filter(el=>el.type==='stock')}
       ));
 
     this.loadingDataLog.state = {Message:'',State: 'None'};
+  }
+  ngOnChanges(): void {
+    if (this.FormMode==='ChartMode'&&this.secidInput!=='') {
+      this.instruments = ['ClearAll',this.secidInput];
+      this.dataRange.get('dateRangeStart').patchValue(new Date(new Date().getTime() - 180 * 24 * 60 * 60 * 1000));
+      this.dataSource?.data? this.submitQuery(false,true):null;
+    }
   }
   ngOnDestroy(): void {this.subscriptions.unsubscribe()}
   manualQuote (action1:string,data:marketData|null){
@@ -249,7 +262,7 @@ export class AppTableMarketDataComponent {
     this.dataSource.filter = '';
     if (this.dataSource.paginator) {this.dataSource.paginator.firstPage()}
   }
-  submitQuery () {
+  submitQuery (showSnackResult:boolean=true,showChart:boolean=false) {
     this.dataSource? this.dataSource.data=null : null;
     let searchObj = {};
     let instrumentsList = [];
@@ -267,8 +280,8 @@ export class AppTableMarketDataComponent {
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
       this.instruments.unshift('ClearAll')
-      this.FormMode==='ChartMode'? this.MarketDataService.sendMarketDataForChart(marketData) : null;
-      this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (marketData.length,'en-US') + ' rows'},'Loaded ');
+      this.FormMode==='ChartMode'? this.MarketDataService.sendMarketDataForChart({data:marketData,showChart:showChart}) : null;
+      showSnackResult? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (marketData.length,'en-US') + ' rows'},'Loaded '):null;
     })
   }
   toggleAllSelection(elem:string, allSelected: boolean) {

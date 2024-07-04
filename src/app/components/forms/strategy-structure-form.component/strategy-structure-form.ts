@@ -62,7 +62,7 @@ export class AppStructureStrategyFormComponent implements OnInit {
       this.indexDBService.getIndexDBStaticTables('getModelPortfolios').subscribe (data => this.MPnames = (data.data as StrategiesGlobalData[]).filter(el=>el.Level===1))
     };
     if (this.MP===1) {
-      this.AtuoCompService.getSecidLists();
+      this.AtuoCompService.subSecIdList.next(true);
       this.id.setValidators(this.AtuoCompService.secidValirator())
       this.filterednstrumentsLists = this.id.valueChanges.pipe(
         startWith(''),

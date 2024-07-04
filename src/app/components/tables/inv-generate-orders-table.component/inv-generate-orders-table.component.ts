@@ -95,9 +95,13 @@ export class AppInvGenerateOrdersTable{
         );
       return !filter || filter_array.reduce((acc,val)=>acc+Number(val[1]),0)===0;
     };
-    this.AutoCompService.getCurrencyList();
-    this.subscriptions.add(this.AutoCompService.recieveCurrencyListReady().subscribe(()=>this.report_id_currency.updateValueAndValidity()));
-    this.AutoCompService.getSecidLists();
+    if (this.AutoCompService.fullCurrenciesList.length) {
+      this.report_id_currency.updateValueAndValidity()
+    } else {
+      this.AutoCompService.subCurrencyList.next(true);
+      this.subscriptions.add(this.AutoCompService.subCurrencyList.subscribe(()=>this.report_id_currency.updateValueAndValidity()));
+    }
+    this.AutoCompService.subSecIdList.next(true);
    
     this.filterednstrumentsLists = this.secidList.valueChanges.pipe(
       startWith(''),

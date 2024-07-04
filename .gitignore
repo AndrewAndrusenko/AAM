@@ -21,6 +21,7 @@ yarn-error.log
 *.sublime-workspace
 
 # Visual Studio Code
+/.vscode
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
@@ -40,6 +41,7 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+/CBR Xml import
 DB_BackUp/*
 DB_BackUp/BackupDB_17_Jan_2024_0701h.sql
 DB_BackUp/BackupDB_17_Jan_2024_1001h.sql

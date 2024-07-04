@@ -90,7 +90,7 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
     })
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToInstrumentData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
-    this.AtuoCompService.getCurrencyList();
+    this.AtuoCompService.fullCurrenciesList.length? null: this.AtuoCompService.subCurrencyList.next(true);
     this.indexDBServiceS.getIndexDBStaticTables('getMoexSecurityGroups').subscribe ((data)=>this.securityGroups = (data.data as moexSecurityGroup[]));
     this.indexDBServiceS.getIndexDBStaticTables('getMoexSecurityTypes').subscribe ((data)=>{
       this.securityTypes = (data.data as moexSecurityType[]);

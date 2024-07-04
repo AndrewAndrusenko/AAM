@@ -44,7 +44,7 @@ export class AppMarketQuoteManualFormComponent {
     private CommonDialogsService:HadlingCommonDialogsService,
     private dialog: MatDialog, 
   ) {
-    this.AutoCompService.getSecidLists();
+    this.AutoCompService.subSecIdList.next(true);
     this.secid.setValidators(this.AutoCompService.secidValirator());
     this.filterednstrumentsLists = this.secid.valueChanges.pipe(
       startWith(''),

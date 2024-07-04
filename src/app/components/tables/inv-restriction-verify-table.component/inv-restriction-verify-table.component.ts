@@ -132,13 +132,11 @@ export class AppInvRestrictionVerifyTableComponent {
       idportfolios:  [],
       MP:null    
     });
-    this.AutoCompService.subModelPortfoliosList.next(true);
-    this.subscriptions.add(
-      this.AutoCompService.getSMPsListReady().subscribe(data=>this.mp_strategies_list=data))
+    this.AutoCompService.subModelPortfolios.next([])
+    this.subscriptions.add(this.AutoCompService.subModelPortfolios.subscribe(data=>this.mp_strategies_list=data))
   }
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
-    let a='ddd'.toLocaleUpperCase
   }
   ngOnInit(): void {
     if (this.useGetClientsPortfolios===true) {

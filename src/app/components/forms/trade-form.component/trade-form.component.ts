@@ -100,13 +100,13 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data => this.firstOpenedAccountingDate = data[0].FirstOpenedDate);
     this.indexDBServiceS.getIndexDBStaticTables('getMoexSecurityTypes').subscribe (data=>this.securityTypes = (data.data as moexSecurityType[]));
-    this.AutoCompService.getCurrencyList();
-    this.arraySubscrition.add(this.AutoCompService.recieveCurrencyListReady().subscribe(()=>{
+    this.AutoCompService.fullCurrenciesList.length? null: this.AutoCompService.subCurrencyList.next(true);
+    this.arraySubscrition.add(this.AutoCompService.subCurrencyList.subscribe(()=>{
       this.id_price_currency.updateValueAndValidity();
       this.id_settlement_currency.updateValueAndValidity();
       this.checkCurrenciesHints()
     }));
-    this.AutoCompService.getSecidLists();
+    this.AutoCompService.subSecIdList.next(true);
     this.AutoCompService.getCounterpartyLists().subscribe(()=>this.id_cpty.setValidators(this.AutoCompService.counterPartyalirator(this.cpty_name)));
   }
   ngOnInit(): void {

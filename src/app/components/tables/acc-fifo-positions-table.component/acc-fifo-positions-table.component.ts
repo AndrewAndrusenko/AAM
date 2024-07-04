@@ -102,7 +102,7 @@ export class AppAccFifoPositionsTable {
       secidIn:  null,
       tdate : new Date(),
     });
-    this.AutoCompleteService.getSecidLists();
+    this.AutoCompleteService.subSecIdList.next(true);
   }
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();

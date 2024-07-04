@@ -156,7 +156,7 @@ export class AppallocationTableComponent  implements AfterViewInit {
       });
   }
   ngAfterViewInit() {
-    this.AutoCompService.getSecidLists();
+    this.AutoCompService.subSecIdList.next(true);
     this.filters!==undefined&&this.fullDataSource!==undefined? this.initialFilterOfDataSource(this.filters) : null;
     this.filterednstrumentsLists = this.secidList.valueChanges.pipe(
       startWith(''),

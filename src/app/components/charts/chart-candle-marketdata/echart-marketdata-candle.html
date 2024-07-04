@@ -1,15 +1,19 @@
-<nav class="navbar navbar-expand-sm navbar-dark bg-primary"  style="align-items: center;">
-  <mat-form-field   style=" text-align: center; width: 12%;" class="no-hint-fields" >
+<div style="display: flex;">
+  <mat-form-field   style="width: 12%; text-align: center;" class="no-hint-fields" >
     <mat-label >Select SecID..</mat-label>
-    <mat-select >
-      <mat-option *ngFor="let secId of secIds" (click)="onChangeCountry(secId)"  [value]="secId">{{secId}}</mat-option>
+    <mat-select  #selectPortfolio>
+      <mat-option *ngFor="let secId of secIds" (click)="onChangeSecid(secId)"  [value]="secId">{{secId}}</mat-option>
     </mat-select>
   </mat-form-field>
-  <a class=" navbar-brand mx-auto" style="align-items: center;">Market Data</a>
-</nav>
-
-<div *ngIf="seriesCandle.length!==0" style="background-color: azure;">
-<div style="width: 98%; top: 1%;" >
-  <div echarts [options]="countryCasesChartOptions" style="width: 100%; min-height: 70vh" ></div>
+  <span style="flex: 1 1 auto;"></span>
+  <label style="font-size: large; align-items: flex-end;width: 20%; margin-top: 1%; ">
+    Market Data
+    <mat-icon color="accent" style="transform: scale(1.5);margin-left: 2%; margin-bottom: -1%;">bar_chart</mat-icon>
+  </label> 
+  <label #fontlarge> </label>
 </div>
+<div *ngIf="seriesCandle.length!==0" style="background-color: azure;">
+  <div style="width: 98%; top: 1%;" >
+    <div echarts [options]="countryCasesChartOptions" style="width: 100%; min-height: 70vh" ></div>
+  </div>
 </div> 

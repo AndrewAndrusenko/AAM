@@ -38,11 +38,8 @@ export class AppClientFormComponent implements OnInit {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToClientData')[0].elementvalue;
     this.accessToPortfolioData = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToPortfolioData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
-    this.AutoCompleteService.subCountries.next(true);
-    this.subscriptions.add(this.AutoCompleteService.getCountriesReady().subscribe(data=>{
-      this.countriesList = data
-    console.log('countries',data);
-    }))
+    this.AutoCompleteService.subCountries.next([]);
+    this.subscriptions.add(this.AutoCompleteService.subCountries.subscribe(data=>this.countriesList = data))
   }
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe()

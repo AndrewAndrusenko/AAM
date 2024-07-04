@@ -131,6 +131,9 @@ export class AppInvestmentDataServiceService {
   getPortfoliosPositions (params_data: {secidList:string[], idportfolios : number[], report_date: string, report_id_currency :number }):Observable<portfolioPositions[]> {
     return this.http.post <portfolioPositions[]> ('/api/AAM/GetPortfolioPositions/',{params:params_data,action:'getPortfolioPositions'})
   }
+  getSecIDsPositions (params_data: {report_date: string, report_id_currency :number,secid :string }):Observable<portfolioPositions[]> {
+    return this.http.post <portfolioPositions[]> ('/api/AAM/GetPortfolioPositions/',{params:params_data,action:'getSecIDsPositions'})
+  }
   getPortfolioMpDeviations (params_data: {secidList:string[], idportfolios : number[], report_date: string, report_id_currency :number }):Observable<portfolioPositions[]> {
     return this.http.post <portfolioPositions[]> ('/api/AAM/GetPortfolioPositions/',{params:params_data,action:'getPortfolioMpDeviations'})
   }

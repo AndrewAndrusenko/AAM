@@ -188,14 +188,22 @@
       <br>
       <app-inv-instrument-modify-form
         [secidParam]="messageReceived.name"
-        [action]="Edit"
-      >
+        [action]="Edit" >
       </app-inv-instrument-modify-form> 
     </div>
   </mat-tab>  
-  <mat-tab label="MarketData & Charts" > </mat-tab> 
-  <mat-tab label="Positions"> Detailed positions with deviations versus model Portfolio  </mat-tab>
-  <mat-tab label="Trades by Instrument"> Trades history by Instrument</mat-tab>
+  <mat-tab label="Chart" >
+    <app-echart-marketdata-candle  style="height: 100%;"> </app-echart-marketdata-candle>
+    <app-table-market-data [FormMode]="'ChartMode'" [secidInput]="messageReceived.name"></app-table-market-data> 
+  </mat-tab> 
+  <mat-tab label="Positions">
+     <app-inv-secid-position-table [secidInput]="messageReceived.name"> 
+    </app-inv-secid-position-table></mat-tab>
+  <mat-tab label="Trades by Instrument">     
+    <app-trade-table
+    [secidInput]="messageReceived.name" >
+    </app-trade-table>
+  </mat-tab>
 </mat-tab-group>
 
 <mat-tab-group  *ngIf="messageReceived.text=='Trades & Orders'" mat-stretch-tabs #TradesOrdersInfo>

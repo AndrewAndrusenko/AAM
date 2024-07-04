@@ -43,7 +43,7 @@ export class indexDBService {
   private subjectMarketSourceReady = new Subject<marketDataSources[]>
 
   constructor(
-    private dbService: NgxIndexedDBService,
+    public dbService: NgxIndexedDBService,
     private AccountingDataService:AppAccountingService, 
     private InvestmentDataService : AppInvestmentDataServiceService,   
     private CurrenciesDataSrv: CurrenciesDataService,
@@ -66,7 +66,7 @@ export class indexDBService {
   }
   indexidCacheData (key:string, data:cachedDataType):Observable<cacheAAM> {
     return this.dbService.add('AAMCache', {code:key, data:data}).pipe(
-      catchError(() => of({code:'null',data:[]})),
+      catchError(() => of({code:'error',data:[]}).pipe(tap(d=>console.log('error indexDB')))),
       tap(result=>result.data.length? console.log('saved for ',key,': ', result.data.length) : console.log('already saved ',key))
     )
   }

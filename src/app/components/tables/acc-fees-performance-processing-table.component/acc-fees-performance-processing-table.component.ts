@@ -105,10 +105,8 @@ export class AppaIAccFeesPerformanceProcessingTableComponent {
   }
   ngOnInit(): void {
     this.AppFeesHandlingService.getProfitTax(new Date().toDateString()).subscribe(data=>this.profitTaxRate=data[0].rate)
-    this.AutoCompleteService.subModelPortfoliosList.next(true);
-    this.subscriptions.add(
-      this.AutoCompleteService.getSMPsListReady().subscribe(data=>this.mp_strategies_list=data)
-    )
+    this.AutoCompleteService.subModelPortfolios.next([]);
+    this.subscriptions.add(this.AutoCompleteService.subModelPortfolios.subscribe(data=>this.mp_strategies_list=data));
     this.multiFilter = (data: FeesTransactions, filter: string) => {
       let filter_array = filter.split(',').map(el=>[el,1]);
       this.columnsToDisplay.forEach(col=>filter_array.forEach(fil=>{

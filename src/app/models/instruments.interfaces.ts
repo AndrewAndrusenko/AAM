@@ -1,6 +1,7 @@
 export interface moexBoard {
   boardid:string,
-  board_title:string
+  board_title:string,
+  is_primary:number
 }
 export interface moexSecurityType {
   id:number, 

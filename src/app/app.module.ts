@@ -208,7 +208,8 @@ const appInitializerFn = (accessRestirictions:AuthService) => {
         AppInvRestrictionVerifyTableComponent,
         AppInvRestrictionVerifyAllocTableComponent,
         AppaAccAccessTransactionTypesTable,
-        AppAccAccessTTFormComponent
+        AppAccAccessTTFormComponent,
+        AppaInvSecidPositionTableComponent
      ],
     bootstrap: [AppComponent],
     providers: [ 
@@ -285,5 +286,6 @@ import { AppInvRestrictionVerifyTableComponent } from './components/tables/inv-r
 import { AppInvRestrictionVerifyAllocTableComponent } from './components/tables/inv-restriction-verify-alloc-table.component/inv-restriction-verify-alloc-table.component';
 import { AppaAccAccessTransactionTypesTable } from './components/tables/acc-access-transaction-types-table.component/acc-access-transaction-types-table.component';
 import { AppAccAccessTTFormComponent } from './components/forms/acc-access-transaction-types-form.component/acc-access-transaction-types-form.component';
+import { AppaInvSecidPositionTableComponent } from './components/tables/inv-secid-position-table/inv-secid-position-table.component.';
 
 

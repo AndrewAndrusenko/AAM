@@ -107,7 +107,7 @@ export class MaltsevRouteReuseStrategy implements RouteReuseStrategy {
   }
 
   private getRouteData(route: ActivatedRouteSnapshot): IRouteConfigData {
-    console.log('route.routeConfig.data',route.routeConfig.path);
+    // console.log('route.routeConfig.data',route.routeConfig.path);
       return route.routeConfig && (route.routeConfig.data as IRouteConfigData);
   }
 }

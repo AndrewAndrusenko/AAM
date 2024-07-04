@@ -61,7 +61,7 @@ export class AppInstrumentCorpActionFormComponent {
     private AtuoCompService:AtuoCompleteService,
   ) 
   {   
-    this.AtuoCompService.getCurrencyList();
+    this.AtuoCompService.fullCurrenciesList.length? null: this.AtuoCompService.subCurrencyList.next(true);
     this.CorpActionsForm = this.fb.group ({
       id: {value:null, disabled: false}, 
       secid: [null, { validators:  Validators.required, updateOn: 'blur' }], 
@@ -100,9 +100,7 @@ export class AppInstrumentCorpActionFormComponent {
       this.instrument? this.caTypes=(data.data as corporateActionsTypes[]).filter(el=>el.sectype.includes(Number(this.instrument.groupid))):null;
       if (!this.instrument&&this.actiontype) {
         let grp = (data.data as corporateActionsTypes[]).find(el=>el.id===this.actiontype.value).sectype
-        console.log('grp',grp,this.actiontype.value);
         this.caTypes=(data.data as corporateActionsTypes[]).filter(el=>el.sectype.includes(Number(...grp)))
-        console.log(data.data);
       }
     })
   }

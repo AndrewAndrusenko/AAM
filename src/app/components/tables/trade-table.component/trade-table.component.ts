@@ -30,6 +30,7 @@ export class AppTradeTableComponent  {
   accessState: string = 'none';
   disabledControlElements: boolean = false;
   @Input() FormMode:string
+  @Input() secidInput:string
   columnsToDisplay = ['idtrade','tdate','trtype','tidinstrument','price','id_price_currency','qty','cpty','vdate','id_settlement_currency','tidorder','allocatedqty','fifo_qty','action'];
   columnsHeaderToDisplay = ['ID','Date','Type','SecID','Price','Currency','Quantity','CParty','ValueDate','Settlement','Order','Allocated','FIFO','Action'
   ];
@@ -89,10 +90,8 @@ export class AppTradeTableComponent  {
       qty:null,
     });
     this.TradeService.getTradeInformation(null).subscribe (tradesData => {
-      console.log('trades arrived:',tradesData.length);
       this.updateTradesDataTable(tradesData)
     }); 
-    console.log('trades request sent:');
     this.arraySubscrition.add(this.TradeService.getReloadOrdersForExecution().subscribe(data=>{
       let i = this.dataSource.data.findIndex(el=>el.idtrade===data.idtrade);
       i!==-1? this.dataSource.data[i].allocatedqty =Number(data.data.filter(alloc=>alloc['id_joined']==this.dataSource.data[i].idtrade)[0].allocated)+Number(this.dataSource.data[i].allocatedqty) : null;
@@ -128,7 +127,7 @@ export class AppTradeTableComponent  {
     };
     this.arraySubscrition.add(this.TreeMenuSeviceS.getActiveTab().subscribe(tabName=>this.activeTab=tabName));
 
-    this.AutoCompService.getSecidLists();
+    this.AutoCompService.subSecIdList.next(true);
     this.AutoCompService.getCounterpartyLists().subscribe();
     this.filterednstrumentsLists = this.secidList.valueChanges.pipe(
       startWith(''),
@@ -139,10 +138,14 @@ export class AppTradeTableComponent  {
       map(value => this.AutoCompService.filterList(value || '','cpty') as counterParty[])
   );
   }
+  ngOnChanges(): void {
+    this.instruments = (['ClearAll',this.secidInput])
+    this.submitQuery(false,false)
+  }
   ngOnDestroy(): void {
     this.arraySubscrition.unsubscribe();
   }
-  submitQuery (reset:boolean=false) {
+  submitQuery (reset:boolean=false,showSnackResult:boolean=true) {
     this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate);
     let searchObj = reset?  {} : this.searchParametersFG.value;
     this.dataSource?.data? this.dataSource.data = null : null;
@@ -164,7 +167,7 @@ export class AppTradeTableComponent  {
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
       this.dataSource.filterPredicate=this.multiFilter;
-      this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded ');
+      showSnackResult? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (data.length,'en-US') + ' rows'}, 'Loaded '):null;
     }));
   }
   openTradeModifyForm (action:string, element:trades|{},tabIndex:number=0) {

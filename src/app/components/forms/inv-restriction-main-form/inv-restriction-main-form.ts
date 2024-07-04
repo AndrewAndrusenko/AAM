@@ -36,7 +36,7 @@ export class AppInvRestrictionMainFormComponent {
       object_id: {value:null, disabled: true}, 
       object_description :{value:null, disabled: false}
     })
-    this.AutoCompService.getSecidLists()
+    this.AutoCompService.subSecIdList.next(true)
   }
   ngOnInit(): void {
     this.action==='View'? this.RestrictionMainForm.disable():null;

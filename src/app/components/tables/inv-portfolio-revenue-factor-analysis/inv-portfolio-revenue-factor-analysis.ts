@@ -81,20 +81,22 @@ export class AppaInvPortfolioRevenueFactorAnalysisTableComponent {
     this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
-    this.dateRangeStart.value.setMonth(this.dateRangeStart.value.getMonth()-2);
+    this.dateRangeStart.patchValue( new Date(new Date().getTime() - 270 * 24 * 60 * 60 * 1000));
     this.searchParametersFG = this.fb.group ({
       p_portfolios_list:  [],
       MP:null,
       p_report_date_start:null,
       p_report_date_end:null,
-      p_report_currency:['840', { validators:  Validators.required}],
+      p_report_currency:['840', { validators:  [this.AutoCompService.currencyValirator(),Validators.required]}],
     });
-    this.AutoCompService.getCurrencyList();
-    this.AutoCompService.subModelPortfoliosList.next(true);
-    this.subscriptions.add(
-      this.AutoCompService.recieveCurrencyListReady().subscribe(()=>this.report_id_currency.updateValueAndValidity()));
-    this.subscriptions.add(
-      this.AutoCompService.getSMPsListReady().subscribe(data=>this.mp_strategies_list=data))
+    if (this.AutoCompService.fullCurrenciesList.length) {
+      this.report_id_currency.updateValueAndValidity()
+    } else {
+      this.AutoCompService.subCurrencyList.next(true);
+      this.subscriptions.add(this.AutoCompService.subCurrencyList.subscribe(()=>this.report_id_currency.updateValueAndValidity()));
+    }
+    this.AutoCompService.subModelPortfolios.next([])
+    this.subscriptions.add(this.AutoCompService.subModelPortfolios.subscribe(data=>this.mp_strategies_list=data))
   }
   ngOnDestroy(): void {this.subscriptions.unsubscribe()}
   ngOnInit(): void {

@@ -139,7 +139,7 @@ export class AppAccFifoTable {
       price:null,
       qty:null,
     });
-    this.AutoCompleteService.getSecidLists();
+    this.AutoCompleteService.subSecIdList.next(true);
   }
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();

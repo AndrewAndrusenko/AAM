@@ -104,6 +104,11 @@ async function fGetPortfolioPositions (request,response) {
   });
   let sql = '';
   switch (request.body.action) {
+    case 'getSecIDsPositions':
+      sql= 'SELECT  round(order_amount/notnull_npv*100,2) AS deviation_percent, * '+
+           'FROM f_i_get_portfolios_structure_detailed_data (${idportfolios},${report_date},${report_id_currency}) '+
+           'WHERE secid=${secid} AND ABS(current_balance)>0;'
+    break;
     case 'getPortfolioPositions':
       sql= `
         SELECT 1 as set_number, round(order_amount/notnull_npv*100,2) AS deviation_percent,(npv!=0) AS not_zero_npv, * 

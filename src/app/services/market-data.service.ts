@@ -7,6 +7,10 @@ interface marketDataCheck {
   sourcecode :string,
   count:number
 }
+export interface marketDataChart {
+  data:marketData [],
+  showChart:boolean
+}
 export interface marketDateLoaded {
   'Source':string,
   'Total rows loaded - ' : number,
@@ -91,7 +95,7 @@ type uploadMarketDataFunc = (ourceCodes:marketSourceSegements[],dateToLoad: stri
 export class AppMarketDataService {
 
   private subjectMarketData = new Subject<marketData[]> ()
-  private subjectCharMarketData = new Subject<marketData[]> ()
+  private subjectCharMarketData = new Subject<marketDataChart> ()
   private deletedMarketDataRows:number;
   constructor(
     private http:HttpClient,
@@ -261,10 +265,10 @@ export class AppMarketDataService {
   getReloadMarketData(): Observable<marketData[]> { 
     return this.subjectMarketData.asObservable(); 
   }
-  sendMarketDataForChart ( dataSet:marketData[]) {
+  sendMarketDataForChart ( dataSet:marketDataChart) {
     this.subjectCharMarketData.next(dataSet); 
   }
-  getMarketDataForChart(): Observable<marketData[]> { 
+  getMarketDataForChart(): Observable<marketDataChart> { 
     return this.subjectCharMarketData.asObservable(); 
   }
  

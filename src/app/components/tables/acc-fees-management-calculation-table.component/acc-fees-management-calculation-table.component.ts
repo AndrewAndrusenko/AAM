@@ -80,16 +80,13 @@ export class AppaIAccFeesManagementTableComponent {
     this.subscriptions.unsubscribe();
   }
   ngOnInit(): void {
-    this.AutoCompleteService.subModelPortfoliosList.next(true);
-    this.subscriptions.add(
-      this.AutoCompleteService.getSMPsListReady().subscribe(data=>this.mp_strategies_list=data)
-    )
+    this.AutoCompleteService.subModelPortfolios.next([]);
+    this.subscriptions.add(this.AutoCompleteService.subModelPortfolios.subscribe(data=>this.mp_strategies_list=data));
     this.multiFilter = (data: ManagementFeeCalcData, filter: string) => {
       let filter_array = filter.split(',').map(el=>[el,1]);
       this.columnsToDisplay.forEach(col=>filter_array.forEach(fil=>{
         data[col]&&fil[0].toString().toUpperCase()===(data[col]).toString().toUpperCase()? fil[1]=0:null
-      })
-        );
+      }));
       return !filter || filter_array.reduce((acc,val)=>acc+Number(val[1]),0)===0;
     };
   }

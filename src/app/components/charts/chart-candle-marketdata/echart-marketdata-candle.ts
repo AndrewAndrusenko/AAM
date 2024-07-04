@@ -16,17 +16,16 @@ export class NgEchartMarketDataCandleComponent  {
   seriesCandle :number [][] = []
   constructor(
     private MarketDataService: AppMarketDataService,
-    private AtuoCompService:AtuoCompleteService,
     private CommonDialogsService:HadlingCommonDialogsService,
-
-    ) {
-    this.AtuoCompService.recieveSecIdList().subscribe(secIDsList=>this.secIds=secIDsList.map(el=>el[0]))
+  ) 
+  {
     this.MarketDataService.getMarketDataForChart().subscribe(marketData=>{
-      this.marketData=marketData;
-      this.secIds = [...new Set(marketData.map(el=>(el.secid)))]
+      this.marketData=marketData.data;
+      this.secIds = [...new Set(marketData.data.map(el=>(el.secid)))]
+      marketData.showChart? this.onChangeSecid(marketData.data[0].secid) : null;
     })
   }
-  onChangeCountry(secid:string) {
+  onChangeSecid(secid:string) {
     this.seriesCandle=[]
     this.setOptions(secid);
   }

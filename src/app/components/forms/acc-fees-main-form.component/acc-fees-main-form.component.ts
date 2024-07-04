@@ -24,7 +24,7 @@ export class AppAccFeesMainFormComponent {
     private AtuoCompService:AtuoCompleteService,
   ) 
   {   
-    this.AtuoCompService.getCurrencyList();
+    this.AtuoCompService.fullCurrenciesList.length? null: this.AtuoCompService.subCurrencyList.next(true);
     this.FeesMainForm = this.fb.group ({
       id :{value:null, disabled: false},
       fee_code:[null, { validators:  [Validators.required]}],

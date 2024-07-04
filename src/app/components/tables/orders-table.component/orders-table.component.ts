@@ -139,7 +139,7 @@ export class AppOrderTableComponent {
         this.TradeService.getOrderInformation({status:['created','confirmed','in_execution','executed']}).subscribe (ordersData => {
           this.updateordersDataTable(ordersData);
         })
-        this.AutoCompService.getSecidLists();
+        this.AutoCompService.subSecIdList.next(true);
         this.filterednstrumentsLists = this.secidList.valueChanges.pipe(
           startWith(''),
           map(value => this.AutoCompService.filterList(value || '','secid') as string[][])

@@ -21,7 +21,6 @@ export class DashboardComponent implements OnDestroy,OnInit {
     private AuthServiceS:AuthService,  
     private indexDBServiceS:indexDBService,
     public dialog: MatDialog,
-    private AutoCompService:AtuoCompleteService,
     private AccountingSchemesService:AccountingSchemesService,
     ) {
     this.subscriptionName= this.appMenuService.getToggleTree().subscribe (message => this.opened = message.text );
@@ -32,8 +31,6 @@ export class DashboardComponent implements OnDestroy,OnInit {
       this.AccountingSchemesService.subjectTransactionTypePipe.next(null);
       this.AuthServiceS.getObjectStatuses();
     })
-    this.AutoCompService.createSecIDpipe();
-    this.AutoCompService.createCurrencypipe();
   }
   ngOnDestroy() { 
     this.subscriptionName.unsubscribe();
