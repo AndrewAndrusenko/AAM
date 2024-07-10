@@ -1,1 +1,0 @@
-select * from f_bbalancesheet_lastmovement('2023-18-02')

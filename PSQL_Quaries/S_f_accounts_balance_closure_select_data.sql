@@ -1,1 +1,0 @@
-SELECT * from f_accounts_balance_closure_select_data('2023-02-22')

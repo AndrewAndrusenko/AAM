@@ -1,1 +1,0 @@
-delete FROM public."bAccountTransaction" where "dataTime"='2023-06-25'

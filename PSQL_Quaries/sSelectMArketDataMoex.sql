@@ -1,2 +1,0 @@
-SELECT boardid, shortname, secid, numtrades, value, open, low, high, legalcloseprice, waprice, close, volume, marketprice2, marketprice3, admittedquote, mp2valtrd, marketprice3tradesvalue, admittedvalue, waval, tradingsession, tradedate
-	FROM public.t_moexdata_foreignshares;

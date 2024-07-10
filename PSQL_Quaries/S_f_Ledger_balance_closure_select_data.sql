@@ -1,1 +1,0 @@
-SELECT * from f_ledger_balance_closure_select_data('2023-02-19') ORDER BY 1
