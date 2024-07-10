@@ -31,25 +31,25 @@
 
       },
       "root": "",
-      "sourceRoot": "FrontendAngularSrc",
+      "sourceRoot": "Frontend-Angular-Src",
       "prefix": "app",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
             "outputPath": "dist/aam",
-            "index": "FrontendAngularSrc/index.html",
-            "main": "FrontendAngularSrc/main.ts",
+            "index": "Frontend-Angular-Src/index.html",
+            "main": "Frontend-Angular-Src/main.ts",
             "polyfills": [
               "zone.js"
             ],
             "tsConfig": "tsconfig.app.json",
             "assets": [
-              "FrontendAngularSrc/favicon.ico",
-              "FrontendAngularSrc/assets"
+              "Frontend-Angular-Src/favicon.ico",
+              "Frontend-Angular-Src/assets"
             ],
             "styles": [
-              "FrontendAngularSrc/styles.scss"
+              "Frontend-Angular-Src/styles.scss"
             ],
             "scripts": [
               "node_modules/jquery/dist/jquery.min.js",
@@ -96,7 +96,7 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
             "browserTarget": "your-application-name:build",
-            "proxyConfig": "FrontendAngularSrc/proxy.conf.json",
+            "proxyConfig": "Frontend-Angular-Src/proxy.conf.json",
             "disableHostCheck": true
 
           },
@@ -109,7 +109,7 @@
             "development": {
               "browserTarget": "AAM:build:development",
               "disableHostCheck": true,
-              "proxyConfig": "FrontendAngularSrc/proxy.conf.json"
+              "proxyConfig": "Frontend-Angular-Src/proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"
