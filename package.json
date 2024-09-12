@@ -4,8 +4,8 @@
   "scripts": {
     "ng": "ng",
     "start dis-host-check": "ng serve --open --host 0.0.0.0 --port 4200 --disable-host-check",
-    "start": "ng serve --open --host 0.0.0.0 --port 4200" ,
-    "ngrok": "c:\\JS\\ngrok http --domain=parrot-organic-overly.ngrok-free.app 4200" ,
+    "start": "ng serve --open --host 0.0.0.0 --port 4200",
+    "ngrok": "c:\\JS\\ngrok http --domain=parrot-organic-overly.ngrok-free.app 4200",
     "server": "node server",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
@@ -49,6 +49,7 @@
     "jquery": "^3.6.3",
     "jszip": "^3.10.1",
     "moment": "^2.29.4",
+    "ngx-device-detector": "^8.0.0",
     "ngx-echarts": "^15.0.3",
     "ngx-indexed-db": "^16.0.0",
     "passport": "^0.6.0",

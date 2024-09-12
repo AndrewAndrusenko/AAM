@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { allocation_fifo } from '../models/interfaces.model';
 import { Observable } from 'rxjs';
-import { FifoPositions, FifoTableData, bcTransactionType_Ext } from '../models/accountng-intefaces.model';
+import { FifoPositions, FifoTableData } from '../models/accountng-intefaces.model';
 @Injectable({
   providedIn: 'root'
 })

@@ -5,6 +5,7 @@ import { EMPTY, catchError } from 'rxjs';
 import { AuthService } from 'Frontend-Angular-Src/app/services/auth.service';
 import { HadlingCommonDialogsService } from 'Frontend-Angular-Src/app/services/hadling-common-dialogs.service';
 import { TreeMenuSevice } from 'Frontend-Angular-Src/app/services/tree-menu.service';
+import { DeviceDetectorService } from 'ngx-device-detector';
 
 interface userRoles {
   value: string;
@@ -26,22 +27,54 @@ export class LoginComponent  {
   }
   )
   ISINuniqueAsyncValidator :ValidatorFn;
-  public sessionID: string
+  public sessionID: string;
+  deviceType:string;
   hide : boolean = true;
   userroles:string[] 
   loginsArray: string[];
+  testingRoles = [
+    {position: 0, role: 'SuperUser', login: 'SuperUser', password: 'Super', desc:'Testing role. Read-Write: All objects.'},
+    {position: 1, role: 'Investment/Client Adviser (RM manager)', login: 'RMManager', password: 'RMManager', desc:'Manage relations with clients. Read-Write: Client, Portfolios. Read-only: all relevant data.'},
+    {position: 2, role: 'Portfolio Manager', login: 'portfolioManager', password: 'portfolioManager', desc:'Asset management via adjusting model portfolios, creating orders, making deals. Read-Write: model portfolios, strategies, orders, trades'},
+    {position: 3, role: 'Trader', login: 'traderTest', password: 'trader', desc:'Executing orders placed by Portfolio Managers. Read-Write:trades, orders'},
+    {position: 4, role: 'Middle Officer', login: 'mofficer', password: 'middle', desc:'Allocating trades between client portolifos, fees calculations, martket data upload/update, managing restrictions. Read-Write:clients trades, fees, restrtions, instruments, market quotes, etc.'},
+    {position: 5, role: 'Back Officer', login: 'bofficer', password: 'back', desc:'Executing non-investment transactions and accounting. Read-Write:accounting entries, fees, swifts'},
+    {position: 6, role: 'Accounting Officer', login: 'Accountant', password: 'balance', desc:'Managing accounts, accounting schemes, fees schedules, executing balance closing and opening, etc non-investment transactions and accounting. Read-Wirte:accounts, balance, accounting entries,accounting schemes, fees schedules, etc'}]
+
+    displayedColumns: string[] = ['position', 'role', 'login', 'password','desc'];
   constructor(
     private authService : AuthService, 
     private router : Router,
     private CommonDialogsService:HadlingCommonDialogsService,
     private TreeMenuSevice:TreeMenuSevice,
     private fb:FormBuilder, 
+    private deviceService: DeviceDetectorService,
+    
   ) {
     this.authService.getUsersRoles().subscribe (usersRolesData => this.userroles=usersRolesData)
     this.authService.getloginsArray().subscribe(data =>{ 
       this.loginsArray=data;
       this.loginCreate.addValidators([Validators.required,Validators.minLength(4),this.validateLogin()])
     })
+  }
+  ngOnInit(): void {
+    //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
+    //Add 'implements OnInit' to the class.
+    switch (true) {
+      case this.deviceService.isDesktop():
+          this.deviceType='Desktop'
+      break;
+      case this.deviceService.isMobile():
+          this.deviceType='Mobile'
+      break;
+      case this.deviceService.isTablet():
+          this.deviceType='Tablet'
+      break;
+      default:
+        this.deviceType='Unknown'
+      break;
+
+    }
   }
   validateLogin(): ValidatorFn  {
     return (control: AbstractControl): { [key: string]: boolean } | null => {

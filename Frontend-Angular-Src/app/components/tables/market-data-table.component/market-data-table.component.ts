@@ -156,7 +156,7 @@ export class AppTableMarketDataComponent {
     this.indexDBService.pipeBoardsMoexSet.next(true);
     this.subscriptions.add(this.indexDBService.receiveBoardsMoexSet().subscribe(boardsData =>{
       this.boardIDs = boardsData
-      this.instruments = ['ClearAll',this.secidInput];
+      this.instruments = this.secidInput!==''? ['ClearAll',this.secidInput]:['ClearAll'];
       this.dataRange.get('dateRangeStart').patchValue(new Date(new Date().getTime() - 180 * 24 * 60 * 60 * 1000));
       this.boards.patchValue([...this.boardIDs.filter(el=>Number(el.is_primary)===1).map(item => item.boardid ), 0])
       }));
@@ -224,6 +224,8 @@ export class AppTableMarketDataComponent {
         el.segments.forEach(el=>el.checked=false)
       });
       this.loadMarketData.enable();
+      this.dataRange.get('dateRangeStart').patchValue(this.dateForLoadingPrices.value);
+      this.dataRange.get('dateRangeEnd').patchValue(this.dateForLoadingPrices.value);
     })
   }
   updateMarketDataTable (marketData:marketData[]) {

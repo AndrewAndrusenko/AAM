@@ -562,15 +562,18 @@ Done:
 || Architecture
 || Business process flow chart
 || CV (check spelling) 
-
-ToDo
 || linkedIn
 || Table Access segregation model
-|| Discord
-|| Q&A Angualar, postgres
 || Git (ts or js, release, export main functions from PG and add them to the repository, add PG database backup file)
-|| YouTube 
+
+ToDo
+|| Q&A Angualar, postgres
 * Fix:[webpack-dev-server] module constantly disconnecting and trying to reconnect - Old Asus
+|| MyPage - Add link to the repository of the AAM project
+|| Create AAM presentation with screen from the interface which highlight core functionality
+Done:
+* Fix complex search of imported quotes. There is a null chip in the autocomplete list and set search date interval by default on today
+* Fix: Creating Fee schedule: Validation of form is failed although all fields are okay
 
 Phase 2:
 || Multi Currencies accounts

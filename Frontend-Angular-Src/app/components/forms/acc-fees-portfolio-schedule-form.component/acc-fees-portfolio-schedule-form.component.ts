@@ -42,8 +42,8 @@ export class AppAccFeesPortfolioScheduleFormComponent {
       fee_type_desc: {value:null, disabled: false},
       id_fee_main: [null, { validators:  [Validators.required]}],
       period_desc: {value:null, disabled: false},
-      period_start:[null,{ validators:  [Validators.required]}],
-      period_end :[null,{ validators:  [Validators.required]}],
+      period_start:[null],
+      period_end :[null],
     })
   }
   ngOnInit(): void {

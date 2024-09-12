@@ -1,8 +1,15 @@
-<div class="form-signin" style=" background-image: url('assets/AdobeStock.webp'); color: black;">
+<ng-container *ngIf="!['Unknown','Desktop'].includes(deviceType)">
+  <div class="mobile-wrap">
+    <h1>Only Desktop version of application is availble</h1>
+    <h1>Please reconnect using your desktop browser</h1>
+  </div>
+</ng-container>
+<div *ngIf="['Unknown','Desktop'].includes(deviceType)" class="form-signin" style=" background-image: url('assets/AdobeStock.webp'); color: black;">
+  <div class="tab-group-wrap">
   <h1 class="font-bold  to-black tx" style="color: black; margin-top: 5vh;margin-left: 2%;">  
-    MP Investment Management System by Andrey Andrusenko
+    MP Asset Management System by Andrew Andrusenko
   </h1>
-  <mat-tab-group  style="padding-left: 50px;" #AccountInfo>
+  <mat-tab-group  style="padding-left: 50px;" #AccountInfo  >
     <mat-tab label="Sign In to System" style="padding: 20px;">
       <form  class="AccessForm" [formGroup]="signInForm">
         <div class="logo">
@@ -106,4 +113,34 @@
       </form>
     </mat-tab>
   </mat-tab-group>
+  </div>
+  <div class="testing-roles-desc" style="margin-top: 14vh;">
+    <h1>Roles for testing with credentials and short description</h1>
+    <table mat-table [dataSource]="testingRoles" class="mat-elevation-z8" style=" background-color:  rgba(99, 116, 192, 0.2); width: 60vw; ">
+      <ng-container matColumnDef="position">
+        <th mat-header-cell *matHeaderCellDef> No. </th>
+        <td mat-cell *matCellDef="let element"> {{element.position}} </td>
+      </ng-container>
+      <ng-container matColumnDef="role">
+        <th mat-header-cell *matHeaderCellDef> Role </th>
+        <td mat-cell *matCellDef="let element"> {{element.role}} </td>
+      </ng-container>
+      <ng-container matColumnDef="login">
+        <th mat-header-cell *matHeaderCellDef> Login </th>
+        <td mat-cell *matCellDef="let element"> {{element.login}} </td>
+      </ng-container>
+      <ng-container matColumnDef="password">
+        <th mat-header-cell *matHeaderCellDef> Password </th>
+        <td mat-cell *matCellDef="let element"> {{element.password}} </td>
+      </ng-container>
+      <ng-container matColumnDef="desc">
+        <th mat-header-cell *matHeaderCellDef> Description </th>
+        <td mat-cell *matCellDef="let element"> {{element.desc}} </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+    
+    
+  </div>
 </div>

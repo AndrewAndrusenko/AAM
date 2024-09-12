@@ -1,4 +1,11 @@
 
+.mobile-wrap {
+  display: grid;
+  width: 100vw;
+  height: 100vh;
+  align-items: center;
+  text-align: center;
+}
 .form-signin {
   min-height: 100vh;
   width: 100%;
@@ -6,7 +13,17 @@
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
+  display: inline-flex;
 } 
+.mat-header-cell {
+  color: #000;
+}
+.mat-cell {
+  color: #000;
+}
+.mat-column-desc {
+  width: 25vw;
+}
 .AccessForm {
   max-width: 23vw;
   border-radius: 15px;
@@ -65,9 +82,8 @@
   min-width: 5vw !important;
   padding: 1%;
   background-color: transparent;
-  color: rgb(0, 0, 0);
-  font-size:larger;
-  font-weight: 700;
+  color: rgb(1, 1, 1) !important;
+  font-size: 1.2em !important;
 }
 
 :host ::ng-deep .mat-tab-label.mat-tab-label-active {
@@ -75,8 +91,9 @@
   padding: 1%;
   margin-bottom: 5px;
   background-color:darkgrey; 
-  color: rgb(222, 217, 217);
-  font-size:large;
+  color: rgb(6, 6, 6) !important;
+  font-size: 1.3em !important;
+
   font-weight: 700;
 }
 .mat-focused label {
@@ -87,3 +104,4 @@
  :host ::ng-deep .mat-form-field-label {
   color:rgb(1, 15, 18) !important;
  }
+ 
