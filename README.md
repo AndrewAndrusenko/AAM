@@ -1,9 +1,14 @@
 # AAM
 Full-Scale SPA: Asset Management Platform
+
 Scalable platform for financial companies to manage individual investment accounts based on model portfolios.
+
 By combining different model portfolios we are able to provide clients with unique strategies according to their risk profile.
+
 Client orders are generated automatically by applying the structure of the model portfolio to each account and then could be merged into one order for execution. Market trades allocated between accounts according to individual orders.
+
 Diverse system of restrictions could be set for each portfolio in order to realize clients preferences.
+
 
 Features:
 - Whole investment managment cycle (client portfolios, stratiegies, investment restrictions, model portfolios, orders, trades, analitics, performance/mangement fees)
