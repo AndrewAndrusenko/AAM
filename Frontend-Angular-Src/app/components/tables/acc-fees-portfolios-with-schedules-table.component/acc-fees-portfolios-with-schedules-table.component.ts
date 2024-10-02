@@ -94,16 +94,16 @@ export class AppAccFeesPortfoliosWithSchedulesTableComponent  {
     private AppFeesHandlingService:AppFeesHandlingService,
     private dialog: MatDialog,
   ) 
-    { this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
-      this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
-      this.columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
-      this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToFeesData')[0].elementvalue;
-      this.disabledControlElements = this.accessState === 'full'? false : true;
-    }
+    { }
     ngOnDestroy(): void {
       this.subscriptions.unsubscribe();
     }
     ngOnInit(): void {
+      this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
+      this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
+      this.columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
+      this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToFeesData')[0].elementvalue;
+      this.disabledControlElements = this.accessState === 'full'? false : true;
       this.id_portfolio===null&&this.onChanges===false? this.submitQuery(false,false):null;
       this.multiFilter = (data: FeesPortfoliosWithSchedulesData, filter: string) => {
         let filter_array = filter.split(',').map(el=>[el,1]);

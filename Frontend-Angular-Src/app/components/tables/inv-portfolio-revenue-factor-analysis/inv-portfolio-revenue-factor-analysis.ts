@@ -76,7 +76,9 @@ export class AppaInvPortfolioRevenueFactorAnalysisTableComponent {
     private CommonDialogsService:HadlingCommonDialogsService,
     private AutoCompService:AtuoCompleteService,
     private fb:FormBuilder, 
-  ) {
+  ) { }
+  ngOnDestroy(): void {this.subscriptions.unsubscribe()}
+  ngOnInit(): void {
     this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
     this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
@@ -97,9 +99,6 @@ export class AppaInvPortfolioRevenueFactorAnalysisTableComponent {
     }
     this.AutoCompService.subModelPortfolios.next([])
     this.subscriptions.add(this.AutoCompService.subModelPortfolios.subscribe(data=>this.mp_strategies_list=data))
-  }
-  ngOnDestroy(): void {this.subscriptions.unsubscribe()}
-  ngOnInit(): void {
     if (this.useGetClientsPortfolios===true) {
       this.subscriptions.add(this.InvestmentDataService.getClientsPortfolios().pipe(
         tap(() => this.dataSource? this.dataSource.data = null: null),

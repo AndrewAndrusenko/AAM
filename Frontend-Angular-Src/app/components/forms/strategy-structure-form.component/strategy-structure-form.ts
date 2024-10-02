@@ -48,7 +48,6 @@ export class AppStructureStrategyFormComponent implements OnInit {
     private dialog: MatDialog, 
     private indexDBService:indexDBService,
     private AuthService:AuthService,  
-
   ) {
   }
   ngOnInit(): void {

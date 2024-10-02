@@ -22,9 +22,9 @@ export class AppInvRestrictionMainFormComponent {
     private CommonDialogsService:HadlingCommonDialogsService,
     private RestrictionsHandlingService:AppRestrictionsHandlingService,
     private AutoCompService:AtuoCompleteService,
- 
   ) 
-  {   
+  {   }
+  ngOnInit(): void {
     this.RestrictionMainForm = this.fb.group ({
       id :{value:null, disabled: false}, 
       portfolioname :{value:null, disabled: false}, 
@@ -37,8 +37,6 @@ export class AppInvRestrictionMainFormComponent {
       object_description :{value:null, disabled: false}
     })
     this.AutoCompService.subSecIdList.next(true)
-  }
-  ngOnInit(): void {
     this.action==='View'? this.RestrictionMainForm.disable():null;
     this.RestrictionMainForm.patchValue(this.data);
     this.restTypeChanged();

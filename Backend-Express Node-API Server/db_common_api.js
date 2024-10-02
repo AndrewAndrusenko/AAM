@@ -15,8 +15,10 @@ let isConnected = !!await require('dns').promises.resolve('google.com').catch(()
 return isConnected;
 }
 async function queryExecute (sql, response, responseType, sqlID, SendResponse=true,resPure=false) {
-  let accRole;
-  accRole = response? response.req.user.accessrole:'error'
+  let accRole='testRole';
+/*   console.log(' response.req.user', response.req.user);
+  accRole = response.req?.user? response.req.user.accessrole:'error' */
+  // accRole = response? response.req.user.accessrole:'error'
   switch (accRole) {
     case 'testRole':
       pool = poolSuper;
@@ -44,7 +46,6 @@ async function queryExecute (sql, response, responseType, sqlID, SendResponse=tr
     break
   }
   return new Promise ((resolve,reject) => {
-    // if (pool===undefined) {resolve (response.headersSent? console.log('There is no pool connection'): response.status(409).send('There is no pool connection'))}
     if (pool===undefined) {resolve (console.log('There is no pool connection'))}
     if (pool!==undefined) {pool.query (sql,  (err, res) => {
       if (err) {
@@ -82,7 +83,6 @@ async function fUpdateTableDB (table, fields,idfieldName, request, response,date
       break;
       }
       sql = pgp.as.format(sqlText,request.body.data);
-      // console.log(sql);
     resolve(queryExecute (sql, response,undefined,'fUpdateTableDB '+request.body.action+' '+table,table))
   })
 }

@@ -41,7 +41,8 @@ export class AppStrategyFormComponent {
     private InvestmentDataService:AppInvestmentDataServiceService, 
     private CommonDialogsService:HadlingCommonDialogsService,
   ) 
-  {
+  { }
+  ngOnInit(): void {
     this.accessToClientData = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToClientData')[0].elementvalue;
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToStrategyData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
@@ -53,8 +54,6 @@ export class AppStrategyFormComponent {
       s_benchmark_account: [null],
       'Benchmark Account': {value:'', disabled: true},
     })
-  }
-  ngOnInit(): void {
     this.strategyId? this.getStrategyData (this.strategyId) :null;
     this.action === 'View'||this.disabledControlElements? this.editStrategyForm.disable() : null;
   }

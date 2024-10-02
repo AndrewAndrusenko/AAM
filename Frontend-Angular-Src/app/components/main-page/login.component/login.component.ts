@@ -49,17 +49,13 @@ export class LoginComponent  {
     private TreeMenuSevice:TreeMenuSevice,
     private fb:FormBuilder, 
     private deviceService: DeviceDetectorService,
-    
-  ) {
+  ) { }
+  ngOnInit(): void {
     this.authService.getUsersRoles().subscribe (usersRolesData => this.userroles=usersRolesData)
     this.authService.getloginsArray().subscribe(data =>{ 
       this.loginsArray=data;
       this.loginCreate.addValidators([Validators.required,Validators.minLength(4),this.validateLogin()])
     })
-  }
-  ngOnInit(): void {
-    //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
-    //Add 'implements OnInit' to the class.
     switch (true) {
       case this.deviceService.isDesktop():
           this.deviceType='Desktop'

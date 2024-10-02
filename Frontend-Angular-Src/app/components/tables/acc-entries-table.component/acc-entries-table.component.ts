@@ -108,6 +108,8 @@ export class AppTableAccEntriesComponent implements OnInit {
     private InvestmentDataService:AppInvestmentDataServiceService,
     private SelectionService:HandlingTableSelectionService,
   ) {
+  }
+  ngOnInit(): void {
     this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
     this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
     this.searchParametersFG = this.fb.group ({
@@ -140,8 +142,6 @@ export class AppTableAccEntriesComponent implements OnInit {
       }));
       return !filter || filter_array.reduce((acc,val)=>acc+Number(val[1]),0)===0;
     };
-  }
-  ngOnInit(): void {
     this.initiateTable(true);
     this.subscriptions.add(this.InvestmentDataService.getClientsPortfolios().pipe(
       tap(() => this.dataSource? this.dataSource.data = null: null),

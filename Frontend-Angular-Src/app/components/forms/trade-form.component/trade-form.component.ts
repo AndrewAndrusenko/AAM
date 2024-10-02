@@ -72,7 +72,8 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     private MarketDataService: AppMarketDataService,
     private dialog: MatDialog, 
   ) 
-  {   
+  { }
+  ngOnInit(): void {
     this.tradeModifyForm = this.fb.group ({
       idtrade:{value:null, disabled: false},
       trtype:[null, { validators:  Validators.required, updateOn: 'blur' }], action:{value:null, disabled: false},
@@ -108,8 +109,6 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     }));
     this.AutoCompService.subSecIdList.next(true);
     this.AutoCompService.getCounterpartyLists().subscribe(()=>this.id_cpty.setValidators(this.AutoCompService.counterPartyalirator(this.cpty_name)));
-  }
-  ngOnInit(): void {
     this.tradeModifyForm.patchValue(this.data)
     this.tidinstrument.setValidators([this.AutoCompService.secidValirator(),Validators.required]);
     this.id_price_currency.setValidators([this.AutoCompService.currencyValirator(),Validators.required]);

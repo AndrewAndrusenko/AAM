@@ -65,7 +65,11 @@ export class AppInvGenerateOrdersTable{
     private CommonDialogsService:HadlingCommonDialogsService,
     private AutoCompService:AtuoCompleteService,
     private fb:FormBuilder, 
-  ) {
+  ) { }
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+  ngOnInit(): void {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.searchParametersFG = this.fb.group ({
@@ -79,11 +83,6 @@ export class AppInvGenerateOrdersTable{
       report_date : [new Date(), { validators:  Validators.required, updateOn: 'blur' }],
       report_id_currency:['840', { validators:  [this.AutoCompService.currencyValirator(),Validators.required]}],
     });
-  }
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
-  }
-  ngOnInit(): void {
     this.indexDBServiceS.getIndexDBStaticTables('getModelPortfolios').subscribe ((data)=>{
       this.mp_strategies_list = (data.data as StrategiesGlobalData[])
     })

@@ -61,7 +61,8 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
     private InstrumentDataS:InstrumentDataService,
     private AtuoCompService:AtuoCompleteService,
   ) 
-  {    
+  {  }
+  ngOnInit(): void {
     this.changePlaceholders('stock_bonds');
     this.instrumentModifyForm = this.fb.group ({
       id : {value:null, disabled: false},

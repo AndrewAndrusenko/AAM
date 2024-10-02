@@ -30,7 +30,8 @@ export class AppAccSchemesLL_FormComponent {
     private fb:FormBuilder, 
     private dialog:MatDialog
   ) 
-  {   
+  {     }
+  ngOnInit(): void {
     this.TransactionTypes = Array.from(this.AccountingSchemesService.TransactionTypes);
     this.SchemeFormLL = this.fb.group ({
       XactTypeCode_Ext:[null, { validators:  [Validators.required]}],
@@ -48,8 +49,6 @@ export class AppAccSchemesLL_FormComponent {
       ledger_credit:[null],
       ledger_debit:[null],
     })
-  }
-  ngOnInit(): void {
     this.action==='View'? this.SchemeFormLL.disable():null;
     this.SchemeFormLL.patchValue(this.data);
     this.AccountingSchemesService.getSchemesParameters().subscribe(data=>this.schemesParams=data);

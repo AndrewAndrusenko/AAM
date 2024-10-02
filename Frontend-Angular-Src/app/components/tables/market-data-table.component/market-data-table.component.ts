@@ -126,7 +126,8 @@ export class AppTableMarketDataComponent {
     private dialog:MatDialog,
     private fb:FormBuilder, 
     public snack:MatSnackBar,
-  ) {
+  ) {  }
+  ngOnInit(): void {
     this.AutoCompService.subSecIdList.next(true)
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToInstrumentData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;

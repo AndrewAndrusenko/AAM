@@ -53,6 +53,7 @@ async function TreeSQLQueryExc (RootNode, userId, nodeParentFavorite,response) {
     break;     
   }
   RootNode[1] ? RootNode = RootNode.join('_') : RootNode = RootNode[0]
+
   PromQty = new Promise(
     (resolve) => {
       db_common_api.queryExecute(sql,response,null,RootNode,false).then(result => {

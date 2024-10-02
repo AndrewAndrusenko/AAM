@@ -22,7 +22,8 @@ export class AppPerformanceRevenueFactorChartComponentt  {
 
   constructor(
   private InvestmentDataService:AppInvestmentDataServiceService, 
-  ) {
+  ) {  }
+  ngOnInit(): void {
     this.InvestmentDataService.recieveRevenueFactorData().pipe(
       tap(data=>data.data.length===0? this.instrumentsList=[]:null),
       filter(data=>data.data.length>0)

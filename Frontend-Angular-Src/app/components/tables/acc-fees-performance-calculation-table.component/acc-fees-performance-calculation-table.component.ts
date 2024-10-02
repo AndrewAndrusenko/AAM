@@ -60,6 +60,11 @@ export class AppaIAccFeesPerformanceTableComponent {
     private AutoCompleteService:AtuoCompleteService,
     private fb:FormBuilder, 
   ) {
+  }
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+  ngOnInit(): void {
     this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
     this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToFeesData')[0].elementvalue;
@@ -70,11 +75,6 @@ export class AppaIAccFeesPerformanceTableComponent {
       p_report_date:new Date(),
       p_report_date_hurdle:new Date(),
     });
-  }
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
-  }
-  ngOnInit(): void {
     this.AutoCompleteService.subModelPortfolios.next([]);
     this.subscriptions.add(this.AutoCompleteService.subModelPortfolios.subscribe(data=>this.mp_strategies_list=data));
     this.multiFilter = (data: PerformanceFeeCalcData, filter: string) => {

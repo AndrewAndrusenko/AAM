@@ -88,18 +88,17 @@ export class AppAccFeesSchedulesTableComponent  {
     private AppFeesHandlingService:AppFeesHandlingService,
     private dialog: MatDialog,
   ) 
-    {
+    { }
+    ngOnDestroy(): void {
+      this.subscriptions.unsubscribe();
+    }
+    ngOnInit(): void {
       this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
       this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
       this.columnsToDisplayWithExpand = [...this.columnsToDisplay ,'expand'];
       this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToFeesData')[0].elementvalue;
       this.disabledControlElements = this.accessState === 'full'? false : true;
       this.submitQuery(false,false)
-    }
-    ngOnDestroy(): void {
-      this.subscriptions.unsubscribe();
-    }
-    ngOnInit(): void {
       this.multiFilter = (data: FeesMainData, filter: string) => {
         let filter_array = filter.split(',').map(el=>[el,1]);
         this.columnsToDisplay.forEach(col=>filter_array.forEach(fil=>{

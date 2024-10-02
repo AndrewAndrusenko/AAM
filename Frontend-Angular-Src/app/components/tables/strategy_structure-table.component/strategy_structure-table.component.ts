@@ -38,7 +38,8 @@ export class AppTableStrategyComponent   {
     private InvestmentDataService:AppInvestmentDataServiceService, 
     private fb:FormBuilder,
   ) 
-  {
+  {}
+  ngOnInit(): void {
     this.editStructureStrategyForm=this.fb.group ({
       id: {value:''},
       sname: [null, { updateOn: 'blur'} ],

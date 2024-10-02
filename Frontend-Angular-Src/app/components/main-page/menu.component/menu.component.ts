@@ -17,7 +17,6 @@ constructor(
   private appMenuService : AppMenuServiceService,
   private indexDBServiceS:indexDBService,
   ) { }
-
   public getLogin = () => {
     let userData = JSON.parse(localStorage.getItem ('userInfo'));
     return userData? userData.user.login +" (AR: " +userData.user.accessrole+ ")":null;

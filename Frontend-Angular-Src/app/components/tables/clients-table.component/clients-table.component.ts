@@ -58,7 +58,8 @@ export class AppClientsTableComponent  {
     private CommonDialogsService:HadlingCommonDialogsService,
     private HandlingCommonTasksS:HandlingCommonTasksService,
   ) 
-  { 
+  {  }
+  ngOnInit(): void {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToClientData')[0].elementvalue;
     this.accessToPortfolioData = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToPortfolioData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;

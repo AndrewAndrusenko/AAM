@@ -87,7 +87,11 @@ export class AppaIAccFeesPerformanceProcessingTableComponent {
     private SelectionService:HandlingTableSelectionService,
     private fb:FormBuilder, 
     private dialog: MatDialog, 
-  ) {
+  ) {  }
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+  ngOnInit(): void {
     this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
     this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToFeesData')[0].elementvalue;
@@ -99,11 +103,6 @@ export class AppaIAccFeesPerformanceProcessingTableComponent {
       p_report_date_end:null,
     });
     this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data => this.firstForAccountingDate = data[0].FirstOpenedDate);
-  }
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
-  }
-  ngOnInit(): void {
     this.AppFeesHandlingService.getProfitTax(new Date().toDateString()).subscribe(data=>this.profitTaxRate=data[0].rate)
     this.AutoCompleteService.subModelPortfolios.next([]);
     this.subscriptions.add(this.AutoCompleteService.subModelPortfolios.subscribe(data=>this.mp_strategies_list=data));

@@ -121,17 +121,11 @@ export class TreeComponent {
   dataChange: BehaviorSubject<DynamicFlatNode[]>;
   private subs = new Subscription();
   constructor(
-    database: DynamicDatabase, 
+    private database: DynamicDatabase, 
     private TreeMenuSevice:TreeMenuSevice, 
     private AuthServiceS:AuthService,  
     private router: Router)  
-  {
-    this.subs.add(this.TreeMenuSevice.receiveRefreshTree().subscribe(()=>this.initialData()))
-    this.treeControl = new FlatTreeControl<DynamicFlatNode>(this.getLevel, this.isExpandable);
-    this.dataSource = new DynamicDataSource(this.treeControl, database);
-    this.databaseM = database;
-    this.initialData();
-  }
+  {  }
   @ViewChild(MatMenuTrigger) trigger: MatMenuTrigger;
   treeControl: FlatTreeControl<DynamicFlatNode>;
   databaseM: DynamicDatabase 
@@ -142,6 +136,13 @@ export class TreeComponent {
   public activeNode : DynamicFlatNode;
   public rootLevelNodes: string[];
   rootAccountingNodes = rootNodesColor
+  ngOnInit(): void {
+    this.subs.add(this.TreeMenuSevice.receiveRefreshTree().subscribe(()=>this.initialData()))
+    this.treeControl = new FlatTreeControl<DynamicFlatNode>(this.getLevel, this.isExpandable);
+    this.dataSource = new DynamicDataSource(this.treeControl, this.database);
+    this.databaseM = this.database;
+    this.initialData();
+  }
   ngOnDestroy(): void {
     this.subs.unsubscribe();
   }

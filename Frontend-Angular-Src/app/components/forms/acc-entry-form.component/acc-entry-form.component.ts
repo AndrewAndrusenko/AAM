@@ -59,34 +59,8 @@ export class AppAccEntryModifyFormComponent {
     private CommonDialogsService:HadlingCommonDialogsService,
     private dialog: MatDialog, 
     private AccountingSchemesService:AccountingSchemesService,
-   
   ) 
-  {
-
-    this.entryModifyForm = this.fb.group ({
-      d_transactionType: {value:0, disabled: false},
-      t_id: {value:0, disabled: false},
-      t_entryDetails:[null, [Validators.required]],
-      t_accountId: {value:null, disabled: false}, 
-      t_ledgerNoId: {value:null, disabled: false}, 
-      t_extTransactionId : {value:null, disabled: false}, 
-      t_dataTime: [null, [Validators.required]],  
-      t_amountTransaction: [null, [Validators.required, Validators.pattern('[0-9,]*([0-9.]{0,3})?$') ]   ], 
-      // t_amountTransaction: [null, [Validators.required, Validators.pattern(this.numbFormant) ]   ], 
-      t_XactTypeCode: {value:null, disabled: false},  
-      t_XactTypeCode_Ext: [null, [Validators.required]], 
-      d_Debit : {value:null, disabled: false},  
-      d_Credit : {value:null, disabled: false},  
-      d_ledgerNo: [null, {validators: [Validators.required], updateOn:'blur' } ], 
-      d_accountNo: [null, {validators: [Validators.required], updateOn:'blur' } ],  
-      d_xActTypeCode_ExtName : {value:null, disabled: false}, 
-      d_closingBalance: {value:null, disabled: false}, 
-      d_closingLedgerBalance: {value:null, disabled: false},
-      t_idtrade: {value:null, disabled: false} 
-    })    
-    this.AccountingSchemesService.subjectTransactionTypePipe.next(null);
-    this.subscriptions.add(this.AccountingSchemesService.receiveTransactionTypesReady().subscribe(data=>this.TransactionTypes=data.data.filter(el=>el.manual_edit_forbidden===false)))
-  }
+  {  }
   AddAsyncValidators (overdraftOverride:boolean, updateValidators:boolean=false) {
     if (this.FirstOpenedAccountingDate !=null) {
       this.validatorAccountOverdraft = customAsyncValidators.AccountingOverdraftAccountAsyncValidator (this.AccountingDataService, this.accountId ,this.amountTransaction, this.dataTime, this.xActTypeCode, this.d_closingBalance, this.id, this.FirstOpenedAccountingDate);
@@ -125,6 +99,28 @@ export class AppAccEntryModifyFormComponent {
     this.accountNo.updateValueAndValidity()
   }
   ngOnInit(): void {
+    this.entryModifyForm = this.fb.group ({
+      d_transactionType: {value:0, disabled: false},
+      t_id: {value:0, disabled: false},
+      t_entryDetails:[null, [Validators.required]],
+      t_accountId: {value:null, disabled: false}, 
+      t_ledgerNoId: {value:null, disabled: false}, 
+      t_extTransactionId : {value:null, disabled: false}, 
+      t_dataTime: [null, [Validators.required]],  
+      t_amountTransaction: [null, [Validators.required, Validators.pattern('[0-9,]*([0-9.]{0,3})?$') ]   ], 
+      t_XactTypeCode: {value:null, disabled: false},  
+      t_XactTypeCode_Ext: [null, [Validators.required]], 
+      d_Debit : {value:null, disabled: false},  
+      d_Credit : {value:null, disabled: false},  
+      d_ledgerNo: [null, {validators: [Validators.required], updateOn:'blur' } ], 
+      d_accountNo: [null, {validators: [Validators.required], updateOn:'blur' } ],  
+      d_xActTypeCode_ExtName : {value:null, disabled: false}, 
+      d_closingBalance: {value:null, disabled: false}, 
+      d_closingLedgerBalance: {value:null, disabled: false},
+      t_idtrade: {value:null, disabled: false} 
+    })    
+    this.AccountingSchemesService.subjectTransactionTypePipe.next(null);
+    this.subscriptions.add(this.AccountingSchemesService.receiveTransactionTypesReady().subscribe(data=>this.TransactionTypes=data.data.filter(el=>el.manual_edit_forbidden===false)))
     this.subscriptions.add (
       this.AccountingDataService.getEntryDraft().pipe(filter(entryData => entryData.refTransaction === this.Ref)).subscribe (entryData=> {
         this.setupDone=true;

@@ -88,6 +88,8 @@ export class AppTableBalanceSheetComponent {
     private dialog: MatDialog,
     private fb:FormBuilder, 
   ) {
+  }
+  ngOnInit(): void {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToBalanceData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.getCurrentBalanceData()

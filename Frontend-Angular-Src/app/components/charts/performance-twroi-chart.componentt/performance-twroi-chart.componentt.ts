@@ -20,7 +20,8 @@ export class AppPerformanceTWROiEchartComponentt  {
   constructor(
   private InvestmentDataService:AppInvestmentDataServiceService, 
   private MarketDataService: AppMarketDataService,
-  ) {
+  ) { }
+  ngOnInit(): void {
     this.InvestmentDataService.recievePerformnceData().subscribe(data=>{
       this.performanceData=data.data;
       this.portfolios = [...new Set(data.data.map(el=>(el.portfolioname)))]

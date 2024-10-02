@@ -18,7 +18,8 @@ export class NgEchartMarketDataCandleComponent  {
     private MarketDataService: AppMarketDataService,
     private CommonDialogsService:HadlingCommonDialogsService,
   ) 
-  {
+  { }
+  ngOnInit(): void {
     this.MarketDataService.getMarketDataForChart().subscribe(marketData=>{
       this.marketData=marketData.data;
       this.secIds = [...new Set(marketData.data.map(el=>(el.secid)))]

@@ -36,7 +36,8 @@ export class AppNewAccountComponent {
     private fb:FormBuilder, 
     private dialog: MatDialog, 
   ) 
-  {
+  { }
+  ngOnInit(): void {
     this.portfolioForm=this.fb.group ({
       idportfolio: {value:null, disabled: false, }, 
       account_type: [{value:null, disabled: false}],
@@ -52,8 +53,6 @@ export class AppNewAccountComponent {
     this.accessToClientData = this.AuthService.accessRestrictions.filter(el =>el.elementid==='accessToClientData')[0].elementvalue;
     this.accessState = this.AuthService.accessRestrictions.filter(el =>el.elementid==='accessToClientData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
-  }
-  ngOnInit(): void {
     this.InvestmentDataService.recieveSummaryPortfolioData().subscribe(data=>{
       this.summaryData=data;
       this.summaryShow=true;

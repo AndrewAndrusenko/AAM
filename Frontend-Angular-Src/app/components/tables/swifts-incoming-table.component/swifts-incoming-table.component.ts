@@ -32,7 +32,7 @@ import { cFormValidationLog } from 'Frontend-Angular-Src/app/models/interfaces.m
   ],
 })
 export class AppTableSWIFTsInListsComponent  implements OnInit,OnDestroy {
-  private readonly destroy$ = new Subject();
+  private subs = new Subscription();
   accessState: string = 'none';
   accessToEntriesData: string = 'none';
   disabledControlElements: boolean = false;
@@ -75,7 +75,12 @@ export class AppTableSWIFTsInListsComponent  implements OnInit,OnDestroy {
     private HandlingCommonTasksS:HandlingCommonTasksService,
     private LogService:LogProcessingService,
     private fb : FormBuilder
-  ) {
+  ) { }
+  ngOnDestroy(): void {
+    this.subs.unsubscribe();
+    this.closeLogSubscriptions();
+  }
+  ngOnInit(): void { 
     this.accessToEntriesData = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToEntriesData')[0].elementvalue;
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToSWIFTData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
@@ -86,25 +91,23 @@ export class AppTableSWIFTsInListsComponent  implements OnInit,OnDestroy {
       this.cDateToProcessSwift.setValue(new Date())
       this.cDateAccounting.setValue(new Date())
     });
-    this.AccountingDataService.GetSWIFTsList (null,null,null,null,'DatesWithSWIFT').pipe(takeUntil(this.destroy$)).subscribe(dates=>this.dateWithSWIFTs = dates[0]['datesarray']);
+    this.subs.add(this.AccountingDataService.GetSWIFTsList (null,null,null,null,'DatesWithSWIFT').subscribe(dates=>{
+      this.dateWithSWIFTs = dates[0]['datesarray'];
+    }))
     this.swiftProcessingFB = this.fb.group ({
       cDateToProcessSwift :[null, [Validators.required]],
       cDateAccounting : [null, [Validators.required]],
       overRideOverdraft: {value:false}
     });
   }
-  ngOnDestroy(): void {
-    this.closeLogSubscriptions();
-  }
-  ngOnInit(): void { }
   updateSwiftsData (action: string, dateMessage?:string,snack:boolean=false) {
-    this.accessState === 'none'? null : this.AccountingDataService.GetSWIFTsList (dateMessage,null,null,null,action).pipe(takeUntil(this.destroy$)).subscribe (SWIFTsList  => {
+    this.subs.add (this.accessState === 'none'? null : this.AccountingDataService.GetSWIFTsList (dateMessage,null,null,null,action).subscribe (SWIFTsList  => {
       snack? this.CommonDialogsService.snackResultHandler({name:'success',detail: formatNumber (SWIFTsList.length,'en-US') + ' rows'},'Loaded '):null;
       this.dataSource? this.dataSource.data = null : null;
       this.dataSource  = new MatTableDataSource(SWIFTsList);
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
-    })
+    }))
   }
   clearLogs () {
     this.errorLogAutoProcessingALL = [];

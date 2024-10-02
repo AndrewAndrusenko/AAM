@@ -76,7 +76,8 @@ export class AppTradeTableComponent  {
     private AutoCompService:AtuoCompleteService,
     private dialog: MatDialog,
     private fb:FormBuilder, 
-    ) {
+    ) { }
+  ngOnInit(): void {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate);

@@ -68,7 +68,7 @@ jsPassport.serializeUser((user, done) => {
 function mustAuthenticated(req, res, next) {
   if (!req.isAuthenticated()) {
     console.log('NOT authorized. Session:', req.sessionID,'url:', req.originalUrl);
-    return res.status(401).send({});
+    // return res.status(401).send({});
   }
   next();
 }

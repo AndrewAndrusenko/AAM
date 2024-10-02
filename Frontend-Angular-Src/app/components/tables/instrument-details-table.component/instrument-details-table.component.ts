@@ -37,7 +37,8 @@ export class AppTableInstrumentDetailsComponent  implements AfterViewInit {
     private AuthServiceS:AuthService,  
     private indexDBServiceS:indexDBService,
     private dialog: MatDialog,
-  ) {
+  ) { }
+  ngOnInit(): void {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToInstrumentData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
   }

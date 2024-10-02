@@ -81,18 +81,13 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
     private CommonDialogsService:HadlingCommonDialogsService,
     private dialog: MatDialog,
     private fb:FormBuilder, 
-  ) {
-    
+  ) { }
+  ngOnInit(): void {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToInstrumentData')[0].elementvalue;
     if (this.accessState ==='none') {
       this.CommonDialogsService.snackResultHandler({name:'error', detail:'Your role has no access to the data'})
     } else {
-/*      this.InstrumentDataS.getMoexInstruments().subscribe (instrumentData => {
-        console.log('instruments arrived:',instrumentData.length);
-        this.updateInstrumentDataTable(instrumentData)
-      })   */
     }
-    console.log('instruments sent request');
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.searchParametersFG = this.fb.group ({
       secidList: null,
@@ -124,8 +119,6 @@ export class AppInstrumentTableComponent  implements AfterViewInit {
           this.dataSource.sort = this.sort;
         })
       )
-  }
-  ngOnInit(): void {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToInstrumentData')[0].elementvalue;
     if (this.accessState ==='none') {
       this.CommonDialogsService.snackResultHandler({name:'error', detail:'Your role has no access to the data'})

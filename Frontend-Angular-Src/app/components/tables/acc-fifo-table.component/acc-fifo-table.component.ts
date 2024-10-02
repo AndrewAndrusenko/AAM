@@ -124,7 +124,11 @@ export class AppAccFifoTable {
     private TradeService: AppTradeService,
     private accountingTradeService: AccountingTradesService,
     private fb:FormBuilder, 
-  ) {
+  ) { }
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+  ngOnInit(): void {
     this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
     this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
@@ -140,11 +144,6 @@ export class AppAccFifoTable {
       qty:null,
     });
     this.AutoCompleteService.subSecIdList.next(true);
-  }
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
-  }
-  ngOnInit(): void {
    this.tradesIDs.patchValue(['ClearAll'])
    this.portfoliosList.patchValue(['ClearAll'])
    this.secidList.patchValue(['ClearAll'])

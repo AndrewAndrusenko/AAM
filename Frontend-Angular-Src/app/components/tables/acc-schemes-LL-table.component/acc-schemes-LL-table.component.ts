@@ -99,7 +99,11 @@ export class AppAccSchemesLL_Table {
     private AccountingSchemesService:AccountingSchemesService,
     private dialog: MatDialog,
     private ref: ChangeDetectorRef
-  ) {
+  ) { }
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+  ngOnInit(): void {
     this.TransactionTypes = this.AccountingSchemesService.TransactionTypes;
     this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
     this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
@@ -113,11 +117,6 @@ export class AppAccSchemesLL_Table {
       this.ref.markForCheck();
     }));
     this.subscriptions.add(this.AccountingSchemesService.receiveSchemeLedgerTransactionReload().subscribe(()=>this.submitQuery(false,false)))
-  }
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
-  }
-  ngOnInit(): void {
     this.disabledControlElements = this.accessState === 'full'&&this.readOnly===false? false : true;
     this.multiFilter = (data: bcSchemeLedgerTransaction, filter: string) => {
       let filter_array = filter.split(',').map(el=>[el,1]);

@@ -26,7 +26,8 @@ export class AppInvInstrumentDetailsFormComponent {
     private InstrumentDataS:InstrumentDataService,
     private indexDBServiceS: indexDBService,
   ) 
-  {   
+  {   }
+  ngOnInit(): void {
     this.instrumentDetailsForm = this.fb.group ({
       status: {value:null, disabled: false},
       boardid:  [null, { validators:  Validators.required, updateOn: 'blur' }], 

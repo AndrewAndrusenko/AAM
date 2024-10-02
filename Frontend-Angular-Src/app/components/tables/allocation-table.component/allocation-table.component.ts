@@ -72,13 +72,6 @@ export class AppallocationTableComponent  implements AfterViewInit {
   multiFilter?: (data: allocation, filter: string) => boolean;
   activeTab:string='';
   tabsNames = ['Trades by Account','Allocation']
-/*   @HostListener('document:keydown', ['$event'])
-  handleKeyboardEvent(event: KeyboardEvent) { 
-    if (this.tabsNames.includes(this.activeTab)){
-      event.altKey&&event.key==='r'? this.submitQuery(false,true):null;
-      event.altKey&&event.key==='w'? this.exportToExcel():null;
-    }
-  } */
   constructor(
     private TreeMenuSeviceS: TreeMenuSevice,
     private InvestmentDataService:AppInvestmentDataServiceService, 
@@ -94,7 +87,11 @@ export class AppallocationTableComponent  implements AfterViewInit {
     private AutoCompService:AtuoCompleteService,
     private fb:FormBuilder, 
     private dialog: MatDialog, 
-  ) {
+  ) { }
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+  ngOnInit(): void {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.searchParametersFG = this.fb.group ({
       type:null,
@@ -105,11 +102,6 @@ export class AppallocationTableComponent  implements AfterViewInit {
       price:null,
       qty:null,
     });
-  }
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
-  }
-  ngOnInit(): void {
     if (this.accessState !== 'full' || this.filters?.disabled_controls===true) {
       this.disabledControlElements = true;
       this.filters?.disabled_controls? delete this.filters.disabled_controls : null;

@@ -71,7 +71,8 @@ export class AppaAccAccessTransactionTypesTable {
     private CommonDialogsService:HadlingCommonDialogsService,
     private AccountingSchemesService:AccountingSchemesService,
     private dialog: MatDialog,
-  ) {
+  ) {  }
+  ngOnInit(): void {
     this.TransactionTypes = this.AccountingSchemesService.TransactionTypes;
     this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
     this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
@@ -79,8 +80,6 @@ export class AppaAccAccessTransactionTypesTable {
     this.AccountingSchemesService.subjectTransactionTypePipe.next(null);
     this.accessRoles = this.AuthServiceS.dbAccessRoles;
     this.subscriptions.add(this.AccountingSchemesService.receiveTAceessransactionTypesReload().subscribe(()=>this.submitQuery(false,false)))
-  }
-  ngOnInit(): void {
     this.submitQuery(false,false);
     this.disabledControlElements = this.accessState === 'full'&&this.readOnly===false? false : true;
     this.multiFilter = (data: accessTransactionTypes, filter: string) => {

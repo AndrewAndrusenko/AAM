@@ -30,7 +30,8 @@ export class AppAccFeesPortfolioScheduleFormComponent {
     private CommonDialogsService:HadlingCommonDialogsService,
     private AppFeesHandlingService:AppFeesHandlingService,
   ) 
-  {   
+  {    }
+  ngOnInit(): void {
     this.FeesPortfolioForm = this.fb.group ({
       id :{value:null, disabled: false},
       fee_code:[null],
@@ -45,8 +46,6 @@ export class AppAccFeesPortfolioScheduleFormComponent {
       period_start:[null],
       period_end :[null],
     })
-  }
-  ngOnInit(): void {
     this.action==='View'? this.FeesPortfolioForm.disable():null;
     this.FeesPortfolioForm.patchValue(this.data);
     this.dateRange.patchValue({period_start:this.period_start.value,period_end:this.period_end.value});

@@ -49,7 +49,8 @@ export class AppTableCorporateActionsComponent  implements AfterViewInit {
     private InstrumentDataS:InstrumentDataService,
     private CommonDialogsService:HadlingCommonDialogsService,
     private dialog: MatDialog,
-  ) {
+  ) {  }
+  ngOnInit(): void {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToInstrumentData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
   }

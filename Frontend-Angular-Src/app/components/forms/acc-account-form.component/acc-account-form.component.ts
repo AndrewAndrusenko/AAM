@@ -53,7 +53,9 @@ export class AppAccAccountModifyFormComponent implements OnInit {
     private AutoCompService:AtuoCompleteService,
     private indexDBService:indexDBService
   ) 
-  { this.AccountingDataService.GetEntityTypeList('',0,'','','bcEnityType').subscribe (data => this.EnityTypes=data)
+  { }
+  ngOnInit(): void {
+    this.AccountingDataService.GetEntityTypeList('',0,'','','bcEnityType').subscribe (data => this.EnityTypes=data)
     this.indexDBService.getIndexDBStaticTables('bcAccountType_Ext').subscribe (data => this.AccountTypes=data.data as bcAccountType_Ext[])
     this.formDisabledFields = ['clientId', 'accountId', 'idportfolio']
     this.formLedgerDisabledFields = ['ledgerNoId', 'clientID']
@@ -91,9 +93,6 @@ export class AppAccAccountModifyFormComponent implements OnInit {
     })
     this.subscriptions.add(this.AutoCompService.subCurrencyList.subscribe(()=>this.currencyCode.updateValueAndValidity()));
     this.subscriptions.add(this.AutoCompService.subSecIdList.subscribe(()=>this.secid.updateValueAndValidity()));
-
-  }
-  ngOnInit(): void {
     this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate);
     (this.aType == 1)? this.accountLedgerModifyForm.patchValue(this.data): this.accountModifyForm.patchValue(this.data);
     this.action==='View'? this.accountLedgerModifyForm.disable():null;

@@ -99,7 +99,11 @@ export class AppOrderTableComponent {
     private AutoCompService:AtuoCompleteService,
     private dialog: MatDialog,
     private fb:FormBuilder, 
-  ) {
+  ) {  }
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+  ngOnInit(): void {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.orderStatuses = this.AuthServiceS.objectStatuses.filter(el =>el.id_object==='Order');
     let perms = this.AuthServiceS.accessRestrictions.filter(el=>el.elementid==='dorders_status_list')
@@ -123,11 +127,6 @@ export class AppOrderTableComponent {
       }));
       return !filter || filter_array.reduce((acc,val)=>acc+Number(val[1]),0)===0;
     };
-  }
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
-  }
-  ngOnInit(): void {
     this.indexDBServiceS.getIndexDBStaticTables('getObjectStatuses');
     if (this.tableMode.includes('Allocation')) {
       this.columnsToDisplayWithExpand = ['select','id','ordertype','type','secid','qty','price','amount','unexecuted','status','allocated','portfolioname','idcurrency','generated','expand'];

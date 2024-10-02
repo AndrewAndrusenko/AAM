@@ -43,7 +43,8 @@ export class AppMarketQuoteManualFormComponent {
     private AutoCompService:AtuoCompleteService,
     private CommonDialogsService:HadlingCommonDialogsService,
     private dialog: MatDialog, 
-  ) {
+  ) {  }
+  ngOnInit(): void {
     this.AutoCompService.subSecIdList.next(true);
     this.secid.setValidators(this.AutoCompService.secidValirator());
     this.filterednstrumentsLists = this.secid.valueChanges.pipe(
@@ -51,8 +52,6 @@ export class AppMarketQuoteManualFormComponent {
       distinctUntilChanged(),
       map(value => this.AutoCompService.filterList(value || '','secid') as string[][])
     );
-  }
-  ngOnInit(): void {
     this.manualQuoteEdit.patchValue(this.data)    
   }
   updateMarketQuote(action:string){

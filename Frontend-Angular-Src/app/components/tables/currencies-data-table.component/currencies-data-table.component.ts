@@ -66,7 +66,8 @@ export class AppTableCurrenciesDataComponent {
     private handlingCommonTasksService:HandlingCommonTasksService,
     private CommonDialogsService:HadlingCommonDialogsService,
     private fb:FormBuilder, 
-  ) {
+  ) { }
+  ngOnInit(): void {
     this.datePipe = new DatePipe ('en-US')
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToInstrumentData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;

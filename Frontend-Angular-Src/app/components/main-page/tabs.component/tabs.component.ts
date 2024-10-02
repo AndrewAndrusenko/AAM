@@ -17,7 +17,8 @@ export class AppTabsComponent implements OnDestroy {
   lastIndexChanged:number = null
   panel_Pr_Res_OpenState:boolean=false;
   panel_St_Res_OpenState:boolean=false;
-  constructor (private TreeMenuSevice : TreeMenuSevice, private titleService:Title) {
+  constructor (private TreeMenuSevice : TreeMenuSevice, private titleService:Title) { }
+  ngOnInit(): void {
     this.subscriptions.add (
       this.TreeMenuSevice.getUpdate().subscribe( message => {
         this.messageReceived = message;

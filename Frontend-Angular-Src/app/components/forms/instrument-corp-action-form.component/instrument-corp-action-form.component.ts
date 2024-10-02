@@ -60,7 +60,8 @@ export class AppInstrumentCorpActionFormComponent {
     private InstrumentDataS:InstrumentDataService,
     private AtuoCompService:AtuoCompleteService,
   ) 
-  {   
+  {   }
+  ngOnInit(): void {
     this.AtuoCompService.fullCurrenciesList.length? null: this.AtuoCompService.subCurrencyList.next(true);
     this.CorpActionsForm = this.fb.group ({
       id: {value:null, disabled: false}, 

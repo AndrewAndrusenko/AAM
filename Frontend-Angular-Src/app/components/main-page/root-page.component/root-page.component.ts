@@ -23,9 +23,9 @@ export class DashboardComponent implements OnDestroy,OnInit {
     public dialog: MatDialog,
     private AccountingSchemesService:AccountingSchemesService,
     ) {
-    this.subscriptionName= this.appMenuService.getToggleTree().subscribe (message => this.opened = message.text );
   }
   ngOnInit() {
+    this.subscriptionName= this.appMenuService.getToggleTree().subscribe (message => this.opened = message.text );
     this.indexDBServiceS.indexdbDeleteAllCache('AAMCache').subscribe(data => {
       console.log('Cache has been cleared', data)
       this.AccountingSchemesService.subjectTransactionTypePipe.next(null);

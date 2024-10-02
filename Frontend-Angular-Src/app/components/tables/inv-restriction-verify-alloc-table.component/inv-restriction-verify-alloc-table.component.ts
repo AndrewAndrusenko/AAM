@@ -120,13 +120,12 @@ export class AppInvRestrictionVerifyAllocTableComponent {
     public dialogRefConfirm: MatDialogRef<AppInvRestrictionVerifyAllocTableComponent>,
     private AuthService:AuthService,  
     private HandlingCommonTasksS:HandlingCommonTasksService,
-  ) {
+  ) {  }
+  ngOnInit(): void {
     this.accessState = this.AuthService.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
     this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
-  }
-  ngOnInit(): void {
     this.updateRestrictionVerifyTable(this.dataVerification)
   }
   cancelAlloc (){

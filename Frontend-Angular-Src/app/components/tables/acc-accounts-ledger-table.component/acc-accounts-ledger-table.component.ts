@@ -37,13 +37,13 @@ export class AppTableAccLedgerAccountsComponent {
     private AuthServiceS:AuthService,  
     private dialog: MatDialog ,
     private HandlingCommonTasksS:HandlingCommonTasksService 
-  ) {
+  ) { }
+  ngOnInit(): void {
     this.modal_principal_parent = new EventEmitter()
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToBalanceData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true; 
     this.accessState !=='none'? this.AccountingDataService.getReloadLedgerAccontList().subscribe (id => this.updateAccountsData(this.action)):null;
     this.updateAccountsData(this.action)
-
   }
   updateAccountsData (action: string,snak:boolean=false) {
     this.dataSource? this.dataSource.data=null : null;
