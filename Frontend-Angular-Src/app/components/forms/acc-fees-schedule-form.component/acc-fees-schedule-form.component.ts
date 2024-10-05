@@ -50,8 +50,7 @@ export class AppAccFeesScheduleFormComponent {
     private CommonDialogsService:HadlingCommonDialogsService,
     private AppFeesHandlingService:AppFeesHandlingService,
   ) 
-  {  }
-  ngOnInit(): void {
+  { 
     this.FeesSchedulesForm = this.fb.group ({
       idfee_scedule :[null], 
       fee_type_value :[null, { validators:  [Validators.required]}],
@@ -66,6 +65,8 @@ export class AppAccFeesScheduleFormComponent {
       pf_hurdle:{value:null, disabled:true},
       highwatermark:[null]
     })
+   }
+  ngOnInit(): void {
     this.action==='View'? this.FeesSchedulesForm.disable():null;
     this.FeesSchedulesForm.patchValue(this.data);
     if (this.action!=='Create') {

@@ -124,14 +124,9 @@ export class AppAccFifoTable {
     private TradeService: AppTradeService,
     private accountingTradeService: AccountingTradesService,
     private fb:FormBuilder, 
-  ) { }
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
-  }
-  ngOnInit(): void {
+  ) {
     this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
     this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
-    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.searchParametersFG = this.fb.group ({
       type:null,
       secidList: [],
@@ -143,15 +138,21 @@ export class AppAccFifoTable {
       price:null,
       qty:null,
     });
+   }
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+  ngOnInit(): void {
+    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.AutoCompleteService.subSecIdList.next(true);
-   this.tradesIDs.patchValue(['ClearAll'])
-   this.portfoliosList.patchValue(['ClearAll'])
-   this.secidList.patchValue(['ClearAll'])
-   this.filterednstrumentsLists = this.secidIn.valueChanges.pipe(
-    startWith(''),
-    distinctUntilChanged(),
-    map((value)=>this.AutoCompleteService.filterList(value,'secid') as string[][])
-   )
+    this.tradesIDs.patchValue(['ClearAll'])
+    this.portfoliosList.patchValue(['ClearAll'])
+    this.secidList.patchValue(['ClearAll'])
+    this.filterednstrumentsLists = this.secidIn.valueChanges.pipe(
+      startWith(''),
+      distinctUntilChanged(),
+      map((value)=>this.AutoCompleteService.filterList(value,'secid') as string[][])
+    )
     this.disabledControlElements = this.accessState === 'full'&&this.readOnly===false? false : true;
     this.multiFilter = (data: FifoTableData, filter: string) => {
       let filter_array = filter.split(',').map(el=>[el,1]);

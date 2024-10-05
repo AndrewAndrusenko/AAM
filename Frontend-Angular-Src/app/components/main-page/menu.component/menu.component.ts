@@ -1,8 +1,8 @@
 import { Component, Input } from '@angular/core';
-import { menuColorGl } from 'Frontend-Angular-Src/app/models/constants.model';
 import { AppMenuServiceService } from 'Frontend-Angular-Src/app/services/menu-service.service';
 import { AuthService } from 'Frontend-Angular-Src/app/services/auth.service';
 import { indexDBService } from 'Frontend-Angular-Src/app/services/indexDB.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-app-menu',
@@ -16,6 +16,7 @@ constructor(
   private authService : AuthService, 
   private appMenuService : AppMenuServiceService,
   private indexDBServiceS:indexDBService,
+  private router:Router
   ) { }
   public getLogin = () => {
     let userData = JSON.parse(localStorage.getItem ('userInfo'));
@@ -25,6 +26,10 @@ constructor(
     var elem = document.documentElement;
     this.fullscreen ? document.exitFullscreen() : elem.requestFullscreen();
     this.fullscreen=!this.fullscreen;
+  }
+  navigateToTree (link:string) {
+    this.router.navigate([link]);
+    // this.TreeMenuSeviceS.sendUpdate('Clients', element.clientname, element.idclient,'Edit')
   }
   LogOut = () => {
     console.log('LogOut cpm',);

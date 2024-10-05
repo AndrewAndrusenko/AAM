@@ -61,9 +61,7 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
     private InstrumentDataS:InstrumentDataService,
     private AtuoCompService:AtuoCompleteService,
   ) 
-  {  }
-  ngOnInit(): void {
-    this.changePlaceholders('stock_bonds');
+  { 
     this.instrumentModifyForm = this.fb.group ({
       id : {value:null, disabled: false},
       groupid : {value:null, disabled: false},
@@ -89,6 +87,9 @@ export class AppInvInstrumentModifyFormComponent implements AfterContentInit  {
       regnumeric:  {value:null, disabled: false},
       listing:  [null, {validators: Validators.pattern('[0-9]'),updateOn: 'blur'}],
     })
+   }
+  ngOnInit(): void {
+    this.changePlaceholders('stock_bonds');
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToInstrumentData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.AtuoCompService.fullCurrenciesList.length? null: this.AtuoCompService.subCurrencyList.next(true);

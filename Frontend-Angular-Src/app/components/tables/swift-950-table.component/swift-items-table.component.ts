@@ -50,6 +50,7 @@ export class AppTableSWIFT950ItemsComponent  implements  AfterViewInit {
     private SelectionService:HandlingTableSelectionService,
     private AuthServiceS:AuthService,  
   ) {
+    
   }
   ngOnInit(): void {
     this.AccountingDataService.getLoadedMT950Transactions().subscribe (swiftsIDs => swiftsIDs.includes (this.parentMsgRow.id)? this.reloadSwiftItemsTable() : null)

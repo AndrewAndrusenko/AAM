@@ -26,8 +26,7 @@ export class AppInvInstrumentDetailsFormComponent {
     private InstrumentDataS:InstrumentDataService,
     private indexDBServiceS: indexDBService,
   ) 
-  {   }
-  ngOnInit(): void {
+  {  
     this.instrumentDetailsForm = this.fb.group ({
       status: {value:null, disabled: false},
       boardid:  [null, { validators:  Validators.required, updateOn: 'blur' }], 
@@ -46,6 +45,8 @@ export class AppInvInstrumentDetailsFormComponent {
       secid: {value:null, disabled: false},
       id: {value:null, disabled: false}
     })
+   }
+  ngOnInit(): void {
     this.indexDBServiceS.getIndexDBStaticTables('getBoardsDataFromInstruments').subscribe (data=>this.moexBoards=(data.data as moexBoard[]))
   }
   ngAfterContentInit(): void {

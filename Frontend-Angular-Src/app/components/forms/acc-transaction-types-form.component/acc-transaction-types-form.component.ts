@@ -20,8 +20,7 @@ export class AppAccTransactionTypesFormComponent {
     private CommonDialogsService:HadlingCommonDialogsService,
     private AccountingSchemesService:AccountingSchemesService,
   ) 
-  {    }
-  ngOnInit(): void {
+  {  
     this.TransactionTypes = Array.from(this.AccountingSchemesService.TransactionTypes);
     this.TransactionTypeForm = this.fb.group ({
       id :{value:null, disabled: false},
@@ -30,6 +29,8 @@ export class AppAccTransactionTypesFormComponent {
       description: [null, { validators:  [Validators.required]}],
       code2: [null, { validators:  [Validators.required]}],
     })
+    }
+  ngOnInit(): void {
     this.action==='View'? this.TransactionTypeForm.disable():null;
     this.TransactionTypeForm.patchValue(this.data);
   }

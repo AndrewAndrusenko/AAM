@@ -79,20 +79,21 @@ export class AppPortfoliosHistTable {
     private CommonDialogsService:HadlingCommonDialogsService,
     private InvestmentDataService:AppInvestmentDataServiceService,
     private fb:FormBuilder
-  ) { }
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
-  }
-  ngOnInit(): void {
+  ) {
     this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
     this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
-    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.searchParametersFG = this.fb.group ({
       p_type:null,
       p_idportfolio:null,
       p_user_id:null,
       p_tr_date:this.dataRange
     });
+   }
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+  ngOnInit(): void {
+    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'&&this.readOnly===false? false : true;
     this.multiFilter = (data: PortfoliosHistory, filter: string) => {
       let filter_array = filter.split(',').map(el=>[el,1]);

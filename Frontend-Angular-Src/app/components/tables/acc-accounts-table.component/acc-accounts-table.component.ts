@@ -46,9 +46,10 @@ export class AppTableAccAccountsComponent {
     private SelectionService:HandlingTableSelectionService,
     private dialog: MatDialog ,
     private HandlingCommonTasksS:HandlingCommonTasksService
-  ) {  }
-  ngOnInit(): void {
+  ) {
     this.modal_principal_parent = new EventEmitter();
+    }
+  ngOnInit(): void {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToBalanceData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true; 
     this.accessState !=='none'? this.AccountingDataService.getReloadAccontList().subscribe (id => this.updateAccountsData(this.action)):null;

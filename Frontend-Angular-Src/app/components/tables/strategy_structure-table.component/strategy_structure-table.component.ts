@@ -38,8 +38,7 @@ export class AppTableStrategyComponent   {
     private InvestmentDataService:AppInvestmentDataServiceService, 
     private fb:FormBuilder,
   ) 
-  {}
-  ngOnInit(): void {
+  {
     this.editStructureStrategyForm=this.fb.group ({
       id: {value:''},
       sname: [null, { updateOn: 'blur'} ],
@@ -47,6 +46,9 @@ export class AppTableStrategyComponent   {
       weight_of_child: {value:'', disabled: false},
       id_item: {value:'', disabled: false},
     })
+  }
+  ngOnInit(): void {
+
     this.subscription.add(
       this.InvestmentDataService.getReloadStrategyStructure().subscribe ((id) => this.updateStrategyStructure(id))
     );

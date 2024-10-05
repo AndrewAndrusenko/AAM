@@ -53,10 +53,7 @@ export class AppAccAccountModifyFormComponent implements OnInit {
     private AutoCompService:AtuoCompleteService,
     private indexDBService:indexDBService
   ) 
-  { }
-  ngOnInit(): void {
-    this.AccountingDataService.GetEntityTypeList('',0,'','','bcEnityType').subscribe (data => this.EnityTypes=data)
-    this.indexDBService.getIndexDBStaticTables('bcAccountType_Ext').subscribe (data => this.AccountTypes=data.data as bcAccountType_Ext[])
+  {
     this.formDisabledFields = ['clientId', 'accountId', 'idportfolio']
     this.formLedgerDisabledFields = ['ledgerNoId', 'clientID']
     this.accountModifyForm = this.fb.group ({
@@ -91,6 +88,10 @@ export class AppAccAccountModifyFormComponent implements OnInit {
       d_APType: {value:null, disabled: true},
       dateOpening:[new Date(), [Validators.required]] 
     })
+   }
+  ngOnInit(): void {
+    this.AccountingDataService.GetEntityTypeList('',0,'','','bcEnityType').subscribe (data => this.EnityTypes=data)
+    this.indexDBService.getIndexDBStaticTables('bcAccountType_Ext').subscribe (data => this.AccountTypes=data.data as bcAccountType_Ext[])
     this.subscriptions.add(this.AutoCompService.subCurrencyList.subscribe(()=>this.currencyCode.updateValueAndValidity()));
     this.subscriptions.add(this.AutoCompService.subSecIdList.subscribe(()=>this.secid.updateValueAndValidity()));
     this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate);

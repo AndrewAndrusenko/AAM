@@ -23,9 +23,7 @@ export class AppAccFeesMainFormComponent {
     private AppFeesHandlingService:AppFeesHandlingService,
     private AtuoCompService:AtuoCompleteService,
   ) 
-  {    }
-  ngOnInit(): void {
-    this.AtuoCompService.fullCurrenciesList.length? null: this.AtuoCompService.subCurrencyList.next(true);
+  {  
     this.FeesMainForm = this.fb.group ({
       id :{value:null, disabled: false},
       fee_code:[null, { validators:  [Validators.required]}],
@@ -37,6 +35,9 @@ export class AppAccFeesMainFormComponent {
       fee_object_type :[null, { validators:  [Validators.required]}],
       id_fee_period :{value:null, disabled: false}
     })
+    }
+  ngOnInit(): void {
+    this.AtuoCompService.fullCurrenciesList.length? null: this.AtuoCompService.subCurrencyList.next(true);
     this.action==='View'? this.FeesMainForm.disable():null;
     this.FeesMainForm.patchValue(this.data);
   }

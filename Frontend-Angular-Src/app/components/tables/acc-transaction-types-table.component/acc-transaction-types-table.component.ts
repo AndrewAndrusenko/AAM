@@ -70,14 +70,15 @@ export class AppaIAccTransactionTypesTable {
     private CommonDialogsService:HadlingCommonDialogsService,
     private AccountingSchemesService:AccountingSchemesService,
     private dialog: MatDialog,
-  ) { }
+  ) {
+    this.TransactionTypes = this.AccountingSchemesService.TransactionTypes;
+    this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
+    this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
+   }
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }
   ngOnInit(): void {
-    this.TransactionTypes = this.AccountingSchemesService.TransactionTypes;
-    this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
-    this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToBalanceData')[0].elementvalue;
     this.AccountingSchemesService.subjectTransactionTypePipe.next(null);
     this.subscriptions.add(this.AccountingSchemesService.receiveTransactionTypesReady().subscribe(data=>this.updateDataTable(data.data)))

@@ -88,6 +88,12 @@ export class AppTableBalanceSheetComponent {
     private dialog: MatDialog,
     private fb:FormBuilder, 
   ) {
+    this.searchParametersFG = this.fb.group ({
+      dataRange:null,
+      noAccountLedger: [],
+      amount:{value:null, disabled:true},
+      accountTypes: []
+    })
   }
   ngOnInit(): void {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToBalanceData')[0].elementvalue;
@@ -95,13 +101,7 @@ export class AppTableBalanceSheetComponent {
     this.getCurrentBalanceData()
     this.AccountingDataService.GetbbalacedDateWithEntries('GetbbalacedDateWithEntries').subscribe(data => this.balacedDateWithEntries = data[0]['datesarray']);
     this.AccountingDataService.GetbAccountingDateToClose('GetbAccountingDateToClose').subscribe(data =>this.firstClosingDate= new Date(data[0].accountingDateToClose));
-    this.searchParametersFG = this.fb.group ({
-      dataRange:null,
-      noAccountLedger: [],
-      amount:{value:null, disabled:true},
-      accountTypes: []
 
-    })
     this.subscriptions.add(this.AccountingBalncesService.receivebBalanceData().subscribe(data=>this.updateBalanceData(data)))
     this.indexDBService.getIndexDBStaticTables('bcAccountType_Ext').subscribe (data => this.accountTypes=(data.data as bcAccountType_Ext[]))
     this.noAccountLedger.patchValue(['ClearAll'])

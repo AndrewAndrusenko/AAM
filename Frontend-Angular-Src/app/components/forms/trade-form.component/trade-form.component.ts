@@ -72,8 +72,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     private MarketDataService: AppMarketDataService,
     private dialog: MatDialog, 
   ) 
-  { }
-  ngOnInit(): void {
+  { 
     this.tradeModifyForm = this.fb.group ({
       idtrade:{value:null, disabled: false},
       trtype:[null, { validators:  Validators.required, updateOn: 'blur' }], action:{value:null, disabled: false},
@@ -97,23 +96,28 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
       idportfolio:{value:null, disabled: false},
       id_buyer_instructions:{value:null, disabled: false},id_seller_instructions:{value:null, disabled: false},id_broker:{value:null, disabled: false}, details:{value:null, disabled: false},cpty_name:{value:null, disabled: false},security_group_name :{value:null, disabled: false},   secid_name:{value:null, disabled: false}, trade_amount:[null], facevalue:[null],faceunit:[null],faceunit_name:[null], code_price_currency:[null],  price_currency_name:[null], settlement_currency_name:[null], code_settlement_currency:[null], settlement_amount:[null], coupon_details:[null],market_price:[null]
     })
+    this.faceunit.value? this.faceunit_name.patchValue(this.AutoCompService.getCurrecyData(this.faceunit.value)['CurrencyCode']):null;
+    this.tidinstrument.setValidators([this.AutoCompService.secidValirator(),Validators.required]);
+    this.id_price_currency.setValidators([this.AutoCompService.currencyValirator(),Validators.required]);
+    this.id_settlement_currency.setValidators([this.AutoCompService.currencyValirator(),Validators.required]);
+
+  }
+  ngOnInit(): void {
+    this.tradeModifyForm.patchValue(this.data)
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data => this.firstOpenedAccountingDate = data[0].FirstOpenedDate);
     this.indexDBServiceS.getIndexDBStaticTables('getMoexSecurityTypes').subscribe (data=>this.securityTypes = (data.data as moexSecurityType[]));
-    this.AutoCompService.fullCurrenciesList.length? null: this.AutoCompService.subCurrencyList.next(true);
+    this.AutoCompService.fullCurrenciesList.length?  this.checkCurrenciesHints(): this.AutoCompService.subCurrencyList.next(true);
     this.arraySubscrition.add(this.AutoCompService.subCurrencyList.subscribe(()=>{
+      console.log('subCurrencyList',);
       this.id_price_currency.updateValueAndValidity();
       this.id_settlement_currency.updateValueAndValidity();
       this.checkCurrenciesHints()
     }));
     this.AutoCompService.subSecIdList.next(true);
     this.AutoCompService.getCounterpartyLists().subscribe(()=>this.id_cpty.setValidators(this.AutoCompService.counterPartyalirator(this.cpty_name)));
-    this.tradeModifyForm.patchValue(this.data)
-    this.tidinstrument.setValidators([this.AutoCompService.secidValirator(),Validators.required]);
-    this.id_price_currency.setValidators([this.AutoCompService.currencyValirator(),Validators.required]);
-    this.id_settlement_currency.setValidators([this.AutoCompService.currencyValirator(),Validators.required]);
-    this.faceunit.value? this.faceunit_name.patchValue(this.AutoCompService.getCurrecyData(this.faceunit.value)['CurrencyCode']):null;
+
     
   }
   ngOnDestroy(): void {
@@ -246,6 +250,7 @@ export class AppTradeModifyFormComponent implements AfterContentInit  {
     ['code_price_currency', 'price_currency_name', 'code_settlement_currency','settlement_currency_name','settlement_rate'].forEach(key => this.tradeModifyForm.get(key).patchValue(null))
   }
   checkCurrenciesHints (){
+    console.log('checkCurrenciesHints',);
     if (this.id_price_currency.value) {  
       let el_price_currency = this.AutoCompService.getCurrecyData(this.id_price_currency.value)
       this.code_price_currency.patchValue(el_price_currency['CurrencyCode'])

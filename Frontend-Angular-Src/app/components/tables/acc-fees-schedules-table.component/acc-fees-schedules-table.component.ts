@@ -82,14 +82,14 @@ export class AppaIAccFeesSchedulesTable {
     private CommonDialogsService:HadlingCommonDialogsService,
     private AppFeesHandlingService:AppFeesHandlingService,
     private dialog: MatDialog,
-  ) {
+  ) {    
+    this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
+    this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
   }
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }
   ngOnInit(): void {
-    this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
-    this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToFeesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'&&this.readOnly===false? false : true;
     this.multiFilter = (data: FeesSchedulesData, filter: string) => {

@@ -71,11 +71,12 @@ export class AppaAccAccessTransactionTypesTable {
     private CommonDialogsService:HadlingCommonDialogsService,
     private AccountingSchemesService:AccountingSchemesService,
     private dialog: MatDialog,
-  ) {  }
-  ngOnInit(): void {
+  ) { 
     this.TransactionTypes = this.AccountingSchemesService.TransactionTypes;
     this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
     this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
+   }
+  ngOnInit(): void {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToBalanceData')[0].elementvalue;
     this.AccountingSchemesService.subjectTransactionTypePipe.next(null);
     this.accessRoles = this.AuthServiceS.dbAccessRoles;

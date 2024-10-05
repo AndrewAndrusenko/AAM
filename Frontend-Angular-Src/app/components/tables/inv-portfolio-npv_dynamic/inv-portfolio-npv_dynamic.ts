@@ -81,7 +81,15 @@ export class AppaInvPortfolioNPVDynamicComponent {
     private CommonDialogsService:HadlingCommonDialogsService,
     private AutoCompService:AtuoCompleteService,
     private fb:FormBuilder, 
-  ) { }
+  ) {
+    this.searchParametersFG = this.fb.group ({
+      p_portfolios_list:  [],
+      MP:null,
+      p_report_date_start:null,
+      p_report_date_end:null,
+      p_report_currency:['840', { validators:  [this.AutoCompService.currencyValirator(),Validators.required]}],
+    });
+   }
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }
@@ -91,13 +99,6 @@ export class AppaInvPortfolioNPVDynamicComponent {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.dateRangeStart.value.setMonth(this.dateRangeStart.value.getMonth()-1);
-    this.searchParametersFG = this.fb.group ({
-      p_portfolios_list:  [],
-      MP:null,
-      p_report_date_start:null,
-      p_report_date_end:null,
-      p_report_currency:['840', { validators:  [this.AutoCompService.currencyValirator(),Validators.required]}],
-    });
     this.AutoCompService.subModelPortfolios.next([])
     this.subscriptions.add(this.AutoCompService.subModelPortfolios.subscribe(data=>this.mp_strategies_list=data))
     this.multiFilter = (data: NPVDynamicData, filter: string) => {

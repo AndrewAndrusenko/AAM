@@ -108,8 +108,6 @@ export class AppTableAccEntriesComponent implements OnInit {
     private InvestmentDataService:AppInvestmentDataServiceService,
     private SelectionService:HandlingTableSelectionService,
   ) {
-  }
-  ngOnInit(): void {
     this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
     this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
     this.searchParametersFG = this.fb.group ({
@@ -124,6 +122,8 @@ export class AppTableAccEntriesComponent implements OnInit {
       amountRange:{value:null, disabled:false}
 
     })
+  }
+  ngOnInit(): void {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToEntriesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.indexDBService.getIndexDBStaticTables('bcAccountType_Ext').subscribe (data => this.accountTypes=(data.data as bcAccountType_Ext[]))
@@ -187,7 +187,7 @@ export class AppTableAccEntriesComponent implements OnInit {
     }
   }
   ngOnChanges(changes: SimpleChanges): void {
-    changes['paramRowData']?.currentValue!==undefined? this.initiateTable() : null;
+    changes['paramRowData']?.currentValue!==undefined&&this.searchParametersFG? this.initiateTable() : null;
   }
   submitQuery (notification:boolean=true, sendNewAllocatedSum:boolean=false) {
     this.selection.clear();

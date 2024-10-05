@@ -66,9 +66,16 @@ export class AppTableCurrenciesDataComponent {
     private handlingCommonTasksService:HandlingCommonTasksService,
     private CommonDialogsService:HadlingCommonDialogsService,
     private fb:FormBuilder, 
-  ) { }
-  ngOnInit(): void {
+  ) { 
     this.datePipe = new DatePipe ('en-US')
+    this.searchParametersFG = this.fb.group ({
+      dataRange : this.dataRange,
+      secidList: null,
+      marketSource : {value:null, disabled:false},
+      boards : {value:null, disabled:false}
+    });
+  }
+  ngOnInit(): void {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToInstrumentData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.indexDBService.pipeMarketSourceSet.next(true);
@@ -78,12 +85,7 @@ export class AppTableCurrenciesDataComponent {
       this.setAll(0);
     }));
     this.loadingDataState={message:'',state:'None',deletedCount:0,loadedCount:0}
-    this.searchParametersFG = this.fb.group ({
-      dataRange : this.dataRange,
-      secidList: null,
-      marketSource : {value:null, disabled:false},
-      boards : {value:null, disabled:false}
-    });
+
     this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data=>{
       this.FirstOpenedAccountingDate = data[0].FirstOpenedDate;
     });

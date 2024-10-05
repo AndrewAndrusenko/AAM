@@ -36,19 +36,19 @@ export class AppNewAccountComponent {
     private fb:FormBuilder, 
     private dialog: MatDialog, 
   ) 
-  { }
-  ngOnInit(): void {
+  {    
     this.portfolioForm=this.fb.group ({
-      idportfolio: {value:null, disabled: false, }, 
-      account_type: [{value:null, disabled: false}],
-      idclient: [{value:null, disabled: false}, [Validators.required]],
-      idstategy: [{value:null, disabled: false}, [Validators.required]],
-      clientname: {value:null, disabled: true}, 
-      stategy_name: [{value:null, disabled: true}],
-      description: {value:null, disabled: true}, 
-      portfolioname:[{value:null, disabled: false}, [Validators.required]],
-      user_id:[this.AuthService.userId]
-    })
+    idportfolio: {value:null, disabled: false, }, 
+    account_type: [{value:null, disabled: false}],
+    idclient: [{value:null, disabled: false}, [Validators.required]],
+    idstategy: [{value:null, disabled: false}, [Validators.required]],
+    clientname: {value:null, disabled: true}, 
+    stategy_name: [{value:null, disabled: true}],
+    description: {value:null, disabled: true}, 
+    portfolioname:[{value:null, disabled: false}, [Validators.required]],
+    user_id:[this.AuthService.userId]
+  }) }
+  ngOnInit(): void {
     this.InvestmentDataService.getAccountTypesList (0,'','Get_AccountTypes_List').subscribe (data => this.accountTypes = data);
     this.accessToClientData = this.AuthService.accessRestrictions.filter(el =>el.elementid==='accessToClientData')[0].elementvalue;
     this.accessState = this.AuthService.accessRestrictions.filter(el =>el.elementid==='accessToClientData')[0].elementvalue;

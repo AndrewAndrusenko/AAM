@@ -15,10 +15,9 @@ let isConnected = !!await require('dns').promises.resolve('google.com').catch(()
 return isConnected;
 }
 async function queryExecute (sql, response, responseType, sqlID, SendResponse=true,resPure=false) {
-  let accRole='testRole';
-/*   console.log(' response.req.user', response.req.user);
-  accRole = response.req?.user? response.req.user.accessrole:'error' */
-  // accRole = response? response.req.user.accessrole:'error'
+/*   console.log(sqlID,);
+  console.log(response.req,); */
+  accRole = response? response.req.user.accessrole:'error'
   switch (accRole) {
     case 'testRole':
       pool = poolSuper;

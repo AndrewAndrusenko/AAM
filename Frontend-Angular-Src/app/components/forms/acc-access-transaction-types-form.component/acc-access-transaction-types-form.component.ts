@@ -24,11 +24,7 @@ export class AppAccAccessTTFormComponent {
     private CommonDialogsService:HadlingCommonDialogsService,
     private AccountingSchemesService:AccountingSchemesService,
   ) 
-  { }
-  ngOnInit(): void {
-    this.code2TT = this.AccountingSchemesService.TransactionTypes;
-    this.subscriptions.add(this.AccountingSchemesService.receiveTransactionTypesReady().subscribe(data=>this.TransactionTypes=data.data.sort((a,b)=>a.id-b.id)))
-    this.AccountingSchemesService.subjectTransactionTypePipe.next(null);
+  {
     this.TransactionTypeForm = this.fb.group ({
       id :{value:null, disabled: false},
       transaction_type_id: [null, { validators:  [Validators.required]}],
@@ -37,6 +33,11 @@ export class AppAccAccessTTFormComponent {
       description: [null, { validators:  [Validators.required]}],
       code2: [null, { validators:  [Validators.required]}],
     })
+   }
+  ngOnInit(): void {
+    this.code2TT = this.AccountingSchemesService.TransactionTypes;
+    this.subscriptions.add(this.AccountingSchemesService.receiveTransactionTypesReady().subscribe(data=>this.TransactionTypes=data.data.sort((a,b)=>a.id-b.id)))
+    this.AccountingSchemesService.subjectTransactionTypePipe.next(null);
     this.subscriptions.add(this.transaction_type_id.valueChanges.pipe(distinctUntilChanged()).subscribe(newId=>this.ttLabelsChange(newId.toString())))
     this.action==='View'? this.TransactionTypeForm.disable():null;
     this.TransactionTypeForm.patchValue(this.data);

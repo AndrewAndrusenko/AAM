@@ -69,15 +69,16 @@ export class AppStrategyStructureHistTable {
     private HandlingCommonTasksS:HandlingCommonTasksService,
     private CommonDialogsService:HadlingCommonDialogsService,
     private InvestmentDataService:AppInvestmentDataServiceService,
-  ) {  }
+  ) { 
+    this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
+    this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
+    this.rDate = new Date('02/05/2024')
+   }
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }
   ngOnInit(): void {
-    this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
-    this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
-    this.rDate = new Date('02/05/2024')
     this.disabledControlElements = this.accessState === 'full'&&this.readOnly===false? false : true;
     this.subscriptions.add (
       this.InvestmentDataService.getReloadStrategyStructure().subscribe(parentStrategyId=>{

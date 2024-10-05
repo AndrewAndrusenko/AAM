@@ -126,11 +126,10 @@ export class AppTableMarketDataComponent {
     private dialog:MatDialog,
     private fb:FormBuilder, 
     public snack:MatSnackBar,
-  ) {  }
-  ngOnInit(): void {
-    this.AutoCompService.subSecIdList.next(true)
-    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToInstrumentData')[0].elementvalue;
-    this.disabledControlElements = this.accessState === 'full'? false : true;
+  ) {
+    this.datePipe = new DatePipe ('en-US')
+    this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
+    this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
     this.searchParametersFG = this.fb.group ({
       dataRange : this.dataRange,
       secidList: null,
@@ -143,16 +142,18 @@ export class AppTableMarketDataComponent {
       sourceCode: [[],Validators.required],
       overwritingCurrentData : [false]
     });
+    }
+  ngOnInit(): void {
+    this.AutoCompService.subSecIdList.next(true)
+    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToInstrumentData')[0].elementvalue;
+    this.disabledControlElements = this.accessState === 'full'? false : true;
     this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data=>this.FirstOpenedAccountingDate = data[0].FirstOpenedDate);
     this.secidList.setValidators(this.AutoCompService.secidValirator())
     this.filterednstrumentsLists = this.secidList.valueChanges.pipe(
       startWith(''),
       map(value => this.AutoCompService.filterList(value || '','secid') as string[][])
     );
-    this.datePipe = new DatePipe ('en-US')
     this.subscriptions.add(this.MarketDataService.getReloadMarketData().subscribe(marketData => this.updateMarketDataTable(marketData)));
-    this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
-    this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
     this.indexDBService.pipeMarketSourceSet.next(true);
     this.indexDBService.pipeBoardsMoexSet.next(true);
     this.subscriptions.add(this.indexDBService.receiveBoardsMoexSet().subscribe(boardsData =>{
@@ -165,7 +166,6 @@ export class AppTableMarketDataComponent {
       msData.forEach(el=>el.segments.forEach(seg=>this.fullSourcesSet.push({code:seg.sourceCode,name:seg.description})))
       this.marketSources = msData.filter(el=>el.type==='stock')}
       ));
-
     this.loadingDataLog.state = {Message:'',State: 'None'};
   }
   ngOnChanges(): void {

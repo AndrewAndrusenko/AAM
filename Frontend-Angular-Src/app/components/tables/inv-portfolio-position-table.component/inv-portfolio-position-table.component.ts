@@ -63,13 +63,7 @@ export class AppaInvPortfolioPositionTableComponent {
     private CommonDialogsService:HadlingCommonDialogsService,
     private AutoCompService:AtuoCompleteService,
     private fb:FormBuilder, 
-  ) {  }
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
-  }
-  ngOnInit(): void {
-    this.accessState = this.AuthService.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
-    this.disabledControlElements = this.accessState === 'full'? false : true;
+  ) { 
     this.searchParametersFG = this.fb.group ({
       idportfolios:  [],
       MP:null,
@@ -77,6 +71,14 @@ export class AppaInvPortfolioPositionTableComponent {
       report_date : [new Date(), { validators:  Validators.required, updateOn: 'blur' }],
       report_id_currency:['840', { validators:  [this.AutoCompService.currencyValirator(),Validators.required]}],
     });
+   }
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+  ngOnInit(): void {
+    this.accessState = this.AuthService.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
+    this.disabledControlElements = this.accessState === 'full'? false : true;
+
     if (this.AutoCompService.fullCurrenciesList.length) {
       this.report_id_currency.updateValueAndValidity()
     } else {
@@ -143,7 +145,7 @@ export class AppaInvPortfolioPositionTableComponent {
   }
   setFilters (filters:localFilters) {
     filters.portfolio_code? this.portfolios =['ClearAll',...filters.portfolio_code]:null;
-    this.submitQuery(false,false);
+    this.searchParametersFG? this.submitQuery(false,false):null;
   }
   updatePositionsDataTable (positionsData:portfolioPositions[]) {
     this.fullDataSource = positionsData;

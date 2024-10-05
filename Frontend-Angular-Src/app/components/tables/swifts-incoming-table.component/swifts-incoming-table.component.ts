@@ -75,7 +75,13 @@ export class AppTableSWIFTsInListsComponent  implements OnInit,OnDestroy {
     private HandlingCommonTasksS:HandlingCommonTasksService,
     private LogService:LogProcessingService,
     private fb : FormBuilder
-  ) { }
+  ) { 
+    this.swiftProcessingFB = this.fb.group ({
+      cDateToProcessSwift :[null, [Validators.required]],
+      cDateAccounting : [null, [Validators.required]],
+      overRideOverdraft: {value:false}
+    });
+  }
   ngOnDestroy(): void {
     this.subs.unsubscribe();
     this.closeLogSubscriptions();
@@ -94,11 +100,6 @@ export class AppTableSWIFTsInListsComponent  implements OnInit,OnDestroy {
     this.subs.add(this.AccountingDataService.GetSWIFTsList (null,null,null,null,'DatesWithSWIFT').subscribe(dates=>{
       this.dateWithSWIFTs = dates[0]['datesarray'];
     }))
-    this.swiftProcessingFB = this.fb.group ({
-      cDateToProcessSwift :[null, [Validators.required]],
-      cDateAccounting : [null, [Validators.required]],
-      overRideOverdraft: {value:false}
-    });
   }
   updateSwiftsData (action: string, dateMessage?:string,snack:boolean=false) {
     this.subs.add (this.accessState === 'none'? null : this.AccountingDataService.GetSWIFTsList (dateMessage,null,null,null,action).subscribe (SWIFTsList  => {

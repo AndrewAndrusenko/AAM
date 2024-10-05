@@ -60,9 +60,7 @@ export class AppInstrumentCorpActionFormComponent {
     private InstrumentDataS:InstrumentDataService,
     private AtuoCompService:AtuoCompleteService,
   ) 
-  {   }
-  ngOnInit(): void {
-    this.AtuoCompService.fullCurrenciesList.length? null: this.AtuoCompService.subCurrencyList.next(true);
+  { 
     this.CorpActionsForm = this.fb.group ({
       id: {value:null, disabled: false}, 
       secid: [null, { validators:  Validators.required, updateOn: 'blur' }], 
@@ -75,6 +73,9 @@ export class AppInstrumentCorpActionFormComponent {
       date: [null, { validators:  Validators.required, updateOn: 'blur' }], 
       action: {value:null, disabled: false}
     })
+    }
+  ngOnInit(): void {
+    this.AtuoCompService.fullCurrenciesList.length? null: this.AtuoCompService.subCurrencyList.next(true);
   }
   ngAfterContentInit(): void {
     this.currency.setValidators(this.AtuoCompService.currencyValirator())

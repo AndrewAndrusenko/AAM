@@ -7,15 +7,22 @@
         (click)="showHideTree()">
         {{treeOpened? 'Tree hide':'Tree show'}} 
       </button>
-      <button mat-flat-button  [matMenuTriggerFor]="menu" class="color-background" matRipple="">Clients</button>
-        <mat-menu #menu="matMenu"  class="color-background">
-        <button mat-menu-item>Accounts</button>
-        <button mat-menu-item>Trades</button>
-      </mat-menu>
       <button mat-flat-button mat-button class="color-background" [matMenuTriggerFor]="menu2">Portfolio Management</button>
-        <mat-menu #menu2="matMenu" class="color-background">
-        <button mat-menu-item>Strategies</button>
-        <button mat-menu-item>Orders</button>
+      <mat-menu #menu2="matMenu" class="color-background">
+        <button mat-menu-item (click)="navigateToTree('tree/Strategies')">Strategies</button>
+        <button mat-menu-item (click)="navigateToTree('tree/Trades & Orders')">Trades&Orders</button>
+        <button mat-menu-item (click)="navigateToTree('tree/Instruments')">Instrumetns</button>
+      </mat-menu>
+      <button mat-flat-button (click)="navigateToTree('tree/Portfolios')" class="color-background"  matRipple="">Portfolios</button>
+      <button mat-flat-button (click)="navigateToTree('tree/Clients')" class="color-background"  matRipple="">Clients</button>
+      <button mat-flat-button  [matMenuTriggerFor]="menuAcc" class="color-background" matRipple="">Accounting</button>
+        <mat-menu #menuAcc="matMenu"  class="color-background">
+        <button mat-menu-item (click)="navigateToTree('tree/Transactions')">Transactions</button>
+        <button mat-menu-item (click)="navigateToTree('tree/Accounts')">Accounts</button>
+        <button mat-menu-item (click)="navigateToTree('tree/Fees')">Fees</button>
+        <button mat-menu-item (click)="navigateToTree('tree/FIFO')">FIFO</button>
+        <button mat-menu-item (click)="navigateToTree('tree/Schemes')">Schemes</button>
+        <button mat-menu-item (click)="navigateToTree('tree/SWIFT')">SWIFT</button>
       </mat-menu>
       <button mat-flat-button mat-button class="color-background"  [matMenuTriggerFor]="menu3">Settings</button>
         <mat-menu #menu3="matMenu" class="color-background">

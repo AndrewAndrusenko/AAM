@@ -100,14 +100,15 @@ export class AppAccSchemesAL_Table {
     private AccountingSchemesService:AccountingSchemesService,
     private dialog: MatDialog,
     private ref: ChangeDetectorRef
-  ) { }
+  ) {
+    this.TransactionTypes = this.AccountingSchemesService.TransactionTypes;
+    this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
+    this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
+   }
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }
   ngOnInit(): void {
-    this.TransactionTypes = this.AccountingSchemesService.TransactionTypes;
-    this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
-    this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToBalanceData')[0].elementvalue;
     this.submitQuery(false,false)
     this.AccountingSchemesService.subjectTransactionTypePipe.next(null);

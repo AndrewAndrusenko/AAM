@@ -123,7 +123,13 @@ export class AppInvRestrictionVerifyTableComponent {
     private CommonDialogsService:HadlingCommonDialogsService,
     private AutoCompService:AtuoCompleteService,
     private fb:FormBuilder, 
-  ) {  }
+  ) {
+    this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
+    this.searchParametersFG = this.fb.group ({
+      idportfolios:  [],
+      MP:null    
+    });
+    }
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }
@@ -131,11 +137,6 @@ export class AppInvRestrictionVerifyTableComponent {
     this.accessState = this.AuthService.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
-    this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
-    this.searchParametersFG = this.fb.group ({
-      idportfolios:  [],
-      MP:null    
-    });
     this.AutoCompService.subModelPortfolios.next([])
     this.subscriptions.add(this.AutoCompService.subModelPortfolios.subscribe(data=>this.mp_strategies_list=data))
     if (this.useGetClientsPortfolios===true) {

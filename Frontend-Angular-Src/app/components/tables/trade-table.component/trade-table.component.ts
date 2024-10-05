@@ -76,20 +76,21 @@ export class AppTradeTableComponent  {
     private AutoCompService:AtuoCompleteService,
     private dialog: MatDialog,
     private fb:FormBuilder, 
-    ) { }
+    ) { 
+      this.searchParametersFG = this.fb.group ({
+        type:null,
+        secidList: [],
+        cptyList:  [],
+        tdate : this.dataRange,
+        vdate : this.dataRangeVdate,
+        price:null,
+        qty:null,
+      });
+    }
   ngOnInit(): void {
     this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.disabledControlElements = this.accessState === 'full'? false : true;
     this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data => this.FirstOpenedAccountingDate = data[0].FirstOpenedDate);
-    this.searchParametersFG = this.fb.group ({
-      type:null,
-      secidList: [],
-      cptyList:  [],
-      tdate : this.dataRange,
-      vdate : this.dataRangeVdate,
-      price:null,
-      qty:null,
-    });
     this.TradeService.getTradeInformation(null).subscribe (tradesData => {
       this.updateTradesDataTable(tradesData)
     }); 

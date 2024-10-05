@@ -33,12 +33,7 @@ export class AppAccSchemesAL_FormComponent {
     private AppAccountingService:AppAccountingService,
     private dialog:MatDialog
   ) 
-  {    }
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
-  }
-  ngOnInit(): void {
-    this.TransactionTypes = Array.from(this.AccountingSchemesService.TransactionTypes).filter(el=>el[0]!=='0');
+  {  
     this.SchemeFormAL = this.fb.group ({
       XactTypeCode_Ext:[null, { validators:  [Validators.required]}],
       id:[null],
@@ -55,6 +50,12 @@ export class AppAccSchemesAL_FormComponent {
       ledger_no:[null],
       account_no:[null],
     })
+    }
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+  ngOnInit(): void {
+    this.TransactionTypes = Array.from(this.AccountingSchemesService.TransactionTypes).filter(el=>el[0]!=='0');
     this.action==='View'? this.SchemeFormAL.disable():null;
     this.SchemeFormAL.patchValue(this.data);
     this.changeTransactionType()

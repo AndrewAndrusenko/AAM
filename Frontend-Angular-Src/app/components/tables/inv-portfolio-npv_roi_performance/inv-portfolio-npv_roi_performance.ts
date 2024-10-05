@@ -79,15 +79,9 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
     private CommonDialogsService:HadlingCommonDialogsService,
     private AutoCompService:AtuoCompleteService,
     private fb:FormBuilder, 
-  ) { }
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
-  }
-  ngOnInit(): void {
+  ) {
     this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
     this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
-    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
-    this.disabledControlElements = this.accessState === 'full'? false : true;
     this.dateRangeStart.value.setMonth(this.dateRangeStart.value.getMonth()-3);
     this.searchParametersFG = this.fb.group ({
       p_portfolios_list:  [],
@@ -96,6 +90,13 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
       p_report_date_end:null,
       p_report_currency:['840', { validators:  [this.AutoCompService.currencyValirator(),Validators.required]}],
     });
+   }
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+  ngOnInit(): void {
+    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
+    this.disabledControlElements = this.accessState === 'full'? false : true;
     if (this.AutoCompService.fullCurrenciesList.length) {
       this.report_id_currency.updateValueAndValidity()
     } else {
@@ -136,11 +137,10 @@ export class AppaInvPortfolioNpvRoiPerformanceTableComponent {
   }
   setFilters (filters:localFilters) {
     if (filters.reset === true) {
-      return this.InvestmentDataService.sendPerformnceData({data:null,currencySymbol:'', showChart: false})
-
+      return this.InvestmentDataService.sendPerformnceData({data:[],currencySymbol:'', showChart: false})
     }
     filters.portfolio_code? this.portfolios =['ClearAll',...filters.portfolio_code]:null;
-    this.submitQuery(false,false);
+    this.searchParametersFG? this.submitQuery(false,false):null;
   }
   resetSearchForm () {
     this.searchParametersFG.reset();

@@ -63,22 +63,23 @@ export class AppaIAccFeesManagementTableComponent {
     private CommonDialogsService:HadlingCommonDialogsService,
     private AppFeesHandlingService:AppFeesHandlingService,
     private fb:FormBuilder, 
-  ) {  }
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
-  }
-  ngOnInit(): void {
-    this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
-    this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
-    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToFeesData')[0].elementvalue;
-    this.disabledControlElements = this.accessState === 'full'? false : true;
+  ) {     
     this.dateRangeStart.value.setMonth(this.dateRangeStart.value.getMonth()-1);
     this.searchParametersFG = this.fb.group ({
       p_portfolios_list:  [],
       MP:null,
       p_report_date_start:null,
       p_report_date_end:null,
-    });
+    }); 
+    this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
+    this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
+  }
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+  ngOnInit(): void {
+    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToFeesData')[0].elementvalue;
+    this.disabledControlElements = this.accessState === 'full'? false : true;
     this.AutoCompleteService.subModelPortfolios.next([]);
     this.subscriptions.add(this.AutoCompleteService.subModelPortfolios.subscribe(data=>this.mp_strategies_list=data));
     this.multiFilter = (data: ManagementFeeCalcData, filter: string) => {

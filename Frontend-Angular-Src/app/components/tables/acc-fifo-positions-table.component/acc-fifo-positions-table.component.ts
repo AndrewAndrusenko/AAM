@@ -92,20 +92,20 @@ export class AppAccFifoPositionsTable {
     private TradeService: AppTradeService,
     private accountingTradeService: AccountingTradesService,
     private fb:FormBuilder, 
-  ) { }
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
-  }
-  ngOnInit(): void {
+  ) {    
     this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
     this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
-    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.searchParametersFG = this.fb.group ({
       secidList: [],
       portfoliosList:  [],
       secidIn:  null,
       tdate : new Date(),
-    });
+    }); }
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+  ngOnInit(): void {
+    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
     this.AutoCompleteService.subSecIdList.next(true);
    this.portfoliosList.patchValue(['ClearAll'])
    this.secidList.patchValue(['ClearAll'])

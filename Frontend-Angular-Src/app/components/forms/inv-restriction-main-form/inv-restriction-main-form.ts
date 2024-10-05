@@ -23,8 +23,7 @@ export class AppInvRestrictionMainFormComponent {
     private RestrictionsHandlingService:AppRestrictionsHandlingService,
     private AutoCompService:AtuoCompleteService,
   ) 
-  {   }
-  ngOnInit(): void {
+  {  
     this.RestrictionMainForm = this.fb.group ({
       id :{value:null, disabled: false}, 
       portfolioname :{value:null, disabled: false}, 
@@ -36,6 +35,8 @@ export class AppInvRestrictionMainFormComponent {
       object_id: {value:null, disabled: true}, 
       object_description :{value:null, disabled: false}
     })
+   }
+  ngOnInit(): void {
     this.AutoCompService.subSecIdList.next(true)
     this.action==='View'? this.RestrictionMainForm.disable():null;
     this.RestrictionMainForm.patchValue(this.data);

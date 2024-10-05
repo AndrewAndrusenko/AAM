@@ -99,16 +99,7 @@ export class AppOrderTableComponent {
     private AutoCompService:AtuoCompleteService,
     private dialog: MatDialog,
     private fb:FormBuilder, 
-  ) {  }
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
-  }
-  ngOnInit(): void {
-    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
-    this.orderStatuses = this.AuthServiceS.objectStatuses.filter(el =>el.id_object==='Order');
-    let perms = this.AuthServiceS.accessRestrictions.filter(el=>el.elementid==='dorders_status_list')
-    this.ordersPermissions = perms.length?  perms[0].elementvalue.split(',') : [] 
-    this.disabledControlElements = this.accessState === 'full'? false : true;
+  ) { 
     this.searchParametersFG = this.fb.group ({
       type:null,
       secidList: [],
@@ -119,6 +110,16 @@ export class AppOrderTableComponent {
       status:null,
       idportfolio:null
     });
+    this.orderStatuses = this.AuthServiceS.objectStatuses.filter(el =>el.id_object==='Order');
+    let perms = this.AuthServiceS.accessRestrictions.filter(el=>el.elementid==='dorders_status_list')
+    this.ordersPermissions = perms.length?  perms[0].elementvalue.split(',') : [] 
+   }
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+  ngOnInit(): void {
+    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToTradesData')[0].elementvalue;
+    this.disabledControlElements = this.accessState === 'full'? false : true;
     this.multiFilter = (data: orders, filter: string) => {
       let filter_array = filter.split(',').map(el=>[el,1]);
       let colForFilter=this.columnsToDisplay.slice(1)
@@ -135,7 +136,7 @@ export class AppOrderTableComponent {
     }
     switch (this.tableMode.join()) {
       case 'Parent':
-        this.TradeService.getOrderInformation({status:['created','confirmed','in_execution','executed']}).subscribe (ordersData => {
+        this.TradeService.getOrderInformation({status:['created','confirmed','in_execution','executed','accounted']}).subscribe (ordersData => {
           this.updateordersDataTable(ordersData);
         })
         this.AutoCompService.subSecIdList.next(true);
@@ -162,10 +163,6 @@ export class AppOrderTableComponent {
             status:['confirmed','in_execution','executed']}))
           ).subscribe (ordersData =>this.updateordersDataTable(ordersData)));
       break;
-/*       case 'Parent,Per_Portfolio':
-        this.TradeService.getOrderInformation({
-          idportfolio:this.filters.idportfolio[0]}).subscribe (ordersData => this.updateordersDataTable(ordersData));
-      break; */
     }
     if (this.tableMode.includes('Child')) {
       this.columnsToDisplayWithExpand.splice(this.columnsToDisplayWithExpand.indexOf('action'),1);

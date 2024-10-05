@@ -90,21 +90,22 @@ export class AppaIAccFeesProcessingTableComponent {
     private fb:FormBuilder, 
     private dialog: MatDialog, 
 
-  ) {  }
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
-  }
-  ngOnInit(): void {
-    this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
-    this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
-    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToFeesData')[0].elementvalue;
-    this.disabledControlElements = this.accessState === 'full'? false : true;
+  ) {
     this.searchParametersFG = this.fb.group ({
       p_portfolios_list: [],
       MP:null,
       p_report_date_start:null,
       p_report_date_end:null,
     });
+    this.columnsToDisplay=this.columnsWithHeaders.map(el=>el.fieldName);
+    this.columnsHeaderToDisplay=this.columnsWithHeaders.map(el=>el.displayName);
+    }
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+  ngOnInit(): void {
+    this.accessState = this.AuthServiceS.accessRestrictions.filter(el =>el.elementid==='accessToFeesData')[0].elementvalue;
+    this.disabledControlElements = this.accessState === 'full'? false : true;
     this.AccountingDataService.GetbParamsgfirstOpenedDate('GetbParamsgfirstOpenedDate').subscribe(data => this.firstForAccountingDate = data[0].FirstOpenedDate);
     this.AppFeesHandlingService.getProfitTax(new Date().toDateString()).subscribe(data=>this.profitTaxRate=data[0].rate)
     this.AutoCompleteService.subModelPortfolios.next([]);
